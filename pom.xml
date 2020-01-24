@@ -82,6 +82,18 @@
       <version>${marc4j.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>net.sf.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <version>2.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.4</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- test dependencies -->
     <dependency>
@@ -102,8 +114,12 @@
       <version>3.11.1</version>
       <scope>test</scope>
     </dependency>
-
-
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest-junit</artifactId>
+      <version>2.0.0.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -126,6 +142,7 @@
           <useIncrementalCompilation>false</useIncrementalCompilation>
           <annotationProcessors>
             <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+            <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</annotationProcessor>
           </annotationProcessors>
           <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/processing</generatedSourcesDirectory>
         </configuration>
