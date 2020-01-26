@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -41,7 +41,7 @@
     </dependency>
 
 
-    <!-- vrtx dependencies -->
+    <!-- Vertx dependencies -->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
@@ -58,14 +58,13 @@
       <version>${vertx.version}</version>
       <scope>provided</scope>
     </dependency>
-
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
 
     <!-- other dependencies -->
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.5</version>
-    </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
@@ -82,13 +81,24 @@
       <version>${marc4j.version}</version>
     </dependency>
 
-
     <!-- test dependencies -->
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <version>${rest-assured.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock</artifactId>
+      <version>2.19.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>net.sf.jopt-simple</groupId>
+          <artifactId>jopt-simple</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -102,8 +112,12 @@
       <version>3.11.1</version>
       <scope>test</scope>
     </dependency>
-
-
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <version>${vertx.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -127,7 +141,7 @@
           <annotationProcessors>
             <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
           </annotationProcessors>
-          <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/processing</generatedSourcesDirectory>
+          <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/export</generatedSourcesDirectory>
         </configuration>
         <executions>
           <execution>
@@ -188,10 +202,6 @@
                 </systemProperty>
                 <systemProperty>
                   <key>jsonschema2pojo.config.includeToString</key>
-                  <value>true</value>
-                </systemProperty>
-                <systemProperty>
-                  <key>jsonschema2pojo.config.includeHashcodeAndEquals</key>
                   <value>true</value>
                 </systemProperty>
                 <systemProperty>

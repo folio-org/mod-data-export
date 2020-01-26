@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Job profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "Profile id",
+      "type": "string"
+    },
+    "destination": {
+      "description": "Final destination place where to send file",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "destination"
+  ]
+}

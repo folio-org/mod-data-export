@@ -2,7 +2,44 @@
   "id": "${artifactId}-${version}",
   "name": "Data Export Module",
   "requires": [],
-  "provides": [],
+  "provides": [
+    {
+      "id": "data-export",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export",
+          "permissionsRequired": [
+            "data-export.export"
+          ],
+          "modulePermissions": [
+          ]
+        }
+      ]
+    },
+    {
+      "id": "_tenant",
+      "version": "1.2",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/_/tenant"
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/_/tenant"
+        }
+      ]
+    }
+  ],
   "permissionSets": [],
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",

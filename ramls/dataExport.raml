@@ -1,0 +1,53 @@
+#%RAML 1.0
+
+title: Data export
+version: v1.0
+protocols: [ HTTP, HTTPS ]
+baseUri: http://localhost
+
+documentation:
+  - title: Data export API
+    content: API for exporting MARC records
+
+types:
+  error: !include raml-util/schemas/error.schema
+  errors: !include raml-util/schemas/errors.schema
+  exportRequest: !include schemas/exportRequest.json
+
+traits:
+  validate: !include raml-util/traits/validation.raml
+  language: !include raml-util/traits/language.raml
+  pageable:  !include raml-util/traits/pageable.raml
+  searchable: !include raml-util/traits/searchable.raml
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection.raml
+  collection-item: !include raml-util/rtypes/item-collection.raml
+
+/data-export:
+  /export:
+    displayName: Data export service
+    description: Method to start export for MARC records
+    post:
+      description: Starts the export process
+      is: [validate]
+      body:
+        application/json:
+          type: exportRequest
+      responses:
+        204:
+        400:
+          description: "Bad request"
+          body:
+             text/plain:
+               example: "Bad request"
+        422:
+          description: "Unprocessable Entity"
+          body:
+            application/json:
+              type: errors
+        500:
+          description: "Internal server error"
+          body:
+            text/plain:
+              example: "Internal server error"
