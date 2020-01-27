@@ -5,7 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 @ProxyGen
-public interface ExportManager {
+public interface ExportManager {  //NOSONAR
   String EXPORT_MANAGER_ADDRESS = "export-manager.queue";     //NOSONAR
 
   static ExportManager create(Vertx vertx) {
