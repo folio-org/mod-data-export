@@ -56,6 +56,13 @@ class ExportManagerImpl implements ExportManager {
       }), null);
   }
 
+  /**
+   *  Runs the main export flow
+   *
+   * @param request   HTTP request
+   * @param params    HTTP request params
+   * @return Future
+   */
   private Future<Void> export(ExportRequest request, OkapiConnectionParams params) {
     List<Future> exportFutures = new ArrayList<>();
     FileStorageService fileStorageService = new FileUploadService() {}.getFileStorageService();
@@ -75,10 +82,19 @@ class ExportManagerImpl implements ExportManager {
     return CompositeFuture.all(exportFutures).mapEmpty();
   }
 
+  /**
+   *
+   * @return
+   */
   private Future<Boolean> isNoJobInProgress() {
     return succeededFuture();
   }
 
+  /**
+   *
+   * @param status
+   * @return
+   */
   private Future<Void> updateJobStatus(String status) {
     return succeededFuture();
   }

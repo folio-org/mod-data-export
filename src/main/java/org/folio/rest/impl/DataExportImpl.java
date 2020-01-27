@@ -22,7 +22,7 @@ public class DataExportImpl implements DataExport {
 
   private ExportManager exportManager;
 
-  public DataExportImpl(Vertx vertx, String tenantId) {
+  public DataExportImpl(Vertx vertx, String tenantId) {     //NOSONAR
     this.exportManager = ExportManager.createProxy(vertx);
   }
 

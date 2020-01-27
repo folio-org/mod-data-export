@@ -32,7 +32,7 @@ public class InitAPIImpl implements InitAPI {
 
   private void registerExportManager(Vertx vertx) {
     new ServiceBinder(vertx)
-      .setAddress(ExportManager.EVENT_BUS_ADDRESS)
+      .setAddress(ExportManager.EXPORT_MANAGER_ADDRESS)
       .register(ExportManager.class, ExportManager.create(vertx));
   }
 }

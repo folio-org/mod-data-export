@@ -1,6 +1,7 @@
 package org.folio.util;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.tools.utils.ValidationHelper;
@@ -34,10 +35,10 @@ public final class ExceptionToResponseMapper {
         .entity(throwable.getMessage())
         .build();
     }
-    Future<Response> validationFuture = Future.factory.future();
-    ValidationHelper.handleError(throwable, validationFuture.completer());
-    if (validationFuture.isComplete()) {
-      Response response = validationFuture.result();
+    Promise<Response> validationFuture = Promise.promise();
+    ValidationHelper.handleError(throwable, validationFuture.future());
+    if (validationFuture.future().isComplete()) {
+      Response response = validationFuture.future().result();
       if (response.getStatus() == INTERNAL_SERVER_ERROR.getStatusCode()) {
         LOGGER.error(throwable.getMessage(), throwable);
       }

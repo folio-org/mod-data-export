@@ -6,20 +6,20 @@ import io.vertx.core.json.JsonObject;
 
 @ProxyGen
 public interface ExportManager {
-  String EVENT_BUS_ADDRESS = "export-manager.queue";
+  String EXPORT_MANAGER_ADDRESS = "export-manager.queue";
 
   static ExportManager create(Vertx vertx) {
     return new ExportManagerImpl(vertx);
   }
 
   static ExportManager createProxy(Vertx vertx) {
-    return new ExportManagerVertxEBProxy(vertx, EVENT_BUS_ADDRESS);
+    return new ExportManagerVertxEBProxy(vertx, EXPORT_MANAGER_ADDRESS);
   }
 
   /**
    * Starts the data-export process in background thread.
-   * @param request   request
-   * @param params    request parameters
+   * @param request   HTTP request
+   * @param params    HTTP request parameters
    */
   void startExport(JsonObject request, JsonObject params);
 }
