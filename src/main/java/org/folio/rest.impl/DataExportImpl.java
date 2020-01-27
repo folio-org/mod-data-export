@@ -31,7 +31,7 @@ public class DataExportImpl implements DataExport {
 
     vertxContext.runOnContext(c -> {
       try {
-        LOGGER.info("Starting the data-export process for the request: {}", entity);
+        LOGGER.info("Starting the data-export process, request: {}", entity);
         exportManager.startExport(JsonObject.mapFrom(entity), JsonObject.mapFrom(okapiHeaders));
         succeededFuture()
           .map(PostDataExportExportResponse.respond204())
