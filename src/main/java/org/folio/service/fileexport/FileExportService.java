@@ -19,6 +19,6 @@ public interface FileExportService {
    * @return Future
    */
   default Future<Void> save(String fileId, List<String> marcRecords) {
-    return succeededFuture();
+    return succeededFuture(); //NOSONAR
   }
 }
