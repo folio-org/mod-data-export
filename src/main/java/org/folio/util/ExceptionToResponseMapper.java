@@ -1,6 +1,5 @@
 package org.folio.util;
 
-import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;

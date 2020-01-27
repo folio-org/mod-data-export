@@ -28,7 +28,6 @@ public class DataExportImpl implements DataExport {
 
   @Override
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-
     vertxContext.runOnContext(c -> {
       try {
         LOGGER.info("Starting the data-export process, request: {}", entity);
