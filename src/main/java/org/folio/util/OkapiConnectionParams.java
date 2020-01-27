@@ -22,31 +22,15 @@ public final class OkapiConnectionParams {
     return okapiUrl;
   }
 
-  public void setOkapiUrl(String okapiUrl) {
-    this.okapiUrl = okapiUrl;
-  }
-
   public String getTenantId() {
     return tenantId;
-  }
-
-  public void setTenantId(String tenantId) {
-    this.tenantId = tenantId;
   }
 
   public String getToken() {
     return token;
   }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
-
   public Map<String, String> getHeaders() {
     return headers;
-  }
-
-  public void setHeaders(Map<String, String> headers) {
-    this.headers = headers;
   }
 }
