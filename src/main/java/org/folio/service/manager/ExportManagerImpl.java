@@ -22,28 +22,34 @@ import java.util.UUID;
 
 import static io.vertx.core.Future.succeededFuture;
 
+/**
+ * The ExportManager component is a central part of the mod-data-export.
+ * Runs the main export process calling other internal services along the way.
+ */
 class ExportManagerImpl implements ExportManager {
-  private final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
-  private final int BATCH_SIZE = 100;
-
-  private Vertx vertx;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
+  private static final int BATCH_SIZE = 50;
+  private final Vertx vertx;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
   public ExportManagerImpl(Vertx vertx) {
     this.vertx = vertx;
-    this.executor = this.vertx.createSharedWorkerExecutor("worker-thread");
+    this.executor = this.vertx.createSharedWorkerExecutor("export-thread-worker");
   }
 
   @Override
-  public void startExport(JsonObject jsonRequest, JsonObject jsonParams) {
-    OkapiConnectionParams params = new OkapiConnectionParams(jsonParams.mapTo(HashMap.class));
+  public void startExport(JsonObject jsonRequest, JsonObject jsonRequestParams) {
     ExportRequest request = jsonRequest.mapTo(ExportRequest.class);
+    OkapiConnectionParams requestParams = new OkapiConnectionParams(jsonRequestParams.mapTo(HashMap.class));
+    FileStorageService fileStorageService = new FileUploadService() {}.getFileStorageService();
+    RecordLoaderService recordLoaderService = new RecordLoaderService() {};
+    FileExportService fileExportService = new FileExportService() {};
     this.executor.executeBlocking(blockingFuture -> {
       succeededFuture()
         .compose(ar -> isNoJobInProgress())
         .compose(ar -> updateJobStatus("IN_PROGRESS"))
-        .compose(ar -> export(request, params))
+        .compose(ar -> export(request, requestParams, fileStorageService, recordLoaderService, fileExportService))
         .setHandler(ar -> {
           if (ar.failed()) {
             LOGGER.error("An error occurred while exporting data, file {}, cause: {}", request.getFileDefinition(), ar.cause());
@@ -56,22 +62,23 @@ class ExportManagerImpl implements ExportManager {
     }, null);
   }
 
-  private Future<Void> export(ExportRequest request, OkapiConnectionParams params) {
-    FileStorageService fileStorageService = new FileUploadService(){}.getFileStorage();
-    RecordLoaderService recordLoaderService = new RecordLoaderService() {};
-    FileExportService fileExportService = new FileExportService() {};
+  private Future<Void> export(ExportRequest request,
+                              OkapiConnectionParams params,
+                              FileStorageService fileStorageService,
+                              RecordLoaderService recordLoaderService,
+                              FileExportService fileExportService) {
     List<Future> exportFutures = new ArrayList<>();
     String exportingFileId = UUID.randomUUID().toString();
-    Iterator<List<String>> fileIterator = fileStorageService.getSourceReader()
+    Iterator<List<String>> fileIterator = fileStorageService.getReader()
       .getSourceStream(request.getFileDefinition(), BATCH_SIZE)
       .iterator();
-    while (fileIterator.hasNext()) {
-    //    lock the "thread-worker" to stop reading and wait until previous UUIDs export
-    //    List<String> instanceIds = fileIterator.next();
-    //    List<String> marcRecords = recordLoaderService.loadRecordsByInstanceIds(instanceIds);
-    //    fileExportService.save(exportingFileId, marcRecords);
-    //    unlock the "thread-worker" to continue reading more UUIDs
-    }
+    // while (fileIterator.hasNext()) {
+      //  lock the "export-thread-worker" to wait until previous file data has been exported
+      //  List<String> instanceIds = fileIterator.next();
+      //  List<String> marcRecords = recordLoaderService.loadRecordsByInstanceIds(instanceIds);
+      //  fileExportService.save(exportingFileId, marcRecords);
+      //  unlock the "export-thread-worker" to continue reading file data
+    // }
     return CompositeFuture.all(exportFutures).mapEmpty();
   }
 

@@ -13,14 +13,15 @@ import javax.ws.rs.core.Response;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-public final class ExceptionHelper {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHelper.class);
+public final class ExceptionToResponseMapper {
 
-  private ExceptionHelper() {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionToResponseMapper.class);
+
+  private ExceptionToResponseMapper() {
   }
 
-  public static Response mapExceptionToResponse(Throwable throwable) {
+  public static Response map(Throwable throwable) {
     if (throwable instanceof BadRequestException) {
       return Response.status(BAD_REQUEST.getStatusCode())
         .type(MediaType.TEXT_PLAIN)

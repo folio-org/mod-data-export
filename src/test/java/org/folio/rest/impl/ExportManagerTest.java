@@ -1,4 +1,4 @@
-package org.folio.rest.impl.manager;
+package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;

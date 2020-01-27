@@ -16,5 +16,10 @@ public interface ExportManager {
     return new ExportManagerVertxEBProxy(vertx, EVENT_BUS_ADDRESS);
   }
 
+  /**
+   * Starts the data-export process in background thread.
+   * @param request   request
+   * @param params    request parameters
+   */
   void startExport(JsonObject request, JsonObject params);
 }
