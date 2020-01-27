@@ -49,7 +49,7 @@ public class ExportManagerTest extends AbstractRestTest {
   }
 
   @Test
-  public void shouldReturn_422_forRequestIsWrong(TestContext context) {
+  public void shouldReturn_422_ifRequestIsWrong(TestContext context) {
     Async async = context.async();
     // given
     ExportRequest exportRequest = new ExportRequest();
