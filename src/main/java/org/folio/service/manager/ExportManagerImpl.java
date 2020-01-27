@@ -57,11 +57,11 @@ class ExportManagerImpl implements ExportManager {
   }
 
   /**
-   *  Runs the main export flow
+   *  Runs the main export flow.
    *
    * @param request   HTTP request
    * @param params    HTTP request params
-   * @return Future
+   * @return Future. Futures get complete when all the records are exported
    */
   private Future<Void> export(ExportRequest request, OkapiConnectionParams params) {
     List<Future> exportFutures = new ArrayList<>();
