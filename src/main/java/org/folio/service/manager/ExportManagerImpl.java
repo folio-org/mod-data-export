@@ -82,19 +82,10 @@ class ExportManagerImpl implements ExportManager {
     return CompositeFuture.all(exportFutures).mapEmpty();
   }
 
-  /**
-   *
-   * @return
-   */
   private Future<Boolean> isNoJobInProgress() {
     return succeededFuture();
   }
 
-  /**
-   *
-   * @param status
-   * @return
-   */
   private Future<Void> updateJobStatus(String status) {
     return succeededFuture();
   }
