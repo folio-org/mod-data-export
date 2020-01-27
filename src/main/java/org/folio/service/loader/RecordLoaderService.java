@@ -15,7 +15,7 @@ public interface RecordLoaderService {
    * @param ids   collection of Inventory ids
    * @return      collection of records
    */
-  default Future<List<String>> loadRecordsByInstanceIds(List<String> ids) {
+  default Future<List<String>> loadRecordsByInstanceIds(List<String> ids) { //NOSONAR
     // Retrieves collection of underlying SRS records as a source of truth
     // Retrieves collection of Inventory records that do not have underlying SRS records
     return Future.succeededFuture(Collections.emptyList()); //NOSONAR

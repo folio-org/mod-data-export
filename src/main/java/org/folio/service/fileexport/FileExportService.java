@@ -18,7 +18,7 @@ public interface FileExportService {
    * @param marcRecords collection of marc records
    * @return Future
    */
-  default Future<Void> save(String fileId, List<String> marcRecords) {
+  default Future<Void> save(String fileId, List<String> marcRecords) { //NOSONAR
     return succeededFuture(); //NOSONAR
   }
 }
