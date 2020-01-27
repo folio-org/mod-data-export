@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  */
 public interface SourceStreamReader {
   /**
-   * Returns pre-initialized stream for the given file of configured by the given batch size
+   * Returns pre-initialized stream configured by the given batch size
    *
    * @param fileDefinition file definition
    * @param batchSize      size batch for one stream iteration
