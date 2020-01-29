@@ -10,19 +10,12 @@ documentation:
     content: API for exporting MARC records
 
 types:
-  error: !include raml-util/schemas/error.schema
   errors: !include raml-util/schemas/errors.schema
   exportRequest: !include schemas/exportRequest.json
 
 traits:
   validate: !include raml-util/traits/validation.raml
   language: !include raml-util/traits/language.raml
-  pageable:  !include raml-util/traits/pageable.raml
-  searchable: !include raml-util/traits/searchable.raml
-
-resourceTypes:
-  collection: !include raml-util/rtypes/collection.raml
-  collection-item: !include raml-util/rtypes/item-collection.raml
 
 /data-export:
   /export:
