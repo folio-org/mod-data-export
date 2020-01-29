@@ -1,8 +1,6 @@
 package org.folio.service.loader;
 
 import io.vertx.core.Future;
-
-import java.util.Collections;
 import java.util.List;
 
 /**

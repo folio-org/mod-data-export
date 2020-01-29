@@ -24,6 +24,7 @@
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <sonar.exclusions>**/ExportManagerImpl.java</sonar.exclusions>
+    <sonar.exclusions>**/OkapiConnectionParams.java</sonar.exclusions>
   </properties>
 
   <dependencies>
