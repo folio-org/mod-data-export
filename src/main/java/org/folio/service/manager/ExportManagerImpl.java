@@ -20,9 +20,10 @@ import static io.vertx.core.Future.succeededFuture;
  * The ExportManager is a central part of the data-export.
  * Runs the main export process calling other internal services along the way.
  */
+@SuppressWarnings({"java:S1172", "java:S125"})
 class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
-  private static final int BATCH_SIZE = 50;
+  private static final int BATCH_SIZE = 50; //NOSONAR
   private final Vertx vertx;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
