@@ -12,13 +12,11 @@ import static io.vertx.core.Future.succeededFuture;
 public interface FileExportService {
 
   /**
-   * Saves collection of marc records to the file
+   * Saves collection of marc records to the destination
    *
-   * @param fileId      id of the file where to save records
+   * @param destination a place where to save records
    * @param marcRecords collection of marc records
    * @return Future
    */
-  default Future<Void> save(String fileId, List<String> marcRecords) { //NOSONAR
-    return succeededFuture(); //NOSONAR
-  }
+   Future<Void> save(String destination, List<String> marcRecords);
 }

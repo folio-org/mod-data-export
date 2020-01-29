@@ -8,13 +8,10 @@ import org.folio.service.fileupload.storage.FileStorageService;
 public interface FileUploadService {
 
   /**
-   * Returns an instance of the FileStorageService depending on the system properties: fileSystem/networkDrive
+   * Returns instance of the FileStorageService depending on the system properties: fileSystem/networkDrive
    *
    * @return FileStorageService
    * @see FileStorageService
    */
-  default FileStorageService getFileStorageService() {
-    return new FileStorageService() {
-    };
-  }
+   FileStorageService getFileStorageService();
 }

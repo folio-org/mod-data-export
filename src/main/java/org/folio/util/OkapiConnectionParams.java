@@ -2,6 +2,9 @@ package org.folio.util;
 
 import java.util.Map;
 
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+
 public final class OkapiConnectionParams {
   private String okapiUrl;
   private String tenantId;
@@ -13,8 +16,8 @@ public final class OkapiConnectionParams {
 
   public OkapiConnectionParams(Map<String, String> okapiHeaders) {
     this.okapiUrl = okapiHeaders.getOrDefault("x-okapi-url", "localhost");
-    this.tenantId = okapiHeaders.getOrDefault("x-okapi-tenant", "");
-    this.token = okapiHeaders.getOrDefault("x-okapi-token", "dummy");
+    this.tenantId = okapiHeaders.getOrDefault(OKAPI_HEADER_TENANT, "");
+    this.token = okapiHeaders.getOrDefault(OKAPI_HEADER_TOKEN, "dummy");
     this.headers = okapiHeaders;
   }
 

@@ -35,7 +35,6 @@ public class DataExportImpl implements DataExport {
         succeededFuture()
           .map(PostDataExportExportResponse.respond204())
           .map(Response.class::cast)
-          .otherwise(ExceptionToResponseMapper::map)
           .setHandler(asyncResultHandler);
       } catch (Exception exception) {
         asyncResultHandler.handle(succeededFuture(

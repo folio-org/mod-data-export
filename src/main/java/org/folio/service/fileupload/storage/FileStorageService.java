@@ -9,12 +9,10 @@ import org.folio.service.fileupload.reader.SourceStreamReader;
 public interface FileStorageService {
 
   /**
-   * Returns an instance of the source reader.
+   * Returns instance of the source reader.
+   *
    * @return SourceStreamReader
    * @see SourceStreamReader
    */
-  default SourceStreamReader getReader() {
-    return new SourceStreamReader() {
-    };
-  }
+   SourceStreamReader getReader();
 }

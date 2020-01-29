@@ -8,8 +8,6 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.http.HttpStatus;
-import org.drools.core.util.StringUtils;
-import org.folio.rest.impl.AbstractRestTest;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobProfile;
@@ -32,7 +30,7 @@ public class ExportManagerTest extends AbstractRestTest {
     ExportRequest exportRequest = new ExportRequest()
     .withFileDefinition(new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withPath("src/test/resources/inventoryUUIDs.csv"))
+      .withPath("inventoryUUIDs.csv"))
     .withJobProfile(new JobProfile()
       .withId(UUID.randomUUID().toString())
       .withDestination("fileSystem")
