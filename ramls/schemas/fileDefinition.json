@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "File definition",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "File id",
+      "type": "string"
+    },
+    "path": {
+      "description": "Path to the file",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "path"
+  ]
+}

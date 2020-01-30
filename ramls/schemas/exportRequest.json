@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "fileDefinition": {
+      "description": "File definition",
+      "type": "object",
+      "$ref": "fileDefinition.json"
+    },
+    "jobProfile": {
+      "description": "Related Job profile",
+      "type": "object",
+      "$ref": "jobProfile.json"
+    }
+  },
+  "required": [
+    "fileDefinition",
+    "jobProfile"
+  ]
+}
