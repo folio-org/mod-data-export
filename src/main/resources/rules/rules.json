@@ -1,0 +1,540 @@
+{
+  "001": [
+    {
+      "description": "The human readable ID",
+      "subfield": [],
+      "dataSource": {
+            "from": "hrid",
+            "translation": ""
+       }
+    }
+  ],
+  "010": [
+    {
+      "description": "Identifier",
+      "subfield": [
+        {
+         "field" : "a",
+         "description": "value for LCCN",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "LCCN"
+             }
+         }
+       }
+      ]
+    }
+  ],
+  "020": [
+    {
+      "description": "Identifier",
+      "subfield": [
+        {
+         "field" : "a",
+         "description": "value for ISBN",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "ISBN"
+             }
+         }
+       },
+       {
+         "field" : "z",
+         "description": "value for Invalid ISBN",
+         "dataSource": {
+            "from": "identifiers.value",
+             "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Invalid ISBN"
+             }
+         }
+       }
+      ]
+    }
+  ],
+  "022": [
+    {
+      "description": "Identifier",
+      "subfield": [
+      {
+         "field" : "a",
+         "description": "value for ISSN",
+         "dataSource": {
+            "from": "identifiers.value",
+             "translation": "getIdentifierValue",
+             "parameter": {
+                    "name": "ISSN"
+             }
+         }
+      },
+      {
+         "field" : "z",
+         "description": "value for Invalid ISSN",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Invalid ISSN"
+             }
+         }
+      },
+      {
+         "field" : "l",
+         "description": "value for Linking ISSN",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Linking ISSN"
+             }
+         }
+      }
+      ]
+    }
+  ],
+  "024": [
+    {
+      "description": "Identifier",
+      "subfield": [
+      {
+         "field" : "a",
+         "description": "value for Other Standard Identifier",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Other Standard Identifier"
+             }
+         }
+      }
+     ]
+  }
+  ],
+  "028": [
+    {
+      "description": "Publisher or Distributor Identifier",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "value for Publisher or Distributor Number",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Publisher or distributor number"
+             }
+         }
+        }
+      ]
+   }
+  ],
+  "035": [
+    {
+      "description": "Identifier",
+      "subfield": [
+        {
+         "field" : "a",
+         "description": "value for System Control Number ",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "System control number"
+             }
+         }
+       }
+      ]
+    }
+  ],
+  "019": [
+    {
+      "description": "Identifier",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Cancelled System Control Numbers Identifier",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "System control number"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "074": [
+    {
+      "description": "Identifier",
+      "subfield": [
+      {
+         "field" : "a",
+         "description": "value for GPO Item Number Identifier",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "GPO item number"
+             }
+         }
+      },
+      {
+         "field" : "z",
+         "description": "value for Cancelled GPO Item Number Identifier",
+         "dataSource": {
+            "from": "identifiers.value",
+            "translation": "getIdentifierValue",
+            "parameter": {
+                    "name": "Cancelled GPO item number"
+             }
+         }
+      }
+   ]
+  }
+ ],
+  "041": [
+    {
+      "description": "Languages",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "languages"
+         }
+       }
+       ]
+     }  
+  ],
+  "090": [
+    {
+      "description": "Classifications",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Classifications for Library of Congress",
+         "dataSource": {
+            "from": "classifications.classificationNumber",
+            "translation": "getClassificationNumber",
+            "parameter": {
+                    "name": "LC"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "092": [
+    {
+      "description": "Classifications",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Classifications for Dewey Decimal",
+         "dataSource": {
+            "from": "classifications.classificationNumber",
+            "translation": "getClassificationNumber",
+            "parameter": {
+                    "name": "Dewey"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "082": [
+    {
+      "description": "Classifications",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Classifications for SUDOC",
+         "dataSource": {
+            "from": "classifications.classificationNumber",
+            "translation": "getClassificationNumber",
+            "parameter": {
+                    "name": "SUDOC"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "700": [
+    {
+      "description": "Contributors",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Contributors for Type personal Name",
+         "dataSource": {
+            "from": "contributors.name",
+            "translation": "getContributorName",
+            "parameter": {
+                    "name": "Personal Name"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "710": [
+    {
+      "description": "Contributors",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Contributors for Type Corporate Name",
+         "dataSource": {
+            "from": "contributors.name",
+            "translation": "getContributorName",
+            "parameter": {
+                    "name": "corporate Name"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "711": [
+    {
+      "description": "Contributors",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Contributors for Type Meeting Name",
+         "dataSource": {
+            "from": "contributors.name",
+            "translation": "getContributorName",
+            "parameter": {
+                    "name": "Meeting Name"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "245": [
+    {
+      "description": "Resource Title",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "title"
+         }
+       }
+       ]
+     }  
+  ],
+  "130": [
+    {
+      "description": "Alternative Titles",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Alternative Title type- Uniform Title",
+         "dataSource": {
+            "from": "alternativeTitles.alternativeTitle",
+            "translation": "getAlternativeTitleName",
+            "parameter": {
+                    "name": "Uniform title"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "246": [
+    {
+      "description": "Alternative Titles",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Alternative Title type- Variant Title",
+         "dataSource": {
+            "from": "alternativeTitles.alternativeTitle",
+            "translation": "getAlternativeTitleName",
+            "parameter": {
+                    "name": "Variant title"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "247": [
+    {
+      "description": "Alternative Titles",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Alternative Title type- Former Title",
+         "dataSource": {
+            "from": "alternativeTitles.alternativeTitle",
+            "translation": "getAlternativeTitleName",
+            "parameter": {
+                    "name": "Former title"
+             }
+         }
+       }
+       ]
+     }  
+  ],
+  "250": [
+    {
+      "description": "Edition",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "editions"
+         }
+       }
+       ]
+     }  
+  ],
+   "264": [
+    {
+      "description": "Publications",
+      "subfield": [
+       {
+         "field" : "a",
+         "description": "Place of publication",
+         "dataSource": {
+            "from": "publication.place"
+         }
+       },
+       {
+         "field" : "b",
+         "description": "publisher",
+         "dataSource": {
+            "from": "publication.publisher"
+         }
+       },
+       {
+         "field" : "c",
+         "description": "publication date",
+         "dataSource": {
+            "from": "publication.dateOfPublication"
+         }
+       }
+       ]
+     }  
+  ],
+  "300": [
+    {
+      "description": "Physical Descriptions",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "physicalDescriptions"
+         }
+       }
+       ]
+     }  
+  ],
+  "310": [
+    {
+      "description": "Publication Frequency",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "publicationFrequency"
+         }
+       }
+       ]
+     }  
+  ],
+  "362": [
+    {
+      "description": "Publication Range",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "publicationRange"
+         }
+       }
+       ]
+     }  
+  ],
+  "490": [
+    {
+      "description": "Series",
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "series"
+         }
+       }
+       ]
+     }  
+  ],
+  "856": [
+    {
+    "indicator": [
+       {
+         "field" : "2",
+          "dataSource": {
+            "from": "electronicAccess.relationshipId",
+            "translation": "setURLRelationship",
+            "parameter":{
+                "from": "Resource",
+                "value": 0
+            }
+         }
+       }
+      ],
+      "subfield": [
+       {
+         "field" : "y",
+          "description": "Link text",
+          "dataSource": {
+            "from": "electronicAccess.linkText"
+         }
+       },
+       {
+         "field" : "3",
+          "description": "Materials Specified",
+          "dataSource": {
+            "from": "electronicAccess.materialsSpecification"
+         }
+       },
+       {
+         "field" : "3",
+         "description": "URI",
+         "dataSource": {
+            "from": "electronicAccess.uri"
+         }
+       },
+       {
+         "field" : "z",
+         "description": "URI public note",
+         "dataSource": {
+            "from": "electronicAccess.publicNote"
+         }
+       }
+       ]
+     }  
+  ],
+  "653": [
+    {
+      "subfield": [
+       {
+         "field" : "a",
+         "dataSource": {
+            "from": "subjects"
+         }
+       }
+       ]
+     }  
+  ]
+}
