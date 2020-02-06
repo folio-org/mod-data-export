@@ -32,8 +32,8 @@
       "type": "string",
       "enum": [
         "NEW",
-        "UPLOADING",
-        "UPLOADED",
+        "IN_PROGRESS",
+        "COMPLETED",
         "ERROR"
       ]
     },

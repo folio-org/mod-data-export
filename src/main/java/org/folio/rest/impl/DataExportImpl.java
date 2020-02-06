@@ -92,7 +92,7 @@ public class DataExportImpl implements DataExport {
     try {
       Future<Response> responseFuture;
       if (okapiHeaders.containsKey(STREAM_ABORT)) {
-        responseFuture = fileUploadService.abortUploading(fileDefinitionId, tenantId)
+        responseFuture = fileUploadService.errorUploading(fileDefinitionId, tenantId)
           .map(String.format("Upload stream for the file [id = '%s'] has been interrupted", fileDefinitionId))
           .map(PostDataExportFileDefinitionsByFileDefinitionIdResponse::respond400WithTextPlain);
       } else {

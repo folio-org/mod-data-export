@@ -19,11 +19,10 @@ import java.util.UUID;
 
 @RunWith(VertxUnitRunner.class)
 public class ExportManagerTest extends AbstractRestTest {
-
   private static final String EXPORT_URL = "/data-export/export";
 
   @Test
-  public void shouldReturn_204_forHappyPath(TestContext context) {
+  public void shouldStartExport(TestContext context) {
     Async async = context.async();
     // given
     ExportManager.create(Vertx.vertx());

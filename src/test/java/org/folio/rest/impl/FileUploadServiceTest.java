@@ -22,12 +22,12 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 public class FileUploadServiceTest extends AbstractRestTest {
+  private static final String STORAGE_ROOT_PATH = "./storage";
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
 
   @Test
@@ -83,7 +83,7 @@ public class FileUploadServiceTest extends AbstractRestTest {
   }
 
   @Test
-  public void postFileDefinition(TestContext context) throws IOException {
+  public void shouldUploadFile_return200(TestContext context) throws IOException {
     Async async = context.async();
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
@@ -103,8 +103,11 @@ public class FileUploadServiceTest extends AbstractRestTest {
       .when()
       .post(FILE_DEFINITION_SERVICE_URL)
       .then()
-      .statusCode(HttpStatus.SC_CREATED);
-    // then we can start file uploading and assert response body and check file content
+      .statusCode(HttpStatus.SC_CREATED)
+      .body("sourcePath", nullValue())
+      .body("createdDate", notNullValue())
+      .body("status", is(FileDefinition.Status.NEW.name()));
+    // then we can start file uploading, assert response body and check file content
     FileDefinition uploadedFileDefinition = RestAssured.given()
       .spec(binaryRequestSpecification)
       .when()
@@ -114,11 +117,11 @@ public class FileUploadServiceTest extends AbstractRestTest {
       .statusCode(HttpStatus.SC_OK)
       .body("sourcePath", notNullValue())
       .body("createdDate", notNullValue())
-      .body("status", is(FileDefinition.Status.UPLOADED.name()))
+      .body("status", is(FileDefinition.Status.COMPLETED.name()))
       .extract().body().as(FileDefinition.class);
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
-    FileUtils.deleteDirectory(new File("./storage"));
+    FileUtils.deleteDirectory(new File(STORAGE_ROOT_PATH));
     async.complete();
   }
 

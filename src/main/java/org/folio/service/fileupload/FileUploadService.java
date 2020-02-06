@@ -53,5 +53,5 @@ public interface FileUploadService {
    * @param tenantId  tenant id
    * @return {@link FileDefinition}
    */
-  Future<FileDefinition> abortUploading(String fileDefinitionId, String tenantId);
+  Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId);
 }

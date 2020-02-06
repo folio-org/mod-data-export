@@ -35,7 +35,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
     return findFileDefinition(fileDefinitionId, tenantId)
-      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(UPLOADING), tenantId));
+      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), tenantId));
   }
 
   @Override
@@ -47,11 +47,11 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId) {
     /* Create job, link it to the file definition */
-    return fileDefinitionService.update(fileDefinition.withStatus(UPLOADED), tenantId);
+    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), tenantId);
   }
 
   @Override
-  public Future<FileDefinition> abortUploading(String fileDefinitionId, String tenantId) {
+  public Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId) {
     return findFileDefinition(fileDefinitionId, tenantId)
       .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId));
   }
