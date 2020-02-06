@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "properties": {
     "id": {
-      "description": "UUID",
+      "description": "File id",
       "type": "string",
       "ref": "../common/uuid.json"
     },

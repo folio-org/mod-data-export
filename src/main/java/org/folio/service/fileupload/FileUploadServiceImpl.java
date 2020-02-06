@@ -15,7 +15,6 @@ import javax.ws.rs.NotFoundException;
 import java.util.Date;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.*;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -28,14 +27,14 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> createFileDefinition(FileDefinition fileDefinition, String tenantId) {
     fileDefinition.setCreatedDate(new Date());
-    fileDefinition.setStatus(NEW);
+    fileDefinition.setStatus(FileDefinition.Status.NEW);
     return fileDefinitionService.save(fileDefinition, tenantId);
   }
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
     return findFileDefinition(fileDefinitionId, tenantId)
-      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), tenantId));
+      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(FileDefinition.Status.IN_PROGRESS), tenantId));
   }
 
   @Override
@@ -47,13 +46,13 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId) {
     /* Create job, link it to the file definition */
-    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), tenantId);
+    return fileDefinitionService.update(fileDefinition.withStatus(FileDefinition.Status.COMPLETED), tenantId);
   }
 
   @Override
   public Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId) {
     return findFileDefinition(fileDefinitionId, tenantId)
-      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId));
+      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(FileDefinition.Status.ERROR), tenantId));
   }
 
   private Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId) {
