@@ -28,8 +28,8 @@ public abstract class AbstractRestTest {
   protected static final String TOKEN = "token";
   private static final String HOST = "http://localhost:";
   private static final int PORT = NetworkUtils.nextFreePort();
-  private static final String OKAPI_URL = HOST + PORT;
-  protected static RequestSpecification requestSpecification;
+  protected static final String OKAPI_URL = HOST + PORT;
+  protected static RequestSpecification jsonRequestSpecification;
   private static Vertx vertx = Vertx.vertx();
 
   @BeforeClass
@@ -73,7 +73,7 @@ public abstract class AbstractRestTest {
 
   @Before
   public void setUp(TestContext context) throws IOException {
-    this.requestSpecification = new RequestSpecBuilder()
+    this.jsonRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.JSON)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
       .setBaseUri(OKAPI_URL)
