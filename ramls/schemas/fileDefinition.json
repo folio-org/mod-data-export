@@ -5,16 +5,44 @@
   "additionalProperties": false,
   "properties": {
     "id": {
-      "description": "File id",
+      "description": "UUID",
+      "type": "string",
+      "ref": "../common/uuid.json"
+    },
+    "fileName": {
+      "description": "File name",
       "type": "string"
     },
-    "path": {
+    "jobExecutionId": {
+      "description": "Job execution id",
+      "type": "string",
+      "ref": "../common/uuid.json"
+    },
+    "sourcePath": {
       "description": "Path to the file",
       "type": "string"
+    },
+    "createdDate": {
+      "description": "Date and time when the file definition was created",
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "description": "Status of files upload",
+      "type": "string",
+      "enum": [
+        "NEW",
+        "UPLOADING",
+        "UPLOADED",
+        "ERROR"
+      ]
+    },
+    "size": {
+      "description": "Size of the file in Kbyte",
+      "type": "integer"
     }
   },
   "required": [
-    "id",
-    "path"
+    "fileName"
   ]
 }
