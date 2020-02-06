@@ -7,7 +7,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.fileupload.definition.FileDefinitionService;
 import org.folio.service.fileupload.storage.FileStorage;
-import org.folio.service.fileupload.storage.FileStorageBuilder;
+import org.folio.service.fileupload.storage.FileStorageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
-    FileStorage fileStorage = FileStorageBuilder.build(vertx);
+    FileStorage fileStorage = FileStorageFactory.create(vertx);
     return fileStorage.saveFileData(data, fileDefinition);
   }
 
