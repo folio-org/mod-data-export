@@ -1,12 +1,14 @@
 package org.folio.service.fileupload.storage;
 
+import io.vertx.core.Future;
+import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.fileupload.reader.SourceStreamReader;
 
 /**
  * File storage service.
  * Service to save files and reading files being stored.
  */
-public interface FileStorageService {
+public interface FileStorage {
 
   /**
    * Returns instance of the source reader.
@@ -14,5 +16,10 @@ public interface FileStorageService {
    * @return SourceStreamReader
    * @see SourceStreamReader
    */
-   SourceStreamReader getReader();
+  SourceStreamReader getReader();
+
+  /**
+   * Saves file bytes to the storage and return its path
+   */
+  Future<FileDefinition> saveFileData(byte[] data, FileDefinition fileDefinition);
 }
