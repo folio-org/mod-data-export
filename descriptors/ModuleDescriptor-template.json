@@ -35,7 +35,7 @@
           ],
           "pathPattern": "/data-export/fileDefinitions/{fileDefinitionId}",
           "permissionsRequired": [
-            "data-export.filedefinitions.upload"
+            "data-export.filedefinitions.uploadfile"
           ],
           "modulePermissions": [
           ]
