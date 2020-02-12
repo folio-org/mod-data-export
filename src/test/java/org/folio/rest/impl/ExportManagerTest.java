@@ -2,7 +2,6 @@ package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -11,7 +10,6 @@ import org.apache.http.HttpStatus;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobProfile;
-import org.folio.service.manager.ExportManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,7 +24,6 @@ public class ExportManagerTest extends AbstractRestTest {
   public void shouldReturn_204_forHappyPath(TestContext context) {
     Async async = context.async();
     // given
-    ExportManager.create(Vertx.vertx());
     ExportRequest exportRequest = new ExportRequest()
     .withFileDefinition(new FileDefinition()
       .withId(UUID.randomUUID().toString())

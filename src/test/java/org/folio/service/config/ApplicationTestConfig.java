@@ -1,11 +1,11 @@
-package org.folio.config;
+package org.folio.service.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {
-  "org.folio.service",
+  "org.folio.service.loader",
   "org.folio.rest.impl"})
-public class ApplicationConfig {
+public class ApplicationTestConfig {
 }

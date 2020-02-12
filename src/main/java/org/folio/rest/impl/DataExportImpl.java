@@ -9,7 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
-import org.folio.service.manager.ExportManager;
+import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.util.ExceptionToResponseMapper;
 
 import javax.ws.rs.core.Response;
@@ -31,7 +31,7 @@ public class DataExportImpl implements DataExport {
     vertxContext.runOnContext(c -> {
       try {
         LOGGER.info("Starting the data-export process, request: {}", entity);
-        exportManager.startExport(JsonObject.mapFrom(entity), JsonObject.mapFrom(okapiHeaders));
+        exportManager.export(JsonObject.mapFrom(entity), JsonObject.mapFrom(okapiHeaders));
         succeededFuture()
           .map(PostDataExportExportResponse.respond204())
           .map(Response.class::cast)

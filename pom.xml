@@ -131,7 +131,7 @@
           <annotationProcessors>
             <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
           </annotationProcessors>
-          <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/export</generatedSourcesDirectory>
+          <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/proxy</generatedSourcesDirectory>
         </configuration>
         <executions>
           <execution>
