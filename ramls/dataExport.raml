@@ -46,9 +46,9 @@ traits:
               example: "Internal server error"
   /fileDefinitions:
     displayName: File upload service
-    description: Method to create file definition to use it for the file uploading
+    description: Service provides file uploading API
     post:
-      description: File definition
+      description: Method to create file definition to use it for the file uploading
       is: [validate]
       body:
         application/json:
@@ -98,7 +98,7 @@ traits:
                 example: "Internal server error"
       /upload:
         post:
-          description: Upload file
+          description: Method to upload file
           body:
               application/octet-stream:
           responses:
