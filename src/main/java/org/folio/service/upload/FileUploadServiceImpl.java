@@ -26,7 +26,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     this.fileDefinitionService = fileDefinitionService;
   }
 
-
   @Override
   public Future<FileDefinition> createFileDefinition(FileDefinition fileDefinition, String tenantId) {
     fileDefinition.setStatus(NEW);
