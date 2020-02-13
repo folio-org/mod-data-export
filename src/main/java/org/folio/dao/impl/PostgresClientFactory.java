@@ -11,15 +11,8 @@ public class PostgresClientFactory {
   @Autowired
   private Vertx vertx;
 
-  public PostgresClientFactory() {
-  }
-
-  public PostgresClientFactory(Vertx vertx) {
-    this.vertx = vertx;
-  }
-
   /**
-   * Creates instance of Postgres Client
+   * Returns instance of Postgres Client
    *
    * @param tenantId tenant id
    * @return Postgres Client
