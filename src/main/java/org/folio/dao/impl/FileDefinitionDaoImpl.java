@@ -31,7 +31,7 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
     Promise<Results<FileDefinition>> promise = Promise.promise();
     try {
       Criteria idCrit = constructCriteria(ID_FIELD, id);
-      pgClientFactory.getInstance(tenantId).get(TABLE, FileDefinition.class, new Criterion(idCrit), false, promise);
+       PgUtil.getById(TABLE, FileDefinition.class, id, okapiHeaders, vertxContext, GetDataExportFileDefinitionsByFileDefinitionIdResponse.class, asyncResultHandler);
     } catch (Exception e) {
       logger.error(e);
       promise.fail(e);
