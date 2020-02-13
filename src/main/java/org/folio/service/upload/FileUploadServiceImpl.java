@@ -4,16 +4,11 @@ import io.vertx.core.Future;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.FileDefinition;
-
-import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.service.upload.storage.FileStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.ws.rs.NotFoundException;
-import java.util.Date;
-
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
