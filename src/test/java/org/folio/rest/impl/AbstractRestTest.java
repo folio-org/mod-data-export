@@ -30,17 +30,16 @@ public abstract class AbstractRestTest {
   private static final int PORT = NetworkUtils.nextFreePort();
   protected static final String OKAPI_URL = HOST + PORT;
   protected static RequestSpecification jsonRequestSpecification;
-  private static Vertx vertx = Vertx.vertx();
+  private static Vertx vertx;
 
   @BeforeClass
   public static void setUpClass(final TestContext context) throws Exception {
+    vertx = Vertx.vertx();
     runDatabase();
     deployVerticle(context);
   }
 
   private static void runDatabase() throws Exception {
-    PostgresClient.stopEmbeddedPostgres();
-    PostgresClient.closeAllClients();
     PostgresClient.setIsEmbedded(true);
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }

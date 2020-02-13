@@ -1,8 +1,8 @@
-package org.folio.service.fileupload;
+package org.folio.service.upload;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.service.fileupload.storage.FileStorage;
+import org.folio.service.upload.storage.FileStorage;
 
 /**
  * File upload service. Provides lifecycle methods for file uploading functionality.
@@ -53,5 +53,5 @@ public interface FileUploadService {
    * @param tenantId  tenant id
    * @return {@link FileDefinition}
    */
-  Future<FileDefinition> abortUploading(String fileDefinitionId, String tenantId);
+  Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId);
 }

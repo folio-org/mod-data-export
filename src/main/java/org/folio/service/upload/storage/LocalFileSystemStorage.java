@@ -1,4 +1,4 @@
-package org.folio.service.fileupload.storage;
+package org.folio.service.upload.storage;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -7,13 +7,15 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.service.fileupload.reader.SourceStreamReader;
+import org.folio.service.upload.reader.SourceStreamReader;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+@Component
 public class LocalFileSystemStorage implements FileStorage {
   private static final String FILE_STORAGE_PATH = "./storage/files";
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalFileSystemStorage.class);

@@ -1,6 +1,10 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -10,8 +14,8 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.fileupload.FileUploadService;
-import org.folio.service.fileupload.definition.FileDefinitionService;
+import org.folio.service.upload.FileUploadService;
+import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.service.manager.ExportManager;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
@@ -88,13 +92,13 @@ public class DataExportImpl implements DataExport {
 
   @Stream
   @Override
-  public void postDataExportFileDefinitionsByFileDefinitionId(String fileDefinitionId, InputStream entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postDataExportFileDefinitionsUploadByFileDefinitionId(String fileDefinitionId, InputStream entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       Future<Response> responseFuture;
       if (okapiHeaders.containsKey(STREAM_ABORT)) {
-        responseFuture = fileUploadService.abortUploading(fileDefinitionId, tenantId)
+        responseFuture = fileUploadService.errorUploading(fileDefinitionId, tenantId)
           .map(String.format("Upload stream for the file [id = '%s'] has been interrupted", fileDefinitionId))
-          .map(PostDataExportFileDefinitionsByFileDefinitionIdResponse::respond400WithTextPlain);
+          .map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond400WithTextPlain);
       } else {
         byte[] data = IOUtils.toByteArray(entity);
         if (fileUploadStateFuture == null) {
@@ -105,7 +109,7 @@ public class DataExportImpl implements DataExport {
           .compose(fileDefinition -> data.length == 0
             ? fileUploadService.completeUploading(fileDefinition, tenantId)
             : succeededFuture(fileDefinition));
-        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson);
+        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
       }
       responseFuture.map(Response.class::cast)
         .otherwise(ExceptionToResponseMapper::map)

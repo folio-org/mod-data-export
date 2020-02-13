@@ -31,7 +31,7 @@ public class FileUploadServiceTest extends AbstractRestTest {
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
 
   @Test
-  public void postFileDefinition_return201(TestContext context) {
+  public void postFileDefinition_return200Status(TestContext context) {
     Async async = context.async();
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
@@ -58,7 +58,7 @@ public class FileUploadServiceTest extends AbstractRestTest {
   }
 
   @Test
-  public void postFileDefinition_return422(TestContext context) {
+  public void postFileDefinition_return422Status(TestContext context) {
     // given
     FileDefinition givenEntity = new FileDefinition();
     // when
@@ -73,7 +73,7 @@ public class FileUploadServiceTest extends AbstractRestTest {
   }
 
   @Test
-  public void getFileDefinition_return404(TestContext context) {
+  public void getFileDefinition_return404Status(TestContext context) {
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -83,7 +83,7 @@ public class FileUploadServiceTest extends AbstractRestTest {
   }
 
   @Test
-  public void postFileDefinition(TestContext context) throws IOException {
+  public void shouldUploadFile_return200Status(TestContext context) throws IOException {
     Async async = context.async();
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
@@ -109,12 +109,12 @@ public class FileUploadServiceTest extends AbstractRestTest {
       .spec(binaryRequestSpecification)
       .when()
       .body(FileUtils.openInputStream(fileToUpload))
-      .post(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId())
+      .post(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId() + "/upload")
       .then()
       .statusCode(HttpStatus.SC_OK)
       .body("sourcePath", notNullValue())
-      .body("createdDate", notNullValue())
-      .body("status", is(FileDefinition.Status.UPLOADED.name()))
+      .body("metadata.createdDate", notNullValue())
+      .body("status", is(FileDefinition.Status.COMPLETED.name()))
       .extract().body().as(FileDefinition.class);
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));

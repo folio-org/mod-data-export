@@ -1,4 +1,4 @@
-package org.folio.service.fileupload.definition;
+package org.folio.service.upload.definition;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;

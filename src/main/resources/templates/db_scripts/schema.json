@@ -1,2 +1,16 @@
 {
+  "tables": [
+    {
+      "tableName": "file_definitions",
+      "fromModuleVersion": "mod-data-export-1.0.0",
+      "withMetadata": true,
+      "withAuditing": false,
+      "uniqueIndex": [
+        {
+          "fieldName": "id",
+          "tOps": "ADD"
+        }
+      ]
+    }
+  ]
 }

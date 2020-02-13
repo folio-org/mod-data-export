@@ -1,4 +1,4 @@
-package org.folio.dao.util;
+package org.folio.dao.impl;
 
 import io.vertx.core.Vertx;
 import org.folio.rest.persist.PostgresClient;

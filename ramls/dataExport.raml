@@ -11,8 +11,8 @@ documentation:
 
 types:
   errors: !include raml-util/schemas/errors.schema
-  exportRequest: !include schemas/exportRequest.json
   fileDefinition: !include schemas/fileDefinition.json
+  exportRequest: !include schemas/exportRequest.json
 
 traits:
   validate: !include raml-util/traits/validation.raml
@@ -46,7 +46,7 @@ traits:
               example: "Internal server error"
   /fileDefinitions:
     displayName: File upload service
-    description: Method to create file definition
+    description: Method to create file definition to use it for the file uploading
     post:
       description: File definition
       is: [validate]
@@ -75,7 +75,7 @@ traits:
               example: "Internal server error"
     /{fileDefinitionId}:
       get:
-        description: Method to get File definition by id
+        description: Method to get file definition by id
         responses:
           200:
             body:
@@ -96,27 +96,28 @@ traits:
             body:
               text/plain:
                 example: "Internal server error"
-      post:
-        description: Upload file
-        body:
-            application/octet-stream:
-        responses:
-          200:
-            body:
-              application/json:
-                type: fileDefinition
-          400:
-            description: "Bad request"
-            body:
-              text/plain:
-                example: "Bad request"
-          404:
-            description: "Not found"
-            body:
-              text/plain:
-                example: "Not found"
-          500:
-            description: "Internal server error"
-            body:
-              text/plain:
-                example: "Internal server error"
+      /upload:
+        post:
+          description: Upload file
+          body:
+              application/octet-stream:
+          responses:
+            200:
+              body:
+                application/json:
+                  type: fileDefinition
+            400:
+              description: "Bad request"
+              body:
+                text/plain:
+                  example: "Bad request"
+            404:
+              description: "Not found"
+              body:
+                text/plain:
+                  example: "Not found"
+            500:
+              description: "Internal server error"
+              body:
+                text/plain:
+                  example: "Internal server error"

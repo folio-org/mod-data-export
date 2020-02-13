@@ -1,4 +1,4 @@
-package org.folio.service.fileexport;
+package org.folio.service.export;
 
 import io.vertx.core.Future;
 

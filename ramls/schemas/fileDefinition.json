@@ -5,9 +5,9 @@
   "additionalProperties": false,
   "properties": {
     "id": {
-      "description": "UUID",
+      "description": "File id",
       "type": "string",
-      "ref": "../common/uuid.json"
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "fileName": {
       "description": "File name",
@@ -16,30 +16,30 @@
     "jobExecutionId": {
       "description": "Job execution id",
       "type": "string",
-      "ref": "../common/uuid.json"
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "sourcePath": {
       "description": "Path to the file",
       "type": "string"
-    },
-    "createdDate": {
-      "description": "Date and time when the file definition was created",
-      "type": "string",
-      "format": "date-time"
     },
     "status": {
       "description": "Status of files upload",
       "type": "string",
       "enum": [
         "NEW",
-        "UPLOADING",
-        "UPLOADED",
+        "IN_PROGRESS",
+        "COMPLETED",
         "ERROR"
       ]
     },
     "size": {
       "description": "Size of the file in Kbyte",
       "type": "integer"
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
     }
   },
   "required": [

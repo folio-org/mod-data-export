@@ -1,8 +1,8 @@
-package org.folio.service.fileupload.storage;
+package org.folio.service.upload.storage;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.service.fileupload.reader.SourceStreamReader;
+import org.folio.service.upload.reader.SourceStreamReader;
 
 /**
  * File storage service.
