@@ -6,15 +6,43 @@
   "properties": {
     "id": {
       "description": "File id",
+      "type": "string",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "fileName": {
+      "description": "File name",
       "type": "string"
     },
-    "path": {
+    "jobExecutionId": {
+      "description": "Job execution id",
+      "type": "string",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "sourcePath": {
       "description": "Path to the file",
       "type": "string"
+    },
+    "status": {
+      "description": "Status of files upload",
+      "type": "string",
+      "enum": [
+        "NEW",
+        "IN_PROGRESS",
+        "COMPLETED",
+        "ERROR"
+      ]
+    },
+    "size": {
+      "description": "Size of the file in Kbyte",
+      "type": "integer"
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
     }
   },
   "required": [
-    "id",
-    "path"
+    "fileName"
   ]
 }
