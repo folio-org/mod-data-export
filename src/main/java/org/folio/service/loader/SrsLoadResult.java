@@ -2,8 +2,6 @@ package org.folio.service.loader;
 
 import java.util.Collection;
 
-import io.vertx.core.json.JsonObject;
-
 public class SrsLoadResult {
 
   private Collection<String> underlyingMarcRecords;
