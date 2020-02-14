@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.folio.clients.SynchronousOkapiClient;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.vertx.core.json.JsonObject;
@@ -33,7 +31,7 @@ public class BlockingRecordLoaderService implements RecordLoaderService {
       Optional<JsonObject> optionalRecord = client.getById(uuid);
       if (optionalRecord.isPresent()) {
         marcRecords.add(getRecordContent(optionalRecord.get()));
-      }else{
+      } else {
         notFoundIds.add(uuid);
       }
     });
