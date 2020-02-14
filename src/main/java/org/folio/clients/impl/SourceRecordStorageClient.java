@@ -9,7 +9,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
-
 import org.folio.clients.SynchronousOkapiClient;
 import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
@@ -18,6 +17,14 @@ import org.springframework.stereotype.Component;
 
 import io.vertx.core.json.JsonObject;
 
+/**
+ * The client that synchronously communicates with the Source Record Storage(SRS).
+ * <p>
+ * Retrieves collection of underlying SRS records as a source of truth.
+ * Retrieves collection of Inventory records that do not have underlying SRS records
+ *
+ * @link https://github.com/folio-org/mod-source-record-storage
+ */
 @Component
 public class SourceRecordStorageClient extends SynchronousOkapiClient {
 
