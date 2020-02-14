@@ -6,7 +6,8 @@
   "properties": {
     "id": {
       "description": "Profile id",
-      "type": "string"
+      "type": "string",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "destination": {
       "description": "Final destination place where to send file",

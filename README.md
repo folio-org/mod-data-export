@@ -26,13 +26,13 @@ See that it says "BUILD SUCCESS" near the end.
 Build the docker container with:
 
 ```
-   docker build -t mod-data-export
+   docker build -t mod-data-export .
 ```
 
 Test that it runs with:
 
 ```
-   docker run -t -i -p 8081:8081 mod-data-export
+   docker run -d -t -i -p 8081:8081 mod-data-export
 ```
 
 ## Installing the module

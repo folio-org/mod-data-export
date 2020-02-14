@@ -1,4 +1,4 @@
-package org.folio.service.fileupload.reader;
+package org.folio.service.upload.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 

@@ -13,7 +13,40 @@
           ],
           "pathPattern": "/data-export/export",
           "permissionsRequired": [
-            "data-export.export"
+            "data-export.export.post"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/fileDefinitions/{fileDefinitionId}",
+          "permissionsRequired": [
+            "data-export.file-definitions.item.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/fileDefinitions",
+          "permissionsRequired": [
+            "data-export.file-definitions.item.post"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/fileDefinitions/{fileDefinitionId}/upload",
+          "permissionsRequired": [
+            "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
           ]
@@ -40,7 +73,40 @@
       ]
     }
   ],
-  "permissionSets": [],
+  "permissionSets": [
+    {
+      "permissionName": "data-export.export.post",
+      "displayName": "Starts export process",
+      "description": "Entry point to start export for the given file definition using job profile"
+    },
+    {
+      "permissionName": "data-export.file-definitions.item.get",
+      "displayName": "Data Export - get file definition by id",
+      "description": "Entry point to get File Definition by id"
+    },
+    {
+      "permissionName": "data-export.file-definitions.item.post",
+      "displayName": "Data Export - create new file definition",
+      "description": "Entry point to post File Definition"
+    },
+    {
+      "permissionName": "data-export.file-definitions.upload.post",
+      "displayName": "Data Export - upload file",
+      "description": "Entry point to upload file"
+    },
+    {
+      "permissionName": "data-export.all",
+      "displayName": "Data Export - all permissions",
+      "description": "Entire set of permissions needed to use the Data Export",
+      "subPermissions": [
+        "data-export.export.post",
+        "data-export.file-definitions.item.get",
+        "data-export.file-definitions.item.post",
+        "data-export.file-definitions.upload.post"
+      ],
+      "visible": false
+    }
+  ],
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",
     "dockerPull": false,
