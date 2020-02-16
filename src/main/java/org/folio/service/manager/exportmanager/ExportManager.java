@@ -4,7 +4,6 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.folio.service.manager.exportmanager.ExportManagerVertxEBProxy;
 
 @ProxyGen
 public interface ExportManager {  //NOSONAR
@@ -24,5 +23,5 @@ public interface ExportManager {  //NOSONAR
    * @param request   json request
    * @param parameters    HTTP request parameters
    */
-  void export(JsonObject request, JsonObject parameters);
+  void exportData(JsonObject request, JsonObject parameters);
 }

@@ -5,7 +5,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +15,6 @@ import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.upload.FileUploadService;
 import org.folio.service.upload.definition.FileDefinitionService;
-import org.folio.service.manager.ExportManager;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,21 +41,18 @@ public class DataExportImpl implements DataExport {
       we can save the state here, at the resource fields.
   */
   private Future<FileDefinition> fileUploadStateFuture;
-  private ExportManager exportManager;
   private String tenantId;
 
   public DataExportImpl(Vertx vertx, String tenantId) {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
-    this.exportManager = ExportManager.createProxy(vertx);
     this.tenantId = TenantTool.calculateTenantId(tenantId);
   }
 
   @Override
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext(c -> {
       try {
         LOGGER.info("Starting the data-export process, request: {}", entity);
-        exportManager.startExport(JsonObject.mapFrom(entity), JsonObject.mapFrom(okapiHeaders));
+        // call import manager to start
         succeededFuture()
           .map(PostDataExportExportResponse.respond204())
           .map(Response.class::cast)
@@ -65,7 +60,6 @@ public class DataExportImpl implements DataExport {
       } catch (Exception exception) {
         asyncResultHandler.handle(succeededFuture(map(exception)));
       }
-    });
   }
 
   @Override
