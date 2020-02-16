@@ -3,50 +3,80 @@ package org.folio.service.manager.exportmanager;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.assertj.core.api.Assertions;
-import org.folio.service.config.ApplicationTestConfig;
-import org.folio.service.fileexport.FileExportService;
+import org.folio.service.ApplicationTestConfig;
+import org.folio.service.export.FileExportService;
 import org.folio.service.loader.MarcLoadResult;
 import org.folio.service.loader.RecordLoaderService;
-import org.folio.service.manager.exportmanager.ExportManager;
-import org.folio.service.manager.exportmanager.ExportManagerImpl;
+import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 
-@RunWith(VertxUnitRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ExportManagerUnitTest {
 
   @Mock
   private RecordLoaderService recordLoaderService;
   @Mock
   private FileExportService fileExportService;
+  @Mock
+  private MappingService mappingService;
   @InjectMocks
   private ExportManagerImpl exportManagerWithMocks = new ExportManagerImpl();
 
-  private Context vertxContext = Vertx.vertx().getOrCreateContext();
+  @Test
+  public void export_shouldAcceptCorrectRequest() {
+    // given
+    Context vertxContext = Vertx.vertx().getOrCreateContext();
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+
+    JsonObject request = new JsonObject().put("identifiers", Collections.emptyList());
+    JsonObject okapiConnectionParams = new JsonObject();
+    // when
+    ExportManager exportManager = new ExportManagerImpl(vertxContext);
+    // then assert that no exception thrown
+    Assertions.assertThatCode(() -> exportManager.exportData(request, okapiConnectionParams))
+      .doesNotThrowAnyException();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void export_shouldNotAcceptWrongRequest() {
+    // given
+    Context vertxContext = Vertx.vertx().getOrCreateContext();
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+
+    ExportManager exportManager = new ExportManagerImpl(vertxContext);
+    JsonObject request = new JsonObject();
+    JsonObject okapiConnectionParams = new JsonObject();
+    // when
+    exportManager.exportData(request, okapiConnectionParams);
+    // then expect IllegalArgumentException
+  }
 
   @Test
   public void exportBlocking_shouldPassExport() {
     // given
-    MarcLoadResult marcLoadResult = new MarcLoadResult(Collections.emptyList(), Collections.emptyList());
-    Mockito.when(recordLoaderService.loadMarcByInstanceIds(anyList(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    int identifiersListSize = 1000;
+    Mockito.when(recordLoaderService.loadMarcByInstanceIds(anyList())).thenReturn(new MarcLoadResult());
+    List<String> identifiers = Mockito.mock(List.class);
+    Mockito.when(identifiers.size()).thenReturn(identifiersListSize);
     // when
-    exportManagerWithMocks.exportBlocking(new ArrayList<>(), new OkapiConnectionParams());
-    // then assert number of method calls
-
+    exportManagerWithMocks.exportBlocking(identifiers, new OkapiConnectionParams());
+    // then
+    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcByInstanceIds(anyList());
+    Mockito.verify(recordLoaderService, Mockito.times(20)).loadInstancesByIds(anyList());
+    Mockito.verify(fileExportService, Mockito.times(2)).save(anyList());
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
   }
 }

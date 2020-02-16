@@ -14,10 +14,9 @@ public interface RecordLoaderService {
    * Retrieves collection of underlying SRS records as a source of truth
    * Returns collection of records by given Instance ids
    * @param uuids   collection of Inventory ids
-   * @param params
    * @return      collection of records
    */
-   MarcLoadResult loadMarcByInstanceIds(List<String> uuids, OkapiConnectionParams params);
+   MarcLoadResult loadMarcByInstanceIds(List<String> uuids);
   /**
    * Retrieves collection of Inventory records that do not have underlying SRS records
    */
