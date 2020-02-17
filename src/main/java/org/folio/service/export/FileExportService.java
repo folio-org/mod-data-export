@@ -8,7 +8,7 @@ import java.util.List;
 public interface FileExportService {
 
   /**
-   * Export collection of marc records to the destination
+   * Exports collection of marc records to the destination
    *
    * @param marcRecords collection of marc records on export
    */

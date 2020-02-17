@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.NotFoundException;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.*;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
