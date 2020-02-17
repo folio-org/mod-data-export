@@ -13,11 +13,6 @@ public class MarcLoadResult {
     this.instanceIds = new ArrayList<>();
   }
 
-  public MarcLoadResult(List<String> srsMarcRecords, List<String> instanceIds) {
-    this.srsMarcRecords = srsMarcRecords;
-    this.instanceIds = instanceIds;
-  }
-
   public List<String> getSrsMarcRecords() {
     return srsMarcRecords;
   }

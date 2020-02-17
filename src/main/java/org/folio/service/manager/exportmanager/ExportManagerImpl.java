@@ -72,7 +72,7 @@ public class ExportManagerImpl implements ExportManager {
     Lists.partition(identifiers, EXPORT_PARTITION_SIZE).forEach(partitionIdentifiers -> {
       MarcLoadResult partitionLoadResult = recordLoaderService.loadSrsMarcRecords(partitionIdentifiers);
       fileExportService.export(partitionLoadResult.getSrsMarcRecords());
-      List<JsonObject> instances = recordLoaderService.loadInventoryInstances(partitionIdentifiers);
+      List<JsonObject> instances = recordLoaderService.loadInventoryInstances(partitionLoadResult.getInstanceIds());
       List<String> mappedMarcRecords = mappingService.map(instances);
       fileExportService.export(mappedMarcRecords);
     });
