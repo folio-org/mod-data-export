@@ -1,10 +1,7 @@
 package org.folio.service.loader;
 
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MarcLoadResult {

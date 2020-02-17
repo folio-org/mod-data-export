@@ -1,10 +1,6 @@
 package org.folio.service.export;
 
-
-import io.vertx.core.json.JsonObject;
-
 import java.util.List;
-
 
 /**
  * File export service
@@ -12,10 +8,9 @@ import java.util.List;
 public interface FileExportService {
 
   /**
-   * Saves collection of marc records to the destination
+   * Export collection of marc records to the destination
    *
-   * @param marcRecords collection of marc records
-   * @return Future
+   * @param marcRecords collection of marc records on export
    */
-  void save(List<String> marcRecords);
+  void export(List<String> marcRecords);
 }

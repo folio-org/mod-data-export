@@ -8,12 +8,11 @@ import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.service.upload.storage.FileStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.ws.rs.NotFoundException;
+
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.*;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {

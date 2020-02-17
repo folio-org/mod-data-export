@@ -40,8 +40,8 @@ public interface FileUploadService {
   /**
    * Completes uploading for the given {@link FileDefinition}
    *
-   * @param fileDefinition  {@link FileDefinition}
-   * @param tenantId tenant id
+   * @param fileDefinition {@link FileDefinition}
+   * @param tenantId       tenant id
    * @return {@link FileDefinition}
    */
   Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId);
@@ -50,7 +50,7 @@ public interface FileUploadService {
    * Aborts uploading for the given {@link FileDefinition} by id
    *
    * @param fileDefinitionId id of the {@link FileDefinition}
-   * @param tenantId  tenant id
+   * @param tenantId         tenant id
    * @return {@link FileDefinition}
    */
   Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId);

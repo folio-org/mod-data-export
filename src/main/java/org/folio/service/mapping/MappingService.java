@@ -6,5 +6,11 @@ import java.util.List;
 
 public interface MappingService {
 
-  List<String> map(List<JsonObject> instances);
+  /**
+   * Performs mapping to marc records
+   *
+   * @param records FOLIO records
+   * @return lit of strings
+   */
+  List<String> map(List<JsonObject> records);
 }

@@ -1,5 +1,6 @@
 package org.folio.service.export;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -9,9 +10,9 @@ import java.util.ArrayList;
 @RunWith(MockitoJUnitRunner.class)
 public class FileExportServiceUnitTest {
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldThrowException() {
+  @Test
+  public void save_doesNotThrowAnyException() {
     FileExportService fileExportService = new FileExportServiceImpl();
-    fileExportService.save(new ArrayList<>());
+    Assertions.assertThatCode(() -> fileExportService.export(new ArrayList<>())).doesNotThrowAnyException();
   }
 }

@@ -10,7 +10,6 @@ import org.folio.service.loader.MarcLoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.OkapiConnectionParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -68,15 +67,15 @@ public class ExportManagerUnitTest {
   public void exportBlocking_shouldPassExport() {
     // given
     int identifiersListSize = 1000;
-    Mockito.when(recordLoaderService.loadMarcByInstanceIds(anyList())).thenReturn(new MarcLoadResult());
+    Mockito.when(recordLoaderService.loadSrsMarcRecords(anyList())).thenReturn(new MarcLoadResult());
     List<String> identifiers = Mockito.mock(List.class);
     Mockito.when(identifiers.size()).thenReturn(identifiersListSize);
     // when
-    exportManagerWithMocks.exportBlocking(identifiers, new OkapiConnectionParams());
+    exportManagerWithMocks.exportBlocking(identifiers);
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcByInstanceIds(anyList());
-    Mockito.verify(recordLoaderService, Mockito.times(20)).loadInstancesByIds(anyList());
-    Mockito.verify(fileExportService, Mockito.times(2)).save(anyList());
-    Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
+    Mockito.verify(recordLoaderService, Mockito.times(67)).loadSrsMarcRecords(anyList());
+    Mockito.verify(recordLoaderService, Mockito.times(67)).loadInventoryInstances(anyList());
+    Mockito.verify(fileExportService, Mockito.times(134)).export(anyList());
+    Mockito.verify(mappingService, Mockito.times(67)).map(anyList());
   }
 }
