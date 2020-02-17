@@ -29,7 +29,7 @@ import io.vertx.core.json.JsonObject;
 public class SourceRecordStorageClient extends SynchronousOkapiClient {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  public static final String GET_RECORD_PATTERN = "%s/source-storage/formattedRecords/%s?identifier=INSTANCE";
+  public static final String GET_RECORD_PATTERN = "%s/source-storage/records?query=(externalIdsHolder.instanceId==%s)";
 
   public SourceRecordStorageClient(OkapiConnectionParams okapiConnectionParams) {
     super(okapiConnectionParams);
@@ -53,4 +53,9 @@ public class SourceRecordStorageClient extends SynchronousOkapiClient {
     }
     return null;
   }
+
+  private String getRecordContent(JsonObject record) {
+    return record.getJsonObject("rawRecord").getString("content");
+  }
+
 }

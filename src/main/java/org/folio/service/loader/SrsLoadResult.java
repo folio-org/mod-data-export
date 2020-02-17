@@ -1,12 +1,13 @@
 package org.folio.service.loader;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class SrsLoadResult {
 
-  private Collection<String> underlyingMarcRecords;
+  private Collection<String> underlyingMarcRecords = new ArrayList<>();
 
-  private Collection<String> singleInstanceIdentifiers;
+  private Collection<String> singleInstanceIdentifiers = new ArrayList<>();;
 
   public Collection<String> getUnderlyingMarcRecords() {
     return underlyingMarcRecords;

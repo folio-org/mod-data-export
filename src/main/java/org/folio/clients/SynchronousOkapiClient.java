@@ -5,8 +5,10 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.ws.rs.core.MediaType;
 
@@ -34,10 +36,10 @@ public abstract class SynchronousOkapiClient {
     this.okapiConnectionParams = okapiConnectionParams;
   }
 
-  public Optional<JsonObject> getById(String id) {
+  public Optional<JsonObject> getByIds(List<String> ids) {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet);
-    prepareRequest(httpGet, id);
+    prepareRequest(httpGet, ids);
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault();
          CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -56,7 +58,7 @@ public abstract class SynchronousOkapiClient {
     requestBase.setHeader((HttpHeaders.ACCEPT), MediaType.APPLICATION_JSON);
   }
 
-  protected abstract void prepareRequest(HttpRequestBase requestBase, String id);
+  protected abstract void prepareRequest(HttpRequestBase requestBase, List<String> id);
 
   protected abstract JsonObject postProcess(CloseableHttpResponse response);
 

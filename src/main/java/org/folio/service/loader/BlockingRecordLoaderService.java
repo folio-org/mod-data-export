@@ -1,7 +1,6 @@
 package org.folio.service.loader;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,23 +23,34 @@ public class BlockingRecordLoaderService implements RecordLoaderService {
 
   @Override
   public SrsLoadResult loadMarcRecords(List<String> uuids) {
+    Optional<JsonObject> optionalRecords = client.getByIds(uuids);
+    return populateLoadResult(uuids, optionalRecords);
+  }
+
+  private SrsLoadResult populateLoadResult(List<String> uuids, Optional<JsonObject> optionalRecords) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
-    Collection<String> marcRecords = new ArrayList<>();
-    Collection<String> notFoundIds = new ArrayList<>();
-    uuids.forEach(uuid -> {
-      Optional<JsonObject> optionalRecord = client.getById(uuid);
-      if (optionalRecord.isPresent()) {
-        marcRecords.add(getRecordContent(optionalRecord.get()));
-      } else {
-        notFoundIds.add(uuid);
+    optionalRecords.ifPresent(r -> {
+      List list = r.getJsonArray("records").getList();
+      List<String> marcRecords = new ArrayList<>();
+      final List<String> setSingleInstanceIdentifiers = new ArrayList<>();
+      for (Object o : list) {
+        if (o instanceof JsonObject) {
+          JsonObject record = (JsonObject) o;
+          marcRecords.add(record.getString("content"));
+          JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
+          if (externalIdsHolder != null) {
+            String instanceId = externalIdsHolder.getString("instanceId");
+            if (uuids.contains(instanceId)) {
+              setSingleInstanceIdentifiers.add(instanceId);
+            }
+          }
+        }
       }
+      srsLoadResult.setUnderlyingMarcRecords(marcRecords);
+      srsLoadResult.setUnderlyingMarcRecords(setSingleInstanceIdentifiers);
     });
-    srsLoadResult.setUnderlyingMarcRecords(marcRecords);
-    srsLoadResult.setSingleInstanceIdentifiers(notFoundIds);
     return srsLoadResult;
   }
 
-  private String getRecordContent(JsonObject record) {
-    return record.getJsonObject("rawRecord").getString("content");
-  }
+
 }
