@@ -43,7 +43,7 @@ public class DataExportImpl implements DataExport {
   private Future<FileDefinition> fileUploadStateFuture;
   private String tenantId;
 
-  public DataExportImpl(Vertx vertx, String tenantId) {
+  public DataExportImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
   }
