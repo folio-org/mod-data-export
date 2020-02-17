@@ -6,18 +6,21 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 @RunWith(MockitoJUnitRunner.class)
 public class RecordLoaderServiceUnitTest {
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldThrowException_WhenLoadMarc() {
+  @Test
+  public void loadMarcRecords_doesNotThrowAnyException() {
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl();
-    recordLoaderService.loadMarcByInstanceIds(new ArrayList<>());
+    assertThatCode(() -> recordLoaderService.loadSrsMarcRecords(new ArrayList<>())).doesNotThrowAnyException();
   }
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldThrowException_WhenLoadInstances() {
+  @Test
+  public void loadInstanceRecords_doesNotThrowAnyException() {
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl();
-    recordLoaderService.loadInstancesByIds(new ArrayList<>());
+    recordLoaderService.loadInventoryInstances(new ArrayList<>());
+    assertThatCode(() -> recordLoaderService.loadInventoryInstances(new ArrayList<>())).doesNotThrowAnyException();
   }
 }

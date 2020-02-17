@@ -11,14 +11,12 @@ import java.util.List;
 public interface RecordLoaderService {
 
   /**
-   * Retrieves collection of underlying SRS records as a source of truth
-   * Returns collection of records by given Instance ids
-   * @param uuids   collection of Inventory ids
+   * Retrieves collection of underlying SRS records
    * @return      collection of records
    */
-   MarcLoadResult loadMarcByInstanceIds(List<String> uuids);
+   MarcLoadResult loadSrsMarcRecords(List<String> instanceIds);
   /**
-   * Retrieves collection of Inventory records that do not have underlying SRS records
+   * Retrieves collection of Inventory records
    */
-  List<JsonObject> loadInstancesByIds(List<String> instanceIds);
+  List<JsonObject> loadInventoryInstances(List<String> instanceIds);
 }

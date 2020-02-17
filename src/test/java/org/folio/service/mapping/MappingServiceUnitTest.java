@@ -6,12 +6,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MappingServiceUnitTest {
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void shouldThrowException() {
+  @Test
+  public void map_doesNotThrowAnyException() {
     MappingService mappingService = new MappingServiceImpl();
-    mappingService.map(new ArrayList<>());
+    assertThatCode(() -> mappingService.map(new ArrayList<>())).doesNotThrowAnyException();
   }
 }

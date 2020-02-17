@@ -8,6 +8,5 @@ import java.util.List;
 public class FileExportServiceImpl implements FileExportService {
   @Override
   public void save(List<String> marcRecords) {
-    throw new UnsupportedOperationException("Method is not implemented yet");
   }
 }
