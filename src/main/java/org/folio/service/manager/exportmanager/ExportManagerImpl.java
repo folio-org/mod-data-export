@@ -16,6 +16,7 @@ import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -30,7 +31,8 @@ public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
   private static final String IDENTIFIERS_REQUEST_KEY = "identifiers";
   private static final int POOL_SIZE = 1;
-  private static final int EXPORT_PARTITION_SIZE = 15;
+  private static final int SRS_LOAD_PARTITION_SIZE = 15;
+  private static final int INVENTORY_LOAD_PARTITION_SIZE = 15;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
@@ -66,16 +68,46 @@ public class ExportManagerImpl implements ExportManager {
   /**
    * Runs the main export flow in blocking manner.
    *
-   * @param identifiers list of inventory identifiers
+   * @param identifiers instance identifiers
    */
   protected void exportBlocking(List<String> identifiers) {
-    Lists.partition(identifiers, EXPORT_PARTITION_SIZE).forEach(partitionIdentifiers -> {
-      MarcLoadResult partitionLoadResult = recordLoaderService.loadSrsMarcRecords(partitionIdentifiers);
-      fileExportService.export(partitionLoadResult.getSrsMarcRecords());
-      List<JsonObject> instances = recordLoaderService.loadInventoryInstances(partitionLoadResult.getInstanceIds());
-      List<String> mappedMarcRecords = mappingService.map(instances);
-      fileExportService.export(mappedMarcRecords);
+    MarcLoadResult marcLoadResult = loadSrsMarcRecordsInPartitions(identifiers);
+    fileExportService.export(marcLoadResult.getSrsMarcRecords());
+    List<JsonObject> instances = loadInventoryInstancesInPartitions(identifiers);
+    List<String> mappedMarcRecords = mappingService.map(instances);
+    fileExportService.export(mappedMarcRecords);
+  }
+
+  /**
+   * Loads marc records from SRS by the given instance identifiers
+   *
+   * @param identifiers instance identifiers
+   * @return @see MarcLoadResult
+   */
+  private MarcLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers) {
+    MarcLoadResult marcLoadResult = new MarcLoadResult();
+    Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
+      MarcLoadResult partitionLoadResult = recordLoaderService.loadSrsMarcRecords(partition);
+      marcLoadResult.getSrsMarcRecords().addAll(partitionLoadResult.getSrsMarcRecords());
+      marcLoadResult.getInstanceIds().addAll(partitionLoadResult.getInstanceIds());
     });
+    return marcLoadResult;
+  }
+
+  /**
+   * Loads instances from Inventory by the given identifiers
+   *
+   * @param identifiers instance identifiers
+   * @return list of instances
+   */
+  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> identifiers) {
+    List<JsonObject> instances = new ArrayList<>();
+    Lists.partition(identifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
+        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstances(partition);
+        instances.addAll(partitionLoadResult);
+      }
+    );
+    return instances;
   }
 
   /**

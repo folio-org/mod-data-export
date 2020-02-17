@@ -75,7 +75,7 @@ public class ExportManagerUnitTest {
     // then
     Mockito.verify(recordLoaderService, Mockito.times(67)).loadSrsMarcRecords(anyList());
     Mockito.verify(recordLoaderService, Mockito.times(67)).loadInventoryInstances(anyList());
-    Mockito.verify(fileExportService, Mockito.times(134)).export(anyList());
-    Mockito.verify(mappingService, Mockito.times(67)).map(anyList());
+    Mockito.verify(fileExportService, Mockito.times(2)).export(anyList());
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
   }
 }
