@@ -1,971 +1,974 @@
-[
-  {
-    "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
-    "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-    "matchedId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
-    "generation": 0,
-    "recordType": "MARC",
-    "rawRecord": {
-      "id": "ca631e20-e4c0-4c3e-9b24-70564c1bc7e5",
-      "content": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content"
-    },
-    "parsedRecord": {
-      "id": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92",
-      "content": {
-        "fields": [
-          {
-            "001": "in00000000041"
-          },
-          {
-            "005": "20171004205343.0"
-          },
-          {
-            "008": "890224c19429999mnuuu l       0    2eng  "
-          },
-          {
-            "035": "1567726"
-          },
-          {
-            "010": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "z": "   42022330 "
-                }
-              ]
-            }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "(OCoLC)10724092"
-                }
-              ]
-            }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "(NIC)notisAHJ5096"
-                }
-              ]
-            }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "1567726"
-                }
-              ]
-            }
-          },
-          {
-            "040": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "DLC"
-                },
-                {
-                  "b": "eng"
-                },
-                {
-                  "c": "DLC"
-                },
-                {
-                  "d": "OCLCQ"
-                },
-                {
-                  "d": "OCLCF"
-                },
-                {
-                  "d": "OCLCO"
-                }
-              ]
-            }
-          },
-          {
-            "043": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "n-us---"
-                }
-              ]
-            }
-          },
-          {
-            "050": {
-              "ind1": "1",
-              "ind2": "0",
-              "subfields": [
-                {
-                  "a": "KF6365"
-                },
-                {
-                  "b": ".M4"
-                }
-              ]
-            }
-          },
-          {
-            "082": {
-              "ind1": "0",
-              "ind2": "4",
-              "subfields": [
-                {
-                  "a": "336.2402673"
-                },
-                {
-                  "2": "19"
-                }
-              ]
-            }
-          },
-          {
-            "245": {
-              "ind1": "0",
-              "ind2": "4",
-              "subfields": [
-                {
-                  "a": "The Law of Federal income taxation."
-                }
-              ]
-            }
-          },
-          {
-            "246": {
-              "ind1": "3",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Mertens the law of federal income taxation"
-                }
-              ]
-            }
-          },
-          {
-            "246": {
-              "ind1": "3",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Mertens law of federal income taxation"
-                }
-              ]
-            }
-          },
-          {
-            "260": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "[St. Paul] :"
-                },
-                {
-                  "b": "West Group,"
-                },
-                {
-                  "c": "1942-"
-                }
-              ]
-            }
-          },
-          {
-            "300": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "v. (loose-leaf)"
-                },
-                {
-                  "c": "26 cm."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Some volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Originally issued in bound format and kept up to date by pocket supplements and revised volumes."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Published in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997)."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "The service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--"
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Includes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Includes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Includes \"Complete internal revenue code\" issued as soft-bound supplement."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Description based on: T.p., 1997-1998 rulings."
-                }
-              ]
-            }
-          },
-          {
-            "650": {
-              "ind1": " ",
-              "ind2": "0",
-              "subfields": [
-                {
-                  "a": "Income tax"
-                },
-                {
-                  "x": "Law and legislation"
-                },
-                {
-                  "z": "United States."
-                }
-              ]
-            }
-          },
-          {
-            "650": {
-              "ind1": " ",
-              "ind2": "7",
-              "subfields": [
-                {
-                  "a": "Income tax"
-                },
-                {
-                  "x": "Law and legislation."
-                },
-                {
-                  "2": "fast"
-                },
-                {
-                  "0": "(OCoLC)fst00968749"
-                }
-              ]
-            }
-          },
-          {
-            "651": {
-              "ind1": " ",
-              "ind2": "7",
-              "subfields": [
-                {
-                  "a": "United States."
-                },
-                {
-                  "2": "fast"
-                },
-                {
-                  "0": "(OCoLC)fst01204155"
-                }
-              ]
-            }
-          },
-          {
-            "700": {
-              "ind1": "1",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Mertens, Jacob,"
-                },
-                {
-                  "d": "1896-"
-                }
-              ]
-            }
-          },
-          {
-            "710": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "West Group."
-                }
-              ]
-            }
-          },
-          {
-            "710": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Clark Boardman Callaghan."
-                }
-              ]
-            }
-          },
-          {
-            "710": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Callaghan and Company."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": "2",
-              "subfields": [
-                {
-                  "a": "Mertens federal tax regulations."
-                },
-                {
-                  "p": "Regulations preambles."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": "2",
-              "subfields": [
-                {
-                  "a": "Mertens federal tax regulations."
-                },
-                {
-                  "p": "Proposed regulations preambles."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": "2",
-              "subfields": [
-                {
-                  "a": "Current tax highlights."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": "2",
-              "subfields": [
-                {
-                  "a": "Mertens federal tax regulations."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": "2",
-              "subfields": [
-                {
-                  "a": "Complete internal revenue code."
-                }
-              ]
-            }
-          },
-          {
-            "776": {
-              "ind1": "0",
-              "ind2": "8",
-              "subfields": [
-                {
-                  "i": "Online version:"
-                },
-                {
-                  "t": "Law of Federal income taxation"
-                },
-                {
-                  "w": "(OCoLC)755250706"
-                }
-              ]
-            }
-          },
-          {
-            "905": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "19890224120000.0"
-                }
-              ]
-            }
-          },
-          {
-            "948": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "20171004"
-                },
-                {
-                  "b": "m"
-                },
-                {
-                  "d": "paj3"
-                },
-                {
-                  "e": "law"
-                },
-                {
-                  "f": "?"
-                }
-              ]
-            }
-          },
-          {
-            "999": {
-              "ind1": "f",
-              "ind2": "f",
-              "subfields": [
-                {
-                  "s": "bc5caa84-e85c-4c98-9956-50ccdaad7115"
-                },
-                {
-                  "i": "ae573875-fbc8-40e7-bda7-0ac283354226"
-                }
-              ]
-            }
-          }
-        ],
-        "leader": "03039cai a2200529   4500"
+{
+  "records": [
+    {
+      "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
+      "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
+      "matchedId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
+      "generation": 0,
+      "recordType": "MARC",
+      "rawRecord": {
+        "id": "ca631e20-e4c0-4c3e-9b24-70564c1bc7e5",
+        "content": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content"
       },
-      "formattedContent": "LEADER 03039cai a2200529   4500\n001 in00000000041\n005 20171004205343.0\n008 890224c19429999mnuuu l       0    2eng  \n035 1567726\n010   $z   42022330 \n035   $a(OCoLC)10724092\n035   $a(NIC)notisAHJ5096\n035   $a1567726\n040   $aDLC$beng$cDLC$dOCLCQ$dOCLCF$dOCLCO\n043   $an-us---\n050 10$aKF6365$b.M4\n082 04$a336.2402673$219\n245 04$aThe Law of Federal income taxation.\n246 3 $aMertens the law of federal income taxation\n246 3 $aMertens law of federal income taxation\n260   $a[St. Paul] :$bWest Group,$c1942-\n300   $av. (loose-leaf)$c26 cm.\n500   $aSome volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation.\n500   $aOriginally issued in bound format and kept up to date by pocket supplements and revised volumes.\n500   $aPublished in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997).\n500   $aThe service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--\n500   $aIncludes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings.\n500   $a\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume.\n500   $aIncludes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table.\n500   $aIncludes \"Complete internal revenue code\" issued as soft-bound supplement.\n500   $aDescription based on: T.p., 1997-1998 rulings.\n650  0$aIncome tax$xLaw and legislation$zUnited States.\n650  7$aIncome tax$xLaw and legislation.$2fast$0(OCoLC)fst00968749\n651  7$aUnited States.$2fast$0(OCoLC)fst01204155\n700 1 $aMertens, Jacob,$d1896-\n710 2 $aWest Group.\n710 2 $aClark Boardman Callaghan.\n710 2 $aCallaghan and Company.\n740 02$aMertens federal tax regulations.$pRegulations preambles.\n740 02$aMertens federal tax regulations.$pProposed regulations preambles.\n740 02$aCurrent tax highlights.\n740 02$aMertens federal tax regulations.\n740 02$aComplete internal revenue code.\n776 08$iOnline version:$tLaw of Federal income taxation$w(OCoLC)755250706\n905   $a19890224120000.0\n948 2 $a20171004$bm$dpaj3$elaw$f?\n999 ff$sbc5caa84-e85c-4c98-9956-50ccdaad7115$iae573875-fbc8-40e7-bda7-0ac283354226\n"
-    },
-    "deleted": false,
-    "externalIdsHolder": {
-      "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226"
-    },
-    "additionalInfo": {
-      "suppressDiscovery": false
-    },
-    "metadata": {
-      "createdDate": "2020-02-10T08:34:34.504+0000",
-      "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
-      "updatedDate": "2020-02-10T08:34:36.506+0000",
-      "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
-    }
-  },
-  {
-    "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
-    "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-    "matchedId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
-    "generation": 0,
-    "recordType": "MARC",
-    "rawRecord": {
-      "id": "4f559f73-c37c-4420-93d5-3e354c6f89f5",
-      "content": "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"
-    },
-    "parsedRecord": {
-      "id": "47178cad-a892-4c2a-b9e4-bb33dea6fc31",
-      "content": {
-        "fields": [
-          {
-            "001": "in00000000052"
-          },
-          {
-            "005": "20170816204126.0"
-          },
-          {
-            "008": "890411m19309999pau      l    001 0 eng  "
-          },
-          {
-            "035": "1579067"
-          },
-          {
-            "010": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "   30014365 //r855"
-                }
-              ]
+      "parsedRecord": {
+        "id": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92",
+        "content": {
+          "fields": [
+            {
+              "001": "in00000000041"
+            },
+            {
+              "005": "20171004205343.0"
+            },
+            {
+              "008": "890224c19429999mnuuu l       0    2eng  "
+            },
+            {
+              "035": "1567726"
+            },
+            {
+              "010": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "z": "   42022330 "
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(OCoLC)10724092"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(NIC)notisAHJ5096"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "1567726"
+                  }
+                ]
+              }
+            },
+            {
+              "040": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "DLC"
+                  },
+                  {
+                    "b": "eng"
+                  },
+                  {
+                    "c": "DLC"
+                  },
+                  {
+                    "d": "OCLCQ"
+                  },
+                  {
+                    "d": "OCLCF"
+                  },
+                  {
+                    "d": "OCLCO"
+                  }
+                ]
+              }
+            },
+            {
+              "043": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "n-us---"
+                  }
+                ]
+              }
+            },
+            {
+              "050": {
+                "ind1": "1",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "KF6365"
+                  },
+                  {
+                    "b": ".M4"
+                  }
+                ]
+              }
+            },
+            {
+              "082": {
+                "ind1": "0",
+                "ind2": "4",
+                "subfields": [
+                  {
+                    "a": "336.2402673"
+                  },
+                  {
+                    "2": "19"
+                  }
+                ]
+              }
+            },
+            {
+              "245": {
+                "ind1": "0",
+                "ind2": "4",
+                "subfields": [
+                  {
+                    "a": "The Law of Federal income taxation."
+                  }
+                ]
+              }
+            },
+            {
+              "246": {
+                "ind1": "3",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Mertens the law of federal income taxation"
+                  }
+                ]
+              }
+            },
+            {
+              "246": {
+                "ind1": "3",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Mertens law of federal income taxation"
+                  }
+                ]
+              }
+            },
+            {
+              "260": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "[St. Paul] :"
+                  },
+                  {
+                    "b": "West Group,"
+                  },
+                  {
+                    "c": "1942-"
+                  }
+                ]
+              }
+            },
+            {
+              "300": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "v. (loose-leaf)"
+                  },
+                  {
+                    "c": "26 cm."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Some volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Originally issued in bound format and kept up to date by pocket supplements and revised volumes."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Published in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997)."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "The service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--"
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Includes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Includes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Includes \"Complete internal revenue code\" issued as soft-bound supplement."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Description based on: T.p., 1997-1998 rulings."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Income tax"
+                  },
+                  {
+                    "x": "Law and legislation"
+                  },
+                  {
+                    "z": "United States."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Income tax"
+                  },
+                  {
+                    "x": "Law and legislation."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst00968749"
+                  }
+                ]
+              }
+            },
+            {
+              "651": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "United States."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01204155"
+                  }
+                ]
+              }
+            },
+            {
+              "700": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Mertens, Jacob,"
+                  },
+                  {
+                    "d": "1896-"
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "West Group."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Clark Boardman Callaghan."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Callaghan and Company."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": "2",
+                "subfields": [
+                  {
+                    "a": "Mertens federal tax regulations."
+                  },
+                  {
+                    "p": "Regulations preambles."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": "2",
+                "subfields": [
+                  {
+                    "a": "Mertens federal tax regulations."
+                  },
+                  {
+                    "p": "Proposed regulations preambles."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": "2",
+                "subfields": [
+                  {
+                    "a": "Current tax highlights."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": "2",
+                "subfields": [
+                  {
+                    "a": "Mertens federal tax regulations."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": "2",
+                "subfields": [
+                  {
+                    "a": "Complete internal revenue code."
+                  }
+                ]
+              }
+            },
+            {
+              "776": {
+                "ind1": "0",
+                "ind2": "8",
+                "subfields": [
+                  {
+                    "i": "Online version:"
+                  },
+                  {
+                    "t": "Law of Federal income taxation"
+                  },
+                  {
+                    "w": "(OCoLC)755250706"
+                  }
+                ]
+              }
+            },
+            {
+              "905": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "19890224120000.0"
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20171004"
+                  },
+                  {
+                    "b": "m"
+                  },
+                  {
+                    "d": "paj3"
+                  },
+                  {
+                    "e": "law"
+                  },
+                  {
+                    "f": "?"
+                  }
+                ]
+              }
+            },
+            {
+              "999": {
+                "ind1": "f",
+                "ind2": "f",
+                "subfields": [
+                  {
+                    "s": "bc5caa84-e85c-4c98-9956-50ccdaad7115"
+                  },
+                  {
+                    "i": "ae573875-fbc8-40e7-bda7-0ac283354226"
+                  }
+                ]
+              }
             }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "(NIC)notisAHK7689"
-                }
-              ]
-            }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "(OCoLC)3289989"
-                }
-              ]
-            }
-          },
-          {
-            "035": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "1579067"
-                }
-              ]
-            }
-          },
-          {
-            "040": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "d": "NIC"
-                },
-                {
-                  "d": "NIC"
-                }
-              ]
-            }
-          },
-          {
-            "043": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "n-us-pa"
-                }
-              ]
-            }
-          },
-          {
-            "050": {
-              "ind1": "0",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "KFP30 1930"
-                },
-                {
-                  "b": ".A44"
-                }
-              ]
-            }
-          },
-          {
-            "110": {
-              "ind1": "1",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Pennsylvania."
-                }
-              ]
-            }
-          },
-          {
-            "240": {
-              "ind1": "1",
-              "ind2": "0",
-              "subfields": [
-                {
-                  "a": "Laws, etc. (Compiled statutes : 1930-   )"
-                }
-              ]
-            }
-          },
-          {
-            "245": {
-              "ind1": "1",
-              "ind2": "0",
-              "subfields": [
-                {
-                  "a": "Purdon's Pennsylvania statutes, annotated :"
-                },
-                {
-                  "b": "permanent ed."
-                }
-              ]
-            }
-          },
-          {
-            "260": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Philadelphia, Pa. :"
-                },
-                {
-                  "b": "George T. Bisel Co. ;"
-                },
-                {
-                  "a": "St. Paul, Minn. :"
-                },
-                {
-                  "b": "West Publishing Co.,"
-                },
-                {
-                  "c": "1930-"
-                }
-              ]
-            }
-          },
-          {
-            "300": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "v. ;"
-                },
-                {
-                  "c": "25 cm."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Includes unnumbered tables and index volumes."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Kept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated."
-                }
-              ]
-            }
-          },
-          {
-            "500": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Vols. for  published by West Group."
-                }
-              ]
-            }
-          },
-          {
-            "650": {
-              "ind1": " ",
-              "ind2": "0",
-              "subfields": [
-                {
-                  "a": "Law"
-                },
-                {
-                  "z": "Pennsylvania."
-                }
-              ]
-            }
-          },
-          {
-            "650": {
-              "ind1": " ",
-              "ind2": "7",
-              "subfields": [
-                {
-                  "a": "Law"
-                },
-                {
-                  "2": "fast"
-                },
-                {
-                  "0": "(OCoLC)fst00993678"
-                }
-              ]
-            }
-          },
-          {
-            "651": {
-              "ind1": " ",
-              "ind2": "7",
-              "subfields": [
-                {
-                  "a": "Pennsylvania"
-                },
-                {
-                  "2": "fast"
-                },
-                {
-                  "0": "(OCoLC)fst01204598"
-                }
-              ]
-            }
-          },
-          {
-            "700": {
-              "ind1": "1",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Purdon, John,"
-                },
-                {
-                  "d": "1784-1835."
-                }
-              ]
-            }
-          },
-          {
-            "710": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "George T. Bisel Company."
-                }
-              ]
-            }
-          },
-          {
-            "710": {
-              "ind1": "2",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "West Publishing Company."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Purdon's Pennsylvania legislative service."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Pennsylvania legislative service."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Purdon's Pennsylvania consolidated statutes, annotated."
-                }
-              ]
-            }
-          },
-          {
-            "740": {
-              "ind1": "0",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "Purdon's Pennsylvania statutes and consolidated statutes annotated."
-                }
-              ]
-            }
-          },
-          {
-            "902": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "pfnd"
-                },
-                {
-                  "b": "Law"
-                }
-              ]
-            }
-          },
-          {
-            "905": {
-              "ind1": " ",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "19890413120000.0"
-                }
-              ]
-            }
-          },
-          {
-            "948": {
-              "ind1": "1",
-              "ind2": " ",
-              "subfields": [
-                {
-                  "a": "20101019"
-                },
-                {
-                  "b": "s"
-                },
-                {
-                  "d": "lap11"
-                },
-                {
-                  "e": "lts"
-                },
-                {
-                  "x": "ToAddCatStat"
-                }
-              ]
-            }
-          },
-          {
-            "999": {
-              "ind1": "f",
-              "ind2": "f",
-              "subfields": [
-                {
-                  "s": "f4bb5a49-5011-4ea2-853e-b6922d489bca"
-                },
-                {
-                  "i": "5fc04e92-70dd-46b8-97ea-194015762a60"
-                }
-              ]
-            }
-          }
-        ],
-        "leader": "01827cam a2200421 a 4500"
+          ],
+          "leader": "03039cai a2200529   4500"
+        },
+        "formattedContent": "LEADER 03039cai a2200529   4500\n001 in00000000041\n005 20171004205343.0\n008 890224c19429999mnuuu l       0    2eng  \n035 1567726\n010   $z   42022330 \n035   $a(OCoLC)10724092\n035   $a(NIC)notisAHJ5096\n035   $a1567726\n040   $aDLC$beng$cDLC$dOCLCQ$dOCLCF$dOCLCO\n043   $an-us---\n050 10$aKF6365$b.M4\n082 04$a336.2402673$219\n245 04$aThe Law of Federal income taxation.\n246 3 $aMertens the law of federal income taxation\n246 3 $aMertens law of federal income taxation\n260   $a[St. Paul] :$bWest Group,$c1942-\n300   $av. (loose-leaf)$c26 cm.\n500   $aSome volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation.\n500   $aOriginally issued in bound format and kept up to date by pocket supplements and revised volumes.\n500   $aPublished in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997).\n500   $aThe service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--\n500   $aIncludes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings.\n500   $a\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume.\n500   $aIncludes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table.\n500   $aIncludes \"Complete internal revenue code\" issued as soft-bound supplement.\n500   $aDescription based on: T.p., 1997-1998 rulings.\n650  0$aIncome tax$xLaw and legislation$zUnited States.\n650  7$aIncome tax$xLaw and legislation.$2fast$0(OCoLC)fst00968749\n651  7$aUnited States.$2fast$0(OCoLC)fst01204155\n700 1 $aMertens, Jacob,$d1896-\n710 2 $aWest Group.\n710 2 $aClark Boardman Callaghan.\n710 2 $aCallaghan and Company.\n740 02$aMertens federal tax regulations.$pRegulations preambles.\n740 02$aMertens federal tax regulations.$pProposed regulations preambles.\n740 02$aCurrent tax highlights.\n740 02$aMertens federal tax regulations.\n740 02$aComplete internal revenue code.\n776 08$iOnline version:$tLaw of Federal income taxation$w(OCoLC)755250706\n905   $a19890224120000.0\n948 2 $a20171004$bm$dpaj3$elaw$f?\n999 ff$sbc5caa84-e85c-4c98-9956-50ccdaad7115$iae573875-fbc8-40e7-bda7-0ac283354226\n"
       },
-      "formattedContent": "LEADER 01827cam a2200421 a 4500\n001 in00000000052\n005 20170816204126.0\n008 890411m19309999pau      l    001 0 eng  \n035 1579067\n010   $a   30014365 //r855\n035   $a(NIC)notisAHK7689\n035   $a(OCoLC)3289989\n035   $a1579067\n040   $dNIC$dNIC\n043   $an-us-pa\n050 0 $aKFP30 1930$b.A44\n110 1 $aPennsylvania.\n240 10$aLaws, etc. (Compiled statutes : 1930-   )\n245 10$aPurdon's Pennsylvania statutes, annotated :$bpermanent ed.\n260   $aPhiladelphia, Pa. :$bGeorge T. Bisel Co. ;$aSt. Paul, Minn. :$bWest Publishing Co.,$c1930-\n300   $av. ;$c25 cm.\n500   $aIncludes unnumbered tables and index volumes.\n500   $aKept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated.\n500   $aVols. for  published by West Group.\n650  0$aLaw$zPennsylvania.\n650  7$aLaw$2fast$0(OCoLC)fst00993678\n651  7$aPennsylvania$2fast$0(OCoLC)fst01204598\n700 1 $aPurdon, John,$d1784-1835.\n710 2 $aGeorge T. Bisel Company.\n710 2 $aWest Publishing Company.\n740 0 $aPurdon's Pennsylvania legislative service.\n740 0 $aPennsylvania legislative service.\n740 0 $aPurdon's Pennsylvania consolidated statutes, annotated.\n740 0 $aPurdon's Pennsylvania statutes and consolidated statutes annotated.\n902   $apfnd$bLaw\n905   $a19890413120000.0\n948 1 $a20101019$bs$dlap11$elts$xToAddCatStat\n999 ff$sf4bb5a49-5011-4ea2-853e-b6922d489bca$i5fc04e92-70dd-46b8-97ea-194015762a60\n"
+      "deleted": false,
+      "externalIdsHolder": {
+        "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226"
+      },
+      "additionalInfo": {
+        "suppressDiscovery": false
+      },
+      "metadata": {
+        "createdDate": "2020-02-10T08:34:34.504+0000",
+        "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
+        "updatedDate": "2020-02-10T08:34:36.506+0000",
+        "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
+      }
     },
-    "deleted": false,
-    "externalIdsHolder": {
-      "instanceId": "5fc04e92-70dd-46b8-97ea-194015762a60"
-    },
-    "additionalInfo": {
-      "suppressDiscovery": false
-    },
-    "metadata": {
-      "createdDate": "2020-02-10T08:34:34.504+0000",
-      "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
-      "updatedDate": "2020-02-10T08:34:36.506+0000",
-      "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
+    {
+      "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
+      "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
+      "matchedId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
+      "generation": 0,
+      "recordType": "MARC",
+      "rawRecord": {
+        "id": "4f559f73-c37c-4420-93d5-3e354c6f89f5",
+        "content": "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"
+      },
+      "parsedRecord": {
+        "id": "47178cad-a892-4c2a-b9e4-bb33dea6fc31",
+        "content": {
+          "fields": [
+            {
+              "001": "in00000000052"
+            },
+            {
+              "005": "20170816204126.0"
+            },
+            {
+              "008": "890411m19309999pau      l    001 0 eng  "
+            },
+            {
+              "035": "1579067"
+            },
+            {
+              "010": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "   30014365 //r855"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(NIC)notisAHK7689"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(OCoLC)3289989"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "1579067"
+                  }
+                ]
+              }
+            },
+            {
+              "040": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "d": "NIC"
+                  },
+                  {
+                    "d": "NIC"
+                  }
+                ]
+              }
+            },
+            {
+              "043": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "n-us-pa"
+                  }
+                ]
+              }
+            },
+            {
+              "050": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "KFP30 1930"
+                  },
+                  {
+                    "b": ".A44"
+                  }
+                ]
+              }
+            },
+            {
+              "110": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Pennsylvania."
+                  }
+                ]
+              }
+            },
+            {
+              "240": {
+                "ind1": "1",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Laws, etc. (Compiled statutes : 1930-   )"
+                  }
+                ]
+              }
+            },
+            {
+              "245": {
+                "ind1": "1",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Purdon's Pennsylvania statutes, annotated :"
+                  },
+                  {
+                    "b": "permanent ed."
+                  }
+                ]
+              }
+            },
+            {
+              "260": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Philadelphia, Pa. :"
+                  },
+                  {
+                    "b": "George T. Bisel Co. ;"
+                  },
+                  {
+                    "a": "St. Paul, Minn. :"
+                  },
+                  {
+                    "b": "West Publishing Co.,"
+                  },
+                  {
+                    "c": "1930-"
+                  }
+                ]
+              }
+            },
+            {
+              "300": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "v. ;"
+                  },
+                  {
+                    "c": "25 cm."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Includes unnumbered tables and index volumes."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Kept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Vols. for  published by West Group."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Law"
+                  },
+                  {
+                    "z": "Pennsylvania."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Law"
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst00993678"
+                  }
+                ]
+              }
+            },
+            {
+              "651": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Pennsylvania"
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01204598"
+                  }
+                ]
+              }
+            },
+            {
+              "700": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Purdon, John,"
+                  },
+                  {
+                    "d": "1784-1835."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "George T. Bisel Company."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "West Publishing Company."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Purdon's Pennsylvania legislative service."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Pennsylvania legislative service."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Purdon's Pennsylvania consolidated statutes, annotated."
+                  }
+                ]
+              }
+            },
+            {
+              "740": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Purdon's Pennsylvania statutes and consolidated statutes annotated."
+                  }
+                ]
+              }
+            },
+            {
+              "902": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "pfnd"
+                  },
+                  {
+                    "b": "Law"
+                  }
+                ]
+              }
+            },
+            {
+              "905": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "19890413120000.0"
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20101019"
+                  },
+                  {
+                    "b": "s"
+                  },
+                  {
+                    "d": "lap11"
+                  },
+                  {
+                    "e": "lts"
+                  },
+                  {
+                    "x": "ToAddCatStat"
+                  }
+                ]
+              }
+            },
+            {
+              "999": {
+                "ind1": "f",
+                "ind2": "f",
+                "subfields": [
+                  {
+                    "s": "f4bb5a49-5011-4ea2-853e-b6922d489bca"
+                  },
+                  {
+                    "i": "5fc04e92-70dd-46b8-97ea-194015762a60"
+                  }
+                ]
+              }
+            }
+          ],
+          "leader": "01827cam a2200421 a 4500"
+        },
+        "formattedContent": "LEADER 01827cam a2200421 a 4500\n001 in00000000052\n005 20170816204126.0\n008 890411m19309999pau      l    001 0 eng  \n035 1579067\n010   $a   30014365 //r855\n035   $a(NIC)notisAHK7689\n035   $a(OCoLC)3289989\n035   $a1579067\n040   $dNIC$dNIC\n043   $an-us-pa\n050 0 $aKFP30 1930$b.A44\n110 1 $aPennsylvania.\n240 10$aLaws, etc. (Compiled statutes : 1930-   )\n245 10$aPurdon's Pennsylvania statutes, annotated :$bpermanent ed.\n260   $aPhiladelphia, Pa. :$bGeorge T. Bisel Co. ;$aSt. Paul, Minn. :$bWest Publishing Co.,$c1930-\n300   $av. ;$c25 cm.\n500   $aIncludes unnumbered tables and index volumes.\n500   $aKept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated.\n500   $aVols. for  published by West Group.\n650  0$aLaw$zPennsylvania.\n650  7$aLaw$2fast$0(OCoLC)fst00993678\n651  7$aPennsylvania$2fast$0(OCoLC)fst01204598\n700 1 $aPurdon, John,$d1784-1835.\n710 2 $aGeorge T. Bisel Company.\n710 2 $aWest Publishing Company.\n740 0 $aPurdon's Pennsylvania legislative service.\n740 0 $aPennsylvania legislative service.\n740 0 $aPurdon's Pennsylvania consolidated statutes, annotated.\n740 0 $aPurdon's Pennsylvania statutes and consolidated statutes annotated.\n902   $apfnd$bLaw\n905   $a19890413120000.0\n948 1 $a20101019$bs$dlap11$elts$xToAddCatStat\n999 ff$sf4bb5a49-5011-4ea2-853e-b6922d489bca$i5fc04e92-70dd-46b8-97ea-194015762a60\n"
+      },
+      "deleted": false,
+      "externalIdsHolder": {
+        "instanceId": "5fc04e92-70dd-46b8-97ea-194015762a60"
+      },
+      "additionalInfo": {
+        "suppressDiscovery": false
+      },
+      "metadata": {
+        "createdDate": "2020-02-10T08:34:34.504+0000",
+        "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
+        "updatedDate": "2020-02-10T08:34:36.506+0000",
+        "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
+      }
     }
-  }
-]
+  ]
+}
+
 

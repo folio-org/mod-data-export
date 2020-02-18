@@ -1,13 +1,14 @@
 package org.folio.service.loader;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.folio.clients.SynchronousOkapiClient;
 import org.springframework.stereotype.Service;
 
-import io.vertx.core.json.JsonObject;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Synchronous implementation of #RecordLoaderService that uses blocking http client.
@@ -24,33 +25,31 @@ public class BlockingRecordLoaderService implements RecordLoaderService {
   @Override
   public SrsLoadResult loadMarcRecords(List<String> uuids) {
     Optional<JsonObject> optionalRecords = client.getByIds(uuids);
-    return populateLoadResult(uuids, optionalRecords);
-  }
-
-  private SrsLoadResult populateLoadResult(List<String> uuids, Optional<JsonObject> optionalRecords) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
-    optionalRecords.ifPresent(r -> {
-      List list = r.getJsonArray("records").getList();
-      List<String> marcRecords = new ArrayList<>();
-      final List<String> setSingleInstanceIdentifiers = new ArrayList<>();
-      for (Object o : list) {
-        if (o instanceof JsonObject) {
-          JsonObject record = (JsonObject) o;
-          marcRecords.add(record.getString("content"));
-          JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
-          if (externalIdsHolder != null) {
-            String instanceId = externalIdsHolder.getString("instanceId");
-            if (uuids.contains(instanceId)) {
-              setSingleInstanceIdentifiers.add(instanceId);
-            }
-          }
-        }
-      }
-      srsLoadResult.setUnderlyingMarcRecords(marcRecords);
-      srsLoadResult.setUnderlyingMarcRecords(setSingleInstanceIdentifiers);
-    });
+    optionalRecords.ifPresent(records -> populateLoadResult(uuids, records, srsLoadResult));
     return srsLoadResult;
   }
 
+  private void populateLoadResult(List<String> queriedUuids, JsonObject foundRecords, SrsLoadResult loadResult) {
+    JsonArray records = foundRecords.getJsonArray("records");
+    Set<String> marcRecords = new HashSet<>();
+    Set<String> setSingleInstanceIdentifiers = new HashSet<>(queriedUuids);
+    for (Object o : records) {
+      if (o instanceof JsonObject) {
+        JsonObject record = (JsonObject) o;
+        marcRecords.add(getRecordContent(record));
+        JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
+        if (externalIdsHolder != null) {
+          String instanceId = externalIdsHolder.getString("instanceId");
+          setSingleInstanceIdentifiers.remove(instanceId);
+        }
+      }
+    }
+    loadResult.setUnderlyingMarcRecords(marcRecords);
+    loadResult.setSingleInstanceIdentifiers(setSingleInstanceIdentifiers);
+  }
 
+  private String getRecordContent(JsonObject record) {
+    return record.getJsonObject("rawRecord").getString("content");
+  }
 }
