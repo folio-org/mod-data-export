@@ -17,8 +17,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
 
@@ -60,21 +63,23 @@ public class ExportManagerUnitTest {
     JsonObject okapiConnectionParams = new JsonObject();
     // when
     exportManager.exportData(request, okapiConnectionParams);
-    // then expect IllegalArgumentException
+    // then expect IllegalArgumentException thrown
   }
 
   @Test
   public void exportBlocking_shouldPassExport() {
     // given
     int identifiersListSize = 1000;
-    Mockito.when(recordLoaderService.loadSrsMarcRecords(anyList())).thenReturn(new MarcLoadResult());
     List<String> identifiers = Mockito.mock(List.class);
     Mockito.when(identifiers.size()).thenReturn(identifiersListSize);
+    MarcLoadResult marcLoadResult = Mockito.mock(MarcLoadResult.class);
+    Mockito.when(marcLoadResult.getSingleInstanceIdentifiers()).thenReturn(Arrays.asList(UUID.randomUUID().toString()));
+    Mockito.when(recordLoaderService.loadSrsMarcRecords(anyList())).thenReturn(marcLoadResult);
     // when
     exportManagerWithMocks.exportBlocking(identifiers);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(67)).loadSrsMarcRecords(anyList());
-    Mockito.verify(recordLoaderService, Mockito.times(67)).loadInventoryInstances(anyList());
+    Mockito.verify(recordLoaderService, Mockito.times(5)).loadInventoryInstances(anyList());
     Mockito.verify(fileExportService, Mockito.times(2)).export(anyList());
     Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
   }

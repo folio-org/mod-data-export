@@ -73,7 +73,7 @@ public class ExportManagerImpl implements ExportManager {
   protected void exportBlocking(List<String> identifiers) {
     MarcLoadResult marcLoadResult = loadSrsMarcRecordsInPartitions(identifiers);
     fileExportService.export(marcLoadResult.getSrsMarcRecords());
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(identifiers);
+    List<JsonObject> instances = loadInventoryInstancesInPartitions(marcLoadResult.getSingleInstanceIdentifiers());
     List<String> mappedMarcRecords = mappingService.map(instances);
     fileExportService.export(mappedMarcRecords);
   }
@@ -89,7 +89,7 @@ public class ExportManagerImpl implements ExportManager {
     Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
       MarcLoadResult partitionLoadResult = recordLoaderService.loadSrsMarcRecords(partition);
       marcLoadResult.getSrsMarcRecords().addAll(partitionLoadResult.getSrsMarcRecords());
-      marcLoadResult.getInstanceIds().addAll(partitionLoadResult.getInstanceIds());
+      marcLoadResult.getSingleInstanceIdentifiers().addAll(partitionLoadResult.getSingleInstanceIdentifiers());
     });
     return marcLoadResult;
   }
@@ -97,12 +97,12 @@ public class ExportManagerImpl implements ExportManager {
   /**
    * Loads instances from Inventory by the given identifiers
    *
-   * @param identifiers instance identifiers
+   * @param singleInstanceIdentifiers identifiers of instances that do not have underlying srs
    * @return list of instances
    */
-  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> identifiers) {
+  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers) {
     List<JsonObject> instances = new ArrayList<>();
-    Lists.partition(identifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
+    Lists.partition(singleInstanceIdentifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
         List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstances(partition);
         instances.addAll(partitionLoadResult);
       }
