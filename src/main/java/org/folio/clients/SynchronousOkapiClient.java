@@ -28,19 +28,17 @@ public abstract class SynchronousOkapiClient {
 
   private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   protected final OkapiConnectionParams okapiConnectionParams;
-  private final CloseableHttpClient httpClient;
 
   public SynchronousOkapiClient(OkapiConnectionParams okapiConnectionParams) {
     this.okapiConnectionParams = okapiConnectionParams;
-    httpClient = HttpClients.createDefault();
   }
 
   public Optional<JsonObject> getByIds(List<String> ids) {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet);
     prepareRequest(httpGet, ids);
-
-    try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+    try (CloseableHttpClient httpClient = HttpClients.createDefault();
+         CloseableHttpResponse response = httpClient.execute(httpGet)) {
       return Optional.ofNullable(postProcess(response));
     } catch (IOException e) {
       log.error("Exception while calling " + httpGet.getURI(), e);
