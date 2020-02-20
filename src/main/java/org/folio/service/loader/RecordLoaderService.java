@@ -1,6 +1,5 @@
 package org.folio.service.loader;
 
-import io.vertx.core.Future;
 import java.util.List;
 
 /**
@@ -15,5 +14,5 @@ public interface RecordLoaderService {
    * @param uuids   collection of Inventory ids
    * @return      collection of records
    */
-   Future<LoadResult> loadRecordsByInstanceIds(List<String> uuids);
+   SrsLoadResult loadMarcRecords(List<String> uuids);
 }
