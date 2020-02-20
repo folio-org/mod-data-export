@@ -1,7 +1,5 @@
 package org.folio.service.loader;
 
-import io.vertx.core.json.JsonObject;
-
 import java.util.List;
 
 /**
@@ -15,7 +13,8 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult
    */
-  MarcLoadResult loadSrsMarcRecords(List<String> instanceIds);
+  SrsLoadResult loadMarcRecords(List<String> uuids);
+
 
   /**
    * Retrieves Inventory instances

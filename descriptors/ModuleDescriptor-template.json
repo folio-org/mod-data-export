@@ -1,7 +1,12 @@
 {
   "id": "${artifactId}-${version}",
   "name": "Data Export Module",
-  "requires": [],
+  "requires": [
+    {
+      "id": "source-storage-records",
+      "version": "1.0"
+    }
+  ],
   "provides": [
     {
       "id": "data-export",
@@ -16,6 +21,7 @@
             "data-export.export.post"
           ],
           "modulePermissions": [
+            "source-storage.records.get"
           ]
         },
         {
