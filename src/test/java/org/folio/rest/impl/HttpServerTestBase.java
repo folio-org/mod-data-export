@@ -5,7 +5,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.folio.clients.OkapiClients;
+import org.folio.clients.OkapiClientsFactory;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +32,7 @@ public abstract class HttpServerTestBase {
   protected static Vertx vertx = Vertx.vertx();
   protected static Router router;
   private static HttpServer httpServer;
-  protected OkapiClients clients = OkapiClients.create(getOkapiConnectionParams());
+  protected OkapiClientsFactory clients = OkapiClientsFactory.create(getOkapiConnectionParams());
 
   @BeforeClass
   public static void setUpClass(final TestContext context) throws Exception {

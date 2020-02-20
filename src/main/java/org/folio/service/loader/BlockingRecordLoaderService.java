@@ -1,14 +1,15 @@
 package org.folio.service.loader;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.folio.clients.SynchronousOkapiClient;
-import org.springframework.stereotype.Service;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.folio.clients.SynchronousOkapiClient;
+import org.springframework.stereotype.Service;
+
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 /**
  * Synchronous implementation of #RecordLoaderService that uses blocking http client.
@@ -35,14 +36,12 @@ public class BlockingRecordLoaderService implements RecordLoaderService {
     Set<String> marcRecords = new HashSet<>();
     Set<String> setSingleInstanceIdentifiers = new HashSet<>(queriedUuids);
     for (Object o : records) {
-      if (o instanceof JsonObject) {
-        JsonObject record = (JsonObject) o;
-        marcRecords.add(getRecordContent(record));
-        JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
-        if (externalIdsHolder != null) {
-          String instanceId = externalIdsHolder.getString("instanceId");
-          setSingleInstanceIdentifiers.remove(instanceId);
-        }
+      JsonObject record = (JsonObject) o;
+      marcRecords.add(getRecordContent(record));
+      JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
+      if (externalIdsHolder != null) {
+        String instanceId = externalIdsHolder.getString("instanceId");
+        setSingleInstanceIdentifiers.remove(instanceId);
       }
     }
     loadResult.setUnderlyingMarcRecords(marcRecords);
