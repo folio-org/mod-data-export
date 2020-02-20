@@ -55,7 +55,7 @@ public abstract class HttpServerTestBase {
   @NotNull
   protected OkapiConnectionParams getOkapiConnectionParams() {
     Map<String, String> okapiHeaders = new HashMap<>();
-    okapiHeaders.put("x-okapi-url", "http://localhost:" + httpServer.actualPort());
+    okapiHeaders.put("x-okapi-url", HOST + httpServer.actualPort());
     return new OkapiConnectionParams(okapiHeaders);
   }
 
