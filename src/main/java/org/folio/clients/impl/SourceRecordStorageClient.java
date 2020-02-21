@@ -32,31 +32,25 @@ import java.util.stream.Collectors;
 @Component
 public class SourceRecordStorageClient extends SynchronousOkapiClient {
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
   public static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
 
-  public SourceRecordStorageClient(OkapiConnectionParams okapiConnectionParams) {
-    super(okapiConnectionParams);
-  }
-
   @Override
-  protected void prepareRequest(HttpRequestBase requestBase, List<String> ids) {
-    requestBase.setURI(prepareFullUri(ids));
+  protected void prepareRequest(HttpRequestBase requestBase, List<String> ids, OkapiConnectionParams params) {
+    requestBase.setURI(prepareFullUri(ids, params));
   }
 
   @NotNull
-  private URI prepareFullUri(List<String> ids) {
-    String query = ids.stream().map(s -> String.format(QUERY_PATTERN, s))
-      .collect(Collectors.joining(" or "));
-    String uriString = "";
+  private URI prepareFullUri(List<String> ids, OkapiConnectionParams params) {
+    String query = ids.stream().map(s -> String.format(QUERY_PATTERN, s)).collect(Collectors.joining(" or "));
     try {
-      uriString = String.format(GET_RECORDS_PATTERN,
-        okapiConnectionParams.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
+      String uri = String.format(GET_RECORDS_PATTERN, params.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
+      return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
-      log.error("Exception while building a query from list of ids", e);
+      LOGGER.error("Exception while building a query from list of ids", e);
+      throw new IllegalArgumentException(e);
     }
-    return URI.create(uriString);
   }
 
   @Override
@@ -66,7 +60,7 @@ public class SourceRecordStorageClient extends SynchronousOkapiClient {
       try {
         return new JsonObject(EntityUtils.toString(entity));
       } catch (IOException e) {
-        log.error("Exception while requesting SRS", e);
+        LOGGER.error("Exception while requesting SRS", e);
       }
     }
     return null;

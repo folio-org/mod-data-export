@@ -1,5 +1,9 @@
 package org.folio.service.loader;
 
+import io.vertx.core.json.JsonObject;
+import org.folio.util.OkapiConnectionParams;
+
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -13,8 +17,7 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecords(List<String> uuids);
-
+  SrsLoadResult loadMarcRecords(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 
   /**
    * Retrieves Inventory instances
@@ -22,5 +25,5 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return collection of json objects
    */
-  List<JsonObject> loadInventoryInstances(List<String> instanceIds);
+  List<JsonObject> loadInventoryInstances(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 }

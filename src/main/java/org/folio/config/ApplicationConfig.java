@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
   "org.folio.service.loader",
   "org.folio.service.export",
   "org.folio.service.mapping",
+  "org.folio.clients",
   "org.folio.rest.impl"})
 public class ApplicationConfig {
 }

@@ -1,27 +1,25 @@
 package org.folio.service.loader;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 public class SrsLoadResult {
+  private List<String> underlyingMarcRecords = new ArrayList<>();
+  private List<String> instanceIdsWithoutSrs = new ArrayList<>();
 
-  private Collection<String> underlyingMarcRecords = new ArrayList<>();
-
-  private Collection<String> singleInstanceIdentifiers = new ArrayList<>();;
-
-  public Collection<String> getUnderlyingMarcRecords() {
+  public List<String> getUnderlyingMarcRecords() {
     return underlyingMarcRecords;
   }
 
-  public void setUnderlyingMarcRecords(Collection<String> underlyingMarcRecords) {
+  public void setUnderlyingMarcRecords(List<String> underlyingMarcRecords) {
     this.underlyingMarcRecords = underlyingMarcRecords;
   }
 
-  public Collection<String> getSingleInstanceIdentifiers() {
-    return singleInstanceIdentifiers;
+  public List<String> getInstanceIdsWithoutSrs() {
+    return instanceIdsWithoutSrs;
   }
 
-  public void setSingleInstanceIdentifiers(Collection<String> singleInstanceIdentifiers) {
-    this.singleInstanceIdentifiers = singleInstanceIdentifiers;
+  public void setInstanceIdsWithoutSrs(List<String> instanceIdsWithoutSrs) {
+    this.instanceIdsWithoutSrs = instanceIdsWithoutSrs;
   }
 }

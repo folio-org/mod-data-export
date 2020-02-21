@@ -5,8 +5,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.jaxrs.model.ExportRequest;
@@ -17,11 +15,14 @@ import org.folio.service.upload.FileUploadService;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -29,7 +30,7 @@ import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.util.ExceptionToResponseMapper.map;
 
 public class DataExportImpl implements DataExport {
-  private static final Logger LOGGER = LoggerFactory.getLogger(DataExportImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
   private FileDefinitionService fileDefinitionService;

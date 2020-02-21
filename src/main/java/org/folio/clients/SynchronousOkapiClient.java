@@ -26,35 +26,29 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
  */
 public abstract class SynchronousOkapiClient {
 
-  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  protected final OkapiConnectionParams okapiConnectionParams;
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  public SynchronousOkapiClient(OkapiConnectionParams okapiConnectionParams) {
-    this.okapiConnectionParams = okapiConnectionParams;
-  }
-
-  public Optional<JsonObject> getByIds(List<String> ids) {
+  public Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params) {
     HttpGet httpGet = new HttpGet();
-    setCommonHeaders(httpGet);
-    prepareRequest(httpGet, ids);
+    setCommonHeaders(httpGet, params);
+    prepareRequest(httpGet, ids, params);
     try (CloseableHttpClient httpClient = HttpClients.createDefault();
          CloseableHttpResponse response = httpClient.execute(httpGet)) {
       return Optional.ofNullable(postProcess(response));
     } catch (IOException e) {
-      log.error("Exception while calling " + httpGet.getURI(), e);
+      LOGGER.error("Exception while calling " + httpGet.getURI(), e);
       return Optional.empty();
     }
   }
 
-  protected void setCommonHeaders(HttpRequestBase requestBase) {
-    Map<String, String> headers = okapiConnectionParams.getHeaders();
-    requestBase.setHeader(OKAPI_HEADER_TOKEN, headers.get(OKAPI_HEADER_TOKEN));
-    requestBase.setHeader(OKAPI_HEADER_TENANT, headers.get(OKAPI_HEADER_TENANT));
+  protected void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
+    requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getOkapiUrl());
+    requestBase.setHeader(OKAPI_HEADER_TENANT, params.getTenantId());
     requestBase.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     requestBase.setHeader((HttpHeaders.ACCEPT), MediaType.APPLICATION_JSON);
   }
 
-  protected abstract void prepareRequest(HttpRequestBase requestBase, List<String> id);
+  protected abstract void prepareRequest(HttpRequestBase requestBase, List<String> id, OkapiConnectionParams params);
 
   protected abstract JsonObject postProcess(CloseableHttpResponse response);
 

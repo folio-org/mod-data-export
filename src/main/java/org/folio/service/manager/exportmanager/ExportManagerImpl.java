@@ -9,14 +9,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.service.export.FileExportService;
-import org.folio.service.loader.MarcLoadResult;
 import org.folio.service.loader.RecordLoaderService;
+import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -56,8 +58,9 @@ public class ExportManagerImpl implements ExportManager {
   public void exportData(JsonObject jsonRequest, JsonObject jsonRequestParams) {
     if (jsonRequest.containsKey(IDENTIFIERS_REQUEST_KEY)) {
       List<String> identifiers = jsonRequest.getJsonArray(IDENTIFIERS_REQUEST_KEY).getList();
+      OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(jsonRequestParams.mapTo(HashMap.class));
       LOGGER.info("Starting export records for the given identifiers, size: " + identifiers.size());
-      this.executor.executeBlocking(ar -> exportBlocking(identifiers), this::handleExportResult);
+      this.executor.executeBlocking(ar -> exportBlocking(identifiers, okapiConnectionParams), this::handleExportResult);
     } else {
       String errorMessage = "Can not find identifiers, request: " + jsonRequest;
       LOGGER.error(errorMessage);
@@ -69,11 +72,12 @@ public class ExportManagerImpl implements ExportManager {
    * Runs the main export flow in blocking manner.
    *
    * @param identifiers instance identifiers
+   * @param params  okapi connection parameters
    */
-  protected void exportBlocking(List<String> identifiers) {
-    MarcLoadResult marcLoadResult = loadSrsMarcRecordsInPartitions(identifiers);
-    fileExportService.export(marcLoadResult.getSrsMarcRecords());
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(marcLoadResult.getSingleInstanceIdentifiers());
+  protected void exportBlocking(List<String> identifiers, OkapiConnectionParams params) {
+    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
+    fileExportService.export(srsLoadResult.getUnderlyingMarcRecords());
+    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     List<String> mappedMarcRecords = mappingService.map(instances);
     fileExportService.export(mappedMarcRecords);
   }
@@ -82,28 +86,30 @@ public class ExportManagerImpl implements ExportManager {
    * Loads marc records from SRS by the given instance identifiers
    *
    * @param identifiers instance identifiers
-   * @return @see MarcLoadResult
+   * @param params  okapi connection parameters
+   * @return @see SrsLoadResult
    */
-  private MarcLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers) {
-    MarcLoadResult marcLoadResult = new MarcLoadResult();
+  private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, OkapiConnectionParams params) {
+    SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      MarcLoadResult partitionLoadResult = recordLoaderService.loadSrsMarcRecords(partition);
-      marcLoadResult.getSrsMarcRecords().addAll(partitionLoadResult.getSrsMarcRecords());
-      marcLoadResult.getSingleInstanceIdentifiers().addAll(partitionLoadResult.getSingleInstanceIdentifiers());
+      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecords(partition, params);
+      srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
+      srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
     });
-    return marcLoadResult;
+    return srsLoadResult;
   }
 
   /**
    * Loads instances from Inventory by the given identifiers
    *
    * @param singleInstanceIdentifiers identifiers of instances that do not have underlying srs
+   * @param params  okapi connection parameters
    * @return list of instances
    */
-  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers) {
+  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, OkapiConnectionParams params) {
     List<JsonObject> instances = new ArrayList<>();
     Lists.partition(singleInstanceIdentifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstances(partition);
+        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstances(partition, params);
         instances.addAll(partitionLoadResult);
       }
     );
@@ -111,7 +117,7 @@ public class ExportManagerImpl implements ExportManager {
   }
 
   /**
-   * Handles asynch result of export
+   * Handles async result of export
    *
    * @param asyncResult result of export
    * @return return future
