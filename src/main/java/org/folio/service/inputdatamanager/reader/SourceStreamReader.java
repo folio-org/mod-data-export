@@ -1,7 +1,8 @@
-package org.folio.service.upload.reader;
+package org.folio.service.inputdatamanager.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -16,5 +17,5 @@ public interface SourceStreamReader {
    * @param batchSize      size batch for one stream iteration
    * @return Stream
    */
-  Stream<List<String>> getSourceStream(FileDefinition fileDefinition, int batchSize);
+   Iterable<String> getSourceStream(FileDefinition fileDefinition, int batchSize) throws IOException;
 }

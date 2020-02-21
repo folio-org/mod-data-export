@@ -4,6 +4,8 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
+import java.io.IOException;
+
 @ProxyGen
 public interface InputDataManager {  //NOSONAR
   String QUEUE_NAME = "input-data-manager.queue";     //NOSONAR
@@ -17,12 +19,12 @@ public interface InputDataManager {  //NOSONAR
   }
 
   /**
-   * Perform the necessary steps to obtains a stream from the file storage that will be used to read uuids to export.
+   * Perform the necessary steps to obtain a stream from the file storage that will be used to read uuids for export.
    *
    * @param request   HTTP request
    * @param params    HTTP request parameters
    */
-  void start(JsonObject request, JsonObject params);
+  void start(JsonObject request, JsonObject params) throws IOException;
 
   /**
    * Publish the next chunk of uuilds to be exported.

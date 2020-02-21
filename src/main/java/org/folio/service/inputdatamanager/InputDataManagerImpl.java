@@ -1,36 +1,38 @@
 package org.folio.service.inputdatamanager;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.util.OkapiConnectionParams;
+import org.folio.service.inputdatamanager.reader.SourceStreamReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.util.stream.Stream;
 
 import static io.vertx.core.Future.succeededFuture;
 
 /**
- * The ExportManager is a central part of the data-export.
- * Runs the main export process calling other internal services along the way.
+ * Acts a source of a uuids to be exported.
+ *
  */
 @SuppressWarnings({"java:S1172", "java:S125"})
+@Component
 class InputDataManagerImpl implements InputDataManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(InputDataManagerImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int BATCH_SIZE = 50; //NOSONAR
   private final Vertx vertx;
-  /* WorkerExecutor provides a worker pool for export process */
-  private WorkerExecutor executor;
+
+  @Autowired
+  private SourceStreamReader sourceStreamReader;
+
+  private Stream<String> sourceStream;
 
   public InputDataManagerImpl(Vertx vertx) {
     this.vertx = vertx;
-    this.executor = this.vertx.createSharedWorkerExecutor("export-thread-worker");
   }
 
 /*  @Override
@@ -52,17 +54,10 @@ class InputDataManagerImpl implements InputDataManager {
       }), null);
   }*/
 
-  private Future<Boolean> isNoJobInProgress() {
-    return succeededFuture();
-  }
-
-  private Future<Void> updateJobStatus(String status) {
-    return succeededFuture();
-  }
-
   @Override
-  public void start(JsonObject request, JsonObject params) {
-
+  public void start(JsonObject request, JsonObject params) throws IOException {
+    log.info("Export started");
+    sourceStream = sourceStreamReader.getSourceStream(null, BATCH_SIZE);
   }
 
   @Override
