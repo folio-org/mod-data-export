@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;

@@ -48,8 +48,7 @@ public class SourceRecordStorageClient extends SynchronousOkapiClient {
       String uri = String.format(GET_RECORDS_PATTERN, params.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
-      LOGGER.error("Exception while building a query from list of ids", e);
-      throw new IllegalArgumentException(e);
+      throw new IllegalArgumentException("Exception while building a query from list of ids", e);
     }
   }
 

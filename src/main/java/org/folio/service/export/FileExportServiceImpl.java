@@ -13,6 +13,6 @@ public class FileExportServiceImpl implements FileExportService {
 
   @Override
   public void export(List<String> marcRecords) {
-    LOGGER.info("Received [" + marcRecords.size() + "] on export");
+    LOGGER.info("Received [{}] marc records on export", marcRecords.size());
   }
 }
