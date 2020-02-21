@@ -29,7 +29,7 @@ public abstract class RestVerticleTestBase {
   protected static final String TENANT_ID = "diku";
   protected static final String TOKEN = "token";
   private static final String HOST = "http://localhost:";
-  private static final int PORT = NetworkUtils.nextFreePort();
+  protected static final int PORT = NetworkUtils.nextFreePort();
   protected static final String OKAPI_URL = HOST + PORT;
   protected static RequestSpecification jsonRequestSpecification;
   private static Vertx vertx;
