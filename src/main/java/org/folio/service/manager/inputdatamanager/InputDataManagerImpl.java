@@ -41,11 +41,10 @@ class InputDataManagerImpl implements InputDataManager {
   @Override
   public void init(JsonObject request, JsonObject params) {
     this.executor.executeBlocking(blockingFuture -> {
-      int batchSize = params.getInteger("batchSize");
       ExportRequest exportRequest = request.mapTo(ExportRequest.class);
       FileDefinition fileDefinition = exportRequest.getFileDefinition();
       LOGGER.info("Initializing data export to read from {}", exportRequest.getFileDefinition().getFileName());
-      sourceStream = sourceReader.getSourceStream(fileDefinition, batchSize);
+      sourceStream = sourceReader.getSourceStream(fileDefinition, exportRequest.getBatchSize());
       proceed(request, params);
     }, this::handleExportResult);
   }

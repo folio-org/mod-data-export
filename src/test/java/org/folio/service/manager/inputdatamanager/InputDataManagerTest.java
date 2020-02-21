@@ -32,22 +32,24 @@ public class InputDataManagerTest extends HttpServerTestBase {
 
   private InputDataManager inputDataManager;
   private ExportManager exportManager;
-  private ExportRequest exportRequest;
+  private JsonObject exportRequest;
   @Mock
   private SourceReader sourceReader;
 
     @Captor
   ArgumentCaptor<JsonObject> exportRequestWithIdentifiers;
   private String[] expectedIdentifiers;
+  private JsonObject requestParams;
 
   @Before
   public void setUp() {
     Context ctx = vertx.getOrCreateContext();
     inputDataManager = new InputDataManagerImpl(ctx);
     FileDefinition fileDefinition = new FileDefinition().withFileName(fileName).withSourcePath("src/test/resources/" + fileName);
-    exportRequest = new ExportRequest().withFileDefinition(fileDefinition);
-    inputDataManager.init(exportRequest, getOkapiConnectionParams(), BATCH_SIZE);
-    when(sourceReader.getSourceStream(any(FileDefinition.class), 5)).thenReturn(mockIterator());
+    exportRequest = JsonObject.mapFrom(new ExportRequest().withFileDefinition(fileDefinition));
+    requestParams = JsonObject.mapFrom(getOkapiConnectionParams());
+    inputDataManager.init(exportRequest, requestParams);
+    when(sourceReader.getSourceStream(any(FileDefinition.class), BATCH_SIZE)).thenReturn(mockIterator());
     // TODO create export manager with source reader
     ctx.put(ExportManager.class.getName(), exportManager);
 
@@ -61,7 +63,8 @@ public class InputDataManagerTest extends HttpServerTestBase {
 
   @Test
   public void testInputFileIsFullProcessed() {
-    inputDataManager.proceed(exportRequest, getOkapiConnectionParams());
+
+    inputDataManager.proceed(exportRequest, requestParams);
     //TODO
     //verify(exportManager, times(1)).export(exportRequestWithIdentifiers.capture(), any(OkapiConnectionParams.class));
     JsonObject entries = exportRequestWithIdentifiers.getValue();
