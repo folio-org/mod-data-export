@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +21,21 @@ import java.util.Set;
 @Service
 public class BlockingRecordLoaderService implements RecordLoaderService {
 
-  @Autowired
   private SourceRecordStorageClient client;
+
+  public BlockingRecordLoaderService (@Autowired SourceRecordStorageClient client) {
+    this.client = client;
+  }
 
   @Override
   public SrsLoadResult loadMarcRecords(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
     Optional<JsonObject> optionalRecords = client.getByIds(uuids, okapiConnectionParams);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
-    optionalRecords.ifPresent(records -> populateLoadResult(uuids, records, srsLoadResult));
+    if (optionalRecords.isPresent()) {
+      populateLoadResult(uuids, optionalRecords.get(), srsLoadResult);
+    } else {
+      srsLoadResult.setInstanceIdsWithoutSrs(uuids);
+    }
     return srsLoadResult;
   }
 

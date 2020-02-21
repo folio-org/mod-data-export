@@ -8,16 +8,6 @@ import org.folio.service.upload.storage.FileStorage;
  * File upload service. Provides lifecycle methods for file uploading functionality.
  */
 public interface FileUploadService {
-
-  /**
-   * Creates FileDefinition with NEW status
-   *
-   * @param fileDefinition {@link FileDefinition}
-   * @param tenantId       tenant id
-   * @return future with {@link FileDefinition}
-   */
-  Future<FileDefinition> createFileDefinition(FileDefinition fileDefinition, String tenantId);
-
   /**
    * Starts uploading for the given {@link FileDefinition} by id
    *

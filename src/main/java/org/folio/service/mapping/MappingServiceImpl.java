@@ -15,7 +15,7 @@ public class MappingServiceImpl implements MappingService {
 
   @Override
   public List<String> map(List<JsonObject> instances) {
-    LOGGER.info("Received [" + instances.size() + "] on mapping");
+    LOGGER.info("Received [{}] instances on mapping", instances);
     return new ArrayList<>();
   }
 }

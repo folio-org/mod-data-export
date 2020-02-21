@@ -3,6 +3,7 @@ package org.folio.service.upload.storage;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.file.FileSystem;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.upload.reader.SourceStreamReader;
@@ -21,12 +22,12 @@ public class LocalFileSystemStorage implements FileStorage {
   private static final String FILE_STORAGE_PATH = "./storage/files";
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private Vertx vertx;
-  private FileSystem fs;
+  private WorkerExecutor workerExecutor;
+  private FileSystem fileSystem;
 
   public LocalFileSystemStorage(Vertx vertx) {
-    this.vertx = vertx;
-    this.fs = vertx.fileSystem();
+    this.workerExecutor = vertx.createSharedWorkerExecutor("local-file-storage-worker");
+    this.fileSystem = vertx.fileSystem();
   }
 
   @Override
@@ -38,15 +39,15 @@ public class LocalFileSystemStorage implements FileStorage {
   public Future<FileDefinition> saveFileData(byte[] data, FileDefinition fileDefinition) {
     Promise<FileDefinition> promise = Promise.promise();
     String fileId = fileDefinition.getId();
-    vertx.<Void>executeBlocking(b -> {
+    workerExecutor.<Void>executeBlocking(blockingFuture -> {
       try {
         String path = getFilePath(fileDefinition);
-        if (!fs.existsBlocking(path)) {
-          fs.mkdirsBlocking(path.substring(0, path.indexOf(fileDefinition.getFileName()) - 1));
+        if (!fileSystem.existsBlocking(path)) {
+          fileSystem.mkdirsBlocking(path.substring(0, path.indexOf(fileDefinition.getFileName()) - 1));
+          fileDefinition.setSourcePath(path);
         }
         final Path pathToFile = Paths.get(path);
         Files.write(pathToFile, data, pathToFile.toFile().exists() ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-        fileDefinition.setSourcePath(path);
         promise.complete(fileDefinition);
       } catch (Exception e) {
         LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileId, e);

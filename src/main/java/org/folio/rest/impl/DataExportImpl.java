@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status;
 import static org.folio.util.ExceptionToResponseMapper.map;
 
 public class DataExportImpl implements DataExport {
@@ -66,7 +67,7 @@ public class DataExportImpl implements DataExport {
   @Override
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar ->  fileUploadService.createFileDefinition(entity, tenantId))
+      .compose(ar ->  fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

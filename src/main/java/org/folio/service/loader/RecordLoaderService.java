@@ -12,7 +12,7 @@ import java.util.List;
 public interface RecordLoaderService {
 
   /**
-   * Retrieves marc records from SRS
+   * Retrieves SRS records
    *
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult

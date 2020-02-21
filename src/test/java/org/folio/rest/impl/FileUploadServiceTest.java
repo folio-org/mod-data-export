@@ -11,6 +11,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
+import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
-public class FileUploadServiceTest extends AbstractRestTest {
+public class FileUploadServiceTest extends RestVerticleTestBase {
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
 
   @Test

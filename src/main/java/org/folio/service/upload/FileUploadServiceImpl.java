@@ -17,7 +17,6 @@ import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -28,12 +27,6 @@ public class FileUploadServiceImpl implements FileUploadService {
   public FileUploadServiceImpl(@Autowired FileStorage fileStorage, @Autowired FileDefinitionService fileDefinitionService) {
     this.fileStorage = fileStorage;
     this.fileDefinitionService = fileDefinitionService;
-  }
-
-  @Override
-  public Future<FileDefinition> createFileDefinition(FileDefinition fileDefinition, String tenantId) {
-    fileDefinition.setStatus(NEW);
-    return fileDefinitionService.save(fileDefinition, tenantId);
   }
 
   @Override

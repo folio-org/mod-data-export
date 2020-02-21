@@ -1,4 +1,4 @@
-package org.folio.rest.impl;
+package org.folio.rest;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -8,7 +8,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
@@ -22,7 +21,10 @@ import java.io.IOException;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
-public abstract class AbstractRestTest {
+/**
+ * Class for tests that base on testing code using Vertx REST verticle
+ */
+public abstract class RestVerticleTestBase {
 
   protected static final String TENANT_ID = "diku";
   protected static final String TOKEN = "token";

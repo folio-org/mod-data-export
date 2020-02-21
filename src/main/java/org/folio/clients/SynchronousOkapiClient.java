@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
@@ -34,7 +33,7 @@ public abstract class SynchronousOkapiClient {
     prepareRequest(httpGet, ids, params);
     try (CloseableHttpClient httpClient = HttpClients.createDefault();
          CloseableHttpResponse response = httpClient.execute(httpGet)) {
-      return Optional.ofNullable(postProcess(response));
+      return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling " + httpGet.getURI(), e);
       return Optional.empty();
@@ -50,6 +49,6 @@ public abstract class SynchronousOkapiClient {
 
   protected abstract void prepareRequest(HttpRequestBase requestBase, List<String> id, OkapiConnectionParams params);
 
-  protected abstract JsonObject postProcess(CloseableHttpResponse response);
+  protected abstract JsonObject getResponseEntity(CloseableHttpResponse response);
 
 }
