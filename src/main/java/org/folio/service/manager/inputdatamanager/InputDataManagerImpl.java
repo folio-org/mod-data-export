@@ -10,7 +10,6 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
-import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +51,7 @@ class InputDataManagerImpl implements InputDataManager {
   @Override
   public void proceed(JsonObject request, JsonObject params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
-    if (sourceStream.hasNext()) {
+    if (sourceStream != null && sourceStream.hasNext()) {
       LOGGER.info("Reading next chunk of uuids from {}", exportRequest.getFileDefinition().getFileName());
       List<String> identifiers = sourceStream.next();
       JsonObject payload = new JsonObject().put("identifiers", identifiers);
