@@ -1,4 +1,4 @@
-package org.folio.config;
+package org.folio.service;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -12,5 +12,5 @@ import org.springframework.context.annotation.Configuration;
   "org.folio.service.mapping",
   "org.folio.clients",
   "org.folio.rest.impl"})
-public class ApplicationConfig {
+public class ApplicationTestConfig {
 }

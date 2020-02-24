@@ -1,6 +1,7 @@
-package org.folio.service.manager;
+package org.folio.service.manager.exportmanager;
 
 import io.vertx.codegen.annotations.ProxyGen;
+import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -8,8 +9,8 @@ import io.vertx.core.json.JsonObject;
 public interface ExportManager {  //NOSONAR
   String EXPORT_MANAGER_ADDRESS = "export-manager.queue";     //NOSONAR
 
-  static ExportManager create(Vertx vertx) {
-    return new ExportManagerImpl(vertx);
+  static ExportManager create(Context context) {
+    return new ExportManagerImpl(context);
   }
 
   static ExportManager createProxy(Vertx vertx) {
@@ -17,9 +18,10 @@ public interface ExportManager {  //NOSONAR
   }
 
   /**
-   * Starts the data-export process in background thread.
-   * @param request   HTTP request
-   * @param params    HTTP request parameters
+   * Runs the data-export process
+   *
+   * @param request    json request
+   * @param parameters HTTP request parameters
    */
-  void startExport(JsonObject request, JsonObject params);
+  void exportData(JsonObject request, JsonObject parameters);
 }

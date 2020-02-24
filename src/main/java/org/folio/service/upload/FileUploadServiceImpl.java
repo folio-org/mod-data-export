@@ -1,35 +1,32 @@
 package org.folio.service.upload;
 
 import io.vertx.core.Future;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.service.upload.storage.FileStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.ws.rs.NotFoundException;
+
+import java.lang.invoke.MethodHandles;
+
 import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileUploadServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private FileDefinitionService fileDefinitionService;
   private FileStorage fileStorage;
 
   public FileUploadServiceImpl(@Autowired FileStorage fileStorage, @Autowired FileDefinitionService fileDefinitionService) {
     this.fileStorage = fileStorage;
     this.fileDefinitionService = fileDefinitionService;
-  }
-
-  @Override
-  public Future<FileDefinition> createFileDefinition(FileDefinition fileDefinition, String tenantId) {
-    fileDefinition.setStatus(NEW);
-    return fileDefinitionService.save(fileDefinition, tenantId);
   }
 
   @Override

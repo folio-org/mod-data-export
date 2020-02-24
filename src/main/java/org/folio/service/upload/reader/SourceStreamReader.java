@@ -16,5 +16,5 @@ public interface SourceStreamReader {
    * @param batchSize      size batch for one stream iteration
    * @return Stream
    */
-   Stream<List<String>> getSourceStream(FileDefinition fileDefinition, int batchSize);
+  Stream<List<String>> getSourceStream(FileDefinition fileDefinition, int batchSize);
 }
