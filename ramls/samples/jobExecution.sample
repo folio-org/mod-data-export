@@ -1,0 +1,17 @@
+{
+  "id":"67dfac11-1caf-4470-9ad1-d533f6360bdd",
+  "hrId":"10000",
+  "filename":"someFile.mrc"
+  "jobProfileInfo":{
+    "id":"88dfac11-1caf-4470-9ad1-d533f6360bad",
+    "destination":"C:\export\files\export_1.csv"
+  },
+  "recordsCount":"50",
+  "endedRunning":"2018-10-30T12:40:01.000",
+  "runBy":{
+    "firstName":"DIKU",
+    "lastName":"ADMINISTRATOR"
+  },
+  "status":"SUCCESS",
+  "errorCause":""
+}
