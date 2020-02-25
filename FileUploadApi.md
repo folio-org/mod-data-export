@@ -175,5 +175,5 @@ curl -X GET -D - -w '\n' \
 
 ### *File cleaning process*
 
-The **mod-data-export** module has its own automatic file cleaning mechanism. One time in an hour, the periodic job 
-finds files that were created more than an hour ago and cleans them.
+The **mod-data-export** module has its own automatic file cleaning mechanism. Once an hour the periodic job removes files 
+which were created 1 hour ago.
