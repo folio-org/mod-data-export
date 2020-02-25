@@ -54,7 +54,7 @@
       ]
     },
     "errorCause":{
-      "description":"Status that describe error state of job execution",
+      "description":"Status that describes error state of job execution",
       "type":"string"
     }
   }
