@@ -30,7 +30,7 @@
       "format":"date-time"
     },
     "runBy":{
-      "description":"First and last name of the user that triggered the job execution",
+      "description":"First and last name of the user who triggered the job execution",
       "type":"object",
       "properties":{
         "firstName":{
@@ -54,7 +54,7 @@
       ]
     },
     "errorCause":{
-      "description":"Status that describes error state of job execution",
+      "description":"Describes the cause of execution errors",
       "type":"string"
     }
   }
