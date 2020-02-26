@@ -29,7 +29,7 @@
       "description": "Number of exported records",
       "type": "integer"
     },
-    "endedRunning": {
+    "completedDate": {
       "description": "Date and time when the job execution completed",
       "type": "string",
       "format": "date-time"
@@ -48,11 +48,6 @@
         }
       }
     },
-    "metadata": {
-      "description": "Metadata",
-      "type": "object",
-      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
-    },
     "status": {
       "description": "Status of files export",
       "type": "string",
@@ -64,9 +59,10 @@
         "FAIL"
       ]
     },
-    "errorCause": {
-      "description": "Describes the cause of execution errors",
-      "type": "string"
+    "metadata": {
+      "description": "Metadata",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
     }
   },
   "required": [
