@@ -21,6 +21,10 @@
   },
   "recordsCount": "2000",
   "endedRunning": "2019-10-30T12:40:01.000",
+  "runBy": {
+    "firstName": "DIKU",
+    "lastName": "ADMINISTRATOR"
+  },
   "status": "SUCCESS",
   "errorCause": "",
   "metadata": {
