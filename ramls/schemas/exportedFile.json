@@ -4,8 +4,7 @@
   "type": "object",
   "properties": {
     "fileId": {
-      "description": "File id",
-      "type": "string",
+      "description": "File unique identifier",
       "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "fileName": {
