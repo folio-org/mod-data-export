@@ -17,7 +17,16 @@
       "uniqueItems": true,
       "items": {
         "type": "object",
-        "$ref": "exportedFile.json"
+        "properties": {
+          "fileId": {
+            "description": "File unique identifier",
+            "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+          },
+          "fileName": {
+            "description": "File name",
+            "type": "string"
+          }
+        }
       }
     },
     "jobProfileInfo": {
@@ -25,9 +34,19 @@
       "type": "object",
       "$ref": "jobProfile.json"
     },
-    "recordsCount": {
-      "description": "Number of exported records",
-      "type": "integer"
+    "progress": {
+      "description": "Execution progress of the job",
+      "type": "object",
+      "properties": {
+        "current": {
+          "description": "Number of records exported",
+          "type": "integer"
+        },
+        "total": {
+          "description": "Total number of records",
+          "type": "integer"
+        }
+      }
     },
     "completedDate": {
       "description": "Date and time when the job execution completed",
