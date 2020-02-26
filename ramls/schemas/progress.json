@@ -3,10 +3,6 @@
   "description": "Execution progress of the job",
   "type": "object",
   "properties": {
-    "jobExecutionId": {
-      "description": "Corresponding jobExecution id",
-      "type": "string"
-    },
     "current": {
       "description": "Currently processing record",
       "type": "integer"
