@@ -1,17 +1,34 @@
 {
   "id": "67dfac11-1caf-4470-9ad1-d533f6360bdd",
   "hrId": "10000",
-  "filename": "marcRecords.mrc",
+  "exportedFiles": [
+    {
+      "fileId": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
+      "fileName": "marcRecords_1.mrc"
+    },
+    {
+      "fileId": "295e28b4-aea2-4458-9073-385a31e1da05",
+      "fileName": "marcRecords_2.mrc"
+    },
+    {
+      "fileId": "bb689511-5365-4050-8084-a03d94728d88",
+      "fileName": "marcRecords_n.mrc"
+    }
+  ],
   "jobProfile": {
     "id": "88dfac11-1caf-4470-9ad1-d533f6360bad",
     "destination": "fileSystem"
   },
   "recordsCount": "2000",
   "endedRunning": "2018-10-30T12:40:01.000",
-  "runBy": {
-    "firstName": "DIKU",
-    "lastName": "ADMINISTRATOR"
-  },
   "status": "SUCCESS",
-  "errorCause": ""
+  "errorCause": "",
+  "metadata": {
+    "createdDate": "2018-10-30T12:41:22.000",
+    "createdByUserId": "",
+    "createdByUsername": "",
+    "updatedDate": "2018-11-02T12:09:51.000",
+    "updatedByUserId": "",
+    "updatedByUsername": ""
+  }
 }
