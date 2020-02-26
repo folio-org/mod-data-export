@@ -12,7 +12,7 @@
       "type": "string"
     },
     "exportedFiles": {
-      "description": "List of files that should be exported",
+      "description": "List of exported files",
       "type": "array",
       "uniqueItems": true,
       "items": {
@@ -20,7 +20,7 @@
         "$ref": "exportedFile.json"
       }
     },
-    "jobProfile": {
+    "jobProfileInfo": {
       "description": "Related JobProfile information",
       "type": "object",
       "$ref": "jobProfile.json"
