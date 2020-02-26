@@ -25,9 +25,10 @@
       "type": "object",
       "$ref": "jobProfile.json"
     },
-    "recordsCount": {
-      "description": "Number of exported records",
-      "type": "integer"
+    "progress": {
+      "description": "Execution progress of the job",
+      "type": "object",
+      "$ref": "./progress.json"
     },
     "completedDate": {
       "description": "Date and time when the job execution completed",

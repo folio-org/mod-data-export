@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Execution progress of the job",
+  "type": "object",
+  "properties": {
+    "jobExecutionId": {
+      "description": "Corresponding jobExecution id",
+      "type": "string"
+    },
+    "current": {
+      "description": "Currently processing record",
+      "type": "integer"
+    },
+    "total": {
+      "description": "Total number of records to be processed",
+      "type": "integer"
+    }
+  }
+}
