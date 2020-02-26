@@ -1,15 +1,17 @@
 # *File Upload API*
 
 ## *Introduction*
-The *mod-data-export* is responsible for convention various FOLIO records to MARC format and export them into the given 
-destination. The list of the FOLIO records can be defined in 2 ways: CSV file with listed identifiers or CQL query. 
+The *mod-data-export* is responsible for conversion of various FOLIO records(Instance,Holding Items) to MARC format and
+export them into the given destination. The list of the FOLIO records can be defined in 2 ways: CSV file with listed 
+identifiers or CQL query. 
 
 This documentation describes the REST API to upload CSV files to the mod-data-export for further processing.
 
 ### *FileDefinition*
 
-File Definition entity describes an upload process of a particular file. The creation of the FileDefinition entity is 
-the first step of the file upload process.
+File Definition [schema](https://github.com/folio-org/mod-data-export/blob/master/ramls/schemas/fileDefinition.json) 
+describes an upload process of a particular file. The creation of the FileDefinition entity is the first step of the 
+file upload process.
 
 | Field | Description |
 | ------ | ------ |
