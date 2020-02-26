@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "File that should be exported",
+  "type": "object",
+  "properties": {
+    "fileId": {
+      "description": "File unique identifier",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "fileName": {
+      "description": "File name",
+      "type": "string"
+    }
+  },
+  "required": [
+    "fileName",
+    "fileId"
+  ]
+}

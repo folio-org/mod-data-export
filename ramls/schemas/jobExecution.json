@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Job Execution Schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "hrId": {
+      "description": "Human readable id",
+      "type": "string"
+    },
+    "exportedFiles": {
+      "description": "List of exported files",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "$ref": "exportedFile.json"
+      }
+    },
+    "jobProfileInfo": {
+      "description": "Related JobProfile information",
+      "type": "object",
+      "$ref": "jobProfile.json"
+    },
+    "recordsCount": {
+      "description": "Number of exported records",
+      "type": "integer"
+    },
+    "completedDate": {
+      "description": "Date and time when the job execution completed",
+      "type": "string",
+      "format": "date-time"
+    },
+    "runBy": {
+      "description": "First and last name of the user who triggered the job execution",
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "description": "First name",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "Last name",
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "description": "Status of files export",
+      "type": "string",
+      "default": "NEW",
+      "enum": [
+        "NEW",
+        "IN_PROGRESS",
+        "SUCCESS",
+        "FAIL"
+      ]
+    },
+    "metadata": {
+      "description": "Metadata",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
+    }
+  },
+  "required": [
+    "status"
+  ]
+}
