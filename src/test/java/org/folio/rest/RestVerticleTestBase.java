@@ -86,7 +86,7 @@ public abstract class RestVerticleTestBase {
   private void setUpOkapiConnectionParams() {
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
-    headers.put(OKAPI_HEADER_URL, OKAPI_HEADER_TENANT);
+    headers.put(OKAPI_HEADER_URL, OKAPI_URL);
     this.okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
