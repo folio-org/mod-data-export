@@ -8,16 +8,19 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import org.apache.commons.collections4.map.HashedMap;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
@@ -29,10 +32,12 @@ public abstract class RestVerticleTestBase {
   protected static final String TENANT_ID = "diku";
   protected static final String TOKEN = "token";
   private static final String HOST = "http://localhost:";
-  private static final int PORT = NetworkUtils.nextFreePort();
+  protected static final int PORT = NetworkUtils.nextFreePort();
+  private static final String OKAPI_HEADER_URL = "x-okapi-url";
   protected static final String OKAPI_URL = HOST + PORT;
   protected static RequestSpecification jsonRequestSpecification;
-  private static Vertx vertx;
+  protected static Vertx vertx;
+  protected OkapiConnectionParams okapiConnectionParams;
 
   @BeforeClass
   public static void setUpClass(final TestContext context) throws Exception {
@@ -74,6 +79,18 @@ public abstract class RestVerticleTestBase {
 
   @Before
   public void setUp(TestContext context) throws IOException {
+    setUpOkapiConnectionParams();
+    setUpJsonRequestSpecification();
+  }
+
+  private void setUpOkapiConnectionParams() {
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    headers.put(OKAPI_HEADER_URL, OKAPI_URL);
+    this.okapiConnectionParams = new OkapiConnectionParams(headers);
+  }
+
+  private void setUpJsonRequestSpecification() {
     this.jsonRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.JSON)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
