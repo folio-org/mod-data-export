@@ -3,11 +3,9 @@ package org.folio.service.cleanup;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.collections4.map.HashedMap;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -16,7 +14,6 @@ import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.service.ApplicationTestConfig;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.OkapiConnectionParams;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static org.drools.core.util.StringUtils.EMPTY;
@@ -40,8 +36,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(VertxUnitRunner.class)
 public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
-  private static final String OKAPI_TENANT_HEADER = "x-okapi-tenant";
-  private static final String OKAPI_URL_HEADER = "x-okapi-url";
   private static final String FILE_DEFINITIONS_TABLE = "file_definitions";
   private static final String STORAGE_PATH = "./storage";
   private static final long ONE_HOUR_ONE_MINUTE_IN_MILLIS = 3660000;
@@ -51,14 +45,11 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   private static final String TEST_FILE_1_NAME = "marc1.mrc";
   public static final String TEST_FILE_2_NAME = "marc2.mrc";
 
-  private static Vertx vertx = Vertx.vertx();
-
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
   @Autowired
   private StorageCleanupService storageCleanupService;
 
-  private OkapiConnectionParams okapiParams;
   private FileDefinition fileDefinition1;
   private FileDefinition fileDefinition2;
   private File testFile1;
@@ -69,11 +60,8 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     super.setUp(context);
     clearFileDefinitionTable(context);
     setUpSpringContext();
-    setUpOkapiParams();
-    testFile1 = new File(STORAGE_PATH + "/" + FILE_DEFINITION_ID_1 + "/" + TEST_FILE_1_NAME);
-    testFile2 = new File(STORAGE_PATH + "/" + FILE_DEFINITION_ID_2 + "/" + TEST_FILE_2_NAME);
-    fileDefinition1 = createFileDefinition(FILE_DEFINITION_ID_1, testFile1.getPath(), TEST_FILE_1_NAME);
-    fileDefinition2 = createFileDefinition(FILE_DEFINITION_ID_2, testFile2.getPath(), TEST_FILE_2_NAME);
+    createTestFiles();
+    createFileDefinitions();
   }
 
   @After
@@ -93,7 +81,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -122,7 +110,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveFileDefinition1Ar -> {
       return fileDefinitionDao.save(fileDefinition2, TENANT_ID).compose(saveFileDefinition2Ar -> {
-        Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+        Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
         // then
         future.setHandler(ar -> {
@@ -152,7 +140,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -177,7 +165,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -200,7 +188,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     //when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -223,7 +211,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -246,7 +234,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiParams);
+      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
       future.setHandler(ar -> {
@@ -259,12 +247,6 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     });
   }
 
-  private void setUpSpringContext() {
-    Context vertxContext = vertx.getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
-    SpringContextUtil.autowireDependencies(this, vertxContext);
-  }
-
   private void clearFileDefinitionTable(TestContext context) {
     Async async = context.async();
     PostgresClient.getInstance(vertx, TENANT_ID).delete(FILE_DEFINITIONS_TABLE, new Criterion(), event -> {
@@ -275,11 +257,20 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     });
   }
 
-  private void setUpOkapiParams() {
-    Map<String, String> headers = new HashedMap<>();
-    headers.put(OKAPI_TENANT_HEADER, TENANT_ID);
-    headers.put(OKAPI_URL_HEADER, "http://localhost:" + PORT);
-    okapiParams = new OkapiConnectionParams(headers);
+  private void setUpSpringContext() {
+    Context vertxContext = vertx.getOrCreateContext();
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+    SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  private void createTestFiles() {
+    testFile1 = new File(STORAGE_PATH + "/" + FILE_DEFINITION_ID_1 + "/" + TEST_FILE_1_NAME);
+    testFile2 = new File(STORAGE_PATH + "/" + FILE_DEFINITION_ID_2 + "/" + TEST_FILE_2_NAME);
+  }
+
+  private void createFileDefinitions() {
+    fileDefinition1 = createFileDefinition(FILE_DEFINITION_ID_1, testFile1.getPath(), TEST_FILE_1_NAME);
+    fileDefinition2 = createFileDefinition(FILE_DEFINITION_ID_2, testFile2.getPath(), TEST_FILE_2_NAME);
   }
 
   private FileDefinition createFileDefinition(String fileDefinitionId, String filePath, String fileName) {

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class StorageCleanupServiceImpl implements StorageCleanupService {
 
-  private static final long TIME_WITHOUT_CHANGES_VALUE_IN_MILLIS = 3600_000;
+  private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 3600_000;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StorageCleanupServiceImpl.class);
 
@@ -31,7 +31,7 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
   @Override
   public Future<Boolean> cleanStorage(OkapiConnectionParams params) {
     Promise<Boolean> promise = Promise.promise();
-    return fileDefinitionDao.getExpiredEntries(getLastChangedDate(), params.getTenantId())
+    return fileDefinitionDao.getExpiredEntries(getFileDefinitionExpirationDate(), params.getTenantId())
       .compose(fileDefinitions -> deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId()))
       .compose(compositeFuture -> {
         promise.complete(isFilesDeleted(compositeFuture));
@@ -39,8 +39,8 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
       });
   }
 
-  private Date getLastChangedDate() {
-    return new Date(new Date().getTime() - TIME_WITHOUT_CHANGES_VALUE_IN_MILLIS);
+  private Date getFileDefinitionExpirationDate() {
+    return new Date(new Date().getTime() - FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS);
   }
 
   private Future<CompositeFuture> deleteExpiredFilesAndRelatedFileDefinitions(List<FileDefinition> fileDefinitions, String tenantId) {

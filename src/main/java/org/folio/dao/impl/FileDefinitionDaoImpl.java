@@ -60,10 +60,10 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
   }
 
   @Override
-  public Future<List<FileDefinition>> getExpiredEntries(Date lastUpdateDate, String tenantId) {
+  public Future<List<FileDefinition>> getExpiredEntries(Date expirationDate, String tenantId) {
     Promise<Results<FileDefinition>> promise = Promise.promise();
     try {
-      Criterion expiredEntriesCriterion = constructExpiredEntriesCriterion(lastUpdateDate);
+      Criterion expiredEntriesCriterion = constructExpiredEntriesCriterion(expirationDate);
       pgClientFactory.getInstance(tenantId).get(TABLE, FileDefinition.class, expiredEntriesCriterion, false, promise);
     } catch (Exception e) {
       logger.error("Error during getting fileDefinition entries by expired date", e);
@@ -108,7 +108,7 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
     return criteria;
   }
 
-  private Criterion constructExpiredEntriesCriterion(Date lastUpdateDate) {
+  private Criterion constructExpiredEntriesCriterion(Date expirationDate) {
     Criterion criterion = new Criterion();
     Criteria notEmptySourcePathCriteria = new Criteria();
     notEmptySourcePathCriteria.addField(SOURCE_PATH_FIELD)
@@ -118,7 +118,7 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
     lastUpdateDateCriteria.addField(METADATA_FIELD)
       .addField(UPDATED_DATE_FIELD)
       .setOperation(LESS_OR_EQUAL_OPERATION)
-      .setVal(lastUpdateDate.toString());
+      .setVal(expirationDate.toString());
     criterion.addCriterion(notEmptySourcePathCriteria, AND_OPERATION, lastUpdateDateCriteria);
     return criterion;
   }
