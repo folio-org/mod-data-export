@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Job Execution Schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "hrId": {
+      "description": "Human readable id",
+      "type": "string"
+    },
+    "exportedFiles": {
+      "description": "List of exported files",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "fileId": {
+            "description": "File unique identifier",
+            "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+          },
+          "fileName": {
+            "description": "File name",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "jobProfileInfo": {
+      "description": "Related JobProfile information",
+      "type": "object",
+      "$ref": "jobProfile.json"
+    },
+    "progress": {
+      "description": "Execution progress of the job",
+      "type": "object",
+      "properties": {
+        "current": {
+          "description": "Number of records exported",
+          "type": "integer"
+        },
+        "total": {
+          "description": "Total number of records",
+          "type": "integer"
+        }
+      }
+    },
+    "completedDate": {
+      "description": "Date and time when the job execution completed",
+      "type": "string",
+      "format": "date-time"
+    },
+    "runBy": {
+      "description": "First and last name of the user who triggered the job execution",
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "description": "First name",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "Last name",
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "description": "Status of files export",
+      "type": "string",
+      "default": "NEW",
+      "enum": [
+        "NEW",
+        "IN_PROGRESS",
+        "SUCCESS",
+        "FAIL"
+      ]
+    },
+    "metadata": {
+      "description": "Metadata",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
+    }
+  },
+  "required": [
+    "status"
+  ]
+}

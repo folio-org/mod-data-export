@@ -1,6 +1,7 @@
 # *File Upload API*
 
 ## *Introduction*
+
 The *mod-data-export* is responsible for exporting FOLIO records into a specified output format into the given destination. 
 The list of the FOLIO records can be defined in 2 ways: CSV file with listed identifiers or CQL query. 
 
@@ -45,7 +46,6 @@ This ENUM located in FileDefinition entity and stores information about its curr
 | IN_PROGRESS | The file upload process is currently in progress |
 | COMPLETED | The file upload process completed |
 | ERROR | The file upload process failed |
-
 
 ### *REST API*
 
