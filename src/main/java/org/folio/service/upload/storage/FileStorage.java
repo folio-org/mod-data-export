@@ -22,4 +22,9 @@ public interface FileStorage {
    * Saves file bytes to the storage and return its path
    */
   Future<FileDefinition> saveFileData(byte[] data, FileDefinition fileDefinition);
+
+  /**
+   * Deletes File and related parent directory from the storage and returns true if succeeded
+   */
+  Future<Boolean> deleteFileAndParentDirectory(FileDefinition fileDefinition);
 }
