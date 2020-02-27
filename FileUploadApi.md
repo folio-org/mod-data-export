@@ -1,9 +1,9 @@
 # *File Upload API*
 
 ## *Introduction*
-The *mod-data-export* is responsible for conversion of various FOLIO records(Instance,Holding Items) to MARC format and
-export them into the given destination. The list of the FOLIO records can be defined in 2 ways: CSV file with listed 
-identifiers or CQL query. 
+
+The *mod-data-export* is responsible for exporting FOLIO records into a specified output format into the given destination. 
+The list of the FOLIO records can be defined in 2 ways: CSV file with listed identifiers or CQL query. 
 
 This documentation describes the REST API to upload CSV files to the mod-data-export for further processing.
 
@@ -45,8 +45,7 @@ This ENUM located in FileDefinition entity and stores information about its curr
 | NEW |The fileDefinition is created but uploaded process did not start yet |
 | IN_PROGRESS | The file upload process is currently in progress |
 | COMPLETED | The file upload process completed |
-| ERROR | The fail upload process failed |
-
+| ERROR | The file upload process failed |
 
 ### *REST API*
 
