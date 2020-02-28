@@ -15,19 +15,19 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Synchronous implementation of #RecordLoaderService that uses blocking http client.
+ *  Implementation of #RecordLoaderService that uses blocking http client.
  */
 @Service
-public class BlockingRecordLoaderService implements RecordLoaderService {
+public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private SourceRecordStorageClient client;
 
-  public BlockingRecordLoaderService (@Autowired SourceRecordStorageClient client) {
+  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient client) {
     this.client = client;
   }
 
   @Override
-  public SrsLoadResult loadMarcRecords(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
+  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
     Optional<JsonObject> optionalRecords = client.getByIds(uuids, okapiConnectionParams);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
@@ -39,7 +39,7 @@ public class BlockingRecordLoaderService implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> loadInventoryInstances(Collection<String> instanceIds, OkapiConnectionParams params) {
+  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params) {
     return new ArrayList<>();
   }
 
