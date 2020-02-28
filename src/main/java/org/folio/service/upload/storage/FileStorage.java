@@ -5,21 +5,15 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.upload.reader.SourceStreamReader;
 
 /**
- * File storage service.
- * Service to save files and reading files being stored.
+ * File storage service, service to save files.
  */
 public interface FileStorage {
 
   /**
-   * Returns instance of the source reader.
+   * Saves file bytes to the storage asynchronously
    *
-   * @return SourceStreamReader
-   * @see SourceStreamReader
    */
-  SourceStreamReader getReader();
+  Future<FileDefinition> saveFileDataAsync(byte[] data, FileDefinition fileDefinition);
 
-  /**
-   * Saves file bytes to the storage and return its path
-   */
-  Future<FileDefinition> saveFileData(byte[] data, FileDefinition fileDefinition);
+  FileDefinition saveFileDataBlocking(byte[] data, FileDefinition fileDefinition);
 }

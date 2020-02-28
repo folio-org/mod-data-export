@@ -17,7 +17,7 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecords(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
+  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 
   /**
    * Retrieves Inventory instances
@@ -25,5 +25,5 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return collection of json objects
    */
-  List<JsonObject> loadInventoryInstances(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
+  List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 }

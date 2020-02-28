@@ -21,7 +21,6 @@ public interface ExportManager {  //NOSONAR
    * Runs the data-export process
    *
    * @param request    json request
-   * @param parameters HTTP request parameters
    */
-  void exportData(JsonObject request, JsonObject parameters);
+  void exportData(JsonObject request);
 }

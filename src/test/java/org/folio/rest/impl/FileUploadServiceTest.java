@@ -69,7 +69,6 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .when()
       .post(FILE_DEFINITION_SERVICE_URL);
     // then
-    // then
     context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
   }
 
