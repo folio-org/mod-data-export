@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
-  private final byte[] MARC_RECORD_TERMINATOR = String.valueOf(Constants.RT).getBytes();
+  private static final byte[] MARC_RECORD_TERMINATOR = String.valueOf(Constants.RT).getBytes();
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
