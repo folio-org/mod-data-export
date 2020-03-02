@@ -57,7 +57,6 @@ public class LocalFileSystemStorage implements FileStorage {
       saveFileData(data, fileDefinition);
     } catch (IOException e) {
       LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
-      throw new RuntimeException(e);
     }
     return fileDefinition;
   }
@@ -83,7 +82,6 @@ public class LocalFileSystemStorage implements FileStorage {
     }
   }
 
-
   @Override
   public Future<Boolean> deleteFileAndParentDirectory(FileDefinition fileDefinition) {
     Promise<Boolean> promise = Promise.promise();
@@ -103,7 +101,7 @@ public class LocalFileSystemStorage implements FileStorage {
 
   private void deleteParentDirectory(Path filePath) throws IOException {
     Path parentFileDefinitionDirectory = filePath.getParent();
-    if(Objects.nonNull(parentFileDefinitionDirectory) && isDirectoryEmpty(parentFileDefinitionDirectory)) {
+    if (Objects.nonNull(parentFileDefinitionDirectory) && isDirectoryEmpty(parentFileDefinitionDirectory)) {
       fileSystem.deleteBlocking(parentFileDefinitionDirectory.toString());
     }
   }
@@ -113,5 +111,4 @@ public class LocalFileSystemStorage implements FileStorage {
       return !directoryStream.findAny().isPresent();
     }
   }
-
 }
