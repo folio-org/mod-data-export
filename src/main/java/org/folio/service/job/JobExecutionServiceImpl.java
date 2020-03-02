@@ -18,8 +18,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobExecutionServiceImpl.class);
-
   @Autowired
   private JobExecutionDao jobExecutionDao;
 

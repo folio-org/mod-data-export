@@ -24,7 +24,6 @@ traits:
 
 resourceTypes:
   collection: !include raml-util/rtypes/collection-get.raml
-  collection-item: !include raml-util/rtypes/item-collection-get.raml
 
 /data-export:
   /export:
@@ -59,9 +58,7 @@ resourceTypes:
     type:
       collection:
         schemaCollection: jobExecutionCollection
-        schemaItem: jobExecution
         exampleCollection: !include samples/jobExecutionCollection.sample
-        exampleItem: !include samples/jobExecution.sample
     get:
       is: [
         searchable: {
