@@ -17,9 +17,6 @@
       "type": "integer"
     }
   },
-  "excludedFromEqualsAndHashCode": [
-    "totalRecords"
-  ],
   "required": [
     "jobExecutions",
     "totalRecords"

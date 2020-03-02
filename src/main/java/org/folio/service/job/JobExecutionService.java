@@ -5,13 +5,10 @@ import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
-
 /**
  * JobExecution Service interface, contains logic for accessing jobs.
- *
  */
 public interface JobExecutionService {
-
 
   /**
    * Returns JobExecutionCollection by the input query
@@ -21,7 +18,6 @@ public interface JobExecutionService {
    * @return future with JobExecutionCollection
    */
   Future<JobExecutionCollection> getJobExecutions(String query, int offset, int limit, String tenantId);
-
 
   /**
    * Saves {@link JobExecution}

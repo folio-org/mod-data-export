@@ -18,19 +18,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
-
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(JobExecutionDaoImpl.class);
-
   private static final String TABLE = "job_executions";
-
   @Autowired
   private PostgresClientFactory pgClientFactory;
 
   @Override
-  public Future<JobExecutionCollection> getJobExecutions(String query, int offset, int limit, String tenantId) {
+  public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
     Promise<Results<JobExecution>> promise = Promise.promise();
     try {
       String[] fieldList = {"*"};
@@ -46,7 +42,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   }
 
   @Override
-  public Future<JobExecution> saveJobExecution(JobExecution jobExecution, String tenantId) {
+  public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     Promise<String> promise = Promise.promise();
     jobExecution.setId(UUID.randomUUID().toString());
     pgClientFactory.getInstance(tenantId).save(TABLE, jobExecution.getId(), jobExecution, promise);

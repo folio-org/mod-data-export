@@ -4,7 +4,6 @@ import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
-
 /**
  * Data access object for {@link JobExecution}
  */
@@ -18,7 +17,7 @@ public interface JobExecutionDao {
    * @param limit  maximum number of results to return
    * @return future with {@link JobExecutionCollection}
    */
-  Future<JobExecutionCollection> getJobExecutions(String query, int offset, int limit, String tenantId);
+  Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId);
 
   /**
    * Saves {@link JobExecution}
@@ -27,5 +26,5 @@ public interface JobExecutionDao {
    * @param tenantId     tenant id
    * @return future with id of saved {@link JobExecution}
    */
-  Future<JobExecution> saveJobExecution(JobExecution jobExecution, String tenantId);
+  Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 }
