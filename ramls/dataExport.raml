@@ -13,9 +13,18 @@ types:
   errors: !include raml-util/schemas/errors.schema
   fileDefinition: !include schemas/fileDefinition.json
   exportRequest: !include schemas/exportRequest.json
+  jobExecutionCollection: !include schemas/jobExecutionCollection.json
+  jobExecution: !include schemas/jobExecution.json
 
 traits:
   validate: !include raml-util/traits/validation.raml
+  pageable:  !include raml-util/traits/pageable.raml
+  searchable: !include raml-util/traits/searchable.raml
+  language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection-get.raml
+  collection-item: !include raml-util/rtypes/item-collection-get.raml
 
 /data-export:
   /export:
@@ -44,6 +53,24 @@ traits:
           body:
             text/plain:
               example: "Internal server error"
+  /jobExecutions:
+    displayName: JobExecutions
+    description: API for getting JobExecutions by query
+    type:
+      collection:
+        schemaCollection: jobExecutionCollection
+        schemaItem: jobExecution
+        exampleCollection: !include samples/jobExecutionCollection.sample
+        exampleItem: !include samples/jobExecution.sample
+    get:
+      is: [
+        searchable: {
+        description:
+          "with valid searchable fields", example: "status=SUCCESS"
+        },
+        pageable,
+        validate
+      ]
   /fileDefinitions:
     displayName: File upload service
     description: Service provides file uploading API

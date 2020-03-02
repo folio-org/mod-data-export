@@ -2,6 +2,8 @@ package org.folio.service.upload;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.service.upload.storage.FileStorage;
 import org.slf4j.Logger;
@@ -22,11 +24,14 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
 public class FileUploadServiceImpl implements FileUploadService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private FileDefinitionService fileDefinitionService;
+  private JobExecutionService jobExecutionService;
   private FileStorage fileStorage;
 
-  public FileUploadServiceImpl(@Autowired FileStorage fileStorage, @Autowired FileDefinitionService fileDefinitionService) {
+  public FileUploadServiceImpl(@Autowired FileStorage fileStorage, @Autowired FileDefinitionService fileDefinitionService,
+  @Autowired JobExecutionService jobExecutionService) {
     this.fileStorage = fileStorage;
     this.fileDefinitionService = fileDefinitionService;
+    this.jobExecutionService = jobExecutionService;
   }
 
   @Override
@@ -42,8 +47,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId) {
-    /* Create job, link it to the file definition */
-    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), tenantId);
+    JobExecution jobExecution = new JobExecution();
+    return jobExecutionService.saveJobExecution(jobExecution, tenantId).compose(savedJob ->
+      fileDefinitionService.update(fileDefinition.withStatus(COMPLETED).withJobExecutionId(savedJob.getId()), tenantId));
   }
 
   @Override

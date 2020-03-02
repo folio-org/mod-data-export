@@ -11,6 +11,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.upload.FileUploadService;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
@@ -37,6 +38,8 @@ public class DataExportImpl implements DataExport {
   private FileDefinitionService fileDefinitionService;
   @Autowired
   private FileUploadService fileUploadService;
+  @Autowired
+  private JobExecutionService jobExecutionService;
   /*
       Reference to the Future to keep uploading state in track while uploading happens.
       Since in streaming uploading the RMB does not recreate rest.impl resource,
@@ -62,6 +65,17 @@ public class DataExportImpl implements DataExport {
       } catch (Exception exception) {
         asyncResultHandler.handle(succeededFuture(map(exception)));
       }
+  }
+
+  @Override
+  public void getDataExportJobExecutions(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> {
+      jobExecutionService.getJobExecutions(query, offset, limit, tenantId)
+        .map(GetDataExportJobExecutionsResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .setHandler(asyncResultHandler);
+    });
   }
 
   @Override
