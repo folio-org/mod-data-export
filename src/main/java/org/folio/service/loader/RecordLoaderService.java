@@ -12,18 +12,18 @@ import java.util.List;
 public interface RecordLoaderService {
 
   /**
-   * Retrieves SRS records
+   * Retrieves SRS records using blocking http client
    *
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecords(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
+  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 
   /**
-   * Retrieves Inventory instances
+   * Retrieves Inventory instances using blocking http client
    *
    * @param instanceIds inventory instances identifiers
    * @return collection of json objects
    */
-  List<JsonObject> loadInventoryInstances(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
+  List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 }

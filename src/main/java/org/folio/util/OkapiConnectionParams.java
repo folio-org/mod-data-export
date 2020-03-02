@@ -5,7 +5,7 @@ import java.util.Map;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
-public final class OkapiConnectionParams {
+public class OkapiConnectionParams {
   private String okapiUrl;
   private String tenantId;
   private String token;

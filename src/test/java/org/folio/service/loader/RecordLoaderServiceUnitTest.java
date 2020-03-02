@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 
 @RunWith(VertxUnitRunner.class)
-public class BlockingRecordLoaderServiceTest extends HttpServerTestBase {
+public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   @BeforeClass
   public static void beforeClass() throws Exception {
     setUpHttpServer();
@@ -50,9 +50,9 @@ public class BlockingRecordLoaderServiceTest extends HttpServerTestBase {
   public void shouldReturnExistingMarcRecords() {
     // given
     SourceRecordStorageClient client = Mockito.spy(SourceRecordStorageClient.class);
-    RecordLoaderService recordLoaderService = new BlockingRecordLoaderService(client);
+    RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecords(new ArrayList<>(), okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasItems("812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content", "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"));
@@ -65,9 +65,9 @@ public class BlockingRecordLoaderServiceTest extends HttpServerTestBase {
     JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
     SourceRecordStorageClient client = Mockito.mock(SourceRecordStorageClient.class);
     Mockito.when(client.getByIds(anyList(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(emptyResponse));
-    RecordLoaderService recordLoaderService = new BlockingRecordLoaderService(client);
+    RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecords(uuids, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getInstanceIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
@@ -78,9 +78,9 @@ public class BlockingRecordLoaderServiceTest extends HttpServerTestBase {
     // given
     List<String> uuids = new ArrayList<>();
     SourceRecordStorageClient client = Mockito.spy(SourceRecordStorageClient.class);
-    RecordLoaderService recordLoaderService = new BlockingRecordLoaderService(client);
+    RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when call loadInventoryInstances method, then assert no exception thrown
-    assertThatCode(() -> recordLoaderService.loadInventoryInstances(uuids, okapiConnectionParams))
+    assertThatCode(() -> recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams))
       .doesNotThrowAnyException();
   }
 }
