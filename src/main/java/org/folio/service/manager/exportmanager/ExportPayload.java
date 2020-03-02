@@ -11,6 +11,9 @@ public class ExportPayload {
   private FileDefinition fileExportDefinition;
   private OkapiConnectionParams okapiConnectionParams;
 
+  public ExportPayload() {
+  }
+
   public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams) {
     this.identifiers = identifiers;
     this.last = last;
@@ -22,15 +25,31 @@ public class ExportPayload {
     return identifiers;
   }
 
+  public void setIdentifiers(List<String> identifiers) {
+    this.identifiers = identifiers;
+  }
+
   public boolean isLast() {
     return last;
+  }
+
+  public void setLast(boolean last) {
+    this.last = last;
   }
 
   public FileDefinition getFileExportDefinition() {
     return fileExportDefinition;
   }
 
+  public void setFileExportDefinition(FileDefinition fileExportDefinition) {
+    this.fileExportDefinition = fileExportDefinition;
+  }
+
   public OkapiConnectionParams getOkapiConnectionParams() {
     return okapiConnectionParams;
+  }
+
+  public void setOkapiConnectionParams(OkapiConnectionParams okapiConnectionParams) {
+    this.okapiConnectionParams = okapiConnectionParams;
   }
 }

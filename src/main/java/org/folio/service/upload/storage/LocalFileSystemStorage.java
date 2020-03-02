@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
-@Component
+@Component("LocalFileSystemStorage")
 public class LocalFileSystemStorage implements FileStorage {
   private static final String FILE_STORAGE_PATH = "./storage/files";
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());

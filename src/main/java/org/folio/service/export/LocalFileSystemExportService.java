@@ -4,6 +4,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.upload.storage.FileStorage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @Service
 public class LocalFileSystemExportService implements ExportService {
   @Autowired
+  @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
 
   @Override
