@@ -5,6 +5,10 @@ import org.folio.util.OkapiConnectionParams;
 
 import java.util.List;
 
+/**
+ * Payload of the export manager request.
+ * Contains necessary information needed to export a chunk of data.
+ */
 public class ExportPayload {
   private List<String> identifiers;
   private boolean last;
