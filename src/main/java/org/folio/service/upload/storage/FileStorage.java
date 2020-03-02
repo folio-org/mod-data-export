@@ -17,4 +17,9 @@ public interface FileStorage {
    * Save bytes to the storage in blocking manner
    */
   FileDefinition saveFileDataBlocking(byte[] data, FileDefinition fileDefinition);
+
+  /**
+   * Deletes File and related parent directory from the storage and returns true if succeeded
+   */
+  Future<Boolean> deleteFileAndParentDirectory(FileDefinition fileDefinition);
 }

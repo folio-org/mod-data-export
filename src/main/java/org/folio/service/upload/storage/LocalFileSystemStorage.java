@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
@@ -27,6 +29,7 @@ public class LocalFileSystemStorage implements FileStorage {
 
   private WorkerExecutor workerExecutor;
   private FileSystem fileSystem;
+
 
   public LocalFileSystemStorage(@Autowired Vertx vertx) {
     this.workerExecutor = vertx.createSharedWorkerExecutor("local-file-storage-worker");
@@ -79,4 +82,36 @@ public class LocalFileSystemStorage implements FileStorage {
       return fileDefinition.getSourcePath();
     }
   }
+
+
+  @Override
+  public Future<Boolean> deleteFileAndParentDirectory(FileDefinition fileDefinition) {
+    Promise<Boolean> promise = Promise.promise();
+    try {
+      Path filePath = Paths.get(fileDefinition.getSourcePath());
+      if (fileSystem.existsBlocking(filePath.toString())) {
+        fileSystem.deleteBlocking(filePath.toString());
+        deleteParentDirectory(filePath);
+      }
+      promise.complete(true);
+    } catch (Exception e) {
+      LOGGER.error("Couldn't delete the file with id {} from the storage", fileDefinition.getId(), e);
+      promise.complete(false);
+    }
+    return promise.future();
+  }
+
+  private void deleteParentDirectory(Path filePath) throws IOException {
+    Path parentFileDefinitionDirectory = filePath.getParent();
+    if(Objects.nonNull(parentFileDefinitionDirectory) && isDirectoryEmpty(parentFileDefinitionDirectory)) {
+      fileSystem.deleteBlocking(parentFileDefinitionDirectory.toString());
+    }
+  }
+
+  private boolean isDirectoryEmpty(Path parentFileDefinitionDirectory) throws IOException {
+    try (Stream<Path> directoryStream = Files.list(parentFileDefinitionDirectory)) {
+      return !directoryStream.findAny().isPresent();
+    }
+  }
+
 }

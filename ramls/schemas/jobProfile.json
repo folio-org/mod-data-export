@@ -12,6 +12,10 @@
     "destination": {
       "description": "Final destination place where to send file",
       "type": "string"
+    },
+    "name": {
+      "description": "Job Profile name",
+      "type": "string"
     }
   },
   "required": [

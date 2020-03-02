@@ -3,6 +3,8 @@ package org.folio.dao;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,6 +20,15 @@ public interface FileDefinitionDao {
    * @return future with optional {@link FileDefinition}
    */
   Future<Optional<FileDefinition>> getById(String id, String tenantId);
+
+  /**
+   * Searches for {@link FileDefinition} by status or with updatedDate greater then {@code lastUpdateDate}
+   *
+   * @param lastUpdateDate time of last fileDefinition changes
+   * @param tenantId tenant id
+   * @return future with list of {@link FileDefinition}
+   */
+  Future<List<FileDefinition>> getExpiredEntries(Date lastUpdateDate, String tenantId);
 
   /**
    * Saves {@link FileDefinition} to database
@@ -36,4 +47,13 @@ public interface FileDefinitionDao {
    * @return future with {@link FileDefinition}
    */
   Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId);
+
+  /**
+   * Deletes {@link FileDefinition} from database
+   *
+   * @param id id of {@link FileDefinition} to delete
+   * @param tenantId tenant id
+   * @return future with true is succeeded
+   */
+  Future<Boolean> deleteById(String id, String tenantId);
 }

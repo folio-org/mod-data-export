@@ -5,6 +5,11 @@
       "fromModuleVersion": "mod-data-export-1.0.0",
       "withMetadata": true,
       "withAuditing": false
+    },
+    {
+      "tableName" : "job_executions",
+      "fromModuleVersion": "mod-data-export-1.0.0",
+      "withAuditing": false
     }
   ]
 }
