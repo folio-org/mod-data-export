@@ -32,7 +32,7 @@ public class LocalFileSystemExportService implements ExportService {
   private byte[] convertToRawRecord(String marcRecord) {
     /*
         MARC records may come in 3 formats: MARC_RAW, MARC_JSON, MARC_XML.
-        We suppose to receive records only in MARC_RAW format
+        Now we suppose to receive records only in MARC_RAW format.
     */
     return Bytes.concat(marcRecord.getBytes(), MARC_RECORD_TERMINATOR);
   }
