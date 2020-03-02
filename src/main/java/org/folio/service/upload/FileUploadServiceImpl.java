@@ -42,7 +42,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
-    return fileStorage.saveFileData(data, fileDefinition);
+    return fileStorage.saveFileDataAsync(data, fileDefinition);
   }
 
   @Override

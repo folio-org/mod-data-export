@@ -72,7 +72,6 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .when()
       .post(FILE_DEFINITION_SERVICE_URL);
     // then
-    // then
     context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
   }
 
@@ -132,6 +131,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
     assertEquals(uploadedFileDefinition.getJobExecutionId(),  jobExecutions.getJobExecutions().get(0).getId());
+    // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
     async.complete();
   }
