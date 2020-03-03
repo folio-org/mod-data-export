@@ -5,6 +5,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.jaxrs.model.ExportRequest;
@@ -12,6 +13,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.job.JobExecutionService;
+import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.service.upload.FileUploadService;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
@@ -40,6 +42,9 @@ public class DataExportImpl implements DataExport {
   private FileUploadService fileUploadService;
   @Autowired
   private JobExecutionService jobExecutionService;
+
+  private InputDataManager inputDataManager;
+
   /*
       Reference to the Future to keep uploading state in track while uploading happens.
       Since in streaming uploading the RMB does not recreate rest.impl resource,
@@ -51,20 +56,21 @@ public class DataExportImpl implements DataExport {
   public DataExportImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
+    this.inputDataManager = vertx.getOrCreateContext().get(InputDataManager.class.getName());
   }
 
   @Override
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-      try {
-        LOGGER.info("Starting the data-export process, request: {}", entity);
-        // call import manager to start
-        succeededFuture()
-          .map(PostDataExportExportResponse.respond204())
-          .map(Response.class::cast)
-          .setHandler(asyncResultHandler);
-      } catch (Exception exception) {
-        asyncResultHandler.handle(succeededFuture(map(exception)));
-      }
+    try {
+      LOGGER.info("Starting the data-export process, request: {}", entity);
+      inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(okapiHeaders));
+      succeededFuture()
+        .map(PostDataExportExportResponse.respond204())
+        .map(Response.class::cast)
+        .setHandler(asyncResultHandler);
+    } catch (Exception exception) {
+      asyncResultHandler.handle(succeededFuture(map(exception)));
+    }
   }
 
   @Override
@@ -79,7 +85,7 @@ public class DataExportImpl implements DataExport {
   @Override
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar ->  fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+      .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

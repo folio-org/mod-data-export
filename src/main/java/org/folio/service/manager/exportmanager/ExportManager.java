@@ -7,14 +7,14 @@ import io.vertx.core.json.JsonObject;
 
 @ProxyGen
 public interface ExportManager {  //NOSONAR
-  String QUEUE_NAME = "export-manager.queue";     //NOSONAR
+  String EXPORT_MANAGER_ADDRESS = "export-manager.queue";     //NOSONAR
 
   static ExportManager create(Context context) {
     return new ExportManagerImpl(context);
   }
 
   static ExportManager createProxy(Vertx vertx) {
-    return new ExportManagerVertxEBProxy(vertx, QUEUE_NAME);
+    return new ExportManagerVertxEBProxy(vertx, EXPORT_MANAGER_ADDRESS);
   }
 
   /**

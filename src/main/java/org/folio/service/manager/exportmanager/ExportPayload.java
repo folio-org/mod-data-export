@@ -14,15 +14,17 @@ public class ExportPayload {
   private boolean last;
   private FileDefinition fileExportDefinition;
   private OkapiConnectionParams okapiConnectionParams;
+  private String jobExecutionId;
 
   public ExportPayload() {
   }
 
-  public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams) {
+  public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams, String jobExecutionId) {
     this.identifiers = identifiers;
     this.last = last;
     this.fileExportDefinition = fileExportDefinition;
     this.okapiConnectionParams = okapiConnectionParams;
+    this.jobExecutionId = jobExecutionId;
   }
 
   public List<String> getIdentifiers() {
@@ -55,5 +57,13 @@ public class ExportPayload {
 
   public void setOkapiConnectionParams(OkapiConnectionParams okapiConnectionParams) {
     this.okapiConnectionParams = okapiConnectionParams;
+  }
+
+  public String getJobExecutionId() {
+    return jobExecutionId;
+  }
+
+  public void setJobExecutionId(String jobExecutionId) {
+    this.jobExecutionId = jobExecutionId;
   }
 }

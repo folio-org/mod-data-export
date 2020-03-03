@@ -1,11 +1,11 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.folio.clients.OkapiClientsFactory;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
+import io.vertx.ext.web.Router;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.jetbrains.annotations.NotNull;
@@ -13,12 +13,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServer;
-import io.vertx.ext.web.Router;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 public abstract class HttpServerTestBase {
 
@@ -31,7 +29,6 @@ public abstract class HttpServerTestBase {
   protected static Vertx vertx = Vertx.vertx();
   protected static Router router;
   private static HttpServer httpServer;
-  protected OkapiClientsFactory clients = OkapiClientsFactory.create(getOkapiConnectionParams());
 
   @BeforeClass
   public static void setUpClass() throws Exception {

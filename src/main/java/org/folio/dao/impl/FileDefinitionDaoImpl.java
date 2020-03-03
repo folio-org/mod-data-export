@@ -36,12 +36,9 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
   private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
   private PostgresClientFactory pgClientFactory;
-  private SimpleDateFormat dateFormatter;
 
   public FileDefinitionDaoImpl(@Autowired PostgresClientFactory pgClientFactory) {
     this.pgClientFactory = pgClientFactory;
-    this.dateFormatter = new SimpleDateFormat(DATE_FORMAT_PATTERN);
-    this.dateFormatter.setTimeZone(TimeZone.getTimeZone(TimeZones.GMT_ID));
   }
 
   @Override

@@ -45,7 +45,7 @@ public class ExportManagerUnitTest {
     FileDefinition fileExportDefinition = new FileDefinition();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams();
     // when
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams);
+    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
     exportManager.exportBlocking(exportPayload);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(67)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class));

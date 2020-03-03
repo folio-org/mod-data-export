@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -12,9 +13,12 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
+import org.folio.service.manager.inputdatamanager.InputDataManager;
+import org.folio.service.manager.status.ExportStatus;
 import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +47,8 @@ public class ExportManagerImpl implements ExportManager {
   private ExportService exportService;
   @Autowired
   private MappingService mappingService;
+  @Autowired
+  private Vertx vertx;
 
   public ExportManagerImpl() {
   }
@@ -50,6 +56,7 @@ public class ExportManagerImpl implements ExportManager {
   public ExportManagerImpl(Context context) {
     SpringContextUtil.autowireDependencies(this, context);
     this.executor = context.owner().createSharedWorkerExecutor("export-thread-worker", POOL_SIZE);
+
   }
 
   @Override
@@ -121,13 +128,28 @@ public class ExportManagerImpl implements ExportManager {
    * @return return future
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+    JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
+    ExportStatus status = getExportStatusByResult(asyncResult, exportPayload);
+    getInputDataManager().proceed(exportPayloadJson, status);
+    return succeededFuture();
+  }
+
+  @NotNull
+  private ExportStatus getExportStatusByResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause());
+      return ExportStatus.ERROR;
     } else {
       LOGGER.info("Export has been successfully passed");
-      // update job progress
+      if (exportPayload.isLast()) {
+        return ExportStatus.COMPLETED;
+      } else {
+        return ExportStatus.IN_PROGRESS;
+      }
     }
-    // call importManager with the status of export
-    return succeededFuture();
+  }
+
+  private InputDataManager getInputDataManager() {
+    return vertx.getOrCreateContext().get(InputDataManager.class.getName());
   }
 }

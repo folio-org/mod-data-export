@@ -1,17 +1,12 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.*;
+import io.vertx.serviceproxy.ServiceBinder;
 import org.folio.config.ApplicationConfig;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.service.manager.exportmanager.ExportManager;
-import org.folio.service.inputdatamanager.InputDataManager;
+import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.spring.SpringContextUtil;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.serviceproxy.ServiceBinder;
 
 public class InitAPIImpl implements InitAPI {
 
@@ -33,17 +28,16 @@ public class InitAPIImpl implements InitAPI {
   }
 
   private void registerProxies(Context context) {
-    InputDataManager inputDataManager = InputDataManager.create(context.owner());
+    ExportManager exportManager = ExportManager.create(context);
     new ServiceBinder(context.owner())
-      .setAddress(InputDataManager.QUEUE_NAME)
-      .register(InputDataManager.class, inputDataManager);
-    context.put(InputDataManager.class.getName(), inputDataManager);
-
-    ExportManager exportManager = ExportManager.create(context.owner());
-    new ServiceBinder(context.owner())
-      .setAddress(ExportManager.QUEUE_NAME)
+      .setAddress(ExportManager.EXPORT_MANAGER_ADDRESS)
       .register(ExportManager.class, exportManager);
     context.put(ExportManager.class.getName(), exportManager);
 
+    InputDataManager inputDataManager = InputDataManager.create(context);
+    new ServiceBinder(context.owner())
+      .setAddress(InputDataManager.INPUT_DATA_MANAGER_ADDRESS)
+      .register(InputDataManager.class, inputDataManager);
+    context.put(InputDataManager.class.getName(), inputDataManager);
   }
 }

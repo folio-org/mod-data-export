@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Iterables;
 import com.sun.xml.xsom.impl.scd.Iterators;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class LocalStorageCsvSourceReader implements SourceReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
