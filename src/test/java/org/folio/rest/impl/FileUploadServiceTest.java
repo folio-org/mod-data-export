@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +26,13 @@ import java.util.UUID;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 public class FileUploadServiceTest extends RestVerticleTestBase {
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
+  private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test
   public void postFileDefinition_return200Status(TestContext context) {
@@ -116,8 +119,18 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .body("metadata.createdDate", notNullValue())
       .body("status", is(FileDefinition.Status.COMPLETED.name()))
       .extract().body().as(FileDefinition.class);
+    // and then created job execution for current upload file definition
+    JobExecutionCollection jobExecutions = RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .get(JOB_EXECUTIONS_URL + "/" + "?query=id=" + uploadedFileDefinition.getJobExecutionId())
+      .then()
+      .statusCode(HttpStatus.SC_OK)
+      .extract().body().as(JobExecutionCollection.class);
+
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
+    assertEquals(uploadedFileDefinition.getJobExecutionId(),  jobExecutions.getJobExecutions().get(0).getId());
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
     async.complete();

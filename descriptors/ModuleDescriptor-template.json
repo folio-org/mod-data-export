@@ -56,6 +56,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/jobExecutions",
+          "permissionsRequired": [
+            "data-export.job-executions.items.get"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -91,14 +102,19 @@
       "description": "Entry point to get File Definition by id"
     },
     {
-      "permissionName": "data-export.file-definitions.item.post",
-      "displayName": "Data Export - create new file definition",
-      "description": "Entry point to post File Definition"
+      "permissionName": "data-export.job-executions.items.get",
+      "displayName": "Data Export - get job execution collection by query",
+      "description": "Entry point to get Job Executions by query"
     },
     {
       "permissionName": "data-export.file-definitions.upload.post",
       "displayName": "Data Export - upload file",
       "description": "Entry point to upload file"
+    },
+    {
+      "permissionName": "data-export.file-definitions.item.post",
+      "displayName": "Data Export - create new file definition",
+      "description": "Entry point to post File Definition"
     },
     {
       "permissionName": "data-export.all",
@@ -108,7 +124,8 @@
         "data-export.export.post",
         "data-export.file-definitions.item.get",
         "data-export.file-definitions.item.post",
-        "data-export.file-definitions.upload.post"
+        "data-export.file-definitions.upload.post",
+        "data-export.job-executions.items.get"
       ],
       "visible": false
     }
