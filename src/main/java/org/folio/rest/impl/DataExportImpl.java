@@ -69,7 +69,7 @@ public class DataExportImpl implements DataExport {
 
   @Override
   public void getDataExportJobExecutions(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext(v -> jobExecutionService.getJobExecutions(query, offset, limit, tenantId)
+    vertxContext.runOnContext(v -> jobExecutionService.get(query, offset, limit, tenantId)
       .map(GetDataExportJobExecutionsResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

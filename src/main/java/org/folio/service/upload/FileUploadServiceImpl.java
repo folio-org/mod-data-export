@@ -48,7 +48,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId) {
     JobExecution jobExecution = new JobExecution();
-    return jobExecutionService.saveJobExecution(jobExecution, tenantId).compose(savedJob ->
+    return jobExecutionService.save(jobExecution, tenantId).compose(savedJob ->
       fileDefinitionService.update(fileDefinition.withStatus(COMPLETED).withJobExecutionId(savedJob.getId()), tenantId));
   }
 

@@ -17,12 +17,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   private JobExecutionDao jobExecutionDao;
 
   @Override
-  public Future<JobExecutionCollection> getJobExecutions(String query, int offset, int limit, String tenantId) {
+  public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
     return jobExecutionDao.get(query, offset, limit, tenantId);
   }
 
   @Override
-  public Future<JobExecution> saveJobExecution(JobExecution jobExecution, String tenantId) {
+  public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     return jobExecutionDao.save(jobExecution, tenantId);
   }
 }

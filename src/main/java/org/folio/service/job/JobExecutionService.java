@@ -17,7 +17,7 @@ public interface JobExecutionService {
    * @param limit  maximum number of results to return
    * @return future with JobExecutionCollection
    */
-  Future<JobExecutionCollection> getJobExecutions(String query, int offset, int limit, String tenantId);
+  Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId);
 
   /**
    * Saves {@link JobExecution}
@@ -25,5 +25,5 @@ public interface JobExecutionService {
    * @param tenantId tenant id
    * @return future with JobExecutionCollection
    */
-  Future<JobExecution> saveJobExecution(JobExecution jobExecution, String tenantId);
+  Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 }
