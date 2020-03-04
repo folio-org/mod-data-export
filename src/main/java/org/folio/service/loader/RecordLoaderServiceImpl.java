@@ -61,6 +61,6 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   private String getRecordContent(JsonObject record) {
-    return record.getJsonObject("rawRecord").getString("content");
+    return record.getJsonObject("parsedRecord").getJsonObject("content").getJsonArray("fields").encode();
   }
 }
