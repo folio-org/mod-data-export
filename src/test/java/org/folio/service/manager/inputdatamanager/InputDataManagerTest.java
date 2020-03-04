@@ -22,7 +22,13 @@ import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -46,26 +52,26 @@ public class InputDataManagerTest {
   private static final int BATCH_SIZE = 2;
   private static final String FILE_NAME = "InventoryUUIDs.csv";
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
-  public static final String TENANT_ID = "diku";
-  public static final String JOB_EXECUTION_ID = "jobExecutionId";
-  public static final String EXPORT_FILE_DEFINITION_NAME = "exportFileDefinition";
-  public static final String TIMESTAMP = "timestamp";
-  public static final String FILE_DIRECTORY = "src/test/resources/";
-  public static final String SPRING_CONTEXT_NAME = "springContext";
-  public static final String THREAD_WORKER_NAME = "input-data-manager-thread-worker";
+  private static final String TENANT_ID = "diku";
+  private static final String JOB_EXECUTION_ID = "jobExecutionId";
+  private static final String EXPORT_FILE_DEFINITION_NAME = "exportFileDefinition";
+  private static final String TIMESTAMP = "timestamp";
+  private static final String FILE_DIRECTORY = "src/test/resources/";
+  private static final String SPRING_CONTEXT_NAME = "springContext";
+  private static final String THREAD_WORKER_NAME = "input-data-manager-thread-worker";
   private static final List<String> EXPECTED_IDS =
     Arrays.asList("c8b50e3f-0446-429c-960e-03774b88223f",
       "aae06d90-a8c2-4514-b227-5756f1f5f5d6",
       "d5c7968c-17e7-4ab1-8aeb-3109e1b77c80",
       "a5e9ccb3-737b-43b0-8f4a-f32a04c9ae16",
       "c5d662af-b0be-4851-bb9c-de70bba3dfce");
-  public static final String DELIMETER = "-";
-  public static final String FILE_EXPORT_DEFINITION_KEY = "fileExportDefinition";
-  public static final String OKAPI_CONNECTION_PARAMS_KEY = "okapiConnectionParams";
-  public static final String JOB_EXECUTION_ID_KEY = "jobExecutionId";
-  public static final String LAST_KEY = "last";
-  public static final String IDENTIFIERS_KEY = "identifiers";
-  public static final String TENANT_ID_KEY = "tenantId";
+  private static final String DELIMETER = "-";
+  private static final String FILE_EXPORT_DEFINITION_KEY = "fileExportDefinition";
+  private static final String OKAPI_CONNECTION_PARAMS_KEY = "okapiConnectionParams";
+  private static final String JOB_EXECUTION_ID_KEY = "jobExecutionId";
+  private static final String LAST_KEY = "last";
+  private static final String IDENTIFIERS_KEY = "identifiers";
+  private static final String TENANT_ID_KEY = "tenantId";
 
   @InjectMocks
   @Spy
@@ -124,12 +130,15 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
+    //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(false);
 
+    //when
     inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
 
+    //then
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
@@ -139,13 +148,16 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
+    //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
+    //when
     inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
 
+    //then
     verify(inputDataLocalMap).put(eq(JOB_EXECUTION_ID), inputDataContextCaptor.capture());
     InputDataContext inputDataContext = inputDataContextCaptor.getValue();
     assertThat(inputDataContext.getSourceStream(), equalTo(sourceStream));
@@ -153,13 +165,16 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
+    //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, false);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
+    //when
     inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
 
+    //then
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(actualFileExportDefinition.getStatus(), equalTo(FileDefinition.Status.IN_PROGRESS));
     assertThat(actualFileExportDefinition.getFileName(), equalTo(FILE_NAME + DELIMETER + TIMESTAMP));
@@ -167,6 +182,7 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
+    //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, false);
@@ -174,8 +190,10 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
+    //when
     inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
 
+    //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
@@ -187,6 +205,7 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
+    //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, true);
@@ -194,8 +213,10 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
+    //when
     inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
 
+    //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
@@ -207,16 +228,16 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
-    ExportPayload exportPayload = new ExportPayload();
-    exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
-    exportPayload.setFileExportDefinition(fileExportDefinition);
-    exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
+    //given
+    ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
 
+    //when
     inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.ERROR);
 
+    //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -224,16 +245,16 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
-    ExportPayload exportPayload = new ExportPayload();
-    exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
-    exportPayload.setFileExportDefinition(fileExportDefinition);
-    exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
+    //given
+    ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
 
+    //when
     inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.COMPLETED);
 
+    //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -241,17 +262,17 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
-    ExportPayload exportPayload = new ExportPayload();
-    exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
-    exportPayload.setFileExportDefinition(fileExportDefinition);
-    exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
+    //given
+    ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceStream()).thenReturn(null);
 
+    //when
     inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.IN_PROGRESS);
 
+    //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -259,18 +280,17 @@ public class InputDataManagerTest {
 
   @Test
   public void shouldExportNextChunk_whenProceedWithExportStatusInProgress_andSourceStreamHasMoreChunksToExport() {
-    ExportPayload exportPayload = new ExportPayload();
-    exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
-    exportPayload.setFileExportDefinition(fileExportDefinition);
-    exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
-
+    //given
+    ExportPayload exportPayload = createExportPayload();
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, true);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
+    //when
     inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.IN_PROGRESS);
 
+    //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
@@ -320,6 +340,14 @@ public class InputDataManagerTest {
       .withFileName(FILE_NAME)
       .withSourcePath(FILE_DIRECTORY + FILE_NAME)
       .withJobExecutionId(JOB_EXECUTION_ID);
+  }
+
+  private ExportPayload createExportPayload() {
+    ExportPayload exportPayload = new ExportPayload();
+    exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
+    exportPayload.setFileExportDefinition(fileExportDefinition);
+    exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
+    return exportPayload;
   }
 
   private Iterator<List<String>> mockIterator() {
