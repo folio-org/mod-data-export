@@ -14,7 +14,7 @@ import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.inputdatamanager.InputDataManager;
-import org.folio.service.manager.status.ExportStatus;
+import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -129,22 +129,23 @@ public class ExportManagerImpl implements ExportManager {
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportStatus status = getExportStatusByResult(asyncResult, exportPayload);
-    getInputDataManager().proceed(exportPayloadJson, status);
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
+    getInputDataManager().proceed(exportPayloadJson, exportResult);
     return succeededFuture();
   }
 
   @NotNull
-  private ExportStatus getExportStatusByResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+  private ExportResult getExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause());
-      return ExportStatus.ERROR;
+      return ExportResult.ERROR;
     } else {
       LOGGER.info("Export has been successfully passed");
+      // update job progress
       if (exportPayload.isLast()) {
-        return ExportStatus.COMPLETED;
+        return ExportResult.COMPLETED;
       } else {
-        return ExportStatus.IN_PROGRESS;
+        return ExportResult.IN_PROGRESS;
       }
     }
   }

@@ -5,7 +5,7 @@ import io.vertx.core.Context;
 import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.folio.service.manager.status.ExportStatus;
+import org.folio.service.manager.exportresult.ExportResult;
 
 @ProxyGen
 public interface InputDataManager {  //NOSONAR
@@ -20,7 +20,7 @@ public interface InputDataManager {  //NOSONAR
   }
 
   /**
-   * Obtain a stream from the file storage that will be used to read uuids for export.
+   * Initialize and start an export process of uuids chunks are read from the file storage
    *
    * @param exportRequest - entity that contains request parameters, such as
    *                      filedefinition, jobProfile, etc.
@@ -32,8 +32,9 @@ public interface InputDataManager {  //NOSONAR
    * Publish the next chunk of uuids to be exported. If there is no more uuids to read,
    * the export is considered completed.
    *
-   * @param exportRequest - entity that contains request parameters, such as
-   *                      filedefinition, jobProfile, etc.
+   * @param payload - payload object that contains a chunk identifiers for export and additional
+   *                  fields such as filedefinition, okapi headers, jobexecutionid etc.
+   * @param exportResult - result status of an export previous payload
    */
-  void proceed(JsonObject exportRequest, ExportStatus status);
+  void proceed(JsonObject payload, ExportResult exportResult);
 }

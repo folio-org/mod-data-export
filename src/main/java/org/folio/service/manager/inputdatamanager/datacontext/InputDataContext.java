@@ -1,25 +1,23 @@
 package org.folio.service.manager.inputdatamanager.datacontext;
 
 import io.vertx.core.shareddata.Shareable;
-import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.rest.jaxrs.model.FileDefinition;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class InputDataContext implements Shareable {
 
-  private Iterator<List<String>> sourceStream;
+  private Iterator<List<String>> fileContentIterator;
 
   public InputDataContext(Iterator<List<String>> sourceStream) {
-    this.sourceStream = sourceStream;
+    this.fileContentIterator = sourceStream;
   }
 
-  public Iterator<List<String>> getSourceStream() {
-    return sourceStream;
+  public Iterator<List<String>> getFileContentIterator() {
+    return fileContentIterator;
   }
 
-  public void setSourceStream(Iterator<List<String>> sourceStream) {
-    this.sourceStream = sourceStream;
+  public void setFileContentIterator(Iterator<List<String>> fileContentIterator) {
+    this.fileContentIterator = fileContentIterator;
   }
 }

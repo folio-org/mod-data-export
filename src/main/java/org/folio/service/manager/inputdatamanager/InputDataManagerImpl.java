@@ -1,6 +1,10 @@
 package org.folio.service.manager.inputdatamanager;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import org.folio.dao.impl.JobExecutionDaoImpl;
@@ -10,7 +14,7 @@ import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
-import org.folio.service.manager.status.ExportStatus;
+import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -38,9 +42,11 @@ class InputDataManagerImpl implements InputDataManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 1;
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
-  public static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
-  public static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
-  public static final String DELIMITER = "-";
+  private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
+  private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
+  private static final String DELIMITER = "-";
+  private static final int BATCH_SIZE = 50;
+
 
   @Autowired
   private SourceReader sourceReader;
@@ -65,7 +71,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   @Override
   public void init(JsonObject request, JsonObject params) {
-    this.executor.executeBlocking(blockingFuture -> initBlocking(request, params), this::handleExportResult);
+    executor.executeBlocking(blockingFuture -> initBlocking(request, params), this::handleExportInitResult);
   }
 
   protected void initBlocking(JsonObject request, JsonObject params) {
@@ -74,55 +80,56 @@ class InputDataManagerImpl implements InputDataManager {
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params.mapTo(Map.class));
     FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
     String tenantId = okapiConnectionParams.getTenantId();
-    Iterator<List<String>> sourceStream = sourceReader.getSourceStream(requestFileDefinition, exportRequest.getBatchSize());
-    if (sourceStream.hasNext()) {
+    Iterator<List<String>> readFileContent = sourceReader.getFileContentIterator(requestFileDefinition, getBatchSize());
+    if (readFileContent.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId)
         .compose(savedFileExportDefinition -> {
-          //TODO
-          //get executionJob and update status to in-progress
+          //get executionJob and update exportresult to in-progress
           String jobExecutionId = requestFileDefinition.getJobExecutionId();
-          initInputDataContext(sourceStream, jobExecutionId);
+          initInputDataContext(readFileContent, jobExecutionId);
           ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
-          exportNextChunk(exportPayload, sourceStream);
+          exportNextChunk(exportPayload, readFileContent);
           return Future.succeededFuture();
         });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      //TODO
-      //update job execution with error status
+      //update job execution with error exportresult
     }
   }
 
   @Override
-  public void proceed(JsonObject payload, ExportStatus exportStatus) {
+  public void proceed(JsonObject payload, ExportResult exportResult) {
+    executor.executeBlocking(blockingFuture -> proceedBlocking(payload, exportResult), this::handleExportResult);
+  }
+
+  protected void proceedBlocking(JsonObject payload, ExportResult exportResult) {
     ExportPayload exportPayload = payload.mapTo(ExportPayload.class);
-    if (ExportStatus.IN_PROGRESS.equals(exportStatus)) {
+    if (ExportResult.IN_PROGRESS.equals(exportResult)) {
       InputDataContext inputDataContext = inputDataLocalMap.get(exportPayload.getJobExecutionId());
-      Iterator<List<String>> sourceStream = inputDataContext.getSourceStream();
-      if (Objects.nonNull(sourceStream) && sourceStream.hasNext()) {
-        exportNextChunk(exportPayload, sourceStream);
+      Iterator<List<String>> fileContentIterator = inputDataContext.getFileContentIterator();
+      if (Objects.nonNull(fileContentIterator) && fileContentIterator.hasNext()) {
+        exportNextChunk(exportPayload, fileContentIterator);
       } else {
-        finalizeExport(exportPayload, ExportStatus.ERROR);
+        finalizeExport(exportPayload, ExportResult.ERROR);
       }
     } else {
-      finalizeExport(exportPayload, exportStatus);
+      finalizeExport(exportPayload, exportResult);
     }
   }
 
-  private void exportNextChunk(ExportPayload exportPayload, Iterator<List<String>> sourceStream) {
-    List<String> identifiers = sourceStream.next();
+  private void exportNextChunk(ExportPayload exportPayload, Iterator<List<String>> fileContentIterator) {
+    List<String> identifiers = fileContentIterator.next();
     exportPayload.setIdentifiers(identifiers);
-    exportPayload.setLast(!sourceStream.hasNext());
+    exportPayload.setLast(!fileContentIterator.hasNext());
     getExportManager().exportData(JsonObject.mapFrom(exportPayload));
   }
 
-  private void finalizeExport(ExportPayload exportPayload, ExportStatus exportStatus) {
-    //TODO
+  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult) {
     //update jobExecution status to Failed
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
-    if (ExportStatus.COMPLETED.equals(exportStatus))
+    if (ExportResult.COMPLETED.equals(exportResult))
       fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
-    if (ExportStatus.ERROR.equals(exportStatus))
+    if (ExportResult.ERROR.equals(exportResult))
       fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     fileDefinitionService.update(fileExportDefinition, tenantId)
@@ -138,11 +145,20 @@ class InputDataManagerImpl implements InputDataManager {
     return vertx.getOrCreateContext().get(ExportManager.class.getName());
   }
 
+  private Future<Void> handleExportInitResult(AsyncResult asyncResult) {
+    if (asyncResult.failed()) {
+      LOGGER.error("Initialization of export is failed, cause: {}", asyncResult.cause());
+    } else {
+      LOGGER.info("Initialization of export has been successfully completed");
+    }
+    return succeededFuture();
+  }
+
   private Future<Void> handleExportResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export is failed, cause: " + asyncResult.cause());
+      LOGGER.error("Export of identifiers chunk is failed, cause: {}", asyncResult.cause());
     } else {
-      LOGGER.info("Export has been successfully completed");
+      LOGGER.info("Export of identifiers chunk has been successfully completed");
     }
     return succeededFuture();
   }
@@ -167,9 +183,13 @@ class InputDataManagerImpl implements InputDataManager {
     return now.format(formatter);
   }
 
-  private void initInputDataContext(Iterator<List<String>> sourceStream, String jobExecutionId) {
-    InputDataContext inputDataContext = new InputDataContext(sourceStream);
+  private void initInputDataContext(Iterator<List<String>> fileContentIterator, String jobExecutionId) {
+    InputDataContext inputDataContext = new InputDataContext(fileContentIterator);
     inputDataLocalMap.put(jobExecutionId, inputDataContext);
+  }
+
+  protected int getBatchSize() {
+    return BATCH_SIZE;
   }
 
 }

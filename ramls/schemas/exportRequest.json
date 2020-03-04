@@ -4,11 +4,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "batchSize": {
-      "type": "integer",
-      "description": "the size of batch of uuids to process at a time",
-      "default": "50"
-    },
     "fileDefinition": {
       "description": "File definition",
       "type": "object",

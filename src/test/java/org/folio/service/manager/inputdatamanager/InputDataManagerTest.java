@@ -17,7 +17,7 @@ import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
-import org.folio.service.manager.status.ExportStatus;
+import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
@@ -110,7 +110,6 @@ public class InputDataManagerTest {
   private ArgumentCaptor<InputDataContext> inputDataContextCaptor;
 
   private ExportRequest exportRequest;
-  private String[] expectedIdentifiers;
   private FileDefinition requestFileDefinition;
   private Map<String, String> requestParams;
   private FileDefinition fileExportDefinition;
@@ -126,13 +125,14 @@ public class InputDataManagerTest {
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(requestParamsJson.mapTo(Map.class)).thenReturn(requestParams);
     doReturn(exportManager).when(inputDataManager).getExportManager();
+    doReturn(2).when(inputDataManager).getBatchSize();
   }
 
   @Test
   public void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
-    when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
+    when(sourceReader.getFileContentIterator(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(false);
 
     //when
@@ -150,7 +150,7 @@ public class InputDataManagerTest {
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
-    when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
+    when(sourceReader.getFileContentIterator(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
@@ -160,14 +160,14 @@ public class InputDataManagerTest {
     //then
     verify(inputDataLocalMap).put(eq(JOB_EXECUTION_ID), inputDataContextCaptor.capture());
     InputDataContext inputDataContext = inputDataContextCaptor.getValue();
-    assertThat(inputDataContext.getSourceStream(), equalTo(sourceStream));
+    assertThat(inputDataContext.getFileContentIterator(), equalTo(sourceStream));
   }
 
   @Test
   public void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
-    when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
+    when(sourceReader.getFileContentIterator(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, false);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
@@ -184,10 +184,10 @@ public class InputDataManagerTest {
   public void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
-    when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
+    when(sourceReader.getFileContentIterator(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, false);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
-    when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
+    when(inputDataContext.getFileContentIterator()).thenReturn(sourceStream);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
     //when
@@ -207,10 +207,10 @@ public class InputDataManagerTest {
   public void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
-    when(sourceReader.getSourceStream(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
+    when(sourceReader.getFileContentIterator(requestFileDefinition, BATCH_SIZE)).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, true);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
-    when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
+    when(inputDataContext.getFileContentIterator()).thenReturn(sourceStream);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
     //when
@@ -235,7 +235,7 @@ public class InputDataManagerTest {
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
 
     //when
-    inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.ERROR);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.ERROR);
 
     //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
@@ -252,7 +252,7 @@ public class InputDataManagerTest {
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
 
     //when
-    inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.COMPLETED);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.COMPLETED);
 
     //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
@@ -267,10 +267,10 @@ public class InputDataManagerTest {
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
-    when(inputDataContext.getSourceStream()).thenReturn(null);
+    when(inputDataContext.getFileContentIterator()).thenReturn(null);
 
     //when
-    inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
 
     //then
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
@@ -283,12 +283,12 @@ public class InputDataManagerTest {
     //given
     ExportPayload exportPayload = createExportPayload();
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
-    when(inputDataContext.getSourceStream()).thenReturn(sourceStream);
+    when(inputDataContext.getFileContentIterator()).thenReturn(sourceStream);
     when(sourceStream.hasNext()).thenReturn(true, true);
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.proceed(JsonObject.mapFrom(exportPayload), ExportStatus.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -326,8 +326,7 @@ public class InputDataManagerTest {
 
   private ExportRequest createExportRequest() {
     return new ExportRequest()
-      .withFileDefinition(requestFileDefinition)
-      .withBatchSize(BATCH_SIZE);
+      .withFileDefinition(requestFileDefinition);
   }
 
   private FileDefinition createFileExportDefinition() {

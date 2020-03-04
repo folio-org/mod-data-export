@@ -5,7 +5,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.UpdateResult;
-import org.apache.commons.lang3.time.TimeZones;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.persist.Criteria.Criteria;
@@ -14,26 +13,23 @@ import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 
 import static org.drools.core.util.StringUtils.EMPTY;
 
 @Repository
 public class FileDefinitionDaoImpl implements FileDefinitionDao {
-  public static final String SOURCE_PATH_FIELD = "'sourcePath'";
-  public static final String NOT_EQUAL_OPERATION = "<>";
-  public static final String METADATA_FIELD = "'metadata'";
-  public static final String UPDATED_DATE_FIELD = "'updatedDate'";
-  public static final String LESS_OR_EQUAL_OPERATION = "<=";
-  public static final String AND_OPERATION = "AND";
+  private static final String SOURCE_PATH_FIELD = "'sourcePath'";
+  private static final String NOT_EQUAL_OPERATION = "<>";
+  private static final String METADATA_FIELD = "'metadata'";
+  private static final String UPDATED_DATE_FIELD = "'updatedDate'";
+  private static final String LESS_OR_EQUAL_OPERATION = "<=";
+  private static final String AND_OPERATION = "AND";
   private final Logger logger = LoggerFactory.getLogger(FileDefinitionDaoImpl.class);
   private static final String TABLE = "file_definitions";
   private static final String ID_FIELD = "'id'";
-  private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
   private PostgresClientFactory pgClientFactory;
 

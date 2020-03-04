@@ -14,7 +14,6 @@ import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -73,7 +72,6 @@ public class ExportManagerTest extends RestVerticleTestBase {
     // when
     ExportRequest exportRequest = new ExportRequest()
       .withFileDefinition(uploadedFileDefinition)
-      .withBatchSize(2)
       .withJobProfile(new JobProfile()
         .withId(UUID.randomUUID().toString())
         .withDestination("fileSystem")
