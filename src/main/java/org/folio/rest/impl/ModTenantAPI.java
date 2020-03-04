@@ -11,6 +11,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.service.cleanup.StorageCleanupService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
+import org.folio.util.TenantUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
@@ -37,9 +38,14 @@ public class ModTenantAPI extends TenantAPI {
         handlers.handle(asyncResult);
       } else {
         initStorageCleanupService(headers, context);
+        initializeTenant(entity);
         handlers.handle(asyncResult);
       }
     }, context);
+  }
+
+  private void initializeTenant(TenantAttributes entity) {
+    TenantUtils
   }
 
   private void initStorageCleanupService(Map<String, String> headers, Context context) {
