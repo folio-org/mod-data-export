@@ -9,6 +9,7 @@ import io.vertx.serviceproxy.ServiceBinder;
 import org.folio.config.ApplicationConfig;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.service.manager.exportmanager.ExportManager;
+import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.spring.SpringContextUtil;
 
 public class InitAPIImpl implements InitAPI {
@@ -22,7 +23,7 @@ public class InitAPIImpl implements InitAPI {
       },
       result -> {
         if (result.succeeded()) {
-          registerExportManager(context);
+          registerProxies(context);
           handler.handle(Future.succeededFuture(true));
         } else {
           handler.handle(Future.failedFuture(result.cause()));
@@ -30,9 +31,17 @@ public class InitAPIImpl implements InitAPI {
       });
   }
 
-  private void registerExportManager(Context context) {
+  private void registerProxies(Context context) {
+    ExportManager exportManager = ExportManager.create(context);
     new ServiceBinder(context.owner())
       .setAddress(ExportManager.EXPORT_MANAGER_ADDRESS)
-      .register(ExportManager.class, ExportManager.create(context));
+      .register(ExportManager.class, exportManager);
+    context.put(ExportManager.class.getName(), exportManager);
+
+    InputDataManager inputDataManager = InputDataManager.create(context);
+    new ServiceBinder(context.owner())
+      .setAddress(InputDataManager.INPUT_DATA_MANAGER_ADDRESS)
+      .register(InputDataManager.class, inputDataManager);
+    context.put(InputDataManager.class.getName(), inputDataManager);
   }
 }

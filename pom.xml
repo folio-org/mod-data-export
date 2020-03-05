@@ -26,6 +26,8 @@
     <sonar.exclusions>**/OkapiConnectionParams.java</sonar.exclusions>
     <sonar.exclusions>**/ModTenantAPI.java</sonar.exclusions>
     <sonar.exclusions>**/ExportPayload.java</sonar.exclusions>
+    <sonar.exclusions>**/InputDataContext.java</sonar.exclusions>
+    <sonar.exclusions>**/InitAPIImpl.java</sonar.exclusions>
   </properties>
 
   <dependencies>
