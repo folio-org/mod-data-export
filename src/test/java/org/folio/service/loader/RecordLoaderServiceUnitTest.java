@@ -37,7 +37,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() throws IOException {
-    String json = IOUtils.toString(new FileReader("src/test/resources/marc_records.json"));
+    String json = IOUtils.toString(new FileReader("src/test/resources/srsResponse.json"));
     JsonObject data = new JsonObject(json);
     router.route("/source-storage/records").handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
@@ -55,7 +55,6 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
-    assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasItems("812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content", "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"));
   }
 
   @Test
