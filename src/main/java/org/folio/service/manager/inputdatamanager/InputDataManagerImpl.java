@@ -45,7 +45,7 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
   private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
   private static final String DELIMITER = "-";
-  private static final int BATCH_SIZE = 1;
+  private static final int BATCH_SIZE = 50;
 
 
   @Autowired
