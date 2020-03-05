@@ -41,7 +41,7 @@ public abstract class SynchronousOkapiClient {
   }
 
   protected void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
-    requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getOkapiUrl());
+    requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getToken());
     requestBase.setHeader(OKAPI_HEADER_TENANT, params.getTenantId());
     requestBase.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     requestBase.setHeader((HttpHeaders.ACCEPT), MediaType.APPLICATION_JSON);

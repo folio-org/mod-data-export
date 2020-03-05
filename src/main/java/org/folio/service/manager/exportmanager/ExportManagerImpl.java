@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -62,7 +63,10 @@ public class ExportManagerImpl implements ExportManager {
   @Override
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
-    this.executor.executeBlocking(blockingFuture -> exportBlocking(exportPayload), ar -> handleExportResult(ar, exportPayload));
+    this.executor.executeBlocking(blockingFuture -> {
+      exportBlocking(exportPayload);
+      blockingFuture.complete();
+    }, ar -> handleExportResult(ar, exportPayload));
   }
 
   /**
@@ -128,21 +132,26 @@ public class ExportManagerImpl implements ExportManager {
    * @return return future
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+    clearIdentifiers(exportPayload);
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     getInputDataManager().proceed(exportPayloadJson, exportResult);
     return succeededFuture();
   }
 
+  private void clearIdentifiers(ExportPayload exportPayload) {
+    exportPayload.setIdentifiers(Collections.emptyList());
+  }
+
   @NotNull
-  private ExportResult getExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+  private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause());
       return ExportResult.ERROR;
     } else {
       LOGGER.info("Export has been successfully passed");
       // update job progress
-      if (exportPayload.isLast()) {
+      if (isLast) {
         return ExportResult.COMPLETED;
       } else {
         return ExportResult.IN_PROGRESS;

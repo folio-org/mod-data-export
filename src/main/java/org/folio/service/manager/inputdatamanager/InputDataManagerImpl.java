@@ -45,7 +45,7 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
   private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
   private static final String DELIMITER = "-";
-  private static final int BATCH_SIZE = 50;
+  private static final int BATCH_SIZE = 1;
 
 
   @Autowired
@@ -71,7 +71,10 @@ class InputDataManagerImpl implements InputDataManager {
 
   @Override
   public void init(JsonObject request, JsonObject params) {
-    executor.executeBlocking(blockingFuture -> initBlocking(request, params), this::handleExportInitResult);
+    executor.executeBlocking(blockingFuture -> {
+      initBlocking(request, params);
+      blockingFuture.complete();
+    }, this::handleExportInitResult);
   }
 
   protected void initBlocking(JsonObject request, JsonObject params) {
@@ -99,7 +102,10 @@ class InputDataManagerImpl implements InputDataManager {
 
   @Override
   public void proceed(JsonObject payload, ExportResult exportResult) {
-    executor.executeBlocking(blockingFuture -> proceedBlocking(payload, exportResult), this::handleExportResult);
+    executor.executeBlocking(blockingFuture -> {
+      proceedBlocking(payload, exportResult);
+      blockingFuture.complete();
+    }, this::handleExportResult);
   }
 
   protected void proceedBlocking(JsonObject payload, ExportResult exportResult) {
