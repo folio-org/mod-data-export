@@ -10,6 +10,12 @@
       "tableName" : "job_executions",
       "fromModuleVersion": "mod-data-export-1.0.0",
       "withAuditing": false
+    },
+    {
+      "tableName" : "bucket",
+      "fromModuleVersion": "mod-data-export-1.0.0",
+      "withAuditing": false,
+      "withMetadata": false
     }
   ]
 }

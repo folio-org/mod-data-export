@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "AWS S3 bucket names for tenants",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "bucketName": {
+      "description": "AWS S3 bucket name for tenant",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "bucketName"
+  ]
+}
