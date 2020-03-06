@@ -13,6 +13,13 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 FOLIO data export module.
 
+#### Important notes
+
+We are using S3 to store exported MARC files. This means that it is expected that AWS credentials are properly configured in a hosting environment as per:
+https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
+
+Each tenant will have its own bucket created by the system with the name in the following format:`$tenantId-export-$randomUUID`
+
 ## Compiling
 
 ```
