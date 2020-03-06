@@ -48,7 +48,7 @@ public class ModTenantAPI extends TenantAPI {
         context.owner().executeBlocking(blockingFuture -> {
           initStorageCleanupService(headers, context);
           String tenantId = TenantTool.calculateTenantId(headers.get(OKAPI_HEADER_TENANT));
-          final Future<Void> future = initializeS3BucketForTenant(tenantId);
+          final Future<String> future = initializeS3BucketForTenant(tenantId);
           future.setHandler(ar -> blockingFuture.complete(future));
         }, ar -> {
           if (ar.failed()) {
@@ -62,7 +62,7 @@ public class ModTenantAPI extends TenantAPI {
     }, context);
   }
 
-  private Future<Void> initializeS3BucketForTenant(String tenantId) {
+  private Future<String> initializeS3BucketForTenant(String tenantId) {
     return awsService.setUpS33BucketForTenant(tenantId);
   }
 

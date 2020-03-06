@@ -8,9 +8,10 @@ import io.vertx.core.Future;
 public interface AwsService {
 
   /**
-   * Create a bucket in S3
+   * Create a bucket in S3. Each tenant will have its own bucket created by the system.
    *
-   * @param tenantId - tenant id is used in a part of the name for the bucket to be created
+   * @param tenantId - tenant id is used in a part of the name for the bucket to be created: $tenantId-export-$randomUUID
+   * @return Succeeded future with newly created bucket name. Returns failed future in case of any errors in bucket creation in AWS.
    */
-  Future<Void> setUpS33BucketForTenant(String tenantId);
+  Future<String> setUpS33BucketForTenant(String tenantId);
 }

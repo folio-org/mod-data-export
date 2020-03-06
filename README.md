@@ -20,6 +20,8 @@ https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.ht
 
 Each tenant will have its own bucket created by the system with the name in the following format:`$tenantId-export-$randomUUID`
 
+There are plans to have hosting agnostic implementation available in 2020 Q2.
+
 ## Compiling
 
 ```
