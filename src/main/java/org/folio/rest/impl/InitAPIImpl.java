@@ -32,16 +32,16 @@ public class InitAPIImpl implements InitAPI {
   }
 
   private void registerProxies(Context context) {
-    ExportManager exportManager = ExportManager.create(context);
+    InputDataManager inputDataManagerProxy = InputDataManager.createProxy(context.owner());
+    ExportManager exportManagerProxy = ExportManager.createProxy(context.owner());
+    context.put(InputDataManager.class.getName(), inputDataManagerProxy);
+    context.put(ExportManager.class.getName(), exportManagerProxy);
+
     new ServiceBinder(context.owner())
       .setAddress(ExportManager.EXPORT_MANAGER_ADDRESS)
-      .register(ExportManager.class, exportManager);
-    context.put(ExportManager.class.getName(), exportManager);
-
-    InputDataManager inputDataManager = InputDataManager.create(context);
+      .register(ExportManager.class,  ExportManager.create(context));
     new ServiceBinder(context.owner())
       .setAddress(InputDataManager.INPUT_DATA_MANAGER_ADDRESS)
-      .register(InputDataManager.class, inputDataManager);
-    context.put(InputDataManager.class.getName(), inputDataManager);
+      .register(InputDataManager.class,  InputDataManager.create(context));
   }
 }
