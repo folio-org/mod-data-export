@@ -4,6 +4,7 @@ package org.folio.service.export;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.export.impl.LocalFileSystemExportService;
 import org.folio.service.upload.storage.FileStorage;
 import org.junit.Test;
 import org.junit.runner.RunWith;

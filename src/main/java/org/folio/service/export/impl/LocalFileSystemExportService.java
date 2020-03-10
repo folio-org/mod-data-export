@@ -1,7 +1,8 @@
-package org.folio.service.export;
+package org.folio.service.export.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.export.ExportService;
 import org.folio.service.upload.storage.FileStorage;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcReader;

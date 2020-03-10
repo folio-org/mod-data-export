@@ -1,10 +1,10 @@
-package org.folio.service.storage.aws;
+package org.folio.service.export;
 
 import org.folio.rest.jaxrs.model.Bucket;
 
 import com.amazonaws.SdkClientException;
 
-public interface FolioAwsClient {
+public interface AmazonClient {
 
   /**
    * Create a bucket in S3.

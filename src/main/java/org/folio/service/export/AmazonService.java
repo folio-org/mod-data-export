@@ -1,11 +1,11 @@
-package org.folio.service.storage.aws;
+package org.folio.service.export;
 
 import io.vertx.core.Future;
 
 /**
  * Utility service to interact with AWS
  */
-public interface AwsService {
+public interface AmazonService {
 
   /**
    * Create a bucket in S3. Each tenant will have its own bucket created by the system.

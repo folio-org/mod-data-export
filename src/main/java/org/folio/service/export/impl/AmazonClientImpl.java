@@ -1,9 +1,9 @@
-package org.folio.service.storage.aws.impl;
+package org.folio.service.export.impl;
 
 import java.lang.invoke.MethodHandles;
 
 import org.folio.rest.jaxrs.model.Bucket;
-import org.folio.service.storage.aws.FolioAwsClient;
+import org.folio.service.export.AmazonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 @Service
-public class FolioAwsClientImpl implements FolioAwsClient {
+public class AmazonClientImpl implements AmazonClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

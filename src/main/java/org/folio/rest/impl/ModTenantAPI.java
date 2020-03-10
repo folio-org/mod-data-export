@@ -10,7 +10,8 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.cleanup.StorageCleanupService;
-import org.folio.service.storage.aws.AwsService;
+
+import org.folio.service.export.AmazonService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class ModTenantAPI extends TenantAPI {
   @Autowired
   private StorageCleanupService storageCleanupService;
   @Autowired
-  AwsService awsService;
+  AmazonService amazonService;
 
   public ModTenantAPI() { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -63,7 +64,7 @@ public class ModTenantAPI extends TenantAPI {
   }
 
   private Future<String> initializeS3BucketForTenant(String tenantId) {
-    return awsService.setUpS33BucketForTenant(tenantId);
+    return amazonService.setUpS33BucketForTenant(tenantId);
   }
 
   private void initStorageCleanupService(Map<String, String> headers, Context context) {

@@ -1,13 +1,12 @@
-package org.folio.service.storage.aws.impl;
+package org.folio.service.export.impl;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.dao.BucketDao;
 import org.folio.rest.jaxrs.model.Bucket;
-import org.folio.service.storage.aws.AwsService;
-import org.folio.service.storage.aws.FolioAwsClient;
+import org.folio.service.export.AmazonService;
+import org.folio.service.export.AmazonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +18,16 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
 @Service
-public class AwsServiceImpl implements AwsService {
+public class AmazonServiceImpl implements AmazonService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String BUCKET_NAME_SUFFIX = "export";
-  private final FolioAwsClient folioAwsClient;
+  private final AmazonClient amazonClient;
   private final BucketDao bucketDao;
 
-  public AwsServiceImpl(@Autowired BucketDao bucketDao, @Autowired FolioAwsClient folioAwsClient) {
+  public AmazonServiceImpl(@Autowired BucketDao bucketDao, @Autowired AmazonClient amazonClient) {
     this.bucketDao = bucketDao;
-    this.folioAwsClient = folioAwsClient;
+    this.amazonClient = amazonClient;
   }
 
   @Override
@@ -40,7 +39,7 @@ public class AwsServiceImpl implements AwsService {
         LOGGER.info("Creating S3 bucket for tenant {}", bucketName);
         final Bucket s3Bucket;
         try {
-          s3Bucket = folioAwsClient.createS3Bucket(bucketName);
+          s3Bucket = amazonClient.createS3Bucket(bucketName);
           bucketDao.save(tenantId, s3Bucket);
           promise.complete(s3Bucket.getBucketName());
         } catch (SdkClientException e) {
