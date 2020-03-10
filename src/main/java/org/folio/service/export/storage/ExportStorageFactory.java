@@ -13,25 +13,9 @@ public class ExportStorageFactory {
 
   @Autowired
   private AmazonClient amazonClient;
+
   public ExportStorageService getExportStorageImplementation(String type) {
-    ExportStorageService ret;
-
-    if (type == null)
-      type = "";
-
-    //add additional implementations later
-    switch (type) {
-      case "AWSS3":
-        ret = new AWSStorageServiceImpl(amazonClient);
-        break;
-      default:
-        ret = new AWSStorageServiceImpl(amazonClient);
-    }
-
-
-    LOGGER.info(String.format("type: %s, class: %s", type, ret.getClass()
-      .getName()));
-    return ret;
+    return new AWSStorageServiceImpl(amazonClient);
   }
 
 }

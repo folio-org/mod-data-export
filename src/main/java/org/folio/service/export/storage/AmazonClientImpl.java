@@ -3,6 +3,7 @@ package org.folio.service.export.storage;
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
+import java.nio.file.Paths;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class AmazonClientImpl implements AmazonClient {
     try {
       LOGGER.info("Uploading files to {}", bucketName);
       MultipleFileUpload xfer = xfer_mgr.uploadDirectory(bucketName, "data-export",
-        new File(fileDefinition.getSourcePath()), false);
+        Paths.get(fileDefinition.getSourcePath()).getParent().toFile(), false);
 
       xfer.waitForCompletion();
     } catch (AmazonServiceException e) {
