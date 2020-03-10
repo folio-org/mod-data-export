@@ -15,10 +15,8 @@ FOLIO data export module.
 
 #### Important notes
 
-We are using S3 to store exported MARC files. This means that it is expected that AWS credentials are properly configured in a hosting environment as per:
-https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
-
-Each tenant will have its own bucket created by the system with the name in the following format:`$tenantId-export-$randomUUID`
+For Q1 release, we are using S3 to store the exported MARC files. This means that it is expected that AWS credentials are properly configured in a hosting environment as per:
+https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html. The module also expects the bucket name to be passed in the system variable `bucket.name`
 
 There are plans to have hosting agnostic implementation available in 2020 Q2.
 
