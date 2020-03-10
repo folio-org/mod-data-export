@@ -3,7 +3,7 @@
 title: Data export
 version: v1.0
 protocols: [ HTTP, HTTPS ]
-baseUri: http://localhost
+baseUri: https://github.com/folio-org/mod-data-export
 
 documentation:
   - title: Data export API
@@ -15,6 +15,7 @@ types:
   exportRequest: !include schemas/exportRequest.json
   jobExecutionCollection: !include schemas/jobExecutionCollection.json
   jobExecution: !include schemas/jobExecution.json
+  fileDownload: !include schemas/fileDownload.json
 
 traits:
   validate: !include raml-util/traits/validation.raml
@@ -68,80 +69,26 @@ resourceTypes:
         pageable,
         validate
       ]
-  /fileDefinitions:
-    displayName: File upload service
-    description: Service provides file uploading API
-    post:
-      description: Method to create file definition to use it for the file uploading
-      is: [validate]
-      body:
-        application/json:
-          type: fileDefinition
-      responses:
-        201:
-          body:
-            application/json:
-              type: fileDefinition
-        400:
-          description: "Bad request"
-          body:
-            text/plain:
-              example: "Bad request"
-        422:
-          description: "Unprocessable Entity"
-          body:
-            application/json:
-              type: errors
-        500:
-          description: "Internal server error"
-          body:
-            text/plain:
-              example: "Internal server error"
-    /{fileDefinitionId}:
-      get:
-        description: Method to get file definition by id
-        responses:
-          200:
-            body:
-              application/json:
-                type: fileDefinition
-          400:
-            description: "Bad request"
-            body:
-              text/plain:
-                example: "Bad request"
-          404:
-            description: "Not found"
-            body:
-              text/plain:
-                example: "Not found"
-          500:
-            description: "Internal server error"
-            body:
-              text/plain:
-                example: "Internal server error"
-      /upload:
-        post:
-          description: Method to upload file
-          body:
-              application/octet-stream:
-          responses:
-            200:
-              body:
-                application/json:
-                  type: fileDefinition
-            400:
-              description: "Bad request"
-              body:
-                text/plain:
-                  example: "Bad request"
-            404:
-              description: "Not found"
-              body:
-                text/plain:
-                  example: "Not found"
-            500:
-              description: "Internal server error"
-              body:
-                text/plain:
-                  example: "Internal server error"
+    /{jobId}/download/{exportFileId}:
+       displayName: File Download Link
+       description: API for getting the link to download files
+       get:
+         responses:
+           200:
+             body:
+               application/json:
+                 type: fileDownload
+                 example:
+                   value: !include samples/fileDownload.sample
+           400:
+             description: "Bad request, e.g. malformed request body or query parameter"
+             body:
+               text/plain:
+                 example: "Unable to generate purchase order line number"
+           500:
+             description: "Internal server error, e.g. due to misconfiguration"
+             body:
+               text/plain:
+                 example: "Internal server error, contact Administrator"
+
+   

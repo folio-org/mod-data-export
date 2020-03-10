@@ -7,7 +7,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
-import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.manager.exportmanager.ExportManager;
@@ -36,7 +35,6 @@ import static io.vertx.core.Future.succeededFuture;
 /**
  * Acts a source of a uuids to be exported.
  */
-@SuppressWarnings({"java:S1172", "java:S125"})
 @Service
 class InputDataManagerImpl implements InputDataManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -50,8 +48,6 @@ class InputDataManagerImpl implements InputDataManager {
 
   @Autowired
   private SourceReader sourceReader;
-  @Autowired
-  private JobExecutionDaoImpl jobExecutionDao;
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
@@ -70,17 +66,17 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, JsonObject params) {
+  public void init(JsonObject request, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
       initBlocking(request, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject params) {
+  protected void initBlocking(JsonObject request, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     FileDefinition requestFileDefinition = exportRequest.getFileDefinition();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params.mapTo(Map.class));
+    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
     String tenantId = okapiConnectionParams.getTenantId();
     Iterator<List<String>> readFileContent = sourceReader.getFileContentIterator(requestFileDefinition, getBatchSize());

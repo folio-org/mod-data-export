@@ -123,7 +123,6 @@ public class InputDataManagerTest {
     exportRequest = createExportRequest();
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
-    when(requestParamsJson.mapTo(Map.class)).thenReturn(requestParams);
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
   }
@@ -136,7 +135,7 @@ public class InputDataManagerTest {
     when(sourceStream.hasNext()).thenReturn(false);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
@@ -155,7 +154,7 @@ public class InputDataManagerTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
     verify(inputDataLocalMap).put(eq(JOB_EXECUTION_ID), inputDataContextCaptor.capture());
@@ -172,7 +171,7 @@ public class InputDataManagerTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
@@ -191,7 +190,7 @@ public class InputDataManagerTest {
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -214,7 +213,7 @@ public class InputDataManagerTest {
     when(sourceStream.next()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParamsJson);
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());

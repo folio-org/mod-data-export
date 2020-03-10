@@ -2,6 +2,7 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
+import java.util.Optional;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
@@ -26,4 +27,12 @@ public interface JobExecutionService {
    * @return future with JobExecutionCollection
    */
   Future<JobExecution> save(JobExecution jobExecution, String tenantId);
+
+  /**
+   *
+   * @param jobExecution
+   * @param tenantId
+   * @return
+   */
+  Future<Optional<JobExecution>> getById(String jobId, String tenantId);
 }
