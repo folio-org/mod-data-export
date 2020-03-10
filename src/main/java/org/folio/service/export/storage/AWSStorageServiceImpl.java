@@ -1,24 +1,14 @@
 package org.folio.service.export.storage;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-
-import java.io.File;
-import java.net.URL;
 import java.util.Date;
 
-import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import org.drools.core.util.StringUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.service.export.AmazonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.amazonaws.HttpMethod;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 
 /**
  * Retrieve files that are stored in AWS S3
@@ -29,15 +19,15 @@ public class AWSStorageServiceImpl implements ExportStorageService {
 
   private final AmazonClient amazonClient;
 
-  public AWSStorageServiceImpl( @Autowired AmazonClient amazonClient) {
+  public AWSStorageServiceImpl(@Autowired AmazonClient amazonClient) {
     this.amazonClient = amazonClient;
   }
 
   /**
    * Fetch the link to download a file for a given job by fileName
    *
-   * @param          jobId: The job to which the files are associated
-   * @param          fileName: The name of the file to download
+   * @param jobId:    The job to which the files are associated
+   * @param fileName: The name of the file to download
    * @param tenantId
    * @return A link using which the file can be downloaded
    */
@@ -48,10 +38,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(System.getProperty("bucket.name"),
       keyName).withMethod(HttpMethod.GET)
       .withExpiration(getExpiration());
-    URL url = amazonClient.generatePresignedUrl(generatePresignedUrlRequest);
-
-    return url.toString();
-
+    return amazonClient.generatePresignedUrl(generatePresignedUrlRequest).toString();
   }
 
   private Date getExpiration() {
@@ -69,9 +56,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     if (StringUtils.isEmpty(bucketName)) {
       throw new RuntimeException("S3 bucket name is not defined. Please set the bucket.name system property");
     }
-    amazonClient.saveFilesUsingTransferManager(bucketName, fileDefinition);
+    amazonClient.storeFile(bucketName, fileDefinition);
   }
-
 
 
 }

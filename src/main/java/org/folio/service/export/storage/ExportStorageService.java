@@ -22,5 +22,4 @@ public interface ExportStorageService {
 
   void storeFile(FileDefinition fileDefinition);
 
-
 }

@@ -1,5 +1,10 @@
 package org.folio.service.export;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageFactory;
@@ -13,13 +18,10 @@ import org.marc4j.marc.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
+  private final String AWS_KEY = "AWSS3";
   @Autowired
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
@@ -39,7 +41,7 @@ public class LocalFileSystemExportService implements ExportService {
   /**
    * Converts incoming marc record from json format to raw format
    * @param jsonRecord json record
-   * @return  array of bytes
+   * @return array of bytes
    */
   private byte[] convertJsonRecordToMarcRecord(String jsonRecord) {
     MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
@@ -54,7 +56,7 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition) {
-    ExportStorageService exportStorageService = exportStorageFactory.getExportStorageImplementation("AWSS3");
+    ExportStorageService exportStorageService = exportStorageFactory.getExportStorageImplementation(AWS_KEY);
     exportStorageService.storeFile(fileDefinition);
   }
 }
