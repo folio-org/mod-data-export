@@ -5,20 +5,26 @@ import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.util.ExceptionToResponseMapper.map;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
 
-import io.vertx.core.*;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import java.io.InputStream;
 import java.util.Map;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.upload.FileUploadService;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCodes;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -93,7 +99,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
       .map(optionalDefinition -> optionalDefinition
-        .orElseThrow(() -> new NotFoundException(String.format("File definition with id [%s] is not found", fileDefinitionId))))
+        .orElseThrow(() -> new HttpException(404, ErrorCodes.FILE_DEFINITION_NOT_FOUND)))
       .map(GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

@@ -10,9 +10,10 @@ public class ExportStorageFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 
-  public ExportStorageService getExportStorageImplementation(String type) {
+  public ExportStorageService getExportStorageImplementation() {
     ExportStorageService ret;
 
+    String type = System.getProperty("file.storage");
     if (type == null)
       type = "";
 

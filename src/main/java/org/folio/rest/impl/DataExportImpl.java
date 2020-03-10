@@ -75,11 +75,11 @@ public class DataExportImpl implements DataExport {
 
   @Override
   @Validate
-  public void getDataExportJobExecutionsDownloadByJobIdAndExportFileId(String jobId, String exportFileId,
+  public void getDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileId(String jobId, String exportFileId,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     succeededFuture().compose(ar -> fetchLink(jobId,exportFileId))
-      .map(GetDataExportJobExecutionsDownloadByJobIdAndExportFileIdResponse::respond200WithApplicationJson)
+      .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
@@ -87,7 +87,7 @@ public class DataExportImpl implements DataExport {
 
 
   private Future<FileDownload> fetchLink(String jobId, String exportFileId) {
-    ExportStorageService expService = exportStorageFactory.getExportStorageImplementation(System.getProperty("file.storage"));
+    ExportStorageService expService = exportStorageFactory.getExportStorageImplementation();
     Promise<FileDownload> promise = Promise.promise();
     String link;
     try {
@@ -102,5 +102,6 @@ public class DataExportImpl implements DataExport {
 
     return promise.future();
   }
+
 
 }

@@ -26,12 +26,12 @@ public class InitAPIImpl implements InitAPI {
     vertx.executeBlocking(
       future -> {
         SpringContextUtil.init(vertx, context, ApplicationConfig.class);
+        registerProxies(context);
+        initializeSystemProperties(handler);
         future.complete();
       },
       result -> {
         if (result.succeeded()) {
-          registerProxies(context);
-          initializeSystemProperties(handler);
           handler.handle(Future.succeededFuture(true));
         } else {
           handler.handle(Future.failedFuture(result.cause()));

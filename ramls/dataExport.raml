@@ -69,7 +69,7 @@ resourceTypes:
         pageable,
         validate
       ]
-    /{jobId}/download/{exportFileId}:
+    /{jobExecutionId}/download/{exportFileId}:
        displayName: File Download Link
        description: API for getting the link to download files
        get:
@@ -84,7 +84,7 @@ resourceTypes:
              description: "Bad request, e.g. malformed request body or query parameter"
              body:
                text/plain:
-                 example: "Unable to generate purchase order line number"
+                 example: "Bad request"
            500:
              description: "Internal server error, e.g. due to misconfiguration"
              body:
