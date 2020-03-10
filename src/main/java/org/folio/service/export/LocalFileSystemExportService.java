@@ -2,6 +2,8 @@ package org.folio.service.export;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.export.storage.ExportStorageFactory;
+import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.upload.storage.FileStorage;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcReader;
@@ -21,6 +23,8 @@ public class LocalFileSystemExportService implements ExportService {
   @Autowired
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
+  @Autowired
+  private ExportStorageFactory exportStorageFactory;
 
   @Override
   public void export(List<String> jsonRecords, FileDefinition fileDefinition) {
@@ -50,6 +54,7 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition) {
-    // copy file to S3
+    ExportStorageService exportStorageService = exportStorageFactory.getExportStorageImplementation("AWSS3");
+    exportStorageService.storeFile(fileDefinition);
   }
 }
