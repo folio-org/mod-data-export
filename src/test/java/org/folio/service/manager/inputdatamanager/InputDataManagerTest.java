@@ -142,7 +142,7 @@ public class InputDataManagerTest {
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
-    assertThat(fileDefinition.getFileName(), equalTo(FILE_NAME + DELIMETER + TIMESTAMP));
+    assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP));
   }
 
 
