@@ -70,7 +70,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
         false);
       multipleFileUpload.waitForCompletion();
     } catch (InterruptedException e) {
-      LOGGER.error(e.getMessage());
+      throw new RuntimeException(e);
     } finally {
       transferManager.shutdownNow();
     }
