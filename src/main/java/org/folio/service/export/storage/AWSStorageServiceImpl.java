@@ -4,7 +4,6 @@ import static java.lang.System.getProperty;
 
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Paths;
-import java.util.Date;
 
 import org.drools.core.util.StringUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -12,9 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
@@ -24,7 +20,6 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 @Service
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int DOWNLOAD_LINK_EXPIRATION = 1000 * 60 * 60;
   private static final String PARENT_FOLDER = "generatedFiles";
 
   @Autowired
@@ -39,19 +34,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
    */
   @Override
   public String getFileDownloadLink(String jobId, String exportFileId, String tenantId) {
-    String keyName = tenantId + "/" + jobId + "/" + exportFileId + ".mrc";
-    GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(getProperty("bucket.name"), keyName)
-      .withMethod(HttpMethod.GET)
-      .withExpiration(getExpiration());
-    return amazonFactory.getS3Client().generatePresignedUrl(request).toString();
-  }
-
-  private Date getExpiration() {
-    Date expiration = new Date();
-    long expTimeMillis = expiration.getTime();
-    expTimeMillis += DOWNLOAD_LINK_EXPIRATION;
-    expiration.setTime(expTimeMillis);
-    return expiration;
+    return StringUtils.EMPTY;
   }
 
   @Override
