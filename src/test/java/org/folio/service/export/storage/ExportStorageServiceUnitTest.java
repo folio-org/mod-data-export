@@ -25,7 +25,7 @@ public class ExportStorageServiceUnitTest {
   private AmazonFactory amazonFactory;
   @InjectMocks
   private ExportStorageService exportStorageService = new AWSStorageServiceImpl();
-
+  private final static String TENANT_ID = "test_tenant";
   @After
   public void tearDown() {
     System.clearProperty("bucket.name");
@@ -52,7 +52,7 @@ public class ExportStorageServiceUnitTest {
 
     Mockito.doNothing().when(transferManagerMock).shutdownNow();
     // when
-    exportStorageService.storeFile(exportFileDefinition);
+    exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
     // then
     Mockito
       .verify(transferManagerMock, Mockito.times(1))
@@ -72,7 +72,7 @@ public class ExportStorageServiceUnitTest {
     FileDefinition exportFileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.txt");
     // when
-    exportStorageService.storeFile(exportFileDefinition);
+    exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
     // then expect RuntimeException
   }
 
@@ -89,7 +89,7 @@ public class ExportStorageServiceUnitTest {
     Mockito.when(amazonFactory.getTransferManager()).thenReturn(transferManagerMock);
 
     // when
-    exportStorageService.storeFile(exportFileDefinition);
+    exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
     // then expect RuntimeException
   }
 }

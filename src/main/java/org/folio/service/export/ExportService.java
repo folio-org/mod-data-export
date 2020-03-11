@@ -20,6 +20,7 @@ public interface ExportService {
    * Performs post export logic
    *
    * @param fileDefinition file definition
+   * @param tenantId tenant id
    */
-  void postExport(FileDefinition fileDefinition);
+  void postExport(FileDefinition fileDefinition, String tenantId);
 }

@@ -20,7 +20,6 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 @Service
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String PARENT_FOLDER = "generatedFiles";
 
   @Autowired
   private AmazonFactory amazonFactory;
@@ -38,7 +37,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
   }
 
   @Override
-  public void storeFile(FileDefinition fileDefinition) {
+  public void storeFile(FileDefinition fileDefinition, String tenantId) {
+    String parentFolder = String.format("%s/%s/%s", tenantId, fileDefinition.getJobExecutionId(), fileDefinition.getId());
     String bucketName = getProperty("bucket.name");
     if (StringUtils.isEmpty(bucketName)) {
       throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
@@ -48,8 +48,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
         LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
         MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
           bucketName,
-          PARENT_FOLDER,
-          Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
+          parentFolder,
+          Paths.get(fileDefinition.getSourcePath()).getFileName().toFile(),
           false);
         multipleFileUpload.waitForCompletion();
       } catch (InterruptedException e) {

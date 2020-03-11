@@ -39,6 +39,7 @@ public class LocalFileSystemExportService implements ExportService {
 
   /**
    * Converts incoming marc record from json format to raw format
+   *
    * @param jsonRecord json record
    * @return array of bytes
    */
@@ -54,8 +55,8 @@ public class LocalFileSystemExportService implements ExportService {
   }
 
   @Override
-  public void postExport(FileDefinition fileDefinition) {
+  public void postExport(FileDefinition fileDefinition, String tenantId) {
     ExportStorageService exportStorageService = exportStorageFactory.getExportStorage();
-    exportStorageService.storeFile(fileDefinition);
+    exportStorageService.storeFile(fileDefinition, tenantId);
   }
 }

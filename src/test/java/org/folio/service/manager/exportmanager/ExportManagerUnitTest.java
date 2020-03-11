@@ -14,13 +14,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportManagerUnitTest {
@@ -43,7 +46,9 @@ public class ExportManagerUnitTest {
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams();
+    Map<String, String> params = new HashMap<>();
+    params.put("x-okapi-tenant", "test_tenant");
+    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
     exportManager.exportBlocking(exportPayload);
@@ -52,6 +57,6 @@ public class ExportManagerUnitTest {
     Mockito.verify(recordLoaderService, Mockito.times(5)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(2)).export(anyList(), any(FileDefinition.class));
     Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
-    Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class));
+    Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
   }
 }
