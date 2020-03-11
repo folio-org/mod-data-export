@@ -177,7 +177,7 @@ public class InputDataManagerTest {
     //then
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(actualFileExportDefinition.getStatus(), equalTo(FileDefinition.Status.IN_PROGRESS));
-    assertThat(actualFileExportDefinition.getFileName(), equalTo(FILE_NAME + DELIMETER + TIMESTAMP));
+    assertThat(actualFileExportDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP));
   }
 
   @Test
