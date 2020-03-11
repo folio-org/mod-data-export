@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 public class ExportStorageFactory {
   private final String AWS_KEY = "AWSS3";
 
-
   public ExportStorageService getExportStorage() {
     return new AWSStorageServiceImpl();
   }
-
 }
