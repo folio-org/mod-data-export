@@ -1,10 +1,11 @@
 package org.folio.service.export.storage;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.amazonaws.services.s3.transfer.TransferManager;
+import static java.lang.System.getProperty;
+
+import java.lang.invoke.MethodHandles;
+import java.nio.file.Paths;
+import java.util.Date;
+
 import org.drools.core.util.StringUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.slf4j.Logger;
@@ -12,11 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.invoke.MethodHandles;
-import java.nio.file.Paths;
-import java.util.Date;
-
-import static java.lang.System.getProperty;
+import com.amazonaws.HttpMethod;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
 
 /**
  * Retrieve files that are stored in AWS S3
@@ -62,15 +62,12 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     TransferManager transferManager = amazonFactory.getTransferManager();
     try {
       LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
-
       MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
         bucketName,
         "data-export",
         Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
         false);
       multipleFileUpload.waitForCompletion();
-    } catch (AmazonServiceException e) {
-      LOGGER.error(e.getErrorMessage());
     } catch (InterruptedException e) {
       LOGGER.error(e.getMessage());
     } finally {

@@ -1,8 +1,13 @@
 package org.folio.service.export.storage;
 
-import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.amazonaws.services.s3.transfer.TransferManager;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+
+import java.io.File;
+
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,11 +16,8 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.File;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportStorageServiceUnitTest {
@@ -23,6 +25,12 @@ public class ExportStorageServiceUnitTest {
   private AmazonFactory amazonFactory;
   @InjectMocks
   private ExportStorageService exportStorageService = new AWSStorageServiceImpl();
+
+
+  @After
+  public void tearDown() {
+    System.clearProperty("bucket.name");
+  }
 
   public ExportStorageServiceUnitTest() {
     MockitoAnnotations.initMocks(this);
@@ -57,4 +65,15 @@ public class ExportStorageServiceUnitTest {
       .verify(multipleFileUploadMock, Mockito.times(1))
       .waitForCompletion();
   }
+
+  @Test(expected = RuntimeException.class)
+  public void shouldFailIfBucketNameIsNotSet() {
+    // given
+    System.clearProperty("bucket.name");
+    FileDefinition exportFileDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.txt");
+    // when
+    exportStorageService.storeFile(exportFileDefinition);
+  }
+
 }

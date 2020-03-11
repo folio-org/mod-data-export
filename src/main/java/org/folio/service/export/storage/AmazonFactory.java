@@ -1,18 +1,19 @@
 package org.folio.service.export.storage;
 
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import org.springframework.stereotype.Component;
 
 @Component
 public class AmazonFactory {
   private final static Regions region = Regions.DEFAULT_REGION;
 
   public AmazonS3 getS3Client() {
-   return AmazonS3ClientBuilder.standard().withRegion(region).build();
+    return AmazonS3ClientBuilder.standard().withRegion(region).build();
   }
 
   public TransferManager getTransferManager() {

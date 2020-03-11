@@ -8,8 +8,9 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 public interface ExportStorageService {
   /**
    * Fetch the link to download a file for a given job by fileName
-   * @param jobId: The job to which the files are associated
-   * @param fileName: The name of the file to download
+   *
+   * @param jobId:    The job to which the files are associated
+   * @param exportFileId:
    * @param tenantId
    * @return A link using which the file can be downloaded
    */
@@ -17,6 +18,7 @@ public interface ExportStorageService {
 
   /**
    * Store the file in S3
+   *
    * @param fileDefinition
    */
 
