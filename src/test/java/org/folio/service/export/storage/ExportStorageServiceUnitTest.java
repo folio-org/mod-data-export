@@ -48,7 +48,7 @@ public class ExportStorageServiceUnitTest {
     FileDefinition exportFileDefinition = new FileDefinition()
       .withId(fileId)
       .withJobExecutionId(jobId)
-      .withSourcePath("files/mockData/generatedBinaryFile.txt");
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     File file = Paths.get(exportFileDefinition.getSourcePath()).getFileName().toFile();
 
     MultipleFileUpload multipleFileUploadMock = Mockito.mock(MultipleFileUpload.class);
@@ -79,7 +79,7 @@ public class ExportStorageServiceUnitTest {
     // given
     System.clearProperty("bucket.name");
     FileDefinition exportFileDefinition = new FileDefinition()
-      .withSourcePath("files/mockData/generatedBinaryFile.txt");
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     // when
     exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
     // then expect RuntimeException
@@ -90,7 +90,7 @@ public class ExportStorageServiceUnitTest {
     // given
     System.setProperty("bucket.name", "TEST-BUCKET");
     FileDefinition exportFileDefinition = new FileDefinition()
-      .withSourcePath("files/mockData/generatedBinaryFile.txt");
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
 
     TransferManager transferManagerMock = Mockito.mock(TransferManager.class);
     Mockito.when(transferManagerMock.uploadDirectory(anyString(), anyString(), any(File.class), anyBoolean()))
