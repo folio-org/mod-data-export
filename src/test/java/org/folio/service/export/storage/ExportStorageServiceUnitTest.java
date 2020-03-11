@@ -43,7 +43,7 @@ public class ExportStorageServiceUnitTest {
     System.setProperty("bucket.name", "TEST-BUCKET");
     String fileId = UUID.randomUUID().toString();
     String jobId = UUID.randomUUID().toString();
-    String key = String.format("%s/%s/%s", TENANT_ID, jobId, fileId);
+    String key = String.format("%s/%s/%s.mrc", TENANT_ID, jobId, fileId);
 
     FileDefinition exportFileDefinition = new FileDefinition()
       .withId(fileId)
