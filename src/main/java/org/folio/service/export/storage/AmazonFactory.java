@@ -17,7 +17,6 @@ public class AmazonFactory {
   }
 
   public TransferManager getTransferManager() {
-    AmazonS3 s3Client = getS3Client();
-    return TransferManagerBuilder.standard().withS3Client(s3Client).build();
+    return TransferManagerBuilder.standard().withS3Client(getS3Client()).build();
   }
 }
