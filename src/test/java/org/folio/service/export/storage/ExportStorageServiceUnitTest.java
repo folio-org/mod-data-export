@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.junit.After;
@@ -38,15 +40,22 @@ public class ExportStorageServiceUnitTest {
   @Test
   public void storeFile_shouldPass() throws InterruptedException {
     // given
-    System.setProperty("bucket.name", "TEST BUCKET");
+    System.setProperty("bucket.name", "TEST-BUCKET");
+    String fileId = UUID.randomUUID().toString();
+    String jobId = UUID.randomUUID().toString();
+    String key = String.format("%s/%s/%s", TENANT_ID, jobId, fileId);
+
     FileDefinition exportFileDefinition = new FileDefinition()
+      .withId(fileId)
+      .withJobExecutionId(jobId)
       .withSourcePath("files/mockData/generatedBinaryFile.txt");
+    File file = Paths.get(exportFileDefinition.getSourcePath()).getFileName().toFile();
 
     MultipleFileUpload multipleFileUploadMock = Mockito.mock(MultipleFileUpload.class);
     Mockito.doNothing().when(multipleFileUploadMock).waitForCompletion();
 
     TransferManager transferManagerMock = Mockito.mock(TransferManager.class);
-    Mockito.when(transferManagerMock.uploadDirectory(anyString(), anyString(), any(File.class), anyBoolean()))
+    Mockito.when(transferManagerMock.uploadDirectory("TEST-BUCKET", key, file, false))
       .thenReturn(multipleFileUploadMock);
     Mockito.when(amazonFactory.getTransferManager()).thenReturn(transferManagerMock);
 
@@ -79,7 +88,7 @@ public class ExportStorageServiceUnitTest {
   @Test(expected = RuntimeException.class)
   public void storeFile_shouldFailOnUploadDirectory() {
     // given
-    System.setProperty("bucket.name", "TEST BUCKET");
+    System.setProperty("bucket.name", "TEST-BUCKET");
     FileDefinition exportFileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.txt");
 
