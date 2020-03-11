@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
+import org.apache.commons.io.FilenameUtils;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -178,8 +179,10 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
+    String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
     return new FileDefinition()
-      .withFileName(requestFileDefinition.getFileName() + DELIMITER + getCurrentTimestamp())
+      .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp())
+      .withJobExecutionId(requestFileDefinition.getJobExecutionId())
       .withStatus(FileDefinition.Status.IN_PROGRESS);
   }
 

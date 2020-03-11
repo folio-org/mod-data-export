@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportServiceUnitTest {
@@ -59,8 +60,8 @@ public class ExportServiceUnitTest {
     ExportStorageService exportStorageService = Mockito.mock(ExportStorageService.class);
     Mockito.when(exportStorageFactory.getExportStorage()).thenReturn(exportStorageService);
     // when
-    exportService.postExport(fileDefinition);
+    exportService.postExport(fileDefinition, "tenant");
     // then
-    Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class));
+    Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
   }
 }
