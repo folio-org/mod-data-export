@@ -17,8 +17,9 @@ public interface ExportService {
   void export(List<String> marcRecords, FileDefinition fileDefinition);
 
   /**
+   * Performs post export logic
    *
-   * @param fileDefinition
+   * @param fileDefinition file definition
    */
   void postExport(FileDefinition fileDefinition);
 }

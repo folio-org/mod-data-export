@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int DOWNLOAD_LINK_EXPIRATION = 1000 * 60 * 60;
+  private static final String PARENT_FOLDER = "generatedFiles";
 
   @Autowired
   private AmazonFactory amazonFactory;
@@ -64,7 +65,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
       LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
       MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
         bucketName,
-        "data-export",
+        PARENT_FOLDER,
         Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
         false);
       multipleFileUpload.waitForCompletion();

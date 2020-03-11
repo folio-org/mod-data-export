@@ -26,7 +26,6 @@ public class ExportStorageServiceUnitTest {
   @InjectMocks
   private ExportStorageService exportStorageService = new AWSStorageServiceImpl();
 
-
   @After
   public void tearDown() {
     System.clearProperty("bucket.name");
@@ -67,13 +66,30 @@ public class ExportStorageServiceUnitTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void shouldFailIfBucketNameIsNotSet() {
+  public void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");
     FileDefinition exportFileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.txt");
     // when
     exportStorageService.storeFile(exportFileDefinition);
+    // then expect RuntimeException
   }
 
+  @Test(expected = RuntimeException.class)
+  public void storeFile_shouldFailOnUploadDirectory() {
+    // given
+    System.setProperty("bucket.name", "TEST BUCKET");
+    FileDefinition exportFileDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.txt");
+
+    TransferManager transferManagerMock = Mockito.mock(TransferManager.class);
+    Mockito.when(transferManagerMock.uploadDirectory(anyString(), anyString(), any(File.class), anyBoolean()))
+      .thenThrow(new RuntimeException());
+    Mockito.when(amazonFactory.getTransferManager()).thenReturn(transferManagerMock);
+
+    // when
+    exportStorageService.storeFile(exportFileDefinition);
+    // then expect RuntimeException
+  }
 }

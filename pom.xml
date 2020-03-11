@@ -29,7 +29,6 @@
     <sonar.exclusions>**/InputDataContext.java</sonar.exclusions>
     <sonar.exclusions>**/InitAPIImpl.java</sonar.exclusions>
     <sonar.exclusions>**/AmazonFactory.java</sonar.exclusions>
-    <sonar.exclusions>**/ExportStorageFactory.java</sonar.exclusions>
   </properties>
 
   <dependencies>
