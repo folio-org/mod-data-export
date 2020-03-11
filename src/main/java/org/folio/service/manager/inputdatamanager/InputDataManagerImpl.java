@@ -46,8 +46,6 @@ class InputDataManagerImpl implements InputDataManager {
 
 
   @Autowired
-  private SourceReader sourceReader;
-  @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
   private Vertx vertx;

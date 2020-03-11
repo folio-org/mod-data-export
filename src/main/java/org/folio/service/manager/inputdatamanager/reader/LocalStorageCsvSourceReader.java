@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import static java.util.Objects.nonNull;
 
 @SuppressWarnings({"java:S2095"})
-@Service
 public class LocalStorageCsvSourceReader implements SourceReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
