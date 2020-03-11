@@ -56,5 +56,6 @@ public class ExportStorageServiceUnitTest {
     Mockito
       .verify(multipleFileUploadMock, Mockito.times(1))
       .waitForCompletion();
+    System.clearProperty("bucket.name");
   }
 }
