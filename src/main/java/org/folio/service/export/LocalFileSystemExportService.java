@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
-  private final String AWS_KEY = "AWSS3";
   @Autowired
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
@@ -56,7 +55,7 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition) {
-    ExportStorageService exportStorageService = exportStorageFactory.getExportStorageImplementation(AWS_KEY);
+    ExportStorageService exportStorageService = exportStorageFactory.getExportStorage();
     exportStorageService.storeFile(fileDefinition);
   }
 }
