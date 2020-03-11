@@ -47,6 +47,7 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
   private static final String DELIMITER = "-";
   private static final int BATCH_SIZE = 50;
+  private static final String MARC_FILE_EXTENSION = ".mrc";
 
 
   @Autowired
@@ -181,7 +182,7 @@ class InputDataManagerImpl implements InputDataManager {
   private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
     String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
     return new FileDefinition()
-      .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp())
+      .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
       .withStatus(FileDefinition.Status.IN_PROGRESS);
   }

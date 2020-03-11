@@ -41,12 +41,10 @@ public class ExportStorageServiceUnitTest {
   public void storeFile_shouldPass() throws InterruptedException {
     // given
     System.setProperty("bucket.name", "TEST-BUCKET");
-    String fileId = UUID.randomUUID().toString();
     String jobId = UUID.randomUUID().toString();
-    String key = String.format("%s/%s/%s.mrc", TENANT_ID, jobId, fileId);
+    String parentFolder = TENANT_ID + "/" + jobId;
 
     FileDefinition exportFileDefinition = new FileDefinition()
-      .withId(fileId)
       .withJobExecutionId(jobId)
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     File file = Paths.get(exportFileDefinition.getSourcePath()).getFileName().toFile();
@@ -55,7 +53,7 @@ public class ExportStorageServiceUnitTest {
     Mockito.doNothing().when(multipleFileUploadMock).waitForCompletion();
 
     TransferManager transferManagerMock = Mockito.mock(TransferManager.class);
-    Mockito.when(transferManagerMock.uploadDirectory("TEST-BUCKET", key, file, false))
+    Mockito.when(transferManagerMock.uploadDirectory("TEST-BUCKET", parentFolder, file, false))
       .thenReturn(multipleFileUploadMock);
     Mockito.when(amazonFactory.getTransferManager()).thenReturn(transferManagerMock);
 

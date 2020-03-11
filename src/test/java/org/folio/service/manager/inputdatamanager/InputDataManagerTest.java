@@ -142,9 +142,8 @@ public class InputDataManagerTest {
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
-    assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP));
+    assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
   }
-
 
   @Test
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
@@ -177,7 +176,7 @@ public class InputDataManagerTest {
     //then
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(actualFileExportDefinition.getStatus(), equalTo(FileDefinition.Status.IN_PROGRESS));
-    assertThat(actualFileExportDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP));
+    assertThat(actualFileExportDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
   }
 
   @Test

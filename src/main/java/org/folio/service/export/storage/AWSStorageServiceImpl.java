@@ -20,7 +20,6 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 @Service
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String MARC_FILE_EXTENSION = "mrc";
 
   @Autowired
   private AmazonFactory amazonFactory;
@@ -39,7 +38,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
 
   @Override
   public void storeFile(FileDefinition fileDefinition, String tenantId) {
-    String parentFolder = String.format("%s/%s/%s.%s", tenantId, fileDefinition.getJobExecutionId(), fileDefinition.getId(), MARC_FILE_EXTENSION);
+    String parentFolder = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty("bucket.name");
     if (StringUtils.isEmpty(bucketName)) {
       throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
