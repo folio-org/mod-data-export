@@ -180,6 +180,7 @@ class InputDataManagerImpl implements InputDataManager {
   private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
     return new FileDefinition()
       .withFileName(requestFileDefinition.getFileName() + DELIMITER + getCurrentTimestamp())
+      .withJobExecutionId(requestFileDefinition.getJobExecutionId())
       .withStatus(FileDefinition.Status.IN_PROGRESS);
   }
 
