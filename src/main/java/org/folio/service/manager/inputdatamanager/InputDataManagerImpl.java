@@ -7,12 +7,19 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
+import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportRequest;
+import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.manager.inputdatamanager.reader.LocalStorageCsvSourceReader;
+import org.folio.service.manager.inputdatamanager.reader.SourceReader;
+import org.folio.service.manager.exportresult.ExportResult;
+import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
@@ -46,6 +53,10 @@ class InputDataManagerImpl implements InputDataManager {
 
 
   @Autowired
+  private SourceReader sourceReader;
+  @Autowired
+  private JobExecutionService jobExecutionService;
+  @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
   private Vertx vertx;
@@ -75,23 +86,71 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition requestFileDefinition = exportRequest.getFileDefinition();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
+    String jobExecutionId = requestFileDefinition.getJobExecutionId();
     String tenantId = okapiConnectionParams.getTenantId();
     SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId)
         .compose(savedFileExportDefinition -> {
-          //get executionJob and update exportresult to in-progress
-          String jobExecutionId = requestFileDefinition.getJobExecutionId();
           initInputDataContext(sourceReader, jobExecutionId);
           ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
+          //here
           exportNextChunk(exportPayload, sourceReader);
-          return Future.succeededFuture();
-        });
+          //up on 1 line
+          updateJobExecutionStatusAndExportedFiles(jobExecutionId, fileExportDefinition, tenantId);
+        return Future.succeededFuture();
+      });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
       sourceReader.close();
-      //update job execution with error exportresult
+      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
     }
+  }
+
+  /**
+   * Updates jobExecution status with IN-PROGRESS && updates exported files && updates completed date
+   *
+   * @param id                   job execution id
+   * @param fileExportDefinition definition of the file to export
+   * @param tenantId             tenant id
+   */
+  private void updateJobExecutionStatusAndExportedFiles(String id, FileDefinition fileExportDefinition, String tenantId) {
+    jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
+      optionalJobExecution.map(jobExecution -> {
+        ExportedFile exportedFile = new ExportedFile()
+          .withFileId(UUID.randomUUID().toString())
+          .withFileName(fileExportDefinition.getFileName());
+        Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+        exportedFiles.add(exportedFile);
+        jobExecution.setExportedFiles(exportedFiles);
+        jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
+        jobExecution.setCompletedDate(new Date());
+        if (Objects.isNull(jobExecution.getStartedDate())) {
+          jobExecution.setStartedDate(new Date());
+        }
+        return jobExecutionService.update(jobExecution, tenantId);
+      });
+      return succeededFuture();
+    });
+  }
+
+  /**
+   * Updates status and completed date of job execution with id
+   *
+   * @param id       job execution id
+   * @param status   status to update
+   * @param tenantId tenant id
+   */
+  private void updateJobExecutionStatus(String id, JobExecution.Status status, String tenantId) {
+    jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
+      optionalJobExecution.map(jobExecution -> {
+        jobExecution.setStatus(status);
+        jobExecution.setCompletedDate(new Date());
+        jobExecutionService.update(jobExecution, tenantId);
+        return jobExecution;
+      });
+      return succeededFuture();
+    });
   }
 
   protected SourceReader initSourceReader(FileDefinition requestFileDefinition, int batchSize) {
@@ -134,16 +193,20 @@ class InputDataManagerImpl implements InputDataManager {
     if(nonNull(sourceReader)) {
       sourceReader.close();
     }
-    //update jobExecution status to Failed
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
-    if (ExportResult.COMPLETED.equals(exportResult))
-      fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
-    if (ExportResult.ERROR.equals(exportResult))
-      fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
+    //in master it fetches from exportPayload.getJobExecutionId()
+    String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
+    if (ExportResult.COMPLETED.equals(exportResult)) {
+      fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
+      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
+    }
+    if (ExportResult.ERROR.equals(exportResult)) {
+      fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
+      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+    }
     fileDefinitionService.update(fileExportDefinition, tenantId)
       .onComplete(saveAsyncResult -> {
-        String jobExecutionId = exportPayload.getJobExecutionId();
         if (inputDataLocalMap.containsKey(jobExecutionId)) {
           inputDataLocalMap.remove(jobExecutionId);
         }
@@ -183,7 +246,8 @@ class InputDataManagerImpl implements InputDataManager {
   private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
     return new FileDefinition()
       .withFileName(requestFileDefinition.getFileName() + DELIMITER + getCurrentTimestamp())
-      .withStatus(FileDefinition.Status.IN_PROGRESS);
+      .withStatus(FileDefinition.Status.IN_PROGRESS)
+      .withJobExecutionId(requestFileDefinition.getJobExecutionId());
   }
 
   protected String getCurrentTimestamp() {
