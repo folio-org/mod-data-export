@@ -10,7 +10,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
@@ -86,7 +85,7 @@ public class ExportManagerImpl implements ExportManager {
     exportService.export(mappedMarcRecords, fileExportDefinition);
 
     if (exportPayload.isLast()) {
-      exportService.postExport(fileExportDefinition, TenantTool.tenantId(params.getHeaders()));
+      exportService.postExport(fileExportDefinition, params.getTenantId());
     }
   }
 
