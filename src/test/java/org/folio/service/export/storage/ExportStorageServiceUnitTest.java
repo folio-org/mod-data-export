@@ -65,7 +65,7 @@ public class ExportStorageServiceUnitTest {
       .waitForCompletion();
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test(expected = IllegalStateException.class)
   public void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");

@@ -58,22 +58,23 @@ public class AWSStorageServiceImpl implements ExportStorageService {
   public void storeFile(FileDefinition fileDefinition) {
     String bucketName = getProperty("bucket.name");
     if (StringUtils.isEmpty(bucketName)) {
-      throw new RuntimeException("S3 bucket name is not defined. Please set the bucket.name system property");
-    }
-    TransferManager transferManager = amazonFactory.getTransferManager();
-    try {
-      LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
-      MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
-        bucketName,
-        PARENT_FOLDER,
-        Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
-        false);
-      multipleFileUpload.waitForCompletion();
-    } catch (InterruptedException e) {
-      LOGGER.error(e.getMessage());
-      Thread.currentThread().interrupt();
-    } finally {
-      transferManager.shutdownNow();
+      throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
+    } else {
+      TransferManager transferManager = amazonFactory.getTransferManager();
+      try {
+        LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
+        MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
+          bucketName,
+          PARENT_FOLDER,
+          Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
+          false);
+        multipleFileUpload.waitForCompletion();
+      } catch (InterruptedException e) {
+        LOGGER.error(e.getMessage());
+        Thread.currentThread().interrupt();
+      } finally {
+        transferManager.shutdownNow();
+      }
     }
   }
 }
