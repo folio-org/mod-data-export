@@ -97,7 +97,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     }
     return promise.future()
       .map(Results::getResults)
-      .map(fileDefinitions -> fileDefinitions.isEmpty() ? Optional.empty() : Optional.of(fileDefinitions.get(0)));
+      .map(jobExecutions -> jobExecutions.isEmpty() ? Optional.empty() : Optional.of(jobExecutions.get(0)));
   }
 
   /**
