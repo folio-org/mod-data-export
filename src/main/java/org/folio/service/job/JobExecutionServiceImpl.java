@@ -2,7 +2,9 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
+
 import java.util.Optional;
+
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
@@ -28,7 +30,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<Optional<JobExecution>> getById(String jobId, String tenantId) {
-    return jobExecutionDao.getById(jobId, tenantId);
+  public Future<JobExecution> update(final JobExecution jobExecution, final String tenantId) {
+    return jobExecutionDao.update(jobExecution, tenantId);
+  }
+
+  @Override
+  public Future<Optional<JobExecution>> getById(final String jobExecutionId, final String tenantId) {
+    return jobExecutionDao.getById(jobExecutionId, tenantId);
   }
 }
