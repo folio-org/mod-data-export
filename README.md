@@ -15,10 +15,15 @@ FOLIO data export module.
 
 #### Important notes
 
-For Q1 release, we are using S3 to store the exported MARC files. This means that it is expected that AWS credentials are properly configured in a hosting environment as per:
-https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html. The module also expects the bucket name to be passed in the JVM as the system variable `bucket.name`
+For Q1 release, the only supported file storage to store the exported MARC files is S3. 
+This means that it is expected that AWS credentials are properly configured in a hosting environment as per:https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
+The credential chain looks for the credentias in multiple places and the precedence order in case it is specified in multiple places is given here: https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html
 
-There are plans to have hosting agnostic implementation available in 2020 Q2.
+The module also expects the bucket name to be passed in the JVM as the system parameter with name `bucket.name`
+
+example: java mod-data-export-fat.jar -Dbucket.name=diku_export
+
+Note: There are plans to have hosting agnostic implementation available in 2020 Q2.
 
 ## Compiling
 
