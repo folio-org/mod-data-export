@@ -52,9 +52,6 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String DELIMITER = "-";
   private static final int BATCH_SIZE = 50;
 
-
-  @Autowired
-  private SourceReader sourceReader;
   @Autowired
   private JobExecutionService jobExecutionService;
   @Autowired
@@ -101,8 +98,8 @@ class InputDataManagerImpl implements InputDataManager {
         });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      sourceReader.close();
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+      sourceReader.close();
     }
   }
 
