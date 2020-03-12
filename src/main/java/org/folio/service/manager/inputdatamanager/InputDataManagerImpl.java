@@ -112,7 +112,7 @@ class InputDataManagerImpl implements InputDataManager {
    */
   private void updateJobExecutionStatusAndExportedFiles(String id, FileDefinition fileExportDefinition, String tenantId) {
     jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
-      optionalJobExecution.map(jobExecution -> {
+      optionalJobExecution.ifPresent(jobExecution -> {
         ExportedFile exportedFile = new ExportedFile()
           .withFileId(UUID.randomUUID().toString())
           .withFileName(fileExportDefinition.getFileName());
@@ -123,7 +123,7 @@ class InputDataManagerImpl implements InputDataManager {
         if (Objects.isNull(jobExecution.getStartedDate())) {
           jobExecution.setStartedDate(new Date());
         }
-        return jobExecutionService.update(jobExecution, tenantId);
+        jobExecutionService.update(jobExecution, tenantId);
       });
       return succeededFuture();
     });
@@ -138,11 +138,10 @@ class InputDataManagerImpl implements InputDataManager {
    */
   private void updateJobExecutionStatus(String id, JobExecution.Status status, String tenantId) {
     jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
-      optionalJobExecution.map(jobExecution -> {
+      optionalJobExecution.ifPresent(jobExecution -> {
         jobExecution.setStatus(status);
         jobExecution.setCompletedDate(new Date());
         jobExecutionService.update(jobExecution, tenantId);
-        return jobExecution;
       });
       return succeededFuture();
     });
