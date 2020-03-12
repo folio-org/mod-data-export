@@ -5,7 +5,7 @@
   "additionalProperties": false,
   "properties": {
     "id": {
-      "description": "File id",
+      "description": "UUID of this File Definition",
       "type": "string",
       "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
@@ -23,7 +23,7 @@
       "type": "string"
     },
     "status": {
-      "description": "Status of files upload",
+      "description": "Status of file upload",
       "type": "string",
       "enum": [
         "NEW",

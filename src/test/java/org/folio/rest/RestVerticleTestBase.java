@@ -91,7 +91,7 @@ public abstract class RestVerticleTestBase {
   }
 
   private void setUpJsonRequestSpecification() {
-    this.jsonRequestSpecification = new RequestSpecBuilder()
+    jsonRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.JSON)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
       .setBaseUri(OKAPI_URL)

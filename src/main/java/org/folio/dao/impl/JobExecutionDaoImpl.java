@@ -1,5 +1,7 @@
 package org.folio.dao.impl;
 
+import static org.folio.util.HelperUtils.constructCriteria;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -9,19 +11,25 @@ import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.persist.Criteria.Criteria;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobExecutionDaoImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   private static final String TABLE = "job_executions";
+  private static final String ID_FIELD = "'id'";
+
   @Autowired
   private PostgresClientFactory pgClientFactory;
 
@@ -49,6 +57,21 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     return promise.future().map(jobExecution);
   }
 
+  @Override
+  public Future<Optional<JobExecution>> getById(String jobId, String tenantId) {
+    Promise<Results<JobExecution>> promise = Promise.promise();
+    try {
+      Criteria idCrit = constructCriteria(ID_FIELD, jobId);
+      pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, new Criterion(idCrit), false, promise);
+    } catch (Exception e) {
+      LOGGER.error(e);
+      promise.fail(e);
+    }
+    return promise.future()
+      .map(Results::getResults)
+      .map(jobExecutions -> jobExecutions.isEmpty() ? Optional.empty() : Optional.of(jobExecutions.get(0)));
+  }
+
   /**
    * Builds CQLWrapper by which db result is filtered
    *
@@ -62,4 +85,5 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     CQL2PgJSON cql2pgJson = new CQL2PgJSON(tableName + ".jsonb");
     return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
   }
+
 }

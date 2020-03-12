@@ -14,7 +14,7 @@
   </licenses>
 
   <properties>
-    <raml-module-builder.version>29.2.2</raml-module-builder.version>
+    <raml-module-builder.version>29.3.0</raml-module-builder.version>
     <vertx.version>3.8.4</vertx.version>
     <junit.version>4.12</junit.version>
     <rest-assured.version>3.3.0</rest-assured.version>
@@ -89,6 +89,11 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
       <version>4.5.11</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk</artifactId>
+      <version>1.11.163</version>
     </dependency>
 
     <!-- test dependencies -->

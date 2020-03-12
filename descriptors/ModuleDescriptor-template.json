@@ -67,6 +67,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/jobExecutions/{jobId}/download/{fileId}",
+          "permissionsRequired": [
+            "data-export.job-executions.items.download.get"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -117,6 +128,11 @@
       "description": "Entry point to post File Definition"
     },
     {
+      "permissionName": "data-export.job-executions.items.download.get",
+      "displayName": "Data Export - get download link for job and a file",
+      "description": "Entry point to get link to download exported files"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -125,7 +141,8 @@
         "data-export.file-definitions.item.get",
         "data-export.file-definitions.item.post",
         "data-export.file-definitions.upload.post",
-        "data-export.job-executions.items.get"
+        "data-export.job-executions.items.get",
+        "data-export.job-executions.items.download.get"
       ],
       "visible": false
     }

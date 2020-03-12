@@ -33,7 +33,6 @@ public class ExportManagerTest extends RestVerticleTestBase {
 
   private static final String EXPORT_URL = "/data-export/export";
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
-  private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test
   public void shouldReturn_204Status_forHappyPath(TestContext context) throws IOException {
