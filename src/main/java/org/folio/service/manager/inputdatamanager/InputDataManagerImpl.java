@@ -7,7 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
-
+import org.apache.commons.io.FilenameUtils;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -51,6 +50,7 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
   private static final String DELIMITER = "-";
   private static final int BATCH_SIZE = 50;
+  private static final String MARC_FILE_EXTENSION = ".mrc";
 
   @Autowired
   private JobExecutionService jobExecutionService;
@@ -237,8 +237,9 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
+    String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
     return new FileDefinition()
-      .withFileName(requestFileDefinition.getFileName() + DELIMITER + getCurrentTimestamp())
+      .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId());
   }

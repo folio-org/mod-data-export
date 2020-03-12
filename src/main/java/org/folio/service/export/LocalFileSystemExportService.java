@@ -1,7 +1,13 @@
 package org.folio.service.export;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.upload.storage.FileStorage;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcReader;
@@ -11,16 +17,14 @@ import org.marc4j.marc.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
   @Autowired
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
+  @Autowired
+  private ExportStorageService exportStorageService;
 
   @Override
   public void export(List<String> jsonRecords, FileDefinition fileDefinition) {
@@ -34,8 +38,9 @@ public class LocalFileSystemExportService implements ExportService {
 
   /**
    * Converts incoming marc record from json format to raw format
+   *
    * @param jsonRecord json record
-   * @return  array of bytes
+   * @return array of bytes
    */
   private byte[] convertJsonRecordToMarcRecord(String jsonRecord) {
     MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
@@ -49,7 +54,7 @@ public class LocalFileSystemExportService implements ExportService {
   }
 
   @Override
-  public void postExport(FileDefinition fileDefinition) {
-    // copy file to S3
+  public void postExport(FileDefinition fileDefinition, String tenantId) {
+    exportStorageService.storeFile(fileDefinition, tenantId);
   }
 }

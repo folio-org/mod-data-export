@@ -152,9 +152,8 @@ public class InputDataManagerTest {
     assertNotNull(jobExecutionCaptor.getValue().getCompletedDate());
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
-    assertThat(fileDefinition.getFileName(), equalTo(FILE_NAME + DELIMETER + TIMESTAMP));
+    assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
   }
-
 
   @Test
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
@@ -189,7 +188,7 @@ public class InputDataManagerTest {
     assertJobExecutionDataWereUpdated();
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(actualFileExportDefinition.getStatus(), equalTo(FileDefinition.Status.IN_PROGRESS));
-    assertThat(actualFileExportDefinition.getFileName(), equalTo(FILE_NAME + DELIMETER + TIMESTAMP));
+    assertThat(actualFileExportDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
   }
 
   @Test

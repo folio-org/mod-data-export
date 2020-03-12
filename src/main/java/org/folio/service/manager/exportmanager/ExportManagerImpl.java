@@ -78,7 +78,6 @@ public class ExportManagerImpl implements ExportManager {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
     exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
@@ -86,7 +85,7 @@ public class ExportManagerImpl implements ExportManager {
     exportService.export(mappedMarcRecords, fileExportDefinition);
 
     if (exportPayload.isLast()) {
-      exportService.postExport(fileExportDefinition);
+      exportService.postExport(fileExportDefinition, params.getTenantId());
     }
   }
 
