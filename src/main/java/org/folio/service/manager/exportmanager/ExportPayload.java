@@ -12,17 +12,17 @@ import java.util.List;
 public class ExportPayload {
   private List<String> identifiers;
   private boolean last;
-  private FileDefinition fileExportDefinition;
+  private String fileDefinitionId;
   private OkapiConnectionParams okapiConnectionParams;
   private String jobExecutionId;
 
   public ExportPayload() {
   }
 
-  public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams, String jobExecutionId) {
+  public ExportPayload(List<String> identifiers, boolean last, String fileDefinitionId, OkapiConnectionParams okapiConnectionParams, String jobExecutionId) {
     this.identifiers = identifiers;
     this.last = last;
-    this.fileExportDefinition = fileExportDefinition;
+    this.fileDefinitionId = fileDefinitionId;
     this.okapiConnectionParams = okapiConnectionParams;
     this.jobExecutionId = jobExecutionId;
   }
@@ -43,12 +43,12 @@ public class ExportPayload {
     this.last = last;
   }
 
-  public FileDefinition getFileExportDefinition() {
-    return fileExportDefinition;
+  public String getFileDefinitionId() {
+    return fileDefinitionId;
   }
 
-  public void setFileExportDefinition(FileDefinition fileExportDefinition) {
-    this.fileExportDefinition = fileExportDefinition;
+  public void setFileDefinitionId(String fileDefinitionId) {
+    this.fileDefinitionId = fileDefinitionId;
   }
 
   public OkapiConnectionParams getOkapiConnectionParams() {

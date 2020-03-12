@@ -187,23 +187,30 @@ class InputDataManagerImpl implements InputDataManager {
     if (nonNull(sourceReader)) {
       sourceReader.close();
     }
-    FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
-    String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    if (ExportResult.COMPLETED.equals(exportResult)) {
-      fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
-      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
-    }
-    if (ExportResult.ERROR.equals(exportResult)) {
-      fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
-      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
-    }
-    fileDefinitionService.update(fileExportDefinition, tenantId)
-      .onComplete(saveAsyncResult -> {
-        if (inputDataLocalMap.containsKey(jobExecutionId)) {
-          inputDataLocalMap.remove(jobExecutionId);
-        }
-      });
+    fileDefinitionService.getById(exportPayload.getFileDefinitionId(), tenantId)
+      .compose(fileExportDefinitionOptional -> {
+          if (fileExportDefinitionOptional.isPresent()) {
+            FileDefinition fileExportDefinition = fileExportDefinitionOptional.get();
+            String jobExecutionId = fileExportDefinition.getJobExecutionId();
+            if (ExportResult.COMPLETED.equals(exportResult)) {
+              fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
+              updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
+            }
+            if (ExportResult.ERROR.equals(exportResult)) {
+              fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
+              updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+            }
+            fileDefinitionService.update(fileExportDefinition, tenantId)
+              .onComplete(saveAsyncResult -> {
+                if (inputDataLocalMap.containsKey(jobExecutionId)) {
+                  inputDataLocalMap.remove(jobExecutionId);
+                }
+              });
+          }
+          return Future.succeededFuture();
+        });
+
   }
 
   protected ExportManager getExportManager() {
@@ -231,7 +238,7 @@ class InputDataManagerImpl implements InputDataManager {
   private ExportPayload createExportPayload(OkapiConnectionParams okapiParams, FileDefinition fileExportDefinition, String jobExecutionId) {
     ExportPayload exportPayload = new ExportPayload();
     exportPayload.setOkapiConnectionParams(okapiParams);
-    exportPayload.setFileExportDefinition(fileExportDefinition);
+    exportPayload.setFileDefinitionId(fileExportDefinition.getId());
     exportPayload.setJobExecutionId(jobExecutionId);
     return exportPayload;
   }

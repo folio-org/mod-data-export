@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
@@ -13,9 +14,10 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
-import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.service.manager.exportresult.ExportResult;
+import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.service.mapping.MappingService;
+import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +52,8 @@ public class ExportManagerImpl implements ExportManager {
   private MappingService mappingService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private FileDefinitionService fileDefinitionService;
 
   public ExportManagerImpl() {
   }
@@ -64,8 +68,7 @@ public class ExportManagerImpl implements ExportManager {
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
     this.executor.executeBlocking(blockingFuture -> {
-      exportBlocking(exportPayload);
-      blockingFuture.complete();
+      exportBlocking(exportPayload).onComplete(asyncHandler -> blockingFuture.complete());
     }, ar -> handleExportResult(ar, exportPayload));
   }
 
@@ -74,19 +77,26 @@ public class ExportManagerImpl implements ExportManager {
    *
    * @param exportPayload payload of the export request
    */
-  protected void exportBlocking(ExportPayload exportPayload) {
+  protected Future exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
-    FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
-    List<String> mappedMarcRecords = mappingService.map(instances);
-    exportService.export(mappedMarcRecords, fileExportDefinition);
-
-    if (exportPayload.isLast()) {
-      exportService.postExport(fileExportDefinition, params.getTenantId());
-    }
+    String tenantId = params.getTenantId();
+    return fileDefinitionService.getById(exportPayload.getFileDefinitionId(), tenantId)
+      .compose(fileExportDefinitionOptional -> {
+        if(fileExportDefinitionOptional.isPresent()) {
+          FileDefinition fileExportDefinition = fileExportDefinitionOptional.get();
+          SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
+          exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
+          List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
+          List<String> mappedMarcRecords = mappingService.map(instances);
+          exportService.export(mappedMarcRecords, fileExportDefinition);
+          if (exportPayload.isLast()) {
+            exportService.postExport(fileExportDefinition, tenantId);
+          }
+          fileDefinitionService.update(fileExportDefinition, tenantId);
+        }
+        return Future.succeededFuture();
+      });
   }
 
   /**
