@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 import io.vertx.core.Promise;
 import java.net.MalformedURLException;
@@ -16,28 +15,32 @@ import java.util.UUID;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.service.export.storage.ExportStorageFactory;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.util.ErrorCodes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+/**
+ *  Tests are written in blocking manner while testing the async code, that causes unstable builds on master branch sometimes.
+ *  We need to overwrite all this tests using VertxUnitRunner instead of MockitoJunitRunner.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class DataExportHelperTest {
-
   @Mock
-  ExportStorageFactory storageFactory;
-
+  private ExportStorageService exportStorageService;
   @Mock
-  JobExecutionService jobExecutionServiceMock;
-
+  private JobExecutionService jobExecutionServiceMock;
   @InjectMocks
   @Spy
-  DataExportHelper helper = new DataExportHelper();
+  private DataExportHelper helper = new DataExportHelper();
 
   @Before
   public void setUp() throws Exception {
@@ -51,8 +54,6 @@ public class DataExportHelperTest {
 
     String url = "https://test.aws.amazon.com";
     Promise<String> pr = Promise.promise();
-
-    when(storageFactory.getExportStorageImplementation()).thenReturn(storageServiceMock);
     pr.complete("test.mrc");
     doReturn(pr.future()).when(helper)
       .getDownloadFileName(anyString(), anyString(), anyString());
@@ -71,12 +72,8 @@ public class DataExportHelperTest {
 
   @Test
   public void testFailGetFileDownloadLink() throws MalformedURLException {
-
     ExportStorageService storageServiceMock = Mockito.mock(ExportStorageService.class);
-
     Promise<String> pr = Promise.promise();
-
-    when(storageFactory.getExportStorageImplementation()).thenReturn(storageServiceMock);
     pr.complete("test.mrc");
     doReturn(pr.future()).when(helper)
       .getDownloadFileName(anyString(), anyString(), anyString());

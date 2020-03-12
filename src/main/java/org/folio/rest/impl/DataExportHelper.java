@@ -4,7 +4,6 @@ import io.vertx.core.Future;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDownload;
-import org.folio.service.export.storage.ExportStorageFactory;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,19 +13,15 @@ import org.springframework.stereotype.Service;
 public class DataExportHelper {
 
   @Autowired
-  private ExportStorageFactory exportStorageFactory;
-
+  private ExportStorageService exportStorageService;
   @Autowired
   private JobExecutionService jobExecutionService;
 
   Future<FileDownload> getDownloadLink(String jobExecutionId, String exportFileId, String tenantId) {
-    ExportStorageService expService = exportStorageFactory.getExportStorageImplementation();
-
     return getDownloadFileName(jobExecutionId, exportFileId, tenantId)
-      .compose(fileName -> expService.getFileDownloadLink(jobExecutionId, fileName, tenantId))
+      .compose(fileName -> exportStorageService.getFileDownloadLink(jobExecutionId, fileName, tenantId))
       .map(link -> new FileDownload().withFileId(exportFileId)
         .withLink(link));
-
   }
 
   Future<String> getDownloadFileName(String jobExecutionId, String exportFileId, String tenantId) {

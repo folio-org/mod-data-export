@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
+import org.apache.commons.io.FilenameUtils;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.manager.exportmanager.ExportManager;

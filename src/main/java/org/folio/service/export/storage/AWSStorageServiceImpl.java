@@ -3,64 +3,74 @@ package org.folio.service.export.storage;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.util.StringUtils;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
-import java.util.Date;
+import io.vertx.core.Vertx;
 import org.folio.rest.exceptions.HttpException;
+import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.util.ErrorCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.Date;
+
+import static java.lang.System.getProperty;
+
 /**
- * Store and Retrieve files that are stored in AWS S3
+ * Saves files into Amazon cloud and provides an access for files being stored there
  */
 @Service
 public class AWSStorageServiceImpl implements ExportStorageService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup()
-    .lookupClass());
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int EXPIRATION_TEN_MINUTES = 1000 * 10 * 60;
+  private static final String BUCKET_PROP_KEY = "bucket.name";
 
   @Autowired
   private AmazonFactory amazonFactory;
+  @Autowired
+  private Vertx vertx;
 
   /**
    * Fetch the link to download a file for a given job by fileName
    *
    * @param jobExecutionId The job to which the files are associated
-   * @param exportFileName   The name of the file to download
-   * @param tenantId
+   * @param exportFileName The name of the file to download
+   * @param tenantId       tenant id
    * @return A link using which the file can be downloaded
    */
   @Override
   public Future<String> getFileDownloadLink(String jobExecutionId, String exportFileName, String tenantId) {
     Promise<String> promise = Promise.promise();
-    AmazonS3 s3Client = awsClient.getAWSS3Client();
+    AmazonS3 s3Client = amazonFactory.getS3Client();
     String keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
-    String bucketName = System.getProperty("bucket.name");
-    URL url = null;
-
+    String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
       throw new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED);
     }
-
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
       .withExpiration(getExpiration());
-    try {
-      url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
-      promise.complete(url.toString());
-
-    } catch (Exception e) {
-      promise.fail(e);
-    }
-
+    vertx.executeBlocking(blockingFuture -> {
+      URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+      blockingFuture.complete(url.toString());
+    }, asyncResult -> {
+      if (asyncResult.failed()) {
+        promise.fail(asyncResult.cause());
+      } else {
+        String url = (String)asyncResult.result();
+        promise.complete(url);
+      }
+    });
     return promise.future();
-
   }
 
   /**
@@ -74,15 +84,15 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     expTimeMillis += EXPIRATION_TEN_MINUTES;
     LOGGER.info("AWS presigned URL link expiration time millis {}", expTimeMillis);
     expiration.setTime(expTimeMillis);
-
     return expiration;
   }
+
 
   @Override
   public void storeFile(FileDefinition fileDefinition, String tenantId) {
     String parentFolder = tenantId + "/" + fileDefinition.getJobExecutionId();
-    String bucketName = getProperty("bucket.name");
-    if (StringUtils.isEmpty(bucketName)) {
+    String bucketName = getProperty(BUCKET_PROP_KEY);
+    if (StringUtils.isNullOrEmpty(bucketName)) {
       throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();

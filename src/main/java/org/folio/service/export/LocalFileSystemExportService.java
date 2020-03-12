@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.service.export.storage.ExportStorageFactory;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.upload.storage.FileStorage;
 import org.marc4j.MarcJsonReader;
@@ -25,7 +24,7 @@ public class LocalFileSystemExportService implements ExportService {
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
   @Autowired
-  private ExportStorageFactory exportStorageFactory;
+  private ExportStorageService exportStorageService;
 
   @Override
   public void export(List<String> jsonRecords, FileDefinition fileDefinition) {
@@ -56,7 +55,6 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition, String tenantId) {
-    ExportStorageService exportStorageService = exportStorageFactory.getExportStorage();
     exportStorageService.storeFile(fileDefinition, tenantId);
   }
 }
