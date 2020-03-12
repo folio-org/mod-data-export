@@ -1,0 +1,14 @@
+{
+    "fileDefinition": {
+        "id": "ecad5316-5f97-446a-bb54-68f16f71e989",
+        "fileName": "snapshot-test.csv",
+        "jobExecutionId": "6208f4de-eb2c-4a06-a880-32245fd3bce1",
+        "sourcePath": "./storage/files/ecad5316-5f97-446a-bb54-68f16f71e989/snapshot-test.csv",
+        "status": "COMPLETED"
+    },
+    "jobProfile": {
+        "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
+        "destination": "fileSystem",
+        "name": "export job profile"
+    }
+}
