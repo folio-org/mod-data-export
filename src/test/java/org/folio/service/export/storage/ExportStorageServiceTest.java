@@ -74,7 +74,7 @@ public class ExportStorageServiceTest {
     FileDefinition exportFileDefinition = new FileDefinition()
       .withJobExecutionId(jobId)
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
-    File file = Paths.get(exportFileDefinition.getSourcePath()).getFileName().toFile();
+    File file = Paths.get(exportFileDefinition.getSourcePath()).getParent().toFile();
 
     MultipleFileUpload multipleFileUploadMock = Mockito.mock(MultipleFileUpload.class);
     Mockito.doNothing().when(multipleFileUploadMock).waitForCompletion();
