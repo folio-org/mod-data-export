@@ -31,6 +31,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 /**
  *  Tests are written in blocking manner while testing the async code, that causes unstable builds on master branch sometimes.
  *  We need to overwrite all this tests using VertxUnitRunner instead of MockitoJunitRunner.
+ *  See org.folio.service.export.storage.ExportStorageServiceUnitTest for example.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DataExportHelperTest {
