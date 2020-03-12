@@ -99,7 +99,7 @@ public class ExportStorageServiceTest {
       .waitForCompletion();
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test(expected = HttpException.class)
   public void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");
