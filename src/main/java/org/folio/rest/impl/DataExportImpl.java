@@ -5,9 +5,7 @@ import static org.folio.util.ExceptionToResponseMapper.map;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.lang.invoke.MethodHandles;
@@ -15,11 +13,8 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.export.storage.ExportStorageFactory;
-import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.inputdatamanager.InputDataManager;
 import org.folio.spring.SpringContextUtil;
@@ -36,7 +31,7 @@ public class DataExportImpl implements DataExport {
   private JobExecutionService jobExecutionService;
 
   @Autowired
-  private ExportStorageFactory exportStorageFactory;
+  private DataExportHelper dataExportHelper;
 
   private InputDataManager inputDataManager;
 
@@ -77,31 +72,11 @@ public class DataExportImpl implements DataExport {
   @Validate
   public void getDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileId(String jobId, String exportFileId,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-
-    succeededFuture().compose(ar -> fetchLink(jobId,exportFileId))
+    succeededFuture().compose(ar -> dataExportHelper.getDownloadLink(jobId, exportFileId, tenantId))
       .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
   }
-
-
-  private Future<FileDownload> fetchLink(String jobId, String exportFileId) {
-    ExportStorageService expService = exportStorageFactory.getExportStorageImplementation();
-    Promise<FileDownload> promise = Promise.promise();
-    String link;
-    try {
-      link = expService.getFileDownloadLink(jobId, exportFileId, tenantId);
-      if (org.apache.commons.lang3.StringUtils.isNotEmpty(link)) {
-        promise.complete(new FileDownload().withFileId(exportFileId)
-          .withLink(link));
-      }
-    } catch (Exception e) {
-      promise.fail(e);
-    }
-
-    return promise.future();
-  }
-
 
 }
