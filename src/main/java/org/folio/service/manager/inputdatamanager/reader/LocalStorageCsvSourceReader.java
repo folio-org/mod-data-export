@@ -1,11 +1,5 @@
 package org.folio.service.manager.inputdatamanager.reader;
 
-import com.google.common.collect.Iterables;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
@@ -14,6 +8,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
 
 import static java.util.Objects.nonNull;
 

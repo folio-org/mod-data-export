@@ -2,7 +2,9 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
+
 import java.util.Optional;
+
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
@@ -13,6 +15,7 @@ public interface JobExecutionService {
 
   /**
    * Returns JobExecutionCollection by the input query
+   *
    * @param query  query string to filter entities
    * @param offset starting index in a list of results
    * @param limit  maximum number of results to return
@@ -22,17 +25,28 @@ public interface JobExecutionService {
 
   /**
    * Saves {@link JobExecution}
-   * @param jobExecution  jobExecution to save
-   * @param tenantId tenant id
+   *
+   * @param jobExecution jobExecution to save
+   * @param tenantId     tenant id
    * @return future with JobExecutionCollection
    */
   Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 
   /**
+   * Updates {@link JobExecution}
    *
-   * @param jobExecution
-   * @param tenantId
-   * @return
+   * @param jobExecution job to update
+   * @param tenantId     tenant id
+   * @return future
    */
-  Future<Optional<JobExecution>> getById(String jobId, String tenantId);
+  Future<JobExecution> update(JobExecution jobExecution, String tenantId);
+
+  /**
+   * Gets {@link JobExecution}
+   *
+   * @param jobExecutionId job id
+   * @param tenantId       tenant id
+   * @return future
+   */
+  Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
 }

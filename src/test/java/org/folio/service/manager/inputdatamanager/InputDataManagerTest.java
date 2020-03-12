@@ -1,6 +1,5 @@
 package org.folio.service.manager.inputdatamanager;
 
-import com.google.common.collect.Lists;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -9,9 +8,18 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
+
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.assertj.core.util.Maps;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.exportresult.ExportResult;
@@ -30,20 +38,20 @@ import org.mockito.Spy;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertThat;
 
 public class InputDataManagerTest {
 
@@ -80,6 +88,8 @@ public class InputDataManagerTest {
   @Mock
   private FileDefinitionService fileDefinitionService;
   @Mock
+  private JobExecutionService jobExecutionService;
+  @Mock
   private JsonObject exportRequestJson;
   @Mock
   private ExportManager exportManager;
@@ -100,11 +110,14 @@ public class InputDataManagerTest {
   private ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor;
   @Captor
   private ArgumentCaptor<InputDataContext> inputDataContextCaptor;
+  @Captor
+  private ArgumentCaptor<JobExecution> jobExecutionCaptor;
 
   private ExportRequest exportRequest;
   private FileDefinition requestFileDefinition;
   private Map<String, String> requestParams;
   private FileDefinition fileExportDefinition;
+  private JobExecution jobExecution;
 
 
   @Before
@@ -114,7 +127,10 @@ public class InputDataManagerTest {
     fileExportDefinition = createFileExportDefinition();
     exportRequest = createExportRequest();
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
+    jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
+    when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
     doReturn(sourceReader).when(inputDataManager).initSourceReader(requestFileDefinition, BATCH_SIZE);
@@ -132,6 +148,8 @@ public class InputDataManagerTest {
     //then
     verify(sourceReader).close();
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
+    verify(jobExecutionService).update(jobExecutionCaptor.capture(), eq(TENANT_ID));
+    assertNotNull(jobExecutionCaptor.getValue().getCompletedDate());
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
     assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
@@ -148,6 +166,8 @@ public class InputDataManagerTest {
     inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobExecutionDataWereUpdated();
     verify(inputDataLocalMap).put(eq(JOB_EXECUTION_ID), inputDataContextCaptor.capture());
     InputDataContext inputDataContext = inputDataContextCaptor.getValue();
     assertThat(inputDataContext.getSourceReader(), equalTo(sourceReader));
@@ -164,6 +184,8 @@ public class InputDataManagerTest {
     inputDataManager.initBlocking(exportRequestJson, requestParams);
 
     //then
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobExecutionDataWereUpdated();
     FileDefinition actualFileExportDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(actualFileExportDefinition.getStatus(), equalTo(FileDefinition.Status.IN_PROGRESS));
     assertThat(actualFileExportDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + TIMESTAMP + ".mrc"));
@@ -183,6 +205,8 @@ public class InputDataManagerTest {
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobExecutionDataWereUpdated();
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
     assertThat(exportRequest.getJsonObject(OKAPI_CONNECTION_PARAMS_KEY).getString(TENANT_ID_KEY), equalTo(TENANT_ID));
@@ -205,6 +229,8 @@ public class InputDataManagerTest {
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobExecutionDataWereUpdated();
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
     assertThat(exportRequest.getJsonObject(OKAPI_CONNECTION_PARAMS_KEY).getString(TENANT_ID_KEY), equalTo(TENANT_ID));
@@ -226,6 +252,9 @@ public class InputDataManagerTest {
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.ERROR);
 
     //then
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobStatus(JobExecution.Status.FAIL);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(sourceReader).close();
@@ -245,6 +274,9 @@ public class InputDataManagerTest {
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.COMPLETED);
 
     //then
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobStatus(JobExecution.Status.SUCCESS);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
     verify(sourceReader).close();
@@ -264,6 +296,9 @@ public class InputDataManagerTest {
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
 
     //then
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    assertJobStatus(JobExecution.Status.FAIL);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -322,7 +357,8 @@ public class InputDataManagerTest {
 
   private FileDefinition createFileExportDefinition() {
     return new FileDefinition()
-      .withFileName(EXPORT_FILE_DEFINITION_NAME);
+      .withFileName(EXPORT_FILE_DEFINITION_NAME)
+      .withJobExecutionId(JOB_EXECUTION_ID);
   }
 
   private FileDefinition createRequestFileDefinition() {
@@ -342,5 +378,17 @@ public class InputDataManagerTest {
 
   private Iterator<List<String>> mockIterator() {
     return Lists.partition(EXPECTED_IDS, BATCH_SIZE).iterator();
+  }
+
+  private void assertJobExecutionDataWereUpdated() {
+    String fileName = fileExportDefinitionCaptor.getValue().getFileName();
+    assertTrue(jobExecution.getExportedFiles().stream()
+      .anyMatch(exportedFile -> exportedFile.getFileName().equals(fileName)));
+    assertEquals(JobExecution.Status.IN_PROGRESS, jobExecution.getStatus());
+    assertNotNull(jobExecution.getStartedDate());
+  }
+
+  private void assertJobStatus(JobExecution.Status status) {
+    assertEquals(jobExecution.getStatus(), status);
   }
 }

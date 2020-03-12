@@ -1,13 +1,16 @@
 package org.folio.dao.impl;
 
-import static org.drools.core.util.StringUtils.EMPTY;
-import static org.folio.util.HelperUtils.constructCriteria;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.UpdateResult;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.persist.Criteria.Criteria;
@@ -15,10 +18,9 @@ import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import java.lang.invoke.MethodHandles;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+
+import static org.drools.core.util.StringUtils.EMPTY;
+import static org.folio.util.HelperUtils.constructCriteria;
 
 
 @Repository
@@ -88,7 +90,6 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
     pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
     return promise.future().map(updateResult -> updateResult.getUpdated() == 1);
   }
-
 
 
   private Criterion constructExpiredEntriesCriterion(Date expirationDate) {

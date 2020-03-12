@@ -1,11 +1,13 @@
 package org.folio.dao.impl;
 
-import static org.folio.util.HelperUtils.constructCriteria;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import javax.ws.rs.NotFoundException;
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
+import java.util.UUID;
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobExecutionDao;
@@ -19,9 +21,8 @@ import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import java.lang.invoke.MethodHandles;
-import java.util.Optional;
-import java.util.UUID;
+
+import static org.folio.util.HelperUtils.constructCriteria;
 
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
@@ -58,10 +59,34 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   }
 
   @Override
-  public Future<Optional<JobExecution>> getById(String jobId, String tenantId) {
+  public Future<JobExecution> update(JobExecution jobExecution, String tenantId) {
+    Promise<JobExecution> promise = Promise.promise();
+    try {
+      Criteria idCrit = constructCriteria(ID_FIELD, jobExecution.getId());
+      pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, new Criterion(idCrit), true, updateResult -> {
+        if (updateResult.failed()) {
+          LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause());
+          promise.fail(updateResult.cause());
+        } else if (updateResult.result().getUpdated() != 1) {
+          String errorMessage = String.format("JobExecution with id '%s' was not found", jobExecution.getId());
+          LOGGER.error(errorMessage);
+          promise.fail(new NotFoundException(errorMessage));
+        } else {
+          promise.complete(jobExecution);
+        }
+      });
+    } catch (Exception e) {
+      LOGGER.error("Error updating jobExecution", e);
+      promise.fail(e);
+    }
+    return promise.future();
+  }
+
+  @Override
+  public Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId) {
     Promise<Results<JobExecution>> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, jobId);
+      Criteria idCrit = constructCriteria(ID_FIELD, jobExecutionId);
       pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, new Criterion(idCrit), false, promise);
     } catch (Exception e) {
       LOGGER.error(e);
@@ -76,9 +101,9 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
    * Builds CQLWrapper by which db result is filtered
    *
    * @param tableName - json key name
-   * @param query - query string to filter jobExecutions based on matching criteria in fields
-   * @param limit - limit of records for pagination
-   * @param offset - starting index in a list of results
+   * @param query     - query string to filter jobExecutions based on matching criteria in fields
+   * @param limit     - limit of records for pagination
+   * @param offset    - starting index in a list of results
    * @return - CQLWrapper
    */
   private CQLWrapper getCQLWrapper(String tableName, String query, int limit, int offset) throws FieldException {
