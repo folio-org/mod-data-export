@@ -38,7 +38,7 @@ import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 
 @RunWith(VertxUnitRunner.class)
-public class ExportStorageServiceUnitTest {
+public class ExportStorageServiceTest {
 
   @Mock
   private AmazonFactory amazonFactory;
@@ -50,7 +50,7 @@ public class ExportStorageServiceUnitTest {
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "testBucket";
 
-  public ExportStorageServiceUnitTest() {
+  public ExportStorageServiceTest() {
     MockitoAnnotations.initMocks(this);
   }
 
