@@ -1,5 +1,6 @@
 package org.folio.service.manager.inputdatamanager;
 
+import com.google.common.collect.Lists;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -8,13 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.assertj.core.util.Maps;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -38,20 +32,24 @@ import org.mockito.Spy;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class InputDataManagerTest {
 
@@ -72,12 +70,13 @@ public class InputDataManagerTest {
       "a5e9ccb3-737b-43b0-8f4a-f32a04c9ae16",
       "c5d662af-b0be-4851-bb9c-de70bba3dfce");
   private static final String DELIMETER = "-";
-  private static final String FILE_EXPORT_DEFINITION_KEY = "fileExportDefinition";
+  private static final String FILE_EXPORT_DEFINITION_KEY = "fileDefinitionId";
   private static final String OKAPI_CONNECTION_PARAMS_KEY = "okapiConnectionParams";
   private static final String JOB_EXECUTION_ID_KEY = "jobExecutionId";
   private static final String LAST_KEY = "last";
   private static final String IDENTIFIERS_KEY = "identifiers";
   private static final String TENANT_ID_KEY = "tenantId";
+  private static final String FILE_DEFINITION_ID = "c8b50e3f-0446-429c-960e-03774b88223f";
 
   @InjectMocks
   @Spy
@@ -117,6 +116,7 @@ public class InputDataManagerTest {
   private FileDefinition requestFileDefinition;
   private Map<String, String> requestParams;
   private FileDefinition fileExportDefinition;
+  private Optional<FileDefinition> fileExportDefinitionOptional;
   private JobExecution jobExecution;
 
 
@@ -125,6 +125,7 @@ public class InputDataManagerTest {
     initializeInputDataManager();
     requestFileDefinition = createRequestFileDefinition();
     fileExportDefinition = createFileExportDefinition();
+    fileExportDefinitionOptional = Optional.of(fileExportDefinition);
     exportRequest = createExportRequest();
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
     jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW);
@@ -208,7 +209,7 @@ public class InputDataManagerTest {
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobExecutionDataWereUpdated();
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
-    assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
+    assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(fileExportDefinition.getId()));
     assertThat(exportRequest.getJsonObject(OKAPI_CONNECTION_PARAMS_KEY).getString(TENANT_ID_KEY), equalTo(TENANT_ID));
     assertThat(exportRequest.getString(JOB_EXECUTION_ID_KEY), equalTo(JOB_EXECUTION_ID));
     assertThat(exportRequest.getBoolean(LAST_KEY), equalTo(true));
@@ -232,7 +233,7 @@ public class InputDataManagerTest {
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobExecutionDataWereUpdated();
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
-    assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
+    assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(fileExportDefinition.getId()));
     assertThat(exportRequest.getJsonObject(OKAPI_CONNECTION_PARAMS_KEY).getString(TENANT_ID_KEY), equalTo(TENANT_ID));
     assertThat(exportRequest.getString(JOB_EXECUTION_ID_KEY), equalTo(JOB_EXECUTION_ID));
     assertThat(exportRequest.getBoolean(LAST_KEY), equalTo(false));
@@ -243,6 +244,7 @@ public class InputDataManagerTest {
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
     //given
     ExportPayload exportPayload = createExportPayload();
+    when(fileDefinitionService.getById(FILE_DEFINITION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(fileExportDefinitionOptional));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -265,6 +267,7 @@ public class InputDataManagerTest {
   public void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
     //given
     ExportPayload exportPayload = createExportPayload();
+    when(fileDefinitionService.getById(FILE_DEFINITION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(fileExportDefinitionOptional));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -287,6 +290,7 @@ public class InputDataManagerTest {
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
     //given
     ExportPayload exportPayload = createExportPayload();
+    when(fileDefinitionService.getById(FILE_DEFINITION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(fileExportDefinitionOptional));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -319,7 +323,7 @@ public class InputDataManagerTest {
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
-    assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
+    assertThat(exportRequest.getString(FILE_EXPORT_DEFINITION_KEY), equalTo(FILE_DEFINITION_ID));
     assertThat(exportRequest.getJsonObject(OKAPI_CONNECTION_PARAMS_KEY).getString(TENANT_ID_KEY), equalTo(TENANT_ID));
     assertThat(exportRequest.getString(JOB_EXECUTION_ID_KEY), equalTo(JOB_EXECUTION_ID));
     assertThat(exportRequest.getBoolean(LAST_KEY), equalTo(false));
@@ -371,7 +375,7 @@ public class InputDataManagerTest {
   private ExportPayload createExportPayload() {
     ExportPayload exportPayload = new ExportPayload();
     exportPayload.setOkapiConnectionParams(new OkapiConnectionParams(requestParams));
-    exportPayload.setFileExportDefinition(fileExportDefinition);
+    exportPayload.setFileDefinitionId(FILE_DEFINITION_ID);
     exportPayload.setJobExecutionId(JOB_EXECUTION_ID);
     return exportPayload;
   }
