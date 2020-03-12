@@ -1,20 +1,21 @@
 package org.folio.service.export.storage;
 
-import org.folio.rest.jaxrs.model.FileDefinition;
 
+import io.vertx.core.Future;
+import org.folio.rest.jaxrs.model.FileDefinition;
 /**
  * File retrieval service. Provides methods for retrieving the exported files.
  */
 public interface ExportStorageService {
+
   /**
    * Fetch the link to download a file for a given job by fileName
-   *
-   * @param jobId:       The job to which the files are associated
-   * @param exportFileId file definition id
-   * @param tenantId     tenant id
+   * @param jobExecutionId The job execution ID to which the files are associated
+   * @param exportFileName The name of the file to download
+   * @param tenantId
    * @return A link using which the file can be downloaded
    */
-  String getFileDownloadLink(String jobId, String exportFileId, String tenantId);
+  Future<String> getFileDownloadLink(String jobExecutionId, String exportFileName, String tenantId);
 
   /**
    * Store the file in S3
@@ -23,5 +24,4 @@ public interface ExportStorageService {
    * @param tenantId       tenant id
    */
   void storeFile(FileDefinition fileDefinition, String tenantId);
-
 }

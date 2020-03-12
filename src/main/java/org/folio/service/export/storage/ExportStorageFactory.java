@@ -5,7 +5,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExportStorageFactory {
 
-  public ExportStorageService getExportStorage() {
+  /**
+   * Currently supports only Amazon S3, more implementations will be added
+   * @return
+   */
+  public ExportStorageService getExportStorageImplementation() {
     return new AWSStorageServiceImpl();
   }
+
 }

@@ -7,15 +7,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
-import org.apache.commons.io.FilenameUtils;
-import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
-import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
-import org.folio.service.manager.inputdatamanager.reader.SourceReader;
 import org.folio.service.manager.exportresult.ExportResult;
+import org.folio.service.manager.inputdatamanager.reader.LocalStorageCsvSourceReader;
+import org.folio.service.manager.inputdatamanager.reader.SourceReader;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -27,17 +25,15 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.nonNull;
 
 /**
  * Acts a source of a uuids to be exported.
  */
-@SuppressWarnings({"java:S1172", "java:S125"})
 @Service
 class InputDataManagerImpl implements InputDataManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -50,10 +46,6 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
 
-  @Autowired
-  private SourceReader sourceReader;
-  @Autowired
-  private JobExecutionDaoImpl jobExecutionDao;
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
@@ -72,34 +64,41 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, JsonObject params) {
+  public void init(JsonObject request, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
       initBlocking(request, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject params) {
+  protected void initBlocking(JsonObject request, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     FileDefinition requestFileDefinition = exportRequest.getFileDefinition();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params.mapTo(Map.class));
+    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
     String tenantId = okapiConnectionParams.getTenantId();
-    Iterator<List<String>> readFileContent = sourceReader.getFileContentIterator(requestFileDefinition, getBatchSize());
-    if (readFileContent.hasNext()) {
+    SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
+    if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId)
         .compose(savedFileExportDefinition -> {
           //get executionJob and update exportresult to in-progress
           String jobExecutionId = requestFileDefinition.getJobExecutionId();
-          initInputDataContext(readFileContent, jobExecutionId);
+          initInputDataContext(sourceReader, jobExecutionId);
           ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
-          exportNextChunk(exportPayload, readFileContent);
+          exportNextChunk(exportPayload, sourceReader);
           return Future.succeededFuture();
         });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
+      sourceReader.close();
       //update job execution with error exportresult
     }
+  }
+
+  protected SourceReader initSourceReader(FileDefinition requestFileDefinition, int batchSize) {
+    SourceReader sourceReader = new LocalStorageCsvSourceReader();
+    sourceReader.init(requestFileDefinition, batchSize);
+    return sourceReader;
   }
 
   @Override
@@ -112,27 +111,30 @@ class InputDataManagerImpl implements InputDataManager {
 
   protected void proceedBlocking(JsonObject payload, ExportResult exportResult) {
     ExportPayload exportPayload = payload.mapTo(ExportPayload.class);
+    InputDataContext inputDataContext = inputDataLocalMap.get(exportPayload.getJobExecutionId());
+    SourceReader sourceReader = inputDataContext.getSourceReader();
     if (ExportResult.IN_PROGRESS.equals(exportResult)) {
-      InputDataContext inputDataContext = inputDataLocalMap.get(exportPayload.getJobExecutionId());
-      Iterator<List<String>> fileContentIterator = inputDataContext.getFileContentIterator();
-      if (Objects.nonNull(fileContentIterator) && fileContentIterator.hasNext()) {
-        exportNextChunk(exportPayload, fileContentIterator);
+      if (nonNull(sourceReader) && sourceReader.hasNext()) {
+        exportNextChunk(exportPayload, sourceReader);
       } else {
-        finalizeExport(exportPayload, ExportResult.ERROR);
+        finalizeExport(exportPayload, ExportResult.ERROR, sourceReader);
       }
     } else {
-      finalizeExport(exportPayload, exportResult);
+      finalizeExport(exportPayload, exportResult, sourceReader);
     }
   }
 
-  private void exportNextChunk(ExportPayload exportPayload, Iterator<List<String>> fileContentIterator) {
-    List<String> identifiers = fileContentIterator.next();
+  private void exportNextChunk(ExportPayload exportPayload, SourceReader sourceReader) {
+    List<String> identifiers = sourceReader.readNext();
     exportPayload.setIdentifiers(identifiers);
-    exportPayload.setLast(!fileContentIterator.hasNext());
+    exportPayload.setLast(!sourceReader.hasNext());
     getExportManager().exportData(JsonObject.mapFrom(exportPayload));
   }
 
-  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult) {
+  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult, SourceReader sourceReader) {
+    if(nonNull(sourceReader)) {
+      sourceReader.close();
+    }
     //update jobExecution status to Failed
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     if (ExportResult.COMPLETED.equals(exportResult))
@@ -193,8 +195,8 @@ class InputDataManagerImpl implements InputDataManager {
     return now.format(formatter);
   }
 
-  private void initInputDataContext(Iterator<List<String>> fileContentIterator, String jobExecutionId) {
-    InputDataContext inputDataContext = new InputDataContext(fileContentIterator);
+  private void initInputDataContext(SourceReader sourceReader, String jobExecutionId) {
+    InputDataContext inputDataContext = new InputDataContext(sourceReader);
     inputDataLocalMap.put(jobExecutionId, inputDataContext);
   }
 
