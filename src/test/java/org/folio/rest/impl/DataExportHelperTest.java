@@ -91,7 +91,7 @@ public class DataExportHelperTest {
   }
 
   @Test
-  public void getDownloadLink_shouldFail(TestContext testContext) throws MalformedURLException {
+  public void getDownloadLink_shouldFailIfFileIdFound(TestContext testContext) throws MalformedURLException {
     Async async = testContext.async();
     // given
     Mockito
