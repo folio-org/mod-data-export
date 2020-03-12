@@ -255,6 +255,7 @@ public class InputDataManagerTest {
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(sourceReader).close();
@@ -276,6 +277,7 @@ public class InputDataManagerTest {
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.SUCCESS);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
     verify(sourceReader).close();
@@ -297,6 +299,7 @@ public class InputDataManagerTest {
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
+    assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -383,7 +386,6 @@ public class InputDataManagerTest {
     assertTrue(jobExecution.getExportedFiles().stream()
       .anyMatch(exportedFile -> exportedFile.getFileName().equals(fileName)));
     assertEquals(jobExecution.getStatus(), JobExecution.Status.IN_PROGRESS);
-    assertNotNull(jobExecution.getCompletedDate());
     assertNotNull(jobExecution.getStartedDate());
   }
 
