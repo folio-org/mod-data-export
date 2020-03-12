@@ -8,8 +8,6 @@ public enum ErrorCodes {
   FILE_DEFINITION_NOT_FOUND("fileDefitionNotFound", "File Definition not found"),
   S3_BUCKET_NOT_PROVIDED("bucketNotProvided", "S3 bucket name is not found in System Properties");
 
-
-
   private final String code;
   private final String description;
 
