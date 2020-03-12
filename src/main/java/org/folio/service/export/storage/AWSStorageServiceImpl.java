@@ -81,7 +81,6 @@ public class AWSStorageServiceImpl implements ExportStorageService {
   @Override
   public void storeFile() {
     // Will be implemented as part of MDEXP-67
-
   }
 
 }

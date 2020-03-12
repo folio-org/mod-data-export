@@ -1,6 +1,8 @@
 package org.folio.service.export.storage;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -27,7 +29,10 @@ public class AWSStorageServiceImplTest {
   AWSClient awsClient;
 
   @InjectMocks
-  ExportStorageService awsStorageService = new AWSStorageServiceImpl();;
+  ExportStorageService awsStorageService = new AWSStorageServiceImpl();
+
+  @InjectMocks
+  ExportStorageFactory exportStorageFactory = new ExportStorageFactory();
 
   @Before
   public void setUp() throws Exception {
@@ -49,7 +54,8 @@ public class AWSStorageServiceImplTest {
     URL response = new URL("https://test-aws-export-vk.s3.amazonaws.com");
     when(s3ClientMock.generatePresignedUrl(any(GeneratePresignedUrlRequest.class))).thenReturn(response);
 
-    assertEquals(response.toString(), awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId).result());
+    assertEquals(response.toString(), awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId)
+      .result());
 
   }
 
@@ -66,13 +72,12 @@ public class AWSStorageServiceImplTest {
     doThrow(new SdkClientException("Bucket Not Found")).when(s3ClientMock)
       .generatePresignedUrl(any(GeneratePresignedUrlRequest.class));
 
-
     assertEquals(true, awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId)
-        .failed());
+      .failed());
 
     assertEquals("Bucket Not Found", awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId)
-        .cause().getMessage());
-
+      .cause()
+      .getMessage());
 
   }
 
@@ -85,6 +90,12 @@ public class AWSStorageServiceImplTest {
 
     awsStorageService.getFileDownloadLink(null, null, null);
 
+  }
+
+  @Test
+  public void testExportStorageFactory() {
+    ExportStorageService fct = exportStorageFactory.getExportStorageImplementation();
+    assertThat(fct, instanceOf(AWSStorageServiceImpl.class));;
   }
 
 }
