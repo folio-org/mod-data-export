@@ -95,10 +95,8 @@ class InputDataManagerImpl implements InputDataManager {
         .compose(savedFileExportDefinition -> {
           initInputDataContext(sourceReader, jobExecutionId);
           ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
-          //here
-          exportNextChunk(exportPayload, sourceReader);
-          //up on 1 line
           updateJobExecutionStatusAndExportedFiles(jobExecutionId, fileExportDefinition, tenantId);
+          exportNextChunk(exportPayload, sourceReader);
           return Future.succeededFuture();
         });
     } else {
@@ -109,7 +107,7 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   /**
-   * Updates jobExecution status with IN-PROGRESS && updates exported files && updates completed date
+   * Updates jobExecution status with IN-PROGRESS && updates exported files && updates started date
    *
    * @param id                   job execution id
    * @param fileExportDefinition definition of the file to export
@@ -125,7 +123,6 @@ class InputDataManagerImpl implements InputDataManager {
         exportedFiles.add(exportedFile);
         jobExecution.setExportedFiles(exportedFiles);
         jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
-        jobExecution.setCompletedDate(new Date());
         if (Objects.isNull(jobExecution.getStartedDate())) {
           jobExecution.setStartedDate(new Date());
         }
@@ -195,7 +192,6 @@ class InputDataManagerImpl implements InputDataManager {
       sourceReader.close();
     }
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
-    //in master it fetches from exportPayload.getJobExecutionId()
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     if (ExportResult.COMPLETED.equals(exportResult)) {
