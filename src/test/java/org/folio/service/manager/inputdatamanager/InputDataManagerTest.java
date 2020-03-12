@@ -385,7 +385,7 @@ public class InputDataManagerTest {
     String fileName = fileExportDefinitionCaptor.getValue().getFileName();
     assertTrue(jobExecution.getExportedFiles().stream()
       .anyMatch(exportedFile -> exportedFile.getFileName().equals(fileName)));
-    assertEquals(jobExecution.getStatus(), JobExecution.Status.IN_PROGRESS);
+    assertEquals(JobExecution.Status.IN_PROGRESS, jobExecution.getStatus());
     assertNotNull(jobExecution.getStartedDate());
   }
 

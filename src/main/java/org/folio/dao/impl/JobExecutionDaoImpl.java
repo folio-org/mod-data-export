@@ -4,13 +4,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-
 import javax.ws.rs.NotFoundException;
-
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobExecutionDao;
