@@ -1,9 +1,9 @@
 package org.folio.service.export;
 
-
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.upload.storage.FileStorage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,11 +18,14 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportServiceUnitTest {
   @Mock
   private FileStorage fileStorage;
+  @Mock
+  private ExportStorageService exportStorageService;
   @InjectMocks
   private ExportService exportService = new LocalFileSystemExportService();
 
@@ -47,5 +50,15 @@ public class ExportServiceUnitTest {
     exportService.export(marcRecords, fileDefinition);
     // then
     Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+  }
+
+  @Test
+  public void postExport_shouldStoreFile() {
+    // given
+    FileDefinition fileDefinition = new FileDefinition();
+    // when
+    exportService.postExport(fileDefinition, "tenant");
+    // then
+    Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
   }
 }
