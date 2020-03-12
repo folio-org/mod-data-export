@@ -90,7 +90,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
 
   @Override
   public void storeFile(FileDefinition fileDefinition, String tenantId) {
-    String parentFolder = tenantId + "/" + fileDefinition.getJobExecutionId();
+    String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
       throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
@@ -100,8 +100,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
         LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
         MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
           bucketName,
-          parentFolder,
-          Paths.get(fileDefinition.getSourcePath()).getFileName().toFile(),
+          folderInS3,
+          Paths.get(fileDefinition.getSourcePath()).getParent().toFile(),
           false);
         multipleFileUpload.waitForCompletion();
       } catch (InterruptedException e) {
