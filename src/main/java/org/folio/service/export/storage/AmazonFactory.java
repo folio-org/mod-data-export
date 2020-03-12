@@ -10,10 +10,9 @@ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 @Component
 public class AmazonFactory {
-  private Regions region = Regions.DEFAULT_REGION;
 
   public AmazonS3 getS3Client() {
-    return AmazonS3ClientBuilder.standard().withRegion(region).build();
+    return AmazonS3ClientBuilder.standard().build();
   }
 
   public TransferManager getTransferManager() {
