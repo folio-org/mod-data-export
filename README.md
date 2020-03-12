@@ -15,13 +15,23 @@ FOLIO data export module.
 
 #### Important notes
 
+## LIMITATIONS OF THE MODULE
 For Q1 release, the only supported file storage to store the exported MARC files is S3. 
 This means that it is expected that AWS credentials are properly configured in a hosting environment as per:https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
 The credential chain looks for the credentias in multiple places and the precedence order in case it is specified in multiple places is given here: https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html
 
+## CONFIGURATIONS NEEDED
 The module also expects the bucket name to be passed in the JVM as the system parameter with name `bucket.name`
 
 example: java mod-data-export-fat.jar -Dbucket.name=diku_export
+
+
+## OTHER
+In a multi-tenant cluster, each tenant data is stored in it's own folder(prefix) under one bucket. For example, if the tenants are tenant001, tenant002, tenant003, below is the pattern used stored in the bucket
+/{tenantId}/{jobExecutionId}/{fileName}.mrc
+- /tenant001/448ae575-daec-49c1-8041-d64c8ed8e5b1/testFile-20200116100503.mrc
+- /tenant002/295e28b4-aea2-4458-9073-385a31e1da05/uc-20200116100503.mrc
+
 
 Note: There are plans to have hosting agnostic implementation available in 2020 Q2.
 
