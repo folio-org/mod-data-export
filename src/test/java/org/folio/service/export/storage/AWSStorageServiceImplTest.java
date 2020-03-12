@@ -2,8 +2,8 @@ package org.folio.service.export.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
@@ -49,11 +49,11 @@ public class AWSStorageServiceImplTest {
     URL response = new URL("https://test-aws-export-vk.s3.amazonaws.com");
     when(s3ClientMock.generatePresignedUrl(any(GeneratePresignedUrlRequest.class))).thenReturn(response);
 
-    assertEquals(response.toString(), awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId));
+    assertEquals(response.toString(), awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId).result());
 
   }
 
-  @Test(expected = SdkClientException.class)
+  @Test
   public void testbucketNameNotFoundInS3() {
 
     String tenantId = "testAWS";
@@ -66,7 +66,13 @@ public class AWSStorageServiceImplTest {
     doThrow(new SdkClientException("Bucket Not Found")).when(s3ClientMock)
       .generatePresignedUrl(any(GeneratePresignedUrlRequest.class));
 
-    awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
+
+    assertEquals(true, awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId)
+        .failed());
+
+    assertEquals("Bucket Not Found", awsStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId)
+        .cause().getMessage());
+
 
   }
 

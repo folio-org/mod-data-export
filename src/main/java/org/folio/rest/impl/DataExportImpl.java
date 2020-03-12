@@ -36,7 +36,7 @@ public class DataExportImpl implements DataExport {
   private JobExecutionService jobExecutionService;
 
   @Autowired
-  private ExportStorageFactory exportStorageFactory;
+  private DataExportHelper dataExportHelper;
 
   private InputDataManager inputDataManager;
 
@@ -77,31 +77,11 @@ public class DataExportImpl implements DataExport {
   @Validate
   public void getDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileId(String jobId, String exportFileId,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-
-    succeededFuture().compose(ar -> fetchLink(jobId,exportFileId))
+    succeededFuture().compose(ar -> dataExportHelper.getDownloadLink(jobId, exportFileId, tenantId))
       .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
   }
-
-
-  private Future<FileDownload> fetchLink(String jobId, String exportFileId) {
-    ExportStorageService expService = exportStorageFactory.getExportStorageImplementation();
-    Promise<FileDownload> promise = Promise.promise();
-    String link;
-    try {
-      link = expService.getFileDownloadLink(jobId, exportFileId, tenantId);
-      if (org.apache.commons.lang3.StringUtils.isNotEmpty(link)) {
-        promise.complete(new FileDownload().withFileId(exportFileId)
-          .withLink(link));
-      }
-    } catch (Exception e) {
-      promise.fail(e);
-    }
-
-    return promise.future();
-  }
-
 
 }

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
   "org.folio.dao",
   "org.folio.service",
   "org.folio.clients",
-  "org.folio.rest.impl",
-  "org.folio.rest.exceptions"})
+  "org.folio.rest.impl"})
 public class ApplicationConfig {
 }
