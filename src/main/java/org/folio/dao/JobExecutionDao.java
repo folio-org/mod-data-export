@@ -1,7 +1,9 @@
 package org.folio.dao;
 
 import io.vertx.core.Future;
+
 import java.util.Optional;
+
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
@@ -30,10 +32,20 @@ public interface JobExecutionDao {
   Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 
   /**
+   * Updates {@link JobExecution}
    *
-   * @param jobId
-   * @param tenantId
-   * @return
+   * @param jobExecution job to update
+   * @param tenantId     tenant id
+   * @return future
    */
-  Future<Optional<JobExecution>> getById(String jobId, String tenantId);
+  Future<JobExecution> update(JobExecution jobExecution, String tenantId);
+
+  /**
+   * Gets {@link JobExecution}
+   *
+   * @param jobExecutionId job id
+   * @param tenantId       tenant id
+   * @return future
+   */
+  Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
 }
