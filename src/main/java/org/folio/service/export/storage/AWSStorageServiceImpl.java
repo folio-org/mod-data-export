@@ -92,7 +92,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new IllegalStateException("S3 bucket name is not defined. Please set the bucket.name system property");
+      throw new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED);
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
       try {
