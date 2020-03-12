@@ -2,7 +2,6 @@ package org.folio.service.export.storage;
 
 
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import org.folio.rest.jaxrs.model.FileDefinition;
 /**
  * File retrieval service. Provides methods for retrieving the exported files.

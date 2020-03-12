@@ -1,19 +1,12 @@
 package org.folio.rest.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-
-import io.vertx.core.Promise;
-import java.net.MalformedURLException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.UUID;
+import io.vertx.core.Future;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.ExportedFile;
+import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
@@ -26,108 +19,97 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 
-/**
- *  Tests are written in blocking manner while testing the async code, that causes unstable builds on master branch sometimes.
- *  We need to overwrite all this tests using VertxUnitRunner instead of MockitoJunitRunner.
- */
-@RunWith(MockitoJUnitRunner.class)
+import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+
+import static io.vertx.core.Future.succeededFuture;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+
+@RunWith(VertxUnitRunner.class)
 public class DataExportHelperTest {
   @Mock
   private ExportStorageService exportStorageService;
   @Mock
-  private JobExecutionService jobExecutionServiceMock;
+  private JobExecutionService jobExecutionService;
   @InjectMocks
   @Spy
   private DataExportHelper helper = new DataExportHelper();
+  private final static String TENANT = "testTenant";
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
   @Test
-  public void testSuccessfulGetDownloadLink() throws MalformedURLException {
-
-    ExportStorageService storageServiceMock = Mockito.mock(ExportStorageService.class);
+  public void getDownloadLink_shouldSuccessfulGetDownloadLink(TestContext testContext) throws MalformedURLException {
+    Async async = testContext.async();
+    // given
+    ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
+    JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
 
     String url = "https://test.aws.amazon.com";
-    Promise<String> pr = Promise.promise();
-    pr.complete("test.mrc");
-    doReturn(pr.future()).when(helper)
-      .getDownloadFileName(anyString(), anyString(), anyString());
+    Mockito.when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString())).thenReturn(succeededFuture(url));
+    Mockito.when(jobExecutionService.getById(anyString(), anyString())).thenReturn(succeededFuture(Optional.of(jobExecution)));
 
-    Promise<String> pr1 = Promise.promise();
-    pr1.complete(url);
-
-    doReturn(pr1.future()).when(storageServiceMock)
-      .getFileDownloadLink(anyString(), anyString(), anyString());
-
-    assertNotNull(helper.getDownloadLink(anyString(), anyString(), anyString())
-      .result()
-      .getLink());
-
+    // when
+    Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
+    // then
+    linkFuture.setHandler(ar -> {
+      assertTrue(ar.succeeded());
+      assertEquals(url, ar.result().getLink());
+      async.complete();
+    });
   }
 
   @Test
-  public void testFailGetFileDownloadLink() throws MalformedURLException {
-    ExportStorageService storageServiceMock = Mockito.mock(ExportStorageService.class);
-    Promise<String> pr = Promise.promise();
-    pr.complete("test.mrc");
-    doReturn(pr.future()).when(helper)
-      .getDownloadFileName(anyString(), anyString(), anyString());
+  public void getDownloadLink_shouldFailGetFileDownloadLink(TestContext testContext) throws MalformedURLException {
+    Async async = testContext.async();
+    // given
+    Mockito
+      .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
+      .thenThrow(new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED));
 
-    doThrow(new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED)).when(storageServiceMock)
-      .getFileDownloadLink(anyString(), anyString(), anyString());
+    ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
+    JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
+    Mockito
+      .when(jobExecutionService.getById(anyString(), anyString()))
+      .thenReturn(succeededFuture(Optional.of(jobExecution)));
 
-    assertEquals(true, helper.getDownloadLink(anyString(), anyString(), anyString())
-      .failed());
-
-    assertNull(helper.getDownloadLink(anyString(), anyString(), anyString())
-      .result());
+    // when
+    Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
+    // then
+    linkFuture.setHandler(ar -> {
+      assertTrue(ar.failed());
+      async.complete();
+    });
   }
 
   @Test
-  public void testSuccessfulGetDownloadFileName() throws MalformedURLException {
+  public void getDownloadLink_shouldFailIfFileIdFound(TestContext testContext) throws MalformedURLException {
+    Async async = testContext.async();
+    // given
+    Mockito
+      .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
+      .thenThrow(new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED));
 
-    String fileName = "test-20200311100503.mrc";
+    ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
+    JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
+    Mockito
+      .when(jobExecutionService.getById(anyString(), anyString()))
+      .thenReturn(succeededFuture(Optional.of(jobExecution)));
 
-    JobExecution jobExecution = new JobExecution();
-    ExportedFile exportedFile = new ExportedFile();
-    String fileId = UUID.randomUUID()
-        .toString();
-    exportedFile.withFileId(fileId)
-      .withFileName(fileName);
-    HashSet<ExportedFile> filesSet = new HashSet<>();
-
-    filesSet.add(exportedFile);
-    jobExecution.withId(UUID.randomUUID().toString())
-      .withExportedFiles(filesSet)
-      .withStatus(JobExecution.Status.SUCCESS);
-    System.err.println(jobExecution);
-
-    Promise<Optional<JobExecution>> pr = Promise.promise();
-    pr.complete(Optional.of(jobExecution));
-
-    doReturn(pr.future()).when(jobExecutionServiceMock).getById(anyString(), anyString());
-
-    assertEquals(fileName, helper.getDownloadFileName("1234", fileId, "test")
-      .result());
-
+    // when
+    Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), UUID.randomUUID().toString(), TENANT);
+    // then
+    linkFuture.setHandler(ar -> {
+      assertTrue(ar.failed());
+      async.complete();
+    });
   }
-
-  @Test
-  public void testFailGetDownloadFileNameNoJobId() throws MalformedURLException {
-
-    Promise<Optional<JobExecution>> pr = Promise.promise();
-    pr.complete(Optional.empty());
-
-    doReturn(pr.future()).when(jobExecutionServiceMock).getById(anyString(), anyString());
-
-    assertEquals(true, helper.getDownloadFileName(anyString(), anyString(), anyString())
-      .failed());
-
-  }
-
 }
