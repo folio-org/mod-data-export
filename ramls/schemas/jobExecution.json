@@ -53,6 +53,11 @@
       "type": "string",
       "format": "date-time"
     },
+    "startedDate": {
+      "description": "Date and time when the job execution started",
+      "type": "string",
+      "format": "date-time"
+    },
     "runBy": {
       "description": "First and last name of the user who triggered the job execution",
       "type": "object",
