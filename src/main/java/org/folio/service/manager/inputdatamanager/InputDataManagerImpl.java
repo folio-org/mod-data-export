@@ -7,7 +7,17 @@ import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
-import org.folio.dao.impl.JobExecutionDaoImpl;
+
+import java.lang.invoke.MethodHandles;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -18,9 +28,6 @@ import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.manager.inputdatamanager.reader.LocalStorageCsvSourceReader;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
-import org.folio.service.manager.exportresult.ExportResult;
-import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
-import org.folio.service.manager.inputdatamanager.reader.SourceReader;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -28,12 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.lang.invoke.MethodHandles;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
@@ -98,8 +99,8 @@ class InputDataManagerImpl implements InputDataManager {
           exportNextChunk(exportPayload, sourceReader);
           //up on 1 line
           updateJobExecutionStatusAndExportedFiles(jobExecutionId, fileExportDefinition, tenantId);
-        return Future.succeededFuture();
-      });
+          return Future.succeededFuture();
+        });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
       sourceReader.close();
@@ -190,7 +191,7 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult, SourceReader sourceReader) {
-    if(nonNull(sourceReader)) {
+    if (nonNull(sourceReader)) {
       sourceReader.close();
     }
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();

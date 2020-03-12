@@ -24,9 +24,6 @@ import org.folio.service.manager.exportmanager.ExportManager;
 import org.folio.service.manager.exportmanager.ExportPayload;
 import org.folio.service.manager.exportresult.ExportResult;
 import org.folio.service.manager.inputdatamanager.reader.SourceReader;
-import org.folio.service.manager.exportresult.ExportResult;
-import org.folio.service.manager.inputdatamanager.datacontext.InputDataContext;
-import org.folio.service.manager.inputdatamanager.reader.SourceReader;
 import org.folio.service.upload.definition.FileDefinitionService;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
@@ -132,7 +129,6 @@ public class InputDataManagerTest {
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
     jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
-    when(requestParamsJson.mapTo(Map.class)).thenReturn(requestParams);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
     doReturn(exportManager).when(inputDataManager).getExportManager();
@@ -388,6 +384,7 @@ public class InputDataManagerTest {
       .anyMatch(exportedFile -> exportedFile.getFileName().equals(fileName)));
     assertEquals(jobExecution.getStatus(), JobExecution.Status.IN_PROGRESS);
     assertNotNull(jobExecution.getCompletedDate());
+    assertNotNull(jobExecution.getStartedDate());
   }
 
   private void assertJobStatus(JobExecution.Status status) {
