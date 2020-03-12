@@ -27,10 +27,10 @@ example: java mod-data-export-fat.jar -Dbucket.name=diku_export
 
 
 ## OTHER
-In a multi-tenant cluster, each tenant data is stored in it's own folder(prefix) under one bucket. For example, if the tenants are tenant001, tenant002, tenant003, below is the pattern used stored in the bucket
+In a multi-tenant cluster, each tenant data is stored in it's own folder(prefix) under one bucket. For example, if the tenants are tenant001, tenant002, and bucket name "exportMarc" below is the pattern used stored in the bucket
 /{tenantId}/{jobExecutionId}/{fileName}.mrc
-- /tenant001/448ae575-daec-49c1-8041-d64c8ed8e5b1/testFile-20200116100503.mrc
-- /tenant002/295e28b4-aea2-4458-9073-385a31e1da05/uc-20200116100503.mrc
+- exportMarc/tenant001/448ae575-daec-49c1-8041-d64c8ed8e5b1/testFile-20200116100503.mrc
+- exportMarc/tenant002/295e28b4-aea2-4458-9073-385a31e1da05/uc-20200116100503.mrc
 
 
 Note: There are plans to have hosting agnostic implementation available in 2020 Q2.
