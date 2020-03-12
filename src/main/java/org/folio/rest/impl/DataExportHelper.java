@@ -17,14 +17,15 @@ public class DataExportHelper {
   @Autowired
   private JobExecutionService jobExecutionService;
 
-  Future<FileDownload> getDownloadLink(String jobExecutionId, String exportFileId, String tenantId) {
+  public Future<FileDownload> getDownloadLink(String jobExecutionId, String exportFileId, String tenantId) {
     return getDownloadFileName(jobExecutionId, exportFileId, tenantId)
       .compose(fileName -> exportStorageService.getFileDownloadLink(jobExecutionId, fileName, tenantId))
-      .map(link -> new FileDownload().withFileId(exportFileId)
+      .map(link -> new FileDownload()
+        .withFileId(exportFileId)
         .withLink(link));
   }
 
-  Future<String> getDownloadFileName(String jobExecutionId, String exportFileId, String tenantId) {
+  private Future<String> getDownloadFileName(String jobExecutionId, String exportFileId, String tenantId) {
     return jobExecutionService.getById(jobExecutionId, tenantId)
       .map(job -> job.map(jb -> jb.getExportedFiles()
         .stream()
