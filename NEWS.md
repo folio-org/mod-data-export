@@ -1,6 +1,6 @@
 ## 2020-13-03 v1.0.0
 
-Export bibliographic MARC records from SRS
+Initial release, which exports MARC bibliographic records to AWS S3, for the instance UUIDs which have underlying records in SRS.
 
 * [MDEXP-69] - Update a jobExecution entry in DB
 * [MDEXP-68] - Create a S3 bucket for a tenant
