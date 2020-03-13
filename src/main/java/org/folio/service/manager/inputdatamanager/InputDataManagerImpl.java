@@ -212,7 +212,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Void> handleExportInitResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Initialization of export is failed, cause: {}", asyncResult.cause());
+      LOGGER.error("Initialization of export is failed", asyncResult.cause());
     } else {
       LOGGER.info("Initialization of export has been successfully completed");
     }
@@ -221,7 +221,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Void> handleExportResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export of identifiers chunk is failed, cause: {}", asyncResult.cause());
+      LOGGER.error("Export of identifiers chunk is failed", asyncResult.cause());
     } else {
       LOGGER.info("Export of identifiers chunk has been successfully completed");
     }
