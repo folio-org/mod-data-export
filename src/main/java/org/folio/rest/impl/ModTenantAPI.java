@@ -8,7 +8,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.service.cleanup.StorageCleanupService;
+import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
