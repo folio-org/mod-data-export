@@ -16,7 +16,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.job.JobExecutionService;
-import org.folio.service.manager.inputdatamanager.InputDataManager;
+import org.folio.service.manager.input.InputDataManager;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.slf4j.Logger;

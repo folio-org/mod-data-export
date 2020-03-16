@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
-import org.folio.service.upload.storage.FileStorage;
+import org.folio.service.file.storage.FileStorage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
