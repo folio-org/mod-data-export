@@ -65,6 +65,7 @@ public class ExportServiceUnitTest {
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
   }
 
+  @Test
   public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
     // given
     FileDefinition fileDefinition = null;
@@ -74,6 +75,7 @@ public class ExportServiceUnitTest {
     Mockito.verify(exportStorageService, Mockito.never()).storeFile(any(FileDefinition.class), anyString());
   }
 
+  @Test
   public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
     // given
     FileDefinition fileDefinition = new FileDefinition()
