@@ -29,6 +29,8 @@ public class ExportServiceUnitTest {
   @InjectMocks
   private ExportService exportService = new LocalFileSystemExportService();
 
+  private static final String TENANT = "tenant";
+
   @Test
   public void export_shouldPassExportFor_1_Record() throws IOException {
     // given
@@ -58,9 +60,18 @@ public class ExportServiceUnitTest {
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     // when
-    exportService.postExport(fileDefinition, "tenant");
+    exportService.postExport(fileDefinition, TENANT);
     // then
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
+  }
+
+  public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
+    // given
+    FileDefinition fileDefinition = null;
+    // when
+    exportService.postExport(fileDefinition, TENANT);
+    // then
+    Mockito.verify(exportStorageService, Mockito.never()).storeFile(any(FileDefinition.class), anyString());
   }
 
   public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
@@ -68,8 +79,8 @@ public class ExportServiceUnitTest {
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(null);
     // when
-    exportService.postExport(fileDefinition, "tenant");
+    exportService.postExport(fileDefinition, TENANT);
     // then
-    Mockito.verify(exportStorageService, Mockito.times(0)).storeFile(any(FileDefinition.class), anyString());
+    Mockito.verify(exportStorageService, Mockito.never()).storeFile(any(FileDefinition.class), anyString());
   }
 }
