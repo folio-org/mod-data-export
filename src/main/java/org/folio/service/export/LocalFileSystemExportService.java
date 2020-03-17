@@ -60,6 +60,12 @@ public class LocalFileSystemExportService implements ExportService {
     }
   }
 
+  /**
+   * Check if file definition entity and it`s source path is valid
+   *
+   * @param fileDefinition file definition
+   * @return true if file definition is valid
+   */
   private boolean isValidFileDefinition(FileDefinition fileDefinition) {
     return fileDefinition != null && fileDefinition.getSourcePath() != null;
   }
