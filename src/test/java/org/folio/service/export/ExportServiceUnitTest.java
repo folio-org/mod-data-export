@@ -55,10 +55,21 @@ public class ExportServiceUnitTest {
   @Test
   public void postExport_shouldStoreFile() {
     // given
-    FileDefinition fileDefinition = new FileDefinition();
+    FileDefinition fileDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     // when
     exportService.postExport(fileDefinition, "tenant");
     // then
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
+  }
+
+  public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
+    // given
+    FileDefinition fileDefinition = new FileDefinition()
+      .withSourcePath(null);
+    // when
+    exportService.postExport(fileDefinition, "tenant");
+    // then
+    Mockito.verify(exportStorageService, Mockito.times(0)).storeFile(any(FileDefinition.class), anyString());
   }
 }

@@ -55,6 +55,13 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition, String tenantId) {
-    exportStorageService.storeFile(fileDefinition, tenantId);
+    if (isValidFileDefinition(fileDefinition)) {
+      exportStorageService.storeFile(fileDefinition, tenantId);
+    }
   }
+
+  private boolean isValidFileDefinition(FileDefinition fileDefinition) {
+    return fileDefinition != null && fileDefinition.getSourcePath() != null;
+  }
+
 }
