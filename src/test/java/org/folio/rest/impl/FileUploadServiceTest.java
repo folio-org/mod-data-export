@@ -40,7 +40,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("InventoryUUIDsOneBatch.csv");
+      .withFileName("InventoryUUIDs.csv");
     // when created a new entity
     RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -89,7 +89,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   public void shouldUploadFile_return200Status(TestContext context) throws IOException {
     Async async = context.async();
     // given fileToUpload, binaryRequestSpecification and fileDefinition
-    File fileToUpload = getFileByName("InventoryUUIDsOneBatch.csv");
+    File fileToUpload = getFileByName("InventoryUUIDs.csv");
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
@@ -98,7 +98,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("InventoryUUIDsOneBatch.csv");
+      .withFileName("InventoryUUIDs.csv");
     // when created a new file definition
     RestAssured.given()
       .spec(jsonRequestSpecification)
