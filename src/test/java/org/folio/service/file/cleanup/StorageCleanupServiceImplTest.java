@@ -55,11 +55,14 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   private File testFile1;
   private File testFile2;
 
+  public StorageCleanupServiceImplTest() {
+    setUpSpringContext();
+  }
+
   @Before
   public void setUp(TestContext context) throws IOException {
     super.setUp(context);
     clearFileDefinitionTable(context);
-    setUpSpringContext();
     createTestFiles();
     createFileDefinitions();
   }
