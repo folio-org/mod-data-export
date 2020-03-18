@@ -27,6 +27,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
@@ -131,6 +132,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
     assertEquals(uploadedFileDefinition.getJobExecutionId(),  jobExecutions.getJobExecutions().get(0).getId());
+    assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
     async.complete();
