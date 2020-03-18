@@ -25,6 +25,7 @@ import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
 import org.folio.service.file.reader.SourceReader;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
@@ -249,7 +250,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.ERROR);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.error(ErrorCode.NO_RECORDS_FOUND));
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -271,7 +272,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.COMPLETED);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -293,7 +294,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(null);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -314,7 +315,7 @@ public class InputDataManagerTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());

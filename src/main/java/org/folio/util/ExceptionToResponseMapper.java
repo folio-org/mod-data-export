@@ -11,7 +11,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.folio.rest.exceptions.HttpException;
+
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.tools.utils.ValidationHelper;
 
@@ -41,9 +42,9 @@ public final class ExceptionToResponseMapper {
         .build();
     }
 
-    if (throwable instanceof HttpException) {
-      code = ((HttpException) throwable).getCode();
-      error = ((HttpException) throwable).getError();
+    if (throwable instanceof ServiceException) {
+      code = ((ServiceException) throwable).getCode();
+      error = ((ServiceException) throwable).getError();
 
       return Response.status(code)
           .type(MediaType.TEXT_PLAIN)

@@ -9,6 +9,7 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
@@ -16,6 +17,7 @@ import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,14 +147,18 @@ public class ExportManagerImpl implements ExportManager {
   private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause());
-      return ExportResult.ERROR;
+      if (asyncResult.cause() instanceof ServiceException) {
+        ServiceException serviceException = (ServiceException) asyncResult.cause();
+        return ExportResult.error(serviceException.getErrorCode());
+      }
+      return ExportResult.error(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
       // update job progress
       if (isLast) {
-        return ExportResult.COMPLETED;
+        return ExportResult.completed();
       } else {
-        return ExportResult.IN_PROGRESS;
+        return ExportResult.inProgress();
       }
     }
   }

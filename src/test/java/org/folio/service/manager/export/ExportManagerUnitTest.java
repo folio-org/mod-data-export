@@ -45,7 +45,8 @@ public class ExportManagerUnitTest {
     Mockito.when(marcLoadResult.getInstanceIdsWithoutSrs()).thenReturn(Arrays.asList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     boolean isLast = true;
-    FileDefinition fileExportDefinition = new FileDefinition();
+    FileDefinition fileExportDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
     params.put("x-okapi-tenant", "test_tenant");
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);

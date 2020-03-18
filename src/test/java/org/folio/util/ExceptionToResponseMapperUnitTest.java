@@ -1,7 +1,7 @@
 package org.folio.util;
 
 import org.apache.http.HttpStatus;
-import org.folio.rest.exceptions.HttpException;
+import org.folio.rest.exceptions.ServiceException;
 import org.junit.Test;
 
 import javax.ws.rs.BadRequestException;
@@ -47,7 +47,7 @@ public class ExceptionToResponseMapperUnitTest {
 
   @Test
   public void shouldReturnHTTPResponse() {
-    Response response = ExceptionToResponseMapper.map(new HttpException(400, "Testing Http Exception"));
+    Response response = ExceptionToResponseMapper.map(new ServiceException(org.folio.HttpStatus.HTTP_BAD_REQUEST, "Testing Http Exception"));
     assertNotNull(response);
     assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
     assertEquals(MediaType.TEXT_PLAIN, response.getMediaType().toString());

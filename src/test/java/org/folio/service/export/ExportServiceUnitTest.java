@@ -2,6 +2,7 @@ package org.folio.service.export;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
@@ -65,24 +66,22 @@ public class ExportServiceUnitTest {
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
   }
 
-  @Test
+  @Test(expected = ServiceException.class)
   public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
     // given
     FileDefinition fileDefinition = null;
     // when
     exportService.postExport(fileDefinition, TENANT);
-    // then
-    Mockito.verify(exportStorageService, Mockito.never()).storeFile(any(FileDefinition.class), anyString());
+    // then expect RuntimeException
   }
 
-  @Test
+  @Test(expected = ServiceException.class)
   public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
     // given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(null);
     // when
     exportService.postExport(fileDefinition, TENANT);
-    // then
-    Mockito.verify(exportStorageService, Mockito.never()).storeFile(any(FileDefinition.class), anyString());
+    // then expect RuntimeException
   }
 }

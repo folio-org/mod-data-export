@@ -29,6 +29,7 @@ import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,15 +162,15 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void proceedBlocking(JsonObject payload, ExportResult exportResult) {
-    ExportPayload exportPayload = payload.mapTo(ExportPayload.class);
+  protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
+    ExportPayload exportPayload = payloadJson.mapTo(ExportPayload.class);
     InputDataContext inputDataContext = inputDataLocalMap.get(exportPayload.getJobExecutionId());
     SourceReader sourceReader = inputDataContext.getSourceReader();
-    if (ExportResult.IN_PROGRESS.equals(exportResult)) {
+    if (exportResult.isInProgress()) {
       if (nonNull(sourceReader) && sourceReader.hasNext()) {
         exportNextChunk(exportPayload, sourceReader);
       } else {
-        finalizeExport(exportPayload, ExportResult.ERROR, sourceReader);
+        finalizeExport(exportPayload, ExportResult.error(ErrorCode.GENERIC_ERROR_CODE), sourceReader);
       }
     } else {
       finalizeExport(exportPayload, exportResult, sourceReader);
@@ -190,12 +191,13 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    if (ExportResult.COMPLETED.equals(exportResult)) {
+    if (exportResult.isCompleted()) {
       fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
     }
-    if (ExportResult.ERROR.equals(exportResult)) {
+    if (exportResult.isError()) {
       fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
+      // update job cause
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
     }
     fileDefinitionService.update(fileExportDefinition, tenantId)

@@ -9,9 +9,10 @@ import com.amazonaws.util.StringUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import org.folio.rest.exceptions.HttpException;
+import org.folio.HttpStatus;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.util.ErrorCodes;
+import org.folio.util.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED);
+      throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     }
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
@@ -92,7 +93,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED);
+      throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
       try {
