@@ -66,7 +66,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
-    // thenя
+    // then
     assertThat(srsLoadResult.getInstanceIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
   }
