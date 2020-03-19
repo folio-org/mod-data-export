@@ -9,23 +9,21 @@ public class ServiceException extends RuntimeException {
   private static final long serialVersionUID = 8109197948434861504L;
 
   private final HttpStatus status;
-  private ErrorCode errorCode;
-  private String message;
+  private final ErrorCode errorCode;
+  private final String message;
 
   public ServiceException(HttpStatus status, String message) {
     super(StringUtils.isNotEmpty(message) ? message : ErrorCode.GENERIC_ERROR_CODE.getDescription());
     this.status = status;
     this.message = message;
+    this.errorCode = ErrorCode.GENERIC_ERROR_CODE;
   }
 
   public ServiceException(HttpStatus status, ErrorCode errCodes) {
     super(errCodes.getDescription());
     this.errorCode = errCodes;
     this.status = status;
-  }
-
-  public ServiceException(HttpStatus status) {
-    this.status = status;
+    this.message = StringUtils.EMPTY;
   }
 
   public int getCode() {

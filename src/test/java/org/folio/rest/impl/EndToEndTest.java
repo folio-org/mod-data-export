@@ -69,7 +69,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String DASH = "-";
   private static final String DATE_TIME_REGEX = "[0-9]{14}";
   private static final String MRC_EXTENSION = "mrc";
-  private static final long TIMER_DELAY = 1000L;
+  private static final long TIMER_DELAY = 5000L;
 
   private static SourceRecordStorageClient mockSourceRecordStorageClient = Mockito.mock(SourceRecordStorageClient.class);
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
