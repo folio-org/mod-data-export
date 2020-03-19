@@ -104,7 +104,7 @@ class InputDataManagerImpl implements InputDataManager {
           updateJobToInProgress(jobExecutionId, fileExportDefinition, user, tenantId);
           exportNextChunk(exportPayload, sourceReader);
         } else {
-          finalizeExport(exportPayload, ExportResult.ERROR, sourceReader);
+          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND), sourceReader);
         }
       });
     } else {
