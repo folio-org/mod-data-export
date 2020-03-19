@@ -32,15 +32,14 @@ import java.util.stream.Collectors;
 public class SourceRecordStorageClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  public static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
-  public static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
+  private static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
+  private static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
 
   public Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params) {
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
     httpGet.setURI(prepareFullUri(ids, params));
-    CloseableHttpClient httpClient = HttpClients.createDefault();
-    try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}",httpGet.getURI(), e);

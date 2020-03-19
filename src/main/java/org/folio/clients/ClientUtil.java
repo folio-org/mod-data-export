@@ -11,6 +11,9 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
 public final class ClientUtil {
 
+  private ClientUtil() {
+  }
+
   public static void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
     requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getToken());
     requestBase.setHeader(OKAPI_HEADER_TENANT, params.getTenantId());

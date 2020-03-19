@@ -123,24 +123,22 @@ class InputDataManagerImpl implements InputDataManager {
    * @param tenantId              tenant id
    */
   private void updateJobExecutionStatusAndExportedFiles(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
-    jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> {
-      optionalJobExecution.ifPresent(jobExecution -> {
-        ExportedFile exportedFile = new ExportedFile()
-          .withFileId(UUID.randomUUID().toString())
-          .withFileName(fileExportDefinition.getFileName());
-        Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
-        exportedFiles.add(exportedFile);
-        jobExecution.setExportedFiles(exportedFiles);
-        jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
-        if (Objects.isNull(jobExecution.getStartedDate())) {
-          jobExecution.setStartedDate(new Date());
-        }
-        jobExecution.setRunBy(new RunBy()
-          .withFirstName(user.getJsonObject("personal").getString("firstname"))
-          .withLastName(user.getJsonObject("personal").getString("lastname")));
-        jobExecutionService.update(jobExecution, tenantId);
-      });
-    });
+    jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> optionalJobExecution.ifPresent(jobExecution -> {
+      ExportedFile exportedFile = new ExportedFile()
+        .withFileId(UUID.randomUUID().toString())
+        .withFileName(fileExportDefinition.getFileName());
+      Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+      exportedFiles.add(exportedFile);
+      jobExecution.setExportedFiles(exportedFiles);
+      jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
+      if (Objects.isNull(jobExecution.getStartedDate())) {
+        jobExecution.setStartedDate(new Date());
+      }
+      jobExecution.setRunBy(new RunBy()
+        .withFirstName(user.getJsonObject("personal").getString("firstname"))
+        .withLastName(user.getJsonObject("personal").getString("lastname")));
+      jobExecutionService.update(jobExecution, tenantId);
+    }));
   }
 
   /**
@@ -206,7 +204,7 @@ class InputDataManagerImpl implements InputDataManager {
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
     }
     if (exportResult.isFailed()) {
-      // updates job error cause here, take it from exportResult.getErrorCode();
+      // updates job error cause here, take it errorCode field
       fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
     }

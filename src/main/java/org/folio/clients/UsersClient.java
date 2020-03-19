@@ -27,8 +27,7 @@ public class UsersClient {
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(String.format(GET_USER_URL, params.getOkapiUrl(), userId)));
-    CloseableHttpClient httpClient = HttpClients.createDefault();
-    try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       HttpEntity entity = response.getEntity();
       HttpStatus httpStatus = HttpStatus.get(response.getStatusLine().getStatusCode());
       if (HttpStatus.HTTP_OK == httpStatus) {
