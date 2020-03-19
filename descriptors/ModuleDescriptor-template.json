@@ -5,6 +5,10 @@
     {
       "id": "source-storage-records",
       "version": "1.0"
+    },
+    {
+      "id": "users",
+      "version": "15.1"
     }
   ],
   "provides": [
@@ -21,6 +25,7 @@
             "data-export.export.post"
           ],
           "modulePermissions": [
+            "users.item.get",
             "source-storage.records.get"
           ]
         },

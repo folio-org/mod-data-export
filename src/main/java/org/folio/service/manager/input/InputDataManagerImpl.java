@@ -15,12 +15,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -59,6 +63,8 @@ class InputDataManagerImpl implements InputDataManager {
   private FileDefinitionService fileDefinitionService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private UsersClient usersClient;
 
   private WorkerExecutor executor;
   private LocalMap<String, InputDataContext> inputDataLocalMap;
@@ -89,14 +95,18 @@ class InputDataManagerImpl implements InputDataManager {
     String tenantId = okapiConnectionParams.getTenantId();
     SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
     if (sourceReader.hasNext()) {
-      fileDefinitionService.save(fileExportDefinition, tenantId)
-        .compose(savedFileExportDefinition -> {
-          initInputDataContext(sourceReader, jobExecutionId);
-          ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
-          updateJobExecutionStatusAndExportedFiles(jobExecutionId, fileExportDefinition, tenantId);
+      fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
+        initInputDataContext(sourceReader, jobExecutionId);
+        ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
+        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
+        if (optionalUser.isPresent()) {
+          JsonObject user = optionalUser.get();
+          updateJobToInProgress(jobExecutionId, fileExportDefinition, user, tenantId);
           exportNextChunk(exportPayload, sourceReader);
-          return Future.succeededFuture();
-        });
+        } else {
+          finalizeExport(exportPayload, ExportResult.ERROR, sourceReader);
+        }
+      });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
@@ -106,28 +116,29 @@ class InputDataManagerImpl implements InputDataManager {
 
   /**
    * Updates jobExecution status with IN-PROGRESS && updates exported files && updates started date
-   *
-   * @param id                   job execution id
-   * @param fileExportDefinition definition of the file to export
-   * @param tenantId             tenant id
+   *  @param id                   job execution id
+   * @param fileExportDefinition  definition of the file to export
+   * @param user                  user represented in json object
+   * @param tenantId              tenant id
    */
-  private void updateJobExecutionStatusAndExportedFiles(String id, FileDefinition fileExportDefinition, String tenantId) {
-    jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
-      optionalJobExecution.ifPresent(jobExecution -> {
-        ExportedFile exportedFile = new ExportedFile()
-          .withFileId(UUID.randomUUID().toString())
-          .withFileName(fileExportDefinition.getFileName());
-        Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
-        exportedFiles.add(exportedFile);
-        jobExecution.setExportedFiles(exportedFiles);
-        jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
-        if (Objects.isNull(jobExecution.getStartedDate())) {
-          jobExecution.setStartedDate(new Date());
-        }
-        jobExecutionService.update(jobExecution, tenantId);
-      });
-      return succeededFuture();
-    });
+  private void updateJobToInProgress(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
+    jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> optionalJobExecution.ifPresent(jobExecution -> {
+      ExportedFile exportedFile = new ExportedFile()
+        .withFileId(UUID.randomUUID().toString())
+        .withFileName(fileExportDefinition.getFileName());
+      Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+      exportedFiles.add(exportedFile);
+      jobExecution.setExportedFiles(exportedFiles);
+      jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
+      if (Objects.isNull(jobExecution.getStartedDate())) {
+        jobExecution.setStartedDate(new Date());
+      }
+      JsonObject personal = user.getJsonObject("personal");
+      jobExecution.setRunBy(new RunBy()
+        .withFirstName(personal.getString("firstName"))
+        .withLastName(personal.getString("lastName")));
+      jobExecutionService.update(jobExecution, tenantId);
+    }));
   }
 
   /**

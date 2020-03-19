@@ -14,11 +14,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.util.Maps;
+import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -30,6 +33,7 @@ import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -79,6 +83,11 @@ public class InputDataManagerTest {
   private static final String LAST_KEY = "last";
   private static final String IDENTIFIERS_KEY = "identifiers";
   private static final String TENANT_ID_KEY = "tenantId";
+  private static final JsonObject USER = new JsonObject()
+    .put("personal", new JsonObject()
+      .put("firstname", "John")
+      .put("lastname", "Doe")
+    );
 
   @InjectMocks
   @Spy
@@ -96,6 +105,8 @@ public class InputDataManagerTest {
   private ExportManager exportManager;
   @Mock
   private InputDataContext inputDataContext;
+  @Mock
+  private UsersClient usersClient;
 
   private Context context;
   private AbstractApplicationContext springContext;
@@ -132,9 +143,11 @@ public class InputDataManagerTest {
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
+    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
     doReturn(sourceReader).when(inputDataManager).initSourceReader(requestFileDefinition, BATCH_SIZE);
+
   }
 
   @Test
@@ -353,7 +366,8 @@ public class InputDataManagerTest {
 
   private ExportRequest createExportRequest() {
     return new ExportRequest()
-      .withFileDefinition(requestFileDefinition);
+      .withFileDefinition(requestFileDefinition)
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
   }
 
   private FileDefinition createFileExportDefinition() {
