@@ -327,10 +327,6 @@ public class EndToEndTest extends RestVerticleTestBase {
       .withJobProfile(new JobProfile()
         .withId(UUID.randomUUID().toString())
         .withDestination(FILE_SYSTEM_DESTINATION)
-      )
-      .withMetadata(new Metadata()
-        .withCreatedByUserId(UUID.randomUUID().toString())
-        .withCreatedDate(new Date())
       );
   }
 
