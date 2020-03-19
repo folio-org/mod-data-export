@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
 /**
  * Class for tests that base on testing code using Vertx REST verticle
@@ -30,7 +31,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 public abstract class RestVerticleTestBase {
 
   protected static final String TENANT_ID = "diku";
-  protected static final String TOKEN = "token";
+  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
   private static final String HOST = "http://localhost:";
   protected static final int PORT = NetworkUtils.nextFreePort();
   private static final String OKAPI_HEADER_URL = "x-okapi-url";
@@ -93,6 +94,7 @@ public abstract class RestVerticleTestBase {
   private void setUpJsonRequestSpecification() {
     jsonRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.JSON)
+      .addHeader(OKAPI_HEADER_TOKEN, TOKEN)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
       .setBaseUri(OKAPI_URL)
       .addHeader("Accept", "text/plain, application/json")

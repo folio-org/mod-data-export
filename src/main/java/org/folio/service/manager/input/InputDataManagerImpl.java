@@ -98,8 +98,8 @@ class InputDataManagerImpl implements InputDataManager {
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
-        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
         ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
+        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
           updateJobExecutionStatusAndExportedFiles(jobExecutionId, fileExportDefinition, user, tenantId);
