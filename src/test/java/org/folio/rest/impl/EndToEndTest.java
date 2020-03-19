@@ -89,7 +89,6 @@ public class EndToEndTest extends RestVerticleTestBase {
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
 
-
   public EndToEndTest() {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, EndToEndTest.TestConfig.class);
@@ -122,8 +121,10 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    context.assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusCode());
-    async.complete();
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      context.assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusCode());
+      async.complete();
+    });
   }
 
   @Test
@@ -148,7 +149,7 @@ public class EndToEndTest extends RestVerticleTestBase {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition.getFileName(), jobExecutionOptional))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
@@ -175,11 +176,11 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    vertx.setTimer(1000L, handler -> {
+    vertx.setTimer(TIMER_DELAY, handler -> {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition.getFileName(), jobExecutionOptional))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
@@ -190,12 +191,11 @@ public class EndToEndTest extends RestVerticleTestBase {
 
   @Ignore
   @Test
-  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonexistingUuid(TestContext context) throws IOException, InterruptedException {
+  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
     givenSetUpSoureRecordMockToReturnEmptyRecords();
-    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = givenCaptureFileExportDefinition();
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_NON_EXITING_UUID);
 
     //when
@@ -207,16 +207,13 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-        .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndNullSourcePath(context, fileExportDefinitionOptional))
-        .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition.getFileName(), jobExecutionOptional))
+    vertx.setTimer(10000L, handler -> {
+      jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
+          .compose(jobExecutionOptional -> assertFailJobExecution(context, jobExecutionOptional))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
-          })
-        );
+          });
     });
   }
 
@@ -302,14 +299,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     return Future.succeededFuture(fileExportDefinition);
   }
 
-  private Future<FileDefinition> assertCompletedFileDefinitionAndNullSourcePath(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {
-    FileDefinition fileExportDefinition = fileExportDefinitionOptional.get();
-    context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
-    context.assertNull(fileExportDefinition.getSourcePath());
-    return Future.succeededFuture(fileExportDefinition);
-  }
-
-  private Future<Object> assertSuccessJobExecution(TestContext context, String fileName, Optional<JobExecution> jobExecutionOptional) {
+  private Future<Object> assertSuccessJobExecution(TestContext context,  Optional<JobExecution> jobExecutionOptional) {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     return Future.succeededFuture();

@@ -4,13 +4,14 @@ import io.vertx.core.Future;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.rest.exceptions.HttpException;
+import org.folio.HttpStatus;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
-import org.folio.util.ErrorCodes;
+import org.folio.util.ErrorCode;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +74,7 @@ public class DataExportHelperTest {
     // given
     Mockito
       .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
-      .thenThrow(new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED));
+      .thenThrow(new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED));
 
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
@@ -96,7 +97,7 @@ public class DataExportHelperTest {
     // given
     Mockito
       .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
-      .thenThrow(new HttpException(400, ErrorCodes.S3_BUCKET_NOT_PROVIDED));
+      .thenThrow(new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED));
 
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));

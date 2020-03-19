@@ -22,7 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.rest.exceptions.HttpException;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.junit.After;
 import org.junit.Before;
@@ -99,7 +99,7 @@ public class ExportStorageServiceTest {
       .waitForCompletion();
   }
 
-  @Test(expected = HttpException.class)
+  @Test(expected = ServiceException.class)
   public void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");
@@ -169,7 +169,7 @@ public class ExportStorageServiceTest {
     });
   }
 
-  @Test(expected = HttpException.class)
+  @Test(expected = ServiceException.class)
   public void testbucketNameNotProvidedInSystemProperty() {
     System.clearProperty("bucket.name");
 

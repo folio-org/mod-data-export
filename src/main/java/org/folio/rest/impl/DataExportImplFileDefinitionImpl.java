@@ -15,16 +15,17 @@ import java.io.InputStream;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
+import org.folio.HttpStatus;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.exceptions.HttpException;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.file.upload.FileUploadService;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.ErrorCodes;
+import org.folio.util.ErrorCode;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -99,7 +100,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
       .map(optionalDefinition -> optionalDefinition
-        .orElseThrow(() -> new HttpException(404, ErrorCodes.FILE_DEFINITION_NOT_FOUND)))
+        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.FILE_DEFINITION_NOT_FOUND)))
       .map(GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

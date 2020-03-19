@@ -6,9 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.HttpStatus;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
+import org.folio.util.ErrorCode;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
@@ -55,6 +58,20 @@ public class LocalFileSystemExportService implements ExportService {
 
   @Override
   public void postExport(FileDefinition fileDefinition, String tenantId) {
+    if (!isValidFileDefinition(fileDefinition)) {
+      throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
+    }
     exportStorageService.storeFile(fileDefinition, tenantId);
   }
+
+  /**
+   * Check if file definition entity and it`s source path is valid
+   *
+   * @param fileDefinition file definition
+   * @return true if file definition is valid
+   */
+  private boolean isValidFileDefinition(FileDefinition fileDefinition) {
+    return fileDefinition != null && fileDefinition.getSourcePath() != null;
+  }
+
 }

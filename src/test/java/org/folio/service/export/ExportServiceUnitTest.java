@@ -2,6 +2,7 @@ package org.folio.service.export;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
@@ -29,6 +30,8 @@ public class ExportServiceUnitTest {
   @InjectMocks
   private ExportService exportService = new LocalFileSystemExportService();
 
+  private static final String TENANT = "tenant";
+
   @Test
   public void export_shouldPassExportFor_1_Record() throws IOException {
     // given
@@ -55,10 +58,30 @@ public class ExportServiceUnitTest {
   @Test
   public void postExport_shouldStoreFile() {
     // given
-    FileDefinition fileDefinition = new FileDefinition();
+    FileDefinition fileDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     // when
-    exportService.postExport(fileDefinition, "tenant");
+    exportService.postExport(fileDefinition, TENANT);
     // then
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
+  }
+
+  @Test(expected = ServiceException.class)
+  public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
+    // given
+    FileDefinition fileDefinition = null;
+    // when
+    exportService.postExport(fileDefinition, TENANT);
+    // then expect RuntimeException
+  }
+
+  @Test(expected = ServiceException.class)
+  public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
+    // given
+    FileDefinition fileDefinition = new FileDefinition()
+      .withSourcePath(null);
+    // when
+    exportService.postExport(fileDefinition, TENANT);
+    // then expect RuntimeException
   }
 }
