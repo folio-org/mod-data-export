@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.IOUtils;
-import org.folio.clients.impl.SourceRecordStorageClient;
+import org.folio.clients.SourceRecordStorageClient;
 import org.folio.rest.HttpServerTestBase;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.BeforeClass;
@@ -23,7 +23,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -67,7 +66,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
-    // then
+    // thenя
     assertThat(srsLoadResult.getInstanceIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
   }

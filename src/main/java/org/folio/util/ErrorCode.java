@@ -2,16 +2,17 @@ package org.folio.util;
 
 import org.folio.rest.jaxrs.model.Error;
 
-public enum ErrorCodes {
+public enum ErrorCode {
 
   GENERIC_ERROR_CODE("genericError", "Generic error"),
-  FILE_DEFINITION_NOT_FOUND("fileDefitionNotFound", "File Definition not found"),
-  S3_BUCKET_NOT_PROVIDED("bucketNotProvided", "S3 bucket name is not found in System Properties");
+  FILE_DEFINITION_NOT_FOUND("fileDefinitionNotFound", "File Definition not found"),
+  S3_BUCKET_NOT_PROVIDED("bucketNotProvided", "S3 bucket name is not found in System Properties"),
+  USER_NOT_FOUND("userNotFound", "User not found");
 
   private final String code;
   private final String description;
 
-  ErrorCodes(String code, String description) {
+  ErrorCode(String code, String description) {
     this.code = code;
     this.description = description;
   }

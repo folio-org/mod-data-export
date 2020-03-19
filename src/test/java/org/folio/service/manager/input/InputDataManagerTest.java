@@ -14,21 +14,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.util.Maps;
+import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
 import org.folio.service.file.reader.SourceReader;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,6 +52,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -78,6 +84,11 @@ public class InputDataManagerTest {
   private static final String LAST_KEY = "last";
   private static final String IDENTIFIERS_KEY = "identifiers";
   private static final String TENANT_ID_KEY = "tenantId";
+  private static final JsonObject USER = new JsonObject()
+    .put("personal", new JsonObject()
+      .put("firstname", "John")
+      .put("lastname", "Doe")
+    );
 
   @InjectMocks
   @Spy
@@ -95,6 +106,8 @@ public class InputDataManagerTest {
   private ExportManager exportManager;
   @Mock
   private InputDataContext inputDataContext;
+  @Mock
+  private UsersClient usersClient;
 
   private Context context;
   private AbstractApplicationContext springContext;
@@ -158,10 +171,11 @@ public class InputDataManagerTest {
   @Test
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
+
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
-
+    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     //when
     inputDataManager.initBlocking(exportRequestJson, requestParams);
 
@@ -179,6 +193,7 @@ public class InputDataManagerTest {
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
+    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
 
     //when
     inputDataManager.initBlocking(exportRequestJson, requestParams);
@@ -199,6 +214,7 @@ public class InputDataManagerTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
+    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
 
     //when
     inputDataManager.initBlocking(exportRequestJson, requestParams);
@@ -223,6 +239,7 @@ public class InputDataManagerTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
+    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
 
     //when
     inputDataManager.initBlocking(exportRequestJson, requestParams);
@@ -249,7 +266,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.ERROR);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE));
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -271,7 +288,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.COMPLETED);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -293,7 +310,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(null);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -314,7 +331,7 @@ public class InputDataManagerTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.IN_PROGRESS);
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -352,7 +369,8 @@ public class InputDataManagerTest {
 
   private ExportRequest createExportRequest() {
     return new ExportRequest()
-      .withFileDefinition(requestFileDefinition);
+      .withFileDefinition(requestFileDefinition)
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
   }
 
   private FileDefinition createFileExportDefinition() {
