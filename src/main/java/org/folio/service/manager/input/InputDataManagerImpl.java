@@ -134,8 +134,8 @@ class InputDataManagerImpl implements InputDataManager {
       }
       JsonObject personal = user.getJsonObject("personal");
       jobExecution.setRunBy(new RunBy()
-        .withFirstName(personal.getString("firstname"))
-        .withLastName(personal.getString("lastname")));
+        .withFirstName(personal.getString("firstName"))
+        .withLastName(personal.getString("lastName")));
       jobExecutionService.update(jobExecution, tenantId);
     }));
   }
