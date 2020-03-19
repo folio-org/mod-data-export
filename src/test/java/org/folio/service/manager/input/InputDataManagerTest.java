@@ -250,7 +250,7 @@ public class InputDataManagerTest {
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.error(ErrorCode.NO_RECORDS_FOUND));
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.failed(ErrorCode.NO_FILE_GENERATED));
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);

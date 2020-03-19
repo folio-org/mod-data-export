@@ -149,9 +149,9 @@ public class ExportManagerImpl implements ExportManager {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
-        return ExportResult.error(serviceException.getErrorCode());
+        return ExportResult.failed(serviceException.getErrorCode());
       }
-      return ExportResult.error(ErrorCode.GENERIC_ERROR_CODE);
+      return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
       // update job progress

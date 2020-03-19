@@ -170,7 +170,7 @@ class InputDataManagerImpl implements InputDataManager {
       if (nonNull(sourceReader) && sourceReader.hasNext()) {
         exportNextChunk(exportPayload, sourceReader);
       } else {
-        finalizeExport(exportPayload, ExportResult.error(ErrorCode.GENERIC_ERROR_CODE), sourceReader);
+        finalizeExport(exportPayload, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE), sourceReader);
       }
     } else {
       finalizeExport(exportPayload, exportResult, sourceReader);
@@ -195,7 +195,7 @@ class InputDataManagerImpl implements InputDataManager {
       fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
     }
-    if (exportResult.isError()) {
+    if (exportResult.isFailed()) {
       fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
       // update job cause
       updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);

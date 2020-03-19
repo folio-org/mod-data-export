@@ -54,7 +54,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED);
+      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     }
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
@@ -93,7 +93,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED);
+      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
       try {

@@ -7,7 +7,7 @@ public enum ErrorCode {
   GENERIC_ERROR_CODE("genericError", "Generic error"),
   FILE_DEFINITION_NOT_FOUND("fileDefitionNotFound", "File Definition not found"),
   S3_BUCKET_NOT_PROVIDED("bucketNotProvided", "S3 bucket name is not found in System Properties"),
-  NO_RECORDS_FOUND("noRecordsFound", "No records found");
+  NO_FILE_GENERATED("noFileGenerated", "Nothing to export: no binary file generated");
 
   private final String code;
   private final String description;

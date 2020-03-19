@@ -9,75 +9,78 @@ import org.folio.util.ErrorCode;
 @DataObject(generateConverter = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ExportResult {
-  private ExportStatus status;
-  private ErrorCode code;
+  private static final ExportResult IN_PROGRESS = new ExportResult(ExportStatus.IN_PROGRESS);
+  private static final ExportResult COMPLETED = new ExportResult(ExportStatus.COMPLETED);
 
+  private ExportStatus exportStatus;
+  private ErrorCode errorCode;
+
+  private ExportResult(ExportStatus status) {
+    this.exportStatus = status;
+  }
+
+  private ExportResult(ExportStatus status, ErrorCode errorCode) {
+    this.exportStatus = status;
+    this.errorCode = errorCode;
+  }
 
   public ExportResult(JsonObject jsonObject) {
     ExportResultConverter.fromJson(jsonObject, this);
   }
 
-  public ExportResult() {
-  }
-
   public static ExportResult completed() {
-    ExportResult exportResult = new ExportResult();
-    exportResult.setStatus(ExportStatus.COMPLETED);
-    return exportResult;
+    return COMPLETED;
   }
 
   public static ExportResult inProgress() {
-    ExportResult exportResult = new ExportResult();
-    exportResult.setStatus(ExportStatus.IN_PROGRESS);
-    return exportResult;
+    return IN_PROGRESS;
   }
 
-  public static ExportResult error(ErrorCode errorCode) {
-    ExportResult exportResult = new ExportResult();
-    exportResult.setStatus(ExportStatus.ERROR);
-    exportResult.setCode(errorCode);
-    return exportResult;
+  public static ExportResult failed(ErrorCode errorCode) {
+    return new ExportResult(ExportStatus.FAILED, errorCode);
   }
 
   @JsonIgnore
   public boolean isCompleted() {
-    return this.status == ExportStatus.COMPLETED;
+    return this.exportStatus == ExportStatus.COMPLETED;
   }
 
   @JsonIgnore
   public boolean isInProgress() {
-    return this.status == ExportStatus.IN_PROGRESS;
+    return this.exportStatus == ExportStatus.IN_PROGRESS;
   }
 
   @JsonIgnore
-  public boolean isError() {
-    return this.status == ExportStatus.ERROR;
+  public boolean isFailed() {
+    return this.exportStatus == ExportStatus.FAILED;
   }
 
   public JsonObject toJson() {
-    return JsonObject.mapFrom(this);
+    JsonObject jsonObject = new JsonObject();
+    ExportResultConverter.toJson(this, jsonObject);
+    return jsonObject;
   }
 
   public ExportStatus getStatus() {
-    return status;
+    return exportStatus;
   }
 
-  public ErrorCode getCode() {
-    return code;
+  public ErrorCode getErrorCode() {
+    return errorCode;
   }
 
   public void setStatus(ExportStatus status) {
-    this.status = status;
+    this.exportStatus = status;
   }
 
-  public void setCode(ErrorCode code) {
-    this.code = code;
+  public void setErrorCode(ErrorCode errorCode) {
+    this.errorCode = errorCode;
   }
 
   public enum ExportStatus {
     COMPLETED,
     IN_PROGRESS,
-    ERROR
+    FAILED
   }
 
 }

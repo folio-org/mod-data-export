@@ -59,7 +59,7 @@ public class LocalFileSystemExportService implements ExportService {
   @Override
   public void postExport(FileDefinition fileDefinition, String tenantId) {
     if (!isValidFileDefinition(fileDefinition)) {
-      throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_RECORDS_FOUND);
+      throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
     }
     exportStorageService.storeFile(fileDefinition, tenantId);
   }
