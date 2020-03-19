@@ -1,12 +1,13 @@
-package org.folio.clients.impl;
+package org.folio.clients;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.folio.clients.SynchronousOkapiClient;
 import org.folio.util.OkapiConnectionParams;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -19,26 +20,31 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * The client that synchronously communicates with the Source Record Storage(SRS).
- * <p>
- * Retrieves collection of underlying SRS records as a source of truth.
- * Retrieves collection of Inventory records that do not have underlying SRS records
  *
  * @link https://github.com/folio-org/mod-source-record-storage
  */
 @Component
-public class SourceRecordStorageClient extends SynchronousOkapiClient {
+public class SourceRecordStorageClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  public static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
-  public static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
+  private static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
+  private static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
 
-  @Override
-  protected void prepareRequest(HttpRequestBase requestBase, List<String> ids, OkapiConnectionParams params) {
-    requestBase.setURI(prepareFullUri(ids, params));
+  public Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params) {
+    HttpGet httpGet = new HttpGet();
+    ClientUtil.setCommonHeaders(httpGet, params);
+    httpGet.setURI(prepareFullUri(ids, params));
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
+      return Optional.ofNullable(getResponseEntity(response));
+    } catch (IOException e) {
+      LOGGER.error("Exception while calling {}",httpGet.getURI(), e);
+      return Optional.empty();
+    }
   }
 
   @NotNull
@@ -52,8 +58,7 @@ public class SourceRecordStorageClient extends SynchronousOkapiClient {
     }
   }
 
-  @Override
-  protected JsonObject getResponseEntity(CloseableHttpResponse response) {
+  private JsonObject getResponseEntity(CloseableHttpResponse response) {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
       try {
