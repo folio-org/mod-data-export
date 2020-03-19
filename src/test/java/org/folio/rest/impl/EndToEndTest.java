@@ -75,8 +75,8 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final long TIMER_DELAY = 1000L;
   private static final JsonObject USER = new JsonObject()
     .put("personal", new JsonObject()
-      .put("firstname", "John")
-      .put("lastname", "Doe")
+      .put("firstName", "John")
+      .put("lastName", "Doe")
     );
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
