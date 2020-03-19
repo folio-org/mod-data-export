@@ -15,7 +15,8 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
-import org.folio.clients.impl.SourceRecordStorageClient;
+import org.folio.clients.SourceRecordStorageClient;
+import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
@@ -28,9 +29,11 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -70,7 +73,13 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String DATE_TIME_REGEX = "[0-9]{14}";
   private static final String MRC_EXTENSION = "mrc";
   private static final long TIMER_DELAY = 1000L;
+  private static final JsonObject USER = new JsonObject()
+    .put("personal", new JsonObject()
+      .put("firstname", "John")
+      .put("lastname", "Doe")
+    );
 
+  private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static SourceRecordStorageClient mockSourceRecordStorageClient = Mockito.mock(SourceRecordStorageClient.class);
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
 
@@ -84,6 +93,11 @@ public class EndToEndTest extends RestVerticleTestBase {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, EndToEndTest.TestConfig.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  @Before
+  public void before() {
+    when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
   }
 
   @After
@@ -337,6 +351,12 @@ public class EndToEndTest extends RestVerticleTestBase {
   @Configuration
   @Import(ApplicationConfig.class)
   public static class TestConfig {
+
+    @Bean
+    @Primary
+    public UsersClient getMockUsersClient() {
+      return mockUsersClient;
+    }
 
     @Bean
     @Primary

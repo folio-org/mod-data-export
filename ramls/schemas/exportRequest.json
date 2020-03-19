@@ -13,6 +13,11 @@
       "description": "Related Job profile",
       "type": "object",
       "$ref": "jobProfile.json"
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "../../ramls/raml-util/schemas/metadata.schema"
     }
   },
   "required": [
