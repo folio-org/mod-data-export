@@ -41,7 +41,7 @@ public class SourceRecordStorageClient {
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
-      LOGGER.error("Exception while calling {}",httpGet.getURI(), e);
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
       return Optional.empty();
     }
   }

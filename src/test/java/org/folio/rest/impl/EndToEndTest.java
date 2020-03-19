@@ -15,7 +15,6 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
-import org.folio.clients.ClientUtil;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
