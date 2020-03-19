@@ -79,7 +79,6 @@ public class EndToEndTest extends RestVerticleTestBase {
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
 
-
   public EndToEndTest() {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, EndToEndTest.TestConfig.class);
@@ -281,13 +280,6 @@ public class EndToEndTest extends RestVerticleTestBase {
     context.assertNotNull(generatedExportFileContent);
     context.assertTrue(isFileNameContainsDatetime(generatedFileName));
     context.assertEquals(FilenameUtils.getExtension(generatedFileName), MRC_EXTENSION);
-    return Future.succeededFuture(fileExportDefinition);
-  }
-
-  private Future<FileDefinition> assertCompletedFileDefinitionAndNullSourcePath(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {
-    FileDefinition fileExportDefinition = fileExportDefinitionOptional.get();
-    context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
-    context.assertNull(fileExportDefinition.getSourcePath());
     return Future.succeededFuture(fileExportDefinition);
   }
 
