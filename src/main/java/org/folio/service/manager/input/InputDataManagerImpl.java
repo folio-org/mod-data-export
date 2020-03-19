@@ -121,26 +121,23 @@ class InputDataManagerImpl implements InputDataManager {
    * @param tenantId              tenant id
    */
   private void updateJobToInProgress(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
-    jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> {
-      optionalJobExecution.ifPresent(jobExecution -> {
-        ExportedFile exportedFile = new ExportedFile()
-          .withFileId(UUID.randomUUID().toString())
-          .withFileName(fileExportDefinition.getFileName());
-        Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
-        exportedFiles.add(exportedFile);
-        jobExecution.setExportedFiles(exportedFiles);
-        jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
-        if (Objects.isNull(jobExecution.getStartedDate())) {
-          jobExecution.setStartedDate(new Date());
-        }
-        JsonObject personal = user.getJsonObject("personal");
-        jobExecution.setRunBy(new RunBy()
-          .withFirstName(personal.getString("firstname"))
-          .withLastName(personal.getString("lastname")));
-        jobExecutionService.update(jobExecution, tenantId);
-      });
-    });
-
+    jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> optionalJobExecution.ifPresent(jobExecution -> {
+      ExportedFile exportedFile = new ExportedFile()
+        .withFileId(UUID.randomUUID().toString())
+        .withFileName(fileExportDefinition.getFileName());
+      Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+      exportedFiles.add(exportedFile);
+      jobExecution.setExportedFiles(exportedFiles);
+      jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
+      if (Objects.isNull(jobExecution.getStartedDate())) {
+        jobExecution.setStartedDate(new Date());
+      }
+      JsonObject personal = user.getJsonObject("personal");
+      jobExecution.setRunBy(new RunBy()
+        .withFirstName(personal.getString("firstname"))
+        .withLastName(personal.getString("lastname")));
+      jobExecutionService.update(jobExecution, tenantId);
+    }));
   }
 
   /**
