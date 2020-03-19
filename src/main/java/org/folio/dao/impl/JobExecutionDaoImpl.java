@@ -30,6 +30,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   private static final String TABLE = "job_executions";
   private static final String ID_FIELD = "'id'";
+  private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -53,9 +54,19 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   @Override
   public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     Promise<String> promise = Promise.promise();
-    jobExecution.setId(UUID.randomUUID().toString());
-    pgClientFactory.getInstance(tenantId).save(TABLE, jobExecution.getId(), jobExecution, promise);
-    return promise.future().map(jobExecution);
+    pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
+        if (getHrIdResult.succeeded()) {
+          jobExecution.withId(UUID.randomUUID().toString())
+            .setHrId(getHrIdResult.result().getList().get(0).toString());
+          pgClientFactory.getInstance(tenantId)
+            .save(TABLE, jobExecution.getId(), jobExecution, promise);
+        } else {
+          LOGGER.error("Error while fetching next HRID in sequence", getHrIdResult.cause());
+          promise.fail(getHrIdResult.cause());
+        }
+      });
+    return promise.future()
+      .map(jobExecution);
   }
 
   @Override
