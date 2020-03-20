@@ -63,6 +63,24 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
+  public void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(TestContext context) {
+    Async async = context.async();
+    // given file
+    FileDefinition givenFileDefinition = new FileDefinition()
+      .withId(UUID.randomUUID().toString())
+      .withFileName("InventoryUUIDs.txt");
+    // when created a new entity
+    Response response = RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(givenFileDefinition).encode())
+      .when()
+      .post(FILE_DEFINITION_SERVICE_URL);
+    // then retrieve it and verify
+    context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+    async.complete();
+  }
+
+  @Test
   public void postFileDefinition_return422Status(TestContext context) {
     // given
     FileDefinition givenEntity = new FileDefinition();
@@ -131,7 +149,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
 
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
     assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
-    assertEquals(uploadedFileDefinition.getJobExecutionId(),  jobExecutions.getJobExecutions().get(0).getId());
+    assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
     assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
