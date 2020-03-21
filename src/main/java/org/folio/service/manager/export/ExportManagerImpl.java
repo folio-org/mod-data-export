@@ -146,7 +146,7 @@ public class ExportManagerImpl implements ExportManager {
   @NotNull
   private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export is failed, cause: " + asyncResult.cause());
+      LOGGER.error("Export is failed, cause: " + asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
         return ExportResult.failed(serviceException.getErrorCode());
