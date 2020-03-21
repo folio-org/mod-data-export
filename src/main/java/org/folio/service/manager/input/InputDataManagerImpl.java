@@ -10,6 +10,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
+import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -47,7 +48,7 @@ import static java.util.Objects.nonNull;
  */
 @Service
 class InputDataManagerImpl implements InputDataManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(InputDataManagerImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 1;
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
