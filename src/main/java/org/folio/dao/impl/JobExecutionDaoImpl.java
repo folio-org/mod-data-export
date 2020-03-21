@@ -61,7 +61,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
           pgClientFactory.getInstance(tenantId)
             .save(TABLE, jobExecution.getId(), jobExecution, promise);
         } else {
-          LOGGER.error("Error while fetching next HRID in sequence", getHrIdResult.cause());
+          LOGGER.error("Error while fetching next HRID in sequence", getHrIdResult.cause().getMessage());
           promise.fail(getHrIdResult.cause());
         }
       });
@@ -76,7 +76,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
       Criteria idCrit = constructCriteria(ID_FIELD, jobExecution.getId());
       pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, new Criterion(idCrit), true, updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause());
+          LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().getUpdated() != 1) {
           String errorMessage = String.format("JobExecution with id '%s' was not found", jobExecution.getId());
