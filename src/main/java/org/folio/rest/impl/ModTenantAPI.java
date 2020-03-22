@@ -52,7 +52,7 @@ public class ModTenantAPI extends TenantAPI {
     vertx.<Void>executeBlocking(blockingCodeHandler -> storageCleanupService.cleanStorage(params),
       cleanupAsyncResult -> {
         if (cleanupAsyncResult.failed()) {
-          logger.error("Error during cleaning file storage.", cleanupAsyncResult.cause());
+          logger.error("Error during cleaning file storage.", cleanupAsyncResult.cause().getMessage());
         } else {
           logger.info("File storage was successfully cleaned of unused files");
         }

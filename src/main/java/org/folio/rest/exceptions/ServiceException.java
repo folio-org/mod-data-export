@@ -36,11 +36,6 @@ public class ServiceException extends RuntimeException {
       : new Error().withCode(String.valueOf(status.toInt())).withMessage(message);
   }
 
-  @Override
-  public String getMessage() {
-    return message;
-  }
-
   public ErrorCode getErrorCode() {
     return errorCode;
   }

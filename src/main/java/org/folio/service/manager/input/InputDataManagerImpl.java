@@ -6,6 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
 import java.lang.invoke.MethodHandles;
@@ -35,8 +37,6 @@ import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -225,7 +225,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Void> handleExportInitResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Initialization of export is failed", asyncResult.cause());
+      LOGGER.error("Initialization of export is failed", asyncResult.cause().getMessage());
     } else {
       LOGGER.info("Initialization of export has been successfully completed");
     }
@@ -234,7 +234,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Void> handleExportResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export of identifiers chunk is failed", asyncResult.cause());
+      LOGGER.error("Export of identifiers chunk is failed", asyncResult.cause().getMessage());
     } else {
       LOGGER.info("Export of identifiers chunk has been successfully completed");
     }
