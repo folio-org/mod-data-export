@@ -23,7 +23,7 @@ public class ServiceException extends RuntimeException {
     super(errCodes.getDescription());
     this.errorCode = errCodes;
     this.status = status;
-    this.message = StringUtils.EMPTY;
+    this.message = errCodes.getDescription();
   }
 
   public int getCode() {

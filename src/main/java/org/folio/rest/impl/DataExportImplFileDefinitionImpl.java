@@ -113,7 +113,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   private Future<Void> validateFileNameExtension(String fileName) {
     if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION)) {
-      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "File name extension does not corresponds csv format");
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION);
     }
     return succeededFuture();
   }

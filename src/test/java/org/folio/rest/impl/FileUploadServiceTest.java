@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.parsing.Parser;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.json.JsonObject;
@@ -14,6 +15,7 @@ import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.util.ErrorCode;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,23 +67,24 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   @Test
   public void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(TestContext context) {
     Async async = context.async();
-    // given file
+    // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName("InventoryUUIDs.txt");
-    // when created a new entity
+    // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
       .body(JsonObject.mapFrom(givenFileDefinition).encode())
       .when()
       .post(FILE_DEFINITION_SERVICE_URL);
-    // then retrieve it and verify
+    // then
     context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+    context.assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION.getDescription(), response.getBody().asString());
     async.complete();
   }
 
   @Test
-  public void postFileDefinition_return422Status(TestContext context) {
+  public void postFileDefinition_return422Status_whenFileNameRequestParamMissing(TestContext context) {
     // given
     FileDefinition givenEntity = new FileDefinition();
     // when
