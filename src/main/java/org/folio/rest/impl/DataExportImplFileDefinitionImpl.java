@@ -1,19 +1,11 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.RestVerticle.STREAM_ABORT;
-import static org.folio.util.ExceptionToResponseMapper.map;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status;
-
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import java.io.InputStream;
-import java.util.Map;
-import javax.ws.rs.core.Response;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.annotations.Stream;
@@ -22,15 +14,25 @@ import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.file.upload.FileUploadService;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.upload.FileUploadService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.ws.rs.core.Response;
+import java.io.InputStream;
+import java.util.Map;
+
+import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.RestVerticle.STREAM_ABORT;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status;
+import static org.folio.util.ExceptionToResponseMapper.map;
+
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
+  public static final String CSV_FORMAT_EXTENSION = "csv";
   @Autowired
   private FileDefinitionService fileDefinitionService;
 
@@ -85,19 +87,20 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Override
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+      .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
- }
+  }
 
 
   @Override
   @Validate
   public void getDataExportFileDefinitionsByFileDefinitionId(String fileDefinitionId, Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+                                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
       .map(optionalDefinition -> optionalDefinition
         .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.FILE_DEFINITION_NOT_FOUND)))
@@ -106,5 +109,12 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
 
+  }
+
+  private Future<Void> validateFileNameExtension(String fileName) {
+    if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION)) {
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION);
+    }
+    return succeededFuture();
   }
 }
