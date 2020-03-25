@@ -26,6 +26,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
 /**
@@ -56,6 +58,9 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String DELIMITER = "-";
   private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
+  public static final String PERSONAL_KEY = "personal";
+  public static final String FIRST_NAME_KEY = "firstName";
+  public static final String LAST_NAME_KEY = "lastName";
 
   @Autowired
   private JobExecutionService jobExecutionService;
@@ -86,6 +91,14 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportInitResult);
   }
 
+  @Override
+  public void proceed(JsonObject payload, ExportResult exportResult) {
+    executor.executeBlocking(blockingFuture -> {
+      proceedBlocking(payload, exportResult);
+      blockingFuture.complete();
+    }, this::handleExportResult);
+  }
+
   protected void initBlocking(JsonObject request, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     FileDefinition requestFileDefinition = exportRequest.getFileDefinition();
@@ -104,22 +117,43 @@ class InputDataManagerImpl implements InputDataManager {
           updateJobToInProgress(jobExecutionId, fileExportDefinition, user, tenantId);
           exportNextChunk(exportPayload, sourceReader);
         } else {
-          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND), sourceReader);
+          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+      updateJobExecution(jobExecutionId, JobExecution.Status.FAIL, tenantId);
       sourceReader.close();
+    }
+  }
+
+  protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
+    ExportPayload exportPayload = payloadJson.mapTo(ExportPayload.class);
+    increaseTotalRecordsNumber(exportResult.getRecordsNumber(), exportPayload.getJobExecutionId());
+    if (exportResult.isInProgress()) {
+      proceedInProgress(exportPayload);
+    } else {
+      finalizeExport(exportPayload, exportResult);
+    }
+  }
+
+  private void proceedInProgress(ExportPayload exportPayload) {
+    InputDataContext inputDataContext = getInputDataContext(exportPayload.getJobExecutionId());
+    SourceReader sourceReader = inputDataContext.getSourceReader();
+    if (nonNull(sourceReader) && sourceReader.hasNext()) {
+      exportNextChunk(exportPayload, sourceReader);
+    } else {
+      finalizeExport(exportPayload, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE));
     }
   }
 
   /**
    * Updates jobExecution status with IN-PROGRESS && updates exported files && updates started date
-   *  @param id                   job execution id
-   * @param fileExportDefinition  definition of the file to export
-   * @param user                  user represented in json object
-   * @param tenantId              tenant id
+   *
+   * @param id                   job execution id
+   * @param fileExportDefinition definition of the file to export
+   * @param user                 user represented in json object
+   * @param tenantId             tenant id
    */
   private void updateJobToInProgress(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
     jobExecutionService.getById(id, tenantId).onSuccess(optionalJobExecution -> optionalJobExecution.ifPresent(jobExecution -> {
@@ -133,10 +167,11 @@ class InputDataManagerImpl implements InputDataManager {
       if (Objects.isNull(jobExecution.getStartedDate())) {
         jobExecution.setStartedDate(new Date());
       }
-      JsonObject personal = user.getJsonObject("personal");
+      JsonObject personal = user.getJsonObject(PERSONAL_KEY);
       jobExecution.setRunBy(new RunBy()
-        .withFirstName(personal.getString("firstName"))
-        .withLastName(personal.getString("lastName")));
+        .withFirstName(personal.getString(FIRST_NAME_KEY))
+        .withLastName(personal.getString(LAST_NAME_KEY)));
+      jobExecution.setProgress(new Progress());
       jobExecutionService.update(jobExecution, tenantId);
     }));
   }
@@ -148,44 +183,24 @@ class InputDataManagerImpl implements InputDataManager {
    * @param status   status to update
    * @param tenantId tenant id
    */
-  private void updateJobExecutionStatus(String id, JobExecution.Status status, String tenantId) {
-    jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
-      optionalJobExecution.ifPresent(jobExecution -> {
-        jobExecution.setStatus(status);
-        jobExecution.setCompletedDate(new Date());
-        jobExecutionService.update(jobExecution, tenantId);
-      });
-      return succeededFuture();
+  private Future<JobExecution> updateJobExecution(String id, JobExecution.Status status, String tenantId) {
+    return jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
+      if (!optionalJobExecution.isPresent()) {
+        return Future.failedFuture(format("Job execution with id %s is not present", id));
+      }
+      JobExecution jobExecution = optionalJobExecution.get();
+      updateJobExecutionProgress(jobExecution.getProgress(), id);
+      jobExecution.setStatus(status);
+      jobExecution.setCompletedDate(new Date());
+      return jobExecutionService.update(jobExecution, tenantId);
     });
   }
+
 
   protected SourceReader initSourceReader(FileDefinition requestFileDefinition, int batchSize) {
     SourceReader sourceReader = new LocalStorageCsvSourceReader();
     sourceReader.init(requestFileDefinition, batchSize);
     return sourceReader;
-  }
-
-  @Override
-  public void proceed(JsonObject payload, ExportResult exportResult) {
-    executor.executeBlocking(blockingFuture -> {
-      proceedBlocking(payload, exportResult);
-      blockingFuture.complete();
-    }, this::handleExportResult);
-  }
-
-  protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
-    ExportPayload exportPayload = payloadJson.mapTo(ExportPayload.class);
-    InputDataContext inputDataContext = inputDataLocalMap.get(exportPayload.getJobExecutionId());
-    SourceReader sourceReader = inputDataContext.getSourceReader();
-    if (exportResult.isInProgress()) {
-      if (nonNull(sourceReader) && sourceReader.hasNext()) {
-        exportNextChunk(exportPayload, sourceReader);
-      } else {
-        finalizeExport(exportPayload, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE), sourceReader);
-      }
-    } else {
-      finalizeExport(exportPayload, exportResult, sourceReader);
-    }
   }
 
   private void exportNextChunk(ExportPayload exportPayload, SourceReader sourceReader) {
@@ -195,27 +210,15 @@ class InputDataManagerImpl implements InputDataManager {
     getExportManager().exportData(JsonObject.mapFrom(exportPayload));
   }
 
-  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult, SourceReader sourceReader) {
-    if (nonNull(sourceReader)) {
-      sourceReader.close();
-    }
+  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult) {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    if (exportResult.isCompleted()) {
-      fileExportDefinition.withStatus(FileDefinition.Status.COMPLETED);
-      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.SUCCESS, tenantId);
-    }
-    if (exportResult.isFailed()) {
-      fileExportDefinition.withStatus(FileDefinition.Status.ERROR);
-      // update job cause
-      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
-    }
-    fileDefinitionService.update(fileExportDefinition, tenantId)
-      .onComplete(saveAsyncResult -> {
-        if (inputDataLocalMap.containsKey(jobExecutionId)) {
-          inputDataLocalMap.remove(jobExecutionId);
-        }
+    updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId)
+      .compose(fileDefinition -> updateJobExecution(jobExecutionId, getJobExecutionStatus(exportResult), tenantId))
+      .onComplete(asyncResult -> {
+        closeSourceReader(jobExecutionId);
+        removeInputDataContext(jobExecutionId);
       });
   }
 
@@ -270,6 +273,58 @@ class InputDataManagerImpl implements InputDataManager {
 
   protected int getBatchSize() {
     return BATCH_SIZE;
+  }
+
+  private void increaseTotalRecordsNumber(int exportedRecordsNumber, String jobExecutionId) {
+    if (exportedRecordsNumber > 0) {
+      InputDataContext inputDataContext = getInputDataContext(jobExecutionId);
+      int updatedTotalRecordNumbers = inputDataContext.getTotalRecordsNumber() + exportedRecordsNumber;
+      inputDataContext.setTotalRecordsNumber(updatedTotalRecordNumbers);
+    }
+  }
+
+  private JobExecution.Status getJobExecutionStatus(ExportResult exportResult) {
+    if (exportResult.isCompleted()) {
+      return JobExecution.Status.SUCCESS;
+    }
+    return JobExecution.Status.FAIL;
+  }
+
+  private FileDefinition.Status getFileDefinitionStatus(ExportResult exportResult) {
+    if (exportResult.isCompleted()) {
+      return FileDefinition.Status.COMPLETED;
+    }
+    return FileDefinition.Status.ERROR;
+  }
+
+  private Future<FileDefinition> updateFileDefinitionStatusByResult(FileDefinition fileDefinition, ExportResult exportResult, String tenantId) {
+    fileDefinition.withStatus(getFileDefinitionStatus(exportResult));
+    return fileDefinitionService.update(fileDefinition, tenantId);
+  }
+
+  private void updateJobExecutionProgress(Progress progress, String id) {
+    InputDataContext inputDataContext = getInputDataContext(id);
+    if (Objects.nonNull(progress) && Objects.nonNull(inputDataContext)) {
+      int totalRecordNumbers = inputDataContext.getTotalRecordsNumber();
+      progress.setTotal(totalRecordNumbers);
+    }
+  }
+
+  private void closeSourceReader(String jobExecutionId) {
+    SourceReader sourceReader = getInputDataContext(jobExecutionId).getSourceReader();
+    if (nonNull(sourceReader)) {
+      sourceReader.close();
+    }
+  }
+
+  private void removeInputDataContext(String jobExecutionId) {
+    if (inputDataLocalMap.containsKey(jobExecutionId)) {
+      inputDataLocalMap.remove(jobExecutionId);
+    }
+  }
+
+  private InputDataContext getInputDataContext(String jobExecutionId) {
+    return inputDataLocalMap.get(jobExecutionId);
   }
 
 }

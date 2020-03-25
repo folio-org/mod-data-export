@@ -65,8 +65,8 @@ public class ExportManagerImpl implements ExportManager {
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
     this.executor.executeBlocking(blockingFuture -> {
-      exportBlocking(exportPayload);
-      blockingFuture.complete();
+      int exportedRecordsNumber = exportBlocking(exportPayload);
+      blockingFuture.complete(Integer.valueOf(exportedRecordsNumber));
     }, ar -> handleExportResult(ar, exportPayload));
   }
 
@@ -75,7 +75,7 @@ public class ExportManagerImpl implements ExportManager {
    *
    * @param exportPayload payload of the export request
    */
-  protected void exportBlocking(ExportPayload exportPayload) {
+  protected int exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
@@ -85,10 +85,10 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     List<String> mappedMarcRecords = mappingService.map(instances);
     exportService.export(mappedMarcRecords, fileExportDefinition);
-
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
+    return srsLoadResult.getUnderlyingMarcRecords().size();
   }
 
   /**
@@ -133,7 +133,6 @@ public class ExportManagerImpl implements ExportManager {
    * @return return future
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
-    clearIdentifiers(exportPayload);
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     getInputDataManager().proceed(exportPayloadJson, exportResult);
@@ -155,12 +154,11 @@ public class ExportManagerImpl implements ExportManager {
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
-      // update job progress
+      int recordsNumber = ((Integer)asyncResult.result()).intValue();
       if (isLast) {
-        return ExportResult.completed();
-      } else {
-        return ExportResult.inProgress();
+        return ExportResult.completed(recordsNumber);
       }
+      return ExportResult.inProgress(recordsNumber);
     }
   }
 

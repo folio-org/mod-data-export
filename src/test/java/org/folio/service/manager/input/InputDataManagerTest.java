@@ -22,6 +22,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.when;
 public class InputDataManagerTest {
 
   private static final int BATCH_SIZE = 2;
+  private static final int RECORDS_NUMBER_2 = 2;
   private static final String FILE_NAME = "InventoryUUIDs.csv";
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String TENANT_ID = "diku";
@@ -88,6 +90,9 @@ public class InputDataManagerTest {
       .put("firstname", "John")
       .put("lastname", "Doe")
     );
+  private static final int RECORDS_NUMBER_1 = 1;
+  private static final int RECORDS_NUMBER_3 = 3;
+  private static final int RECORDS_NUMBER_0 = 0;
 
   @InjectMocks
   @Spy
@@ -256,11 +261,13 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1);
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.failed(ErrorCode.NO_FILE_GENERATED));
@@ -269,6 +276,7 @@ public class InputDataManagerTest {
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
     assertNotNull(jobExecution.getCompletedDate());
+    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_1));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(sourceReader).close();
@@ -278,19 +286,23 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed(RECORDS_NUMBER_2));
 
     //then
+    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_3);
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.SUCCESS);
     assertNotNull(jobExecution.getCompletedDate());
+    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_3));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
     verify(sourceReader).close();
@@ -300,19 +312,23 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(null);
+    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress(RECORDS_NUMBER_2));
 
     //then
+    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_3);
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
     assertNotNull(jobExecution.getCompletedDate());
+    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_3));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -324,13 +340,15 @@ public class InputDataManagerTest {
     ExportPayload exportPayload = createExportPayload();
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_0);
     when(sourceReader.hasNext()).thenReturn(true, true);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress(RECORDS_NUMBER_2));
 
     //then
+    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_2);
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));
