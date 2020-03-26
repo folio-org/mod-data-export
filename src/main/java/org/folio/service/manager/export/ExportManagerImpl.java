@@ -135,6 +135,7 @@ public class ExportManagerImpl implements ExportManager {
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
+    clearIdentifiers(exportPayload);
     getInputDataManager().proceed(exportPayloadJson, exportResult);
     return succeededFuture();
   }
