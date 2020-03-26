@@ -6,6 +6,7 @@ import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.job.JobExecutionService;
+import org.folio.util.ErrorCode;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.storage.FileStorage;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     return findFileDefinition(fileDefinitionId, tenantId)
       .compose(fileDefinition -> {
         if (!fileDefinition.getStatus().equals(NEW)) {
-          throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, "File already uploaded for this FileDefinition");
+          throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.FILE_ALREADY_UPLOADED);
         }
         return fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), tenantId);
       });

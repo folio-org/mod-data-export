@@ -9,7 +9,8 @@ public enum ErrorCode {
   S3_BUCKET_NOT_PROVIDED("bucketNotProvided", "S3 bucket name is not found in System Properties"),
   NO_FILE_GENERATED("noFileGenerated", "Nothing to export: no binary file generated"),
   USER_NOT_FOUND("userNotFound", "User not found"),
-  INVALID_UPLOADED_FILE_EXTENSION("invalidUploadedFileExtension", "File name extension does not corresponds csv format");
+  INVALID_UPLOADED_FILE_EXTENSION("invalidUploadedFileExtension", "File name extension does not corresponds csv format"),
+  FILE_ALREADY_UPLOADED("fileAlreadyUploaded","File already uploaded for this FileDefinition");
 
   private final String code;
   private final String description;
