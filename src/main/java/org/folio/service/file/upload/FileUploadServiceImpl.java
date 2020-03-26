@@ -1,6 +1,8 @@
 package org.folio.service.file.upload;
 
 import io.vertx.core.Future;
+import org.folio.HttpStatus;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.job.JobExecutionService;
@@ -19,6 +21,7 @@ import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -37,7 +40,12 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
     return findFileDefinition(fileDefinitionId, tenantId)
-      .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), tenantId));
+      .compose(fileDefinition -> {
+        if (!fileDefinition.getStatus().equals(NEW)) {
+          throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, "File already uploaded for this FileDefinition");
+        }
+        return fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), tenantId);
+      });
   }
 
   @Override

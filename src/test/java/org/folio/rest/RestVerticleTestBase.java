@@ -1,7 +1,9 @@
 package org.folio.rest;
 
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -99,5 +101,13 @@ public abstract class RestVerticleTestBase {
       .setBaseUri(OKAPI_URL)
       .addHeader("Accept", "text/plain, application/json")
       .build();
+  }
+
+  protected Response postRequest(JsonObject body, String path) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(body.encode())
+      .when()
+      .post(path);
   }
 }

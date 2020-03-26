@@ -114,11 +114,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     //when
     ExportRequest exportRequest = getExportRequest(uploadedFileDefinition);
-    Response response = RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
+    Response response = postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
@@ -138,11 +134,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     //when
     ExportRequest exportRequest = getExportRequest(uploadedFileDefinition);
-    RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
 
     // then
     vertx.setTimer(1000L, handler -> {
@@ -169,11 +161,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     //when
     ExportRequest exportRequest = getExportRequest(uploadedFileDefinition);
-    RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
@@ -200,11 +188,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     //when
     ExportRequest exportRequest = getExportRequest(uploadedFileDefinition);
-    RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
 
     // then
     vertx.setTimer(10000L, handler -> {
@@ -226,11 +210,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     //when
     ExportRequest exportRequest = getExportRequest(uploadedFileDefinition);
-    Response response = RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
@@ -243,23 +223,36 @@ public class EndToEndTest extends RestVerticleTestBase {
     });
   }
 
+  @Test
+  public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
+    FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
+
+    File fileToUpload = getFileFromResourceByName(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
+
+    RestAssured.given()
+      .spec(binaryRequestSpecification)
+      .when()
+      .body(FileUtils.openInputStream(fileToUpload))
+      .post(FILE_DEFINITION_SERVICE_URL + uploadedFileDefinition.getId() + UPLOAD_URL)
+      .then()
+      .statusCode(HttpStatus.SC_BAD_REQUEST)
+      .log()
+      .all();
+    ;
+
+  }
+
+
   private FileDefinition givenUploadFile(String fileName) throws IOException {
     File fileToUpload = getFileFromResourceByName(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
-      .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
-      .setBaseUri(OKAPI_URL)
-      .build();
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName(fileName);
 
-    RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(givenFileDefinition).encode())
-      .when()
-      .post(FILE_DEFINITION_SERVICE_URL);
+    postRequest(JsonObject.mapFrom(givenFileDefinition), FILE_DEFINITION_SERVICE_URL);
 
     return RestAssured.given()
       .spec(binaryRequestSpecification)
@@ -268,6 +261,16 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + UPLOAD_URL)
       .then()
       .extract().body().as(FileDefinition.class);
+  }
+
+
+
+  private RequestSpecification buildRequestSpecification() {
+    return new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .setBaseUri(OKAPI_URL)
+      .build();
   }
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
