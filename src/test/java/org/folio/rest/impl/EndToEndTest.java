@@ -27,6 +27,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.After;
 import org.junit.Before;
@@ -51,10 +52,12 @@ import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+
 
 @RunWith(VertxUnitRunner.class)
 public class EndToEndTest extends RestVerticleTestBase {
@@ -247,6 +250,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     .post(FILE_DEFINITION_SERVICE_URL + uploadedFileDefinition.getId() + UPLOAD_URL)
     .then()
     .statusCode(HttpStatus.SC_BAD_REQUEST)
+    .body(containsString(ErrorCode.FILE_ALREADY_UPLOADED.getDescription()))
     .log()
     .all();
 
