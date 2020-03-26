@@ -22,6 +22,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.service.job.JobExecutionServiceImpl;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
@@ -54,8 +55,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,7 +103,7 @@ public class InputDataManagerUnitTest {
   @Mock
   private FileDefinitionService fileDefinitionService;
   @Mock
-  private JobExecutionService jobExecutionService;
+  private JobExecutionServiceImpl jobExecutionService;
   @Mock
   private JsonObject exportRequestJson;
   @Mock
@@ -157,6 +160,8 @@ public class InputDataManagerUnitTest {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(false);
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
 
     //when
     inputDataManager.initBlocking(exportRequestJson, requestParams);
@@ -176,6 +181,8 @@ public class InputDataManagerUnitTest {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
@@ -194,6 +201,8 @@ public class InputDataManagerUnitTest {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true, false);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
@@ -212,6 +221,8 @@ public class InputDataManagerUnitTest {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true, false);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
@@ -236,6 +247,8 @@ public class InputDataManagerUnitTest {
     //given
     doReturn(TIMESTAMP).when(inputDataManager).getCurrentTimestamp();
     when(sourceReader.hasNext()).thenReturn(true, true);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
@@ -260,6 +273,7 @@ public class InputDataManagerUnitTest {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -283,6 +297,7 @@ public class InputDataManagerUnitTest {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.SUCCESS), eq(TENANT_ID));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -307,6 +322,7 @@ public class InputDataManagerUnitTest {
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(null);
@@ -345,6 +361,76 @@ public class InputDataManagerUnitTest {
     assertThat(exportRequest.getJsonArray(IDENTIFIERS_KEY), equalTo(new JsonArray(EXPECTED_IDS)));
   }
 
+  @Test
+  public void shouldNotExport_whenWhenFileDefinitionNotFound() {
+    //given
+    requestFileDefinition.setStatus(FileDefinition.Status.ERROR);
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID))
+      .thenReturn(Future.failedFuture(String.format("File definition not found with id %s", requestFileDefinition.getId())));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
+
+    //then
+    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService, never()).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
+  }
+
+  @Test
+  public void shouldNotExport_whenWhenFileDefinitionStatusIsNew() {
+    //given
+    requestFileDefinition = createRequestFileDefinition();
+    requestFileDefinition.setStatus(FileDefinition.Status.NEW);
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
+
+    //then
+    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
+  }
+
+  @Test
+  public void shouldNotExport_whenWhenFileDefinitionStatusIsInProgress() {
+    //given
+    requestFileDefinition.setStatus(FileDefinition.Status.IN_PROGRESS);
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
+
+    //then
+    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
+  }
+
+  @Test
+  public void shouldNotExport_whenWhenFileDefinitionStatusIsError() {
+    //given
+    requestFileDefinition.setStatus(FileDefinition.Status.ERROR);
+    when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(requestFileDefinition)));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, requestParams);
+
+    //then
+    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
+    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
+    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
+  }
+
   private void initializeInputDataManager() {
     context = Mockito.mock(Context.class);
     springContext = Mockito.mock(AbstractApplicationContext.class);
@@ -371,7 +457,7 @@ public class InputDataManagerUnitTest {
 
   private ExportRequest createExportRequest() {
     return new ExportRequest()
-      .withFileDefinition(requestFileDefinition)
+      .withFileDefinitionId(UUID.randomUUID().toString())
       .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
   }
 
@@ -385,7 +471,8 @@ public class InputDataManagerUnitTest {
     return new FileDefinition()
       .withFileName(FILE_NAME)
       .withSourcePath(FILE_DIRECTORY + FILE_NAME)
-      .withJobExecutionId(JOB_EXECUTION_ID);
+      .withJobExecutionId(JOB_EXECUTION_ID)
+      .withStatus(FileDefinition.Status.COMPLETED);
   }
 
   private ExportPayload createExportPayload() {
