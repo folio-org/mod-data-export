@@ -225,21 +225,32 @@ public class EndToEndTest extends RestVerticleTestBase {
 
   @Test
   public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
-    FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
+    Async async = context.async();
 
+    FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
+    //when
     File fileToUpload = getFileFromResourceByName(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
     RequestSpecification binaryRequestSpecification = buildRequestSpecification();
 
+ // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
+        .compose(succeeded -> {
+          return Future.succeededFuture();
+        });
+    });
     RestAssured.given()
-      .spec(binaryRequestSpecification)
-      .when()
-      .body(FileUtils.openInputStream(fileToUpload))
-      .post(FILE_DEFINITION_SERVICE_URL + uploadedFileDefinition.getId() + UPLOAD_URL)
-      .then()
-      .statusCode(HttpStatus.SC_BAD_REQUEST)
-      .log()
-      .all();
-    ;
+    .spec(binaryRequestSpecification)
+    .when()
+    .body(FileUtils.openInputStream(fileToUpload))
+    .post(FILE_DEFINITION_SERVICE_URL + uploadedFileDefinition.getId() + UPLOAD_URL)
+    .then()
+    .statusCode(HttpStatus.SC_BAD_REQUEST)
+    .log()
+    .all();
+
+    async.complete();
 
   }
 
