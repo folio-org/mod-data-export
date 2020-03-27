@@ -38,8 +38,8 @@ import static io.vertx.core.Future.succeededFuture;
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
   private static final int POOL_SIZE = 1;
-  private static final int SRS_LOAD_PARTITION_SIZE = 15;
-  private static final int INVENTORY_LOAD_PARTITION_SIZE = 15;
+  private static final int SRS_LOAD_PARTITION_SIZE = 10;
+  private static final int INVENTORY_LOAD_PARTITION_SIZE = 10;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
