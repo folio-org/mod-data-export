@@ -80,7 +80,7 @@ public class ExportManagerImpl implements ExportManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    LOGGER.info("Records that are not presenting in SRS {}", srsLoadResult.getInstanceIdsWithoutSrs());
+    LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
     exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     List<String> mappedMarcRecords = mappingService.map(instances);
