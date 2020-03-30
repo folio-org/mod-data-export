@@ -86,7 +86,7 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
-    findFileDefinition(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
+    fileDefinitionService.findFileDefinition(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
       String jobExecutionId = requestFileDefinition.getJobExecutionId();
       if (requestFileDefinition.getStatus().equals(FileDefinition.Status.COMPLETED)) {
         FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
@@ -178,19 +178,6 @@ class InputDataManagerImpl implements InputDataManager {
 
   protected ExportManager getExportManager() {
     return vertx.getOrCreateContext().get(ExportManager.class.getName());
-  }
-
-  private Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId) {
-    return fileDefinitionService.getById(fileDefinitionId, tenantId)
-      .compose(optionalFileDefinition -> {
-        if (optionalFileDefinition.isPresent()) {
-          return succeededFuture(optionalFileDefinition.get());
-        } else {
-          String errorMessage = String.format("File definition not found with id %s", fileDefinitionId);
-          LOGGER.error(errorMessage);
-          return failedFuture(errorMessage);
-        }
-      });
   }
 
   private Future<Void> handleExportInitResult(AsyncResult asyncResult) {
