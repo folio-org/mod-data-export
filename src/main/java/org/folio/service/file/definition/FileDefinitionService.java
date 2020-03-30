@@ -33,4 +33,14 @@ public interface FileDefinitionService {
    * @return future with {@link FileDefinition}
    */
   Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId);
+
+  /**
+   * Find {@link FileDefinition} by the given id
+   *
+   * @param fileDefinitionId file definition id
+   * @param tenantId         tenant id
+   * @return future with {@link FileDefinition}
+   */
+  Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId);
+
 }

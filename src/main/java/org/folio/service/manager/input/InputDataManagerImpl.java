@@ -93,7 +93,7 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
-    findFileDefinition(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
+    fileDefinitionService.findFileDefinition(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
       String jobExecutionId = requestFileDefinition.getJobExecutionId();
       if (requestFileDefinition.getStatus().equals(FileDefinition.Status.COMPLETED)) {
         FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
