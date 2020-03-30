@@ -59,7 +59,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class InputDataManagerTest {
+public class InputDataManagerUnitTest {
 
   private static final int BATCH_SIZE = 2;
   private static final int RECORDS_NUMBER_2 = 2;
