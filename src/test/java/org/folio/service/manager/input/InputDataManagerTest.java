@@ -276,7 +276,6 @@ public class InputDataManagerTest {
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_1));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(sourceReader).close();
@@ -295,14 +294,12 @@ public class InputDataManagerTest {
     when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed(RECORDS_NUMBER_2));
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
 
     //then
-    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_3);
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.SUCCESS);
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_3));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
     verify(sourceReader).close();
@@ -321,14 +318,12 @@ public class InputDataManagerTest {
     when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress(RECORDS_NUMBER_2));
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
-    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_3);
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
     assertJobStatus(JobExecution.Status.FAIL);
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(jobExecution.getProgress().getTotal(), Integer.valueOf(RECORDS_NUMBER_3));
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
     verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
@@ -345,10 +340,9 @@ public class InputDataManagerTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress(RECORDS_NUMBER_2));
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
 
     //then
-    verify(inputDataContext).setTotalRecordsNumber(RECORDS_NUMBER_2);
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
     JsonObject exportRequest = exportPayloadJsonCaptor.getValue();
     assertThat(exportRequest.getJsonObject(FILE_EXPORT_DEFINITION_KEY), equalTo(JsonObject.mapFrom(fileExportDefinition)));

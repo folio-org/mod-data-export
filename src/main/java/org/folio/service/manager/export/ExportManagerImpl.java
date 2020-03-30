@@ -12,6 +12,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.ExportService;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
@@ -50,6 +51,8 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private MappingService mappingService;
   @Autowired
+  private JobExecutionService jobExecutionService;
+  @Autowired
   private Vertx vertx;
 
   public ExportManagerImpl() {
@@ -65,8 +68,8 @@ public class ExportManagerImpl implements ExportManager {
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
     this.executor.executeBlocking(blockingFuture -> {
-      int exportedRecordsNumber = exportBlocking(exportPayload);
-      blockingFuture.complete(Integer.valueOf(exportedRecordsNumber));
+      exportBlocking(exportPayload);
+      blockingFuture.complete();
     }, ar -> handleExportResult(ar, exportPayload));
   }
 
@@ -75,7 +78,7 @@ public class ExportManagerImpl implements ExportManager {
    *
    * @param exportPayload payload of the export request
    */
-  protected int exportBlocking(ExportPayload exportPayload) {
+  protected void exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
@@ -88,7 +91,7 @@ public class ExportManagerImpl implements ExportManager {
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-    return srsLoadResult.getUnderlyingMarcRecords().size();
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size());
   }
 
   /**
@@ -134,7 +137,7 @@ public class ExportManagerImpl implements ExportManager {
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
     clearIdentifiers(exportPayload);
     getInputDataManager().proceed(exportPayloadJson, exportResult);
     return succeededFuture();
@@ -145,7 +148,7 @@ public class ExportManagerImpl implements ExportManager {
   }
 
   @NotNull
-  private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
+  private ExportResult getExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
@@ -155,11 +158,13 @@ public class ExportManagerImpl implements ExportManager {
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
-      int recordsNumber = ((Integer)asyncResult.result()).intValue();
-      if (isLast) {
-        return ExportResult.completed(recordsNumber);
+      String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
+      int exportedRecordsNumber = exportPayload.getExportedRecordsNumber();
+      jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exportedRecordsNumber, tenantId);
+      if (exportPayload.isLast()) {
+        return ExportResult.completed();
       }
-      return ExportResult.inProgress(recordsNumber);
+      return ExportResult.inProgress();
     }
   }
 

@@ -122,14 +122,13 @@ class InputDataManagerImpl implements InputDataManager {
       });
     } else {
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      updateJobExecution(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+      updateJobExecutionStatus(jobExecutionId, JobExecution.Status.FAIL, tenantId);
       sourceReader.close();
     }
   }
 
   protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
     ExportPayload exportPayload = payloadJson.mapTo(ExportPayload.class);
-    increaseTotalRecordsNumber(exportResult.getRecordsNumber(), exportPayload.getJobExecutionId());
     if (exportResult.isInProgress()) {
       proceedInProgress(exportPayload);
     } else {
@@ -183,16 +182,14 @@ class InputDataManagerImpl implements InputDataManager {
    * @param status   status to update
    * @param tenantId tenant id
    */
-  private Future<JobExecution> updateJobExecution(String id, JobExecution.Status status, String tenantId) {
-    return jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
-      if (!optionalJobExecution.isPresent()) {
-        return Future.failedFuture(format("Job execution with id %s is not present", id));
-      }
-      JobExecution jobExecution = optionalJobExecution.get();
-      updateJobExecutionProgress(jobExecution.getProgress(), id);
-      jobExecution.setStatus(status);
-      jobExecution.setCompletedDate(new Date());
-      return jobExecutionService.update(jobExecution, tenantId);
+  private void updateJobExecutionStatus(String id, JobExecution.Status status, String tenantId) {
+    jobExecutionService.getById(id, tenantId).compose(optionalJobExecution -> {
+      optionalJobExecution.ifPresent(jobExecution -> {
+        jobExecution.setStatus(status);
+        jobExecution.setCompletedDate(new Date());
+        jobExecutionService.update(jobExecution, tenantId);
+      });
+      return succeededFuture();
     });
   }
 
@@ -214,12 +211,10 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId)
-      .compose(fileDefinition -> updateJobExecution(jobExecutionId, getJobExecutionStatus(exportResult), tenantId))
-      .onComplete(asyncResult -> {
-        closeSourceReader(jobExecutionId);
-        removeInputDataContext(jobExecutionId);
-      });
+    updateJobExecutionStatus(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
+    updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+    closeSourceReader(jobExecutionId);
+    removeInputDataContext(jobExecutionId);
   }
 
   protected ExportManager getExportManager() {
@@ -275,14 +270,6 @@ class InputDataManagerImpl implements InputDataManager {
     return BATCH_SIZE;
   }
 
-  private void increaseTotalRecordsNumber(int exportedRecordsNumber, String jobExecutionId) {
-    if (exportedRecordsNumber > 0) {
-      InputDataContext inputDataContext = getInputDataContext(jobExecutionId);
-      int updatedTotalRecordNumbers = inputDataContext.getTotalRecordsNumber() + exportedRecordsNumber;
-      inputDataContext.setTotalRecordsNumber(updatedTotalRecordNumbers);
-    }
-  }
-
   private JobExecution.Status getJobExecutionStatus(ExportResult exportResult) {
     if (exportResult.isCompleted()) {
       return JobExecution.Status.SUCCESS;
@@ -297,9 +284,9 @@ class InputDataManagerImpl implements InputDataManager {
     return FileDefinition.Status.ERROR;
   }
 
-  private Future<FileDefinition> updateFileDefinitionStatusByResult(FileDefinition fileDefinition, ExportResult exportResult, String tenantId) {
+  private void updateFileDefinitionStatusByResult(FileDefinition fileDefinition, ExportResult exportResult, String tenantId) {
     fileDefinition.withStatus(getFileDefinitionStatus(exportResult));
-    return fileDefinitionService.update(fileDefinition, tenantId);
+    fileDefinitionService.update(fileDefinition, tenantId);
   }
 
   private void updateJobExecutionProgress(Progress progress, String id) {

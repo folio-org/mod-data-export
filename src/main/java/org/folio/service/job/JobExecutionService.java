@@ -49,4 +49,6 @@ public interface JobExecutionService {
    * @return future
    */
   Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
+
+  Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int delta, String tenantId);
 }

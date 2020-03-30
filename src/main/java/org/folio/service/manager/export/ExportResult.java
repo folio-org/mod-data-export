@@ -9,14 +9,14 @@ import org.folio.util.ErrorCode;
 @DataObject(generateConverter = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ExportResult {
+  private static final ExportResult IN_PROGRESS = new ExportResult(ExportStatus.IN_PROGRESS);
+  private static final ExportResult COMPLETED = new ExportResult(ExportStatus.COMPLETED);
 
   private ExportStatus exportStatus;
   private ErrorCode errorCode;
-  private int recordsNumber;
 
-  private ExportResult(ExportStatus status, int recordsNumber) {
+  private ExportResult(ExportStatus status) {
     this.exportStatus = status;
-    this.recordsNumber = recordsNumber;
   }
 
   private ExportResult(ExportStatus status, ErrorCode errorCode) {
@@ -28,12 +28,12 @@ public class ExportResult {
     ExportResultConverter.fromJson(jsonObject, this);
   }
 
-  public static ExportResult completed(int recordsNumber) {
-    return new ExportResult(ExportStatus.COMPLETED, recordsNumber);
+  public static ExportResult completed() {
+    return COMPLETED;
   }
 
-  public static ExportResult inProgress(int recordsNumber) {
-    return new ExportResult(ExportStatus.IN_PROGRESS, recordsNumber);
+  public static ExportResult inProgress() {
+    return IN_PROGRESS;
   }
 
   public static ExportResult failed(ErrorCode errorCode) {
@@ -69,20 +69,12 @@ public class ExportResult {
     return errorCode;
   }
 
-  public int getRecordsNumber() {
-    return recordsNumber;
-  }
-
   public void setStatus(ExportStatus status) {
     this.exportStatus = status;
   }
 
   public void setErrorCode(ErrorCode errorCode) {
     this.errorCode = errorCode;
-  }
-
-  public void setRecordsNumber(int recordsNumber) {
-    this.recordsNumber = recordsNumber;
   }
 
   public enum ExportStatus {
