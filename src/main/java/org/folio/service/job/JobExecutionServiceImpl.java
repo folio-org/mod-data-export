@@ -3,7 +3,6 @@ package org.folio.service.job;
 
 import io.vertx.core.Future;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import org.folio.dao.JobExecutionDao;

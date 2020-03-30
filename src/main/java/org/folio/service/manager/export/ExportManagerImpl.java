@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
@@ -11,6 +12,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
@@ -20,15 +22,12 @@ import org.folio.service.mapping.MappingService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static io.vertx.core.Future.succeededFuture;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -136,19 +135,23 @@ public class ExportManagerImpl implements ExportManager {
    * @return return future
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+    Promise promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     clearIdentifiers(exportPayload);
-    getInputDataManager().proceed(exportPayloadJson, exportResult);
-    return succeededFuture();
+    incrementCurrentProgress(exportPayload, exportResult)
+      .onComplete(handler -> {
+        getInputDataManager().proceed(exportPayloadJson, exportResult);
+        promise.complete();
+      });
+    return promise.future();
   }
 
   private void clearIdentifiers(ExportPayload exportPayload) {
     exportPayload.setIdentifiers(Collections.emptyList());
   }
 
-  @NotNull
-  private ExportResult getExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+  private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: " + asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
@@ -158,14 +161,20 @@ public class ExportManagerImpl implements ExportManager {
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
-      String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-      int exportedRecordsNumber = exportPayload.getExportedRecordsNumber();
-      jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exportedRecordsNumber, tenantId);
-      if (exportPayload.isLast()) {
+      if (isLast) {
         return ExportResult.completed();
       }
       return ExportResult.inProgress();
     }
+  }
+
+  private Future<JobExecution> incrementCurrentProgress(ExportPayload exportPayload, ExportResult exportResult) {
+    if (!exportResult.isFailed()) {
+      String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
+      int exportedRecordsNumber = exportPayload.getExportedRecordsNumber();
+      return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exportedRecordsNumber, tenantId);
+    }
+    return Future.succeededFuture();
   }
 
   private InputDataManager getInputDataManager() {

@@ -305,7 +305,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
-    context.assertEquals(jobExecution.getProgress().getTotal(), total);
+    context.assertEquals(jobExecution.getProgress().getCurrent(), total);
     return Future.succeededFuture();
   }
 

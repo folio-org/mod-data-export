@@ -90,9 +90,6 @@ public class InputDataManagerTest {
       .put("firstname", "John")
       .put("lastname", "Doe")
     );
-  private static final int RECORDS_NUMBER_1 = 1;
-  private static final int RECORDS_NUMBER_3 = 3;
-  private static final int RECORDS_NUMBER_0 = 0;
 
   @InjectMocks
   @Spy
@@ -267,7 +264,6 @@ public class InputDataManagerTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1);
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.failed(ErrorCode.NO_FILE_GENERATED));
@@ -291,7 +287,6 @@ public class InputDataManagerTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
@@ -315,7 +310,6 @@ public class InputDataManagerTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(null);
-    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_1, RECORDS_NUMBER_3);
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.inProgress());
@@ -335,7 +329,6 @@ public class InputDataManagerTest {
     ExportPayload exportPayload = createExportPayload();
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(inputDataContext.getTotalRecordsNumber()).thenReturn(RECORDS_NUMBER_0);
     when(sourceReader.hasNext()).thenReturn(true, true);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 

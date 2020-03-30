@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
 /**
