@@ -288,14 +288,6 @@ class InputDataManagerImpl implements InputDataManager {
     fileDefinitionService.update(fileDefinition, tenantId);
   }
 
-  private void updateJobExecutionProgress(Progress progress, String id) {
-    InputDataContext inputDataContext = getInputDataContext(id);
-    if (Objects.nonNull(progress) && Objects.nonNull(inputDataContext)) {
-      int totalRecordNumbers = inputDataContext.getTotalRecordsNumber();
-      progress.setTotal(totalRecordNumbers);
-    }
-  }
-
   private void closeSourceReader(String jobExecutionId) {
     SourceReader sourceReader = getInputDataContext(jobExecutionId).getSourceReader();
     if (nonNull(sourceReader)) {
