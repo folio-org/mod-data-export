@@ -79,6 +79,8 @@ public class EndToEndTest extends RestVerticleTestBase {
       .put("firstName", "John")
       .put("lastName", "Doe")
     );
+  private static final int CURRENT_RECORDS_2 = 2;
+  private static final int CURRENT_RECORDS_12 = 12;
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static SourceRecordStorageClient mockSourceRecordStorageClient = Mockito.mock(SourceRecordStorageClient.class);
@@ -145,11 +147,11 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    vertx.setTimer(1000L, handler -> {
+    vertx.setTimer(TIMER_DELAY, handler -> {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_2))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
@@ -180,7 +182,7 @@ public class EndToEndTest extends RestVerticleTestBase {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
@@ -299,9 +301,11 @@ public class EndToEndTest extends RestVerticleTestBase {
     return Future.succeededFuture(fileExportDefinition);
   }
 
-  private Future<Object> assertSuccessJobExecution(TestContext context,  Optional<JobExecution> jobExecutionOptional) {
+  private Future<Object> assertSuccessJobExecution(TestContext context,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber) {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
+    context.assertNotNull(jobExecution.getCompletedDate());
+    context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
     return Future.succeededFuture();
   }
 
