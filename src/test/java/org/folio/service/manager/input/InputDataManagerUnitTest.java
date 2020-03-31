@@ -22,6 +22,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -58,9 +59,10 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class InputDataManagerTest {
+public class InputDataManagerUnitTest {
 
   private static final int BATCH_SIZE = 2;
+  private static final int RECORDS_NUMBER_2 = 2;
   private static final String FILE_NAME = "InventoryUUIDs.csv";
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String TENANT_ID = "diku";
@@ -256,6 +258,7 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
@@ -278,6 +281,7 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
@@ -300,6 +304,7 @@ public class InputDataManagerTest {
   @Test
   public void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
     //given
+    jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
