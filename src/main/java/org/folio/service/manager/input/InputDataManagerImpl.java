@@ -14,20 +14,14 @@ import org.apache.commons.io.FilenameUtils;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -41,7 +35,6 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
 
