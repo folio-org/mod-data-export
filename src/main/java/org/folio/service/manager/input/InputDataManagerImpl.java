@@ -14,14 +14,20 @@ import org.apache.commons.io.FilenameUtils;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
+import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
@@ -206,12 +212,13 @@ class InputDataManagerImpl implements InputDataManager {
     return exportPayload;
   }
 
-  private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
-    String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
+  private FileDefinition createExportFileDefinition(ExportRequest exportRequest) {
+    String fileNameWithoutExtension = FilenameUtils.getBaseName(exportRequest.getFileDefinition().getFileName());
     return new FileDefinition()
       .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
-      .withJobExecutionId(requestFileDefinition.getJobExecutionId());
+      .withJobExecutionId(exportRequest.getFileDefinition().getJobExecutionId())
+      .withMetadata(exportRequest.getMetadata());
   }
 
   protected String getCurrentTimestamp() {

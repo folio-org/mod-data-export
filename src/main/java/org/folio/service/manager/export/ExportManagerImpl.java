@@ -38,8 +38,8 @@ import static io.vertx.core.Future.succeededFuture;
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
   private static final int POOL_SIZE = 1;
-  private static final int SRS_LOAD_PARTITION_SIZE = 15;
-  private static final int INVENTORY_LOAD_PARTITION_SIZE = 15;
+  private static final int SRS_LOAD_PARTITION_SIZE = 10;
+  private static final int INVENTORY_LOAD_PARTITION_SIZE = 10;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
@@ -80,6 +80,7 @@ public class ExportManagerImpl implements ExportManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
+    LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
     exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     List<String> mappedMarcRecords = mappingService.map(instances);
