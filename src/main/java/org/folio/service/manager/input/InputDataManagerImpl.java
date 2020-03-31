@@ -95,7 +95,7 @@ class InputDataManagerImpl implements InputDataManager {
     fileDefinitionService.findFileDefinition(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
       String jobExecutionId = requestFileDefinition.getJobExecutionId();
       if (requestFileDefinition.getStatus().equals(FileDefinition.Status.COMPLETED)) {
-        FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
+        FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition);
         SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
         if (sourceReader.hasNext()) {
           fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
@@ -212,12 +212,12 @@ class InputDataManagerImpl implements InputDataManager {
     return exportPayload;
   }
 
-  private FileDefinition createExportFileDefinition(ExportRequest exportRequest) {
-    String fileNameWithoutExtension = FilenameUtils.getBaseName(exportRequest.getFileDefinition().getFileName());
+  private FileDefinition createExportFileDefinition(ExportRequest exportRequest, FileDefinition requestFileDefinition) {
+    String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
     return new FileDefinition()
       .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
-      .withJobExecutionId(exportRequest.getFileDefinition().getJobExecutionId())
+      .withJobExecutionId(requestFileDefinition.getJobExecutionId())
       .withMetadata(exportRequest.getMetadata());
   }
 
