@@ -102,7 +102,7 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     FileDefinition requestFileDefinition = exportRequest.getFileDefinition();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
-    FileDefinition fileExportDefinition = createExportFileDefinition(requestFileDefinition);
+    FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest);
     String jobExecutionId = requestFileDefinition.getJobExecutionId();
     String tenantId = okapiConnectionParams.getTenantId();
     SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
@@ -246,12 +246,13 @@ class InputDataManagerImpl implements InputDataManager {
     return exportPayload;
   }
 
-  private FileDefinition createExportFileDefinition(FileDefinition requestFileDefinition) {
-    String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
+  private FileDefinition createExportFileDefinition(ExportRequest exportRequest) {
+    String fileNameWithoutExtension = FilenameUtils.getBaseName(exportRequest.getFileDefinition().getFileName());
     return new FileDefinition()
       .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
-      .withJobExecutionId(requestFileDefinition.getJobExecutionId());
+      .withJobExecutionId(exportRequest.getFileDefinition().getJobExecutionId())
+      .withMetadata(exportRequest.getMetadata());
   }
 
   protected String getCurrentTimestamp() {
