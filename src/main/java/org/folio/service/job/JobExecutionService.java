@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.jaxrs.model.Progress;
 
 /**
  * JobExecution Service interface, contains logic for accessing jobs.
@@ -50,5 +51,13 @@ public interface JobExecutionService {
    */
   Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
 
+  /**
+   * Increment current value in {@link Progress} of {@link JobExecution}
+   *
+   * @param jobExecutionId id of a job
+   * @param delta an increment of a current
+   * @param tenantId  tenant id
+   * @return future
+   */
   Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int delta, String tenantId);
 }
