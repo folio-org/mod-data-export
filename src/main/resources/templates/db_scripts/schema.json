@@ -9,7 +9,7 @@
     },
     {
       "tableName" : "job_executions",
-      "fromModuleVersion": "mod-data-export-1.0.1",
+      "fromModuleVersion": "mod-data-export-1.1.0",
       "withAuditing": false,
       "index": [{
           "fieldName" : "status",
