@@ -8,6 +8,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,7 +51,7 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
         } else {
           String errorMessage = String.format("File definition not found with id %s", fileDefinitionId);
           LOGGER.error(errorMessage);
-          return failedFuture(errorMessage);
+          return failedFuture(new NotFoundException(errorMessage));
         }
       });
   }
