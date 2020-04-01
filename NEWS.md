@@ -1,7 +1,7 @@
 ## 2020-01-04 v1.1.0 - Released
 This release contains few bugfixes and also populates few fields that the required to be shown on the UI
 
-[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.0.0...v1.0.1)
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.0.0...v1.1.0)
 
 ### Bug Fixes
 * [MDEXP-94](https://issues.folio.org/browse/MDEXP-94) - Generated binary file is not removed
