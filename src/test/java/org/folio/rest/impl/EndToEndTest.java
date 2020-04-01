@@ -29,7 +29,6 @@ import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -145,17 +144,12 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-        .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
-        .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_2))
-          .compose(succeeded -> {
-            async.complete();
-            return Future.succeededFuture();
-          })
-        );
-    });
+    vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
+      .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_2))
+        .onComplete(succeeded -> async.complete())
+      ));
   }
 
   @Test
@@ -176,20 +170,14 @@ public class EndToEndTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
 
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-        .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
-        .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
-          .compose(succeeded -> {
-            async.complete();
-            return Future.succeededFuture();
-          })
-        );
-    });
+    vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
+      .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
+        .onComplete(succeeded -> async.complete())
+      ));
   }
 
-  @Ignore
   @Test
   public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
@@ -210,10 +198,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(10000L, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
           .compose(jobExecutionOptional -> assertFailJobExecution(context, jobExecutionOptional))
-          .compose(succeeded -> {
-            async.complete();
-            return Future.succeededFuture();
-          });
+          .onComplete(succeeded -> async.complete());
     });
   }
 
