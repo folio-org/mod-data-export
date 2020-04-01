@@ -25,7 +25,6 @@ import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.file.definition.FileDefinitionServiceImpl;
 import org.folio.service.job.JobExecutionServiceImpl;
 import org.folio.rest.jaxrs.model.Progress;
-import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;

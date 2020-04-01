@@ -108,7 +108,7 @@ class InputDataManagerImpl implements InputDataManager {
               jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, tenantId);
               exportNextChunk(exportPayload, sourceReader);
             } else {
-              finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND), sourceReader);
+              finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
             }
           });
         } else {
@@ -121,6 +121,25 @@ class InputDataManagerImpl implements InputDataManager {
         jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
       }
     });
+  }
+
+  protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
+    ExportPayload exportPayload = payloadJson.mapTo(ExportPayload.class);
+    if (exportResult.isInProgress()) {
+      proceedInProgress(exportPayload);
+    } else {
+      finalizeExport(exportPayload, exportResult);
+    }
+  }
+
+  private void proceedInProgress(ExportPayload exportPayload) {
+    InputDataContext inputDataContext = getInputDataContext(exportPayload.getJobExecutionId());
+    SourceReader sourceReader = inputDataContext.getSourceReader();
+    if (nonNull(sourceReader) && sourceReader.hasNext()) {
+      exportNextChunk(exportPayload, sourceReader);
+    } else {
+      finalizeExport(exportPayload, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE));
+    }
   }
 
   protected SourceReader initSourceReader(FileDefinition requestFileDefinition, int batchSize) {
@@ -140,7 +159,7 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    updateJobExecutionStatus(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
+    jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
     updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
     closeSourceReader(jobExecutionId);
     removeInputDataContext(jobExecutionId);
