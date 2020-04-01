@@ -4,7 +4,7 @@ This release contains few bugfixes and also populates few fields that the requir
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.0.0...v1.0.1)
 
 ### Bug Fixes
-* [MDEXP-94](https://issues.folio.org/browse/MDEXP-91) - Generated binary file is not removed
+* [MDEXP-94](https://issues.folio.org/browse/MDEXP-94) - Generated binary file is not removed
 * [MDEXP-91](https://issues.folio.org/browse/MDEXP-91) - In large data exports - not all records are being exported
 
 
