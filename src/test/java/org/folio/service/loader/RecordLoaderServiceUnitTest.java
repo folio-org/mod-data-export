@@ -106,12 +106,25 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_ShouldReturnNotFoundInstancesFromInventory() throws IOException {
+  public void loadInstanceRecords_ShouldReturnEmptyListWhenThereInNoRecordsInInventory() throws IOException {
     // given
     StorageClient client = Mockito.mock(StorageClient.class);
     String json = IOUtils.toString(new FileReader("src/test/resources/InventoryStorageEmptyResponse.json"));
     JsonObject data = new JsonObject(json);
     when(client.getByIdsFromInventory(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
+    RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
+    // when
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams);
+    //then
+    assertThat(inventoryResponse, empty());
+  }
+
+  @Test
+  public void loadInstanceRecords_ShouldReturnEmptyListWhenOptionalResponseIsNotPresent() {
+    // given
+    StorageClient client = Mockito.mock(StorageClient.class);
+    when(client.getByIdsFromInventory(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
