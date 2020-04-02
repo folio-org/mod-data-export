@@ -17,8 +17,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,6 +28,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
 public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
@@ -69,7 +73,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
     StorageClient client = Mockito.mock(StorageClient.class);
-    Mockito.when(client.getByIdsFromSRS(anyList(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(emptyResponse));
+    when(client.getByIdsFromSRS(anyList(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(emptyResponse));
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
@@ -96,10 +100,24 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     StorageClient client = Mockito.spy(StorageClient.class);
     RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
     // when
-    List<JsonObject> inventoryJson = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams);
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams);
     //then
-    assertThat(inventoryJson, hasSize(2));
+    assertThat(inventoryResponse, hasSize(2));
+  }
 
+  @Test
+  public void loadInstanceRecords_ShouldReturnNotFoundInstancesFromInventory() throws IOException {
+    // given
+    StorageClient client = Mockito.mock(StorageClient.class);
+    String json = IOUtils.toString(new FileReader("src/test/resources/InventoryStorageEmptyResponse.json"));
+    JsonObject data = new JsonObject(json);
+    when(client.getByIdsFromInventory(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
+    RecordLoaderService recordLoaderService = new RecordLoaderServiceImpl(client);
+    // when
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams);
+    //then
+    assertThat(inventoryResponse, empty());
   }
 
 }
