@@ -81,6 +81,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     );
   private static final int CURRENT_RECORDS_2 = 2;
   private static final int CURRENT_RECORDS_12 = 12;
+  private static final int LIMIT = 10;
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static StorageClient mockStorageClient = Mockito.mock(StorageClient.class);
@@ -273,7 +274,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
-    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
+    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.empty());
   }
 
   private ArgumentCaptor<FileDefinition> givenCaptureFileExportDefinition() {
@@ -285,7 +286,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
     String json = FileUtils.readFileToString(getFileFromResourceByName(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
-    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
+    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
   }
 
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFile(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {

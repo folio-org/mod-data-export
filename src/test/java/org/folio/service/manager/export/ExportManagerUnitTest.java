@@ -24,9 +24,11 @@ import java.util.stream.Stream;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportManagerUnitTest {
+  private static final int LIMIT = 10;
 
   @Mock
   private RecordLoaderService recordLoaderService;
@@ -43,7 +45,7 @@ public class ExportManagerUnitTest {
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
     Mockito.when(marcLoadResult.getInstanceIdsWithoutSrs()).thenReturn(Arrays.asList(UUID.randomUUID().toString()));
-    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(marcLoadResult);
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -54,8 +56,8 @@ public class ExportManagerUnitTest {
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
     exportManager.exportBlocking(exportPayload);
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(100)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class));
-    Mockito.verify(recordLoaderService, Mockito.times(10)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(100)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(10)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(2)).export(anyList(), any(FileDefinition.class));
     Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());

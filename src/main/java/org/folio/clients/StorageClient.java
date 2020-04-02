@@ -30,13 +30,14 @@ public class StorageClient {
   private static final String QUERY_PATTERN_SRS = "externalIdsHolder.instanceId==%s";
   private static final String GET_INSTANCE_PATTERN_INVENTORY = "%s/instance-storage/instances?query=(%s)";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
+  private static final String LIMIT_PATTERN = "&limit=";
 
-  public Optional<JsonObject> getByIdsFromSRS(List<String> ids, OkapiConnectionParams params) {
-    return getByIds(ids, params, GET_RECORDS_PATTERN_SRS, QUERY_PATTERN_SRS);
+  public Optional<JsonObject> getByIdsFromSRS(List<String> ids, OkapiConnectionParams params, int partitionSize) {
+    return getByIds(ids, params, GET_RECORDS_PATTERN_SRS+ LIMIT_PATTERN + partitionSize, QUERY_PATTERN_SRS);
   }
 
-  public Optional<JsonObject> getByIdsFromInventory(List<String> ids, OkapiConnectionParams params) {
-    return getByIds(ids, params, GET_INSTANCE_PATTERN_INVENTORY, QUERY_PATTERN_INVENTORY);
+  public Optional<JsonObject> getByIdsFromInventory(List<String> ids, OkapiConnectionParams params, int partitionSize) {
+    return getByIds(ids, params, GET_INSTANCE_PATTERN_INVENTORY + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
   }
 
   private Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String pattern, String queryPattern) {

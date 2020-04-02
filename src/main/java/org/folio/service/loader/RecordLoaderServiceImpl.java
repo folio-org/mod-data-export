@@ -27,8 +27,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
-    Optional<JsonObject> optionalRecords = client.getByIdsFromSRS(uuids, okapiConnectionParams);
+  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams, int partitionSize) {
+    Optional<JsonObject> optionalRecords = client.getByIdsFromSRS(uuids, okapiConnectionParams, partitionSize);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
       populateLoadResultFromSRS(uuids, optionalRecords.get(), srsLoadResult);
@@ -39,8 +39,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params) {
-    Optional<JsonObject> optionalRecords = client.getByIdsFromInventory(new ArrayList<>(instanceIds), params);
+  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params, int partitionSize) {
+    Optional<JsonObject> optionalRecords = client.getByIdsFromInventory(new ArrayList<>(instanceIds), params, partitionSize);
     return optionalRecords.map(this::populateLoadResultFromInventory).orElseGet(ArrayList::new);
   }
 
