@@ -9,6 +9,10 @@
     {
       "id": "users",
       "version": "15.1"
+    },
+    {
+      "id": "instance-storage",
+      "version": "7.4"
     }
   ],
   "provides": [
@@ -26,7 +30,8 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.records.get"
+            "source-storage.records.get",
+            "inventory-storage.instances.item.get"
           ]
         },
         {

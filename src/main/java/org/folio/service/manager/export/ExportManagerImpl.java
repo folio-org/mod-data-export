@@ -85,6 +85,7 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
     exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
+    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     List<String> mappedMarcRecords = mappingService.map(instances);
     exportService.export(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
