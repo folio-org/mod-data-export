@@ -1,4 +1,12 @@
-## 2020-01-04 v1.1.0 - Released
+## 04-02-2020 v1.1.1 - Released
+This release contains a bugfix to the fromModuleVersion and start of sequence to 1
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.1.0...v1.1.1)
+
+### Bug Fixes
+* [MDEXP-118](https://issues.folio.org/browse/MDEXP-118) - fromModuleVersion not updated
+
+## 04-01-2020 v1.1.0 - Released
 This release contains few bugfixes and also populates few fields that the required to be shown on the UI
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.0.0...v1.1.0)
