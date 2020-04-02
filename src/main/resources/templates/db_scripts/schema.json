@@ -2,7 +2,7 @@
   "tables": [
     {
       "tableName": "file_definitions",
-      "fromModuleVersion": "mod-data-export-1.0.0",
+      "fromModuleVersion": "mod-data-export-1.1.1",
       "withMetadata": true,
       "withAuditing": false,
       "customSnippetPath": "job_execution_sequence.sql"
