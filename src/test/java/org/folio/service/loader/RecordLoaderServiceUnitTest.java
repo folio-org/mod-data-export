@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
 public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
-  private static final int LIMIT = 10;
+  private static final int LIMIT = 20;
 
   @BeforeClass
   public static void beforeClass() throws Exception {

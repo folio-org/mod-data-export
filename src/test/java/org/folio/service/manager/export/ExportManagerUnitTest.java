@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ExportManagerUnitTest {
-  private static final int LIMIT = 10;
+  private static final int LIMIT = 20;
 
   @Mock
   private RecordLoaderService recordLoaderService;
@@ -56,8 +56,8 @@ public class ExportManagerUnitTest {
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
     exportManager.exportBlocking(exportPayload);
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(100)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
-    Mockito.verify(recordLoaderService, Mockito.times(10)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(50)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(3)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(2)).export(anyList(), any(FileDefinition.class));
     Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());

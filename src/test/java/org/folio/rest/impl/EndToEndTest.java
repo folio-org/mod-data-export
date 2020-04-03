@@ -80,8 +80,8 @@ public class EndToEndTest extends RestVerticleTestBase {
       .put("lastName", "Doe")
     );
   private static final int CURRENT_RECORDS_2 = 2;
-  private static final int CURRENT_RECORDS_12 = 12;
-  private static final int LIMIT = 10;
+  private static final int CURRENT_RECORDS_8 = 8;
+  private static final int LIMIT = 20;
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static StorageClient mockStorageClient = Mockito.mock(StorageClient.class);
@@ -183,7 +183,7 @@ public class EndToEndTest extends RestVerticleTestBase {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_8))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
