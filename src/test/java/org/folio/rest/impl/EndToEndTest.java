@@ -15,7 +15,7 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
-import org.folio.clients.SourceRecordStorageClient;
+import org.folio.clients.StorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
@@ -80,10 +80,11 @@ public class EndToEndTest extends RestVerticleTestBase {
       .put("lastName", "Doe")
     );
   private static final int CURRENT_RECORDS_2 = 2;
-  private static final int CURRENT_RECORDS_12 = 12;
+  private static final int CURRENT_RECORDS_8 = 8;
+  private static final int LIMIT = 20;
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
-  private static SourceRecordStorageClient mockSourceRecordStorageClient = Mockito.mock(SourceRecordStorageClient.class);
+  private static StorageClient mockStorageClient = Mockito.mock(StorageClient.class);
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
 
   @Autowired
@@ -182,7 +183,7 @@ public class EndToEndTest extends RestVerticleTestBase {
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
         .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
         .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
+          .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_8))
           .compose(succeeded -> {
             async.complete();
             return Future.succeededFuture();
@@ -273,7 +274,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
-    when(mockSourceRecordStorageClient.getByIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
+    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.empty());
   }
 
   private ArgumentCaptor<FileDefinition> givenCaptureFileExportDefinition() {
@@ -285,7 +286,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
     String json = FileUtils.readFileToString(getFileFromResourceByName(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
-    when(mockSourceRecordStorageClient.getByIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
+    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
   }
 
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFile(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {
@@ -356,8 +357,8 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     @Bean
     @Primary
-    public SourceRecordStorageClient getMockSourceRecordStorageClient() {
-      return mockSourceRecordStorageClient;
+    public StorageClient getMockSourceRecordStorageClient() {
+      return mockStorageClient;
     }
 
     @Bean
