@@ -33,7 +33,7 @@ public class StorageClient {
   private static final String LIMIT_PATTERN = "&limit=";
 
   public Optional<JsonObject> getByIdsFromSRS(List<String> ids, OkapiConnectionParams params, int partitionSize) {
-    return getByIds(ids, params, GET_RECORDS_PATTERN_SRS+ LIMIT_PATTERN + partitionSize, QUERY_PATTERN_SRS);
+    return getByIds(ids, params, GET_RECORDS_PATTERN_SRS + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_SRS);
   }
 
   public Optional<JsonObject> getByIdsFromInventory(List<String> ids, OkapiConnectionParams params, int partitionSize) {
