@@ -174,7 +174,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_12))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_8))
         .onComplete(succeeded -> async.complete())
       ));
   }
