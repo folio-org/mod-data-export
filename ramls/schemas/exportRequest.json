@@ -6,11 +6,11 @@
   "properties": {
     "fileDefinitionId": {
       "description": "File definition id",
-      "type": "string"
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "jobProfileId": {
       "description": "Related Job profile id",
-      "type": "string"
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "metadata": {
       "description": "Meta information ",
