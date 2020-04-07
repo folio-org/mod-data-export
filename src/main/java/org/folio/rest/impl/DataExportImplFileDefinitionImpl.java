@@ -102,8 +102,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   public void getDataExportFileDefinitionsByFileDefinitionId(String fileDefinitionId, Map<String, String> okapiHeaders,
                                                              Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
-      .map(optionalDefinition -> optionalDefinition
-        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.FILE_DEFINITION_NOT_FOUND)))
       .map(GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

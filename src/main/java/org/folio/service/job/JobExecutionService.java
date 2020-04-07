@@ -54,7 +54,7 @@ public interface JobExecutionService {
   Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
 
   /**
-   * Updates status and completed date of {@link JobExecution} with id
+   * Updates status of {@link JobExecution} with id
    *
    * @param id       job execution id
    * @param status   status to update

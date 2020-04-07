@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 import java.util.UUID;
 
 import static io.vertx.core.Future.failedFuture;
@@ -25,8 +24,17 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
   private FileDefinitionDao fileDefinitionDao;
 
   @Override
-  public Future<Optional<FileDefinition>> getById(String id, String tenantId) {
-    return fileDefinitionDao.getById(id, tenantId);
+  public Future<FileDefinition> getById(String id, String tenantId) {
+    return fileDefinitionDao.getById(id, tenantId)
+      .compose(optionalFileDefinition -> {
+        if (optionalFileDefinition.isPresent()) {
+          return succeededFuture(optionalFileDefinition.get());
+        } else {
+          String errorMessage = String.format("File definition not found with id %s", id);
+          LOGGER.error(errorMessage);
+          return failedFuture(new NotFoundException(errorMessage));
+        }
+      });
   }
 
   @Override
@@ -42,17 +50,4 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
     return fileDefinitionDao.update(fileDefinition, tenantId);
   }
 
-  @Override
-  public Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId) {
-    return getById(fileDefinitionId, tenantId)
-      .compose(optionalFileDefinition -> {
-        if (optionalFileDefinition.isPresent()) {
-          return succeededFuture(optionalFileDefinition.get());
-        } else {
-          String errorMessage = String.format("File definition not found with id %s", fileDefinitionId);
-          LOGGER.error(errorMessage);
-          return failedFuture(new NotFoundException(errorMessage));
-        }
-      });
-  }
 }

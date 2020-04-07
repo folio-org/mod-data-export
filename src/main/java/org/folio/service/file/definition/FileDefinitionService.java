@@ -3,8 +3,6 @@ package org.folio.service.file.definition;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
 
-import java.util.Optional;
-
 public interface FileDefinitionService {
 
   /**
@@ -14,7 +12,7 @@ public interface FileDefinitionService {
    * @param tenantId tenant id
    * @return future with optional {@link FileDefinition}
    */
-  Future<Optional<FileDefinition>> getById(String id, String tenantId);
+  Future<FileDefinition> getById(String id, String tenantId);
 
   /**
    * Saves {@link FileDefinition} to database
@@ -33,14 +31,5 @@ public interface FileDefinitionService {
    * @return future with {@link FileDefinition}
    */
   Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId);
-
-  /**
-   * Find {@link FileDefinition} by the given id
-   *
-   * @param fileDefinitionId file definition id
-   * @param tenantId         tenant id
-   * @return future with {@link FileDefinition}
-   */
-  Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId);
 
 }
