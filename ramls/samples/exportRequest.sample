@@ -1,16 +1,6 @@
 {
-  "fileDefinition": {
-    "id": "ecad5316-5f97-446a-bb54-68f16f71e989",
-    "fileName": "snapshot-test.csv",
-    "jobExecutionId": "6208f4de-eb2c-4a06-a880-32245fd3bce1",
-    "sourcePath": "./storage/files/ecad5316-5f97-446a-bb54-68f16f71e989/snapshot-test.csv",
-    "status": "COMPLETED"
-  },
-  "jobProfile": {
-    "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
-    "destination": "fileSystem",
-    "name": "export job profile"
-  },
+  "fileDefinitionId": "e5f54eb6-6d11-11ea-bc55-0242ac130003",
+  "jobProfileId": "2fd2bf30-9d03-4f7e-9393-df55eaef2c2f",
   "metadata": {
     "createdDate": "2019-07-22T11:22:07Z",
     "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
