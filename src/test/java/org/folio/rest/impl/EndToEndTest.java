@@ -52,6 +52,7 @@ import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -241,7 +242,7 @@ public class EndToEndTest extends RestVerticleTestBase {
  // then
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional))
+        .compose(jobExecutionOptional -> assertCreationJobExecution(context, jobExecutionOptional))
         .compose(succeeded -> {
           return Future.succeededFuture();
         });
@@ -325,6 +326,12 @@ public class EndToEndTest extends RestVerticleTestBase {
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
     context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
+    return Future.succeededFuture();
+  }
+
+  private Future<Object> assertCreationJobExecution(TestContext context,  Optional<JobExecution> jobExecutionOptional) {
+    JobExecution jobExecution = jobExecutionOptional.get();
+    context.assertEquals(jobExecution.getStatus(), NEW);
     return Future.succeededFuture();
   }
 
