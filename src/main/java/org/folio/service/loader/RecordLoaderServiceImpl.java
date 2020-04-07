@@ -2,7 +2,7 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.folio.clients.SourceRecordStorageClient;
+import org.folio.clients.StorageClient;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,18 +20,18 @@ import java.util.Set;
 @Service
 public class RecordLoaderServiceImpl implements RecordLoaderService {
 
-  private SourceRecordStorageClient client;
+  private StorageClient client;
 
-  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient client) {
+  public RecordLoaderServiceImpl(@Autowired StorageClient client) {
     this.client = client;
   }
 
   @Override
-  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
-    Optional<JsonObject> optionalRecords = client.getByIds(uuids, okapiConnectionParams);
+  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams, int partitionSize) {
+    Optional<JsonObject> optionalRecords = client.getByIdsFromSRS(uuids, okapiConnectionParams, partitionSize);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
-      populateLoadResult(uuids, optionalRecords.get(), srsLoadResult);
+      populateLoadResultFromSRS(uuids, optionalRecords.get(), srsLoadResult);
     } else {
       srsLoadResult.setInstanceIdsWithoutSrs(uuids);
     }
@@ -39,11 +39,12 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params) {
-    return new ArrayList<>();
+  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params, int partitionSize) {
+    Optional<JsonObject> optionalRecords = client.getByIdsFromInventory(new ArrayList<>(instanceIds), params, partitionSize);
+    return optionalRecords.map(this::populateLoadResultFromInventory).orElseGet(ArrayList::new);
   }
 
-  private void populateLoadResult(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {
+  private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {
     JsonArray records = underlyingRecords.getJsonArray("records");
     List<String> marcRecords = new ArrayList<>();
     Set<String> singleInstanceIdentifiersSet = new HashSet<>(uuids);
@@ -58,6 +59,15 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     }
     loadResult.setUnderlyingMarcRecords(marcRecords);
     loadResult.setInstanceIdsWithoutSrs(new ArrayList<>(singleInstanceIdentifiersSet));
+  }
+
+  private List<JsonObject> populateLoadResultFromInventory(JsonObject instancesJson) {
+    List<JsonObject> instancesResult = new ArrayList<>();
+    JsonArray instances = instancesJson.getJsonArray("instances");
+    for (Object instance : instances) {
+        instancesResult.add(JsonObject.mapFrom(instance));
+    }
+    return instancesResult;
   }
 
   private String getRecordContent(JsonObject record) {

@@ -22,22 +22,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * The client that synchronously communicates with the Source Record Storage(SRS).
- *
- * @link https://github.com/folio-org/mod-source-record-storage
- */
 @Component
-public class SourceRecordStorageClient {
+public class StorageClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String GET_RECORDS_PATTERN = "%s/source-storage/records?query=(%s)";
-  private static final String QUERY_PATTERN = "externalIdsHolder.instanceId==%s";
+  private static final String GET_RECORDS_PATTERN_SRS = "%s/source-storage/records?query=(%s)";
+  private static final String QUERY_PATTERN_SRS = "externalIdsHolder.instanceId==%s";
+  private static final String GET_INSTANCE_PATTERN_INVENTORY = "%s/instance-storage/instances?query=(%s)";
+  private static final String QUERY_PATTERN_INVENTORY = "id==%s";
+  private static final String LIMIT_PATTERN = "&limit=";
 
-  public Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params) {
+  public Optional<JsonObject> getByIdsFromSRS(List<String> ids, OkapiConnectionParams params, int partitionSize) {
+    return getByIds(ids, params, GET_RECORDS_PATTERN_SRS + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_SRS);
+  }
+
+  public Optional<JsonObject> getByIdsFromInventory(List<String> ids, OkapiConnectionParams params, int partitionSize) {
+    return getByIds(ids, params, GET_INSTANCE_PATTERN_INVENTORY + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
+  }
+
+  private Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String pattern, String queryPattern) {
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
-    httpGet.setURI(prepareFullUri(ids, params));
+    httpGet.setURI(prepareFullUri(ids, params, pattern, queryPattern));
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
@@ -47,10 +53,10 @@ public class SourceRecordStorageClient {
   }
 
   @NotNull
-  private URI prepareFullUri(List<String> ids, OkapiConnectionParams params) {
-    String query = ids.stream().map(s -> String.format(QUERY_PATTERN, s)).collect(Collectors.joining(" or "));
+  private URI prepareFullUri(List<String> ids, OkapiConnectionParams params, String recordPattern, String queryPattern) {
+    String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
-      String uri = String.format(GET_RECORDS_PATTERN, params.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
+      String uri = String.format(recordPattern, params.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
@@ -63,7 +69,7 @@ public class SourceRecordStorageClient {
       try {
         return new JsonObject(EntityUtils.toString(entity));
       } catch (IOException e) {
-        LOGGER.error("Exception while requesting SRS", e);
+        LOGGER.error("Exception while requesting instances", e);
       }
     }
     return null;

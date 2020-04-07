@@ -38,8 +38,8 @@ import java.util.List;
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
   private static final int POOL_SIZE = 1;
-  private static final int SRS_LOAD_PARTITION_SIZE = 10;
-  private static final int INVENTORY_LOAD_PARTITION_SIZE = 10;
+  private static final int SRS_LOAD_PARTITION_SIZE = 20;
+  private static final int INVENTORY_LOAD_PARTITION_SIZE = 20;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
@@ -85,6 +85,8 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
     exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
+    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
+    LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
     List<String> mappedMarcRecords = mappingService.map(instances);
     exportService.export(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
@@ -103,7 +105,7 @@ public class ExportManagerImpl implements ExportManager {
   private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, OkapiConnectionParams params) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params);
+      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params, SRS_LOAD_PARTITION_SIZE);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
       srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
     });
@@ -120,7 +122,7 @@ public class ExportManagerImpl implements ExportManager {
   private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, OkapiConnectionParams params) {
     List<JsonObject> instances = new ArrayList<>();
     Lists.partition(singleInstanceIdentifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, params);
+        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, params, INVENTORY_LOAD_PARTITION_SIZE);
         instances.addAll(partitionLoadResult);
       }
     );
