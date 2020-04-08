@@ -4,15 +4,13 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "fileDefinition": {
-      "description": "File definition",
-      "type": "object",
-      "$ref": "fileDefinition.json"
+    "fileDefinitionId": {
+      "description": "File definition id",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
-    "jobProfile": {
-      "description": "Related Job profile",
-      "type": "object",
-      "$ref": "jobProfile.json"
+    "jobProfileId": {
+      "description": "Related Job profile id",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "metadata": {
       "description": "Meta information ",
@@ -21,7 +19,7 @@
     }
   },
   "required": [
-    "fileDefinition",
-    "jobProfile"
+    "fileDefinitionId",
+    "jobProfileId"
   ]
 }

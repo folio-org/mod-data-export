@@ -9,16 +9,9 @@ import org.folio.service.job.JobExecutionService;
 import org.folio.util.ErrorCode;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.storage.FileStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.NotFoundException;
-
-import java.lang.invoke.MethodHandles;
-
-import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
@@ -26,7 +19,6 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private FileDefinitionService fileDefinitionService;
   private JobExecutionService jobExecutionService;
   private FileStorage fileStorage;
@@ -40,7 +32,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
-    return findFileDefinition(fileDefinitionId, tenantId)
+    return fileDefinitionService.getById(fileDefinitionId, tenantId)
       .compose(fileDefinition -> {
         if (!fileDefinition.getStatus().equals(NEW)) {
           throw new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.FILE_ALREADY_UPLOADED);
@@ -63,21 +55,8 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> errorUploading(String fileDefinitionId, String tenantId) {
-    return findFileDefinition(fileDefinitionId, tenantId)
+    return fileDefinitionService.getById(fileDefinitionId, tenantId)
       .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId));
   }
 
-  private Future<FileDefinition> findFileDefinition(String fileDefinitionId, String tenantId) {
-    return fileDefinitionService.getById(fileDefinitionId, tenantId)
-      .compose(optionalFileDefinition -> {
-        if (optionalFileDefinition.isPresent()) {
-          FileDefinition fileDefinition = optionalFileDefinition.get();
-          return succeededFuture(fileDefinition);
-        } else {
-          String errorMessage = "FileDefinition not found. Id: " + fileDefinitionId;
-          LOGGER.error(errorMessage);
-          return Future.failedFuture(new NotFoundException(errorMessage));
-        }
-      });
-  }
 }

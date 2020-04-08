@@ -9,8 +9,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,13 +24,8 @@ public class ExportManagerTest extends RestVerticleTestBase {
     Async async = context.async();
     // given
     ExportRequest exportRequest = new ExportRequest()
-      .withFileDefinition(new FileDefinition()
-        .withId(UUID.randomUUID().toString())
-        .withFileName("inventoryUUIDs.csv"))
-      .withJobProfile(new JobProfile()
-        .withId(UUID.randomUUID().toString())
-        .withDestination("fileSystem")
-      );
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(UUID.randomUUID().toString());
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
