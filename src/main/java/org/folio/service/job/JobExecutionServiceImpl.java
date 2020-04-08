@@ -82,6 +82,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       jobExecution.setRunBy(new RunBy()
         .withFirstName(personal.getString("firstName"))
         .withLastName(personal.getString("lastName")));
+      jobExecution.setProgress(new Progress());
       update(jobExecution, tenantId);
     }));
   }
