@@ -3,8 +3,6 @@ package org.folio.service.job;
 
 import io.vertx.core.Future;
 
-import java.util.Optional;
-
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -51,7 +49,7 @@ public interface JobExecutionService {
    * @param tenantId       tenant id
    * @return future
    */
-  Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
+  Future<JobExecution> getById(String jobExecutionId, String tenantId);
 
   /**
    * Updates status of {@link JobExecution} with id
