@@ -1,6 +1,5 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.HttpServerTestBase;
@@ -33,11 +32,12 @@ public class InventoryStorageClientUnitTest extends HttpServerTestBase {
   private static void setUpMocks() throws IOException {
     String instancesJson = IOUtils.toString(new FileReader("src/test/resources/inventoryStorageResponse.json"));
     JsonObject instanceData = new JsonObject(instancesJson);
-    router.route("/instance-storage/instances").handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(instanceData.toBuffer());
-    });
+    httpServer.requestHandler(request -> {
+      request.response().putHeader("content-type", "application/json");
+      if (request.path().contains("/instance-storage/instances")) {
+        request.response().end(instanceData.toBuffer());
+      }
+    }).listen(port);
   }
 
   @Test
@@ -45,9 +45,9 @@ public class InventoryStorageClientUnitTest extends HttpServerTestBase {
     // given
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     // when
-    Optional<JsonObject> inventoryResponce = client.getByIdsFromInventory(uuids, okapiConnectionParams, LIMIT);
+    Optional<JsonObject> inventoryResponse = client.getByIdsFromInventory(uuids, okapiConnectionParams, LIMIT);
     // then
-    Assert.assertTrue(inventoryResponce.isPresent());
-    Assert.assertEquals(2, inventoryResponce.get().getJsonArray("instances").getList().size());
+    Assert.assertTrue(inventoryResponse.isPresent());
+    Assert.assertEquals(2, inventoryResponse.get().getJsonArray("instances").getList().size());
   }
 }

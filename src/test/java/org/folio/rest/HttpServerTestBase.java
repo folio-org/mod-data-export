@@ -2,7 +2,6 @@ package org.folio.rest;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
-import io.vertx.ext.web.Router;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.AfterClass;
@@ -23,17 +22,15 @@ public abstract class HttpServerTestBase {
   protected static final String TOKEN = "token";
   private static final String HOST = "http://localhost:";
   protected static Vertx vertx;
-  protected static Router router;
   protected static OkapiConnectionParams okapiConnectionParams;
-  private static HttpServer httpServer;
+  protected static HttpServer httpServer;
+  protected static int port;
 
   @BeforeClass
   public static void setUpHttpServer() {
     vertx = Vertx.vertx();
-    int port = NetworkUtils.nextFreePort();
-    router = Router.router(vertx);
+    port = NetworkUtils.nextFreePort();
     httpServer = vertx.createHttpServer();
-    httpServer.requestHandler(router).listen(port);
 
     Map<String, String> okapiHeaders = new HashMap<>();
     okapiHeaders.put("x-okapi-url", HOST + port);

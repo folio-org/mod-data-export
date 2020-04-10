@@ -1,7 +1,5 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.HttpServerTestBase;
@@ -28,11 +26,12 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   private static void setUpMocks() throws IOException {
     String json = IOUtils.toString(new FileReader("src/test/resources/clients/userResponse.json"));
     JsonObject data = new JsonObject(json);
-    router.route("/users/:id").method(HttpMethod.GET).handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(data.toBuffer());
-    });
+    httpServer.requestHandler(request -> {
+      request.response().putHeader("content-type", "application/json");
+      if (request.path().contains("/users/")) {
+        request.response().end(data.toBuffer());
+      }
+    }).listen(port);
   }
 
   @Test

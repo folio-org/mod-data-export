@@ -1,6 +1,5 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.HttpServerTestBase;
@@ -33,11 +32,12 @@ public class SrsClientUnitTest extends HttpServerTestBase {
   private static void setUpMocks() throws IOException {
     String json = IOUtils.toString(new FileReader("src/test/resources/srsResponse.json"));
     JsonObject data = new JsonObject(json);
-    router.route("/source-storage/records").handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(data.toBuffer());
-    });
+    httpServer.requestHandler(request -> {
+      request.response().putHeader("content-type", "application/json");
+      if (request.path().contains("/source-storage/records")) {
+        request.response().end(data.toBuffer());
+      }
+    }).listen(port);
   }
 
   @Test
