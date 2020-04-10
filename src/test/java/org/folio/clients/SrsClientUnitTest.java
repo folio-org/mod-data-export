@@ -1,6 +1,5 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
@@ -9,15 +8,21 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UsersClientUnitTest extends HttpServerTestBase {
+public class SrsClientUnitTest extends HttpServerTestBase {
+  private static final int LIMIT = 20;
+
+  @Spy
+  StorageClient client;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -26,9 +31,9 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() throws IOException {
-    String json = IOUtils.toString(new FileReader("src/test/resources/clients/userResponse.json"));
+    String json = IOUtils.toString(new FileReader("src/test/resources/srsResponse.json"));
     JsonObject data = new JsonObject(json);
-    router.route("/users/:id").method(HttpMethod.GET).handler(routingContext -> {
+    router.route("/source-storage/records").handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");
       response.end(data.toBuffer());
@@ -36,12 +41,13 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnUserById() {
+  public void shouldReturnExistingMarcRecords() throws IOException {
     // given
-    UsersClient usersClient = new UsersClient();
+    List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     // when
-    Optional<JsonObject> optionalUser = usersClient.getById(UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> srsResponce = client.getByIdsFromSRS(uuids, okapiConnectionParams, LIMIT);
     // then
-    Assert.assertTrue(optionalUser.isPresent());
+    Assert.assertTrue(srsResponce.isPresent());
+    Assert.assertEquals(2, srsResponce.get().getJsonArray("records").getList().size());
   }
 }
