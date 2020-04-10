@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
@@ -33,14 +34,8 @@ public class DataExportHelper {
         .filter(expFile -> expFile.getFileId()
           .equals(exportFileId))
         .findFirst()
-        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Job with id: %s not found", jobExecutionId))))
-      .compose(exportedFile -> {
-        if (StringUtils.isEmpty(exportedFile.getFileName())) {
-          throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Export File with id: %s not found: ", exportFileId));
-        } else {
-          return Future.succeededFuture(exportedFile.getFileName());
-        }
-      });
+        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Export File with id: %s not found:", exportFileId))))
+      .map(ExportedFile::getFileName);
   }
 
 }
