@@ -39,7 +39,7 @@ public class ExportServiceUnitTest {
     FileDefinition fileDefinition = new FileDefinition();
     Mockito.when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when
-    exportService.export(Collections.singletonList(jsonRecord), fileDefinition);
+    exportService.exportSrsRecord(Collections.singletonList(jsonRecord), fileDefinition);
     // then
     Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
@@ -50,7 +50,7 @@ public class ExportServiceUnitTest {
     List<String> marcRecords = null;
     FileDefinition fileDefinition = new FileDefinition();
     // when
-    exportService.export(marcRecords, fileDefinition);
+    exportService.exportSrsRecord(marcRecords, fileDefinition);
     // then
     Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
