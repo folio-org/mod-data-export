@@ -10,8 +10,8 @@ public class XmlRecordWriter extends MarcRecordWriter {
   @Override
   public String getResult() {
     OutputStream outputStream = new ByteArrayOutputStream();
-    MarcWriter writer = new MarcXmlWriter(outputStream, ENCODING);
-    writer.write(RECORD);
+    MarcWriter writer = new MarcXmlWriter(outputStream, encoding);
+    writer.write(record);
     writer.close();
     return outputStream.toString();
   }

@@ -8,7 +8,11 @@ import io.vertx.core.json.JsonObject;
 import net.minidev.json.JSONArray;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.reader.values.*;
+import org.folio.service.mapping.reader.values.CompositeValue;
+import org.folio.service.mapping.reader.values.MissingValue;
+import org.folio.service.mapping.reader.values.RuleValue;
+import org.folio.service.mapping.reader.values.SimpleValue;
+import org.folio.service.mapping.reader.values.StringValue;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;

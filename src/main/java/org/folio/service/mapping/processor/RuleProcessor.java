@@ -8,7 +8,11 @@ import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.values.*;
+import org.folio.service.mapping.reader.values.CompositeValue;
+import org.folio.service.mapping.reader.values.ListValue;
+import org.folio.service.mapping.reader.values.RuleValue;
+import org.folio.service.mapping.reader.values.SimpleValue;
+import org.folio.service.mapping.reader.values.StringValue;
 import org.folio.service.mapping.writer.RecordWriter;
 
 import java.util.ArrayList;

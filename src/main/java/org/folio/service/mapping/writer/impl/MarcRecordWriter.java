@@ -15,32 +15,32 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class MarcRecordWriter extends AbstractRecordWriter {
-  protected final String ENCODING = StandardCharsets.UTF_8.name();
-  private final MarcFactory FACTORY = MarcFactory.newInstance();
-  protected final Record RECORD = FACTORY.newRecord();
+  protected String encoding = StandardCharsets.UTF_8.name();
+  private MarcFactory factory = MarcFactory.newInstance();
+  protected Record record = factory.newRecord();
 
   @Override
   public void writeControlField(RecordControlField recordControlField) {
-    ControlField marcControlField = FACTORY.newControlField(recordControlField.getTag(), recordControlField.getData());
-    RECORD.addVariableField(marcControlField);
+    ControlField marcControlField = factory.newControlField(recordControlField.getTag(), recordControlField.getData());
+    record.addVariableField(marcControlField);
   }
 
   @Override
   public void writeDataField(RecordDataField recordDataField) {
-    DataField marcDataField = FACTORY.newDataField(recordDataField.getTag(), recordDataField.getIndicator1(), recordDataField.getIndicator2());
+    DataField marcDataField = factory.newDataField(recordDataField.getTag(), recordDataField.getIndicator1(), recordDataField.getIndicator2());
     for (Map.Entry<Character, String> subField : recordDataField.getSubFields()) {
       Character subFieldCode = subField.getKey();
       String subFieldData = subField.getValue();
-      marcDataField.addSubfield(FACTORY.newSubfield(subFieldCode, subFieldData));
+      marcDataField.addSubfield(factory.newSubfield(subFieldCode, subFieldData));
     }
-    RECORD.addVariableField(marcDataField);
+    record.addVariableField(marcDataField);
   }
 
   @Override
   public String getResult() {
     OutputStream outputStream = new ByteArrayOutputStream();
-    MarcWriter writer = new MarcStreamWriter(outputStream, ENCODING);
-    writer.write(RECORD);
+    MarcWriter writer = new MarcStreamWriter(outputStream, encoding);
+    writer.write(record);
     writer.close();
     return outputStream.toString();
   }

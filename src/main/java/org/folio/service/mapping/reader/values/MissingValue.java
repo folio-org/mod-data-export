@@ -12,7 +12,7 @@ public class MissingValue implements RuleValue<MissingValue> {
 
   @Override
   public MissingValue getValue() {
-    return INSTANCE;
+    return getInstance();
   }
 
   @Override

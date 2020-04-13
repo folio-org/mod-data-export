@@ -11,7 +11,7 @@ public class JsonRecordWriter extends MarcRecordWriter {
   public String getResult() {
     OutputStream outputStream = new ByteArrayOutputStream();
     MarcWriter writer = new MarcJsonWriter(outputStream);
-    writer.write(RECORD);
+    writer.write(record);
     writer.close();
     return outputStream.toString();
   }
