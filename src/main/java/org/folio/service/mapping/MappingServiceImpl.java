@@ -24,6 +24,7 @@ import java.util.List;
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private RuleProcessor ruleProcessor;
+  private Settings settings = null;
 
   public MappingServiceImpl() {
     try {
@@ -48,7 +49,6 @@ public class MappingServiceImpl implements MappingService {
   public String runDefaultMapping(JsonObject instance) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    Settings settings = new Settings();
     return this.ruleProcessor.process(entityReader, recordWriter, settings);
   }
 }
