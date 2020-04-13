@@ -27,7 +27,7 @@ public abstract class HttpServerTestBase {
   protected static OkapiConnectionParams okapiConnectionParams;
 
   @Rule
-  public WireMockRule snapshotMockServer = new WireMockRule(
+  public WireMockRule mockServer = new WireMockRule(
     WireMockConfiguration.wireMockConfig()
       .dynamicPort()
       .notifier(new Slf4jNotifier(true))
@@ -36,7 +36,7 @@ public abstract class HttpServerTestBase {
   @Before
   public void setUpOkapiParams() {
     Map<String, String> okapiHeaders = new HashMap<>();
-    okapiHeaders.put("x-okapi-url", HOST + snapshotMockServer.port());
+    okapiHeaders.put("x-okapi-url", HOST + mockServer.port());
     okapiHeaders.put(OKAPI_HEADER_TENANT, TENANT_ID);
     okapiHeaders.put(OKAPI_HEADER_TOKEN, TOKEN);
     okapiConnectionParams = new OkapiConnectionParams(okapiHeaders);
