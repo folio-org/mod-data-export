@@ -63,7 +63,7 @@ public abstract class AbstractRecordWriter implements RecordWriter {
     RecordDataField field = new RecordDataField(tag);
     for (String stringValue : listValue.getValue()) {
       if (listValue.getDataSource().isSubFieldSource()) {
-        char subFieldCode = dataSource.getSubField().charAt(0);
+        char subFieldCode = dataSource.getSubfield().charAt(0);
         String subFieldData = stringValue;
         field.addSubField(subFieldCode, subFieldData);
       } else if (dataSource.isIndicatorSource()) {
@@ -83,7 +83,7 @@ public abstract class AbstractRecordWriter implements RecordWriter {
     for (StringValue stringValue : entry) {
       DataSource dataSource = stringValue.getDataSource();
       if (dataSource.isSubFieldSource()) {
-        char subFieldCode = dataSource.getSubField().charAt(0);
+        char subFieldCode = dataSource.getSubfield().charAt(0);
         String subFieldData = stringValue.getValue();
         if (subFieldData != null) {
           field.addSubField(subFieldCode, subFieldData);

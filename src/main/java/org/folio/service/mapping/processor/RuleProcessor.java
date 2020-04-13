@@ -46,9 +46,7 @@ public final class RuleProcessor {
   }
 
   public String process(EntityReader reader, RecordWriter writer, Settings settings) {
-    Iterator<Rule> ruleIterator = rules.iterator();
-    while (ruleIterator.hasNext()) {
-      Rule rule = ruleIterator.next();
+    this.rules.forEach(rule -> {
       RuleValue ruleValue = reader.read(rule);
       switch (ruleValue.getType()) {
         case SIMPLE:
@@ -63,14 +61,14 @@ public final class RuleProcessor {
           break;
         case MISSING:
       }
-    }
+    });
     return writer.getResult();
   }
 
   private void translate(SimpleValue simpleValue, Settings settings) {
     Translation translation = simpleValue.getDataSource().getTranslation();
     if (translation != null) {
-      TranslationFunction translationFunction = TranslationsHolder.lookup(translation);
+      TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());
       if (STRING.equals(simpleValue.getSubType())) {
         StringValue stringValue = (StringValue) simpleValue;
         String readValue = stringValue.getValue();
@@ -94,7 +92,7 @@ public final class RuleProcessor {
       readEntry.forEach(stringValue -> {
         Translation translation = stringValue.getDataSource().getTranslation();
         if (translation != null) {
-          TranslationFunction translationFunction = TranslationsHolder.lookup(translation);
+          TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());
           String readValue = stringValue.getValue();
           String translatedValue = translationFunction.apply(readValue, translation.getParameters(), settings);
           stringValue.setValue(translatedValue);

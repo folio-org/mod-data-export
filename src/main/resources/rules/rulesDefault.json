@@ -14,7 +14,35 @@
     "dataSource": [
       {
         "from": "$.languages",
-        "subField": "a"
+        "subfield": "a"
+      }
+    ]
+  },
+  {
+    "tag": "245",
+    "description": "Title",
+    "dataSource": [
+      {
+        "from": "$.title",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
       }
     ]
   }

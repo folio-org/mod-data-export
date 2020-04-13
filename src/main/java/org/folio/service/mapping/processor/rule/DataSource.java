@@ -4,7 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 public class DataSource {
   private String tag;
-  private String subField;
+  private String subfield;
   private String indicator;
   private String from;
   private Translation translation;
@@ -12,10 +12,10 @@ public class DataSource {
   public DataSource(String tag, JsonObject dataSource) {
     this.tag = tag;
     this.from = dataSource.getString("from");
-    this.subField = dataSource.getString("subField");
+    this.subfield = dataSource.getString("subfield");
     this.indicator = dataSource.getString("indicator");
     if (dataSource.containsKey("translation")) {
-      this.translation = dataSource.getJsonObject("translation").mapTo(Translation.class);
+      this.translation = new Translation(dataSource.getJsonObject("translation"));
     }
   }
 
@@ -23,8 +23,8 @@ public class DataSource {
     return this.tag;
   }
 
-  public String getSubField() {
-    return subField;
+  public String getSubfield() {
+    return subfield;
   }
 
   public String getIndicator() {
@@ -40,7 +40,7 @@ public class DataSource {
   }
 
   public boolean isSubFieldSource() {
-    return this.subField != null;
+    return this.subfield != null;
   }
 
   public boolean isIndicatorSource() {
