@@ -24,7 +24,7 @@ import static org.folio.TestUtil.getResourceAsString;
 public class RuleProcessorTest {
   private static JsonObject entity;
   private static JsonArray rules;
-  private Settings settings = new Settings();
+  private Settings settings = null;
 
   @BeforeClass
   public static void setup() throws IOException {
