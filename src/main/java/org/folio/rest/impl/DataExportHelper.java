@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import io.vertx.core.Future;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ExportedFile;
