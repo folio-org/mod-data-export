@@ -1,17 +1,13 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.IOUtils;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -23,22 +19,6 @@ public class InventoryStorageClientUnitTest extends HttpServerTestBase {
 
   @Spy
   StorageClient client;
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    setUpHttpServer();
-    setUpMocks();
-  }
-
-  private static void setUpMocks() throws IOException {
-    String instancesJson = IOUtils.toString(new FileReader("src/test/resources/inventoryStorageResponse.json"));
-    JsonObject instanceData = new JsonObject(instancesJson);
-    router.route("/instance-storage/instances").handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(instanceData.toBuffer());
-    });
-  }
 
   @Test
   public void shouldReturnExistingInstances() throws IOException {

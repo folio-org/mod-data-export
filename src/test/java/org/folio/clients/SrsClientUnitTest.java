@@ -1,17 +1,13 @@
 package org.folio.clients;
 
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.IOUtils;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -23,22 +19,6 @@ public class SrsClientUnitTest extends HttpServerTestBase {
 
   @Spy
   StorageClient client;
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    setUpHttpServer();
-    setUpMocks();
-  }
-
-  private static void setUpMocks() throws IOException {
-    String json = IOUtils.toString(new FileReader("src/test/resources/srsResponse.json"));
-    JsonObject data = new JsonObject(json);
-    router.route("/source-storage/records").handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(data.toBuffer());
-    });
-  }
 
   @Test
   public void shouldReturnExistingMarcRecords() throws IOException {
