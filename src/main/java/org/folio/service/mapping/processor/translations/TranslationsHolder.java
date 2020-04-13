@@ -1,7 +1,6 @@
 package org.folio.service.mapping.processor.translations;
 
 import io.vertx.core.json.JsonObject;
-import org.folio.service.mapping.processor.rule.Translation;
 
 public enum TranslationsHolder implements TranslationFunction {
   SET_VALUE() {
