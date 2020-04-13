@@ -1,0 +1,58 @@
+[
+  {
+    "tag": "001",
+    "description": "Test field 001, reading simple string value, writing control field",
+    "dataSource": [
+      {
+        "from": "$.id"
+      }
+    ]
+  },
+  {
+    "tag": "002",
+    "description": "Test field 002, reading simple string value, writing data field",
+    "dataSource": [
+      {
+        "from": "$.personalNumber",
+        "subField": "a"
+      }
+    ]
+  },
+  {
+    "tag": "003",
+    "description": "Test field 003, reading simple array of string values, writing control field",
+    "dataSource": [
+      {
+        "from": "$.languages"
+      }
+    ]
+  },
+  {
+    "tag": "004",
+    "description": "Test field 004, reading simple array of string values, writing data field",
+    "dataSource": [
+      {
+        "from": "$.fonts",
+        "subField": "b"
+      }
+    ]
+  },
+  {
+    "tag": "005",
+    "description": "Test field 005, reading composite value, writing data field",
+    "dataSource": [
+      {
+        "from": "$.books[*].title",
+        "subField": "c"
+      },
+      {
+        "from": "$.books[*].genre",
+        "subField": "d"
+      },
+      {
+        "from": "$.books[*].author",
+        "subField": "e"
+      }
+    ]
+  }
+]
