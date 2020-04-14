@@ -1,24 +1,5 @@
 [
   {
-    "tag": "001",
-    "description": "The human readable ID",
-    "dataSource": [
-      {
-        "from": "$.hrid"
-      }
-    ]
-  },
-  {
-    "tag": "041",
-    "description": "Languages",
-    "dataSource": [
-      {
-        "from": "$.languages",
-        "subfield": "a"
-      }
-    ]
-  },
-  {
     "tag": "245",
     "description": "Title",
     "dataSource": [
