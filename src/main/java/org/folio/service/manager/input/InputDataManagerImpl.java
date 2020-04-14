@@ -10,27 +10,27 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.reader.LocalStorageCsvSourceReader;
+import org.folio.service.file.reader.SourceReader;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
-import org.folio.service.file.reader.LocalStorageCsvSourceReader;
-import org.folio.service.file.reader.SourceReader;
-import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
@@ -92,30 +92,25 @@ class InputDataManagerImpl implements InputDataManager {
     fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition ->
       jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId).onSuccess(jobExecution -> {
         String jobExecutionId = jobExecution.getId();
-        if (requestFileDefinition.getStatus().equals(FileDefinition.Status.COMPLETED)) {
-          FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
-          SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
-          if (sourceReader.hasNext()) {
-            fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
-              initInputDataContext(sourceReader, jobExecutionId);
-              ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
-              Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
-              if (optionalUser.isPresent()) {
-                JsonObject user = optionalUser.get();
-                jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, tenantId);
-                exportNextChunk(exportPayload, sourceReader);
-              } else {
-                finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
-              }
-            });
-          } else {
-            fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-            jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
-            sourceReader.close();
-          }
+        FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
+        SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
+        if (sourceReader.hasNext()) {
+          fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
+            initInputDataContext(sourceReader, jobExecutionId);
+            ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
+            Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
+            if (optionalUser.isPresent()) {
+              JsonObject user = optionalUser.get();
+              jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, tenantId);
+              exportNextChunk(exportPayload, sourceReader);
+            } else {
+              finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+            }
+          });
         } else {
-          LOGGER.error(String.format("Failed to start export process, file definition status with id %s is not COMPLETED", exportRequest.getFileDefinitionId()));
+          fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
           jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+          sourceReader.close();
         }
       }));
   }

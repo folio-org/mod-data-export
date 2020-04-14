@@ -373,58 +373,6 @@ public class InputDataManagerUnitTest {
     verify(jobExecutionService, never()).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
   }
 
-  @Test
-  public void shouldNotExport_whenWhenFileDefinitionStatusIsNew() {
-    //given
-    requestFileDefinition = createRequestFileDefinition();
-    requestFileDefinition.setStatus(FileDefinition.Status.NEW);
-    when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
-
-    //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
-
-    //then
-    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
-  }
-
-  @Test
-  public void shouldNotExport_whenWhenFileDefinitionStatusIsInProgress() {
-    //given
-    requestFileDefinition.setStatus(FileDefinition.Status.IN_PROGRESS);
-    when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
-
-    //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
-
-    //then
-    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
-  }
-
-  @Test
-  public void shouldNotExport_whenWhenFileDefinitionStatusIsError() {
-    //given
-    requestFileDefinition.setStatus(FileDefinition.Status.ERROR);
-    when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
-
-    //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
-
-    //then
-    verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
-    verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
-  }
-
   private void initializeInputDataManager() {
     context = Mockito.mock(Context.class);
     springContext = Mockito.mock(AbstractApplicationContext.class);
