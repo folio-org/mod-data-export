@@ -54,5 +54,14 @@
         "subField": "e"
       }
     ]
+  },
+  {
+    "tag": "00x",
+    "description": "Nonexistent field just for the testing purposes",
+    "dataSource": [
+      {
+        "from": "$.none"
+      }
+    ]
   }
 ]
