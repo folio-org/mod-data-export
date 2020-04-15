@@ -10,29 +10,27 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
-import java.lang.invoke.MethodHandles;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.reader.LocalStorageCsvSourceReader;
+import org.folio.service.file.reader.SourceReader;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
-import org.folio.service.file.reader.LocalStorageCsvSourceReader;
-import org.folio.service.file.reader.SourceReader;
-import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
@@ -46,7 +44,6 @@ class InputDataManagerImpl implements InputDataManager {
   private static final int POOL_SIZE = 1;
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
-  private static final String TIMESTAMP_PATTERN = "yyyyMMddHHmmss";
   private static final String DELIMITER = "-";
   private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
@@ -92,10 +89,10 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
-    fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition -> {
-      String jobExecutionId = requestFileDefinition.getJobExecutionId();
-      if (requestFileDefinition.getStatus().equals(FileDefinition.Status.COMPLETED)) {
-        FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition);
+    fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition ->
+      jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId).onSuccess(jobExecution -> {
+        String jobExecutionId = jobExecution.getId();
+        FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
         SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
         if (sourceReader.hasNext()) {
           fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
@@ -115,11 +112,7 @@ class InputDataManagerImpl implements InputDataManager {
           jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
           sourceReader.close();
         }
-      } else {
-        LOGGER.error(String.format("Failed to start export process, file definition status with id %s is not COMPLETED", exportRequest.getFileDefinitionId()));
-        jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
-      }
-    });
+      }));
   }
 
   protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
@@ -194,19 +187,13 @@ class InputDataManagerImpl implements InputDataManager {
     return exportPayload;
   }
 
-  private FileDefinition createExportFileDefinition(ExportRequest exportRequest, FileDefinition requestFileDefinition) {
+  private FileDefinition createExportFileDefinition(ExportRequest exportRequest, FileDefinition requestFileDefinition, JobExecution jobExecution) {
     String fileNameWithoutExtension = FilenameUtils.getBaseName(requestFileDefinition.getFileName());
     return new FileDefinition()
-      .withFileName(fileNameWithoutExtension + DELIMITER + getCurrentTimestamp() + MARC_FILE_EXTENSION)
+      .withFileName(fileNameWithoutExtension + DELIMITER + jobExecution.getHrId() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
       .withMetadata(exportRequest.getMetadata());
-  }
-
-  protected String getCurrentTimestamp() {
-    LocalDateTime now = LocalDateTime.now();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIMESTAMP_PATTERN);
-    return now.format(formatter);
   }
 
   private void initInputDataContext(SourceReader sourceReader, String jobExecutionId) {
