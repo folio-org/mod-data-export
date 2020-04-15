@@ -28,15 +28,13 @@ public class DataExportHelper {
 
   private Future<String> getDownloadFileName(String jobExecutionId, String exportFileId, String tenantId) {
     return jobExecutionService.getById(jobExecutionId, tenantId)
-      .map(job -> job.map(jb -> jb.getExportedFiles()
+      .map(job -> job.getExportedFiles()
         .stream()
         .filter(expFile -> expFile.getFileId()
           .equals(exportFileId))
-        .findFirst())
-        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Job with id: %s not found", jobExecutionId))))
-      .map(exportedFile -> exportedFile.map(ExportedFile::getFileName)
-          .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Export File with id: %s not found: ", exportFileId))));
-
+        .findFirst()
+        .orElseThrow(() -> new ServiceException(HttpStatus.HTTP_NOT_FOUND, String.format("Export File with id: %s not found:", exportFileId))))
+      .map(ExportedFile::getFileName);
   }
 
 }

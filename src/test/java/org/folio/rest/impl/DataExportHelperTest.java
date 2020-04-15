@@ -23,7 +23,6 @@ import org.mockito.Spy;
 
 import java.net.MalformedURLException;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.UUID;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -56,7 +55,7 @@ public class DataExportHelperTest {
 
     String url = "https://test.aws.amazon.com";
     Mockito.when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString())).thenReturn(succeededFuture(url));
-    Mockito.when(jobExecutionService.getById(anyString(), anyString())).thenReturn(succeededFuture(Optional.of(jobExecution)));
+    Mockito.when(jobExecutionService.getById(anyString(), anyString())).thenReturn(succeededFuture(jobExecution));
 
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
@@ -80,7 +79,7 @@ public class DataExportHelperTest {
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
     Mockito
       .when(jobExecutionService.getById(anyString(), anyString()))
-      .thenReturn(succeededFuture(Optional.of(jobExecution)));
+      .thenReturn(succeededFuture(jobExecution));
 
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
@@ -103,7 +102,7 @@ public class DataExportHelperTest {
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
     Mockito
       .when(jobExecutionService.getById(anyString(), anyString()))
-      .thenReturn(succeededFuture(Optional.of(jobExecution)));
+      .thenReturn(succeededFuture(jobExecution));
 
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), UUID.randomUUID().toString(), TENANT);
