@@ -1,26 +1,19 @@
 package org.folio.service.mapping.processor;
 
+import static org.folio.service.mapping.reader.values.SimpleValue.SubType.LIST_OF_STRING;
+import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING;
+
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.folio.service.mapping.processor.rule.Rule;
+import java.util.ArrayList;
+import java.util.List;
+import org.folio.service.mapping.processor.rule.Rules;
 import org.folio.service.mapping.processor.rule.Translation;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.values.CompositeValue;
-import org.folio.service.mapping.reader.values.ListValue;
-import org.folio.service.mapping.reader.values.RuleValue;
-import org.folio.service.mapping.reader.values.SimpleValue;
-import org.folio.service.mapping.reader.values.StringValue;
+import org.folio.service.mapping.reader.values.*;
 import org.folio.service.mapping.writer.RecordWriter;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.folio.service.mapping.reader.values.SimpleValue.SubType.LIST_OF_STRING;
-import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING;
 
 /**
  * RuleProcessor is a central part of mapping.
@@ -35,18 +28,15 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  * @see RecordWriter
  */
 public final class RuleProcessor {
-  private List<Rule> rules = new ArrayList<>();
+  private Rules rules;
 
-  public RuleProcessor(JsonArray rules) {
-    Iterator ruleIterator = rules.iterator();
-    while (ruleIterator.hasNext()) {
-      Rule rule = new Rule(JsonObject.mapFrom(ruleIterator.next()));
-      this.rules.add(rule);
-    }
+  public RuleProcessor(Rules rules) {
+    this.rules = rules;
+
   }
 
   public String process(EntityReader reader, RecordWriter writer, Settings settings) {
-    this.rules.forEach(rule -> {
+    this.rules.getRules().forEach(rule -> {
       RuleValue ruleValue = reader.read(rule);
       switch (ruleValue.getType()) {
         case SIMPLE:

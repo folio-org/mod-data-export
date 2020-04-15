@@ -1,9 +1,16 @@
 package org.folio.service.mapping;
 
 import com.google.common.io.Resources;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.rule.Rules;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
@@ -12,13 +19,6 @@ import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -29,8 +29,7 @@ public class MappingServiceImpl implements MappingService {
   public MappingServiceImpl() {
     try {
       URL url = Resources.getResource("rules/rulesDefault.json");
-      JsonArray rules = new JsonArray(Resources.toString(url, StandardCharsets.UTF_8));
-      this.ruleProcessor = new RuleProcessor(rules);
+      this.ruleProcessor = new RuleProcessor(Json.decodeValue(Resources.toString(url, StandardCharsets.UTF_8), Rules.class));
     } catch (IOException exception) {
       LOGGER.error("Exception occurred while initializing MappingService", exception);
     }
