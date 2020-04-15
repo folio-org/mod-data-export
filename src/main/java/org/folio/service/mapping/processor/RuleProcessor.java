@@ -3,7 +3,6 @@ package org.folio.service.mapping.processor;
 import static org.folio.service.mapping.reader.values.SimpleValue.SubType.LIST_OF_STRING;
 import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING;
 
-import io.vertx.core.json.JsonArray;
 import java.util.ArrayList;
 import java.util.List;
 import org.folio.service.mapping.processor.rule.Rules;
@@ -42,12 +41,12 @@ public final class RuleProcessor {
         case SIMPLE:
           SimpleValue simpleValue = (SimpleValue) ruleValue;
           translate(simpleValue, settings);
-          writer.write(simpleValue);
+          writer.write(rule.getTag(), simpleValue);
           break;
         case COMPOSITE:
           CompositeValue compositeValue = (CompositeValue) ruleValue;
           translate(compositeValue, settings);
-          writer.write(compositeValue);
+          writer.write(rule.getTag(), compositeValue);
           break;
         case MISSING:
       }

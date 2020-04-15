@@ -1,13 +1,12 @@
 package org.folio.service.mapping.processor.rule;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class Rule {
   private String tag;
   private String description;
-  private List<DataSource> dataSources = new ArrayList<>();
+  private List<DataSource> dataSources ;
 
 
   public String getTag() {

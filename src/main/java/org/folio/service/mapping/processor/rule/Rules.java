@@ -1,10 +1,9 @@
 package org.folio.service.mapping.processor.rule;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Rules {
-  private List<Rule> rules = new ArrayList<>();
+  private List<Rule> rules;
 
   public List<Rule> getRules() {
     return rules;

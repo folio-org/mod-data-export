@@ -1,12 +1,12 @@
 package org.folio.service.mapping.processor.translations;
 
-import io.vertx.core.json.JsonObject;
+import org.folio.service.mapping.processor.rule.Parameter;
 
 public enum TranslationsHolder implements TranslationFunction {
   SET_VALUE() {
     @Override
-    public String apply(String value, JsonObject parameters, Settings settings) {
-      return parameters.getString("value");
+    public String apply(String value, Parameter parameters, Settings settings) {
+      return parameters.getValue();
     }
   };
 

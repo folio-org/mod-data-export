@@ -8,8 +8,10 @@ import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.rule.Rules;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.reader.EntityReader;
@@ -29,7 +31,10 @@ public class MappingServiceImpl implements MappingService {
   public MappingServiceImpl() {
     try {
       URL url = Resources.getResource("rules/rulesDefault.json");
-      this.ruleProcessor = new RuleProcessor(Json.decodeValue(Resources.toString(url, StandardCharsets.UTF_8), Rules.class));
+      Rules rules = new Rules();
+      List<Rule> rul = Arrays.asList(Json.decodeValue(Resources.toString(url, StandardCharsets.UTF_8), Rule[].class));
+      rules.setRules(rul);
+      this.ruleProcessor = new RuleProcessor(rules);
     } catch (IOException exception) {
       LOGGER.error("Exception occurred while initializing MappingService", exception);
     }

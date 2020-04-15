@@ -1,8 +1,8 @@
 package org.folio.service.mapping.processor.translations;
 
-import io.vertx.core.json.JsonObject;
+import org.folio.service.mapping.processor.rule.Parameter;
 
 @FunctionalInterface
 public interface TranslationFunction {
-  String apply(String value, JsonObject parameters, Settings settings);
+  String apply(String value, Parameter parameters, Settings settings);
 }
