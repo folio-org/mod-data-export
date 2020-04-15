@@ -16,6 +16,8 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.LIST_O
 import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING;
 
 public abstract class AbstractRecordWriter implements RecordWriter {
+  private static final String INDICATOR_1 = "1";
+  private static final String INDICATOR_2 = "2";
 
   @Override
   public void write(SimpleValue simpleValue) {
@@ -68,9 +70,9 @@ public abstract class AbstractRecordWriter implements RecordWriter {
         field.addSubField(subFieldCode, subFieldData);
       } else if (dataSource.isIndicatorSource()) {
         char indicator = stringValue.charAt(0);
-        if ("1".equals(dataSource.getIndicator())) {
+        if (INDICATOR_1.equals(dataSource.getIndicator())) {
           field.setIndicator1(indicator);
-        } else if ("2".equals(dataSource.getIndicator())) {
+        } else if (INDICATOR_2.equals(dataSource.getIndicator())) {
           field.setIndicator2(indicator);
         }
       }
@@ -90,9 +92,9 @@ public abstract class AbstractRecordWriter implements RecordWriter {
         }
       } else if (dataSource.isIndicatorSource()) {
         char indicator = stringValue.getValue().charAt(0);
-        if ("1".equals(dataSource.getIndicator())) {
+        if (INDICATOR_1.equals(dataSource.getIndicator())) {
           field.setIndicator1(indicator);
-        } else if ("2".equals(dataSource.getIndicator())) {
+        } else if (INDICATOR_2.equals(dataSource.getIndicator())) {
           field.setIndicator2(indicator);
         }
       }
