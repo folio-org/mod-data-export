@@ -205,10 +205,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertFailJobExecution(context, jobExecutionOptional))
-        .compose(succeeded -> {
-          async.complete();
-          return Future.succeededFuture();
-        });
+        .onComplete(succeeded -> async.complete());
     });
   }
 
@@ -225,9 +222,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertCreationJobExecution(context, jobExecutionOptional))
-        .compose(succeeded -> {
-          return Future.succeededFuture();
-        });
+        .onComplete(succeeded -> Future.succeededFuture());
     });
     RestAssured.given()
     .spec(binaryRequestSpecification)
