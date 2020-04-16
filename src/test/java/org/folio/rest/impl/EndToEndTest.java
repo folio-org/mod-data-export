@@ -72,7 +72,6 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WITH_ONE_BATCH_OF_UUIDS = "InventoryUUIDsOneBatch.csv";
   private static final String DASH = "-";
-  private static final String DATE_TIME_REGEX = "[0-9]{14}";
   private static final String MRC_EXTENSION = "mrc";
   private static final long TIMER_DELAY = 1000L;
   private static final JsonObject USER = new JsonObject()
@@ -144,7 +143,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_2))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -166,7 +165,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, jobExecutionOptional, CURRENT_RECORDS_8))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -299,13 +298,13 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
     context.assertNotNull(generatedExportFileContent);
-    context.assertTrue(isFileNameContainsDatetime(generatedFileName));
     context.assertEquals(FilenameUtils.getExtension(generatedFileName), MRC_EXTENSION);
     return Future.succeededFuture(fileExportDefinition);
   }
 
-  private Future<Object> assertSuccessJobExecution(TestContext context,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber) {
+  private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber) {
     JobExecution jobExecution = jobExecutionOptional.get();
+    context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
     context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
@@ -346,8 +345,8 @@ public class EndToEndTest extends RestVerticleTestBase {
     return generatedExportFileContent;
   }
 
-  private boolean isFileNameContainsDatetime(String generatedFileName) {
-    return FilenameUtils.getBaseName(generatedFileName).split(DASH)[1].matches(DATE_TIME_REGEX);
+  private boolean isFileNameContainsJobExecutionHrId(String generatedFileName, String jobExecutionHrId) {
+    return FilenameUtils.getBaseName(generatedFileName).split(DASH)[1].equals(jobExecutionHrId);
   }
 
   @Configuration

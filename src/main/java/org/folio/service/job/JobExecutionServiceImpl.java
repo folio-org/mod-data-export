@@ -2,26 +2,28 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
-
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
-import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.rest.jaxrs.model.RunBy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static io.vertx.core.Future.succeededFuture;
+import javax.ws.rs.NotFoundException;
+import java.lang.invoke.MethodHandles;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
@@ -30,6 +32,8 @@ import static java.util.Objects.nonNull;
  */
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
   @Autowired
   private JobExecutionDao jobExecutionDao;
 
@@ -49,25 +53,31 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<Optional<JobExecution>> getById(final String jobExecutionId, final String tenantId) {
-    return jobExecutionDao.getById(jobExecutionId, tenantId);
+  public Future<JobExecution> getById(final String jobExecutionId, final String tenantId) {
+    return jobExecutionDao.getById(jobExecutionId, tenantId)
+      .compose(optionalJobExecution -> {
+        if (optionalJobExecution.isPresent()) {
+          return succeededFuture(optionalJobExecution.get());
+        } else {
+          String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
+          LOGGER.error(errorMessage);
+          return failedFuture(new NotFoundException(errorMessage));
+        }
+      });
   }
 
   @Override
   public void updateJobStatusById(String id, JobExecution.Status status, String tenantId) {
-    getById(id, tenantId).compose(optionalJobExecution -> {
-      optionalJobExecution.ifPresent(jobExecution -> {
+    getById(id, tenantId).onSuccess(jobExecution -> {
         jobExecution.setStatus(status);
         jobExecution.setCompletedDate(new Date());
         update(jobExecution, tenantId);
-      });
-      return succeededFuture();
     });
   }
 
   @Override
   public void prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
-    getById(id, tenantId).onSuccess(optionalJobExecution -> optionalJobExecution.ifPresent(jobExecution -> {
+    getById(id, tenantId).onSuccess(jobExecution -> {
       ExportedFile exportedFile = new ExportedFile()
         .withFileId(UUID.randomUUID().toString())
         .withFileName(fileExportDefinition.getFileName());
@@ -84,7 +94,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         .withLastName(personal.getString("lastName")));
       jobExecution.setProgress(new Progress());
       update(jobExecution, tenantId);
-    }));
+    });
   }
 
 
