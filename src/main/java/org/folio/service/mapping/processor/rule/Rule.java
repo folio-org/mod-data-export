@@ -11,11 +11,11 @@ public class Rule {
 
   public Rule(JsonObject rule) {
     String tag = rule.getString("tag");
-    JsonArray mapping = rule.getJsonArray("dataSources");
-    if (mapping.isEmpty()) {
+    JsonArray dataSources = rule.getJsonArray("dataSources");
+    if (dataSources.isEmpty()) {
       throw new IllegalArgumentException(String.format("The given rule does not have data source, rule : %s", rule));
     } else {
-      mapping.forEach(item -> this.dataSources.add(new DataSource(tag, (JsonObject) item)));
+      dataSources.forEach(item -> this.dataSources.add(new DataSource(tag, (JsonObject) item)));
     }
   }
 
