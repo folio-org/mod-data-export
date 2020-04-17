@@ -1,19 +1,23 @@
 package org.folio.clients;
 
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(VertxUnitRunner.class)
 public class SrsClientUnitTest extends HttpServerTestBase {
@@ -22,13 +26,29 @@ public class SrsClientUnitTest extends HttpServerTestBase {
   @Spy
   StorageClient client;
 
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    setUpHttpServer();
+    setUpMocks();
+  }
+
+  private static void setUpMocks() {
+    String json = getResourceAsString(SRS_RESPONSE_JSON);
+    JsonObject data = new JsonObject(json);
+    router.route(RECORDS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
+      HttpServerResponse response = routingContext.response();
+      response.putHeader("content-type", "application/json");
+      response.end(data.toBuffer());
+    });
+  }
+
   @Before
-  public void setup() {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
   @Test
-  public void shouldReturnExistingMarcRecords() throws IOException {
+  public void shouldReturnExistingMarcRecords() {
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     // when

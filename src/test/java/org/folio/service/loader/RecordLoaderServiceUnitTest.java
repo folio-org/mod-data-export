@@ -2,7 +2,6 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.IOUtils;
 import org.folio.clients.StorageClient;
 import org.folio.rest.HttpServerTestBase;
 import org.folio.util.OkapiConnectionParams;
@@ -14,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.folio.TestUtil.getResourceAsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -46,16 +44,16 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   JsonObject dataFromInventory;
 
   @Before
-  public void setUp() throws IOException {
+  public void setUp() {
 
-    String json = IOUtils.toString(new FileReader("src/test/resources/srsResponse.json"));
+    String json = getResourceAsString(SRS_RESPONSE_JSON);
     dataFromSRS = new JsonObject(json);
-    String instancesJson = IOUtils.toString(new FileReader("src/test/resources/inventoryStorageResponse.json"));
+    String instancesJson = getResourceAsString(INVENTORY_RESPONSE_JSON);
     dataFromInventory = new JsonObject(instancesJson);
   }
 
   @Test
-  public void shouldReturnExistingMarcRecords() throws IOException {
+  public void shouldReturnExistingMarcRecords() {
     // given
     when(client.getByIdsFromSRS(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromSRS));
     // when
@@ -98,9 +96,9 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() throws IOException {
+  public void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
-    String json = IOUtils.toString(new FileReader("src/test/resources/InventoryStorageEmptyResponse.json"));
+    String json = getResourceAsString(INVENTORY_EMPTY_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
     when(client.getByIdsFromInventory(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
