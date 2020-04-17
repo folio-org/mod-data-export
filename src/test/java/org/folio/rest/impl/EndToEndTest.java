@@ -222,7 +222,9 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertCreationJobExecution(context, jobExecutionOptional))
-        .onComplete(succeeded -> Future.succeededFuture());
+        .compose(succeeded -> {
+          return Future.succeededFuture();
+        });
     });
     RestAssured.given()
     .spec(binaryRequestSpecification)
