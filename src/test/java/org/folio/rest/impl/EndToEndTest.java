@@ -73,7 +73,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String FILE_WITH_ONE_BATCH_OF_UUIDS = "InventoryUUIDsOneBatch.csv";
   private static final String DASH = "-";
   private static final String MRC_EXTENSION = "mrc";
-  private static final long TIMER_DELAY = 1000L;
+  private static final long TIMER_DELAY = 5000L;
   private static final JsonObject USER = new JsonObject()
     .put("personal", new JsonObject()
       .put("firstName", "John")
