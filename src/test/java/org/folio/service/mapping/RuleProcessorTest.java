@@ -1,8 +1,10 @@
 package org.folio.service.mapping;
 
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
@@ -16,18 +18,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RuleProcessorTest {
   private static JsonObject entity;
-  private static JsonArray rules;
+  private static List<Rule> rules;
   private Settings settings = null;
 
   @BeforeClass
   public static void setup() {
     entity = new JsonObject(getResourceAsString("processor/given_entity.json"));
-    rules = new JsonArray(getResourceAsString("processor/test_rules.json"));
+    rules = Arrays.asList(Json.decodeValue(getResourceAsString("processor/test_rules.json"), Rule[].class));
   }
 
   @Test

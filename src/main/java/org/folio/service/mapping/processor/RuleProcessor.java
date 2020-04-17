@@ -1,22 +1,15 @@
 package org.folio.service.mapping.processor;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.rule.Translation;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.values.CompositeValue;
-import org.folio.service.mapping.reader.values.ListValue;
-import org.folio.service.mapping.reader.values.RuleValue;
-import org.folio.service.mapping.reader.values.SimpleValue;
-import org.folio.service.mapping.reader.values.StringValue;
+import org.folio.service.mapping.reader.values.*;
 import org.folio.service.mapping.writer.RecordWriter;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.folio.service.mapping.reader.values.SimpleValue.SubType.LIST_OF_STRING;
@@ -24,7 +17,7 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
 
 /**
  * RuleProcessor is a central part of mapping.
- *
+ * <p>
  * High-level algorithm:
  * # read data by the given rule
  * # translate data
@@ -35,14 +28,10 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  * @see RecordWriter
  */
 public final class RuleProcessor {
-  private List<Rule> rules = new ArrayList<>();
+  private List<Rule> rules;
 
-  public RuleProcessor(JsonArray rules) {
-    Iterator ruleIterator = rules.iterator();
-    while (ruleIterator.hasNext()) {
-      Rule rule = new Rule(JsonObject.mapFrom(ruleIterator.next()));
-      this.rules.add(rule);
-    }
+  public RuleProcessor(List<Rule> rules) {
+    this.rules = rules;
   }
 
   public String process(EntityReader reader, RecordWriter writer, Settings settings) {
@@ -52,12 +41,12 @@ public final class RuleProcessor {
         case SIMPLE:
           SimpleValue simpleValue = (SimpleValue) ruleValue;
           translate(simpleValue, settings);
-          writer.write(simpleValue);
+          writer.write(rule.getTag(), simpleValue);
           break;
         case COMPOSITE:
           CompositeValue compositeValue = (CompositeValue) ruleValue;
           translate(compositeValue, settings);
-          writer.write(compositeValue);
+          writer.write(rule.getTag(), compositeValue);
           break;
         case MISSING:
       }

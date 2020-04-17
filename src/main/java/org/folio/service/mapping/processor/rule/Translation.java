@@ -6,9 +6,12 @@ public class Translation {
   private String function;
   private JsonObject parameters;
 
-  public Translation(JsonObject translation) {
-    this.function = translation.getString("function");
-    this.parameters = translation.getJsonObject("parameters");
+  public void setFunction(String function) {
+    this.function = function;
+  }
+
+  public void setParameters(JsonObject parameters) {
+    this.parameters = parameters;
   }
 
   public String getFunction() {

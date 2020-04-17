@@ -1,49 +1,40 @@
 package org.folio.service.mapping.processor.rule;
 
-import io.vertx.core.json.JsonObject;
-
 public class DataSource {
-  private String tag;
+  private String from;
   private String subfield;
   private String indicator;
-  private String from;
   private Translation translation;
 
-  public DataSource(String tag, JsonObject dataSource) {
-    this.tag = tag;
-    this.from = dataSource.getString("from");
-    this.subfield = dataSource.getString("subfield");
-    this.indicator = dataSource.getString("indicator");
-    if (dataSource.containsKey("translation")) {
-      this.translation = new Translation(dataSource.getJsonObject("translation"));
-    }
+  public String getFrom() {
+    return from;
   }
 
-  public String getTag() {
-    return this.tag;
+  public void setFrom(String from) {
+    this.from = from;
   }
 
   public String getSubfield() {
     return subfield;
   }
 
+  public void setSubfield(String subfield) {
+    this.subfield = subfield;
+  }
+
   public String getIndicator() {
     return indicator;
   }
 
-  public String getFrom() {
-    return from;
+  public void setIndicator(String indicator) {
+    this.indicator = indicator;
   }
 
   public Translation getTranslation() {
     return translation;
   }
 
-  public boolean isSubFieldSource() {
-    return this.subfield != null;
-  }
-
-  public boolean isIndicatorSource() {
-    return this.indicator != null;
+  public void setTranslation(Translation translation) {
+    this.translation = translation;
   }
 }

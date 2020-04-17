@@ -17,16 +17,18 @@ public interface RecordWriter {
   /**
    * Writes simple value to record whether control field or data field.
    *
+   * @param tag   tag name of the marc record
    * @param value simple value
    */
-  void write(SimpleValue value);
+  void write(String tag, SimpleValue value);
 
   /**
    * Writes composite value to record. This can be only data field.
    *
+   * @param tag   tag name of the marc record
    * @param value composite value
    */
-  void write(CompositeValue value);
+  void write(String tag, CompositeValue value);
 
   /**
    * Returns final result of writing

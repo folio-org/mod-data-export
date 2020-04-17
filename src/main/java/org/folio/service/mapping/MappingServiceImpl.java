@@ -1,9 +1,12 @@
 package org.folio.service.mapping;
 
 import com.google.common.io.Resources;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
@@ -18,6 +21,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -29,7 +33,8 @@ public class MappingServiceImpl implements MappingService {
   public MappingServiceImpl() {
     try {
       URL url = Resources.getResource("rules/rulesDefault.json");
-      JsonArray rules = new JsonArray(Resources.toString(url, StandardCharsets.UTF_8));
+      String stringRules = Resources.toString(url, StandardCharsets.UTF_8);
+      List<Rule> rules = Arrays.asList(Json.decodeValue(stringRules, Rule[].class));
       this.ruleProcessor = new RuleProcessor(rules);
     } catch (IOException exception) {
       LOGGER.error("Exception occurred while initializing MappingService", exception);
