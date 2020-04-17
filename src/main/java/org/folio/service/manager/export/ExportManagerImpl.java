@@ -25,6 +25,7 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
 @SuppressWarnings({"java:S1172", "java:S125"})
 @Service
 public class ExportManagerImpl implements ExportManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExportManagerImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 1;
   private static final int SRS_LOAD_PARTITION_SIZE = 20;
   private static final int INVENTORY_LOAD_PARTITION_SIZE = 20;
@@ -83,12 +84,12 @@ public class ExportManagerImpl implements ExportManager {
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
-    exportService.export(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
+    exportService.exportSrsRecord(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
     List<String> mappedMarcRecords = mappingService.map(instances);
-    exportService.export(mappedMarcRecords, fileExportDefinition);
+    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
