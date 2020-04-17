@@ -1,10 +1,5 @@
 package org.folio.service.export;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
@@ -21,6 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 @Service
 public class LocalFileSystemExportService implements ExportService {
   @Autowired
@@ -30,11 +30,11 @@ public class LocalFileSystemExportService implements ExportService {
   private ExportStorageService exportStorageService;
 
   @Override
-  public void export(List<String> jsonRecords, FileDefinition fileDefinition) {
+  public void exportSrsRecord(List<String> jsonRecords, FileDefinition fileDefinition) {
     if (CollectionUtils.isNotEmpty(jsonRecords) && fileDefinition != null) {
       for (String jsonRecord : jsonRecords) {
-        byte[] marcRecord = convertJsonRecordToMarcRecord(jsonRecord);
-        fileStorage.saveFileDataBlocking(marcRecord, fileDefinition);
+        byte[] bytes = convertJsonRecordToMarcRecord(jsonRecord);
+        fileStorage.saveFileDataBlocking(bytes, fileDefinition);
       }
     }
   }
@@ -54,6 +54,17 @@ public class LocalFileSystemExportService implements ExportService {
       marcStreamWriter.write(record);
     }
     return byteArrayOutputStream.toByteArray();
+  }
+
+
+  @Override
+  public void exportInventoryRecords(List<String> inventoryRecords, FileDefinition fileDefinition) {
+    if (CollectionUtils.isNotEmpty(inventoryRecords) && fileDefinition != null) {
+      for (String record : inventoryRecords) {
+        byte[] bytes = record.getBytes(StandardCharsets.UTF_8);
+        fileStorage.saveFileDataBlocking(bytes, fileDefinition);
+      }
+    }
   }
 
   @Override

@@ -1,7 +1,7 @@
 package org.folio.service.export;
 
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.IOUtils;
+import org.folio.TestUtil;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
@@ -13,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,24 +31,47 @@ public class ExportServiceUnitTest {
   private static final String TENANT = "tenant";
 
   @Test
-  public void export_shouldPassExportFor_1_Record() throws IOException {
+  public void shouldPassExportFor_1_SrsRecord() {
     // given
-    String jsonRecord = new JsonObject(IOUtils.toString(new FileReader("src/test/resources/json_record.json"))).encode();
+    String jsonRecord = new JsonObject(TestUtil.getResourceAsString("json_record.json")).encode();
     FileDefinition fileDefinition = new FileDefinition();
     Mockito.when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when
-    exportService.export(Collections.singletonList(jsonRecord), fileDefinition);
+    exportService.exportSrsRecord(Collections.singletonList(jsonRecord), fileDefinition);
     // then
     Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
 
   @Test
-  public void export_shouldPassExportFor_NULL_Records() {
+  public void shouldPassExportFor_NULL_SrsRecords() {
     // given
     List<String> marcRecords = null;
     FileDefinition fileDefinition = new FileDefinition();
     // when
-    exportService.export(marcRecords, fileDefinition);
+    exportService.exportSrsRecord(marcRecords, fileDefinition);
+    // then
+    Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+  }
+
+  @Test
+  public void shouldPassExportFor_1_InventoryRecord() {
+    // given
+    String inventoryRecord = "testRecord";
+    FileDefinition fileDefinition = new FileDefinition();
+    Mockito.when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
+    // when
+    exportService.exportInventoryRecords(Collections.singletonList(inventoryRecord), fileDefinition);
+    // then
+    Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+  }
+
+  @Test
+  public void shouldPassExportFor_NULL_InventoryRecords() {
+    // given
+    List<String> inventoryRecords = null;
+    FileDefinition fileDefinition = new FileDefinition();
+    // when
+    exportService.exportInventoryRecords(inventoryRecords, fileDefinition);
     // then
     Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
