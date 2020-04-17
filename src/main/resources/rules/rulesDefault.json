@@ -2,7 +2,7 @@
   {
     "tag": "245",
     "description": "Title",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.title",
         "subfield": "a"

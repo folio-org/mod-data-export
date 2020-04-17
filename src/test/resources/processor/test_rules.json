@@ -2,7 +2,7 @@
   {
     "tag": "001",
     "description": "Test field 001, reading simple string value, writing control field",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.id"
       }
@@ -11,17 +11,17 @@
   {
     "tag": "002",
     "description": "Test field 002, reading simple string value, writing data field",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.personalNumber",
-        "subField": "a"
+        "subfield": "a"
       }
     ]
   },
   {
     "tag": "003",
     "description": "Test field 003, reading simple array of string values, writing control field",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.languages"
       }
@@ -30,35 +30,35 @@
   {
     "tag": "004",
     "description": "Test field 004, reading simple array of string values, writing data field",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.fonts",
-        "subField": "b"
+        "subfield": "b"
       }
     ]
   },
   {
     "tag": "005",
     "description": "Test field 005, reading composite value, writing data field",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.books[*].title",
-        "subField": "c"
+        "subfield": "c"
       },
       {
         "from": "$.books[*].genre",
-        "subField": "d"
+        "subfield": "d"
       },
       {
         "from": "$.books[*].author",
-        "subField": "e"
+        "subfield": "e"
       }
     ]
   },
   {
     "tag": "00x",
     "description": "Nonexistent field just for the testing purposes",
-    "dataSource": [
+    "dataSources": [
       {
         "from": "$.none"
       }

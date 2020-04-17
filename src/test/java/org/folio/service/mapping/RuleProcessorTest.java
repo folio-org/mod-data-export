@@ -16,8 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
-
 import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,7 +25,7 @@ public class RuleProcessorTest {
   private Settings settings = null;
 
   @BeforeClass
-  public static void setup() throws IOException {
+  public static void setup() {
     entity = new JsonObject(getResourceAsString("processor/given_entity.json"));
     rules = new JsonArray(getResourceAsString("processor/test_rules.json"));
   }
