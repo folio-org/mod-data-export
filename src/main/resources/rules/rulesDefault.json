@@ -26,5 +26,42 @@
         }
       }
     ]
+  },
+  {
+    "tag": "999",
+    "description": "Unique ID of the instance record",
+    "dataSources": [
+      {
+        "from": "$.id",
+        "subfield": "i"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "f"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "f"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "tag": "001",
+    "description": "The human readable ID",
+    "dataSources": [
+      {
+        "from": "$.hrid"
+      }
+    ]
   }
 ]
