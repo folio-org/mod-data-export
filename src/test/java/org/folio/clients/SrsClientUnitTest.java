@@ -10,13 +10,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(VertxUnitRunner.class)
-public class UsersClientUnitTest extends HttpServerTestBase {
+public class SrsClientUnitTest extends HttpServerTestBase {
+  private static final int LIMIT = 20;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -25,9 +27,9 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() {
-    String json = getResourceAsString(USER_RESPONSE_JSON);
+    String json = getResourceAsString(SRS_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
-    router.route(USERS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
+    router.route(RECORDS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");
       response.end(data.toBuffer());
@@ -35,12 +37,14 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnUserById() {
+  public void shouldReturnExistingMarcRecords() {
     // given
-    UsersClient usersClient = new UsersClient();
+    StorageClient storageClient = new StorageClient();
+    List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     // when
-    Optional<JsonObject> optionalUser = usersClient.getById(UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> srsResponce = storageClient.getByIdsFromSRS(uuids, okapiConnectionParams, LIMIT);
     // then
-    Assert.assertTrue(optionalUser.isPresent());
+    Assert.assertTrue(srsResponce.isPresent());
+    Assert.assertEquals(2, srsResponce.get().getJsonArray("records").getList().size());
   }
 }

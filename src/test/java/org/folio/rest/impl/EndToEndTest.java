@@ -66,14 +66,14 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String STORAGE_DIRECTORY_PATH = "./storage";
   private static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   private static final String UPLOAD_URL = "/upload";
-  private static final String SRS_RESPONSE_FILE_NAME = "srsResponse.json";
+  private static final String SRS_RESPONSE_FILE_NAME = "clients/srsResponse.json";
   private static final String FILE_WITH_NON_EXITING_UUID = "InventoryUUIDsNonExiting.csv";
   private static final String FILE_WITH_TWO_BATCHES_OF_UUIDS = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WITH_ONE_BATCH_OF_UUIDS = "InventoryUUIDsOneBatch.csv";
   private static final String DASH = "-";
   private static final String MRC_EXTENSION = "mrc";
-  private static final long TIMER_DELAY = 1000L;
+  private static final long TIMER_DELAY = 5000L;
   private static final JsonObject USER = new JsonObject()
     .put("personal", new JsonObject()
       .put("firstName", "John")
@@ -205,10 +205,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(uploadedFileDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertFailJobExecution(context, jobExecutionOptional))
-        .compose(succeeded -> {
-          async.complete();
-          return Future.succeededFuture();
-        });
+        .onComplete(succeeded -> async.complete());
     });
   }
 
