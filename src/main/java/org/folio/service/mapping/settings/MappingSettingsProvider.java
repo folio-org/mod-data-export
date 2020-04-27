@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The component is responsible to provide settings and parameters needed for mapping.
  * Caches settings for the given job id.
- * If requested settings is not found by the given key then performs loading.
+ * If requested settings are not found by the given job id then performs loading.
  */
 @Component
 public class MappingSettingsProvider {
