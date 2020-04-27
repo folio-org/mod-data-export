@@ -1,5 +1,14 @@
 [
   {
+    "tag": "001",
+    "description": "The human readable ID",
+    "dataSources": [
+      {
+        "from": "$.hrid"
+      }
+    ]
+  },
+  {
     "tag": "245",
     "description": "Title",
     "dataSources": [
@@ -22,6 +31,34 @@
           "function": "set_value",
           "parameters": {
             "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "tag": "490",
+    "description": "Series",
+    "dataSources": [
+      {
+        "from": "$.series",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
           }
         }
       }
@@ -52,15 +89,6 @@
             "value": "f"
           }
         }
-      }
-    ]
-  },
-  {
-    "tag": "001",
-    "description": "The human readable ID",
-    "dataSources": [
-      {
-        "from": "$.hrid"
       }
     ]
   }
