@@ -31,7 +31,7 @@
           "modulePermissions": [
             "users.item.get",
             "source-storage.records.get",
-            "inventory-storage.instances.item.get"
+            "inventory-storage.instances.collection.get"
           ]
         },
         {
