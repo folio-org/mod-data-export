@@ -50,7 +50,6 @@ public class ExportManagerUnitTest {
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
-    params.put("x-okapi-tenant", "test_tenant");
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
@@ -59,7 +58,7 @@ public class ExportManagerUnitTest {
     Mockito.verify(recordLoaderService, Mockito.times(50)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(recordLoaderService, Mockito.times(3)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
-    Mockito.verify(mappingService, Mockito.times(1)).map(anyList());
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
   }
 }

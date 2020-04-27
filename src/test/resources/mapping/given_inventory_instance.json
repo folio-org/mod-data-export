@@ -1,5 +1,10 @@
 {
-  "id":"c8b50e3f-0446-429c-960e-03774b88223f",
-  "hrid":"1",
-  "title": "The Journal of ecclesiastical history"
+  "id": "c8b50e3f-0446-429c-960e-03774b88223f",
+  "hrid": "1",
+  "title": "The Journal of ecclesiastical history",
+  "natureOfContentTermIds": [
+    "96879b60-098b-453b-bf9a-c47866f1ab2a",
+    "04a6a8d2-f902-4774-b15f-d8bd885dc804",
+    "none-existing-id"
+  ]
 }

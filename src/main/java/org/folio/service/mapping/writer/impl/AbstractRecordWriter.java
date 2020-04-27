@@ -49,7 +49,9 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   public void write(String tag, CompositeValue compositeValue) {
     for (List<StringValue> entry : compositeValue.getValue()) {
       RecordDataField recordDataField = buildDataFieldForStringValues(tag, entry);
-      writeDataField(recordDataField);
+      if (!recordDataField.getSubFields().isEmpty()) {
+        writeDataField(recordDataField);
+      }
     }
   }
 
