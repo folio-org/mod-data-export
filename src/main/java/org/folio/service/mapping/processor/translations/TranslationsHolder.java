@@ -25,7 +25,7 @@ public enum TranslationsHolder implements TranslationFunction {
         JsonObject entry = optionalEntry.get();
         return entry.getString("name");
       } else {
-        LOGGER.info(String.format("Corresponding nature of content term is not found by the given id: %s", id));
+        LOGGER.info("Nature of content term is not found by the given id: {}", id);
         return null;
       }
     }

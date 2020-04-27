@@ -54,7 +54,7 @@ public class MappingServiceImpl implements MappingService {
     return records;
   }
 
-  public String runDefaultMapping(JsonObject instance, Settings settings) {
+  private String runDefaultMapping(JsonObject instance, Settings settings) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.process(entityReader, recordWriter, settings);
