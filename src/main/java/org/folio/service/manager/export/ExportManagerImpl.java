@@ -93,7 +93,7 @@ public class ExportManagerImpl implements ExportManager {
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size());
   }
 
   /**
