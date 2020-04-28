@@ -1,4 +1,4 @@
-package org.folio.service.mapping.processor.translations;
+package org.folio.service.mapping.settings;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.list.UnmodifiableList;

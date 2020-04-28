@@ -1,7 +1,7 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
-import org.folio.service.mapping.processor.translations.Settings;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.junit.Assert;

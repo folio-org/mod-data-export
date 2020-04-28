@@ -1,6 +1,7 @@
 package org.folio.service.mapping.processor.translations;
 
 import io.vertx.core.json.JsonObject;
+import org.folio.service.mapping.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,7 +5,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.processor.translations.Settings;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
 import org.folio.service.mapping.settings.MappingSettingsProvider;

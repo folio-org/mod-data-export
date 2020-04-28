@@ -2,7 +2,6 @@ package org.folio.service.mapping.settings;
 
 import io.vertx.core.json.JsonObject;
 import org.folio.clients.InventoryClient;
-import org.folio.service.mapping.processor.translations.Settings;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
