@@ -30,16 +30,17 @@ public class InventoryClient {
 
   private static final int SETTING_LIMIT = 100;
   private static final String NATURE_OF_CONTENT_TERMS_URL = "%s/nature-of-content-terms?limit=" + SETTING_LIMIT;
+  private static final String NATURE_OF_CONTENT_TERMS_FIELD = "natureOfContentTerms";
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
     return ClientUtil.getByIds(ids, params, GET_INSTANCES_URL + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
   }
 
   public List<JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
-    return getSettingsByUrl(NATURE_OF_CONTENT_TERMS_URL, params, "natureOfContentTerms");
+    return getSettingsByUrl(NATURE_OF_CONTENT_TERMS_URL, params, NATURE_OF_CONTENT_TERMS_FIELD);
   }
 
-  private List<JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String fieldKey) {
+  private List<JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {
     List<JsonObject> result = new ArrayList<>();
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
@@ -47,8 +48,8 @@ public class InventoryClient {
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       HttpEntity httpEntity = response.getEntity();
       JsonObject jsonEntity = new JsonObject(EntityUtils.toString(httpEntity));
-      if (jsonEntity.containsKey(fieldKey)) {
-        JsonArray array = jsonEntity.getJsonArray(fieldKey);
+      if (jsonEntity.containsKey(field)) {
+        JsonArray array = jsonEntity.getJsonArray(field);
         for (Object element : array) {
           result.add(JsonObject.mapFrom(element));
         }
