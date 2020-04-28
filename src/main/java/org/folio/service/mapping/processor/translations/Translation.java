@@ -1,4 +1,4 @@
-package org.folio.service.mapping.processor.rule;
+package org.folio.service.mapping.processor.translations;
 
 import io.vertx.core.json.JsonObject;
 
