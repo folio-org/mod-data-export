@@ -1,38 +1,78 @@
 {
   "records": [
     {
-      "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
-      "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "matchedId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
+      "id": "5524a0c3-9b57-48ca-b07b-79dd02cdad08",
+      "snapshotId": "cd518242-c769-41e2-9d4d-15b12b8f2bd7",
+      "matchedId": "5524a0c3-9b57-48ca-b07b-79dd02cdad08",
       "generation": 0,
       "recordType": "MARC",
       "rawRecord": {
-        "id": "ca631e20-e4c0-4c3e-9b24-70564c1bc7e5",
-        "content": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content"
+        "id": "c57adc55-7711-48a7-a76d-dbb6e2b736bb",
+        "content": "content"
       },
       "parsedRecord": {
-        "id": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92",
+        "id": "29e6f38b-3267-493e-b734-f3992818edb1",
         "content": {
           "fields": [
             {
-              "001": "in00000000041"
+              "001": "in00000002173"
             },
             {
-              "005": "20171004205343.0"
+              "003": "DE-101"
             },
             {
-              "008": "890224c19429999mnuuu l       0    2eng  "
+              "005": "20190617233050.0"
             },
             {
-              "035": "1567726"
+              "007": "tu"
             },
             {
-              "010": {
+              "008": "190603s2019    pl ||||| |||| 00||||pol  "
+            },
+            {
+              "035": "1187681857"
+            },
+            {
+              "015": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "z": "   42022330 "
+                    "a": "19,A26"
+                  },
+                  {
+                    "2": "dnb"
+                  }
+                ]
+              }
+            },
+            {
+              "016": {
+                "ind1": "7",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "2": "DE-101"
+                  },
+                  {
+                    "a": "1187681857"
+                  }
+                ]
+              }
+            },
+            {
+              "020": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "9788307034508"
+                  },
+                  {
+                    "c": "Broschur"
+                  },
+                  {
+                    "9": "978-83-07-03450-8"
                   }
                 ]
               }
@@ -43,29 +83,7 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "(OCoLC)10724092"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "(NIC)notisAHJ5096"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "1567726"
+                    "a": "(DE-599)DNB1187681857"
                   }
                 ]
               }
@@ -76,47 +94,44 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "DLC"
+                    "a": "1180"
                   },
                   {
-                    "b": "eng"
+                    "b": "ger"
                   },
                   {
-                    "c": "DLC"
+                    "c": "DE-101"
                   },
                   {
-                    "d": "OCLCQ"
+                    "d": "9999"
                   },
                   {
-                    "d": "OCLCF"
-                  },
-                  {
-                    "d": "OCLCO"
+                    "e": "rda"
                   }
                 ]
               }
             },
             {
-              "043": {
+              "041": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "n-us---"
+                    "a": "pol"
+                  },
+                  {
+                    "h": "ger"
                   }
                 ]
               }
             },
             {
-              "050": {
-                "ind1": "1",
-                "ind2": "0",
+              "044": {
+                "ind1": " ",
+                "ind2": " ",
                 "subfields": [
                   {
-                    "a": "KF6365"
-                  },
-                  {
-                    "b": ".M4"
+                    "c": "XA-PL"
                   }
                 ]
               }
@@ -127,539 +142,90 @@
                 "ind2": "4",
                 "subfields": [
                   {
-                    "a": "336.2402673"
+                    "8": "1\\u"
                   },
                   {
-                    "2": "19"
-                  }
-                ]
-              }
-            },
-            {
-              "245": {
-                "ind1": "0",
-                "ind2": "4",
-                "subfields": [
-                  {
-                    "a": "The Law of Federal income taxation."
-                  }
-                ]
-              }
-            },
-            {
-              "246": {
-                "ind1": "3",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Mertens the law of federal income taxation"
-                  }
-                ]
-              }
-            },
-            {
-              "246": {
-                "ind1": "3",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Mertens law of federal income taxation"
-                  }
-                ]
-              }
-            },
-            {
-              "260": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "[St. Paul] :"
+                    "a": "838.91403"
                   },
                   {
-                    "b": "West Group,"
+                    "q": "DE-101"
                   },
                   {
-                    "c": "1942-"
+                    "2": "23/ger"
                   }
                 ]
               }
             },
             {
-              "300": {
-                "ind1": " ",
+              "083": {
+                "ind1": "7",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "v. (loose-leaf)"
+                    "a": "830"
                   },
                   {
-                    "c": "26 cm."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Some volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Originally issued in bound format and kept up to date by pocket supplements and revised volumes."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Published in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997)."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "The service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--"
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Includes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Includes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Includes \"Complete internal revenue code\" issued as soft-bound supplement."
-                  }
-                ]
-              }
-            },
-            {
-              "500": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Description based on: T.p., 1997-1998 rulings."
-                  }
-                ]
-              }
-            },
-            {
-              "650": {
-                "ind1": " ",
-                "ind2": "0",
-                "subfields": [
-                  {
-                    "a": "Income tax"
+                    "a": "510"
                   },
                   {
-                    "x": "Law and legislation"
+                    "q": "DE-101"
                   },
                   {
-                    "z": "United States."
+                    "2": "23sdnb"
                   }
                 ]
               }
             },
             {
-              "650": {
+              "085": {
                 "ind1": " ",
-                "ind2": "7",
+                "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Income tax"
+                    "8": "1\\u"
                   },
                   {
-                    "x": "Law and legislation."
-                  },
-                  {
-                    "2": "fast"
-                  },
-                  {
-                    "0": "(OCoLC)fst00968749"
+                    "b": "838"
                   }
                 ]
               }
             },
             {
-              "651": {
+              "090": {
                 "ind1": " ",
-                "ind2": "7",
+                "ind2": " ",
                 "subfields": [
                   {
-                    "a": "United States."
-                  },
-                  {
-                    "2": "fast"
-                  },
-                  {
-                    "0": "(OCoLC)fst01204155"
+                    "a": "b"
                   }
                 ]
               }
             },
             {
-              "700": {
+              "100": {
                 "ind1": "1",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Mertens, Jacob,"
+                    "0": "(DE-588)118509861"
                   },
                   {
-                    "d": "1896-"
-                  }
-                ]
-              }
-            },
-            {
-              "710": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "West Group."
-                  }
-                ]
-              }
-            },
-            {
-              "710": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Clark Boardman Callaghan."
-                  }
-                ]
-              }
-            },
-            {
-              "710": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Callaghan and Company."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": "2",
-                "subfields": [
-                  {
-                    "a": "Mertens federal tax regulations."
+                    "0": "http://d-nb.info/gnd/118509861"
                   },
                   {
-                    "p": "Regulations preambles."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": "2",
-                "subfields": [
-                  {
-                    "a": "Mertens federal tax regulations."
+                    "0": "(DE-101)118509861"
                   },
                   {
-                    "p": "Proposed regulations preambles."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": "2",
-                "subfields": [
-                  {
-                    "a": "Current tax highlights."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": "2",
-                "subfields": [
-                  {
-                    "a": "Mertens federal tax regulations."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": "2",
-                "subfields": [
-                  {
-                    "a": "Complete internal revenue code."
-                  }
-                ]
-              }
-            },
-            {
-              "776": {
-                "ind1": "0",
-                "ind2": "8",
-                "subfields": [
-                  {
-                    "i": "Online version:"
+                    "a": "Bernhard, Thomas"
                   },
                   {
-                    "t": "Law of Federal income taxation"
+                    "d": "1931-1989"
                   },
                   {
-                    "w": "(OCoLC)755250706"
-                  }
-                ]
-              }
-            },
-            {
-              "905": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "19890224120000.0"
-                  }
-                ]
-              }
-            },
-            {
-              "948": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "20171004"
+                    "e": "Verfasser"
                   },
                   {
-                    "b": "m"
-                  },
-                  {
-                    "d": "paj3"
-                  },
-                  {
-                    "e": "law"
-                  },
-                  {
-                    "f": "?"
-                  }
-                ]
-              }
-            },
-            {
-              "999": {
-                "ind1": "f",
-                "ind2": "f",
-                "subfields": [
-                  {
-                    "s": "bc5caa84-e85c-4c98-9956-50ccdaad7115"
-                  },
-                  {
-                    "i": "ae573875-fbc8-40e7-bda7-0ac283354226"
-                  }
-                ]
-              }
-            }
-          ],
-          "leader": "03039cai a2200529   4500"
-        },
-        "formattedContent": "LEADER 03039cai a2200529   4500\n001 in00000000041\n005 20171004205343.0\n008 890224c19429999mnuuu l       0    2eng  \n035 1567726\n010   $z   42022330 \n035   $a(OCoLC)10724092\n035   $a(NIC)notisAHJ5096\n035   $a1567726\n040   $aDLC$beng$cDLC$dOCLCQ$dOCLCF$dOCLCO\n043   $an-us---\n050 10$aKF6365$b.M4\n082 04$a336.2402673$219\n245 04$aThe Law of Federal income taxation.\n246 3 $aMertens the law of federal income taxation\n246 3 $aMertens law of federal income taxation\n260   $a[St. Paul] :$bWest Group,$c1942-\n300   $av. (loose-leaf)$c26 cm.\n500   $aSome volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation.\n500   $aOriginally issued in bound format and kept up to date by pocket supplements and revised volumes.\n500   $aPublished in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997).\n500   $aThe service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--\n500   $aIncludes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings.\n500   $a\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume.\n500   $aIncludes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table.\n500   $aIncludes \"Complete internal revenue code\" issued as soft-bound supplement.\n500   $aDescription based on: T.p., 1997-1998 rulings.\n650  0$aIncome tax$xLaw and legislation$zUnited States.\n650  7$aIncome tax$xLaw and legislation.$2fast$0(OCoLC)fst00968749\n651  7$aUnited States.$2fast$0(OCoLC)fst01204155\n700 1 $aMertens, Jacob,$d1896-\n710 2 $aWest Group.\n710 2 $aClark Boardman Callaghan.\n710 2 $aCallaghan and Company.\n740 02$aMertens federal tax regulations.$pRegulations preambles.\n740 02$aMertens federal tax regulations.$pProposed regulations preambles.\n740 02$aCurrent tax highlights.\n740 02$aMertens federal tax regulations.\n740 02$aComplete internal revenue code.\n776 08$iOnline version:$tLaw of Federal income taxation$w(OCoLC)755250706\n905   $a19890224120000.0\n948 2 $a20171004$bm$dpaj3$elaw$f?\n999 ff$sbc5caa84-e85c-4c98-9956-50ccdaad7115$iae573875-fbc8-40e7-bda7-0ac283354226\n"
-      },
-      "deleted": false,
-      "externalIdsHolder": {
-        "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226"
-      },
-      "additionalInfo": {
-        "suppressDiscovery": false
-      },
-      "metadata": {
-        "createdDate": "2020-02-10T08:34:34.504+0000",
-        "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
-        "updatedDate": "2020-02-10T08:34:36.506+0000",
-        "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
-      }
-    },
-    {
-      "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
-      "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "matchedId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
-      "generation": 0,
-      "recordType": "MARC",
-      "rawRecord": {
-        "id": "4f559f73-c37c-4420-93d5-3e354c6f89f5",
-        "content": "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"
-      },
-      "parsedRecord": {
-        "id": "47178cad-a892-4c2a-b9e4-bb33dea6fc31",
-        "content": {
-          "fields": [
-            {
-              "001": "in00000000052"
-            },
-            {
-              "005": "20170816204126.0"
-            },
-            {
-              "008": "890411m19309999pau      l    001 0 eng  "
-            },
-            {
-              "035": "1579067"
-            },
-            {
-              "010": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "   30014365 //r855"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "(NIC)notisAHK7689"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "(OCoLC)3289989"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "1579067"
-                  }
-                ]
-              }
-            },
-            {
-              "040": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "d": "NIC"
-                  },
-                  {
-                    "d": "NIC"
-                  }
-                ]
-              }
-            },
-            {
-              "043": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "n-us-pa"
-                  }
-                ]
-              }
-            },
-            {
-              "050": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "KFP30 1930"
-                  },
-                  {
-                    "b": ".A44"
-                  }
-                ]
-              }
-            },
-            {
-              "110": {
-                "ind1": "1",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Pennsylvania."
+                    "4": "aut"
                   }
                 ]
               }
@@ -670,7 +236,16 @@
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Laws, etc. (Compiled statutes : 1930-   )"
+                    "0": "(DE-588)4509408-1"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4509408-1"
+                  },
+                  {
+                    "0": "(DE-101)95416430X"
+                  },
+                  {
+                    "a": "Wittgensteins Neffe"
                   }
                 ]
               }
@@ -681,33 +256,52 @@
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Purdon's Pennsylvania statutes, annotated :"
+                    "a": "Bratanek Wittgensteina"
                   },
                   {
-                    "b": "permanent ed."
+                    "b": "przyjaźń"
+                  },
+                  {
+                    "c": "Thomas Bernhard ; przełożył i posłowiem opatrzył Marek Kędzierski"
                   }
                 ]
               }
             },
             {
-              "260": {
+              "250": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Philadelphia, Pa. :"
+                    "a": "Wydanie II"
+                  }
+                ]
+              }
+            },
+            {
+              "259": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "wyi"
+                  }
+                ]
+              }
+            },
+            {
+              "264": {
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "a": "Warszawa"
                   },
                   {
-                    "b": "George T. Bisel Co. ;"
+                    "b": "Czytelnik"
                   },
                   {
-                    "a": "St. Paul, Minn. :"
-                  },
-                  {
-                    "b": "West Publishing Co.,"
-                  },
-                  {
-                    "c": "1930-"
+                    "c": "2019"
                   }
                 ]
               }
@@ -718,219 +312,385 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "v. ;"
+                    "a": "171 Seiten"
                   },
                   {
-                    "c": "25 cm."
+                    "c": "20 cm"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "336": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Includes unnumbered tables and index volumes."
+                    "a": "Text"
+                  },
+                  {
+                    "b": "txt"
+                  },
+                  {
+                    "2": "rdacontent"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "337": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Kept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated."
+                    "a": "ohne Hilfsmittel zu benutzen"
+                  },
+                  {
+                    "b": "n"
+                  },
+                  {
+                    "2": "rdamedia"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "338": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Vols. for  published by West Group."
+                    "a": "Band"
+                  },
+                  {
+                    "b": "nc"
+                  },
+                  {
+                    "2": "rdacarrier"
                   }
                 ]
               }
             },
             {
-              "650": {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
                 "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)4003939-0"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4003939-0"
+                  },
+                  {
+                    "0": "(DE-101)040039390"
+                  },
+                  {
+                    "a": "Autobiografie"
+                  },
+                  {
+                    "y": "1967-1979"
+                  },
+                  {
+                    "2": "gnd-content"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)4006804-3"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4006804-3"
+                  },
+                  {
+                    "0": "(DE-101)040068048"
+                  },
+                  {
+                    "a": "Biografie"
+                  },
+                  {
+                    "y": "1967-1979"
+                  },
+                  {
+                    "2": "gnd-content"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
+                "ind1": "0",
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Law"
+                    "0": "(DE-588)118509861"
                   },
                   {
-                    "z": "Pennsylvania."
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
                   }
                 ]
               }
             },
             {
-              "650": {
-                "ind1": " ",
-                "ind2": "7",
+              "689": {
+                "ind1": "0",
+                "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Law"
+                    "5": "DE-101"
                   },
                   {
-                    "2": "fast"
-                  },
-                  {
-                    "0": "(OCoLC)fst00993678"
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "651": {
-                "ind1": " ",
-                "ind2": "7",
+              "689": {
+                "ind1": "1",
+                "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Pennsylvania"
+                    "0": "(DE-588)118634321"
                   },
                   {
-                    "2": "fast"
+                    "0": "http://d-nb.info/gnd/118634321"
                   },
                   {
-                    "0": "(OCoLC)fst01204598"
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
                   }
                 ]
               }
             },
             {
-              "700": {
+              "689": {
                 "ind1": "1",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Purdon, John,"
+                    "5": "DE-101"
                   },
                   {
-                    "d": "1784-1835."
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "710": {
+              "689": {
+                "ind1": "2",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
+                "ind1": "2",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
                 "ind1": "2",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "George T. Bisel Company."
-                  }
-                ]
-              }
-            },
-            {
-              "710": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
+                    "5": "DE-101"
+                  },
                   {
-                    "a": "West Publishing Company."
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania legislative service."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Pennsylvania legislative service."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania consolidated statutes, annotated."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania statutes and consolidated statutes annotated."
-                  }
-                ]
-              }
-            },
-            {
-              "902": {
+              "850": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "pfnd"
-                  },
-                  {
-                    "b": "Law"
+                    "a": "DE-101a"
                   }
                 ]
               }
             },
             {
-              "905": {
-                "ind1": " ",
+              "925": {
+                "ind1": "r",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "19890413120000.0"
-                  }
-                ]
-              }
-            },
-            {
-              "948": {
-                "ind1": "1",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "20101019"
-                  },
-                  {
-                    "b": "s"
-                  },
-                  {
-                    "d": "lap11"
-                  },
-                  {
-                    "e": "lts"
-                  },
-                  {
-                    "x": "ToAddCatStat"
+                    "a": "ru"
                   }
                 ]
               }
@@ -941,31 +701,940 @@
                 "ind2": "f",
                 "subfields": [
                   {
-                    "s": "f4bb5a49-5011-4ea2-853e-b6922d489bca"
+                    "s": "5524a0c3-9b57-48ca-b07b-79dd02cdad08"
                   },
                   {
-                    "i": "5fc04e92-70dd-46b8-97ea-194015762a60"
+                    "i": "1631ed4a-47ed-4588-810b-b18c4d64ca8c"
                   }
                 ]
               }
             }
           ],
-          "leader": "01827cam a2200421 a 4500"
-        },
-        "formattedContent": "LEADER 01827cam a2200421 a 4500\n001 in00000000052\n005 20170816204126.0\n008 890411m19309999pau      l    001 0 eng  \n035 1579067\n010   $a   30014365 //r855\n035   $a(NIC)notisAHK7689\n035   $a(OCoLC)3289989\n035   $a1579067\n040   $dNIC$dNIC\n043   $an-us-pa\n050 0 $aKFP30 1930$b.A44\n110 1 $aPennsylvania.\n240 10$aLaws, etc. (Compiled statutes : 1930-   )\n245 10$aPurdon's Pennsylvania statutes, annotated :$bpermanent ed.\n260   $aPhiladelphia, Pa. :$bGeorge T. Bisel Co. ;$aSt. Paul, Minn. :$bWest Publishing Co.,$c1930-\n300   $av. ;$c25 cm.\n500   $aIncludes unnumbered tables and index volumes.\n500   $aKept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated.\n500   $aVols. for  published by West Group.\n650  0$aLaw$zPennsylvania.\n650  7$aLaw$2fast$0(OCoLC)fst00993678\n651  7$aPennsylvania$2fast$0(OCoLC)fst01204598\n700 1 $aPurdon, John,$d1784-1835.\n710 2 $aGeorge T. Bisel Company.\n710 2 $aWest Publishing Company.\n740 0 $aPurdon's Pennsylvania legislative service.\n740 0 $aPennsylvania legislative service.\n740 0 $aPurdon's Pennsylvania consolidated statutes, annotated.\n740 0 $aPurdon's Pennsylvania statutes and consolidated statutes annotated.\n902   $apfnd$bLaw\n905   $a19890413120000.0\n948 1 $a20101019$bs$dlap11$elts$xToAddCatStat\n999 ff$sf4bb5a49-5011-4ea2-853e-b6922d489bca$i5fc04e92-70dd-46b8-97ea-194015762a60\n"
+          "leader": "02609nam a2200541 c 4500"
+        }
       },
       "deleted": false,
+      "order": 2167,
       "externalIdsHolder": {
-        "instanceId": "5fc04e92-70dd-46b8-97ea-194015762a60"
+        "instanceId": "1631ed4a-47ed-4588-810b-b18c4d64ca8c"
       },
       "additionalInfo": {
         "suppressDiscovery": false
       },
+      "state": "ACTUAL",
       "metadata": {
-        "createdDate": "2020-02-10T08:34:34.504+0000",
-        "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
-        "updatedDate": "2020-02-10T08:34:36.506+0000",
-        "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
+        "createdDate": "2020-04-15T08:10:02.449+0000",
+        "createdByUserId": "7e519491-6589-5f57-a97a-b6e385e284d9",
+        "updatedDate": "2020-04-15T08:10:08.674+0000",
+        "updatedByUserId": "7e519491-6589-5f57-a97a-b6e385e284d9"
+      }
+    },
+    {
+      "id": "06f4e809-3248-44fe-a64a-7354eb36d141",
+      "snapshotId": "12cacb7a-85fb-4e45-9e61-54f70c888f75",
+      "matchedId": "06f4e809-3248-44fe-a64a-7354eb36d141",
+      "generation": 0,
+      "recordType": "MARC",
+      "rawRecord": {
+        "id": "f6bc9dc5-f3ce-4ed3-8ce3-02064eb595ad",
+        "content": "content"
+      },
+      "parsedRecord": {
+        "id": "88bcb743-1866-411e-b256-0b444413ed75",
+        "content": {
+          "fields": [
+            {
+              "001": "in00000000019"
+            },
+            {
+              "005": "20170726114813.0"
+            },
+            {
+              "008": "160906t20162016un a     bd   000 0cukr c"
+            },
+            {
+              "020": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "9789662783858"
+                  },
+                  {
+                    "q": "(paperback)"
+                  }
+                ]
+              }
+            },
+            {
+              "020": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "9662783857"
+                  },
+                  {
+                    "q": "(paperback)"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(OCoLC)987797440"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "(RuMoEVIS)5135521B"
+                  }
+                ]
+              }
+            },
+            {
+              "035": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "9766936"
+                  }
+                ]
+              }
+            },
+            {
+              "040": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "STF"
+                  },
+                  {
+                    "b": "eng"
+                  },
+                  {
+                    "e": "rda"
+                  },
+                  {
+                    "c": "STF"
+                  },
+                  {
+                    "d": "OCLCO"
+                  },
+                  {
+                    "d": "OCLCF"
+                  },
+                  {
+                    "d": "NIC"
+                  }
+                ]
+              }
+            },
+            {
+              "041": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "ukr"
+                  },
+                  {
+                    "b": "eng"
+                  }
+                ]
+              }
+            },
+            {
+              "042": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "pcc"
+                  }
+                ]
+              }
+            },
+            {
+              "043": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "e-un---"
+                  }
+                ]
+              }
+            },
+            {
+              "050": {
+                "ind1": " ",
+                "ind2": "4",
+                "subfields": [
+                  {
+                    "a": "DK508.465"
+                  },
+                  {
+                    "b": ".K725 2016"
+                  }
+                ]
+              }
+            },
+            {
+              "066": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "c": "(Q"
+                  },
+                  {
+                    "c": "(N"
+                  }
+                ]
+              }
+            },
+            {
+              "245": {
+                "ind1": "0",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "6": "880-01"
+                  },
+                  {
+                    "a": "Krai͡eznavt͡si Cherkavshchyny :"
+                  },
+                  {
+                    "b": "biobibliohrafichnyĭ dovidnyk /"
+                  },
+                  {
+                    "c": "upori͡adnyky: V.M. Melʹnychenko, H.M. Holysh."
+                  }
+                ]
+              }
+            },
+            {
+              "264": {
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "6": "880-02"
+                  },
+                  {
+                    "a": "Cherkasy :"
+                  },
+                  {
+                    "b": "Vertykalʹ,"
+                  },
+                  {
+                    "c": "2016."
+                  }
+                ]
+              }
+            },
+            {
+              "264": {
+                "ind1": " ",
+                "ind2": "4",
+                "subfields": [
+                  {
+                    "c": "©2016"
+                  }
+                ]
+              }
+            },
+            {
+              "300": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "219 pages :"
+                  },
+                  {
+                    "b": "illustrations ;"
+                  },
+                  {
+                    "c": "20 cm"
+                  }
+                ]
+              }
+            },
+            {
+              "336": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "text"
+                  },
+                  {
+                    "b": "txt"
+                  },
+                  {
+                    "2": "rdacontent"
+                  }
+                ]
+              }
+            },
+            {
+              "337": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "unmediated"
+                  },
+                  {
+                    "b": "n"
+                  },
+                  {
+                    "2": "rdamedia"
+                  }
+                ]
+              }
+            },
+            {
+              "338": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "volume"
+                  },
+                  {
+                    "b": "nc"
+                  },
+                  {
+                    "2": "rdacarrier"
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-03"
+                  },
+                  {
+                    "a": "At head of title: Cherkasʹka oblasna orhanizat͡sii͡a Nat͡sionalʹnoï spilky krai͡eznavt͡siv Ukraïny, Cherkasʹkyĭ nat͡sionalʹnyĭ universytet imeni Bohdana Khmelʹnyt͡sʹkoho."
+                  }
+                ]
+              }
+            },
+            {
+              "500": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-04"
+                  },
+                  {
+                    "a": "\"25-richchi͡u Nezalez͡hnosti Ukraïny prysvi͡achui͡etʹsi͡a.\""
+                  }
+                ]
+              }
+            },
+            {
+              "546": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "In Ukrainian with summary in English."
+                  }
+                ]
+              }
+            },
+            {
+              "504": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Includes bibliographical references."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Historians"
+                  },
+                  {
+                    "z": "Ukraine"
+                  },
+                  {
+                    "z": "Cherkasʹka oblastʹ"
+                  },
+                  {
+                    "v": "Bio-bibliography"
+                  },
+                  {
+                    "v": "Dictionaries"
+                  },
+                  {
+                    "x": "Ukrainian."
+                  }
+                ]
+              }
+            },
+            {
+              "651": {
+                "ind1": " ",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "a": "Cherkasʹka oblastʹ (Ukraine)"
+                  },
+                  {
+                    "v": "Bio-bibliography"
+                  },
+                  {
+                    "v": "Dictionaries"
+                  },
+                  {
+                    "x": "Ukrainian."
+                  }
+                ]
+              }
+            },
+            {
+              "650": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Historians."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst00957686"
+                  }
+                ]
+              }
+            },
+            {
+              "651": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Ukraine"
+                  },
+                  {
+                    "z": "Cherkasʹka oblastʹ."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01229006"
+                  }
+                ]
+              }
+            },
+            {
+              "653": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Bibliography."
+                  }
+                ]
+              }
+            },
+            {
+              "653": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Dictionaries and other reference general works."
+                  }
+                ]
+              }
+            },
+            {
+              "653": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "History (General)"
+                  }
+                ]
+              }
+            },
+            {
+              "653": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "Ukraine."
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Biographies."
+                  },
+                  {
+                    "2": "lcgft"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Bibliographies."
+                  },
+                  {
+                    "2": "lcgft"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Dictionaries."
+                  },
+                  {
+                    "2": "lcgft"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Bibliographies."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01919895"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Biographies."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01919896"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "a": "Dictionaries."
+                  },
+                  {
+                    "2": "fast"
+                  },
+                  {
+                    "0": "(OCoLC)fst01423826"
+                  }
+                ]
+              }
+            },
+            {
+              "700": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-05"
+                  },
+                  {
+                    "a": "Melʹnychenko, V. M."
+                  },
+                  {
+                    "q": "(Vasylʹ Mykolaĭovych),"
+                  },
+                  {
+                    "e": "editor."
+                  }
+                ]
+              }
+            },
+            {
+              "700": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-06"
+                  },
+                  {
+                    "a": "Holysh, H. M."
+                  },
+                  {
+                    "q": "(Hryhoriĭ Mykhaĭlovych),"
+                  },
+                  {
+                    "d": "1949-"
+                  },
+                  {
+                    "e": "editor."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-07"
+                  },
+                  {
+                    "a": "Nat︠s︡ionalʹna spilka krai︠e︡znavt︠s︡iv Ukraïny."
+                  },
+                  {
+                    "b": "Cherkasʹka oblasna orhanizat︠s︡ii︠a︡,"
+                  },
+                  {
+                    "e": "issuing body."
+                  }
+                ]
+              }
+            },
+            {
+              "710": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "880-08"
+                  },
+                  {
+                    "a": "Cherkasʹkyĭ nat︠s︡ionalʹnyĭ universytet imeni Bohdana Khmelʹnyt︠s︡ʹkoho,"
+                  },
+                  {
+                    "e": "issuing body."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": "0",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "6": "245-01"
+                  },
+                  {
+                    "a": "Краєзнавці Черкавщини :"
+                  },
+                  {
+                    "b": "біобібліографічний довідник /"
+                  },
+                  {
+                    "c": "упорядники: В.М. Мельниченко, Г.М. Голиш."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "6": "264-02"
+                  },
+                  {
+                    "a": "Черкаси :"
+                  },
+                  {
+                    "b": "Вертикаль,"
+                  },
+                  {
+                    "c": "2016."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "500-03"
+                  },
+                  {
+                    "a": "At head of title: Черкаська обласна організація Національної спілки краєзнавців України, Черкаський національний університет імені Богдана Хмельницького."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "500-04"
+                  },
+                  {
+                    "a": "\"25-річчю Незалежності України присвячується.\""
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "700-05"
+                  },
+                  {
+                    "a": "Мельниченко, В. М."
+                  },
+                  {
+                    "q": "(Василь Миколайович),"
+                  },
+                  {
+                    "e": "editor."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "700-06"
+                  },
+                  {
+                    "a": "Голиш, Г. М."
+                  },
+                  {
+                    "q": "(Григорій Михайлович),"
+                  },
+                  {
+                    "d": "1949-"
+                  },
+                  {
+                    "e": "editor."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "710-07"
+                  },
+                  {
+                    "a": "Національна спілка краєзнавців України."
+                  },
+                  {
+                    "b": "Черкаська обласна організація,"
+                  },
+                  {
+                    "e": "issuing body."
+                  }
+                ]
+              }
+            },
+            {
+              "880": {
+                "ind1": "2",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "6": "710-08"
+                  },
+                  {
+                    "a": "Черкаський національний університет імені Богдана Хмельницького,"
+                  },
+                  {
+                    "e": "issuing body."
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20170126"
+                  },
+                  {
+                    "b": "i"
+                  },
+                  {
+                    "d": "batch"
+                  },
+                  {
+                    "e": "lts"
+                  },
+                  {
+                    "h": "appr"
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "3",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20170126"
+                  },
+                  {
+                    "h": "EastView"
+                  },
+                  {
+                    "i": "EV20170126-135.mrc.uc"
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "0",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20170419"
+                  },
+                  {
+                    "b": "m"
+                  },
+                  {
+                    "d": "nk31"
+                  },
+                  {
+                    "e": "lts"
+                  }
+                ]
+              }
+            },
+            {
+              "948": {
+                "ind1": "1",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "20170726"
+                  },
+                  {
+                    "b": "c"
+                  },
+                  {
+                    "d": "gln1"
+                  },
+                  {
+                    "e": "lts"
+                  }
+                ]
+              }
+            },
+            {
+              "999": {
+                "ind1": "f",
+                "ind2": "f",
+                "subfields": [
+                  {
+                    "s": "06f4e809-3248-44fe-a64a-7354eb36d141"
+                  },
+                  {
+                    "i": "e241517c-37f3-40f3-bf63-38dca578ea15"
+                  }
+                ]
+              }
+            }
+          ],
+          "leader": "03479cam a2200697 i 4500"
+        }
+      },
+      "deleted": false,
+      "order": 50,
+      "externalIdsHolder": {
+        "instanceId": "e241517c-37f3-40f3-bf63-38dca578ea15"
+      },
+      "additionalInfo": {
+        "suppressDiscovery": false
+      },
+      "state": "ACTUAL",
+      "metadata": {
+        "createdDate": "2020-04-28T09:58:32.569+0000",
+        "createdByUserId": "4e838c3a-4210-5cdd-886a-f4175946cc6a",
+        "updatedDate": "2020-04-28T09:58:33.642+0000",
+        "updatedByUserId": "4e838c3a-4210-5cdd-886a-f4175946cc6a"
       }
     }
   ]
