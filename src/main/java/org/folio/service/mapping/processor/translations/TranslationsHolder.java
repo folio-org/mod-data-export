@@ -1,6 +1,7 @@
 package org.folio.service.mapping.processor.translations;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.service.mapping.settings.Settings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ public enum TranslationsHolder implements TranslationFunction {
         return entry.getString("name");
       } else {
         LOGGER.info("Nature of content term is not found by the given id: {}", id);
-        return null;
+        return StringUtils.EMPTY;
       }
     }
   };

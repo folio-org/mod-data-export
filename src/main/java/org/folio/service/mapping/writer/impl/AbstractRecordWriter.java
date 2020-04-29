@@ -1,5 +1,6 @@
 package org.folio.service.mapping.writer.impl;
 
+import com.google.common.base.Strings;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.reader.values.CompositeValue;
 import org.folio.service.mapping.reader.values.ListValue;
@@ -86,7 +87,7 @@ public abstract class AbstractRecordWriter implements RecordWriter {
       if (isSubFieldSource(dataSource)) {
         char subFieldCode = dataSource.getSubfield().charAt(0);
         String subFieldData = stringValue.getValue();
-        if (subFieldData != null) {
+        if (!Strings.isNullOrEmpty(subFieldData)) {
           field.addSubField(subFieldCode, subFieldData);
         }
       } else if (isIndicatorSource(dataSource)) {

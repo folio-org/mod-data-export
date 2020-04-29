@@ -1,6 +1,7 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
@@ -44,7 +45,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetNatureOfContentTerm_shouldReturnNull() {
+  public void SetNatureOfContentTerm_shouldReturnEmptyString() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "non-existing-id";
@@ -57,6 +58,6 @@ public class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(value, null, settings);
     // then
-    Assert.assertNull(result);
+    Assert.assertEquals(StringUtils.EMPTY, result);
   }
 }
