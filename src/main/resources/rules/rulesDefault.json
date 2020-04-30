@@ -37,6 +37,62 @@
     ]
   },
   {
+    "tag": "300",
+    "description": "Physical Descriptions",
+    "dataSources": [
+      {
+        "from": "$.physicalDescriptions",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "tag": "490",
+    "description": "Series",
+    "dataSources": [
+      {
+        "from": "$.series",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "tag": "655",
     "description": "Nature of content terms",
     "dataSources": [
