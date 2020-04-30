@@ -13,6 +13,10 @@
     {
       "id": "instance-storage",
       "version": "7.4"
+    },
+    {
+      "id": "nature-of-content-terms",
+      "version": "1.0"
     }
   ],
   "provides": [

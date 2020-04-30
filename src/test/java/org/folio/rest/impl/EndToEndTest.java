@@ -104,7 +104,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   @Before
   public void before() {
     when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
-    when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyList());
+    when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());
   }
 
   @After

@@ -1,8 +1,10 @@
 package org.folio.service.mapping;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.folio.service.mapping.settings.Settings;
+import org.folio.TestUtil;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,9 +14,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.folio.TestUtil.getResourceAsString;
@@ -30,16 +33,20 @@ public class MappingServiceUnitTest {
   @Before
   public void mockSettings() {
     Settings settings = new Settings();
-    JsonObject natureOfContentTerm_audioBook = new JsonObject()
-      .put("id", "96879b60-098b-453b-bf9a-c47866f1ab2a")
-      .put("name", "audiobook")
-      .put("source", "folio");
-    JsonObject natureOfContentTerm_autobiography = new JsonObject()
-      .put("id", "04a6a8d2-f902-4774-b15f-d8bd885dc804")
-      .put("name", "autobiography")
-      .put("source", "folio");
-    settings.addNatureOfContentTerms(Arrays.asList(natureOfContentTerm_audioBook, natureOfContentTerm_autobiography));
+    settings.addNatureOfContentTerms(getNatureOfContentTerms());
     Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
+  }
+
+  private Map<String, JsonObject> getNatureOfContentTerms() {
+    JsonArray natureOfContentTermArray =
+      new JsonObject(TestUtil.getResourceAsString("clients/inventory/get_nature_of_content_terms_response.json"))
+        .getJsonArray("natureOfContentTerms");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : natureOfContentTermArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
   }
 
   @Test

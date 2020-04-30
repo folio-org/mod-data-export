@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 
 public enum TranslationsHolder implements TranslationFunction {
 
@@ -20,15 +19,12 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_NATURE_OF_CONTENT_TERM() {
     @Override
     public String apply(String id, JsonObject parameters, Settings settings) {
-      Optional<JsonObject> optionalEntry = settings.getNatureOfContentTerms().stream()
-        .filter(entry -> id.equals(entry.getString(ID)))
-        .findFirst();
-      if (optionalEntry.isPresent()) {
-        JsonObject entry = optionalEntry.get();
-        return entry.getString("name");
-      } else {
-        LOGGER.info("Nature of content term is not found by the given id: {}", id);
+      JsonObject entry = settings.getNatureOfContentTerms().get(id);
+      if (entry == null) {
+        LOGGER.error("Nature of content term is not found by the given id: {}", id);
         return StringUtils.EMPTY;
+      } else {
+        return entry.getString("name");
       }
     }
   };
@@ -37,7 +33,6 @@ public enum TranslationsHolder implements TranslationFunction {
     return valueOf(function.toUpperCase());
   }
 
-  private static final String ID = "id";
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
 

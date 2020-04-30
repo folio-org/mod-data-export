@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -28,7 +29,7 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String LIMIT_PATTERN = "&limit=";
 
-  private static final int SETTING_LIMIT = 100;
+  private static final int SETTING_LIMIT = 200;
   private static final String NATURE_OF_CONTENT_TERMS_URL = "%s/nature-of-content-terms?limit=" + SETTING_LIMIT;
   private static final String NATURE_OF_CONTENT_TERMS_FIELD = "natureOfContentTerms";
 
@@ -36,28 +37,29 @@ public class InventoryClient {
     return ClientUtil.getByIds(ids, params, GET_INSTANCES_URL + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
   }
 
-  public List<JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
     return getSettingsByUrl(NATURE_OF_CONTENT_TERMS_URL, params, NATURE_OF_CONTENT_TERMS_FIELD);
   }
 
-  private List<JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {
-    List<JsonObject> result = new ArrayList<>();
+  private Map<String, JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {
+    Map<String, JsonObject> map = new HashMap<>();
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(format(url, params.getOkapiUrl())));
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       HttpEntity httpEntity = response.getEntity();
-      JsonObject jsonEntity = new JsonObject(EntityUtils.toString(httpEntity));
-      if (jsonEntity.containsKey(field)) {
-        JsonArray array = jsonEntity.getJsonArray(field);
-        for (Object element : array) {
-          result.add(JsonObject.mapFrom(element));
+      JsonObject responseBody = new JsonObject(EntityUtils.toString(httpEntity));
+      if (responseBody.containsKey(field)) {
+        JsonArray array = responseBody.getJsonArray(field);
+        for (Object item : array) {
+          JsonObject jsonItem = JsonObject.mapFrom(item);
+          map.put(jsonItem.getString("id"), jsonItem);
         }
       }
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
     }
-    return result;
+    return map;
   }
 
 }

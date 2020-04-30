@@ -1,12 +1,9 @@
 package org.folio.service.mapping.settings;
 
-import io.vertx.core.json.JsonObject;
 import org.folio.clients.InventoryClient;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * The component is responsible to provide settings and parameters needed for mapping.
@@ -36,9 +33,8 @@ public class MappingSettingsProvider {
   }
 
   private Settings loadSettings(OkapiConnectionParams okapiConnectionParams) {
-    List<JsonObject> natureOfContentTerms = inventoryClient.getNatureOfContentTerms(okapiConnectionParams);
     Settings settings = new Settings();
-    settings.addNatureOfContentTerms(natureOfContentTerms);
+    settings.addNatureOfContentTerms(inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
     return settings;
   }
 }

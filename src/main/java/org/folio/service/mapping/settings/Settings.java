@@ -1,18 +1,18 @@
 package org.folio.service.mapping.settings;
 
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.list.UnmodifiableList;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Settings {
-  private UnmodifiableList<JsonObject> natureOfContentTerms;
+  private Map<String, JsonObject> natureOfContentTerms = new HashMap<>();
 
-  public void addNatureOfContentTerms(List<JsonObject> natureOfContentTerms) {
-    this.natureOfContentTerms = new UnmodifiableList<>(natureOfContentTerms);
+  public void addNatureOfContentTerms(Map<String, JsonObject> natureOfContentTerms) {
+    this.natureOfContentTerms.putAll(natureOfContentTerms);
   }
 
-  public UnmodifiableList<JsonObject> getNatureOfContentTerms() {
+  public Map<String, JsonObject> getNatureOfContentTerms() {
     return natureOfContentTerms;
   }
 }

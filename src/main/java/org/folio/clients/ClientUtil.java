@@ -15,12 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MediaType;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +57,7 @@ public final class ClientUtil {
   private static URI prepareFullUri(List<String> ids, OkapiConnectionParams params, String recordPattern, String queryPattern) {
     String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
-      String uri = String.format(recordPattern, params.getOkapiUrl(), URLEncoder.encode(query, "UTF-8"));
+      String uri = String.format(recordPattern, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
@@ -70,7 +70,7 @@ public final class ClientUtil {
       try {
         return new JsonObject(EntityUtils.toString(entity));
       } catch (IOException e) {
-        LOGGER.error("Exception while requesting instances", e);
+        LOGGER.error("Exception while building response entity", e);
       }
     }
     return null;

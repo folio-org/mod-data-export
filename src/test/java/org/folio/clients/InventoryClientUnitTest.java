@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.TestUtil.getResourceAsString;
@@ -62,7 +63,7 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     // when
-    List<JsonObject> natureOfContentTerms = inventoryClient.getNatureOfContentTerms(okapiConnectionParams);
+    Map<String, JsonObject> natureOfContentTerms = inventoryClient.getNatureOfContentTerms(okapiConnectionParams);
     // then
     Assert.assertFalse(natureOfContentTerms.isEmpty());
     Assert.assertEquals(2, natureOfContentTerms.size());

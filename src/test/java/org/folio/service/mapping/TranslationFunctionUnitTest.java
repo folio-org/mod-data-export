@@ -2,18 +2,35 @@ package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.service.mapping.settings.Settings;
+import org.folio.TestUtil;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
+import org.folio.service.mapping.settings.Settings;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
+import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslationFunctionUnitTest {
+  private Settings settings = new Settings();
+
+  @Before
+  public void setUp() {
+    this.settings.addNatureOfContentTerms(getNatureOfContentTerms());
+  }
+
+  private Map<String, JsonObject> getNatureOfContentTerms() {
+    JsonObject natureOfContentTerm =
+      new JsonObject(TestUtil.getResourceAsString("clients/inventory/get_nature_of_content_terms_response.json"))
+        .getJsonArray("natureOfContentTerms")
+        .getJsonObject(0);
+    return Collections.singletonMap(natureOfContentTerm.getString("id"), natureOfContentTerm);
+  }
 
   @Test
   public void SetValue_shouldSetGivenValue() {
@@ -31,17 +48,11 @@ public class TranslationFunctionUnitTest {
   public void SetNatureOfContentTerm_shouldReturnTermName() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
-    String value = "96879b60-098b-453b-bf9a-c47866f1ab2a";
-    Settings settings = new Settings();
-    JsonObject natureOfContentTerm_audioBook = new JsonObject()
-      .put("id", "96879b60-098b-453b-bf9a-c47866f1ab2a")
-      .put("name", "audiobook")
-      .put("source", "folio");
-    settings.addNatureOfContentTerms(Collections.singletonList(natureOfContentTerm_audioBook));
+    String value = "44cd89f3-2e76-469f-a955-cc57cb9e0395";
     // when
     String result = translationFunction.apply(value, null, settings);
     // then
-    Assert.assertEquals("audiobook", result);
+    Assert.assertEquals("textbook", result);
   }
 
   @Test
@@ -49,12 +60,6 @@ public class TranslationFunctionUnitTest {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "non-existing-id";
-    Settings settings = new Settings();
-    JsonObject natureOfContentTerm_audioBook = new JsonObject()
-      .put("id", "96879b60-098b-453b-bf9a-c47866f1ab2a")
-      .put("name", "audiobook")
-      .put("source", "folio");
-    settings.addNatureOfContentTerms(Collections.singletonList(natureOfContentTerm_audioBook));
     // when
     String result = translationFunction.apply(value, null, settings);
     // then
