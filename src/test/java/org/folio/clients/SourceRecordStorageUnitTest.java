@@ -1,5 +1,8 @@
 package org.folio.clients;
 
+import static org.folio.util.ExternalPathResolver.SRS;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
+
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
@@ -16,9 +19,9 @@ import java.util.Optional;
 
 import static org.folio.TestUtil.getResourceAsString;
 
+
 @RunWith(VertxUnitRunner.class)
 public class SourceRecordStorageUnitTest extends HttpServerTestBase {
-  protected static final String RECORDS_BY_ID_URL = "/source-storage/records";
   protected static final String SRS_RESPONSE_JSON = "clients/srs/get_records_response.json";
   private static final int LIMIT = 20;
 
@@ -31,7 +34,7 @@ public class SourceRecordStorageUnitTest extends HttpServerTestBase {
   private static void setUpMocks() {
     String json = getResourceAsString(SRS_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
-    router.route(RECORDS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
+    router.route(resourcesPath(SRS)).method(HttpMethod.GET).handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");
       response.end(data.toBuffer());
