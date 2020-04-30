@@ -15,7 +15,9 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
-import org.folio.clients.StorageClient;
+import org.folio.TestUtil;
+import org.folio.clients.InventoryClient;
+import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
@@ -168,7 +170,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFileInTwoBatches(context, fileExportDefinitionOptional.get()))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
         .onComplete(succeeded -> async.complete())
