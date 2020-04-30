@@ -17,7 +17,9 @@ import java.util.Optional;
 import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(VertxUnitRunner.class)
-public class InventoryStorageClientUnitTest extends HttpServerTestBase {
+public class SourceRecordStorageUnitTest extends HttpServerTestBase {
+  protected static final String RECORDS_BY_ID_URL = "/source-storage/records";
+  protected static final String SRS_RESPONSE_JSON = "clients/srs/get_records_response.json";
   private static final int LIMIT = 20;
 
   @BeforeClass
@@ -27,9 +29,9 @@ public class InventoryStorageClientUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() {
-    String instancesJson = getResourceAsString(INVENTORY_RESPONSE_JSON);
-    JsonObject data = new JsonObject(instancesJson);
-    router.route(INSTANCE_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
+    String json = getResourceAsString(SRS_RESPONSE_JSON);
+    JsonObject data = new JsonObject(json);
+    router.route(RECORDS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");
       response.end(data.toBuffer());
@@ -37,14 +39,14 @@ public class InventoryStorageClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnExistingInstances() {
+  public void shouldReturnExistingMarcRecords() {
     // given
-    StorageClient storageClient = new StorageClient();
-    List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
+    List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     // when
-    Optional<JsonObject> inventoryResponce = storageClient.getByIdsFromInventory(uuids, okapiConnectionParams, LIMIT);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, okapiConnectionParams, LIMIT);
     // then
-    Assert.assertTrue(inventoryResponce.isPresent());
-    Assert.assertEquals(2, inventoryResponce.get().getJsonArray("instances").getList().size());
+    Assert.assertTrue(srsResponse.isPresent());
+    Assert.assertEquals(2, srsResponse.get().getJsonArray("records").getList().size());
   }
 }
