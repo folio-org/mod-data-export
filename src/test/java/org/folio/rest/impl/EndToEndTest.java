@@ -72,6 +72,8 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final String FILE_WITH_TWO_BATCHES_OF_UUIDS = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WITH_ONE_BATCH_OF_UUIDS = "InventoryUUIDsOneBatch.csv";
+  private static final String EXPECTED_GENERATED_FILE_IN_1_BATCH = "endToEndTestFiles/ExpectedGeneratedFileIn1Batch.mrc";
+
   private static final String DASH = "-";
   private static final String MRC_EXTENSION = "mrc";
   private static final long TIMER_DELAY = 5000L;
@@ -291,7 +293,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFileInOneBatch(TestContext context, FileDefinition fileExportDefinition) {
     File actualGeneratedFile = new File(fileExportDefinition.getSourcePath());
     String actualGeneratedFileContent = readFileContent(context, actualGeneratedFile);
-    String expectedGeneratedFileContent = TestUtil.getResourceAsString("endToEndTestFiles/ExpectedGeneratedFileIn1Batch.mrc");
+    String expectedGeneratedFileContent = TestUtil.getResourceAsString(EXPECTED_GENERATED_FILE_IN_1_BATCH);
     context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
     context.assertNotNull(actualGeneratedFile);
     context.assertEquals(FilenameUtils.getExtension(actualGeneratedFile.getName()), MRC_EXTENSION);
