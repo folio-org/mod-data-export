@@ -1,1 +1,1 @@
-00147nam a2200061 a 4500001000200000245004200002999004100044100aThe Journal of ecclesiastical historyffic8b50e3f-0446-429c-960e-03774b88223f
+00322nam a2200109 a 4500001000200000245004200002300003100044300003600075490003600111490002400147999004100171100aThe Journal of ecclesiastical history  axx, 238 p. : ill. ; 24 cm.  axxix, 224 Seiten Illustrationen0 aCooperative information systems0 aThe lateral historyffic8b50e3f-0446-429c-960e-03774b88223f
