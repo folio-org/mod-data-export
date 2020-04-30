@@ -15,6 +15,7 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
+import org.folio.TestUtil;
 import org.folio.clients.StorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
@@ -63,7 +64,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
   private static final String EXPORT_URL = "/data-export/export";
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
-  private static final String STORAGE_DIRECTORY_PATH = "./storage";
+  private static final String STORAGE_DIRECTORY_PATH = "./storage/files";
   private static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   private static final String UPLOAD_URL = "/upload";
   private static final String SRS_RESPONSE_FILE_NAME = "clients/srsResponse.json";
@@ -109,7 +110,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
+  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException {
     Async async = context.async();
 
     //given
@@ -127,7 +128,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException, InterruptedException {
+  public void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException {
     Async async = context.async();
 
     //given
@@ -141,7 +142,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFileInOneBatch(context, fileExportDefinitionOptional.get()))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2))
         .onComplete(succeeded -> async.complete())
@@ -149,7 +150,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
+  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException {
     Async async = context.async();
 
     //given
@@ -163,7 +164,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFileInTwoBatches(context, fileExportDefinitionOptional.get()))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
         .onComplete(succeeded -> async.complete())
@@ -171,7 +172,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
+  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException {
     Async async = context.async();
 
     //given
@@ -191,7 +192,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException, InterruptedException {
+  public void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException {
     Async async = context.async();
 
     //given
@@ -210,7 +211,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
+  public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException {
     Async async = context.async();
 
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
@@ -287,15 +288,22 @@ public class EndToEndTest extends RestVerticleTestBase {
     when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
   }
 
-  private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFile(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {
-    FileDefinition fileExportDefinition = fileExportDefinitionOptional.get();
-    File generatedExportFile = new File(fileExportDefinition.getSourcePath());
-    String generatedExportFileContent = readFileContent(context, generatedExportFile);
-    String generatedFileName = generatedExportFile.getName();
-
+  private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFileInOneBatch(TestContext context, FileDefinition fileExportDefinition) {
+    File actualGeneratedFile = new File(fileExportDefinition.getSourcePath());
+    String actualGeneratedFileContent = readFileContent(context, actualGeneratedFile);
+    String expectedGeneratedFileContent = TestUtil.getResourceAsString("endToEndTestFiles/ExpectedGeneratedFileIn1Batch.mrc");
     context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
-    context.assertNotNull(generatedExportFileContent);
-    context.assertEquals(FilenameUtils.getExtension(generatedFileName), MRC_EXTENSION);
+    context.assertNotNull(actualGeneratedFile);
+    context.assertEquals(FilenameUtils.getExtension(actualGeneratedFile.getName()), MRC_EXTENSION);
+    context.assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
+    return Future.succeededFuture(fileExportDefinition);
+  }
+
+  private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFileInTwoBatches(TestContext context, FileDefinition fileExportDefinition) {
+    File actualGeneratedFile = new File(fileExportDefinition.getSourcePath());
+    context.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
+    context.assertNotNull(actualGeneratedFile);
+    context.assertEquals(FilenameUtils.getExtension(actualGeneratedFile.getName()), MRC_EXTENSION);
     return Future.succeededFuture(fileExportDefinition);
   }
 
