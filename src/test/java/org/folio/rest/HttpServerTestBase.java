@@ -25,13 +25,6 @@ public abstract class HttpServerTestBase {
 
   protected static final String TENANT_ID = "diku";
   protected static final String TOKEN = "token";
-  protected static final String USERS_BY_ID_URL = "/users/:id";
-  protected static final String RECORDS_BY_ID_URL = "/source-storage/records";
-  protected static final String INSTANCE_BY_ID_URL = "/instance-storage/instances";
-  protected static final String INVENTORY_RESPONSE_JSON = "clients/inventoryStorageResponse.json";
-  protected static final String INVENTORY_EMPTY_RESPONSE_JSON = "clients/InventoryStorageEmptyResponse.json";
-  protected static final String USER_RESPONSE_JSON = "clients/userResponse.json";
-  protected static final String SRS_RESPONSE_JSON = "clients/srsResponse.json";
   protected static Vertx vertx;
   protected static Router router;
   protected static OkapiConnectionParams okapiConnectionParams;

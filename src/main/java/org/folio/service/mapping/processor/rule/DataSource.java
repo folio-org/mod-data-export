@@ -1,5 +1,7 @@
 package org.folio.service.mapping.processor.rule;
 
+import org.folio.service.mapping.processor.translations.Translation;
+
 public class DataSource {
   private String from;
   private String subfield;

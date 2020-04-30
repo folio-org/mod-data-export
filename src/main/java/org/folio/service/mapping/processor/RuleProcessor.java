@@ -1,8 +1,8 @@
 package org.folio.service.mapping.processor;
 
 import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.processor.rule.Translation;
-import org.folio.service.mapping.processor.translations.Settings;
+import org.folio.service.mapping.processor.translations.Translation;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;

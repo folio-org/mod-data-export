@@ -93,6 +93,37 @@
     ]
   },
   {
+    "tag": "655",
+    "description": "Nature of content terms",
+    "dataSources": [
+      {
+        "from": "$.natureOfContentTermIds",
+        "subfield": "a",
+        "translation": {
+          "function": "set_nature_of_content_term"
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "4"
+          }
+        }
+      }
+    ]
+  },
+  {
     "tag": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [

@@ -2,6 +2,7 @@ package org.folio.service.mapping.processor.translations;
 
 import io.vertx.core.json.JsonObject;
 import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.settings.Settings;
 
 /**
  * This interface provides a contract to call data translations.

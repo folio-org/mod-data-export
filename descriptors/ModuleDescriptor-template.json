@@ -13,6 +13,10 @@
     {
       "id": "instance-storage",
       "version": "7.4"
+    },
+    {
+      "id": "nature-of-content-terms",
+      "version": "1.0"
     }
   ],
   "provides": [
@@ -31,7 +35,8 @@
           "modulePermissions": [
             "users.item.get",
             "source-storage.records.get",
-            "inventory-storage.instances.collection.get"
+            "inventory-storage.instances.collection.get",
+            "inventory-storage.nature-of-content-terms.collection.get"
           ]
         },
         {

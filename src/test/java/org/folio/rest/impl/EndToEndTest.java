@@ -15,7 +15,6 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
-import org.folio.TestUtil;
 import org.folio.clients.StorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.config.ApplicationConfig;
@@ -44,14 +43,15 @@ import org.springframework.context.annotation.Primary;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -64,10 +64,10 @@ public class EndToEndTest extends RestVerticleTestBase {
 
   private static final String EXPORT_URL = "/data-export/export";
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
-  private static final String STORAGE_DIRECTORY_PATH = "./storage/files";
+  private static final String STORAGE_DIRECTORY_PATH = "./storage";
   private static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   private static final String UPLOAD_URL = "/upload";
-  private static final String SRS_RESPONSE_FILE_NAME = "clients/srsResponse.json";
+  private static final String SRS_RESPONSE_FILE_NAME = "clients/srs/get_records_response.json";
   private static final String FILE_WITH_NON_EXITING_UUID = "InventoryUUIDsNonExiting.csv";
   private static final String FILE_WITH_TWO_BATCHES_OF_UUIDS = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
@@ -87,7 +87,8 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
-  private static StorageClient mockStorageClient = Mockito.mock(StorageClient.class);
+  private static SourceRecordStorageClient mockSrsClient = Mockito.mock(SourceRecordStorageClient.class);
+  private static InventoryClient mockInventoryClient = Mockito.mock(InventoryClient.class);
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
 
   @Autowired
@@ -104,6 +105,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   @Before
   public void before() {
     when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
+    when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());
   }
 
   @After
@@ -112,7 +114,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException {
+  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -152,7 +154,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException {
+  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -166,7 +168,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     // then
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
-      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFileInTwoBatches(context, fileExportDefinitionOptional.get()))
+      .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
         .onComplete(succeeded -> async.complete())
@@ -174,7 +176,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException {
+  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -275,7 +277,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
-    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.empty());
+    when(mockSrsClient.getRecordsByIds(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.empty());
   }
 
   private ArgumentCaptor<FileDefinition> givenCaptureFileExportDefinition() {
@@ -287,7 +289,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
     String json = FileUtils.readFileToString(getFileFromResourceByName(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
-    when(mockStorageClient.getByIdsFromSRS(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
+    when(mockSrsClient.getRecordsByIds(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
   }
 
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFileInOneBatch(TestContext context, FileDefinition fileExportDefinition) {
@@ -368,8 +370,12 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     @Bean
     @Primary
-    public StorageClient getMockSourceRecordStorageClient() {
-      return mockStorageClient;
+    public InventoryClient getMockInventoryClient() { return mockInventoryClient; }
+
+    @Bean
+    @Primary
+    public SourceRecordStorageClient getMockSourceRecordStorageClient() {
+      return mockSrsClient;
     }
 
     @Bean
