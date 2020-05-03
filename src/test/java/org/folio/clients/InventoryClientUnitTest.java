@@ -24,7 +24,7 @@ import static org.folio.util.ExternalPathResolver.resourcesPath;
 public class InventoryClientUnitTest extends HttpServerTestBase {
   private static final String GET_INSTANCES_RESPONSE = "clients/inventory/get_instances_response.json";
   private static final int LIMIT = 20;
-  private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "clients/inventory/get_nature_of_content_terms_response.json";
+  private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "mockData/settings/get_nature_of_content_terms_response.json";
 
   @BeforeClass
   public static void beforeClass() throws Exception {

@@ -22,7 +22,7 @@ import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(VertxUnitRunner.class)
 public class SourceRecordStorageUnitTest extends HttpServerTestBase {
-  protected static final String SRS_RESPONSE_JSON = "clients/srs/get_records_response.json";
+  protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
   private static final int LIMIT = 20;
 
   @BeforeClass

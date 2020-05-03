@@ -18,7 +18,7 @@ import static org.folio.TestUtil.getResourceAsString;
 @RunWith(VertxUnitRunner.class)
 public class UsersClientUnitTest extends HttpServerTestBase {
   protected static final String USERS_BY_ID_URL = "/users/:id";
-  protected static final String USER_RESPONSE_JSON = "clients/user/get_user_response.json";
+  protected static final String USER_RESPONSE_JSON = "mockData/user/get_user_response.json";
 
   @BeforeClass
   public static void beforeClass() throws Exception {

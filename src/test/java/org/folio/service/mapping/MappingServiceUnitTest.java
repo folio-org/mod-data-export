@@ -39,7 +39,7 @@ public class MappingServiceUnitTest {
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
     JsonArray natureOfContentTermArray =
-      new JsonObject(TestUtil.getResourceAsString("clients/inventory/get_nature_of_content_terms_response.json"))
+      new JsonObject(TestUtil.getResourceAsString("mockData/settings/get_nature_of_content_terms_response.json"))
         .getJsonArray("natureOfContentTerms");
     Map<String, JsonObject> map = new HashMap<>();
     for (Object object : natureOfContentTermArray) {

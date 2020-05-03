@@ -36,7 +36,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String INVENTORY_EMPTY_RESPONSE_JSON = "clients/inventory/get_instances_empty_response.json";
-  protected static final String SRS_RESPONSE_JSON = "clients/srs/get_records_response.json";
+  protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
 
   @Mock
   SourceRecordStorageClient srsClient;
