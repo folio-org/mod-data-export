@@ -115,7 +115,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
-      .setBaseUri(OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
       .build();
 
     FileDefinition givenFileDefinition = new FileDefinition()

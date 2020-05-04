@@ -1,8 +1,6 @@
 package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
@@ -29,8 +27,8 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -46,11 +44,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
 import static org.hamcrest.Matchers.containsString;
@@ -59,16 +55,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-
+@Ignore
 @RunWith(VertxUnitRunner.class)
 public class EndToEndTest extends RestVerticleTestBase {
 
-  private static final String EXPORT_URL = "/data-export/export";
-  private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
-  private static final String STORAGE_DIRECTORY_PATH = "./storage";
-  private static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
-  private static final String UPLOAD_URL = "/upload";
-  private static final String SRS_RESPONSE_FILE_NAME = "clients/srs/get_records_response.json";
+  private static final String SRS_RESPONSE_FILE_NAME = "mockData/srs/get_records_response.json";
   private static final String FILE_WITH_NON_EXITING_UUID = "InventoryUUIDsNonExiting.csv";
   private static final String FILE_WITH_TWO_BATCHES_OF_UUIDS = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
@@ -97,20 +88,17 @@ public class EndToEndTest extends RestVerticleTestBase {
 
   public EndToEndTest() {
     Context vertxContext = vertx.getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, EndToEndTest.TestConfig.class);
-    SpringContextUtil.autowireDependencies(this, vertxContext);
+//    SpringContextUtil.init(vertxContext.owner(), vertxContext, EndToEndTest.TestConfig.class);
+//    SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
+  @Ignore
   @Before
   public void before() {
     when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());
   }
 
-  @After
-  public void tearDown() throws Exception {
-    FileUtils.deleteDirectory(new File(STORAGE_DIRECTORY_PATH));
-  }
 
   @Test
   public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
@@ -267,14 +255,6 @@ public class EndToEndTest extends RestVerticleTestBase {
 
 
 
-  private RequestSpecification buildRequestSpecification() {
-    return new RequestSpecBuilder()
-      .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
-      .setBaseUri(OKAPI_URL)
-      .build();
-  }
-
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
     when(mockSrsClient.getRecordsByIds(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.empty());
   }
@@ -330,10 +310,6 @@ public class EndToEndTest extends RestVerticleTestBase {
       .withJobProfileId(UUID.randomUUID().toString());
   }
 
-  private File getFileFromResourceByName(String fileName) {
-    ClassLoader classLoader = getClass().getClassLoader();
-    return new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
-  }
 
   private String readFileContent(TestContext context, File generatedExportFile) {
     String generatedExportFileContent = null;
@@ -350,30 +326,30 @@ public class EndToEndTest extends RestVerticleTestBase {
     return FilenameUtils.getBaseName(generatedFileName).split(DASH)[1].equals(jobExecutionHrId);
   }
 
-  @Configuration
-  @Import(ApplicationConfig.class)
-  public static class TestConfig {
-
-    @Bean
-    @Primary
-    public UsersClient getMockUsersClient() {
-      return mockUsersClient;
-    }
-
-    @Bean
-    @Primary
-    public InventoryClient getMockInventoryClient() { return mockInventoryClient; }
-
-    @Bean
-    @Primary
-    public SourceRecordStorageClient getMockSourceRecordStorageClient() {
-      return mockSrsClient;
-    }
-
-    @Bean
-    @Primary
-    public ExportStorageService getMockExportStorageService() {
-      return mockExportStorageService;
-    }
-  }
+//  @Configuration
+//  @Import(ApplicationConfig.class)
+//  public static class TestConfig {
+//
+//    @Bean
+//    @Primary
+//    public UsersClient getMockUsersClient() {
+//      return mockUsersClient;
+//    }
+//
+//    @Bean
+//    @Primary
+//    public InventoryClient getMockInventoryClient() { return mockInventoryClient; }
+//
+//    @Bean
+//    @Primary
+//    public SourceRecordStorageClient getMockSourceRecordStorageClient() {
+//      return mockSrsClient;
+//    }
+//
+//    @Bean
+//    @Primary
+//    public ExportStorageService getMockExportStorageService() {
+//      return mockExportStorageService;
+//    }
+//  }
 }

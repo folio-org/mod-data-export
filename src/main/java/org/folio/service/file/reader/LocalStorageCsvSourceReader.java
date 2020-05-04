@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -42,7 +43,10 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public List<String> readNext() {
-    return iterator.next();
+    return iterator.next()
+      .stream()
+      .map(s -> s.replaceAll("\"", "").trim())
+      .collect(Collectors.toList());
   }
 
   @Override

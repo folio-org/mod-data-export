@@ -16,14 +16,15 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.TestUtil.getResourceAsString;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
 
 @RunWith(VertxUnitRunner.class)
 public class InventoryClientUnitTest extends HttpServerTestBase {
-  private static final String INSTANCE_BY_ID_URL = "/instance-storage/instances";
   private static final String GET_INSTANCES_RESPONSE = "clients/inventory/get_instances_response.json";
   private static final int LIMIT = 20;
-  private static final String NATURE_OF_CONTENT_TERMS_URL = "/nature-of-content-terms";
-  private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "clients/inventory/get_nature_of_content_terms_response.json";
+  private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "mockData/settings/get_nature_of_content_terms_response.json";
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -32,13 +33,13 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() {
-    router.route(INSTANCE_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
+    router.route(resourcesPath(INSTANCE)).method(HttpMethod.GET).handler(routingContext -> {
       String responseData = getResourceAsString(GET_INSTANCES_RESPONSE);
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");
       response.end(responseData);
     });
-    router.route(NATURE_OF_CONTENT_TERMS_URL).method(HttpMethod.GET).handler(routingContext -> {
+    router.route(resourcesPath(CONTENT_TERMS)).method(HttpMethod.GET).handler(routingContext -> {
       String responseData = getResourceAsString(GET_NATURE_OF_CONTENT_TERMS_RESPONSE);
       HttpServerResponse response = routingContext.response();
       response.putHeader("content-type", "application/json");

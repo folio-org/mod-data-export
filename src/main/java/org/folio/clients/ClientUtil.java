@@ -34,10 +34,22 @@ public final class ClientUtil {
   private ClientUtil() {
   }
 
-  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String pattern, String queryPattern) {
+  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
     HttpGet httpGet = new HttpGet();
     ClientUtil.setCommonHeaders(httpGet, params);
-    httpGet.setURI(prepareFullUri(ids, params, pattern, queryPattern));
+    httpGet.setURI(prepareFullUriWithQuery(ids, params, endpoint, queryPattern));
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
+      return Optional.ofNullable(getResponseEntity(response));
+    } catch (IOException e) {
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
+      return Optional.empty();
+    }
+  }
+
+  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) {
+    HttpGet httpGet = new HttpGet();
+    ClientUtil.setCommonHeaders(httpGet, params);
+    httpGet.setURI(prepareFullUri(params, endpoint));
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
@@ -54,14 +66,20 @@ public final class ClientUtil {
   }
 
   @NotNull
-  private static URI prepareFullUri(List<String> ids, OkapiConnectionParams params, String recordPattern, String queryPattern) {
+  private static URI prepareFullUriWithQuery(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
     String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
-      String uri = String.format(recordPattern, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
+      String uri = String.format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
     }
+  }
+
+  @NotNull
+  private static URI prepareFullUri(OkapiConnectionParams params, String endpoint) {
+      String uri = String.format(endpoint, params.getOkapiUrl());
+      return URI.create(uri);
   }
 
   private static JsonObject getResponseEntity(CloseableHttpResponse response) {
