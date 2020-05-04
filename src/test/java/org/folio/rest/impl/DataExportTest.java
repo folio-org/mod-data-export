@@ -59,7 +59,7 @@ public class DataExportTest  extends RestVerticleTestBase{
 
 
   @Test
-  public void shouldNotCallInventory_whenuploadFilehasOnlyUnderyingSRS(TestContext context) throws IOException, InterruptedException {
+  public void shouldNotCallInventory_whenUploadFileHasOnlyUnderlyingSRS(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -75,14 +75,15 @@ public class DataExportTest  extends RestVerticleTestBase{
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
         .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, 2))
-        .compose(optional -> validateExternalCalls(context, 1,0))
+        .compose(optional -> validateExternalCalls(context))
         .onComplete(succeeded -> async.complete())
       ));
   }
 
-  private Future<FileDefinition> validateExternalCalls(TestContext context, int countSrs, int countInstance) {
-    context.assertEquals(countSrs, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
-    context.assertEquals(countSrs, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+  private Future<FileDefinition> validateExternalCalls(TestContext context) {
+    context.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
+    context.assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
+    context.assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS));
     return Future.succeededFuture();
   }
 
