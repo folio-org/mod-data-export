@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.folio.TestUtil.getResourceAsString;
+import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MappingServiceUnitTest {
@@ -50,14 +50,20 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldNotThrowAnyException() {
-    List<JsonObject> givenInstances = Collections.emptyList();
+  public void shouldReturnEmptyRecords_for_EmptyInstances() {
+    // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
-    assertThatCode(() -> mappingService.map(givenInstances, jobExecutionId, params)).doesNotThrowAnyException();
+    List<JsonObject> givenInstances = Collections.emptyList();
+    // when
+    List<String> actualRecords = mappingService.map(givenInstances, jobExecutionId, params);
+    // then
+    Assert.assertNotNull(actualRecords);
+    Assert.assertEquals(actualRecords.size(), 0);
+    Mockito.verify(mappingSettingsProvider, Mockito.never()).getSettings(any(String.class), any(OkapiConnectionParams.class));
   }
 
   @Test
-  public void shouldMapInstanceToMarcRecord() {
+  public void shouldMapInstance_to_marcRecord() {
     // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     JsonObject instance = new JsonObject(getResourceAsString("mapping/given_inventory_instance.json"));

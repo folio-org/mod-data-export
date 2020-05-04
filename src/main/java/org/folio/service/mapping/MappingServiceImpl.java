@@ -3,6 +3,7 @@ package org.folio.service.mapping;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.settings.Settings;
@@ -23,6 +24,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -45,6 +47,9 @@ public class MappingServiceImpl implements MappingService {
 
   @Override
   public List<String> map(List<JsonObject> instances, String jobExecutionId, OkapiConnectionParams connectionParams) {
+    if (CollectionUtils.isEmpty(instances)) {
+      return Collections.emptyList();
+    }
     List<String> records = new ArrayList<>();
     Settings settings = settingsProvider.getSettings(jobExecutionId, connectionParams);
     for (JsonObject instance : instances) {
