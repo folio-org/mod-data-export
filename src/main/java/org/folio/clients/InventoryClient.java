@@ -32,6 +32,10 @@ public class InventoryClient {
   private static final int SETTING_LIMIT = 200;
   private static final String NATURE_OF_CONTENT_TERMS_URL = "%s/nature-of-content-terms?limit=" + SETTING_LIMIT;
   private static final String NATURE_OF_CONTENT_TERMS_FIELD = "natureOfContentTerms";
+  private static final String MATERIAL_TYPES_URL = "%s/material-types?limit=" + SETTING_LIMIT;
+  private static final String MATERIAL_TYPES_FIELD = "mtypes";
+  private static final String ELECTRONIC_ACCESS_RELATIONSHIPS_URL = "%s/electronic-access-relationships?limit=" + SETTING_LIMIT;
+  private static final String ELECTRONIC_ACCESS_RELATIONSHIPS_FIELD = "electronicAccessRelationships";
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
     return ClientUtil.getByIds(ids, params, GET_INSTANCES_URL + LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
@@ -39,6 +43,14 @@ public class InventoryClient {
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
     return getSettingsByUrl(NATURE_OF_CONTENT_TERMS_URL, params, NATURE_OF_CONTENT_TERMS_FIELD);
+  }
+
+  public Map<String, JsonObject> getMaterialType(OkapiConnectionParams params) {
+    return getSettingsByUrl(MATERIAL_TYPES_URL, params, MATERIAL_TYPES_FIELD);
+  }
+
+  public Map<String, JsonObject> getElectronicAccessRelationships(OkapiConnectionParams params) {
+    return getSettingsByUrl(ELECTRONIC_ACCESS_RELATIONSHIPS_URL, params, ELECTRONIC_ACCESS_RELATIONSHIPS_FIELD);
   }
 
   private Map<String, JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {

@@ -35,6 +35,8 @@ public class MappingSettingsProvider {
   private Settings loadSettings(OkapiConnectionParams okapiConnectionParams) {
     Settings settings = new Settings();
     settings.addNatureOfContentTerms(inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
+    settings.addMaterialTypes(inventoryClient.getMaterialType(okapiConnectionParams));
+    settings.addElectronicAccessRelationships(inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
     return settings;
   }
 }

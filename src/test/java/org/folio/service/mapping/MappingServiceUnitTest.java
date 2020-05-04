@@ -1,8 +1,12 @@
 package org.folio.service.mapping;
 
+import com.google.common.base.Splitter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
+import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.RuleProcessorFactory;
+import org.folio.service.mapping.profiles.RecordType;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
 import org.folio.service.mapping.settings.Settings;
 import org.folio.util.OkapiConnectionParams;
@@ -14,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,14 +32,17 @@ public class MappingServiceUnitTest {
 
   @Mock
   private MappingSettingsProvider mappingSettingsProvider;
+  private RuleProcessor ruleProcessor;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
+  private RuleProcessorFactory ruleProcessorFactory = new RuleProcessorFactory();
 
   @Before
-  public void mockSettings() {
+  public void mockSettings() throws IOException {
     Settings settings = new Settings();
     settings.addNatureOfContentTerms(getNatureOfContentTerms());
     Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
+    ruleProcessor = ruleProcessorFactory.createDefault();
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -52,14 +60,14 @@ public class MappingServiceUnitTest {
   @Test
   public void shouldNotThrowAnyException() {
     List<JsonObject> givenInstances = Collections.emptyList();
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
+    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider, ruleProcessor);
     assertThatCode(() -> mappingService.map(givenInstances, jobExecutionId, params)).doesNotThrowAnyException();
   }
 
   @Test
   public void shouldMapInstanceToMarcRecord() {
     // given
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
+    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider, ruleProcessor);
     JsonObject instance = new JsonObject(getResourceAsString("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     // when
@@ -69,6 +77,14 @@ public class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
     String expectedMarcRecord = getResourceAsString("mapping/expected_marc_record.mrc");
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
+  @Test
+  public void test() {
+    List<String> field = Splitter.on(".").omitEmptyStrings().splitToList("field.subfield");
+    System.out.println(field);
+
+    System.out.println(RecordType.ITEM.toString().toLowerCase());
   }
 }
 

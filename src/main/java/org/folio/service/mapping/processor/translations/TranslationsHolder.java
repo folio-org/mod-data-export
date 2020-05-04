@@ -27,6 +27,30 @@ public enum TranslationsHolder implements TranslationFunction {
         return entry.getString("name");
       }
     }
+  },
+  SET_MATERIAL_TYPE() {
+    @Override
+    public String apply(String id, JsonObject parameters, Settings settings) {
+      JsonObject entry = settings.getMaterialTypes().get(id);
+      if (entry == null) {
+        LOGGER.error("Material type not found by the given id: {}", id);
+        return StringUtils.EMPTY;
+      } else {
+        return entry.getString("name");
+      }
+    }
+  },
+  SET_ELECTRONIC_ACCESS_RELATIONSHIP() {
+    @Override
+    public String apply(String id, JsonObject parameters, Settings settings) {
+      JsonObject entry = settings.getElectronicAccessRelationships().get(id);
+      if (entry == null) {
+        LOGGER.error("Electronic access is not found by the given id: {}", id);
+        return StringUtils.EMPTY;
+      } else {
+        return entry.getString("name");
+      }
+    }
   };
 
   public static TranslationFunction lookup(String function) {

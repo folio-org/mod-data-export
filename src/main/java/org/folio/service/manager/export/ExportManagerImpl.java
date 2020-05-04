@@ -19,12 +19,17 @@ import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.MappingService;
+import org.folio.service.mapping.MappingServiceImpl;
+import org.folio.service.mapping.processor.RuleProcessor;
+import org.folio.service.mapping.processor.RuleProcessorFactory;
+import org.folio.service.mapping.settings.MappingSettingsProvider;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,11 +54,13 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private ExportService exportService;
   @Autowired
-  private MappingService mappingService;
+  private RuleProcessorFactory ruleProcessorFactory;
   @Autowired
   private JobExecutionService jobExecutionService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private MappingSettingsProvider settingsProvider;
 
   public ExportManagerImpl() {
   }
@@ -88,8 +95,12 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params);
-    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
+    try {
+      List<String> mappedMarcRecords = getMappingService().map(instances, exportPayload.getJobExecutionId(), params);
+      exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
+    } catch (IOException e) {
+      LOGGER.error("Exception occurred while initializing MappingService", e);
+    }
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
@@ -182,5 +193,10 @@ public class ExportManagerImpl implements ExportManager {
 
   private InputDataManager getInputDataManager() {
     return vertx.getOrCreateContext().get(InputDataManager.class.getName());
+  }
+
+  private MappingService getMappingService() throws IOException {
+    RuleProcessor defaultRuleProcessor = ruleProcessorFactory.createDefault();
+    return new MappingServiceImpl(settingsProvider, defaultRuleProcessor);
   }
 }
