@@ -58,7 +58,7 @@ public class MappingServiceUnitTest {
     List<String> actualRecords = mappingService.map(givenInstances, jobExecutionId, params);
     // then
     Assert.assertNotNull(actualRecords);
-    Assert.assertEquals(actualRecords.size(), 0);
+    Assert.assertEquals(0, actualRecords.size());
     Mockito.verify(mappingSettingsProvider, Mockito.never()).getSettings(any(String.class), any(OkapiConnectionParams.class));
   }
 
