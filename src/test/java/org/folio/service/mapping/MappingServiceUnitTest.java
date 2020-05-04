@@ -50,7 +50,7 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldReturnEmptyRecords_for_EmptyInstances() {
+  public void shouldReturnEmptyRecords_for_emptyInstances() {
     // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     List<JsonObject> givenInstances = Collections.emptyList();
