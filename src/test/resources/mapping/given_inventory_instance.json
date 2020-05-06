@@ -1,4 +1,11 @@
 {
+  "holdings": [{
+    "id": "c8b50e3f-0446-429c-960e-03774b88223f"
+  }],
+  "item": [{
+    "id": "c8b50e3f-0446-429c-960e-03774b88223f",
+    "materialTypeId": "ebbbdef1-00e1-428b-bc11-314dc0705074"
+  }],
   "instance": {
     "id":"c8b50e3f-0446-429c-960e-03774b88223f",
     "hrid":"1",

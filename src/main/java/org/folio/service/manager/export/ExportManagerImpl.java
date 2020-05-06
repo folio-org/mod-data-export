@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.drools.core.base.extractors.ArrayElementReader;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -110,18 +111,20 @@ public class ExportManagerImpl implements ExportManager {
   }
 
   private List<JsonObject> appendHoldingsAndItemRecords(List<JsonObject> instances, OkapiConnectionParams params) {
+    List<JsonObject> instancesWithHoldingsAndItems = new ArrayList<>();
     for (JsonObject instance : instances) {
       List<JsonObject> holdings = loadInventoryHoldingsByInstanceId(instance.getString("id"), params);
       List<JsonObject> items = new ArrayList<>();
-      JsonObject instanceWithHoldingAndItems = new JsonObject();
+      JsonObject instanceWithHoldingsAndItems = new JsonObject();
       for (JsonObject holding : holdings) {
         items.addAll(loadInventoryItemsByHoldingsId(holding.getString("id"), params));
       }
-      instanceWithHoldingAndItems.put("instance", instance);
-      instanceWithHoldingAndItems.put("holdings", new JsonArray(holdings));
-      instanceWithHoldingAndItems.put("item", new JsonArray(items));
+      instanceWithHoldingsAndItems.put("instance", instance);
+      instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
+      instanceWithHoldingsAndItems.put("item", new JsonArray(items));
+      instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
-    return instances;
+    return instancesWithHoldingsAndItems;
   }
 
   /**
