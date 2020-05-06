@@ -1,6 +1,6 @@
 package org.folio.service.mapping.profiles;
 
-public class MappingFieldName {
+public class MappingProfileTransformation {
   private String displayName;
   private String id;
   private String path;
