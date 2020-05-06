@@ -1,0 +1,42 @@
+{
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "description":"Mapping rule detail",
+  "type":"object",
+  "javaType":"org.folio.rest.jaxrs.model.MappingRule",
+  "additionalProperties":false,
+  "properties":{
+    "id":{
+      "description":"Unique identifier",
+      "$ref":"../../../ramls/raml-util/schemas/uuid.schema"
+    },
+    "name":{
+      "description":"Name of field",
+      "type":"string"
+    },
+    "description":{
+      "description":"Mapping Field description",
+      "type":"string"
+    },
+    "path":{
+      "description":"JSON path to set mapped value",
+      "type":"string"
+    },
+    "enabled":{
+      "description":"Indicates whether field should be mapped",
+      "type":"string"
+    },
+    "transformation":{
+      "description":"Mapping expression",
+      "type":"string"
+    },
+    "recordType":{
+      "description":"Mapping Profile type",
+      "type":"string",
+      "$ref":"recordTypes.json"
+    }
+  },
+  "required":[
+    "name",
+    "recordTypes"
+  ]
+}

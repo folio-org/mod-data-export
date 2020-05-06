@@ -8,6 +8,25 @@
       "customSnippetPath": "job_execution_sequence.sql"
     },
     {
+      "tableName": "mapping_profiles",
+      "fromModuleVersion": "mod-data-export-1.2.0",
+      "withMetadata": true,
+      "withAuditing": false
+    },
+    {
+      "tableName": "job_profiles",
+      "fromModuleVersion": "mod-data-export-1.2.0",
+      "withMetadata": true,
+      "withAuditing": false,
+      "foreignKeys": [
+        {
+          "fieldName": "mappingProfileId",
+          "targetTable": "mapping_profiles",
+          "tOps": "ADD"
+        }
+      ]
+    },
+    {
       "tableName" : "job_executions",
       "fromModuleVersion": "mod-data-export-1.1.0",
       "withAuditing": false,
@@ -23,6 +42,13 @@
       ],
       "uniqueIndex": [{
           "fieldName": "hrId"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "fieldName": "jobProfileId",
+          "targetTable": "job_profiles",
+          "tOps": "ADD"
         }
       ]
     }

@@ -1,0 +1,7 @@
+{
+   "name":"The name of the connection",
+   "host":"The host example",
+   "port":"The port example",
+   "description":"The description example",
+   "authentication":"The authentication object example"
+}

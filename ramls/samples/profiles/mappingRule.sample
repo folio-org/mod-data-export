@@ -1,0 +1,9 @@
+{
+   "id":"3798f546-7afb-11ea-bc55-0242ac130003",
+   "name":"Example mapping field",
+   "description":"Example mapping field description",
+   "path":"instanceName1.fieldName3",
+   "transformation":"001",
+   "enabled":"true",
+   "recordType":"INSTANCE"
+}
