@@ -164,9 +164,4 @@ public abstract class RestVerticleTestBase {
       .setBaseUri(BASE_OKAPI_URL)
       .build();
   }
-
-  protected File getFileFromResourceByName(String fileName) {
-    ClassLoader classLoader = getClass().getClassLoader();
-    return new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
-  }
 }
