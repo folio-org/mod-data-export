@@ -6,6 +6,7 @@ import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.RuleFactory;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.profiles.RecordType;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
 import org.folio.service.mapping.settings.Settings;
@@ -14,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -30,19 +32,25 @@ import static org.folio.TestUtil.getResourceAsString;
 @RunWith(MockitoJUnitRunner.class)
 public class MappingServiceUnitTest {
 
+  @InjectMocks
+  private MappingServiceImpl mappingService = new MappingServiceImpl();
+
   @Mock
   private MappingSettingsProvider mappingSettingsProvider;
   private RuleProcessor ruleProcessor;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private RuleFactory ruleProcessorFactory = new RuleFactory();
+  private List<Rule> rules;
 
   @Before
   public void mockSettings() throws IOException {
     Settings settings = new Settings();
     settings.addNatureOfContentTerms(getNatureOfContentTerms());
     Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
-    ruleProcessor = ruleProcessorFactory.createDefault();
+    ruleProcessor = new RuleProcessor();
+    mappingService.setRuleProcessor(ruleProcessor);
+    rules = ruleProcessorFactory.create(null);
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -60,18 +68,16 @@ public class MappingServiceUnitTest {
   @Test
   public void shouldNotThrowAnyException() {
     List<JsonObject> givenInstances = Collections.emptyList();
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider, ruleProcessor);
-    assertThatCode(() -> mappingService.map(givenInstances, jobExecutionId, params)).doesNotThrowAnyException();
+    assertThatCode(() -> mappingService.map(givenInstances, jobExecutionId, params, rules)).doesNotThrowAnyException();
   }
 
   @Test
   public void shouldMapInstanceToMarcRecord() {
     // given
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider, ruleProcessor);
     JsonObject instance = new JsonObject(getResourceAsString("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, jobExecutionId, params);
+    List<String> actualMarcRecords = mappingService.map(instances, jobExecutionId, params, rules);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);

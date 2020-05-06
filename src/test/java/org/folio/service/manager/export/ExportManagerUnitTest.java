@@ -58,7 +58,7 @@ public class ExportManagerUnitTest {
     Mockito.verify(recordLoaderService, Mockito.times(50)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(recordLoaderService, Mockito.times(3)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
-    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), anyString(), any(OkapiConnectionParams.class), anyList());
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
   }
 }

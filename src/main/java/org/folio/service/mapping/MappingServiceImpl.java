@@ -45,4 +45,12 @@ public class MappingServiceImpl implements MappingService {
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.process(entityReader, recordWriter, settings, rules);
   }
+
+  public RuleProcessor getRuleProcessor() {
+    return ruleProcessor;
+  }
+
+  public void setRuleProcessor(RuleProcessor ruleProcessor) {
+    this.ruleProcessor = ruleProcessor;
+  }
 }

@@ -37,11 +37,11 @@ public class RuleProcessorTest {
   @Test
   public void shouldMapEntityTo_MarcRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new MarcRecordWriter();
     // when
-    String actualMarcRecord = ruleProcessor.process(reader, writer, settings);
+    String actualMarcRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedMarcRecord = getResourceAsString("processor/mapped_marc_record.mrc");
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
@@ -50,11 +50,11 @@ public class RuleProcessorTest {
   @Test
   public void shouldMapEntityTo_JsonRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new JsonRecordWriter();
     // when
-    String actualJsonRecord = ruleProcessor.process(reader, writer, settings);
+    String actualJsonRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedJsonRecord = getResourceAsString("processor/mapped_json_record.json");
     Assert.assertEquals(expectedJsonRecord, actualJsonRecord);
@@ -63,11 +63,11 @@ public class RuleProcessorTest {
   @Test
   public void shouldMapEntityTo_XmlRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new XmlRecordWriter();
     // when
-    String actualXmlRecord = ruleProcessor.process(reader, writer, settings);
+    String actualXmlRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedXmlRecord = getResourceAsString("processor/mapped_xml_record.xml");
     Assert.assertEquals(expectedXmlRecord, actualXmlRecord);
