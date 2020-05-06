@@ -1,5 +1,13 @@
 package org.folio.rest;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.SRS;
+import static org.folio.util.ExternalPathResolver.USERS;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
+import static org.junit.Assert.fail;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import io.vertx.core.Vertx;
@@ -12,7 +20,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.folio.util.ExternalPathResolver.*;
-import static org.junit.Assert.fail;
 
 public class MockServer {
   private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
