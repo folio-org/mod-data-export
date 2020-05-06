@@ -7,6 +7,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -19,21 +20,21 @@ import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.MappingService;
-import org.folio.service.mapping.MappingServiceImpl;
-import org.folio.service.mapping.processor.RuleProcessor;
-import org.folio.service.mapping.processor.RuleProcessorFactory;
-import org.folio.service.mapping.settings.MappingSettingsProvider;
+import org.folio.service.mapping.processor.RuleFactory;
+import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.service.mapping.profiles.MappingProfile;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -54,13 +55,13 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private ExportService exportService;
   @Autowired
-  private RuleProcessorFactory ruleProcessorFactory;
+  private RuleFactory ruleFactory;
   @Autowired
   private JobExecutionService jobExecutionService;
   @Autowired
   private Vertx vertx;
   @Autowired
-  private MappingSettingsProvider settingsProvider;
+  private MappingService mappingService;
 
   public ExportManagerImpl() {
   }
@@ -87,6 +88,7 @@ public class ExportManagerImpl implements ExportManager {
    */
   protected void exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
+    MappingProfile mappingProfile = new MappingProfile();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
@@ -95,16 +97,31 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    try {
-      List<String> mappedMarcRecords = getMappingService().map(instances, exportPayload.getJobExecutionId(), params);
-      exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
-    } catch (IOException e) {
-      LOGGER.error("Exception occurred while initializing MappingService", e);
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+    if (isNotEmpty(mappingProfile.getMappingProfileFields())) {
+      instances = appendHoldingsAndItemRecords(instances, params);
     }
+    List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params, rules);
+    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size());
+  }
+
+  private List<JsonObject> appendHoldingsAndItemRecords(List<JsonObject> instances, OkapiConnectionParams params) {
+    for (JsonObject instance : instances) {
+      List<JsonObject> holdings = loadInventoryHoldingsByInstanceId(instance.getString("id"), params);
+      List<JsonObject> items = new ArrayList<>();
+      JsonObject instanceWithHoldingAndItems = new JsonObject();
+      for (JsonObject holding : holdings) {
+        items.addAll(loadInventoryItemsByHoldingsId(holding.getString("id"), params));
+      }
+      instanceWithHoldingAndItems.put("instance", instance);
+      instanceWithHoldingAndItems.put("holdings", new JsonArray(holdings));
+      instanceWithHoldingAndItems.put("item", new JsonArray(items));
+    }
+    return instances;
   }
 
   /**
@@ -139,6 +156,14 @@ public class ExportManagerImpl implements ExportManager {
       }
     );
     return instances;
+  }
+
+  private List<JsonObject> loadInventoryHoldingsByInstanceId(String instanceIdentifier, OkapiConnectionParams params) {
+    return new ArrayList<>();
+  }
+
+  private List<JsonObject> loadInventoryItemsByHoldingsId(String holdingsIdentifier, OkapiConnectionParams params) {
+    return new ArrayList<>();
   }
 
   /**
@@ -195,8 +220,4 @@ public class ExportManagerImpl implements ExportManager {
     return vertx.getOrCreateContext().get(InputDataManager.class.getName());
   }
 
-  private MappingService getMappingService() throws IOException {
-    RuleProcessor defaultRuleProcessor = ruleProcessorFactory.createDefault();
-    return new MappingServiceImpl(settingsProvider, defaultRuleProcessor);
-  }
 }

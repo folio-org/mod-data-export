@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.service.mapping.processor.RuleProcessor;
-import org.folio.service.mapping.processor.RuleProcessorFactory;
+import org.folio.service.mapping.processor.RuleFactory;
 import org.folio.service.mapping.profiles.RecordType;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
 import org.folio.service.mapping.settings.Settings;
@@ -35,7 +35,7 @@ public class MappingServiceUnitTest {
   private RuleProcessor ruleProcessor;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
-  private RuleProcessorFactory ruleProcessorFactory = new RuleProcessorFactory();
+  private RuleFactory ruleProcessorFactory = new RuleFactory();
 
   @Before
   public void mockSettings() throws IOException {

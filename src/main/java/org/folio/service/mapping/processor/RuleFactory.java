@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
+import org.folio.service.mapping.profiles.MappingProfile;
 import org.folio.service.mapping.profiles.MappingProfileField;
 import org.folio.service.mapping.profiles.RecordType;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 @Service
-public class RuleProcessorFactory {
+public class RuleFactory {
 
   public static final int TAG_INDEX = 0;
 
@@ -37,44 +38,49 @@ public class RuleProcessorFactory {
 
   private List<Rule> defaultRules;
 
-  public RuleProcessor createDefault() throws IOException {
-    return new RuleProcessor(getDefaultRules());
+  public List<Rule> create(MappingProfile mappingProfile) {
+    if (mappingProfile == null) {
+      return getDefaultRules();
+    }
+    List<Rule> rules = new ArrayList<>();
+    if(mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)){
+      rules.addAll(getDefaultRules());
+    }
+    rules.addAll(createByMappingFields(mappingProfile.getMappingProfileFields()));
+    return rules;
   }
 
-  public RuleProcessor createByMappingFields(List<MappingProfileField> mappingProfileFields) throws IOException {
+  private List<Rule> createByMappingFields(List<MappingProfileField> mappingProfileFields) {
     List<Rule> rules = new ArrayList<>();
     for (MappingProfileField mappingProfileField : mappingProfileFields) {
       if (isNoneBlank(mappingProfileField.getPath())) {
         if (RecordType.INSTANCE.equals(mappingProfileField.getRecordType()) && isBlank(mappingProfileField.getTransformation())) {
-          Rule defaultRule = getDefaultRuleByPath(mappingProfileField.getPath());
-          if(Objects.nonNull(defaultRule)) {
-            rules.add(defaultRule);
+          for (Rule defaultRule : getDefaultRules()) {
+            for (DataSource dataSource : defaultRule.getDataSources()) {
+              if (isNoneBlank(dataSource.getFrom()) && mappingProfileField.getPath().equals(dataSource.getFrom())) {
+                rules.add(defaultRule);
+              }
+            }
           }
         } else {
           rules.add(buildRuleByMappingProfileField(mappingProfileField));
         }
       }
     }
-    return new RuleProcessor(rules);
+    return rules;
   }
 
-  private Rule getDefaultRuleByPath(String fieldPath) throws IOException {
-    for (Rule defaultRule : getDefaultRules()) {
-      for (DataSource dataSource : defaultRule.getDataSources()) {
-        if (isNoneBlank(dataSource.getFrom()) && fieldPath.equals(dataSource.getFrom())) {
-          return defaultRule;
-        }
-      }
-    }
-    return null;
-  }
-
-  private List<Rule> getDefaultRules() throws IOException {
+  private List<Rule> getDefaultRules() {
     if (Objects.nonNull(this.defaultRules)) {
       return this.defaultRules;
     }
     URL url = Resources.getResource("rules/rulesDefault.json");
-    String stringRules = Resources.toString(url, StandardCharsets.UTF_8);
+    String stringRules = null;
+    try {
+      stringRules = Resources.toString(url, StandardCharsets.UTF_8);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     this.defaultRules = Arrays.asList(Json.decodeValue(stringRules, Rule[].class));
     return this.defaultRules;
   }

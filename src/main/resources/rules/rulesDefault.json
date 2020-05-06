@@ -4,7 +4,7 @@
     "description": "The human readable ID",
     "dataSources": [
       {
-        "from": "$.hrid"
+        "from": "$.instance.hrid"
       }
     ]
   },
@@ -13,7 +13,7 @@
     "description": "Title",
     "dataSources": [
       {
-        "from": "$.title",
+        "from": "$.instance.title",
         "subfield": "a"
       },
       {
@@ -41,7 +41,7 @@
     "description": "Physical Descriptions",
     "dataSources": [
       {
-        "from": "$.physicalDescriptions",
+        "from": "$.instance.physicalDescriptions",
         "subfield": "a"
       },
       {
@@ -69,7 +69,7 @@
     "description": "Series",
     "dataSources": [
       {
-        "from": "$.series",
+        "from": "$.instance.series",
         "subfield": "a"
       },
       {
@@ -97,7 +97,7 @@
     "description": "Nature of content terms",
     "dataSources": [
       {
-        "from": "$.natureOfContentTermIds",
+        "from": "$.instance.natureOfContentTermIds",
         "subfield": "a",
         "translation": {
           "function": "set_nature_of_content_term"
@@ -128,7 +128,7 @@
     "description": "Unique ID of the instance record",
     "dataSources": [
       {
-        "from": "$.id",
+        "from": "$.instance.id",
         "subfield": "i"
       },
       {

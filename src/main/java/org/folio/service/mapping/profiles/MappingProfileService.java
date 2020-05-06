@@ -41,6 +41,7 @@ public class MappingProfileService {
     ELECTRONIC_ACCESS_URI,
     ELECTRONIC_ACCESS_RELATIONSHIP_ID
   );
+
   public static final String SETTINGS_NAME_KEY = "name";
 
   @Autowired
@@ -75,7 +76,7 @@ public class MappingProfileService {
       MappingProfileTransformation mappingProfileTransformation = new MappingProfileTransformation();
       mappingProfileTransformation.setRecordType(recordType);
       mappingProfileTransformation.setId(transformationConfig.getId());
-      mappingProfileTransformation.setPath(pathBuilder.build(transformationConfig, settingsEntry.getKey()));
+      mappingProfileTransformation.setPath(pathBuilder.build(recordType, transformationConfig, settingsEntry.getKey()));
       String formattedName = nameFormatter.format(recordType, transformationConfig.getFormattedName(), settingsEntry.getValue().getString(SETTINGS_NAME_KEY));
       mappingProfileTransformation.setDisplayName(formattedName);
       subfieldNames.add(mappingProfileTransformation);
@@ -87,7 +88,7 @@ public class MappingProfileService {
     MappingProfileTransformation mappingProfileTransformation = new MappingProfileTransformation();
     mappingProfileTransformation.setRecordType(recordType);
     mappingProfileTransformation.setId(transformationConfig.getId());
-    mappingProfileTransformation.setPath(transformationConfig.getPath());
+    mappingProfileTransformation.setPath(pathBuilder.build(recordType, transformationConfig));
     mappingProfileTransformation.setDisplayName(nameFormatter.format(recordType, transformationConfig.getFormattedName()));
     return mappingProfileTransformation;
   }

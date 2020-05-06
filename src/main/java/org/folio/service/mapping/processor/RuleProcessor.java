@@ -8,6 +8,7 @@ import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.values.*;
 import org.folio.service.mapping.writer.RecordWriter;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +28,11 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  * @see TranslationFunction
  * @see RecordWriter
  */
+@Service
 public final class RuleProcessor {
-  private List<Rule> rules;
 
-  public RuleProcessor(List<Rule> rules) {
-    this.rules = rules;
-  }
-
-  public String process(EntityReader reader, RecordWriter writer, Settings settings) {
-    this.rules.forEach(rule -> {
+  public String process(EntityReader reader, RecordWriter writer, Settings settings, List<Rule> rules) {
+    rules.forEach(rule -> {
       RuleValue ruleValue = reader.read(rule);
       switch (ruleValue.getType()) {
         case SIMPLE:
