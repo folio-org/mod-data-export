@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
@@ -163,10 +162,5 @@ public abstract class RestVerticleTestBase {
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
       .setBaseUri(BASE_OKAPI_URL)
       .build();
-  }
-
-  protected File getFileFromResourceByName(String fileName) {
-    ClassLoader classLoader = getClass().getClassLoader();
-    return new File(Objects.requireNonNull(classLoader.getResource(fileName)).getFile());
   }
 }

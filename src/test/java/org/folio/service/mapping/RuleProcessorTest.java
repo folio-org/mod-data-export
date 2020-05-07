@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.folio.TestUtil.getResourceAsString;
+import static org.folio.TestUtil.readFileContentFromResources;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RuleProcessorTest {
@@ -30,8 +30,8 @@ public class RuleProcessorTest {
 
   @BeforeClass
   public static void setup() {
-    entity = new JsonObject(getResourceAsString("processor/given_entity.json"));
-    rules = Arrays.asList(Json.decodeValue(getResourceAsString("processor/test_rules.json"), Rule[].class));
+    entity = new JsonObject(readFileContentFromResources("processor/given_entity.json"));
+    rules = Arrays.asList(Json.decodeValue(readFileContentFromResources("processor/test_rules.json"), Rule[].class));
   }
 
   @Test
@@ -43,7 +43,7 @@ public class RuleProcessorTest {
     // when
     String actualMarcRecord = ruleProcessor.process(reader, writer, settings);
     // then
-    String expectedMarcRecord = getResourceAsString("processor/mapped_marc_record.mrc");
+    String expectedMarcRecord = readFileContentFromResources("processor/mapped_marc_record.mrc");
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -56,7 +56,7 @@ public class RuleProcessorTest {
     // when
     String actualJsonRecord = ruleProcessor.process(reader, writer, settings);
     // then
-    String expectedJsonRecord = getResourceAsString("processor/mapped_json_record.json");
+    String expectedJsonRecord = readFileContentFromResources("processor/mapped_json_record.json");
     Assert.assertEquals(expectedJsonRecord, actualJsonRecord);
   }
 
@@ -69,7 +69,7 @@ public class RuleProcessorTest {
     // when
     String actualXmlRecord = ruleProcessor.process(reader, writer, settings);
     // then
-    String expectedXmlRecord = getResourceAsString("processor/mapped_xml_record.xml");
+    String expectedXmlRecord = readFileContentFromResources("processor/mapped_xml_record.xml");
     Assert.assertEquals(expectedXmlRecord, actualXmlRecord);
   }
 }

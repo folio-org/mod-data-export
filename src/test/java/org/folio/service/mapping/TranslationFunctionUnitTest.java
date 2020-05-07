@@ -26,7 +26,7 @@ public class TranslationFunctionUnitTest {
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
     JsonObject natureOfContentTerm =
-      new JsonObject(TestUtil.getResourceAsString("mockData/settings/get_nature_of_content_terms_response.json"))
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_nature_of_content_terms_response.json"))
         .getJsonArray("natureOfContentTerms")
         .getJsonObject(0);
     return Collections.singletonMap(natureOfContentTerm.getString("id"), natureOfContentTerm);

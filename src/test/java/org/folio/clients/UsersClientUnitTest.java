@@ -4,6 +4,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.folio.TestUtil;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -12,8 +13,6 @@ import org.junit.runner.RunWith;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.folio.TestUtil.getResourceAsString;
 
 @RunWith(VertxUnitRunner.class)
 public class UsersClientUnitTest extends HttpServerTestBase {
@@ -27,7 +26,7 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   private static void setUpMocks() {
-    String json = getResourceAsString(USER_RESPONSE_JSON);
+    String json = TestUtil.readFileContentFromResources(USER_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
     router.route(USERS_BY_ID_URL).method(HttpMethod.GET).handler(routingContext -> {
       HttpServerResponse response = routingContext.response();
