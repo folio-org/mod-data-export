@@ -37,6 +37,6 @@
   },
   "required":[
     "name",
-    "recordTypes"
+    "recordType"
   ]
 }
