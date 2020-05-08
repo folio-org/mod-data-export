@@ -29,7 +29,7 @@
       "type":"array",
       "items":{
         "type":"object",
-        "$ref":"mappingRule.json"
+        "$ref":"mappingProfileRule.json"
       }
     },
     "userInfo":{

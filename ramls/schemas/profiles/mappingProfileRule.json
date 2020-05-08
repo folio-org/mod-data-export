@@ -6,15 +6,7 @@
   "additionalProperties":false,
   "properties":{
     "id":{
-      "description":"Unique identifier",
-      "$ref":"../../../ramls/raml-util/schemas/uuid.schema"
-    },
-    "name":{
-      "description":"Name of field",
-      "type":"string"
-    },
-    "description":{
-      "description":"Mapping Field description",
+      "description":"Identifier",
       "type":"string"
     },
     "path":{
