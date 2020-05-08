@@ -5,6 +5,7 @@ import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.mapping.MappingService;
+import org.folio.service.mapping.profiles.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,7 +59,7 @@ public class ExportManagerUnitTest {
     Mockito.verify(recordLoaderService, Mockito.times(50)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(recordLoaderService, Mockito.times(3)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
-    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), anyString(), any(OkapiConnectionParams.class), anyList());
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), any(MappingProfile.class), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
   }
 }

@@ -49,8 +49,6 @@ public class MappingServiceUnitTest {
     settings.addNatureOfContentTerms(getNatureOfContentTerms());
     Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
     ruleProcessor = new RuleProcessor();
-    mappingService.setRuleProcessor(ruleProcessor);
-    rules = ruleProcessorFactory.create(null);
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -68,7 +66,7 @@ public class MappingServiceUnitTest {
   @Test
   public void shouldNotThrowAnyException() {
     List<JsonObject> givenInstances = Collections.emptyList();
-    assertThatCode(() -> mappingService.map(givenInstances, jobExecutionId, params, rules)).doesNotThrowAnyException();
+    assertThatCode(() -> mappingService.map(givenInstances, null, jobExecutionId, params)).doesNotThrowAnyException();
   }
 
   @Test
@@ -77,7 +75,7 @@ public class MappingServiceUnitTest {
     JsonObject instance = new JsonObject(getResourceAsString("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, jobExecutionId, params, rules);
+    List<String> actualMarcRecords = mappingService.map(instances, null, jobExecutionId, params);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);

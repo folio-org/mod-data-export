@@ -1,8 +1,10 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import org.folio.service.mapping.processor.RuleFactory;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.service.mapping.profiles.MappingProfile;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
@@ -24,15 +26,21 @@ public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
-  private RuleProcessor ruleProcessor;
-  @Autowired
   private MappingSettingsProvider settingsProvider;
 
+  private RuleFactory ruleFactory;
+  private RuleProcessor ruleProcessor;
+
+  public MappingServiceImpl() {
+    this.ruleProcessor = new RuleProcessor();
+    this.ruleFactory = new RuleFactory();
+  }
 
   @Override
-  public List<String> map(List<JsonObject> instances, String jobExecutionId, OkapiConnectionParams connectionParams, List<Rule> rules) {
+  public List<String> map(List<JsonObject> instances, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
     List<String> records = new ArrayList<>();
     Settings settings = settingsProvider.getSettings(jobExecutionId, connectionParams);
+    List<Rule> rules = ruleFactory.create(mappingProfile);
     for (JsonObject instance : instances) {
       String record = runDefaultMapping(instance, settings, rules);
       records.add(record);
@@ -46,11 +54,4 @@ public class MappingServiceImpl implements MappingService {
     return this.ruleProcessor.process(entityReader, recordWriter, settings, rules);
   }
 
-  public RuleProcessor getRuleProcessor() {
-    return ruleProcessor;
-  }
-
-  public void setRuleProcessor(RuleProcessor ruleProcessor) {
-    this.ruleProcessor = ruleProcessor;
-  }
 }

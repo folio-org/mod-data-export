@@ -26,7 +26,6 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
-@Service
 public class RuleFactory {
 
   public static final int TAG_INDEX = 0;

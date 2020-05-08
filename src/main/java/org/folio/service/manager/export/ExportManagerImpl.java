@@ -98,11 +98,10 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    List<Rule> rules = ruleFactory.create(mappingProfile);
     if (isNotEmpty(mappingProfile.getMappingProfileFields())) {
       instances = appendHoldingsAndItemRecords(instances, params);
     }
-    List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params, rules);
+    List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());

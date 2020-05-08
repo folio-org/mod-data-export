@@ -9,8 +9,11 @@ import java.util.Map;
 
 public class ElectronicAccessRelationshipsLoader implements SettingsLoader {
 
-  @Autowired
   private InventoryClient inventoryClient;
+
+  public ElectronicAccessRelationshipsLoader() {
+    this.inventoryClient = new InventoryClient();
+  }
 
   @Override
   public Map<String, JsonObject> load(OkapiConnectionParams okapiConnectionParams) {
