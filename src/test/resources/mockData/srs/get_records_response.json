@@ -552,31 +552,71 @@
       "recordType": "MARC",
       "rawRecord": {
         "id": "4f559f73-c37c-4420-93d5-3e354c6f89f5",
-        "content": "47178cad-a892-4c2a-b9e4-bb33dea6fc31 content"
+        "content": "content"
       },
       "parsedRecord": {
-        "id": "47178cad-a892-4c2a-b9e4-bb33dea6fc31",
+        "id": "29e6f38b-3267-493e-b734-f3992818edb1",
         "content": {
           "fields": [
             {
-              "001": "in00000000052"
+              "001": "in00000002173"
             },
             {
-              "005": "20170816204126.0"
+              "003": "DE-101"
             },
             {
-              "008": "890411m19309999pau      l    001 0 eng  "
+              "005": "20190617233050.0"
             },
             {
-              "035": "1579067"
+              "007": "tu"
             },
             {
-              "010": {
+              "008": "190603s2019    pl ||||| |||| 00||||pol  "
+            },
+            {
+              "035": "1187681857"
+            },
+            {
+              "015": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "   30014365 //r855"
+                    "a": "19,A26"
+                  },
+                  {
+                    "2": "dnb"
+                  }
+                ]
+              }
+            },
+            {
+              "016": {
+                "ind1": "7",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "2": "DE-101"
+                  },
+                  {
+                    "a": "1187681857"
+                  }
+                ]
+              }
+            },
+            {
+              "020": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "9788307034508"
+                  },
+                  {
+                    "c": "Broschur"
+                  },
+                  {
+                    "9": "978-83-07-03450-8"
                   }
                 ]
               }
@@ -587,29 +627,7 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "(NIC)notisAHK7689"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "(OCoLC)3289989"
-                  }
-                ]
-              }
-            },
-            {
-              "035": {
-                "ind1": " ",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "1579067"
+                    "a": "(DE-599)DNB1187681857"
                   }
                 ]
               }
@@ -620,46 +638,138 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "d": "NIC"
+                    "a": "1180"
                   },
                   {
-                    "d": "NIC"
+                    "b": "ger"
+                  },
+                  {
+                    "c": "DE-101"
+                  },
+                  {
+                    "d": "9999"
+                  },
+                  {
+                    "e": "rda"
                   }
                 ]
               }
             },
             {
-              "043": {
+              "041": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "n-us-pa"
+                    "a": "pol"
+                  },
+                  {
+                    "h": "ger"
                   }
                 ]
               }
             },
             {
-              "050": {
-                "ind1": "0",
+              "044": {
+                "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "KFP30 1930"
-                  },
-                  {
-                    "b": ".A44"
+                    "c": "XA-PL"
                   }
                 ]
               }
             },
             {
-              "110": {
+              "082": {
+                "ind1": "0",
+                "ind2": "4",
+                "subfields": [
+                  {
+                    "8": "1\\u"
+                  },
+                  {
+                    "a": "838.91403"
+                  },
+                  {
+                    "q": "DE-101"
+                  },
+                  {
+                    "2": "23/ger"
+                  }
+                ]
+              }
+            },
+            {
+              "083": {
+                "ind1": "7",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "830"
+                  },
+                  {
+                    "a": "510"
+                  },
+                  {
+                    "q": "DE-101"
+                  },
+                  {
+                    "2": "23sdnb"
+                  }
+                ]
+              }
+            },
+            {
+              "085": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "8": "1\\u"
+                  },
+                  {
+                    "b": "838"
+                  }
+                ]
+              }
+            },
+            {
+              "090": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "b"
+                  }
+                ]
+              }
+            },
+            {
+              "100": {
                 "ind1": "1",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Pennsylvania."
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  },
+                  {
+                    "e": "Verfasser"
+                  },
+                  {
+                    "4": "aut"
                   }
                 ]
               }
@@ -670,7 +780,16 @@
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Laws, etc. (Compiled statutes : 1930-   )"
+                    "0": "(DE-588)4509408-1"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4509408-1"
+                  },
+                  {
+                    "0": "(DE-101)95416430X"
+                  },
+                  {
+                    "a": "Wittgensteins Neffe"
                   }
                 ]
               }
@@ -681,33 +800,52 @@
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Purdon's Pennsylvania statutes, annotated :"
+                    "a": "Bratanek Wittgensteina"
                   },
                   {
-                    "b": "permanent ed."
+                    "b": "przyjaźń"
+                  },
+                  {
+                    "c": "Thomas Bernhard ; przełożył i posłowiem opatrzył Marek Kędzierski"
                   }
                 ]
               }
             },
             {
-              "260": {
+              "250": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Philadelphia, Pa. :"
+                    "a": "Wydanie II"
+                  }
+                ]
+              }
+            },
+            {
+              "259": {
+                "ind1": " ",
+                "ind2": " ",
+                "subfields": [
+                  {
+                    "a": "wyi"
+                  }
+                ]
+              }
+            },
+            {
+              "264": {
+                "ind1": " ",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "a": "Warszawa"
                   },
                   {
-                    "b": "George T. Bisel Co. ;"
+                    "b": "Czytelnik"
                   },
                   {
-                    "a": "St. Paul, Minn. :"
-                  },
-                  {
-                    "b": "West Publishing Co.,"
-                  },
-                  {
-                    "c": "1930-"
+                    "c": "2019"
                   }
                 ]
               }
@@ -718,219 +856,385 @@
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "v. ;"
+                    "a": "171 Seiten"
                   },
                   {
-                    "c": "25 cm."
+                    "c": "20 cm"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "336": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Includes unnumbered tables and index volumes."
+                    "a": "Text"
+                  },
+                  {
+                    "b": "txt"
+                  },
+                  {
+                    "2": "rdacontent"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "337": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Kept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated."
+                    "a": "ohne Hilfsmittel zu benutzen"
+                  },
+                  {
+                    "b": "n"
+                  },
+                  {
+                    "2": "rdamedia"
                   }
                 ]
               }
             },
             {
-              "500": {
+              "338": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Vols. for  published by West Group."
+                    "a": "Band"
+                  },
+                  {
+                    "b": "nc"
+                  },
+                  {
+                    "2": "rdacarrier"
                   }
                 ]
               }
             },
             {
-              "650": {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "600": {
+                "ind1": "1",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  },
+                  {
+                    "2": "gnd"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
                 "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)4003939-0"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4003939-0"
+                  },
+                  {
+                    "0": "(DE-101)040039390"
+                  },
+                  {
+                    "a": "Autobiografie"
+                  },
+                  {
+                    "y": "1967-1979"
+                  },
+                  {
+                    "2": "gnd-content"
+                  }
+                ]
+              }
+            },
+            {
+              "655": {
+                "ind1": " ",
+                "ind2": "7",
+                "subfields": [
+                  {
+                    "0": "(DE-588)4006804-3"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/4006804-3"
+                  },
+                  {
+                    "0": "(DE-101)040068048"
+                  },
+                  {
+                    "a": "Biografie"
+                  },
+                  {
+                    "y": "1967-1979"
+                  },
+                  {
+                    "2": "gnd-content"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
+                "ind1": "0",
                 "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Law"
+                    "0": "(DE-588)118509861"
                   },
                   {
-                    "z": "Pennsylvania."
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
                   }
                 ]
               }
             },
             {
-              "650": {
-                "ind1": " ",
-                "ind2": "7",
+              "689": {
+                "ind1": "0",
+                "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Law"
+                    "5": "DE-101"
                   },
                   {
-                    "2": "fast"
-                  },
-                  {
-                    "0": "(OCoLC)fst00993678"
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "651": {
-                "ind1": " ",
-                "ind2": "7",
+              "689": {
+                "ind1": "1",
+                "ind2": "0",
                 "subfields": [
                   {
-                    "a": "Pennsylvania"
+                    "0": "(DE-588)118634321"
                   },
                   {
-                    "2": "fast"
+                    "0": "http://d-nb.info/gnd/118634321"
                   },
                   {
-                    "0": "(OCoLC)fst01204598"
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
                   }
                 ]
               }
             },
             {
-              "700": {
+              "689": {
                 "ind1": "1",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "Purdon, John,"
+                    "5": "DE-101"
                   },
                   {
-                    "d": "1784-1835."
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "710": {
+              "689": {
+                "ind1": "2",
+                "ind2": "0",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118509861"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118509861"
+                  },
+                  {
+                    "0": "(DE-101)118509861"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Bernhard, Thomas"
+                  },
+                  {
+                    "d": "1931-1989"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
+                "ind1": "2",
+                "ind2": "1",
+                "subfields": [
+                  {
+                    "0": "(DE-588)118634321"
+                  },
+                  {
+                    "0": "http://d-nb.info/gnd/118634321"
+                  },
+                  {
+                    "0": "(DE-101)118634321"
+                  },
+                  {
+                    "d": "p"
+                  },
+                  {
+                    "a": "Wittgenstein, Paul"
+                  },
+                  {
+                    "d": "1907-1979"
+                  }
+                ]
+              }
+            },
+            {
+              "689": {
                 "ind1": "2",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "George T. Bisel Company."
-                  }
-                ]
-              }
-            },
-            {
-              "710": {
-                "ind1": "2",
-                "ind2": " ",
-                "subfields": [
+                    "5": "DE-101"
+                  },
                   {
-                    "a": "West Publishing Company."
+                    "5": "DE-101"
                   }
                 ]
               }
             },
             {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania legislative service."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Pennsylvania legislative service."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania consolidated statutes, annotated."
-                  }
-                ]
-              }
-            },
-            {
-              "740": {
-                "ind1": "0",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "Purdon's Pennsylvania statutes and consolidated statutes annotated."
-                  }
-                ]
-              }
-            },
-            {
-              "902": {
+              "850": {
                 "ind1": " ",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "pfnd"
-                  },
-                  {
-                    "b": "Law"
+                    "a": "DE-101a"
                   }
                 ]
               }
             },
             {
-              "905": {
-                "ind1": " ",
+              "925": {
+                "ind1": "r",
                 "ind2": " ",
                 "subfields": [
                   {
-                    "a": "19890413120000.0"
-                  }
-                ]
-              }
-            },
-            {
-              "948": {
-                "ind1": "1",
-                "ind2": " ",
-                "subfields": [
-                  {
-                    "a": "20101019"
-                  },
-                  {
-                    "b": "s"
-                  },
-                  {
-                    "d": "lap11"
-                  },
-                  {
-                    "e": "lts"
-                  },
-                  {
-                    "x": "ToAddCatStat"
+                    "a": "ru"
                   }
                 ]
               }
@@ -941,18 +1245,17 @@
                 "ind2": "f",
                 "subfields": [
                   {
-                    "s": "f4bb5a49-5011-4ea2-853e-b6922d489bca"
+                    "s": "5524a0c3-9b57-48ca-b07b-79dd02cdad08"
                   },
                   {
-                    "i": "5fc04e92-70dd-46b8-97ea-194015762a60"
+                    "i": "1631ed4a-47ed-4588-810b-b18c4d64ca8c"
                   }
                 ]
               }
             }
           ],
-          "leader": "01827cam a2200421 a 4500"
-        },
-        "formattedContent": "LEADER 01827cam a2200421 a 4500\n001 in00000000052\n005 20170816204126.0\n008 890411m19309999pau      l    001 0 eng  \n035 1579067\n010   $a   30014365 //r855\n035   $a(NIC)notisAHK7689\n035   $a(OCoLC)3289989\n035   $a1579067\n040   $dNIC$dNIC\n043   $an-us-pa\n050 0 $aKFP30 1930$b.A44\n110 1 $aPennsylvania.\n240 10$aLaws, etc. (Compiled statutes : 1930-   )\n245 10$aPurdon's Pennsylvania statutes, annotated :$bpermanent ed.\n260   $aPhiladelphia, Pa. :$bGeorge T. Bisel Co. ;$aSt. Paul, Minn. :$bWest Publishing Co.,$c1930-\n300   $av. ;$c25 cm.\n500   $aIncludes unnumbered tables and index volumes.\n500   $aKept up to date by pocket parts, supplementary pamphlets, interim annotation service, bound supplements, Purdon's Pennsylvania legislative service, and replacement volumes with title: Purdon's Pennsylvania consolidated statutes, annotated ; Purdon's Pennsylvania statutes and consolidated statutes annotated.\n500   $aVols. for  published by West Group.\n650  0$aLaw$zPennsylvania.\n650  7$aLaw$2fast$0(OCoLC)fst00993678\n651  7$aPennsylvania$2fast$0(OCoLC)fst01204598\n700 1 $aPurdon, John,$d1784-1835.\n710 2 $aGeorge T. Bisel Company.\n710 2 $aWest Publishing Company.\n740 0 $aPurdon's Pennsylvania legislative service.\n740 0 $aPennsylvania legislative service.\n740 0 $aPurdon's Pennsylvania consolidated statutes, annotated.\n740 0 $aPurdon's Pennsylvania statutes and consolidated statutes annotated.\n902   $apfnd$bLaw\n905   $a19890413120000.0\n948 1 $a20101019$bs$dlap11$elts$xToAddCatStat\n999 ff$sf4bb5a49-5011-4ea2-853e-b6922d489bca$i5fc04e92-70dd-46b8-97ea-194015762a60\n"
+          "leader": "02609nam a2200541 c 4500"
+        }
       },
       "deleted": false,
       "externalIdsHolder": {
@@ -962,10 +1265,10 @@
         "suppressDiscovery": false
       },
       "metadata": {
-        "createdDate": "2020-02-10T08:34:34.504+0000",
-        "createdByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786",
-        "updatedDate": "2020-02-10T08:34:36.506+0000",
-        "updatedByUserId": "a652bf71-33f9-5a3e-aad2-b15ae3708786"
+        "createdDate": "2020-04-15T08:10:02.449+0000",
+        "createdByUserId": "7e519491-6589-5f57-a97a-b6e385e284d9",
+        "updatedDate": "2020-04-15T08:10:08.674+0000",
+        "updatedByUserId": "7e519491-6589-5f57-a97a-b6e385e284d9"
       }
     }
   ]

@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.folio.TestUtil.getResourceAsString;
+import static org.folio.TestUtil.readFileContentFromResources;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -52,9 +52,9 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   @Before
   public void setUp() {
 
-    String json = getResourceAsString(SRS_RESPONSE_JSON);
+    String json = readFileContentFromResources(SRS_RESPONSE_JSON);
     dataFromSRS = new JsonObject(json);
-    String instancesJson = getResourceAsString(INVENTORY_RESPONSE_JSON);
+    String instancesJson = readFileContentFromResources(INVENTORY_RESPONSE_JSON);
     dataFromInventory = new JsonObject(instancesJson);
   }
 
@@ -104,7 +104,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   @Test
   public void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
-    String json = getResourceAsString(INVENTORY_EMPTY_RESPONSE_JSON);
+    String json = readFileContentFromResources(INVENTORY_EMPTY_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
     when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());

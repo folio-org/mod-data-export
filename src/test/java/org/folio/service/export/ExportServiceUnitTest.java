@@ -33,7 +33,8 @@ public class ExportServiceUnitTest {
   @Test
   public void shouldPassExportFor_1_SrsRecord() {
     // given
-    String jsonRecord = new JsonObject(TestUtil.getResourceAsString("json_record.json")).encode();
+    String response = TestUtil.readFileContentFromResources("mockData/srs/get_records_response.json");
+    String jsonRecord = new JsonObject(response).getJsonArray("records").getJsonObject(0).toString();
     FileDefinition fileDefinition = new FileDefinition();
     Mockito.when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when
@@ -79,8 +80,7 @@ public class ExportServiceUnitTest {
   @Test
   public void postExport_shouldStoreFile() {
     // given
-    FileDefinition fileDefinition = new FileDefinition()
-      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
+    FileDefinition fileDefinition = new FileDefinition().withSourcePath("generatedBinaryFile.mrc");
     // when
     exportService.postExport(fileDefinition, TENANT);
     // then

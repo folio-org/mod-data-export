@@ -13,6 +13,7 @@ import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpStatus;
+import org.folio.TestUtil;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
@@ -207,7 +208,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
     //when
-    File fileToUpload = getFileFromResourceByName(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
+    File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
     RequestSpecification binaryRequestSpecification = buildRequestSpecification();
 
  // then
@@ -235,7 +236,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
 
   private FileDefinition givenUploadFile(String fileName) throws IOException {
-    File fileToUpload = getFileFromResourceByName(FILES_FOR_UPLOAD_DIRECTORY + fileName);
+    File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
     RequestSpecification binaryRequestSpecification = buildRequestSpecification();
 
     FileDefinition givenFileDefinition = new FileDefinition()
@@ -266,7 +267,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
-    String json = FileUtils.readFileToString(getFileFromResourceByName(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
+    String json = FileUtils.readFileToString(TestUtil.getFileFromResources(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
     when(mockSrsClient.getRecordsByIds(any(List.class), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(data));
   }

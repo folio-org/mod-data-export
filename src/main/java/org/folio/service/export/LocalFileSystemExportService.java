@@ -48,7 +48,7 @@ public class LocalFileSystemExportService implements ExportService {
   private byte[] convertJsonRecordToMarcRecord(String jsonRecord) {
     MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream);
+    MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
     while (marcJsonReader.hasNext()) {
       Record record = marcJsonReader.next();
       marcStreamWriter.write(record);
