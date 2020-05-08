@@ -28,7 +28,7 @@
     }
   },
   "required":[
-    "name",
+    "id",
     "recordType"
   ]
 }
