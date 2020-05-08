@@ -1,52 +1,52 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Job profile",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {
-    "id": {
-      "description": "Unique identifier",
-      "type": "string",
-      "$ref": "../../raml-util/schemas/uuid.schema"
+  "$schema":"http://json-schema.org/draft-04/schema#",
+  "description":"Job profile",
+  "type":"object",
+  "additionalProperties":false,
+  "properties":{
+    "id":{
+      "description":"Unique identifier",
+      "type":"string",
+      "$ref":"../../raml-util/schemas/uuid.schema"
     },
-    "name": {
-      "description": "Job Profile name",
-      "type": "string"
+    "name":{
+      "description":"Job Profile name",
+      "type":"string"
     },
-    "destination": {
-      "description": "Final destination place where to send file",
-      "type": "string"
+    "destination":{
+      "description":"Final destination place where to send file",
+      "type":"string"
     },
-    "description": {
-      "description": "Mapping Profile description",
-      "type": "string"
+    "description":{
+      "description":"Mapping Profile description",
+      "type":"string"
     },
-    "userInfo": {
-      "description": "First name, last name and username of the user, who updated the Job Profile",
-      "type": "object",
-      "$ref": "userInfo.json"
+    "userInfo":{
+      "description":"First name, last name and username of the user, who updated the Job Profile",
+      "type":"object",
+      "$ref":"userInfo.json"
     },
-    "mappingProfileId": {
-      "description": "Associated mapping profile id",
-      "type": "string",
-      "$ref": "../../raml-util/schemas/uuid.schema"
+    "mappingProfileId":{
+      "description":"Associated mapping profile id",
+      "type":"string",
+      "$ref":"../../raml-util/schemas/uuid.schema"
     },
-    "protocol": {
-      "description": "TCP/IP settings",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "protocol.json"
+    "protocol":{
+      "description":"TCP/IP settings",
+      "type":"array",
+      "items":{
+        "type":"object",
+        "$ref":"protocol.json"
       }
     },
-    "metadata": {
-      "description": "Metadata provided by the server",
-      "type": "object",
-      "$ref": "../../raml-util/schemas/metadata.schema",
-      "readonly": true
+    "metadata":{
+      "description":"Metadata provided by the server",
+      "type":"object",
+      "$ref":"../../raml-util/schemas/metadata.schema",
+      "readonly":true
     }
   },
-  "required": [
+  "required":[
     "id",
     "destination"
   ]

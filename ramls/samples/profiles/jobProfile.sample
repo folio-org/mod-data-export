@@ -11,20 +11,19 @@
    "mappingProfileId":"3798f546-7afb-11ea-bc55-0242ac130003",
    "protocol":[
       {
-                "name":"The name of the connection",
-                "host":"The host example",
-                "port":"The port example",
-                "description":"The description example",
-                "authentication":"The authentication object example"
-             }
+         "name":"The name of the connection",
+         "host":"The host example",
+         "port":"The port example",
+         "description":"The description example",
+         "authentication":"The authentication object example"
+      }
    ],
-   "metadata":
-    {
-     "createdDate": "2019-07-22T11:22:07Z",
-     "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
-     "createdByUsername": "janedoeuser",
-     "updatedDate": "2019-07-27T13:28:54Z",
-     "updatedByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
-     "updatedByUsername": ""
+   "metadata":{
+      "createdDate":"2019-07-22T11:22:07Z",
+      "createdByUserId":"dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+      "createdByUsername":"janedoeuser",
+      "updatedDate":"2019-07-27T13:28:54Z",
+      "updatedByUserId":"dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+      "updatedByUsername":""
    }
 }
