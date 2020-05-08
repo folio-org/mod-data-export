@@ -9,9 +9,7 @@ import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.profiles.MappingProfile;
-import org.folio.service.mapping.profiles.MappingProfileField;
-import org.folio.service.mapping.profiles.RecordType;
-import org.springframework.stereotype.Service;
+import org.folio.service.mapping.profiles.MappingProfileRule;
 
 import java.io.IOException;
 import java.net.URL;
@@ -21,10 +19,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.folio.service.mapping.profiles.RecordType.HOLDINGS;
+import static org.folio.service.mapping.profiles.RecordType.INSTANCE;
 
 public class RuleFactory {
 
@@ -42,31 +43,50 @@ public class RuleFactory {
       return getDefaultRules();
     }
     List<Rule> rules = new ArrayList<>();
-    if(mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)){
+    if (mappingProfile.getRecordTypes().contains(INSTANCE)) {
       rules.addAll(getDefaultRules());
     }
-    rules.addAll(createByMappingFields(mappingProfile.getMappingProfileFields()));
+    rules.addAll(createByMappingFields(mappingProfile.getMappingProfileRules()));
     return rules;
   }
 
-  private List<Rule> createByMappingFields(List<MappingProfileField> mappingProfileFields) {
+  private List<Rule> createByMappingFields(List<MappingProfileRule> mappingProfileRules) {
     List<Rule> rules = new ArrayList<>();
-    for (MappingProfileField mappingProfileField : mappingProfileFields) {
-      if (isNoneBlank(mappingProfileField.getPath())) {
-        if (RecordType.INSTANCE.equals(mappingProfileField.getRecordType()) && isBlank(mappingProfileField.getTransformation())) {
+    for (MappingProfileRule mappingProfileRule : mappingProfileRules) {
+      if (mappingProfileRule.isEnabled() && isNoneBlank(mappingProfileRule.getPath())) {
+        if (INSTANCE.equals(mappingProfileRule.getRecordType()) && isBlank(mappingProfileRule.getTransformation())) {
           for (Rule defaultRule : getDefaultRules()) {
             for (DataSource dataSource : defaultRule.getDataSources()) {
-              if (isNoneBlank(dataSource.getFrom()) && mappingProfileField.getPath().equals(dataSource.getFrom())) {
+              if (isNoneBlank(dataSource.getFrom()) && mappingProfileRule.getPath().equals(dataSource.getFrom())) {
                 rules.add(defaultRule);
               }
             }
           }
         } else {
-          rules.add(buildRuleByMappingProfileField(mappingProfileField));
+          String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingProfileRules);
+          if (!(isHoldingsPermanentLocation(mappingProfileRule) && temporaryLocationTransformation.equals(mappingProfileRule.getTransformation()))) {
+            rules.add(buildRuleByMappingProfileField(mappingProfileRule));
+          }
         }
       }
     }
     return rules;
+  }
+
+  private boolean isHoldingsPermanentLocation(MappingProfileRule mappingProfileRule) {
+    return HOLDINGS.equals(mappingProfileRule.getRecordType()) && "permanentLocationId".equals(mappingProfileRule.getId());
+  }
+
+  private String getTemporaryLocationTransformation(List<MappingProfileRule> mappingProfileRules) {
+    Optional<MappingProfileRule> temporaryLocationRule = mappingProfileRules.stream()
+      .filter(rule -> HOLDINGS.equals(rule.getRecordType()))
+      .filter(rule -> "temporaryLocationId".equals(rule.getId()))
+      .findFirst();
+    if (temporaryLocationRule.isPresent()) {
+      MappingProfileRule mappingProfileRule = temporaryLocationRule.get();
+      return mappingProfileRule.getTransformation();
+    }
+    return EMPTY;
   }
 
   private List<Rule> getDefaultRules() {
@@ -84,14 +104,14 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-  private Rule buildRuleByMappingProfileField(MappingProfileField mappingProfileField) {
-    List<String> transformationParts = Splitter.on(StringUtils.SPACE).trimResults().splitToList(mappingProfileField.getTransformation());
+  private Rule buildRuleByMappingProfileField(MappingProfileRule mappingProfileRule) {
+    List<String> transformationParts = Splitter.on(StringUtils.SPACE).trimResults().splitToList(mappingProfileRule.getTransformation());
     Rule rule = new Rule();
     rule.setTag(transformationParts.get(TAG_INDEX));
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
-    fromDataSource.setFrom(mappingProfileField.getPath());
-    fromDataSource = addTranslationToDataSource(fromDataSource, mappingProfileField.getName());
+    fromDataSource.setFrom(mappingProfileRule.getPath());
+    fromDataSource = addTranslationToDataSource(fromDataSource, mappingProfileRule.getId());
     if (transformationParts.size() > 1) {
       if (transformationParts.size() == 2) {
         fromDataSource.setSubfield(transformationParts.get(2).replace("$", EMPTY));

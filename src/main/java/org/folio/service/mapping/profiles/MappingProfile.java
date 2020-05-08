@@ -1,7 +1,5 @@
 package org.folio.service.mapping.profiles;
 
-import org.drools.compiler.lang.dsl.DSLMappingEntry;
-
 import java.util.List;
 
 public class MappingProfile {
@@ -12,7 +10,7 @@ public class MappingProfile {
   private String userFirstName;
   private String userLastName;
   private String userId;
-  private List<MappingProfileField> mappingProfileFields;
+  private List<MappingProfileRule> mappingProfileRules;
 
   public String getId() {
     return id;
@@ -70,12 +68,12 @@ public class MappingProfile {
     this.userId = userId;
   }
 
-  public List<MappingProfileField> getMappingProfileFields() {
-    return mappingProfileFields;
+  public List<MappingProfileRule> getMappingProfileRules() {
+    return mappingProfileRules;
   }
 
-  public void setMappingProfileFields(List<MappingProfileField> mappingProfileFields) {
-    this.mappingProfileFields = mappingProfileFields;
+  public void setMappingProfileRules(List<MappingProfileRule> mappingProfileRules) {
+    this.mappingProfileRules = mappingProfileRules;
   }
 
 }

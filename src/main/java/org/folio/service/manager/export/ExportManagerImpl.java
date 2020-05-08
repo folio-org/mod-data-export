@@ -11,7 +11,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.drools.core.base.extractors.ArrayElementReader;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -22,7 +21,6 @@ import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.MappingService;
 import org.folio.service.mapping.processor.RuleFactory;
-import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.profiles.MappingProfile;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
@@ -98,7 +96,7 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    if (isNotEmpty(mappingProfile.getMappingProfileFields())) {
+    if (isNotEmpty(mappingProfile.getMappingProfileRules())) {
       instances = appendHoldingsAndItemRecords(instances, params);
     }
     List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);

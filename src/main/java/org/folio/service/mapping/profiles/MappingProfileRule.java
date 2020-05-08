@@ -1,9 +1,7 @@
 package org.folio.service.mapping.profiles;
 
-public class MappingProfileField {
+public class MappingProfileRule {
   private String id;
-  private String name;
-  private String description;
   private RecordType recordType;
   private boolean enabled;
   private String path;
@@ -15,22 +13,6 @@ public class MappingProfileField {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public RecordType getRecordType() {
