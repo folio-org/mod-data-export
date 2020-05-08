@@ -33,9 +33,9 @@ public class MockServer {
 
   // Mock data paths
   public static final String BASE_MOCK_DATA_PATH = "mockData/";
-  private static final String INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "instance/instance.json";
+  private static final String INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_response.json";
   private static final String SRS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
-  private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "settings/get_nature_of_content_terms_response.json";
+  private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
@@ -88,7 +88,7 @@ public class MockServer {
     router.get(resourcesPath(INSTANCE)).handler(ctx -> handleGetInstanceRecord(ctx));
     router.get(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
-    router.get(resourcesPath(USERS)+":id").handler(ctx -> handleGetUsersRecord(ctx));
+    router.get(resourcesPath(USERS) + ":id").handler(ctx -> handleGetUsersRecord(ctx));
 
     return router;
   }
