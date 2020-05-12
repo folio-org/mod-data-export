@@ -37,6 +37,42 @@
     ]
   },
   {
+    "tag": "264",
+    "description": "Publication",
+    "dataSources": [
+      {
+        "from": "$.publication[*].place",
+        "subfield": "a"
+      },
+      {
+        "from": "$.publication[*].publisher",
+        "subfield": "b"
+      },
+      {
+        "from": "$.publication[*].dateOfPublication",
+        "subfield": "c"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "1"
+          }
+        }
+      }
+    ]
+  },
+  {
     "tag": "300",
     "description": "Physical Descriptions",
     "dataSources": [
