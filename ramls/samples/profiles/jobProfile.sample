@@ -2,7 +2,7 @@
   "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
   "name": "Load vendor order records",
   "destination": "fileSystem",
-  "description": "Ordered on vendor site; load MARC to create bib, holdings, item, and order; keep MARC",
+  "description": "Job profile description",
   "userInfo": {
     "firstName": "DIKU",
     "lastName": "ADMINISTRATOR",
@@ -12,10 +12,10 @@
   "protocol": [
     {
       "name": "The name of the connection",
-      "host": "The host example",
-      "port": "The port example",
+      "host": "Gemini",
+      "port": "21",
       "description": "The description example",
-      "authentication": "The authentication object example"
+      "authentication": "User ID"
     }
   ],
   "metadata": {

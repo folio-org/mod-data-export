@@ -39,11 +39,10 @@
     },
     "outputFormat": {
       "description": "Mapping Profile output format",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "$ref": "outputFormat.json"
-      }
+      "type": "string",
+      "enum": [
+        "MARC"
+      ]
     },
     "metadata": {
       "description": "Metadata provided by the server",

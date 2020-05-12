@@ -5,11 +5,9 @@
       "name": "Example mapping profile",
       "description": "Example mapping profile description",
       "recordTypes": [
-        "INSTANCE",
-        "HOLDINGS",
-        "ITEM"
+        "INSTANCE"
       ],
-      "outputFormat": "marc",
+      "outputFormat": "MARC",
       "mappingProfileRules": [
         {
           "fieldId": "electronicAccess.linkText",

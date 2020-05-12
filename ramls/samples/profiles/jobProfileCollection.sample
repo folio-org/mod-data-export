@@ -2,9 +2,9 @@
   "jobProfiles": [
     {
       "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
-      "name": "Load vendor order records",
+      "name": "Job profile name",
       "destination": "fileSystem",
-      "description": "Jon profile description",
+      "description": "Job profile description",
       "userInfo": {
         "firstName": "DIKU",
         "lastName": "ADMINISTRATOR",
@@ -13,11 +13,11 @@
       "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003",
       "protocol": [
         {
-          "name": "The name of the connection",
-          "host": "The host example",
-          "port": "The port example",
+          "name": "FTP",
+          "host": "Gemini",
+          "port": "21",
           "description": "The description example",
-          "authentication": "The authentication object example"
+          "authentication": "User ID"
         }
       ],
       "metadata": {
