@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of Mapping Profiles",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mappingProfiles": {
+      "description": "List of Mapping Profiles",
+      "type": "array",
+      "id": "mappingProfileList",
+      "items": {
+        "type": "object",
+        "$ref": "mappingProfile.json"
+      }
+    },
+    "totalRecords": {
+      "description": "Total number of Mapping Profiles",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "mappingProfiles",
+    "totalRecords"
+  ]
+}
