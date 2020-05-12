@@ -48,6 +48,7 @@ public class DataExportTest extends RestVerticleTestBase {
 
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
+  private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   @Autowired
@@ -86,6 +87,34 @@ public class DataExportTest extends RestVerticleTestBase {
 
         });
       });
+    });
+  }
+
+  @Test
+  public void testExport_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition();
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue()
+            .getId(), tenantId)
+            .onSuccess(optionalFileDefinition -> {
+              context.verify(() -> {
+                assertSuccessJobExecution(jobExecution, 1);
+                validateExternalCallsForInventory();
+                context.completeNow();
+              });
+            });
+        });
     });
   }
 
@@ -137,6 +166,12 @@ public class DataExportTest extends RestVerticleTestBase {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS));
+  }
+
+  private void validateExternalCallsForInventory() {
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
   }
 
   @Configuration

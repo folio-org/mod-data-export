@@ -1,34 +1,26 @@
 {
-   "jobProfiles":[
-      {
-         "id":"448ae575-daec-49c1-8041-d64c8ed8e5b1",
-         "name":"Load vendor order records",
-         "destination":"fileSystem",
-         "description":"Ordered on vendor site; load MARC to create bib, holdings, item, and order; keep MARC",
-         "userInfo":{
-            "firstName":"DIKU",
-            "lastName":"ADMINISTRATOR",
-            "userName":"diku_admin"
-         },
-         "mappingProfileId":"3798f546-7afb-11ea-bc55-0242ac130003",
-         "protocol":[
-            {
-               "name":"The name of the connection",
-               "host":"The host example",
-               "port":"The port example",
-               "description":"The description example",
-               "authentication":"The authentication object example"
-            }
-         ],
-         "metadata":{
-            "createdDate":"2020-04-10T12:41:22.000",
-            "createdByUserId":"",
-            "createdByUsername":"@username",
-            "updatedDate":"2020-04-10T12:41:22.000",
-            "updatedByUserId":"",
-            "updatedByUsername":"@username"
-         }
+  "jobProfiles": [
+    {
+      "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
+      "name": "Job profile name",
+      "destination": "fileSystem",
+      "description": "Job profile description",
+      "userInfo": {
+        "firstName": "DIKU",
+        "lastName": "ADMINISTRATOR",
+        "userName": "diku_admin"
+      },
+      "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003",
+      "protocol": [],
+      "metadata": {
+        "createdDate": "2020-04-10T12:41:22.000",
+        "createdByUserId": "",
+        "createdByUsername": "@username",
+        "updatedDate": "2020-04-10T12:41:22.000",
+        "updatedByUserId": "",
+        "updatedByUsername": "@username"
       }
-   ],
-   "totalRecords":1
+    }
+  ],
+  "totalRecords": 1
 }
