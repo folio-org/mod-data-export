@@ -1,39 +1,37 @@
 package org.folio.service.mapping;
 
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.mockito.ArgumentMatchers.any;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.folio.service.mapping.settings.MappingSettingsProvider;
-import org.folio.service.mapping.settings.Settings;
-import org.folio.util.OkapiConnectionParams;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.mockito.ArgumentMatchers.any;
+import org.folio.service.mapping.settings.MappingSettingsProvider;
+import org.folio.service.mapping.settings.Settings;
+import org.folio.util.OkapiConnectionParams;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MappingServiceUnitTest {
 
   @Mock
   private MappingSettingsProvider mappingSettingsProvider;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
-
-  @Before
-  public void mockSettings() {
-    Settings settings = new Settings();
+  Settings settings = new Settings();
+  public MappingServiceUnitTest() {
     settings.addNatureOfContentTerms(getNatureOfContentTerms());
-    Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -53,6 +51,7 @@ public class MappingServiceUnitTest {
     // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     List<JsonObject> givenInstances = Collections.emptyList();
+
     // when
     List<String> actualRecords = mappingService.map(givenInstances, jobExecutionId, params);
     // then
@@ -67,6 +66,7 @@ public class MappingServiceUnitTest {
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
+    Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
     // when
     List<String> actualMarcRecords = mappingService.map(instances, jobExecutionId, params);
     // then

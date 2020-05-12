@@ -8,36 +8,32 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.UUID;
-
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-
-import com.amazonaws.services.s3.transfer.MultipleFileUpload;
-import com.amazonaws.services.s3.transfer.TransferManager;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(VertxExtension.class)
 public class ExportStorageServiceTest {
 
   @Mock
@@ -50,17 +46,13 @@ public class ExportStorageServiceTest {
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "testBucket";
 
-  public ExportStorageServiceTest() {
-    MockitoAnnotations.initMocks(this);
-  }
 
-
-  @Before
+  @BeforeEach
   public void setUp() {
     System.setProperty("bucket.name", BUCKET_NAME);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     System.clearProperty("bucket.name");
   }
@@ -99,18 +91,21 @@ public class ExportStorageServiceTest {
       .waitForCompletion();
   }
 
-  @Test(expected = ServiceException.class)
+  @Test
   public void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");
     FileDefinition exportFileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     // when
-    exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
+
+    Assertions.assertThrows(ServiceException.class, () -> {
+      exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
+    });
     // then expect RuntimeException
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void storeFile_shouldFailOnUploadDirectory() {
     // given
     FileDefinition exportFileDefinition = new FileDefinition()
@@ -120,13 +115,15 @@ public class ExportStorageServiceTest {
       .thenThrow(new RuntimeException());
     Mockito.when(amazonFactory.getTransferManager()).thenReturn(transferManagerMock);
     // when
-    exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
+
     // then expect RuntimeException
+    Assertions.assertThrows(RuntimeException.class, () -> {
+      exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
+    });
   }
 
   @Test
-  public void testSuccessfulGenerateURL(TestContext testContext) throws MalformedURLException {
-    Async async = testContext.async();
+  public void testSuccessfulGenerateURL(VertxTestContext testContext) throws MalformedURLException {
     // given
     String tenantId = "testAWS";
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
@@ -141,15 +138,17 @@ public class ExportStorageServiceTest {
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
     // then
     linkFuture.setHandler(ar -> {
-      assertTrue(ar.succeeded());
-      assertEquals(response.toString(), ar.result());
-      async.complete();
+      testContext.verify(()-> {
+        assertTrue(ar.succeeded());
+        assertEquals(response.toString(), ar.result());
+        testContext.completeNow();
+      });
+
     });
   }
 
   @Test
-  public void testbucketNameNotFoundInS3(TestContext testContext) {
-    Async async = testContext.async();
+  public void testbucketNameNotFoundInS3(VertxTestContext testContext) {
     // given
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
@@ -163,19 +162,25 @@ public class ExportStorageServiceTest {
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, TENANT_ID);
     // then
     linkFuture.setHandler(ar -> {
-      assertTrue(ar.failed());
-      assertEquals("Bucket Not Found", ar.cause().getMessage());
-      async.complete();
+      testContext.verify(() -> {
+        assertTrue(ar.failed());
+        assertEquals("Bucket Not Found", ar.cause().getMessage());
+        testContext.completeNow();
+      });
+
     });
   }
 
-  @Test(expected = ServiceException.class)
+  @Test
   public void testbucketNameNotProvidedInSystemProperty() {
     System.clearProperty("bucket.name");
 
     AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);
     when(amazonFactory.getS3Client()).thenReturn(s3ClientMock);
 
-    exportStorageService.getFileDownloadLink(null, null, null);
+    Assertions.assertThrows(ServiceException.class, () -> {
+      exportStorageService.getFileDownloadLink(null, null, null);
+    });
+
   }
 }

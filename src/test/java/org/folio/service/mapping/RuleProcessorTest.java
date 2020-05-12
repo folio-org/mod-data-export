@@ -1,26 +1,25 @@
 package org.folio.service.mapping;
 
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.junit.Assert.assertEquals;
+
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import java.util.Arrays;
+import java.util.List;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.JsonRecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.service.mapping.writer.impl.XmlRecordWriter;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.folio.TestUtil.readFileContentFromResources;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RuleProcessorTest {
@@ -28,7 +27,7 @@ public class RuleProcessorTest {
   private static List<Rule> rules;
   private Settings settings = null;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup() {
     entity = new JsonObject(readFileContentFromResources("processor/given_entity.json"));
     rules = Arrays.asList(Json.decodeValue(readFileContentFromResources("processor/test_rules.json"), Rule[].class));
@@ -44,7 +43,7 @@ public class RuleProcessorTest {
     String actualMarcRecord = ruleProcessor.process(reader, writer, settings);
     // then
     String expectedMarcRecord = readFileContentFromResources("processor/mapped_marc_record.mrc");
-    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
   @Test
@@ -57,7 +56,7 @@ public class RuleProcessorTest {
     String actualJsonRecord = ruleProcessor.process(reader, writer, settings);
     // then
     String expectedJsonRecord = readFileContentFromResources("processor/mapped_json_record.json");
-    Assert.assertEquals(expectedJsonRecord, actualJsonRecord);
+    assertEquals(expectedJsonRecord, actualJsonRecord);
   }
 
   @Test
@@ -70,6 +69,6 @@ public class RuleProcessorTest {
     String actualXmlRecord = ruleProcessor.process(reader, writer, settings);
     // then
     String expectedXmlRecord = readFileContentFromResources("processor/mapped_xml_record.xml");
-    Assert.assertEquals(expectedXmlRecord, actualXmlRecord);
+    assertEquals(expectedXmlRecord, actualXmlRecord);
   }
 }

@@ -7,8 +7,8 @@ import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.settings.Settings;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -17,14 +17,14 @@ import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TranslationFunctionUnitTest {
-  private Settings settings = new Settings();
+  private static Settings settings = new Settings();
 
-  @Before
-  public void setUp() {
-    this.settings.addNatureOfContentTerms(getNatureOfContentTerms());
+  @BeforeAll
+  public static void setUp() {
+    settings.addNatureOfContentTerms(getNatureOfContentTerms());
   }
 
-  private Map<String, JsonObject> getNatureOfContentTerms() {
+  private static Map<String, JsonObject> getNatureOfContentTerms() {
     JsonObject natureOfContentTerm =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_nature_of_content_terms_response.json"))
         .getJsonArray("natureOfContentTerms")

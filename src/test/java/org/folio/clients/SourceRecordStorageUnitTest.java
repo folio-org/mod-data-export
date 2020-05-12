@@ -10,8 +10,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.TestUtil;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
@@ -23,7 +23,7 @@ public class SourceRecordStorageUnitTest extends HttpServerTestBase {
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
   private static final int LIMIT = 20;
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     setUpHttpServer();
     setUpMocks();
