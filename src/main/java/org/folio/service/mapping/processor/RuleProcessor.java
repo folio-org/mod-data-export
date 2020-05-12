@@ -28,6 +28,7 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  * @see RecordWriter
  */
 public final class RuleProcessor {
+  private static final String LEADER_FIELD = "leader";
   private List<Rule> rules;
 
   public RuleProcessor(List<Rule> rules) {
@@ -36,19 +37,22 @@ public final class RuleProcessor {
 
   public String process(EntityReader reader, RecordWriter writer, Settings settings) {
     this.rules.forEach(rule -> {
-      RuleValue ruleValue = reader.read(rule);
-      switch (ruleValue.getType()) {
-        case SIMPLE:
-          SimpleValue simpleValue = (SimpleValue) ruleValue;
-          translate(simpleValue, settings);
-          writer.write(rule.getTag(), simpleValue);
-          break;
-        case COMPOSITE:
-          CompositeValue compositeValue = (CompositeValue) ruleValue;
-          translate(compositeValue, settings);
-          writer.write(rule.getTag(), compositeValue);
-          break;
-        case MISSING:
+      if (LEADER_FIELD.equals(rule.getField())) {
+        rule.getDataSources().forEach(dataSource -> writer.writeLeader(dataSource.getTranslation()));
+      } else {
+        RuleValue ruleValue = reader.read(rule);
+        switch (ruleValue.getType()) {
+          case SIMPLE:
+            SimpleValue simpleValue = (SimpleValue) ruleValue;
+            translate(simpleValue, settings);
+            writer.writeField(rule.getField(), simpleValue);
+            break;
+          case COMPOSITE:
+            CompositeValue compositeValue = (CompositeValue) ruleValue;
+            translate(compositeValue, settings);
+            writer.writeField(rule.getField(), compositeValue);
+            break;
+        }
       }
     });
     return writer.getResult();
@@ -61,13 +65,13 @@ public final class RuleProcessor {
       if (STRING.equals(simpleValue.getSubType())) {
         StringValue stringValue = (StringValue) simpleValue;
         String readValue = stringValue.getValue();
-        String translatedValue = translationFunction.apply(readValue, translation.getParameters(), settings);
+        String translatedValue = translationFunction.apply(readValue, translation, settings);
         stringValue.setValue(translatedValue);
       } else if (LIST_OF_STRING.equals(simpleValue.getSubType())) {
         ListValue listValue = (ListValue) simpleValue;
         List<String> translatedValues = new ArrayList<>();
         for (String readValue : listValue.getValue()) {
-          String translatedValue = translationFunction.apply(readValue, translation.getParameters(), settings);
+          String translatedValue = translationFunction.apply(readValue, translation, settings);
           translatedValues.add(translatedValue);
         }
         listValue.setValue(translatedValues);
@@ -83,7 +87,7 @@ public final class RuleProcessor {
         if (translation != null) {
           TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());
           String readValue = stringValue.getValue();
-          String translatedValue = translationFunction.apply(readValue, translation.getParameters(), settings);
+          String translatedValue = translationFunction.apply(readValue, translation, settings);
           stringValue.setValue(translatedValue);
         }
       });

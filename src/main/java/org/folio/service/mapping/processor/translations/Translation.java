@@ -1,26 +1,29 @@
 package org.folio.service.mapping.processor.translations;
 
-import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 
 public class Translation {
   private String function;
-  private JsonObject parameters;
+  private Map<String, String> parameters;
 
   public void setFunction(String function) {
     this.function = function;
   }
 
   public void setParameters(Map<String, String> parameters) {
-    this.parameters = JsonObject.mapFrom(parameters);
+    this.parameters = parameters;
   }
 
   public String getFunction() {
     return function;
   }
 
-  public JsonObject getParameters() {
+  public Map<String, String> getParameters() {
     return parameters;
+  }
+
+  public String getParameter(String key) {
+    return parameters.get(key);
   }
 }

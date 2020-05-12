@@ -1,5 +1,6 @@
 package org.folio.service.mapping.writer.impl;
 
+import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.writer.fields.RecordControlField;
 import org.folio.service.mapping.writer.fields.RecordDataField;
 import org.marc4j.MarcStreamWriter;
@@ -18,6 +19,17 @@ public class MarcRecordWriter extends AbstractRecordWriter {
   protected String encoding = StandardCharsets.UTF_8.name();
   private MarcFactory factory = MarcFactory.newInstance();
   protected Record record = factory.newRecord();
+
+  @Override
+  public void writeLeader(Translation translation) {
+    if (translation.getFunction().equals("set_17-19_positions")) {
+      char[] implDefined2 = new char[3];
+      implDefined2[0] = translation.getParameter("position17").charAt(0);
+      implDefined2[1] = translation.getParameter("position18").charAt(0);
+      implDefined2[2] = translation.getParameter("position19").charAt(0);
+      record.getLeader().setImplDefined2(implDefined2);
+    }
+  }
 
   @Override
   public void writeControlField(RecordControlField recordControlField) {

@@ -3,16 +3,16 @@ package org.folio.service.mapping.processor.rule;
 import java.util.List;
 
 public class Rule {
-  private String tag;
+  private String field;
   private String description;
   private List<DataSource> dataSources;
 
-  public String getTag() {
-    return tag;
+  public String getField() {
+    return field;
   }
 
-  public void setTag(String tag) {
-    this.tag = tag;
+  public void setField(String field) {
+    this.field = field;
   }
 
   public String getDescription() {

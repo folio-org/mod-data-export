@@ -21,7 +21,7 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   private static final String INDICATOR_2 = "2";
 
   @Override
-  public void write(String tag, SimpleValue simpleValue) {
+  public void writeField(String tag, SimpleValue simpleValue) {
     DataSource dataSource = simpleValue.getDataSource();
     if (STRING.equals(simpleValue.getSubType())) {
       StringValue stringValue = (StringValue) simpleValue;
@@ -47,7 +47,7 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   }
 
   @Override
-  public void write(String tag, CompositeValue compositeValue) {
+  public void writeField(String tag, CompositeValue compositeValue) {
     for (List<StringValue> entry : compositeValue.getValue()) {
       RecordDataField recordDataField = buildDataFieldForStringValues(tag, entry);
       if (!recordDataField.getSubFields().isEmpty()) {
