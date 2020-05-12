@@ -1,6 +1,6 @@
 {
   "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
-  "name": "Load vendor order records",
+  "name": "job profile name",
   "destination": "fileSystem",
   "description": "Job profile description",
   "userInfo": {
