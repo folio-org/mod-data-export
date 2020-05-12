@@ -10,7 +10,7 @@
   ],
   "mappingProfileRules": [
     {
-      "id": "electronicAccess.linkText",
+      "fieldId": "electronicAccess.linkText",
       "path": "$.electronicAccess[*].linkText",
       "transformation": "001",
       "enabled": "true",
