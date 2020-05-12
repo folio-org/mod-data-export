@@ -5,7 +5,9 @@
   "recordTypes": [
     "INSTANCE"
   ],
-  "outputFormat": "MARC",
+  "outputFormat": [
+    "MARC"
+  ],
   "mappingProfileRules": [
     {
       "id": "electronicAccess.linkText",
