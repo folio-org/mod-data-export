@@ -28,7 +28,7 @@
     }
   },
   "required": [
-    "id",
+    "fieldId",
     "recordType"
   ]
 }
