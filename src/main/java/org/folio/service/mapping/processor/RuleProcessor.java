@@ -52,6 +52,7 @@ public final class RuleProcessor {
             translate(compositeValue, settings);
             writer.writeField(rule.getField(), compositeValue);
             break;
+          case MISSING:
         }
       }
     });
