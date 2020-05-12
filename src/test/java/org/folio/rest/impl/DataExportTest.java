@@ -45,6 +45,7 @@ public class DataExportTest extends RestVerticleTestBase {
 
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
+  private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   @Autowired
@@ -75,9 +76,38 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
-          assertSuccessJobExecution(jobExecution, 2);
-          assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-          validateExternalCalls();
+          context.verify(v-> {
+            assertSuccessJobExecution(jobExecution, 2);
+            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
+            validateExternalCalls();
+          });
+          async.complete();
+        });
+      });
+    });
+  }
+
+
+  @Test
+  public void testExport_GenerateRecordsOnFly(TestContext context) throws IOException {
+    Async async = context.async();
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition();
+    //when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(v -> {
+            assertSuccessJobExecution(jobExecution, 1);
+            validateExternalCallsForInventory();
+          });
           async.complete();
         });
       });
@@ -119,19 +149,25 @@ public class DataExportTest extends RestVerticleTestBase {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
     String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "GeneratedFileForSrsRecordsOnly.mrc");
     Assert.assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
-    Assert.assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
+    Assert.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
   private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords) {
-    Assert.assertEquals(jobExecution.getStatus(), SUCCESS);
+    Assert.assertEquals(SUCCESS, jobExecution.getStatus());
     Assert.assertNotNull(jobExecution.getCompletedDate());
-    Assert.assertEquals(jobExecution.getProgress().getCurrent(), numberOfExportedRecords);
+    Assert.assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
   }
 
   private void validateExternalCalls() {
     Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
     Assert.assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
     Assert.assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS));
+  }
+
+  private void validateExternalCallsForInventory() {
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+    Assert.assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
   }
 
   @Configuration

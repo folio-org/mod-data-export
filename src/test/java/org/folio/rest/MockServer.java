@@ -14,6 +14,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -110,8 +111,15 @@ public class MockServer {
   private void handleGetSRSRecord(RoutingContext ctx) {
     logger.info("handleGetSRSRecord got: " + ctx.request()
       .path());
+    String query = ctx.request()
+      .query();
     try {
-      JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      JsonObject srsRecords;
+      if (query.contains("7fbd5d84-62d1-44c6-9c45-6cb173998bbd")) {
+        srsRecords = buildEmptyCollection("records");
+        } else {
+        srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      }
       addServerRqRsData(HttpMethod.GET, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {
@@ -175,4 +183,10 @@ public class MockServer {
     return serverRqRs.get(objName, method);
   }
 
+  private JsonObject buildEmptyCollection(String entryType) {
+    JsonObject result = new JsonObject();
+    result.put(entryType, new JsonArray());
+    result.put("totalRecords", 0);
+    return result;
+  }
 }
