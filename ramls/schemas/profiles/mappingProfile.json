@@ -24,12 +24,12 @@
         "$ref": "recordTypes.json"
       }
     },
-    "mappingProfileRules": {
-      "description": "List of mapping profile rules",
+    "transformations": {
+      "description": "List of mapping profile transformations",
       "type": "array",
       "items": {
         "type": "object",
-        "$ref": "mappingProfileRule.json"
+        "$ref": "transformations.json"
       }
     },
     "userInfo": {

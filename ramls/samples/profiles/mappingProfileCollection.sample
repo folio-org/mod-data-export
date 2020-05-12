@@ -8,7 +8,7 @@
         "INSTANCE"
       ],
       "outputFormat": "MARC",
-      "mappingProfileRules": [
+      "transformations": [
         {
           "fieldId": "electronicAccess.linkText",
           "path": "$.electronicAccess[*].linkText",

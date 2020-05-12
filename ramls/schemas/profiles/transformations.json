@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Mapping rule detail",
+  "description": "Mapping transformations detail",
   "type": "object",
-  "javaType": "org.folio.rest.jaxrs.model.MappingRule",
+  "javaType": "org.folio.rest.jaxrs.model.Transformations",
   "additionalProperties": false,
   "properties": {
     "fieldId": {
