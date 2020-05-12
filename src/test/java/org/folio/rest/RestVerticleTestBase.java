@@ -1,5 +1,6 @@
 package org.folio.rest;
 
+import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
@@ -15,6 +16,7 @@ import io.vertx.core.logging.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -64,6 +66,7 @@ public abstract class RestVerticleTestBase {
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
+  protected static final String NON_EXISTED_ID = "invalid-aaaa-500a-aaaa-11111111111";
 
   @BeforeAll
   public static void setUpClass() throws Exception {
@@ -74,11 +77,6 @@ public abstract class RestVerticleTestBase {
 
     runDatabase();
     deployVerticle();
-  }
-
-  @Before
-  public void setUp() {
-    MockServer.release();
   }
 
   private static void runDatabase() throws Exception {
@@ -138,6 +136,7 @@ public abstract class RestVerticleTestBase {
   public void setUp() throws IOException {
     setUpOkapiConnectionParams();
     setUpJsonRequestSpecification();
+    MockServer.release();
   }
 
   private void setUpOkapiConnectionParams() {
@@ -165,6 +164,39 @@ public abstract class RestVerticleTestBase {
       .when()
       .post(path);
   }
+
+  protected Response getRequest(String path) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .get(path);
+  }
+
+  protected Response getRequestById(String path, String id) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .get(path);
+  }
+
+  protected Response putRequestById(String path, String id, String body) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .body(body)
+      .put(path);
+  }
+
+  protected Response deleteRequestById(String path, String id) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .delete(path);
+  }
+
 
   protected static String getMockData(String path) throws IOException {
     try (InputStream resourceAsStream = RestVerticleTestBase.class.getClassLoader().getResourceAsStream(path)) {
