@@ -93,6 +93,61 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/mappingProfiles",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.post"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/mappingProfiles",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.items.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.put"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.delete"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -148,6 +203,31 @@
       "description": "Entry point to get link to download exported files"
     },
     {
+      "permissionName": "data-export.mapping-profiles.item.post",
+      "displayName": "Data Export - create new mapping profile",
+      "description": "Entry point to post Mapping Profile"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.items.get",
+      "displayName": "Data Export - get mapping profiles collection by query",
+      "description": "Entry point to get Mapping Profiles by query"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.item.get",
+      "displayName": "Data Export - get mapping profile by id",
+      "description": "Entry point to get Mapping Profiles by id"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.item.put",
+      "displayName": "Data Export - update existing mapping profile by id",
+      "description": "Entry point to update Mapping Profile"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.item.delete",
+      "displayName": "Data Export - delete mapping profile by id",
+      "description": "Entry point to delete Mapping Profile by id"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -157,7 +237,12 @@
         "data-export.file-definitions.item.post",
         "data-export.file-definitions.upload.post",
         "data-export.job-executions.items.get",
-        "data-export.job-executions.items.download.get"
+        "data-export.job-executions.items.download.get",
+        "data-export.mapping-profiles.item.post",
+        "data-export.mapping-profiles.items.get",
+        "data-export.mapping-profiles.item.get",
+        "data-export.mapping-profiles.item.put",
+        "data-export.mapping-profiles.item.delete"
       ],
       "visible": false
     }
