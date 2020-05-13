@@ -11,7 +11,7 @@
       "transformations": [
         {
           "fieldId": "electronicAccess.linkText",
-          "path": "$.electronicAccess[*].linkText",
+          "path": "Json path for electronicAccess[*].linkText",
           "transformation": "001",
           "enabled": "true",
           "recordType": "INSTANCE"
