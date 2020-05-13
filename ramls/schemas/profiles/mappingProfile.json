@@ -55,6 +55,6 @@
     "id",
     "name",
     "recordTypes",
-    "mappingProfileRules"
+    "transformations"
   ]
 }
