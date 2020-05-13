@@ -102,7 +102,7 @@ class InputDataManagerImpl implements InputDataManager {
             Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
             if (optionalUser.isPresent()) {
               JsonObject user = optionalUser.get();
-              jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, tenantId);
+              jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
               exportNextChunk(exportPayload, sourceReader);
             } else {
               finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));

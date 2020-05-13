@@ -36,5 +36,12 @@ public interface SourceReader {
    */
   void close();
 
+  /**
+   * Returns the total count of all elements in source
+   *
+   * @return the total count of all elements in source
+   */
+  long totalCount();
+
 
 }

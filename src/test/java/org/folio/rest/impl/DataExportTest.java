@@ -46,6 +46,10 @@ public class DataExportTest extends RestVerticleTestBase {
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  public static final String TOTAL_NUMBER_2 = "2";
+  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  public static final String TOTAL_NUMBER_1 = "1";
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   @Autowired
@@ -77,7 +81,7 @@ public class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
           context.verify(v-> {
-            assertSuccessJobExecution(jobExecution, 2);
+            assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
             assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
             validateExternalCalls();
           });
@@ -105,7 +109,7 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 1);
+            assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_1, TOTAL_NUMBER_1);
             validateExternalCallsForInventory();
           });
           async.complete();
@@ -152,10 +156,11 @@ public class DataExportTest extends RestVerticleTestBase {
     Assert.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
-  private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords) {
+  private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords, String totalNumberOfRecords) {
     Assert.assertEquals(SUCCESS, jobExecution.getStatus());
     Assert.assertNotNull(jobExecution.getCompletedDate());
     Assert.assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
+    Assert.assertEquals(totalNumberOfRecords, jobExecution.getProgress().getTotal());
   }
 
   private void validateExternalCalls() {
