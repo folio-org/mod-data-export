@@ -4,8 +4,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.resource.DataExportMappingProfiles;
 import org.folio.rest.tools.utils.TenantTool;
@@ -15,14 +13,12 @@ import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
-import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 
 public class DataExportImplMappingProfilesImpl implements DataExportMappingProfiles {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final String tenantId;
   @Autowired
   private MappingProfileService mappingProfileService;
