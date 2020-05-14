@@ -12,13 +12,13 @@ public enum TranslationsHolder implements TranslationFunction {
 
   SET_VALUE() {
     @Override
-    public String apply(String value, JsonObject parameters, Settings settings) {
-      return parameters.getString("value");
+    public String apply(String value, Translation translation, Settings settings) {
+      return translation.getParameter("value");
     }
   },
   SET_NATURE_OF_CONTENT_TERM() {
     @Override
-    public String apply(String id, JsonObject parameters, Settings settings) {
+    public String apply(String id, Translation translation, Settings settings) {
       JsonObject entry = settings.getNatureOfContentTerms().get(id);
       if (entry == null) {
         LOGGER.error("Nature of content term is not found by the given id: {}", id);

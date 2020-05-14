@@ -1,6 +1,5 @@
 package org.folio.service.mapping.processor.translations;
 
-import io.vertx.core.json.JsonObject;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.settings.Settings;
 
@@ -16,9 +15,9 @@ public interface TranslationFunction {
    * Applies data transformation for the given value
    *
    * @param value      value of subfield or indicator
-   * @param parameters specific parameters for the function, can be null
+   * @param translation translation
    * @param settings   setting from inventory-storage
    * @return translated result
    */
-  String apply(String value, JsonObject parameters, Settings settings);
+  String apply(String value, Translation translation, Settings settings);
 }

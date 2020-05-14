@@ -1,5 +1,6 @@
 package org.folio.service.mapping.writer;
 
+import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.reader.values.CompositeValue;
 import org.folio.service.mapping.reader.values.RuleValue;
 import org.folio.service.mapping.reader.values.SimpleValue;
@@ -15,20 +16,27 @@ import org.folio.service.mapping.reader.values.SimpleValue;
 public interface RecordWriter {
 
   /**
+   * Updates leader using information from the given translation
+   *
+   * @param translation translation of the mapping rule to update leader
+   */
+  void writeLeader(Translation translation);
+
+  /**
    * Writes simple value to record whether control field or data field.
    *
-   * @param tag   tag name of the marc record
-   * @param value simple value
+   * @param field   destination field
+   * @param simpleValue simple value
    */
-  void write(String tag, SimpleValue value);
+  <S extends SimpleValue> void writeField(String field, S simpleValue);
 
   /**
    * Writes composite value to record. This can be only data field.
    *
-   * @param tag   tag name of the marc record
-   * @param value composite value
+   * @param field   destination field
+   * @param compositeValue composite value
    */
-  void write(String tag, CompositeValue value);
+  void writeField(String field, CompositeValue compositeValue);
 
   /**
    * Returns final result of writing

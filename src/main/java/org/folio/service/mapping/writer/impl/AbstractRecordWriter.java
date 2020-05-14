@@ -21,25 +21,25 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   private static final String INDICATOR_2 = "2";
 
   @Override
-  public void write(String tag, SimpleValue simpleValue) {
+  public void writeField(String field, SimpleValue simpleValue) {
     DataSource dataSource = simpleValue.getDataSource();
     if (STRING.equals(simpleValue.getSubType())) {
       StringValue stringValue = (StringValue) simpleValue;
       if (isSubFieldSource(dataSource) || isIndicatorSource(dataSource)) {
-        RecordDataField recordDataField = buildDataFieldForStringValues(tag, Collections.singletonList(stringValue));
+        RecordDataField recordDataField = buildDataFieldForStringValues(field, Collections.singletonList(stringValue));
         writeDataField(recordDataField);
       } else {
-        RecordControlField recordControlField = new RecordControlField(tag, stringValue.getValue());
+        RecordControlField recordControlField = new RecordControlField(field, stringValue.getValue());
         writeControlField(recordControlField);
       }
     } else if (LIST_OF_STRING.equals(simpleValue.getSubType())) {
       ListValue listValue = (ListValue) simpleValue;
       if (isSubFieldSource(dataSource) || isIndicatorSource(dataSource)) {
-        RecordDataField recordDataField = buildDataFieldForListOfStrings(tag, listValue);
+        RecordDataField recordDataField = buildDataFieldForListOfStrings(field, listValue);
         writeDataField(recordDataField);
       } else {
         for (String value : listValue.getValue()) {
-          RecordControlField recordControlField = new RecordControlField(tag, value);
+          RecordControlField recordControlField = new RecordControlField(field, value);
           writeControlField(recordControlField);
         }
       }
@@ -47,9 +47,9 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   }
 
   @Override
-  public void write(String tag, CompositeValue compositeValue) {
+  public void writeField(String field, CompositeValue compositeValue) {
     for (List<StringValue> entry : compositeValue.getValue()) {
-      RecordDataField recordDataField = buildDataFieldForStringValues(tag, entry);
+      RecordDataField recordDataField = buildDataFieldForStringValues(field, entry);
       if (!recordDataField.getSubFields().isEmpty()) {
         writeDataField(recordDataField);
       }
@@ -60,46 +60,46 @@ public abstract class AbstractRecordWriter implements RecordWriter {
 
   protected abstract void writeDataField(RecordDataField recordDataField);
 
-  private RecordDataField buildDataFieldForListOfStrings(String tag, ListValue listValue) {
+  private RecordDataField buildDataFieldForListOfStrings(String field, ListValue listValue) {
     DataSource dataSource = listValue.getDataSource();
-    RecordDataField field = new RecordDataField(tag);
+    RecordDataField recordDataField = new RecordDataField(field);
     for (String stringValue : listValue.getValue()) {
       if (isSubFieldSource(dataSource)) {
         char subFieldCode = dataSource.getSubfield().charAt(0);
         String subFieldData = stringValue;
-        field.addSubField(subFieldCode, subFieldData);
+        recordDataField.addSubField(subFieldCode, subFieldData);
       } else if (isIndicatorSource(dataSource)) {
         char indicator = stringValue.charAt(0);
         if (INDICATOR_1.equals(dataSource.getIndicator())) {
-          field.setIndicator1(indicator);
+          recordDataField.setIndicator1(indicator);
         } else if (INDICATOR_2.equals(dataSource.getIndicator())) {
-          field.setIndicator2(indicator);
+          recordDataField.setIndicator2(indicator);
         }
       }
     }
-    return field;
+    return recordDataField;
   }
 
-  private RecordDataField buildDataFieldForStringValues(String tag, List<StringValue> entry) {
-    RecordDataField field = new RecordDataField(tag);
+  private RecordDataField buildDataFieldForStringValues(String field, List<StringValue> entry) {
+    RecordDataField recordDataField = new RecordDataField(field);
     for (StringValue stringValue : entry) {
       DataSource dataSource = stringValue.getDataSource();
       if (isSubFieldSource(dataSource)) {
         char subFieldCode = dataSource.getSubfield().charAt(0);
         String subFieldData = stringValue.getValue();
         if (!Strings.isNullOrEmpty(subFieldData)) {
-          field.addSubField(subFieldCode, subFieldData);
+          recordDataField.addSubField(subFieldCode, subFieldData);
         }
       } else if (isIndicatorSource(dataSource)) {
         char indicator = stringValue.getValue().charAt(0);
         if (INDICATOR_1.equals(dataSource.getIndicator())) {
-          field.setIndicator1(indicator);
+          recordDataField.setIndicator1(indicator);
         } else if (INDICATOR_2.equals(dataSource.getIndicator())) {
-          field.setIndicator2(indicator);
+          recordDataField.setIndicator2(indicator);
         }
       }
     }
-    return field;
+    return recordDataField;
   }
 
 
