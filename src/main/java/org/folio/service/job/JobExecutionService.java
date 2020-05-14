@@ -2,7 +2,6 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
-
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -29,7 +28,7 @@ public interface JobExecutionService {
    *
    * @param jobExecution jobExecution to save
    * @param tenantId     tenant id
-   * @return future with JobExecutionCollection
+   * @return future with JobExecution
    */
   Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 
@@ -74,8 +73,8 @@ public interface JobExecutionService {
    * Increment current value in {@link Progress} of {@link JobExecution}
    *
    * @param jobExecutionId id of a job
-   * @param delta an increment of a current
-   * @param tenantId  tenant id
+   * @param delta          an increment of a current
+   * @param tenantId       tenant id
    * @return future
    */
   Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int delta, String tenantId);
