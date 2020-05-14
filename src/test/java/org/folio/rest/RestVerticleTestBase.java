@@ -73,6 +73,11 @@ public abstract class RestVerticleTestBase {
     deployVerticle(context);
   }
 
+  @Before
+  public void setUp() {
+    MockServer.release();
+  }
+
   private static void runDatabase() throws Exception {
     PostgresClient.setIsEmbedded(true);
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();

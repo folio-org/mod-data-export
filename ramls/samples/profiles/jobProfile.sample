@@ -1,0 +1,20 @@
+{
+  "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
+  "name": "job profile name",
+  "destination": "fileSystem",
+  "description": "Job profile description",
+  "userInfo": {
+    "firstName": "DIKU",
+    "lastName": "ADMINISTRATOR",
+    "userName": "diku_admin"
+  },
+  "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003",
+  "metadata": {
+    "createdDate": "2019-07-22T11:22:07Z",
+    "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+    "createdByUsername": "janedoeuser",
+    "updatedDate": "2019-07-27T13:28:54Z",
+    "updatedByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+    "updatedByUsername": ""
+  }
+}

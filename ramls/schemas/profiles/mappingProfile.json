@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Mapping Profile schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "$ref": "../../raml-util/schemas/uuid.schema"
+    },
+    "name": {
+      "description": "Mapping Profile name",
+      "type": "string"
+    },
+    "description": {
+      "description": "Mapping Profile description",
+      "type": "string"
+    },
+    "recordTypes": {
+      "description": "Mapping Profile records type",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "$ref": "recordTypes.json"
+      }
+    },
+    "transformations": {
+      "description": "List of mapping profile transformations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "transformations.json"
+      }
+    },
+    "userInfo": {
+      "description": "First name, last name and username of the user, who updated the Mapping Profile",
+      "type": "object",
+      "$ref": "userInfo.json"
+    },
+    "outputFormat": {
+      "description": "Mapping Profile output format",
+      "type": "string",
+      "enum": [
+        "MARC"
+      ]
+    },
+    "metadata": {
+      "description": "Metadata provided by the server",
+      "type": "object",
+      "$ref": "../../raml-util/schemas/metadata.schema",
+      "readonly": true
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "recordTypes",
+    "transformations"
+  ]
+}

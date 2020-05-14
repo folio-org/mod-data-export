@@ -29,10 +29,10 @@
         }
       }
     },
-    "jobProfileInfo": {
-      "description": "Related JobProfile information",
-      "type": "object",
-      "$ref": "jobProfile.json"
+    "jobProfileId": {
+      "description": "Related JobProfile id",
+      "type": "string",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "progress": {
       "description": "Execution progress of the job",
