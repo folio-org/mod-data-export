@@ -67,6 +67,7 @@ public abstract class RestVerticleTestBase {
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   protected static final String NON_EXISTED_ID = "invalid-aaaa-500a-aaaa-11111111111";
+  protected static final String DELIMITER = "/";
 
   @BeforeAll
   public static void setUpClass() throws Exception {

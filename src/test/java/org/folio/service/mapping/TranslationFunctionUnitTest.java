@@ -3,6 +3,7 @@ package org.folio.service.mapping;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.TestUtil;
+import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.settings.Settings;
@@ -37,11 +38,12 @@ public class TranslationFunctionUnitTest {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_value");
     String value = "field value";
-    JsonObject parameter = new JsonObject().put("value", "new field value");
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("value", value));
     // when
-    String result = translationFunction.apply(value, parameter, null);
+    String result = translationFunction.apply(value, translation, null);
     // then
-    Assert.assertEquals("new field value", result);
+    Assert.assertEquals(value, result);
   }
 
   @Test

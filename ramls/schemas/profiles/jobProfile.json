@@ -33,11 +33,8 @@
     },
     "protocol": {
       "description": "TCP/IP settings",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "protocol.json"
-      }
+      "type": "object",
+      "$ref": "protocol.json"
     },
     "metadata": {
       "description": "Metadata provided by the server",
