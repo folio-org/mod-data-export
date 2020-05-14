@@ -111,7 +111,7 @@
           ],
           "pathPattern": "/data-export/mappingProfiles",
           "permissionsRequired": [
-            "data-export.mapping-profiles.items.get"
+            "data-export.mapping-profiles.collection.get"
           ],
           "modulePermissions": [
           ]
