@@ -34,9 +34,9 @@ public interface RecordWriter {
    * Writes composite value to record. This can be only data field.
    *
    * @param field   destination field
-   * @param value composite value
+   * @param compositeValue composite value
    */
-  void writeField(String field, CompositeValue value);
+  void writeField(String field, CompositeValue compositeValue);
 
   /**
    * Returns final result of writing
