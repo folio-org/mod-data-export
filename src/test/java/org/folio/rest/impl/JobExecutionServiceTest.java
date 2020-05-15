@@ -5,7 +5,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class JobExecutionServiceTest extends RestVerticleTestBase {
   private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test
-  public void getJobExecutions_return200Status_forHappyPath(TestContext context) {
+  public void getJobExecutions_return200Status_forHappyPath() {
     RestAssured.given()
       .spec(jsonRequestSpecification)
       .when()
@@ -28,7 +28,7 @@ public class JobExecutionServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void getJobExecutions_return200StatusWithEmptyList_IfNoJobExecutionsWithGivenId(TestContext context) {
+  public void getJobExecutions_return200StatusWithEmptyList_IfNoJobExecutionsWithGivenId() {
     RestAssured.given()
       .spec(jsonRequestSpecification)
       .when()

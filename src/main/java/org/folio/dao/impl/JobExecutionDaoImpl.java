@@ -1,28 +1,26 @@
 package org.folio.dao.impl;
 
+import static org.folio.util.HelperUtils.constructCriteria;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.UUID;
-import org.folio.cql2pgjson.CQL2PgJSON;
+import javax.ws.rs.NotFoundException;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.Criteria.Limit;
-import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
+import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import static org.folio.util.HelperUtils.constructCriteria;
 
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
@@ -40,7 +38,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     Promise<Results<JobExecution>> promise = Promise.promise();
     try {
       String[] fieldList = {"*"};
-      CQLWrapper cql = getCQLWrapper(TABLE, query, limit, offset);
+      CQLWrapper cql = HelperUtils.getCQLWrapper(TABLE, query, limit, offset);
       pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, fieldList, cql, true, false, promise);
     } catch (FieldException exception) {
       LOGGER.error("Error while querying jobExecutions", exception);
@@ -108,18 +106,6 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
       .map(jobExecutions -> jobExecutions.isEmpty() ? Optional.empty() : Optional.of(jobExecutions.get(0)));
   }
 
-  /**
-   * Builds CQLWrapper by which db result is filtered
-   *
-   * @param tableName - json key name
-   * @param query     - query string to filter jobExecutions based on matching criteria in fields
-   * @param limit     - limit of records for pagination
-   * @param offset    - starting index in a list of results
-   * @return - CQLWrapper
-   */
-  private CQLWrapper getCQLWrapper(String tableName, String query, int limit, int offset) throws FieldException {
-    CQL2PgJSON cql2pgJson = new CQL2PgJSON(tableName + ".jsonb");
-    return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
-  }
+
 
 }

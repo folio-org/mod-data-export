@@ -2,7 +2,7 @@ package org.folio.util;
 
 import org.apache.http.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;

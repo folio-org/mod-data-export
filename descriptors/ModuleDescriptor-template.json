@@ -98,6 +98,61 @@
           "methods": [
             "POST"
           ],
+          "pathPattern": "/data-export/jobProfiles",
+          "permissionsRequired": [
+            "data-export.job-profiles.item.post"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/jobProfiles",
+          "permissionsRequired": [
+            "data-export.job-profiles.collection.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "permissionsRequired": [
+            "data-export.job-profiles.item.get"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "PUT"
+          ],
+          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "permissionsRequired": [
+            "data-export.job-profiles.item.put"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "permissionsRequired": [
+            "data-export.job-profiles.item.delete"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
           "pathPattern": "/data-export/mappingProfiles",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.post"
@@ -203,6 +258,31 @@
       "description": "Entry point to get link to download exported files"
     },
     {
+      "permissionName": "data-export.job-profiles.item.post",
+      "displayName": "Data Export - create new job profile",
+      "description": "Entry point to post Job Profile"
+    },
+    {
+      "permissionName": "data-export.job-profiles.collection.get",
+      "displayName": "Data Export - get job profiles collection by query",
+      "description": "Entry point to get Job Profiles by query"
+    },
+    {
+      "permissionName": "data-export.job-profiles.item.get",
+      "displayName": "Data Export - get job profile by id",
+      "description": "Entry point to get Job Profiles by id"
+    },
+    {
+      "permissionName": "data-export.job-profiles.item.put",
+      "displayName": "Data Export - update existing job profile by id",
+      "description": "Entry point to update Job Profile"
+    },
+    {
+      "permissionName": "data-export.job-profiles.item.delete",
+      "displayName": "Data Export - delete job profile by id",
+      "description": "Entry point to delete Job Profile by id"
+    },
+    {
       "permissionName": "data-export.mapping-profiles.item.post",
       "displayName": "Data Export - create new mapping profile",
       "description": "Entry point to post Mapping Profile"
@@ -238,11 +318,15 @@
         "data-export.file-definitions.upload.post",
         "data-export.job-executions.items.get",
         "data-export.job-executions.items.download.get",
+        "data-export.job-profiles.item.post",
+        "data-export.job-profiles.collection.get",
+        "data-export.job-profiles.item.get",
+        "data-export.job-profiles.item.put",
+        "data-export.job-profiles.item.delete",
         "data-export.mapping-profiles.item.post",
         "data-export.mapping-profiles.collection.get",
         "data-export.mapping-profiles.item.get",
-        "data-export.mapping-profiles.item.put",
-        "data-export.mapping-profiles.item.delete"
+        "data-export.mapping-profiles.item.put"
       ],
       "visible": false
     }

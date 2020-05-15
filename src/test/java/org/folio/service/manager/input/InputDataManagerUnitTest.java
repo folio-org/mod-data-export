@@ -8,7 +8,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -31,8 +30,9 @@ import org.folio.service.manager.export.ExportResult;
 import org.folio.service.file.reader.SourceReader;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class InputDataManagerUnitTest {
 
   private static final int BATCH_SIZE = 2;
@@ -135,9 +137,8 @@ public class InputDataManagerUnitTest {
   private FileDefinition fileExportDefinition;
   private JobExecution jobExecution;
 
-
-  @Before
-  public void setUp() {
+  @BeforeEach
+  public void setup() {
     initializeInputDataManager();
     requestFileDefinition = createRequestFileDefinition();
     fileExportDefinition = createFileExportDefinition();

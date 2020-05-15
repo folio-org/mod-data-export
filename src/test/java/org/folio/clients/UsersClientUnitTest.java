@@ -7,8 +7,8 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.TestUtil;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   protected static final String USERS_BY_ID_URL = "/users/:id";
   protected static final String USER_RESPONSE_JSON = "mockData/user/get_user_response.json";
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     setUpHttpServer();
     setUpMocks();
