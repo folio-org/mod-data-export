@@ -76,6 +76,8 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final int CURRENT_RECORDS_2 = 2;
   private static final int CURRENT_RECORDS_8 = 8;
   private static final int LIMIT = 20;
+  private static final String TOTAL_4 = "4";
+  public static final String TOTAL_51 = "51";
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static SourceRecordStorageClient mockSrsClient = Mockito.mock(SourceRecordStorageClient.class);
@@ -136,7 +138,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2, TOTAL_4))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -158,7 +160,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8, TOTAL_51))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -284,12 +286,13 @@ public class EndToEndTest extends RestVerticleTestBase {
     return Future.succeededFuture(fileExportDefinition);
   }
 
-  private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber) {
+  private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber, String total) {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
     context.assertEquals(jobExecution.getProgress().getExported(), currentNumber);
+    context.assertEquals(jobExecution.getProgress().getTotal(), total);
     return Future.succeededFuture();
   }
 

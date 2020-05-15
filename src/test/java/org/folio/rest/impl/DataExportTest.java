@@ -77,7 +77,7 @@ public class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 2, 0);
+            assertSuccessJobExecution(jobExecution, 2, 0, 2);
             assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
             validateExternalCalls();
             async.complete();
@@ -105,7 +105,7 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 1, 0);
+            assertSuccessJobExecution(jobExecution, 1, 0, 1);
             validateExternalCallsForInventory();
             async.complete();
           });
@@ -152,11 +152,12 @@ public class DataExportTest extends RestVerticleTestBase {
     Assert.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
-  private void assertSuccessJobExecution(JobExecution jobExecution, int exportedRecords, int failedRecords) {
+  private void assertSuccessJobExecution(JobExecution jobExecution, int exported, int failed, String total) {
     Assert.assertEquals(SUCCESS, jobExecution.getStatus());
     Assert.assertNotNull(jobExecution.getCompletedDate());
-    Assert.assertEquals(exportedRecords, jobExecution.getProgress().getExported().intValue());
-    Assert.assertEquals(failedRecords, jobExecution.getProgress().getFailed().intValue());
+    Assert.assertEquals(exported, jobExecution.getProgress().getExported().intValue());
+    Assert.assertEquals(failed, jobExecution.getProgress().getFailed().intValue());
+    Assert.assertEquals(total, jobExecution.getProgress().getTotal());
   }
 
   private void validateExternalCalls() {

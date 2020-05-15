@@ -68,7 +68,7 @@ public interface JobExecutionService {
    * @param user                 user represented in json object
    * @param tenantId             tenant id
    */
-  void prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId);
+  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}

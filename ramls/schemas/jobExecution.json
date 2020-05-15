@@ -50,7 +50,8 @@
         },
         "total": {
           "description": "Total number of records",
-          "type": "integer"
+          "type": "string",
+          "default": "0"
         }
       }
     },
