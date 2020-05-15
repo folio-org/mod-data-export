@@ -8,6 +8,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.stream.Stream;
 import kotlin.text.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
@@ -18,12 +19,19 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EntitiesCrudTest extends RestVerticleTestBase{
 
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
   private String sample = null;
+
+  static Stream<TestEntities> deleteOrder() {
+    return Stream.of(
+      TestEntities.JOBPROFILE,
+      TestEntities.MAPPINGPROFILE);
+  }
 
   @ParameterizedTest
   @Order(1)
@@ -96,7 +104,19 @@ class EntitiesCrudTest extends RestVerticleTestBase{
 
   @ParameterizedTest
   @Order(6)
-  @EnumSource(TestEntities.class)
+  @EnumSource(value = TestEntities.class, names = {"MAPPINGPROFILE"})
+  void testDeleteEndpoint_foreginKeyFailure(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-data-exports %s test failure with Foreign Key Constraint: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
+        testEntity.getId()));
+    deleteRequestById(testEntity.getEndpointWithId(), testEntity.getId()).then()
+      .log()
+      .ifValidationFails()
+      .statusCode(422);
+  }
+
+  @ParameterizedTest
+  @Order(7)
+  @MethodSource("deleteOrder")
   void testDeleteEndpoint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-data-exports %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
         testEntity.getId()));

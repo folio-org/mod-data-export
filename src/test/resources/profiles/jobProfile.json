@@ -3,6 +3,5 @@
   "name": "job profile name",
   "destination": "fileSystem",
   "description": "Job profile description",
-  "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003",
-  "protocol": []
+  "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003"
 }

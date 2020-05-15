@@ -17,7 +17,14 @@
       "tableName": "job_profiles",
       "fromModuleVersion": "mod-data-export-1.2.0",
       "withMetadata": true,
-      "withAuditing": false
+      "withAuditing": false,
+      "foreignKeys": [
+        {
+          "fieldName": "mappingProfileId",
+          "targetTable": "mapping_profiles",
+          "tOps": "ADD"
+        }
+      ]
     },
     {
       "tableName" : "job_executions",

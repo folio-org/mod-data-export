@@ -49,6 +49,10 @@ public class DataExportTest extends RestVerticleTestBase {
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  public static final String TOTAL_NUMBER_2 = "2";
+  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  public static final String TOTAL_NUMBER_1 = "1";
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   @Autowired
@@ -79,7 +83,7 @@ public class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(() -> {
             FileDefinition fileExportDefinition = optionalFileDefinition.get();
-            assertSuccessJobExecution(jobExecution, 2);
+            assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
             assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
             validateExternalCalls();
             context.completeNow();
@@ -109,7 +113,7 @@ public class DataExportTest extends RestVerticleTestBase {
             .getId(), tenantId)
             .onSuccess(optionalFileDefinition -> {
               context.verify(() -> {
-                assertSuccessJobExecution(jobExecution, 1);
+                assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_1, TOTAL_NUMBER_1);
                 validateExternalCallsForInventory();
                 context.completeNow();
               });
@@ -153,13 +157,13 @@ public class DataExportTest extends RestVerticleTestBase {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
     String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "GeneratedFileForSrsRecordsOnly.mrc");
     assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
-    assertEquals(fileExportDefinition.getStatus(), FileDefinition.Status.COMPLETED);
+    assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
-  private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords) {
-    assertEquals(jobExecution.getStatus(), SUCCESS);
+  private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords, String totalNumberOfRecords) {
+    assertEquals(SUCCESS, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(jobExecution.getProgress().getCurrent(), numberOfExportedRecords);
+    assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
   }
 
   private void validateExternalCalls() {
