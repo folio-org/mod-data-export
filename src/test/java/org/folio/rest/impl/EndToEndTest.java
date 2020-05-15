@@ -17,7 +17,6 @@ import org.folio.TestUtil;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
-import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.RestVerticleTestBase;
@@ -25,7 +24,6 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
-import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
@@ -36,10 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +70,8 @@ public class EndToEndTest extends RestVerticleTestBase {
   private static final int CURRENT_RECORDS_2 = 2;
   private static final int CURRENT_RECORDS_8 = 8;
   private static final int LIMIT = 20;
+  private static final String TOTAL_4 = "4";
+  public static final String TOTAL_51 = "51";
 
   private static UsersClient mockUsersClient = Mockito.mock(UsersClient.class);
   private static SourceRecordStorageClient mockSrsClient = Mockito.mock(SourceRecordStorageClient.class);
@@ -136,7 +132,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_2, TOTAL_4))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -158,7 +154,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler -> fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), okapiConnectionParams.getTenantId())
       .compose(fileExportDefinitionOptional -> assertCompletedFileDefinitionAndExportedFile(context, fileExportDefinitionOptional))
       .compose(fileExportDefinition -> jobExecutionDao.getById(fileExportDefinition.getJobExecutionId(), okapiConnectionParams.getTenantId())
-        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8))
+        .compose(jobExecutionOptional -> assertSuccessJobExecution(context, fileExportDefinition, jobExecutionOptional, CURRENT_RECORDS_8, TOTAL_51))
         .onComplete(succeeded -> async.complete())
       ));
   }
@@ -284,12 +280,13 @@ public class EndToEndTest extends RestVerticleTestBase {
     return Future.succeededFuture(fileExportDefinition);
   }
 
-  private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber) {
+  private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber, String total) {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
     context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
+    context.assertEquals(jobExecution.getProgress().getTotal(), total);
     return Future.succeededFuture();
   }
 

@@ -69,15 +69,15 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   @Override
   public void updateJobStatusById(String id, JobExecution.Status status, String tenantId) {
     getById(id, tenantId).onSuccess(jobExecution -> {
-        jobExecution.setStatus(status);
-        jobExecution.setCompletedDate(new Date());
-        update(jobExecution, tenantId);
+      jobExecution.setStatus(status);
+      jobExecution.setCompletedDate(new Date());
+      update(jobExecution, tenantId);
     });
   }
 
   @Override
-  public void prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, String tenantId) {
-    getById(id, tenantId).onSuccess(jobExecution -> {
+  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
+    return getById(id, tenantId).compose(jobExecution -> {
       ExportedFile exportedFile = new ExportedFile()
         .withFileId(UUID.randomUUID().toString())
         .withFileName(fileExportDefinition.getFileName());
@@ -92,8 +92,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       jobExecution.setRunBy(new RunBy()
         .withFirstName(personal.getString("firstName"))
         .withLastName(personal.getString("lastName")));
-      jobExecution.setProgress(new Progress());
-      update(jobExecution, tenantId);
+      jobExecution.setProgress(new Progress()
+        .withTotal(String.valueOf(totalCount)));
+      return update(jobExecution, tenantId);
     });
   }
 

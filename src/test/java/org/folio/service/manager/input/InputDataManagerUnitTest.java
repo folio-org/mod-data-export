@@ -34,7 +34,6 @@ import org.folio.util.OkapiConnectionParams;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,8 +46,9 @@ import org.springframework.context.support.AbstractApplicationContext;
 import com.google.common.collect.Lists;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -90,6 +90,8 @@ public class InputDataManagerUnitTest {
       .put("firstname", "John")
       .put("lastname", "Doe")
     );
+  private static final long TOTAL_COUNT_2 = 2L;
+  private static final long TOTAL_COUNT_4 = 4L;
 
   @InjectMocks
   @Spy
@@ -145,7 +147,7 @@ public class InputDataManagerUnitTest {
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
-    when(usersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
+    when(usersClient.getById(anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
     doReturn(sourceReader).when(inputDataManager).initSourceReader(requestFileDefinition, BATCH_SIZE);
@@ -175,7 +177,8 @@ public class InputDataManagerUnitTest {
   public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
@@ -194,7 +197,8 @@ public class InputDataManagerUnitTest {
   public void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
@@ -213,7 +217,8 @@ public class InputDataManagerUnitTest {
   public void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
@@ -238,7 +243,8 @@ public class InputDataManagerUnitTest {
   public void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), ArgumentMatchers.any(FileDefinition.class), eq(USER), eq(TENANT_ID));
+    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_4);
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_4), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
@@ -368,7 +374,7 @@ public class InputDataManagerUnitTest {
     //then
     verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
     verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
-    verify(jobExecutionService, never()).prepareJobForExport(JOB_EXECUTION_ID, fileExportDefinition, USER, TENANT_ID);
+    verify(jobExecutionService, never()).prepareJobForExport(anyString(), any(FileDefinition.class), any(JsonObject.class), any(Long.class), anyString());
     verify(fileDefinitionService, never()).save(requestFileDefinition, TENANT_ID);
     verify(jobExecutionService, never()).updateJobStatusById(requestFileDefinition.getJobExecutionId(), JobExecution.Status.FAIL, TENANT_ID);
   }
