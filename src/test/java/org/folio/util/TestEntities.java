@@ -5,7 +5,7 @@ import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.MappingProfile;
 
 public enum TestEntities {
-  MAPPINGPROFILE("/data-export/mappingProfiles", MappingProfile.class, "profiles/MappingProfile.json", "description", "Testing Export", 0),
+  MAPPINGPROFILE("/data-export/mappingProfiles", MappingProfile.class, "profiles/mappingProfile.json", "description", "Testing Export", 0),
   JOBPROFILE("/data-export/jobProfiles", JobProfile.class, "profiles/jobProfile.json", "description", "Testing Export", 0);
 
 
