@@ -29,8 +29,8 @@ public class LocalStorageCsvSourceReader implements SourceReader {
   public void init(FileDefinition fileDefinition, int batchSize) {
     try {
       this.fileDefinition = fileDefinition;
-      fileStream = Files.lines(Paths.get(fileDefinition.getSourcePath()));
-      iterator = Iterables.partition(fileStream::iterator, batchSize).iterator();
+      this.fileStream = Files.lines(Paths.get(fileDefinition.getSourcePath()));
+      this.iterator = Iterables.partition(fileStream::iterator, batchSize).iterator();
     } catch (IOException e) {
       LOGGER.error("Exception while reading from {} ", fileDefinition.getFileName(), e);
       iterator = Collections.emptyIterator();
