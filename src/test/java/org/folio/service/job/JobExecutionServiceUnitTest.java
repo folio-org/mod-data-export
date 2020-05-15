@@ -6,6 +6,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Progress;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,11 +40,29 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
+  public void shouldIncrementCurrentProgress(TestContext context) {
+    //given
+    Async async = context.async();
+    JobExecution job = new JobExecution().withProgress(new Progress().withExported(10).withFailed(3));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(job)));
+    when(jobExecutionDao.update(job, TENANT_ID)).thenReturn(Future.succeededFuture(job));
+    //when
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 5, 1, TENANT_ID);
+    //then
+    future.setHandler(ar -> {
+      context.assertTrue(ar.succeeded());
+      context.assertEquals(15, job.getProgress().getExported());
+      context.assertEquals(4, job.getProgress().getFailed());
+      async.complete();
+    });
+  }
+
+  @Test
   public void getById_shouldReturnFailedFuture_whenJobExecutionDoesNotExist(TestContext context) {
     //given
     Async async = context.async();
     String errorMessage = String.format("Job execution not found with id %s", JOB_EXECUTION_ID);
-    when(jobExecutionDao.getById(JOB_EXECUTION_ID, "diku")).thenReturn(Future.succeededFuture(Optional.empty()));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     //when
     Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
     //then
@@ -60,7 +79,7 @@ public class JobExecutionServiceUnitTest {
     Async async = context.async();
     String errorMessage = String.format("Unable to update progress of job execution with id %s", JOB_EXECUTION_ID);
     JobExecution jobExecution = new JobExecution();
-    when(jobExecutionDao.getById(JOB_EXECUTION_ID, "diku")).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     //when
     Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
@@ -76,7 +95,7 @@ public class JobExecutionServiceUnitTest {
     //given
     Async async = context.async();
     String errorMessage = String.format("Job execution with id %s doesn't exist", JOB_EXECUTION_ID);
-    when(jobExecutionDao.getById(JOB_EXECUTION_ID, "diku")).thenReturn(Future.succeededFuture(Optional.empty()));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     //when
     Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
@@ -86,5 +105,4 @@ public class JobExecutionServiceUnitTest {
       async.complete();
     });
   }
-
 }
