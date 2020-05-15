@@ -61,6 +61,7 @@ public abstract class RestVerticleTestBase {
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
+  protected static final String DELIMITER = "/";
 
   @BeforeClass
   public static void setUpClass(final TestContext context) throws Exception {

@@ -1,6 +1,22 @@
 [
   {
-    "tag": "001",
+    "field": "leader",
+    "description": "Leader",
+    "dataSources": [
+      {
+        "translation": {
+          "function": "set_17-19_positions",
+          "parameters": {
+            "position17": "3",
+            "position18": "c",
+            "position19": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "field": "001",
     "description": "The human readable ID",
     "dataSources": [
       {
@@ -9,7 +25,7 @@
     ]
   },
   {
-    "tag": "245",
+    "field": "245",
     "description": "Title",
     "dataSources": [
       {
@@ -37,7 +53,7 @@
     ]
   },
   {
-    "tag": "264",
+    "field": "264",
     "description": "Publication",
     "dataSources": [
       {
@@ -73,7 +89,7 @@
     ]
   },
   {
-    "tag": "300",
+    "field": "300",
     "description": "Physical Descriptions",
     "dataSources": [
       {
@@ -101,7 +117,7 @@
     ]
   },
   {
-    "tag": "490",
+    "field": "490",
     "description": "Series",
     "dataSources": [
       {
@@ -129,7 +145,7 @@
     ]
   },
   {
-    "tag": "655",
+    "field": "655",
     "description": "Nature of content terms",
     "dataSources": [
       {
@@ -160,7 +176,7 @@
     ]
   },
   {
-    "tag": "999",
+    "field": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [
       {
