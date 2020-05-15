@@ -29,7 +29,7 @@ public interface JobExecutionService {
    *
    * @param jobExecution jobExecution to save
    * @param tenantId     tenant id
-   * @return future with JobExecutionCollection
+   * @return future with JobExecution
    */
   Future<JobExecution> save(JobExecution jobExecution, String tenantId);
 
