@@ -126,9 +126,21 @@ class EntitiesCrudTest extends RestVerticleTestBase{
       .statusCode(204);
   }
 
+  @ParameterizedTest
+  @Order(8)
+  @EnumSource(TestEntities.class)
+  void testVerifyDelete(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-data-exports %s test: Verify %s is deleted with ID: %s", testEntity.name(),
+        testEntity.name(), testEntity.getId()));
+    deleteRequestById(testEntity.getEndpointWithId(), testEntity.getId()).then()
+    .log()
+    .ifValidationFails()
+    .statusCode(404);
+  }
+
 
   private String getSample(String fileName) throws IOException {
-    return FileUtils.readFileToString(TestUtil.getFileFromResources(fileName), Charsets.UTF_8);
+    return TestUtil.readFileContentFromResources(fileName);
   }
 
 }

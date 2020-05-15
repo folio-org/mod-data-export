@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -10,6 +11,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.resource.DataExportJobProfiles;
+import org.folio.rest.jaxrs.resource.DataExportMappingProfiles.DeleteDataExportMappingProfilesByIdResponse;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profile.jobprofile.JobProfileService;
 import org.folio.spring.SpringContextUtil;
@@ -56,7 +58,9 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
   public void deleteDataExportJobProfilesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> jobProfileService.deleteById(id, tenantId))
-      .map(deleted -> DeleteDataExportJobProfilesByIdResponse.respond204())
+    .map(isDeleted -> Boolean.TRUE.equals(isDeleted)
+        ? DeleteDataExportJobProfilesByIdResponse.respond204()
+        : DeleteDataExportJobProfilesByIdResponse.respond404WithTextPlain(format("JobProfile with id '%s' was not found", id)))
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
