@@ -76,12 +76,12 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
-          context.verify(v-> {
-            assertSuccessJobExecution(jobExecution, 2);
+          context.verify(v -> {
+            assertSuccessJobExecution(jobExecution, 2, 0);
             assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
             validateExternalCalls();
+            async.complete();
           });
-          async.complete();
         });
       });
     });
@@ -105,10 +105,10 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 1);
+            assertSuccessJobExecution(jobExecution, 1, 0);
             validateExternalCallsForInventory();
+            async.complete();
           });
-          async.complete();
         });
       });
     });
@@ -152,10 +152,11 @@ public class DataExportTest extends RestVerticleTestBase {
     Assert.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
-  private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords) {
+  private void assertSuccessJobExecution(JobExecution jobExecution, int exportedRecords, int failedRecords) {
     Assert.assertEquals(SUCCESS, jobExecution.getStatus());
     Assert.assertNotNull(jobExecution.getCompletedDate());
-    Assert.assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
+    Assert.assertEquals(exportedRecords, jobExecution.getProgress().getExported().intValue());
+    Assert.assertEquals(failedRecords, jobExecution.getProgress().getFailed().intValue());
   }
 
   private void validateExternalCalls() {

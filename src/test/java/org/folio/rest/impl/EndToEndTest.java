@@ -289,7 +289,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
-    context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
+    context.assertEquals(jobExecution.getProgress().getExported(), currentNumber);
     return Future.succeededFuture();
   }
 

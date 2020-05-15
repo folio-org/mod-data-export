@@ -99,16 +99,15 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
 
   @Override
-  public Future<JobExecution> incrementCurrentProgress(final String jobExecutionId, final int delta, final String tenantId) {
+  public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, String tenantId) {
     return jobExecutionDao.getById(jobExecutionId, tenantId)
       .compose(jobExecutionOptional -> {
         if (jobExecutionOptional.isPresent()) {
           JobExecution jobExecution = jobExecutionOptional.get();
           Progress progress = jobExecution.getProgress();
           if (nonNull(progress)) {
-            int current = nonNull(progress.getCurrent()) ? progress.getCurrent() : 0;
-            int incrementedCurrent = current + delta;
-            progress.setCurrent(incrementedCurrent);
+            progress.setExported(progress.getExported() + exported);
+            progress.setFailed(progress.getFailed() + failed);
             return jobExecutionDao.update(jobExecution, tenantId);
           }
           return Future.failedFuture(format("Unable to update progress of job execution with id %s", jobExecutionId));

@@ -62,7 +62,7 @@ public class JobExecutionServiceUnitTest {
     JobExecution jobExecution = new JobExecution();
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, "diku")).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
     future.setHandler(ar -> {
       context.assertTrue(ar.failed());
@@ -78,7 +78,7 @@ public class JobExecutionServiceUnitTest {
     String errorMessage = String.format("Job execution with id %s doesn't exist", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, "diku")).thenReturn(Future.succeededFuture(Optional.empty()));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
     future.setHandler(ar -> {
       context.assertTrue(ar.failed());
