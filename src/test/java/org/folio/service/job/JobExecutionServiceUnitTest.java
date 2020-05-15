@@ -1,10 +1,14 @@
 package org.folio.service.job;
 
+import com.google.common.collect.Sets;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.dao.impl.JobExecutionDaoImpl;
+import org.folio.rest.jaxrs.model.ExportedFile;
+import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Progress;
 import org.junit.Assert;
@@ -26,13 +30,21 @@ public class JobExecutionServiceUnitTest {
 
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
+  private static final String FILE_DEFINITION_FILE_NAME = "fileName";
+  private static final String PERSONAL_KEY = "personal";
+  private static final String FIRST_NAME_KEY = "firstName";
+  private static final String FIRST_NAME_VALUE = "firstName";
+  private static final String LAST_NAME_KEY = "lastName";
+  private static final String LAST_NAME_VALUE = "lastName";
+  private static final long TOTAL_COUNT_LONG = 2L;
+  private static final String TOTAL_COUNT_STRING = "2";
 
   @Spy
   @InjectMocks
-  JobExecutionServiceImpl jobExecutionService;
+  private JobExecutionServiceImpl jobExecutionService;
 
   @Mock
-  JobExecutionDaoImpl jobExecutionDao;
+  private JobExecutionDaoImpl jobExecutionDao;
 
   @Before
   public void setUp() {
@@ -104,5 +116,41 @@ public class JobExecutionServiceUnitTest {
       Assert.assertEquals(ar.cause().getMessage(), errorMessage);
       async.complete();
     });
+  }
+
+  @Test
+  public void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(TestContext context) {
+    //given
+    Async async = context.async();
+    JobExecution jobExecution = new JobExecution()
+      .withExportedFiles(Sets.newHashSet());
+    FileDefinition fileDefinition = new FileDefinition()
+      .withFileName(FILE_DEFINITION_FILE_NAME);
+    JsonObject user = new JsonObject()
+      .put(PERSONAL_KEY, new JsonObject()
+        .put(FIRST_NAME_KEY, FIRST_NAME_VALUE)
+        .put(LAST_NAME_KEY, LAST_NAME_VALUE));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
+
+    //when
+    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, TENANT_ID);
+
+    //then
+    future.setHandler(ar -> {
+      context.assertTrue(ar.succeeded());
+      JobExecution updatedJobExecution = ar.result();
+      ExportedFile exportedFile = getFirstExportedFile(updatedJobExecution);
+      context.assertNotNull(exportedFile.getFileId());
+      context.assertEquals(FILE_DEFINITION_FILE_NAME, exportedFile.getFileName());
+      context.assertEquals(FIRST_NAME_VALUE, updatedJobExecution.getRunBy().getFirstName());
+      context.assertEquals(LAST_NAME_VALUE, updatedJobExecution.getRunBy().getLastName());
+      context.assertEquals(TOTAL_COUNT_STRING, updatedJobExecution.getProgress().getTotal());
+      async.complete();
+    });
+  }
+
+  private ExportedFile getFirstExportedFile(JobExecution updatedJobExecution) {
+    return updatedJobExecution.getExportedFiles().iterator().next();
   }
 }
