@@ -77,7 +77,7 @@ public class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 2, 0, 2);
+            assertSuccessJobExecution(jobExecution, 2, 0, "2");
             assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
             validateExternalCalls();
             async.complete();
@@ -105,7 +105,7 @@ public class DataExportTest extends RestVerticleTestBase {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(v -> {
-            assertSuccessJobExecution(jobExecution, 1, 0, 1);
+            assertSuccessJobExecution(jobExecution, 1, 0, "1");
             validateExternalCallsForInventory();
             async.complete();
           });
