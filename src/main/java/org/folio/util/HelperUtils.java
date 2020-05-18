@@ -17,7 +17,7 @@ public class HelperUtils {
    * Builds criteria by which db result is filtered
    *
    * @param jsonbField - json key name
-   * @param value      - value corresponding to the key
+   * @param value - value corresponding to the key
    * @return - Criteria object
    */
   public static Criteria constructCriteria(String jsonbField, String value) {
@@ -27,6 +27,7 @@ public class HelperUtils {
     criteria.setVal(value);
     return criteria;
   }
+
 
   /**
    * Builds CQLWrapper by which db result is filtered
@@ -39,7 +40,7 @@ public class HelperUtils {
    */
   public static CQLWrapper getCQLWrapper(String tableName, String query, int limit, int offset) throws FieldException {
     CQL2PgJSON cql2pgJson = new CQL2PgJSON(tableName + ".jsonb");
-    return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit)).setOffset(new Offset(offset));
+    return new CQLWrapper(cql2pgJson, query).setLimit(new Limit(limit))
+      .setOffset(new Offset(offset));
   }
-
 }

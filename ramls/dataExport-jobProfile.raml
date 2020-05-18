@@ -1,0 +1,56 @@
+#%RAML 1.0
+
+title: Data export
+version: v1.0
+protocols: [ HTTP, HTTPS ]
+baseUri: https://github.com/folio-org/mod-data-export
+
+documentation:
+  - title: Data export Job Profile API
+    content: APIs for creating job Profiles to manage export jobs
+
+types:
+  errors: !include raml-util/schemas/errors.schema
+  jobProfile: !include schemas/profiles/jobProfile.json
+  jobProfileCollection: !include schemas/profiles/jobProfileCollection.json
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection.raml
+  collection-item: !include raml-util/rtypes/item-collection.raml
+  
+traits:
+  validate: !include raml-util/traits/validation.raml
+  pageable:  !include raml-util/traits/pageable.raml
+  searchable: !include raml-util/traits/searchable.raml
+  language: !include raml-util/traits/language.raml
+
+
+
+/data-export/jobProfiles:
+    description: Service provides APIs supporting Job profiles
+    type:
+      collection:
+        schemaCollection: jobProfileCollection
+        schemaItem: jobProfile
+        exampleCollection: !include samples/profiles/jobProfileCollection.sample
+        exampleItem: !include samples/profiles/jobProfile.sample
+        
+    post:
+      is: [validate]
+    get:
+      is: [ pageable, searchable: { description: "with valid searchable fields", example: "status=SUCCESS"}, validate ]
+    /{id}:
+      uriParameters:
+        id:
+          description: The UUID of a job Profile
+          type: UUID
+      displayName: Job Profile
+      description: Get, Delete or Update a specific job Profile
+      type:
+        collection-item:
+          schema: jobProfile
+          exampleItem: !include samples/profiles/jobProfile.sample

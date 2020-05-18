@@ -1,31 +1,5 @@
 package org.folio.service.file.cleanup;
 
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.dao.FileDefinitionDao;
-import org.folio.rest.RestVerticleTestBase;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.Metadata;
-import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.service.ApplicationTestConfig;
-import org.folio.spring.SpringContextUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Date;
-
 import static java.util.Objects.nonNull;
 import static org.drools.core.util.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
@@ -33,7 +7,34 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Date;
+import org.folio.dao.FileDefinitionDao;
+import org.folio.rest.RestVerticleTestBase;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.Metadata;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.service.ApplicationTestConfig;
+import org.folio.spring.SpringContextUtil;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(VertxExtension.class)
 public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private static final String FILE_DEFINITIONS_TABLE = "file_definitions";
@@ -59,15 +60,15 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     setUpSpringContext();
   }
 
-  @Before
-  public void setUp(TestContext context) throws IOException {
-    super.setUp(context);
+  @BeforeEach
+  public void setUp(VertxTestContext context) throws IOException {
+    super.setUp();
     clearFileDefinitionTable(context);
     createTestFiles();
     createFileDefinitions();
   }
 
-  @After
+  @AfterEach
   public void tearDownFileSystem() throws IOException {
     removeFileAndParentDirectory(testFile1);
     removeFileAndParentDirectory(testFile2);
@@ -75,9 +76,8 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFile_andFileDefinition_whenFileDefinitionWasUpdatedLaterThanHourAgo(TestContext context) throws IOException {
+  public void shouldRemoveFile_andFileDefinition_whenFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
     // given
-    Async async = context.async();
     createTestFileAndDirectories(testFile1);
     fileDefinition1.getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
@@ -88,21 +88,23 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
       // then
       future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertTrue(ar.result());
-        assertFalse(testFile1.exists());
-        assertFalse(Files.exists(Paths.get(testFile1.getParent())));
-        assertFileDefinitionIsRemoved();
-        async.complete();
+        context.verify(()->{
+          assertTrue(ar.succeeded());
+          assertTrue(ar.result());
+          assertFalse(testFile1.exists());
+          assertFalse(Files.exists(Paths.get(testFile1.getParent())));
+          assertFileDefinitionIsRemoved();
+          context.completeNow();
+        });
+
       });
       return Promise.promise().future();
     });
   }
 
   @Test
-  public void shouldRemoveTwoFiles_andFileDefinitions_whenFileDefinitionsWasUpdatedLaterThanHourAgo(TestContext context) throws IOException {
+  public void shouldRemoveTwoFiles_andFileDefinitions_whenFileDefinitionsWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
     // given
-    Async async = context.async();
     createTestFileAndDirectories(testFile1);
     fileDefinition1.getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
@@ -117,14 +119,17 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
         // then
         future.setHandler(ar -> {
-          assertTrue(ar.succeeded());
-          assertTrue(ar.result());
-          assertFalse(testFile1.exists());
-          assertFalse(testFile2.exists());
-          assertFalse(Files.exists(Paths.get(testFile1.getParent())));
-          assertFalse(Files.exists(Paths.get(testFile2.getParent())));
-          assertFileDefinitionIsRemoved();
-          async.complete();
+          context.verify(() -> {
+            assertTrue(ar.succeeded());
+            assertTrue(ar.result());
+            assertFalse(testFile1.exists());
+            assertFalse(testFile2.exists());
+            assertFalse(Files.exists(Paths.get(testFile1.getParent())));
+            assertFalse(Files.exists(Paths.get(testFile2.getParent())));
+            assertFileDefinitionIsRemoved();
+            context.completeNow();
+          });
+
         });
         return Promise.promise().future();
       });
@@ -132,9 +137,8 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(TestContext context) throws IOException {
+  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(VertxTestContext context) throws IOException {
     // given
-    Async async = context.async();
     testFile1 = new File("./" + TEST_FILE_1_NAME);
     createTestFileAndDirectories(testFile1);
     fileDefinition1.withSourcePath("./" + TEST_FILE_1_NAME)
@@ -147,20 +151,22 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
       // then
       future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertTrue(ar.result());
-        assertFalse(testFile1.exists());
-        assertFileDefinitionIsRemoved();
-        async.complete();
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+          assertTrue(ar.result());
+          assertFalse(testFile1.exists());
+          assertFileDefinitionIsRemoved();
+          context.completeNow();
+        });
+
       });
       return Promise.promise().future();
     });
   }
 
   @Test
-  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNotEmpty(TestContext context) throws IOException {
+  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNotEmpty(VertxTestContext context) throws IOException {
     // given
-    Async async = context.async();
     createTestFileAndDirectories(testFile1);
     createAnotherFileInFileDefinitionDirectory();
     fileDefinition1.getMetadata()
@@ -172,20 +178,22 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
       // then
       future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertTrue(ar.result());
-        assertFalse(testFile1.exists());
-        assertFileDefinitionIsRemoved();
-        async.complete();
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+          assertTrue(ar.result());
+          assertFalse(testFile1.exists());
+          assertFileDefinitionIsRemoved();
+          context.completeNow();
+        });
+
       });
       return Promise.promise().future();
     });
   }
 
   @Test
-  public void shouldRemoveFileDefinition_whenFileDoesNotExist_andFileDefinitionWasUpdatedLaterThanHourAgo(TestContext context) {
+  public void shouldRemoveFileDefinition_whenFileDoesNotExist_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
-    Async async = context.async();
     fileDefinition1.getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
 
@@ -194,20 +202,21 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertTrue(ar.result());
-        assertFileDefinitionIsRemoved();
-        async.complete();
-      });
+        future.setHandler(ar -> {
+          context.verify(() -> {
+            assertTrue(ar.succeeded());
+            assertTrue(ar.result());
+            assertFileDefinitionIsRemoved();
+            context.completeNow();
+          });
+        });
       return Promise.promise().future();
     });
   }
 
   @Test
-  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedLaterThanHourAgo(TestContext context) {
+  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
-    Async async = context.async();
     fileDefinition1.withSourcePath(EMPTY)
       .getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
@@ -217,20 +226,21 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertFalse(ar.result());
-        assertFileDefinitionIsNotRemoved();
-        async.complete();
-      });
+        future.setHandler(ar -> {
+          context.verify(() -> {
+            assertTrue(ar.succeeded());
+            assertFalse(ar.result());
+            assertFileDefinitionIsNotRemoved();
+            context.completeNow();
+          });
+        });
       return Promise.promise().future();
     });
   }
 
   @Test
-  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedEarlierThanHourAgo(TestContext context) {
+  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedEarlierThanHourAgo(VertxTestContext context) {
     // given
-    Async async = context.async();
     fileDefinition1.withSourcePath(EMPTY)
       .getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - FIFTY_NINE_MINUTES_IN_MILLIS));
@@ -240,24 +250,25 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
-        assertTrue(ar.succeeded());
-        assertFalse(ar.result());
-        assertFileDefinitionIsNotRemoved();
-        async.complete();
-      });
+        future.setHandler(ar -> {
+          context.verify(() -> {
+            assertTrue(ar.succeeded());
+            assertFalse(ar.result());
+            assertFileDefinitionIsNotRemoved();
+            context.completeNow();
+          });
+        });
       return Promise.promise().future();
     });
   }
 
-  private void clearFileDefinitionTable(TestContext context) {
-    Async async = context.async();
+  private void clearFileDefinitionTable(VertxTestContext context) {
     PostgresClient.getInstance(vertx, TENANT_ID).delete(FILE_DEFINITIONS_TABLE, new Criterion(), event -> {
       if (event.failed()) {
-        context.fail(event.cause());
+        context.failNow(event.cause());
       }
-      async.complete();
     });
+    context.completeNow();
   }
 
   private void setUpSpringContext() {

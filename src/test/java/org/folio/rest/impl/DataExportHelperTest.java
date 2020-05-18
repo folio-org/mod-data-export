@@ -1,9 +1,15 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import io.vertx.core.Future;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import java.net.MalformedURLException;
+import java.util.Collections;
+import java.util.UUID;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ExportedFile;
@@ -12,25 +18,17 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.util.ErrorCode;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-
-import java.net.MalformedURLException;
-import java.util.Collections;
-import java.util.UUID;
-
-import static io.vertx.core.Future.succeededFuture;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DataExportHelperTest {
   @Mock
   private ExportStorageService exportStorageService;
@@ -41,14 +39,9 @@ public class DataExportHelperTest {
   private DataExportHelper helper = new DataExportHelper();
   private final static String TENANT = "testTenant";
 
-  @Before
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
-  }
 
   @Test
-  public void getDownloadLink_shouldSuccessfulGetDownloadLink(TestContext testContext) throws MalformedURLException {
-    Async async = testContext.async();
+  public void getDownloadLink_shouldSuccessfulGetDownloadLink() throws MalformedURLException {
     // given
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
@@ -63,13 +56,11 @@ public class DataExportHelperTest {
     linkFuture.setHandler(ar -> {
       assertTrue(ar.succeeded());
       assertEquals(url, ar.result().getLink());
-      async.complete();
     });
   }
 
   @Test
-  public void getDownloadLink_shouldFailGetFileDownloadLink(TestContext testContext) throws MalformedURLException {
-    Async async = testContext.async();
+  public void getDownloadLink_shouldFailGetFileDownloadLink() throws MalformedURLException {
     // given
     Mockito
       .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
@@ -86,18 +77,11 @@ public class DataExportHelperTest {
     // then
     linkFuture.setHandler(ar -> {
       assertTrue(ar.failed());
-      async.complete();
     });
   }
 
   @Test
-  public void getDownloadLink_shouldFailIfFileIdFound(TestContext testContext) throws MalformedURLException {
-    Async async = testContext.async();
-    // given
-    Mockito
-      .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
-      .thenThrow(new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED));
-
+  public void getDownloadLink_shouldFailIfFileIdNotFound() throws MalformedURLException {
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
     Mockito
@@ -109,7 +93,6 @@ public class DataExportHelperTest {
     // then
     linkFuture.setHandler(ar -> {
       assertTrue(ar.failed());
-      async.complete();
     });
   }
 }

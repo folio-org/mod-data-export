@@ -1,30 +1,5 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.parsing.Parser;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.apache.commons.io.FileUtils;
-import org.apache.http.HttpStatus;
-import org.folio.rest.RestVerticleTestBase;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.JobExecutionCollection;
-import org.folio.util.ErrorCode;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.UUID;
-
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -32,14 +7,38 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.UUID;
+import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpStatus;
+import org.folio.rest.RestVerticleTestBase;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.util.ErrorCode;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(VertxExtension.class)
 public class FileUploadServiceTest extends RestVerticleTestBase {
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
   private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test
-  public void postFileDefinition_return200Status(TestContext context) {
-    Async async = context.async();
+  public void postFileDefinition_return200Status(VertxTestContext context) {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
@@ -56,17 +55,19 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
       .get(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId());
-    context.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-    FileDefinition createdFileDefinition = response.as(FileDefinition.class);
-    context.assertEquals(givenFileDefinition.getId(), createdFileDefinition.getId());
-    context.assertEquals(givenFileDefinition.getFileName(), createdFileDefinition.getFileName());
-    context.assertEquals(FileDefinition.Status.NEW, createdFileDefinition.getStatus());
-    async.complete();
+    context.verify(() -> {
+      assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+      FileDefinition createdFileDefinition = response.as(FileDefinition.class);
+      assertEquals(givenFileDefinition.getId(), createdFileDefinition.getId());
+      assertEquals(givenFileDefinition.getFileName(), createdFileDefinition.getFileName());
+      assertEquals(FileDefinition.Status.NEW, createdFileDefinition.getStatus());
+      context.completeNow();
+    });
+
   }
 
   @Test
-  public void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(TestContext context) {
-    Async async = context.async();
+  public void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(VertxTestContext context) {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
@@ -78,13 +79,16 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .when()
       .post(FILE_DEFINITION_SERVICE_URL);
     // then
-    context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
-    context.assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION.getDescription(), response.getBody().asString());
-    async.complete();
+    context.verify(() -> {
+      assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+      assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION.getDescription(), response.getBody().asString());
+      context.completeNow();
+    });
+
   }
 
   @Test
-  public void postFileDefinition_return422Status_whenFileNameRequestParamMissing(TestContext context) {
+  public void postFileDefinition_return422Status_whenFileNameRequestParamMissing(VertxTestContext context) {
     // given
     FileDefinition givenEntity = new FileDefinition();
     // when
@@ -94,22 +98,30 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .when()
       .post(FILE_DEFINITION_SERVICE_URL);
     // then
-    context.assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+
+    context.verify(() -> {
+      assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+      context.completeNow();
+    });
+
   }
 
   @Test
-  public void getFileDefinition_return404Status(TestContext context) {
+  public void getFileDefinition_return404Status(VertxTestContext context) {
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
       .get(FILE_DEFINITION_SERVICE_URL + "/" + UUID.randomUUID().toString());
     // then
-    context.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
+    context.verify(() -> {
+      assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
+      context.completeNow();
+    });
+
   }
 
   @Test
-  public void shouldUploadFile_return200Status(TestContext context) throws IOException {
-    Async async = context.async();
+  public void shouldUploadFile_return200Status(VertxTestContext context) throws IOException {
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
@@ -151,12 +163,16 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
       .extract().body().as(JobExecutionCollection.class);
 
     File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
-    assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
-    assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
-    assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
+
+    context.verify(() -> {
+      assertTrue(FileUtils.contentEquals(fileToUpload, uploadedFile));
+      assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
+      assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
+      context.completeNow();
+    });
+
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
-    async.complete();
   }
 
   @NotNull

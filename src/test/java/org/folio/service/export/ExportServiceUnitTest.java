@@ -1,25 +1,28 @@
 package org.folio.service.export;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+
 import io.vertx.core.json.JsonObject;
+import java.util.Collections;
+import java.util.List;
 import org.folio.TestUtil;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ExportServiceUnitTest {
   @Mock
   private FileStorage fileStorage;
@@ -87,22 +90,27 @@ public class ExportServiceUnitTest {
     Mockito.verify(exportStorageService, Mockito.times(1)).storeFile(any(FileDefinition.class), anyString());
   }
 
-  @Test(expected = ServiceException.class)
+  @Test
   public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
     // given
     FileDefinition fileDefinition = null;
     // when
-    exportService.postExport(fileDefinition, TENANT);
+    Assertions.assertThrows(ServiceException.class, () -> {
+      exportService.postExport(fileDefinition, TENANT);
+    });
+
     // then expect RuntimeException
   }
 
-  @Test(expected = ServiceException.class)
+  @Test
   public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
     // given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(null);
     // when
-    exportService.postExport(fileDefinition, TENANT);
+    Assertions.assertThrows(ServiceException.class, () -> {
+      exportService.postExport(fileDefinition, TENANT);
+    });
     // then expect RuntimeException
   }
 }

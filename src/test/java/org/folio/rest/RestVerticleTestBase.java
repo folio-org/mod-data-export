@@ -1,5 +1,6 @@
 package org.folio.rest;
 
+import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
@@ -12,15 +13,18 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
@@ -31,10 +35,11 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
 
 /**
  * Class for tests that base on testing code using Vertx REST verticle
@@ -61,22 +66,18 @@ public abstract class RestVerticleTestBase {
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
+  protected static final String NON_EXISTED_ID = "invalid-aaaa-500a-aaaa-11111111111";
   protected static final String DELIMITER = "/";
 
-  @BeforeClass
-  public static void setUpClass(final TestContext context) throws Exception {
+  @BeforeAll
+  public static void setUpClass() throws Exception {
     vertx = Vertx.vertx();
 
     mockServer = new MockServer(mockPort);
     mockServer.start();
 
     runDatabase();
-    deployVerticle(context);
-  }
-
-  @Before
-  public void setUp() {
-    MockServer.release();
+    deployVerticle();
   }
 
   private static void runDatabase() throws Exception {
@@ -84,42 +85,59 @@ public abstract class RestVerticleTestBase {
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
   }
 
-  private static void deployVerticle(final TestContext context) {
-    Async async = context.async();
+  private static void deployVerticle() throws InterruptedException, ExecutionException, TimeoutException {
     TenantClient tenantClient = new TenantClient(BASE_OKAPI_URL, TENANT_ID, TOKEN);
     DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT));
+    CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      try {
+      if (res.succeeded()) {
         TenantAttributes tenantAttributes = new TenantAttributes();
         tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
-        tenantClient.postTenant(tenantAttributes, res2 -> {
-          async.complete();
-        });
-      } catch (Exception e) {
-        e.printStackTrace();
+        try {
+          tenantClient.postTenant(tenantAttributes, res2 -> {
+            deploymentComplete.complete(res.result());
+          });
+        } catch (Exception e) {
+          deploymentComplete.completeExceptionally(e);
+        }
+
+      } else {
+        deploymentComplete.completeExceptionally(res.cause());
       }
     });
+    deploymentComplete.get(60, TimeUnit.SECONDS);
+
+
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception {
     FileUtils.deleteDirectory(new File(STORAGE_DIRECTORY_PATH));
   }
 
-  @AfterClass
-  public static void tearDownClass(final TestContext context) {
-    Async async = context.async();
+  @AfterAll
+  public static void tearDownClass() throws InterruptedException, ExecutionException, TimeoutException {
     mockServer.close();
-    vertx.close(context.asyncAssertSuccess(res -> {
-      PostgresClient.stopEmbeddedPostgres();
-      async.complete();
-    }));
+    CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
+
+    vertx.close(res -> {
+      if (res.succeeded()) {
+        undeploymentComplete.complete(null);
+      } else {
+        undeploymentComplete.completeExceptionally(res.cause());
+      }
+    });
+
+    undeploymentComplete.get(20, TimeUnit.SECONDS);
+    PostgresClient.stopEmbeddedPostgres();
+
   }
 
-  @Before
-  public void setUp(TestContext context) throws IOException {
+  @BeforeEach
+  public void setUp() throws IOException {
     setUpOkapiConnectionParams();
     setUpJsonRequestSpecification();
+    MockServer.release();
   }
 
   private void setUpOkapiConnectionParams() {
@@ -147,6 +165,39 @@ public abstract class RestVerticleTestBase {
       .when()
       .post(path);
   }
+
+  protected Response getRequest(String path) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .get(path);
+  }
+
+  protected Response getRequestById(String path, String id) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .get(path);
+  }
+
+  protected Response putRequestById(String path, String id, String body) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .body(body)
+      .put(path);
+  }
+
+  protected Response deleteRequestById(String path, String id) {
+    return RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .pathParam("id", id)
+      .when()
+      .delete(path);
+  }
+
 
   protected static String getMockData(String path) throws IOException {
     try (InputStream resourceAsStream = RestVerticleTestBase.class.getClassLoader().getResourceAsStream(path)) {

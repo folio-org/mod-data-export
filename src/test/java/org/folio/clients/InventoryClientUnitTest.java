@@ -6,8 +6,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.HttpServerTestBase;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
   private static final int LIMIT = 20;
   private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "mockData/inventory/get_nature_of_content_terms_response.json";
 
-  @BeforeClass
+  @BeforeAll
   public static void beforeClass() throws Exception {
     setUpHttpServer();
     setUpMocks();
