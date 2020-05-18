@@ -95,7 +95,7 @@ public class ModTenantAPI extends TenantAPI {
       Promise<List<String>> promise = Promise.promise();
       PostgresClient.getInstance(context.owner()).runSQLFile(sqlScript, false, promise);
 
-      LOGGER.info("Module is being deployed in test mode, test data will be initialized. Check the server log for details.");
+      LOGGER.info("Module is being deployed, default data will be initialized. Check the server log for details.");
 
       return promise.future();
     } catch (IOException e) {
