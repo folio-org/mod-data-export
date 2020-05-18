@@ -57,7 +57,7 @@ import org.springframework.context.annotation.Primary;
 
 @Disabled("Disabled until all tests are moved to DataExportTest ")
 @RunWith(VertxUnitRunner.class)
-public class EndToEndTest extends RestVerticleTestBase {
+class EndToEndTest extends RestVerticleTestBase {
 
   private static final String SRS_RESPONSE_FILE_NAME = "mockData/srs/get_records_response.json";
   private static final String FILE_WITH_NON_EXITING_UUID = "InventoryUUIDsNonExiting.csv";
@@ -102,7 +102,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
 
   @Test
-  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
+  void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -120,7 +120,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException, InterruptedException {
+  void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -142,7 +142,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
+  void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -164,7 +164,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
+  void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -184,7 +184,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException, InterruptedException {
+  void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -203,7 +203,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
+  void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);

@@ -51,7 +51,7 @@ public class JobExecutionServiceUnitTest {
 
 
   @Test
-  public void getById_shouldReturnFailedFuture_whenJobExecutionDoesNotExist(VertxTestContext context) {
+  void getById_shouldReturnFailedFuture_whenJobExecutionDoesNotExist(VertxTestContext context) {
     //given
     String errorMessage = String.format("Job execution not found with id %s", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
@@ -69,7 +69,7 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void incrementCurrentProgress_shouldIncrement(VertxTestContext context) {
+  void incrementCurrentProgress_shouldIncrement(VertxTestContext context) {
     //given
     JobExecution job = new JobExecution().withProgress(new Progress().withExported(10).withFailed(3));
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(job)));
@@ -88,7 +88,7 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void incrementCurrentProgress_shouldReturnFailedFuture_whenProgressIsAbsent(VertxTestContext context) {
+  void incrementCurrentProgress_shouldReturnFailedFuture_whenProgressIsAbsent(VertxTestContext context) {
     //given
     String errorMessage = String.format("Unable to update progress of job execution with id %s", JOB_EXECUTION_ID);
     JobExecution jobExecution = new JobExecution();
@@ -109,7 +109,7 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void incrementCurrentProgress_shouldReturnFailedFuture_whenJobExecutionIsAbsent(VertxTestContext context) {
+  void incrementCurrentProgress_shouldReturnFailedFuture_whenJobExecutionIsAbsent(VertxTestContext context) {
     //given
     String errorMessage = String.format("Job execution with id %s doesn't exist", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
@@ -127,7 +127,7 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
+  void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
       .withExportedFiles(Sets.newHashSet());
