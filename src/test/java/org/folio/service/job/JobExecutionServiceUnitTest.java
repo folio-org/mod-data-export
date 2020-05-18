@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class JobExecutionServiceUnitTest {
+class JobExecutionServiceUnitTest {
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static final String FILE_DEFINITION_FILE_NAME = "fileName";
