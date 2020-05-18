@@ -163,7 +163,7 @@ public class DataExportTest extends RestVerticleTestBase {
   private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords, String totalNumberOfRecords) {
     assertEquals(SUCCESS, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
+    assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
   }
 
   private void validateExternalCalls() {
