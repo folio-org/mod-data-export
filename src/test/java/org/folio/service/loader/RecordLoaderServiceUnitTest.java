@@ -6,7 +6,6 @@ import io.vertx.junit5.VertxExtension;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.rest.HttpServerTestBase;
-import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +27,6 @@ import static org.folio.TestUtil.readFileContentFromResources;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -76,7 +74,7 @@ public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
-    when(srsClient.getRecordsByIds(anyList(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(Optional.of(emptyResponse));
+    when(srsClient.getRecordsByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(emptyResponse));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams, LIMIT);
     // then
