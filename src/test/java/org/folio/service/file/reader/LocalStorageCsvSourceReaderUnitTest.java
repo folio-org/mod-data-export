@@ -1,6 +1,7 @@
 package org.folio.service.file.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import java.io.UncheckedIOException;
@@ -15,10 +16,10 @@ class LocalStorageCsvSourceReaderUnitTest {
   private static final long TOTAL_COUNT_5 = 5L;
   private static final long TOTAL_COUNT_0 = 0L;
 
-  private LocalStorageCsvSourceReader reader;
+  private static LocalStorageCsvSourceReader reader;
 
   @BeforeAll
-  public void setUp() {
+  public static void setUp() {
     reader = new LocalStorageCsvSourceReader();
   }
 
@@ -58,15 +59,18 @@ class LocalStorageCsvSourceReaderUnitTest {
     reader.close();
   }
 
-  @Test(expected = UncheckedIOException.class)
+  @Test
   void shouldThrowUncheckedIOException_whenReadNextAfterClose() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
     //when
-    reader.init(fileDefinition, BATCH_SIZE);
-    reader.close();
-    reader.readNext();
+    Assertions.assertThrows(UncheckedIOException.class, () -> {
+      reader.init(fileDefinition, BATCH_SIZE);
+      reader.close();
+      reader.readNext();
+    });
+
   }
 
 }
