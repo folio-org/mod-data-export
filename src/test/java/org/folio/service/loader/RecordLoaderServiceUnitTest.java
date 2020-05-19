@@ -60,7 +60,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnExistingMarcRecords() {
+  void shouldReturnExistingMarcRecords() {
     // given
     when(srsClient.getRecordsByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromSRS));
     // when
@@ -70,7 +70,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnNotFoundInstanceIds() {
+  void shouldReturnNotFoundInstanceIds() {
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
@@ -83,7 +83,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_doesNotThrowAnyException() {
+  void loadInstanceRecords_doesNotThrowAnyException() {
     // given
     List<String> uuids = new ArrayList<>();
     // when call loadInventoryInstances method, then assert no exception thrown
@@ -92,7 +92,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_shouldReturnTwoRecordsByIds() {
+  void loadInstanceRecords_shouldReturnTwoRecordsByIds() {
     // given
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
@@ -103,7 +103,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
+  void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
     String json = readFileContentFromResources(INVENTORY_EMPTY_RESPONSE_JSON);
     JsonObject data = new JsonObject(json);
@@ -116,7 +116,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void loadInstanceRecords_shouldReturnEmptyList_whenOptionalResponseIsNotPresent() {
+  void loadInstanceRecords_shouldReturnEmptyList_whenOptionalResponseIsNotPresent() {
     // given
     when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
