@@ -37,7 +37,8 @@ public class InventoryClient {
   }
 
   private Map<String, JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {
-    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, url);
+    String endpoint = buildQueryEndpoint(url, params.getOkapiUrl());
+    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, endpoint);
     Map<String, JsonObject> map = new HashMap<>();
     responseBody.ifPresent(rb -> {
       if (rb.containsKey(field)) {

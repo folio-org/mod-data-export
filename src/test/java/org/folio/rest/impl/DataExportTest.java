@@ -1,9 +1,9 @@
 package org.folio.rest.impl;
 
 import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 

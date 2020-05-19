@@ -89,7 +89,7 @@ public class MockServer {
     router.get(resourcesPath(INSTANCE)).handler(ctx -> handleGetInstanceRecord(ctx));
     router.get(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
-    router.get(resourcesPath(USERS) + ":id").handler(ctx -> handleGetUsersRecord(ctx));
+    router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
 
     return router;
   }

@@ -1,9 +1,8 @@
 package org.folio.service.file.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import java.io.UncheckedIOException;
 
 import static org.junit.Assert.assertEquals;
@@ -18,7 +17,7 @@ class LocalStorageCsvSourceReaderUnitTest {
 
   private LocalStorageCsvSourceReader reader;
 
-  @Before
+  @BeforeAll
   public void setUp() {
     reader = new LocalStorageCsvSourceReader();
   }
