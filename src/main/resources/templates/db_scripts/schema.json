@@ -52,5 +52,12 @@
         }
       ]
     }
+  ],
+  "scripts": [
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/rename_progress_current_to_exported.sql",
+      "fromModuleVersion": "mod-data-export-1.2.0"
+    }
   ]
 }

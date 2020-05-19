@@ -31,6 +31,7 @@ import org.folio.TestUtil;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
+import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.RestVerticleTestBase;
@@ -38,6 +39,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeAll;
@@ -48,10 +50,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 @Disabled("Disabled until all tests are moved to DataExportTest ")
 @RunWith(VertxUnitRunner.class)
-public class EndToEndTest extends RestVerticleTestBase {
+class EndToEndTest extends RestVerticleTestBase {
 
   private static final String SRS_RESPONSE_FILE_NAME = "mockData/srs/get_records_response.json";
   private static final String FILE_WITH_NON_EXITING_UUID = "InventoryUUIDsNonExiting.csv";
@@ -96,7 +102,7 @@ public class EndToEndTest extends RestVerticleTestBase {
 
 
   @Test
-  public void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
+  void shouldReturn_204Status_forHappyPathExport(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -114,7 +120,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException, InterruptedException {
+  void shouldExportFileWithRecords_whenExportInOneBatch(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -136,7 +142,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
+  void shouldExportFileWithRecords_whenExportInTwoBatches(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -158,7 +164,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
+  void shouldNotExportFile_whenUploadedFileContainsOnlyNonExistingUuid(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -178,7 +184,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException, InterruptedException {
+  void shouldUpdateJobExecutionStatusToFail_whenUploadedFileIsEmpty(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     //given
@@ -197,7 +203,7 @@ public class EndToEndTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
+  void shouldReturn_400Status_forReUploadFile(TestContext context) throws IOException, InterruptedException {
     Async async = context.async();
 
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
@@ -283,7 +289,7 @@ public class EndToEndTest extends RestVerticleTestBase {
     context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
     context.assertEquals(jobExecution.getStatus(), SUCCESS);
     context.assertNotNull(jobExecution.getCompletedDate());
-    context.assertEquals(jobExecution.getProgress().getCurrent(), currentNumber);
+    context.assertEquals(jobExecution.getProgress().getExported(), currentNumber);
     context.assertEquals(jobExecution.getProgress().getTotal(), total);
     return Future.succeededFuture();
   }
