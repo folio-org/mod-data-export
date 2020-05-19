@@ -45,7 +45,7 @@ public class ModTenantAPI extends TenantAPI {
         TenantLoading tenantLoading = new TenantLoading();
         Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SAMPLE).withValue("true");
         entity.getParameters().add(parameter);
-        buildDataLoadingParameters(tenantLoading, entity);
+        buildDataLoadingParameters(tenantLoading);
         tenantLoading.perform(entity, headers, context.owner(), res1 -> {
           if (res1.failed()) {
             handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
@@ -76,7 +76,7 @@ public class ModTenantAPI extends TenantAPI {
       });
   }
 
-  private void buildDataLoadingParameters(TenantLoading tenantLoading, TenantAttributes entity) {
+  private void buildDataLoadingParameters(TenantLoading tenantLoading) {
       tenantLoading.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead(DATA)
         .add(MAPPING_PROFILES, MAPPING_PROFILES_URI);
