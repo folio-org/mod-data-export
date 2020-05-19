@@ -31,9 +31,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
