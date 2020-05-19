@@ -33,7 +33,7 @@ class EntitiesCrudTest extends RestVerticleTestBase {
       TestEntities.MAPPINGPROFILE);
   }
 
-  @Disabled
+  @Disabled("Disabled until default job profile will be exist")
   @ParameterizedTest
   @Order(1)
   @EnumSource(TestEntities.class)
@@ -61,7 +61,7 @@ class EntitiesCrudTest extends RestVerticleTestBase {
     .statusCode(201);
   }
 
-  @Disabled
+  @Disabled("Disabled until default job profile will be exist")
   @ParameterizedTest
   @Order(3)
   @EnumSource(TestEntities.class)
