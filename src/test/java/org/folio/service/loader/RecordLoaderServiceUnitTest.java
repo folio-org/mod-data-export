@@ -2,6 +2,7 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
@@ -13,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +31,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class RecordLoaderServiceUnitTest extends HttpServerTestBase {
+class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String INVENTORY_EMPTY_RESPONSE_JSON = "clients/inventory/get_instances_empty_response.json";
