@@ -1,22 +1,16 @@
 package org.folio.service.job;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.util.Optional;
-import java.util.UUID;
 import org.assertj.core.util.Sets;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Progress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -25,10 +19,18 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class JobExecutionServiceUnitTest {
+class JobExecutionServiceUnitTest {
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static final String FILE_DEFINITION_FILE_NAME = "fileName";
@@ -49,7 +51,7 @@ public class JobExecutionServiceUnitTest {
 
 
   @Test
-  public void getById_shouldReturnFailedFuture_whenJobExecutionDoesNotExist(VertxTestContext context) {
+  void getById_shouldReturnFailedFuture_whenJobExecutionDoesNotExist(VertxTestContext context) {
     //given
     String errorMessage = String.format("Job execution not found with id %s", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
@@ -67,13 +69,32 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void incrementCurrentProgress_shouldReturnFailedFuture_whenProgressIsAbsent(VertxTestContext context) {
+  void incrementCurrentProgress_shouldIncrement(VertxTestContext context) {
+    //given
+    JobExecution job = new JobExecution().withProgress(new Progress().withExported(10).withFailed(3));
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(job)));
+    when(jobExecutionDao.update(job, TENANT_ID)).thenReturn(Future.succeededFuture(job));
+    //when
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 5, 1, TENANT_ID);
+    //then
+    future.setHandler(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        assertEquals(15, job.getProgress().getExported().intValue());
+        assertEquals(4, job.getProgress().getFailed().intValue());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void incrementCurrentProgress_shouldReturnFailedFuture_whenProgressIsAbsent(VertxTestContext context) {
     //given
     String errorMessage = String.format("Unable to update progress of job execution with id %s", JOB_EXECUTION_ID);
     JobExecution jobExecution = new JobExecution();
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
     future.setHandler(ar -> {
 
@@ -88,12 +109,12 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void incrementCurrentProgress_shouldReturnFailedFuture_whenJobExecutionIsAbsent(VertxTestContext context) {
+  void incrementCurrentProgress_shouldReturnFailedFuture_whenJobExecutionIsAbsent(VertxTestContext context) {
     //given
     String errorMessage = String.format("Job execution with id %s doesn't exist", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
     future.setHandler(ar -> {
       context.verify(() -> {
@@ -106,7 +127,7 @@ public class JobExecutionServiceUnitTest {
   }
 
   @Test
-  public void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
+  void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
       .withExportedFiles(Sets.newHashSet());
