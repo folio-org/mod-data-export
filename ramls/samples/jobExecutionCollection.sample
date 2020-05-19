@@ -23,7 +23,8 @@
         "name": "default"
       },
       "progress": {
-        "current": 1200,
+        "exported": 109000,
+        "failed": 485,
         "total": "109485"
       },
       "completedDate": "2019-10-30T12:40:01.000+0000",

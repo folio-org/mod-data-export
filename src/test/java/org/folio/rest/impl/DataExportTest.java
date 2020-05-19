@@ -44,7 +44,7 @@ import org.springframework.context.annotation.Primary;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-public class DataExportTest extends RestVerticleTestBase {
+class DataExportTest extends RestVerticleTestBase {
 
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
@@ -67,7 +67,7 @@ public class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void testExport_UnderlyingSrsOnly(VertxTestContext context) throws IOException {
+  void testExport_UnderlyingSrsOnly(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS);
@@ -95,7 +95,7 @@ public class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void testExport_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
+  void testExport_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY);
@@ -163,7 +163,7 @@ public class DataExportTest extends RestVerticleTestBase {
   private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords, String totalNumberOfRecords) {
     assertEquals(SUCCESS, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
-    assertEquals(numberOfExportedRecords, jobExecution.getProgress().getCurrent());
+    assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
   }
 
   private void validateExternalCalls() {
