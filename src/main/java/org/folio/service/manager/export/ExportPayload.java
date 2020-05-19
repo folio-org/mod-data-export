@@ -16,6 +16,7 @@ public class ExportPayload {
   private OkapiConnectionParams okapiConnectionParams;
   private String jobExecutionId;
   private int exportedRecordsNumber;
+  private int failedRecordsNumber;
 
   public ExportPayload() {
   }
@@ -74,5 +75,13 @@ public class ExportPayload {
 
   public void setExportedRecordsNumber(int exportedRecordsNumber) {
     this.exportedRecordsNumber = exportedRecordsNumber;
+  }
+
+  public int getFailedRecordsNumber() {
+    return failedRecordsNumber;
+  }
+
+  public void setFailedRecordsNumber(int failedRecordsNumber) {
+    this.failedRecordsNumber = failedRecordsNumber;
   }
 }

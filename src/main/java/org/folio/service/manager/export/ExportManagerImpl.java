@@ -92,8 +92,8 @@ public class ExportManagerImpl implements ExportManager {
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords()
-      .size() + mappedMarcRecords.size());
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
   }
 
   /**
@@ -174,8 +174,9 @@ public class ExportManagerImpl implements ExportManager {
   private Future<JobExecution> incrementCurrentProgress(ExportPayload exportPayload, ExportResult exportResult) {
     if (!exportResult.isFailed()) {
       String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-      int exportedRecordsNumber = exportPayload.getExportedRecordsNumber();
-      return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exportedRecordsNumber, tenantId);
+      int exported = exportPayload.getExportedRecordsNumber();
+      int failed = exportPayload.getFailedRecordsNumber();
+      return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, tenantId);
     }
     return Future.succeededFuture();
   }

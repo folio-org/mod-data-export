@@ -38,9 +38,15 @@
       "description": "Execution progress of the job",
       "type": "object",
       "properties": {
-        "current": {
-          "description": "Number of records exported",
-          "type": "integer"
+        "exported": {
+          "description": "Number of successfully exported records",
+          "type": "integer",
+          "default": 0
+        },
+        "failed": {
+          "description": "Number of records that are failed on export",
+          "type": "integer",
+          "default": 0
         },
         "total": {
           "description": "Total number of records",
