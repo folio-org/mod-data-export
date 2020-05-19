@@ -1,7 +1,11 @@
 package org.folio.clients;
 
-import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.clients.ClientUtil.buildQueryEndpoint;
+import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.HOLDING;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
@@ -17,10 +21,14 @@ import org.springframework.stereotype.Component;
 public class InventoryClient {
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
+  private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
+  private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int SETTING_LIMIT = 200;
+  private static final int HOLDINGS_LIMIT = 1000;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
-    return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
+    return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+        QUERY_PATTERN_INVENTORY);
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
@@ -42,6 +50,17 @@ public class InventoryClient {
     });
 
     return map;
+  }
+
+  public Optional<JsonObject> getholdingsForInstance(String instanceID, OkapiConnectionParams params) {
+    String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+        params.getOkapiUrl(), QUERY_PATTERN_HOLDING, instanceID);
+    return getRequest(params, endpoint);
+  }
+
+  public Optional<JsonObject> getItemsForHoldings(List<String> holdingIds, OkapiConnectionParams params) {
+    return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+        QUERY_PATTERN_ITEM);
   }
 
 }

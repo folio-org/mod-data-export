@@ -34,7 +34,6 @@ import java.util.List;
  * The ExportManager is a central part of the data-export.
  * Runs the main export process calling other internal services along the way.
  */
-@SuppressWarnings({"java:S1172", "java:S125"})
 @Service
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -87,13 +86,14 @@ public class ExportManagerImpl implements ExportManager {
     exportService.exportSrsRecord(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
+    LOGGER.info("Number of instances not found in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
     List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size()+mappedMarcRecords.size());
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords()
+      .size() + mappedMarcRecords.size());
   }
 
   /**
@@ -138,7 +138,7 @@ public class ExportManagerImpl implements ExportManager {
    * @return return future
    */
   private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
-    Promise promise = Promise.promise();
+    Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     clearIdentifiers(exportPayload);
@@ -156,7 +156,7 @@ public class ExportManagerImpl implements ExportManager {
 
   private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export is failed, cause: " + asyncResult.cause().getMessage());
+      LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
         return ExportResult.failed(serviceException.getErrorCode());

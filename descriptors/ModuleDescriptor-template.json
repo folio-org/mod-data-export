@@ -15,6 +15,14 @@
       "version": "7.4"
     },
     {
+      "id": "holdings-storage",
+      "version": "4.2"
+    },
+    {
+      "id": "item-storage",
+      "version": "8.3"
+    },
+    {
       "id": "nature-of-content-terms",
       "version": "1.0"
     }
@@ -36,6 +44,8 @@
             "users.item.get",
             "source-storage.records.get",
             "inventory-storage.instances.collection.get",
+            "inventory-storage.holdings.collection.get",
+            "inventory-storage.items.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get"
           ]
         },
