@@ -22,7 +22,7 @@ public class ModTenantAPI extends TenantAPI {
   private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantAPI.class);
 
   private static final long DELAY_TIME_BETWEEN_CLEANUP_VALUE_MILLIS = 3600_000;
-  private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
+  private static final String LOAD_SAMPLE_PARAMETER = "loadSample";
   private static final String DATA = "data";
   private static final String MAPPING_PROFILES = "mappingProfiles";
   private static final String MAPPING_PROFILES_URI = "data-export/mappingProfiles";
@@ -43,7 +43,7 @@ public class ModTenantAPI extends TenantAPI {
       } else {
         initStorageCleanupService(headers, context);
         TenantLoading tenantLoading = new TenantLoading();
-        Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SAMPLE).withValue("true");
+        Parameter parameter = new Parameter().withKey(LOAD_SAMPLE_PARAMETER).withValue("true");
         entity.getParameters().add(parameter);
         buildDataLoadingParameters(tenantLoading);
         tenantLoading.perform(entity, headers, context.owner(), res1 -> {
@@ -77,9 +77,9 @@ public class ModTenantAPI extends TenantAPI {
   }
 
   private void buildDataLoadingParameters(TenantLoading tenantLoading) {
-      tenantLoading.withKey(PARAMETER_LOAD_SAMPLE)
-        .withLead(DATA)
-        .add(MAPPING_PROFILES, MAPPING_PROFILES_URI);
+    tenantLoading.withKey(LOAD_SAMPLE_PARAMETER)
+      .withLead(DATA)
+      .add(MAPPING_PROFILES, MAPPING_PROFILES_URI);
   }
 
 }

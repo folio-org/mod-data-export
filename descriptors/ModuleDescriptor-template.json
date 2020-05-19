@@ -326,7 +326,8 @@
         "data-export.mapping-profiles.item.post",
         "data-export.mapping-profiles.collection.get",
         "data-export.mapping-profiles.item.get",
-        "data-export.mapping-profiles.item.put"
+        "data-export.mapping-profiles.item.put",
+        "data-export.mapping-profiles.item.delete"
       ],
       "visible": false
     }
