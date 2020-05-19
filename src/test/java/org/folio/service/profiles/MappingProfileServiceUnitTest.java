@@ -15,11 +15,12 @@ import org.folio.service.profiles.mapping.MappingProfileServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
@@ -42,7 +44,6 @@ public class MappingProfileServiceUnitTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     expectedMappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")

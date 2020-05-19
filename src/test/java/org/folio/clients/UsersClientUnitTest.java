@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RunWith(VertxUnitRunner.class)
-public class UsersClientUnitTest extends HttpServerTestBase {
+class UsersClientUnitTest extends HttpServerTestBase {
   protected static final String USERS_BY_ID_URL = "/users/:id";
   protected static final String USER_RESPONSE_JSON = "mockData/user/get_user_response.json";
 
@@ -36,7 +36,7 @@ public class UsersClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnUserById() {
+  void shouldReturnUserById() {
     // given
     UsersClient usersClient = new UsersClient();
     // when

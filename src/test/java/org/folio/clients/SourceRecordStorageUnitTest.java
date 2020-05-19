@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RunWith(VertxUnitRunner.class)
-public class SourceRecordStorageUnitTest extends HttpServerTestBase {
+class SourceRecordStorageUnitTest extends HttpServerTestBase {
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
   private static final int LIMIT = 20;
 
@@ -40,7 +40,7 @@ public class SourceRecordStorageUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldReturnExistingMarcRecords() {
+  void shouldReturnExistingMarcRecords() {
     // given
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
