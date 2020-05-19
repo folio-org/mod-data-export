@@ -42,19 +42,7 @@ public class ModTenantAPI extends TenantAPI {
         handlers.handle(asyncResult);
       } else {
         initStorageCleanupService(headers, context);
-        TenantLoading tenantLoading = new TenantLoading();
-        Parameter parameter = new Parameter().withKey(LOAD_DEFAULT_DATA_PARAMETER).withValue("true");
-        entity.getParameters().add(parameter);
-        buildDataLoadingParameters(tenantLoading);
-        tenantLoading.perform(entity, headers, context.owner(), res1 -> {
-          if (res1.failed()) {
-            handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-              .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
-            return;
-          }
-          handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-            .respond201WithApplicationJson("")));
-        });
+        initDefaultData(entity, headers, handlers, context);
       }
     }, context);
   }
@@ -74,6 +62,22 @@ public class ModTenantAPI extends TenantAPI {
           LOGGER.info("File storage was successfully cleaned of unused files");
         }
       });
+  }
+
+  private void initDefaultData(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
+    TenantLoading tenantLoading = new TenantLoading();
+    Parameter parameter = new Parameter().withKey(LOAD_DEFAULT_DATA_PARAMETER).withValue("true");
+    entity.getParameters().add(parameter);
+    buildDataLoadingParameters(tenantLoading);
+    tenantLoading.perform(entity, headers, context.owner(), response -> {
+      if (response.failed()) {
+        handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
+          .respond500WithTextPlain(response.cause().getLocalizedMessage())));
+        return;
+      }
+      handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
+        .respond201WithApplicationJson("")));
+    });
   }
 
   private void buildDataLoadingParameters(TenantLoading tenantLoading) {
