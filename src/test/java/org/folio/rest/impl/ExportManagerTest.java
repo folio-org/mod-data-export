@@ -19,12 +19,12 @@ import java.util.UUID;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-public class ExportManagerTest extends RestVerticleTestBase {
+class ExportManagerTest extends RestVerticleTestBase {
 
   private static final String EXPORT_URL = "/data-export/export";
 
   @Test
-  public void shouldReturn_204Status_forHappyPath(VertxTestContext context) {
+  void shouldReturn_204Status_forHappyPath(VertxTestContext context) {
     // given
     ExportRequest exportRequest = new ExportRequest()
       .withFileDefinitionId(UUID.randomUUID().toString())
@@ -43,7 +43,7 @@ public class ExportManagerTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturn_422Status_ifRequestIsWrong(VertxTestContext context) {
+  void shouldReturn_422Status_ifRequestIsWrong(VertxTestContext context) {
     // given
     ExportRequest exportRequest = new ExportRequest();
     // when

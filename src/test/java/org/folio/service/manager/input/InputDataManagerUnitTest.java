@@ -156,7 +156,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
+  void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(false);
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
@@ -175,7 +175,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
+  void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
@@ -195,7 +195,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
+  void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
@@ -215,7 +215,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
+  void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
@@ -241,7 +241,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
+  void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_4);
@@ -267,7 +267,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
+  void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
@@ -292,7 +292,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
+  void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
@@ -317,7 +317,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
+  void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
@@ -341,7 +341,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldExportNextChunk_whenProceedWithExportStatusInProgress_andSourceStreamHasMoreChunksToExport() {
+  void shouldExportNextChunk_whenProceedWithExportStatusInProgress_andSourceStreamHasMoreChunksToExport() {
     //given
     ExportPayload exportPayload = createExportPayload();
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -363,7 +363,7 @@ public class InputDataManagerUnitTest {
   }
 
   @Test
-  public void shouldNotExport_whenFileDefinitionNotFound() {
+  void shouldNotExport_whenFileDefinitionNotFound() {
     //given
     requestFileDefinition.setStatus(FileDefinition.Status.ERROR);
     when(fileDefinitionService.getById(exportRequest.getFileDefinitionId(), TENANT_ID))

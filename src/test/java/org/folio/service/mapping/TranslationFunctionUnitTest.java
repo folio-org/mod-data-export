@@ -34,7 +34,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetValue_shouldSetGivenValue() {
+  void SetValue_shouldSetGivenValue() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_value");
     String value = "field value";
@@ -47,7 +47,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetNatureOfContentTerm_shouldReturnTermName() {
+  void SetNatureOfContentTerm_shouldReturnTermName() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "44cd89f3-2e76-469f-a955-cc57cb9e0395";
@@ -58,7 +58,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetNatureOfContentTerm_shouldReturnEmptyString() {
+  void SetNatureOfContentTerm_shouldReturnEmptyString() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "non-existing-id";

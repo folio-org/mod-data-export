@@ -33,12 +33,12 @@ import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-public class FileUploadServiceTest extends RestVerticleTestBase {
+class FileUploadServiceTest extends RestVerticleTestBase {
   private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
   private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test
-  public void postFileDefinition_return200Status(VertxTestContext context) {
+  void postFileDefinition_return200Status(VertxTestContext context) {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
@@ -67,7 +67,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(VertxTestContext context) {
+  void postFileDefinition_return422Status_whenFileNameExtensionNotCsv(VertxTestContext context) {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
@@ -88,7 +88,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void postFileDefinition_return422Status_whenFileNameRequestParamMissing(VertxTestContext context) {
+  void postFileDefinition_return422Status_whenFileNameRequestParamMissing(VertxTestContext context) {
     // given
     FileDefinition givenEntity = new FileDefinition();
     // when
@@ -107,7 +107,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void getFileDefinition_return404Status(VertxTestContext context) {
+  void getFileDefinition_return404Status(VertxTestContext context) {
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -121,7 +121,7 @@ public class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldUploadFile_return200Status(VertxTestContext context) throws IOException {
+  void shouldUploadFile_return200Status(VertxTestContext context) throws IOException {
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()

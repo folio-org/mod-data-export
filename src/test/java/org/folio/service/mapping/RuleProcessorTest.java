@@ -34,7 +34,7 @@ public class RuleProcessorTest {
   }
 
   @Test
-  public void shouldMapEntityTo_MarcRecord() {
+  void shouldMapEntityTo_MarcRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);
@@ -47,7 +47,7 @@ public class RuleProcessorTest {
   }
 
   @Test
-  public void shouldMapEntityTo_JsonRecord() {
+  void shouldMapEntityTo_JsonRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);
@@ -60,7 +60,7 @@ public class RuleProcessorTest {
   }
 
   @Test
-  public void shouldMapEntityTo_XmlRecord() {
+  void shouldMapEntityTo_XmlRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);

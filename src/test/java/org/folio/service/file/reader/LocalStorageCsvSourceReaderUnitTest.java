@@ -8,7 +8,7 @@ import java.io.UncheckedIOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class LocalStorageCsvSourceReaderUnitTest {
+class LocalStorageCsvSourceReaderUnitTest {
 
   private static final int BATCH_SIZE = 2;
   private static final String NONEXISTING_FILE_NAME = "nonexistingfile";
@@ -24,7 +24,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
+  void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
     //when
     long actualTotalCount = reader.totalCount();
     //then
@@ -32,7 +32,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldReturnTotalCountZero_whenReaderInitializedWithNonExistingFile() {
+  void shouldReturnTotalCountZero_whenReaderInitializedWithNonExistingFile() {
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(NONEXISTING_FILE_NAME);
     //when
@@ -43,7 +43,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldReturnTotalCountFive_whenReaderInitialized() {
+  void shouldReturnTotalCountFive_whenReaderInitialized() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
@@ -55,12 +55,12 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldNotThrowException_whenCloseNotInitializedReader() {
+  void shouldNotThrowException_whenCloseNotInitializedReader() {
     reader.close();
   }
 
   @Test(expected = UncheckedIOException.class)
-  public void shouldThrowUncheckedIOException_whenReadNextAfterClose() {
+  void shouldThrowUncheckedIOException_whenReadNextAfterClose() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);

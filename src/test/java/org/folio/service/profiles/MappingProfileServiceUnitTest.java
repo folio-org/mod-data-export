@@ -55,7 +55,7 @@ public class MappingProfileServiceUnitTest {
 
 
   @Test
-  public void getById_shouldReturnFailedFuture_whenMappingProfileDoesNotExist(TestContext context) {
+  void getById_shouldReturnFailedFuture_whenMappingProfileDoesNotExist(TestContext context) {
     // given
     Async async = context.async();
     String errorMessage = String.format("Mapping profile not found with id %s", MAPPING_PROFILE_ID);
@@ -72,7 +72,7 @@ public class MappingProfileServiceUnitTest {
   }
 
   @Test
-  public void save_shouldCallDaoSave_addUuidToTheMappingProfile(TestContext context) {
+  void save_shouldCallDaoSave_addUuidToTheMappingProfile(TestContext context) {
     // given
     Async async = context.async();
     expectedMappingProfile.setId(null);
@@ -89,7 +89,7 @@ public class MappingProfileServiceUnitTest {
   }
 
   @Test
-  public void delete_shouldCallDaoDelete(TestContext context) {
+  void delete_shouldCallDaoDelete(TestContext context) {
     // given
     when(mappingProfileDao.delete(expectedMappingProfile.getId(), TENANT_ID)).thenReturn(Future.succeededFuture(true));
     // when
@@ -99,7 +99,7 @@ public class MappingProfileServiceUnitTest {
   }
 
   @Test
-  public void update_shouldCallDaoUpdate(TestContext context) {
+  void update_shouldCallDaoUpdate(TestContext context) {
     // given
     when(mappingProfileDao.update(expectedMappingProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedMappingProfile));
     // when
@@ -109,7 +109,7 @@ public class MappingProfileServiceUnitTest {
   }
 
   @Test
-  public void get_shouldCallDaoGet(TestContext context) {
+  void get_shouldCallDaoGet(TestContext context) {
     // given
     String query = "?query=recordTypes=INSTANCE";
     when(mappingProfileDao.get(query, 0, 10, TENANT_ID))
