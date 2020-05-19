@@ -33,7 +33,6 @@ class EntitiesCrudTest extends RestVerticleTestBase {
       TestEntities.MAPPINGPROFILE);
   }
 
-  @Disabled("Disabled until default job profile will be exist")
   @ParameterizedTest
   @Order(1)
   @EnumSource(TestEntities.class)
@@ -43,7 +42,7 @@ class EntitiesCrudTest extends RestVerticleTestBase {
       .log()
       .all()
       .statusCode(200)
-      .body("totalRecords", equalTo(0));
+      .body("totalRecords", equalTo(1));
   }
 
   @ParameterizedTest
@@ -61,17 +60,16 @@ class EntitiesCrudTest extends RestVerticleTestBase {
     .statusCode(201);
   }
 
-  @Disabled("Disabled until default job profile will be exist")
   @ParameterizedTest
   @Order(3)
   @EnumSource(TestEntities.class)
   void testVerifyCollectionQuantity(TestEntities testEntity) throws MalformedURLException {
-    logger.info(String.format("--- mod-data-export %s test: Verifying only 1 record was created ... ", testEntity.name()));
+    logger.info(String.format("--- mod-data-export %s test: Verifying only 1 record was created, 2 records in total with default... ", testEntity.name()));
     getRequest(testEntity.getEndpoint()).then()
       .log()
       .all()
       .statusCode(200)
-      .body("totalRecords", equalTo(1));
+      .body("totalRecords", equalTo(2));
 
   }
 
