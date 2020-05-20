@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.when;
 class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
-  MappingProfile expectedMappingProfile;
+  private MappingProfile expectedMappingProfile;
   @Spy
   @InjectMocks
   private MappingProfileServiceImpl mappingProfileService;
@@ -70,6 +71,7 @@ class MappingProfileServiceUnitTest {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
+        assertTrue(ar.cause() instanceof NotFoundException);
         assertEquals(errorMessage, ar.cause().getMessage());
         context.completeNow();
       });
