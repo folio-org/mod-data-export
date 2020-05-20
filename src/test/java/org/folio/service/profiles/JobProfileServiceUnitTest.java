@@ -25,7 +25,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -57,7 +56,6 @@ class JobProfileServiceUnitTest {
   @Test
   void getById_shouldReturnFailedFuture_whenJobProfileDoesNotExist(VertxTestContext context) {
     // given
-    String errorMessage = String.format("JobProfile not found with id %s", JOB_PROFILE_ID);
     when(jobProfileDao.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     // when
     Future<JobProfile> future = jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID);
@@ -66,7 +64,6 @@ class JobProfileServiceUnitTest {
       assertTrue(ar.failed());
       verify(jobProfileDao).getById(eq(JOB_PROFILE_ID), eq(TENANT_ID));
       assertTrue(ar.cause() instanceof NotFoundException);
-      assertEquals(errorMessage, ar.cause().getMessage());
       context.completeNow();
     }));
   }

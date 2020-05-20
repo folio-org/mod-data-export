@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -62,7 +61,6 @@ class MappingProfileServiceUnitTest {
   @Test
   void getById_shouldReturnFailedFuture_whenMappingProfileDoesNotExist(VertxTestContext context) {
     // given
-    String errorMessage = String.format("Mapping profile not found with id %s", MAPPING_PROFILE_ID);
     when(mappingProfileDao.getById(MAPPING_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     // when
     Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, TENANT_ID);
@@ -71,7 +69,6 @@ class MappingProfileServiceUnitTest {
       assertTrue(ar.failed());
       verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
       assertTrue(ar.cause() instanceof NotFoundException);
-      assertEquals(errorMessage, ar.cause().getMessage());
       context.completeNow();
     }));
   }
