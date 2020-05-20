@@ -7,7 +7,7 @@ import io.vertx.core.Vertx;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.resource.DataExportMappingProfiles;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.profiles.mapping.MappingProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;

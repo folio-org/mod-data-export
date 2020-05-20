@@ -11,7 +11,7 @@ import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.model.UserInfo;
-import org.folio.service.profiles.mapping.MappingProfileServiceImpl;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

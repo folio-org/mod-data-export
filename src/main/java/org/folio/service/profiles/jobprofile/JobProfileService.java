@@ -1,4 +1,4 @@
-package org.folio.service.profile.jobprofile;
+package org.folio.service.profiles.jobprofile;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.JobProfile;
