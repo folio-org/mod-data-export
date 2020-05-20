@@ -69,7 +69,7 @@ class JobProfileServiceUnitTest {
   }
 
   @Test
-  void save_shouldCallDaoSave_addUuidToTheMappingProfile(VertxTestContext context) {
+  void save_shouldCallDaoSave_addUuidToTheJobProfile(VertxTestContext context) {
     // given
     expectedJobProfile.setId(null);
     when(jobProfileDao.save(expectedJobProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedJobProfile));
