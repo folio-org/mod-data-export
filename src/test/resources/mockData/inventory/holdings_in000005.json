@@ -1,0 +1,50 @@
+{
+  "holdingsRecords": [
+    {
+      "id": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "hrid": "hold000000000004",
+      "formerIds": [],
+      "instanceId": "7fbd5d84-62d1-44c6-9c45-6cb173998bbd",
+      "permanentLocationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "electronicAccess": [],
+      "callNumber": "PR6056.I4588 B749 2016",
+      "notes": [],
+      "holdingsStatements": [],
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": [],
+      "statisticalCodeIds": [],
+      "holdingsItems": [],
+      "bareHoldingsItems": [],
+      "metadata": {
+        "createdDate": "2020-05-20T01:28:25.750+0000",
+        "updatedDate": "2020-05-20T01:28:25.750+0000"
+      }
+    },
+    {
+      "id": "fb7b70f1-b898-4924-a991-0e4b6312bb5f",
+      "hrid": "hold000000000005",
+      "formerIds": [],
+      "instanceId": "7fbd5d84-62d1-44c6-9c45-6cb173998bbd",
+      "permanentLocationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "electronicAccess": [],
+      "callNumber": "PR6056.I4588 B749 2016",
+      "notes": [],
+      "holdingsStatements": [],
+      "holdingsStatementsForIndexes": [],
+      "holdingsStatementsForSupplements": [],
+      "statisticalCodeIds": [],
+      "holdingsItems": [],
+      "bareHoldingsItems": [],
+      "metadata": {
+        "createdDate": "2020-05-20T01:28:25.810+0000",
+        "updatedDate": "2020-05-20T01:28:25.810+0000"
+      }
+    }
+  ],
+  "totalRecords": 2,
+  "resultInfo": {
+    "totalRecords": 2,
+    "facets": [],
+    "diagnostics": []
+  }
+}

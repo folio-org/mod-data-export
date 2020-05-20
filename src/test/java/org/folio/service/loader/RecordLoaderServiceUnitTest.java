@@ -1,9 +1,20 @@
 package org.folio.service.loader;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
+import java.util.*;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.rest.HttpServerTestBase;
@@ -15,21 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -37,8 +33,9 @@ import static org.mockito.Mockito.when;
 class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
-  protected static final String INVENTORY_EMPTY_RESPONSE_JSON = "clients/inventory/get_instances_empty_response.json";
+  protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
+  protected static final String HOLDINGS_RESPONSE_JSON = "mockData/inventory/holdings_in000005.json";
 
   @Mock
   SourceRecordStorageClient srsClient;
@@ -50,6 +47,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
 
   static JsonObject dataFromSRS;
   static JsonObject dataFromInventory;
+  static JsonObject dataFromInventoryHoldings;
 
   @BeforeAll
   public static void setUp() {
@@ -57,6 +55,9 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     dataFromSRS = new JsonObject(json);
     String instancesJson = readFileContentFromResources(INVENTORY_RESPONSE_JSON);
     dataFromInventory = new JsonObject(instancesJson);
+
+    String holdingssJson = readFileContentFromResources(HOLDINGS_RESPONSE_JSON);
+    dataFromInventoryHoldings = new JsonObject(holdingssJson);
   }
 
   @Test
@@ -105,8 +106,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   @Test
   void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
-    String json = readFileContentFromResources(INVENTORY_EMPTY_RESPONSE_JSON);
-    JsonObject data = new JsonObject(json);
+    JsonObject data = buildEmptyResponse("instances");
     when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
@@ -126,4 +126,45 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     assertThat(inventoryResponse, empty());
   }
 
+  @Test
+  void getHoldingsRecords_shouldReturnTwoRecordsByIds() {
+    // given
+    String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
+    when(inventoryClient.getholdingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromInventoryHoldings));
+    // when
+    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
+    //then
+    assertThat(holdingsResponse, hasSize(2));
+  }
+
+  @Test
+  void getHoldingsRecords_shouldReturnEmptyList_whenThereInNoHoldingsRecords() {
+    // given
+    JsonObject data = buildEmptyResponse("holdingsRecords");
+    String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
+    when(inventoryClient.getholdingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    // when
+    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
+    //then
+    assertThat(holdingsResponse, empty());
+  }
+
+  @Test
+  void getItemsRecords_shouldReturnEmptyList_whenThereInNoItemRecords() {
+    // given
+    JsonObject data = buildEmptyResponse("items");
+    List<String> holdingIDs = Collections.singletonList(UUID.randomUUID().toString());
+    when(inventoryClient.getItemsByHoldingIds(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    // when
+    List<JsonObject> itemsResponse = recordLoaderService.getAllItemsForHolding(holdingIDs, okapiConnectionParams);
+    //then
+    assertThat(itemsResponse, empty());
+  }
+
+  private JsonObject buildEmptyResponse(String entity) {
+    String json = readFileContentFromResources(EMPTY_RESPONSE_JSON);
+    JsonObject data = new JsonObject(json);
+    data.put(entity, new JsonArray());
+    return data;
+  }
 }
