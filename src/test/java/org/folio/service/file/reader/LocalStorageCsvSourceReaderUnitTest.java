@@ -65,9 +65,10 @@ class LocalStorageCsvSourceReaderUnitTest {
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
     //when
+    reader.init(fileDefinition, BATCH_SIZE);
+    reader.close();
+    //then
     Assertions.assertThrows(UncheckedIOException.class, () -> {
-      reader.init(fileDefinition, BATCH_SIZE);
-      reader.close();
       reader.readNext();
     });
 

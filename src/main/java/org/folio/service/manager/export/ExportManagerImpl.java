@@ -92,7 +92,7 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
 
-    MappingProfile mappingProfile = new MappingProfile();
+    MappingProfile mappingProfile = getMappingProfile();
     if(mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS)|| mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
       instances = fetchHoldingsAndItems(instances, params);
     }
@@ -103,6 +103,11 @@ public class ExportManagerImpl implements ExportManager {
     }
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+  }
+
+  // Dummy method, will be replaced in MDEXP-171
+   MappingProfile getMappingProfile() {
+    return new MappingProfile();
   }
 
   /**
