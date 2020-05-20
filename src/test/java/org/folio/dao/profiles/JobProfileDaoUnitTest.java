@@ -92,6 +92,7 @@ class JobProfileDaoUnitTest {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
+        assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
     });
