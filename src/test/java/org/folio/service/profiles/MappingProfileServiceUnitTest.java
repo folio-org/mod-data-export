@@ -67,15 +67,13 @@ class MappingProfileServiceUnitTest {
     // when
     Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, TENANT_ID);
     // then
-    future.setHandler(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.failed());
-        verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
-        assertTrue(ar.cause() instanceof NotFoundException);
-        assertEquals(errorMessage, ar.cause().getMessage());
-        context.completeNow();
-      });
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.failed());
+      verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
+      assertTrue(ar.cause() instanceof NotFoundException);
+      assertEquals(errorMessage, ar.cause().getMessage());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -86,14 +84,12 @@ class MappingProfileServiceUnitTest {
     // when
     Future<MappingProfile> future = mappingProfileService.save(expectedMappingProfile, TENANT_ID);
     // then
-    future.setHandler(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        verify(mappingProfileDao).save(eq(expectedMappingProfile), eq(TENANT_ID));
-        Assert.assertNotNull(ar.result().getId());
-        context.completeNow();
-      });
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).save(eq(expectedMappingProfile), eq(TENANT_ID));
+      Assert.assertNotNull(ar.result().getId());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -103,13 +99,11 @@ class MappingProfileServiceUnitTest {
     // when
     Future<Boolean> future = mappingProfileService.delete(expectedMappingProfile.getId(), TENANT_ID);
     // then
-    future.setHandler(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        verify(mappingProfileDao).delete(eq(expectedMappingProfile.getId()), eq(TENANT_ID));
-        context.completeNow();
-      });
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).delete(eq(expectedMappingProfile.getId()), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -119,13 +113,11 @@ class MappingProfileServiceUnitTest {
     // when
     Future<MappingProfile> future = mappingProfileService.update(expectedMappingProfile, TENANT_ID);
     // then
-    future.setHandler(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        verify(mappingProfileDao).update(eq(expectedMappingProfile), eq(TENANT_ID));
-        context.completeNow();
-      });
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).update(eq(expectedMappingProfile), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -138,13 +130,11 @@ class MappingProfileServiceUnitTest {
     // when
     Future<MappingProfileCollection> future = mappingProfileService.get(query, 0, 10, TENANT_ID);
     // then
-    future.setHandler(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        verify(mappingProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
-        context.completeNow();
-      });
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
 }
