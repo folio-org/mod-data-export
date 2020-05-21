@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class MappingServiceUnitTest {
+class MappingServiceUnitTest {
 
   @Mock
   private MappingSettingsProvider mappingSettingsProvider;
@@ -47,7 +47,7 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldReturnEmptyRecords_for_emptyInstances() {
+  void shouldReturnEmptyRecords_for_emptyInstances() {
     // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     List<JsonObject> givenInstances = Collections.emptyList();
@@ -61,7 +61,7 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldMapInstance_to_marcRecord() {
+  void shouldMapInstance_to_marcRecord() {
     // given
     MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));

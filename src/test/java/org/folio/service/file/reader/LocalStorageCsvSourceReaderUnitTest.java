@@ -3,11 +3,15 @@ package org.folio.service.file.reader;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.UncheckedIOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@RunWith(MockitoJUnitRunner.class)
 public class LocalStorageCsvSourceReaderUnitTest {
 
   private static final int BATCH_SIZE = 2;
@@ -56,7 +60,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
 
   @Test
   public void shouldNotThrowException_whenCloseNotInitializedReader() {
-    reader.close();
+    assertDoesNotThrow(() -> reader.close());
   }
 
   @Test(expected = UncheckedIOException.class)

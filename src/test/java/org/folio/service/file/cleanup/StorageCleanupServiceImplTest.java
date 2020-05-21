@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
+class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private static final String FILE_DEFINITIONS_TABLE = "file_definitions";
   private static final String STORAGE_PATH = "./storage";
@@ -78,7 +78,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFile_andFileDefinition_whenFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
+  void shouldRemoveFile_andFileDefinition_whenFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
     // given
     createTestFileAndDirectories(testFile1);
     fileDefinition1.getMetadata()
@@ -105,7 +105,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveTwoFiles_andFileDefinitions_whenFileDefinitionsWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
+  void shouldRemoveTwoFiles_andFileDefinitions_whenFileDefinitionsWasUpdatedLaterThanHourAgo(VertxTestContext context) throws IOException {
     // given
     createTestFileAndDirectories(testFile1);
     fileDefinition1.getMetadata()
@@ -139,7 +139,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(VertxTestContext context) throws IOException {
+  void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(VertxTestContext context) throws IOException {
     // given
     testFile1 = new File("./" + TEST_FILE_1_NAME);
     createTestFileAndDirectories(testFile1);
@@ -167,7 +167,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNotEmpty(VertxTestContext context) throws IOException {
+  void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNotEmpty(VertxTestContext context) throws IOException {
     // given
     createTestFileAndDirectories(testFile1);
     createAnotherFileInFileDefinitionDirectory();
@@ -194,7 +194,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldRemoveFileDefinition_whenFileDoesNotExist_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
+  void shouldRemoveFileDefinition_whenFileDoesNotExist_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
     fileDefinition1.getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
@@ -217,7 +217,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
+  void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
     fileDefinition1.withSourcePath(EMPTY)
       .getMetadata()
@@ -241,7 +241,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedEarlierThanHourAgo(VertxTestContext context) {
+  void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedEarlierThanHourAgo(VertxTestContext context) {
     // given
     fileDefinition1.withSourcePath(EMPTY)
       .getMetadata()

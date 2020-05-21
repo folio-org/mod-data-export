@@ -3,7 +3,6 @@ package org.folio.dao;
 import io.vertx.core.Future;
 
 import java.util.Optional;
-import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 

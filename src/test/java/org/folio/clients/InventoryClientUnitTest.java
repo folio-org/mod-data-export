@@ -21,7 +21,7 @@ import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.resourcesPath;
 
 @RunWith(VertxUnitRunner.class)
-public class InventoryClientUnitTest extends HttpServerTestBase {
+class InventoryClientUnitTest extends HttpServerTestBase {
   private static final String GET_INSTANCES_RESPONSE = "clients/inventory/get_instances_response.json";
   private static final int LIMIT = 20;
   private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "mockData/inventory/get_nature_of_content_terms_response.json";
@@ -48,7 +48,7 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldRetrieveExistingInstances() {
+  void shouldRetrieveExistingInstances() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
@@ -60,7 +60,7 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
   }
 
   @Test
-  public void shouldRetrieveNatureOfContentTerms() {
+  void shouldRetrieveNatureOfContentTerms() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     // when

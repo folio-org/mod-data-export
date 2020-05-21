@@ -1,9 +1,9 @@
 package org.folio.service.profiles;
 
 import io.vertx.core.Future;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.folio.dao.impl.MappingProfileDaoImpl;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
@@ -11,38 +11,42 @@ import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.model.UserInfo;
-import org.folio.service.profiles.mapping.MappingProfileServiceImpl;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.ws.rs.NotFoundException;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.times;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
-public class MappingProfileServiceUnitTest {
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(VertxExtension.class)
+class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
-  MappingProfile expectedMappingProfile;
+  private MappingProfile expectedMappingProfile;
   @Spy
   @InjectMocks
   private MappingProfileServiceImpl mappingProfileService;
   @Mock
   private MappingProfileDaoImpl mappingProfileDao;
 
-  @Before
+  @BeforeEach
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     expectedMappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")
@@ -55,70 +59,79 @@ public class MappingProfileServiceUnitTest {
 
 
   @Test
-  public void getById_shouldReturnFailedFuture_whenMappingProfileDoesNotExist(TestContext context) {
+  void getById_shouldReturnFailedFuture_whenMappingProfileDoesNotExist(VertxTestContext context) {
     // given
-    Async async = context.async();
-    String errorMessage = String.format("Mapping profile not found with id %s", MAPPING_PROFILE_ID);
     when(mappingProfileDao.getById(MAPPING_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     // when
     Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, TENANT_ID);
     // then
-    verify(mappingProfileDao, times(1)).getById(MAPPING_PROFILE_ID, TENANT_ID);
-    future.setHandler(ar -> {
-      context.assertTrue(ar.failed());
-      Assert.assertEquals(ar.cause().getMessage(), errorMessage);
-      async.complete();
-    });
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.failed());
+      verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
+      assertTrue(ar.cause() instanceof NotFoundException);
+      context.completeNow();
+    }));
   }
 
   @Test
-  public void save_shouldCallDaoSave_addUuidToTheMappingProfile(TestContext context) {
+  void save_shouldCallDaoSave_addUuidToTheMappingProfile(VertxTestContext context) {
     // given
-    Async async = context.async();
     expectedMappingProfile.setId(null);
     when(mappingProfileDao.save(expectedMappingProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedMappingProfile));
     // when
     Future<MappingProfile> future = mappingProfileService.save(expectedMappingProfile, TENANT_ID);
     // then
-    verify(mappingProfileDao, times(1)).save(expectedMappingProfile, TENANT_ID);
-    future.setHandler(ar -> {
-      context.assertTrue(ar.succeeded());
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).save(eq(expectedMappingProfile), eq(TENANT_ID));
       Assert.assertNotNull(ar.result().getId());
-      async.complete();
-    });
+      context.completeNow();
+    }));
   }
 
   @Test
-  public void delete_shouldCallDaoDelete(TestContext context) {
+  void delete_shouldCallDaoDelete(VertxTestContext context) {
     // given
     when(mappingProfileDao.delete(expectedMappingProfile.getId(), TENANT_ID)).thenReturn(Future.succeededFuture(true));
     // when
-    mappingProfileService.delete(expectedMappingProfile.getId(), TENANT_ID);
+    Future<Boolean> future = mappingProfileService.delete(expectedMappingProfile.getId(), TENANT_ID);
     // then
-    verify(mappingProfileDao, times(1)).delete(expectedMappingProfile.getId(), TENANT_ID);
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).delete(eq(expectedMappingProfile.getId()), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
   @Test
-  public void update_shouldCallDaoUpdate(TestContext context) {
+  void update_shouldCallDaoUpdate(VertxTestContext context) {
     // given
     when(mappingProfileDao.update(expectedMappingProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedMappingProfile));
     // when
-    mappingProfileService.update(expectedMappingProfile, TENANT_ID);
+    Future<MappingProfile> future = mappingProfileService.update(expectedMappingProfile, TENANT_ID);
     // then
-    verify(mappingProfileDao, times(1)).update(expectedMappingProfile, TENANT_ID);
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).update(eq(expectedMappingProfile), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
   @Test
-  public void get_shouldCallDaoGet(TestContext context) {
+  void get_shouldCallDaoGet(VertxTestContext context) {
     // given
     String query = "?query=recordTypes=INSTANCE";
     when(mappingProfileDao.get(query, 0, 10, TENANT_ID))
       .thenReturn(Future.succeededFuture(new MappingProfileCollection()
         .withMappingProfiles(singletonList(expectedMappingProfile))));
     // when
-    mappingProfileService.get(query, 0, 10, TENANT_ID);
+    Future<MappingProfileCollection> future = mappingProfileService.get(query, 0, 10, TENANT_ID);
     // then
-    verify(mappingProfileDao, times(1)).get(query, 0, 10, TENANT_ID);
+    future.setHandler(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(mappingProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
+      context.completeNow();
+    }));
   }
 
 }

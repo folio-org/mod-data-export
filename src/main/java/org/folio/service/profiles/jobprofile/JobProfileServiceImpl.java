@@ -1,4 +1,4 @@
-package org.folio.service.profile.jobprofile;
+package org.folio.service.profiles.jobprofile;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;

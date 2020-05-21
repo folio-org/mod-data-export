@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class ExportManagerUnitTest {
+class ExportManagerUnitTest {
   private static final int LIMIT = 20;
 
   @Mock
@@ -42,7 +42,7 @@ public class ExportManagerUnitTest {
   private ExportManagerImpl exportManager = new ExportManagerImpl();
 
   @Test
-  public void exportBlocking_shouldPassExportFor_1000_Records() {
+  void exportBlocking_shouldPassExportFor_1000_Records() {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
