@@ -53,7 +53,7 @@ public class InventoryClient {
     return map;
   }
 
-  public Optional<JsonObject> getholdingsByInstanceId(String instanceID, OkapiConnectionParams params) {
+  public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
         params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
     return getRequest(params, endpoint);

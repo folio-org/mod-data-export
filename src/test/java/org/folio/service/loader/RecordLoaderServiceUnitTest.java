@@ -130,7 +130,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   void getHoldingsRecords_shouldReturnTwoRecordsByIds() {
     // given
     String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
-    when(inventoryClient.getholdingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromInventoryHoldings));
+    when(inventoryClient.getHoldingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromInventoryHoldings));
     // when
     List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
     //then
@@ -142,7 +142,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
     // given
     JsonObject data = buildEmptyResponse("holdingsRecords");
     String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
-    when(inventoryClient.getholdingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    when(inventoryClient.getHoldingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
     // when
     List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
     //then

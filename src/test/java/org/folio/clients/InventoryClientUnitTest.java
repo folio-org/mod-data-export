@@ -64,7 +64,7 @@ class InventoryClientUnitTest extends RestVerticleTestBase {
     InventoryClient inventoryClient = new InventoryClient();
     String instanceID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
     // when
-    Optional<JsonObject> holdingsResponse = inventoryClient.getholdingsByInstanceId(instanceID, okapiConnectionParams);
+    Optional<JsonObject> holdingsResponse = inventoryClient.getHoldingsByInstanceId(instanceID, okapiConnectionParams);
     // then
     Assert.assertTrue(holdingsResponse.isPresent());
     Assert.assertEquals(2, holdingsResponse.get().getJsonArray("holdingsRecords").getList().size());

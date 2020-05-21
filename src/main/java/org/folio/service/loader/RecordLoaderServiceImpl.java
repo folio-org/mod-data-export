@@ -88,13 +88,13 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   @Override
   public List<JsonObject> getHoldingsForInstance(String instanceId, OkapiConnectionParams params) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getholdingsByInstanceId(instanceId, params);
+    Optional<JsonObject> optionalRecords = inventoryClient.getHoldingsByInstanceId(instanceId, params);
     return optionalRecords.map(holdings -> populateLoadResultFromResponse("holdingsRecords", holdings)).orElseGet(ArrayList::new);
   }
 
   @Override
   public List<JsonObject> getAllItemsForHolding(List<String> holdingIds, OkapiConnectionParams params) {
     Optional<JsonObject> optionalRecords = inventoryClient.getItemsByHoldingIds(holdingIds, params);
-    return optionalRecords.map(holdings -> populateLoadResultFromResponse("items", holdings)).orElseGet(ArrayList::new);
+    return optionalRecords.map(items -> populateLoadResultFromResponse("items", items)).orElseGet(ArrayList::new);
   }
 }
