@@ -1,20 +1,9 @@
 package org.folio.clients;
 
-import io.vertx.core.json.JsonObject;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
-import org.folio.util.OkapiConnectionParams;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
-import javax.ws.rs.core.MediaType;
+import io.vertx.core.json.JsonObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
@@ -24,9 +13,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import javax.ws.rs.core.MediaType;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.folio.util.OkapiConnectionParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class ClientUtil {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -65,7 +63,6 @@ public final class ClientUtil {
     requestBase.setHeader((HttpHeaders.ACCEPT), MediaType.APPLICATION_JSON);
   }
 
-  @NotNull
   private static URI prepareFullUriWithQuery(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
     String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
@@ -76,7 +73,6 @@ public final class ClientUtil {
     }
   }
 
-  @NotNull
   private static URI prepareFullUri(OkapiConnectionParams params, String endpoint) {
       String uri = String.format(endpoint, params.getOkapiUrl());
       return URI.create(uri);

@@ -1,10 +1,17 @@
 package org.folio.dao.impl;
 
+import static org.folio.util.HelperUtils.constructCriteria;
+import static org.folio.util.HelperUtils.getCQLWrapper;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.UpdateResult;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
+import javax.ws.rs.NotFoundException;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.MappingProfileDao;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -15,13 +22,6 @@ import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import javax.ws.rs.NotFoundException;
-import java.lang.invoke.MethodHandles;
-import java.util.Optional;
-
-import static org.folio.util.HelperUtils.constructCriteria;
-import static org.folio.util.HelperUtils.getCQLWrapper;
 
 @Repository
 public class MappingProfileDaoImpl implements MappingProfileDao {
@@ -65,7 +65,7 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
         if (updateResult.failed()) {
           LOGGER.error("Could not update mappingProfile with id {}", mappingProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
-        } else if (updateResult.result().getUpdated() != 1) {
+        } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("MappingProfile with id '%s' was not found", mappingProfile.getId());
           LOGGER.error(errorMessage);
           promise.fail(new NotFoundException(errorMessage));
@@ -82,7 +82,7 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
 
   @Override
   public Future<Boolean> delete(String mappingProfileId, String tenantId) {
-    Promise<UpdateResult> promise = Promise.promise();
+    Promise<RowSet<Row>> promise = Promise.promise();
     try {
       Criteria idCrit = constructCriteria(ID_FIELD, mappingProfileId);
       pgClientFactory.getInstance(tenantId).delete(TABLE, new Criterion(idCrit), promise);
@@ -90,7 +90,7 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
       LOGGER.error(e);
       promise.fail(e);
     }
-    return promise.future().map(updateResult -> updateResult.getUpdated() == 1);
+    return promise.future().map(updateResult -> updateResult.rowCount() == 1);
   }
 
   @Override
