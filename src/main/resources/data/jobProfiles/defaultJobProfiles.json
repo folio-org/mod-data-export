@@ -8,9 +8,5 @@
     "lastName": "Process",
     "userName": "system_process"
   },
-  "mappingProfileId": "25d81cbe-9686-11ea-bb37-0242ac130002",
-  "metadata": {
-    "createdDate": "2019-07-22T11:22:07Z",
-    "updatedDate": "2019-07-27T13:28:54Z"
-  }
+  "mappingProfileId": "25d81cbe-9686-11ea-bb37-0242ac130002"
 }
