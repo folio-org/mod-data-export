@@ -1,4 +1,4 @@
-package org.folio.service.profiles.mapping;
+package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
 import io.vertx.core.logging.Logger;

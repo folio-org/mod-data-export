@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.UncheckedIOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class LocalStorageCsvSourceReaderUnitTest {
 
@@ -56,7 +57,7 @@ class LocalStorageCsvSourceReaderUnitTest {
 
   @Test
   void shouldNotThrowException_whenCloseNotInitializedReader() {
-    reader.close();
+    assertDoesNotThrow(() -> reader.close());
   }
 
   @Test

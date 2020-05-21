@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 
 @RunWith(VertxUnitRunner.class)
-public class JobExecutionServiceTest extends RestVerticleTestBase {
+class JobExecutionServiceTest extends RestVerticleTestBase {
   private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
 
   @Test

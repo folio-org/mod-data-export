@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TranslationFunctionUnitTest {
+class TranslationFunctionUnitTest {
   private static Settings settings = new Settings();
 
   @BeforeAll

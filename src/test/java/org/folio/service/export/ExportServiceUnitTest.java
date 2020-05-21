@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class ExportServiceUnitTest {
+class ExportServiceUnitTest {
   @Mock
   private FileStorage fileStorage;
   @Mock

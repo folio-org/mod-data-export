@@ -63,7 +63,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class InputDataManagerUnitTest {
+class InputDataManagerUnitTest {
 
   private static final int BATCH_SIZE = 2;
   private static final String FILE_NAME = "InventoryUUIDs.csv";

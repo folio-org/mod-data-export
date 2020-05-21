@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.resource.DataExportJobProfiles;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.profile.jobprofile.JobProfileService;
+import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.springframework.beans.factory.annotation.Autowired;

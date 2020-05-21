@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RuleProcessorTest {
+class RuleProcessorTest {
   private static JsonObject entity;
   private static List<Rule> rules;
   private Settings settings = null;
