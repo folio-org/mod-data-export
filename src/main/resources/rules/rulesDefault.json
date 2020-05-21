@@ -25,6 +25,111 @@
     ]
   },
   {
+    "field": "010",
+    "description": "Identifier LCCN",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "LCCN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "from": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "020",
+    "description": "Identifier ISBN",
+    "dataSources": [
+      {
+        "from": "$.identifiers.value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISBN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "field": "022",
+    "description": "Identifier ISSN",
+    "dataSources": [
+      {
+        "from": "$.identifiers.value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISSN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "field": "245",
     "description": "Title",
     "dataSources": [

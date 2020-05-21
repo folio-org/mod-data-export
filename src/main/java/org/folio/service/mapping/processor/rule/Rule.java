@@ -1,11 +1,13 @@
 package org.folio.service.mapping.processor.rule;
 
+
 import java.util.List;
 
 public class Rule {
   private String field;
   private String description;
   private List<DataSource> dataSources;
+  private Metadata metadata;
 
   public String getField() {
     return field;
@@ -29,5 +31,13 @@ public class Rule {
 
   public void setDataSources(List<DataSource> dataSources) {
     this.dataSources = dataSources;
+  }
+
+  public Metadata getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(Metadata metadata) {
+    this.metadata = metadata;
   }
 }

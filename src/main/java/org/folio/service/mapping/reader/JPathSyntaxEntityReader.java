@@ -7,6 +7,7 @@ import com.jayway.jsonpath.Option;
 import io.vertx.core.json.JsonObject;
 import net.minidev.json.JSONArray;
 import org.folio.service.mapping.processor.rule.DataSource;
+import org.folio.service.mapping.processor.rule.Metadata;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.reader.values.CompositeValue;
 import org.folio.service.mapping.reader.values.MissingValue;
@@ -69,7 +70,16 @@ public class JPathSyntaxEntityReader extends AbstractEntityReader {
         }
         compositeValue.addEntry(entry);
       }
+      populateMetadata(rule, compositeValue);
       return compositeValue;
+    }
+  }
+
+  private void populateMetadata(Rule rule, CompositeValue compositeValue) {
+    Metadata metadata = rule.getMetadata();
+    if (metadata != null) {
+      Object data = this.documentContext.read(metadata.getFrom());
+      metadata.setData(data);
     }
   }
 
