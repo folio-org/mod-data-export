@@ -55,7 +55,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
         if (getHrIdResult.succeeded()) {
           jobExecution.withId(UUID.randomUUID().toString())
-            .setHrId(getHrIdResult.result().getList().get(0).toString());
+            .setHrId(getHrIdResult.result().getString(0));
           pgClientFactory.getInstance(tenantId)
             .save(TABLE, jobExecution.getId(), jobExecution, promise);
         } else {
