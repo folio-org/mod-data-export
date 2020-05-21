@@ -25,7 +25,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
   private String tenantId;
   private static final String JOBPROFILE_LOCATION_PREFIX = "/data-export/jobProfiles/%s";
 
-  public DataExportImplJobProfileImpl(Vertx vertx, String tenantId) {
+  public DataExportImplJobProfileImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
   }

@@ -48,12 +48,12 @@ class ExportStorageServiceTest {
 
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     System.setProperty("bucket.name", BUCKET_NAME);
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     System.clearProperty("bucket.name");
   }
 
@@ -172,7 +172,7 @@ class ExportStorageServiceTest {
   }
 
   @Test
-  void testBucketNameNotProvidedInSystemProperty() {
+  void testbucketNameNotProvidedInSystemProperty() {
     System.clearProperty("bucket.name");
 
     AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);
