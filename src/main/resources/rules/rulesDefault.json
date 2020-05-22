@@ -100,7 +100,7 @@
   },
   {
     "field": "022",
-    "description": "Identifier LCCN",
+    "description": "Identifier ISSN",
     "dataSources": [
       {
         "from": "$.identifiers[*].value",
