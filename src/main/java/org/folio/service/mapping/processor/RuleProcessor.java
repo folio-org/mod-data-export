@@ -1,12 +1,17 @@
 package org.folio.service.mapping.processor;
 
+import org.folio.service.mapping.processor.rule.Metadata;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
-import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.values.*;
+import org.folio.service.mapping.reader.values.CompositeValue;
+import org.folio.service.mapping.reader.values.ListValue;
+import org.folio.service.mapping.reader.values.RuleValue;
+import org.folio.service.mapping.reader.values.SimpleValue;
+import org.folio.service.mapping.reader.values.StringValue;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.writer.RecordWriter;
 
 import java.util.ArrayList;
@@ -35,7 +40,7 @@ public final class RuleProcessor {
     this.rules = rules;
   }
 
-  public String process(EntityReader reader, RecordWriter writer, Settings settings) {
+  public String process(EntityReader reader, RecordWriter writer, ReferenceData referenceData) {
     this.rules.forEach(rule -> {
       if (LEADER_FIELD.equals(rule.getField())) {
         rule.getDataSources().forEach(dataSource -> writer.writeLeader(dataSource.getTranslation()));
@@ -44,12 +49,12 @@ public final class RuleProcessor {
         switch (ruleValue.getType()) {
           case SIMPLE:
             SimpleValue simpleValue = (SimpleValue) ruleValue;
-            translate(simpleValue, settings);
+            translate(simpleValue, referenceData, rule.getMetadata());
             writer.writeField(rule.getField(), simpleValue);
             break;
           case COMPOSITE:
             CompositeValue compositeValue = (CompositeValue) ruleValue;
-            translate(compositeValue, settings);
+            translate(compositeValue, referenceData, rule.getMetadata());
             writer.writeField(rule.getField(), compositeValue);
             break;
           case MISSING:
@@ -59,20 +64,21 @@ public final class RuleProcessor {
     return writer.getResult();
   }
 
-  private void translate(SimpleValue simpleValue, Settings settings) {
+  private void translate(SimpleValue simpleValue, ReferenceData referenceData, Metadata metadata) {
     Translation translation = simpleValue.getDataSource().getTranslation();
     if (translation != null) {
       TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());
       if (STRING.equals(simpleValue.getSubType())) {
         StringValue stringValue = (StringValue) simpleValue;
         String readValue = stringValue.getValue();
-        String translatedValue = translationFunction.apply(readValue, translation, settings);
+        String translatedValue = translationFunction.apply(readValue, 0, translation, referenceData, metadata);
         stringValue.setValue(translatedValue);
       } else if (LIST_OF_STRING.equals(simpleValue.getSubType())) {
         ListValue listValue = (ListValue) simpleValue;
         List<String> translatedValues = new ArrayList<>();
-        for (String readValue : listValue.getValue()) {
-          String translatedValue = translationFunction.apply(readValue, translation, settings);
+        for (int currentIndex = 0; currentIndex < listValue.getValue().size(); currentIndex++) {
+          String readValue = listValue.getValue().get(currentIndex);
+          String translatedValue = translationFunction.apply(readValue, currentIndex, translation, referenceData, metadata);
           translatedValues.add(translatedValue);
         }
         listValue.setValue(translatedValues);
@@ -80,18 +86,19 @@ public final class RuleProcessor {
     }
   }
 
-  private void translate(CompositeValue compositeValue, Settings settings) {
+  private void translate(CompositeValue compositeValue, ReferenceData referenceData, Metadata metadata) {
     List<List<StringValue>> readValues = compositeValue.getValue();
-    for (List<StringValue> readEntry : readValues) {
-      readEntry.forEach(stringValue -> {
+    for (int currentIndex = 0; currentIndex < readValues.size(); currentIndex++) {
+      List<StringValue> readEntry = readValues.get(currentIndex);
+      for (StringValue stringValue : readEntry) {
         Translation translation = stringValue.getDataSource().getTranslation();
         if (translation != null) {
           TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());
           String readValue = stringValue.getValue();
-          String translatedValue = translationFunction.apply(readValue, translation, settings);
+          String translatedValue = translationFunction.apply(readValue, currentIndex, translation, referenceData, metadata);
           stringValue.setValue(translatedValue);
         }
-      });
+      }
     }
   }
 }

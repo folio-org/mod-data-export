@@ -13,6 +13,7 @@ public class ExternalPathResolver {
   public static final String SRS = "srs";
   public static final String INSTANCE = "instance";
   public static final String CONTENT_TERMS = "natureOfContentTerms";
+  public static final String IDENTIFIER_TYPES = "identifierTypes";
   public static final String USERS = "users";
 
 
@@ -24,6 +25,7 @@ public class ExternalPathResolver {
     apis.put(SRS, "/source-storage/records");
     apis.put(INSTANCE, "/instance-storage/instances");
     apis.put(CONTENT_TERMS, "/nature-of-content-terms");
+    apis.put(IDENTIFIER_TYPES, "/identifier-types");
     apis.put(USERS, "/users/");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);

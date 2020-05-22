@@ -11,7 +11,7 @@ import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
-import org.folio.service.mapping.settings.Settings;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.JsonRecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
@@ -25,7 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class RuleProcessorTest {
   private static JsonObject entity;
   private static List<Rule> rules;
-  private Settings settings = null;
+  private ReferenceData referenceData = null;
 
   @BeforeAll
   public static void setup() {
@@ -40,7 +40,7 @@ public class RuleProcessorTest {
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new MarcRecordWriter();
     // when
-    String actualMarcRecord = ruleProcessor.process(reader, writer, settings);
+    String actualMarcRecord = ruleProcessor.process(reader, writer, referenceData);
     // then
     String expectedMarcRecord = readFileContentFromResources("processor/mapped_marc_record.mrc");
     assertEquals(expectedMarcRecord, actualMarcRecord);
@@ -53,7 +53,7 @@ public class RuleProcessorTest {
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new JsonRecordWriter();
     // when
-    String actualJsonRecord = ruleProcessor.process(reader, writer, settings);
+    String actualJsonRecord = ruleProcessor.process(reader, writer, referenceData);
     // then
     String expectedJsonRecord = readFileContentFromResources("processor/mapped_json_record.json");
     assertEquals(expectedJsonRecord, actualJsonRecord);
@@ -66,7 +66,7 @@ public class RuleProcessorTest {
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new XmlRecordWriter();
     // when
-    String actualXmlRecord = ruleProcessor.process(reader, writer, settings);
+    String actualXmlRecord = ruleProcessor.process(reader, writer, referenceData);
     // then
     String expectedXmlRecord = readFileContentFromResources("processor/mapped_xml_record.xml");
     assertEquals(expectedXmlRecord, actualXmlRecord);

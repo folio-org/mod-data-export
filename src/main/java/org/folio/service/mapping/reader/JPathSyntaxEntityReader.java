@@ -17,6 +17,7 @@ import org.folio.service.mapping.reader.values.StringValue;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -70,16 +71,22 @@ public class JPathSyntaxEntityReader extends AbstractEntityReader {
         }
         compositeValue.addEntry(entry);
       }
-      populateMetadata(rule, compositeValue);
+      populateMetadata(rule);
       return compositeValue;
     }
   }
 
-  private void populateMetadata(Rule rule, CompositeValue compositeValue) {
+  private void populateMetadata(Rule rule) {
     Metadata metadata = rule.getMetadata();
     if (metadata != null) {
-      Object data = this.documentContext.read(metadata.getFrom());
-      metadata.setData(data);
+      for (Map.Entry<String, Metadata.Entry> entry : metadata.getData().entrySet()) {
+        Object data = this.documentContext.read(entry.getValue().getFrom());
+        if (data instanceof JSONArray) {
+          JSONArray jsonArray = (JSONArray) data;
+          List<?> list = Arrays.asList(jsonArray.toArray());
+          entry.getValue().setData(list);
+        }
+      }
     }
   }
 

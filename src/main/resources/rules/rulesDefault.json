@@ -58,7 +58,7 @@
       }
     ],
     "metadata": {
-      "from": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -66,7 +66,7 @@
     "description": "Identifier ISBN",
     "dataSources": [
       {
-        "from": "$.identifiers.value",
+        "from": "$.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -93,14 +93,17 @@
           }
         }
       }
-    ]
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
   },
   {
     "field": "022",
-    "description": "Identifier ISSN",
+    "description": "Identifier LCCN",
     "dataSources": [
       {
-        "from": "$.identifiers.value",
+        "from": "$.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -127,7 +130,121 @@
           }
         }
       }
-    ]
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "035",
+    "description": "Identifier System Control Number",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "System control number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "035",
+    "description": "Identifier OCLC",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "OCLC"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "074",
+    "description": "Identifier GPO",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "GPO item number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
   },
   {
     "field": "245",
