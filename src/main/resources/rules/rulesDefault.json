@@ -367,6 +367,34 @@
     ]
   },
   {
+    "field": "653",
+    "description": "Physical Descriptions",
+    "dataSources": [
+      {
+        "from": "$.subjects",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "field": "655",
     "description": "Nature of content terms",
     "dataSources": [
