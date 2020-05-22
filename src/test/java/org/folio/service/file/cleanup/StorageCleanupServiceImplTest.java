@@ -89,7 +89,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
+      future.onComplete(ar -> {
         context.verify(()->{
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -120,7 +120,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
         Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
         // then
-        future.setHandler(ar -> {
+        future.onComplete(ar -> {
           context.verify(() -> {
             assertTrue(ar.succeeded());
             assertTrue(ar.result());
@@ -152,7 +152,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
+      future.onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -179,7 +179,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-      future.setHandler(ar -> {
+      future.onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -204,7 +204,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-        future.setHandler(ar -> {
+        future.onComplete(ar -> {
           context.verify(() -> {
             assertTrue(ar.succeeded());
             assertTrue(ar.result());
@@ -228,7 +228,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-        future.setHandler(ar -> {
+        future.onComplete(ar -> {
           context.verify(() -> {
             assertTrue(ar.succeeded());
             assertFalse(ar.result());
@@ -252,7 +252,7 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
 
       // then
-        future.setHandler(ar -> {
+        future.onComplete(ar -> {
           context.verify(() -> {
             assertTrue(ar.succeeded());
             assertFalse(ar.result());
@@ -315,13 +315,13 @@ public class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   }
 
   private void assertFileDefinitionIsRemoved() {
-    fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).setHandler(fileDefinitionAr -> {
+    fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
       assertTrue(fileDefinitionAr.failed());
     });
   }
 
   private void assertFileDefinitionIsNotRemoved() {
-    fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).setHandler(fileDefinitionAr -> {
+    fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
       assertEquals(fileDefinitionAr.result().get(), fileDefinition1);
     });
   }

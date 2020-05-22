@@ -40,7 +40,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
             .withLocation(JOBPROFILE_LOCATION_PREFIX)))
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   @Override
@@ -50,7 +50,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
       .map(GetDataExportJobProfilesByIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
 
   }
 
@@ -63,7 +63,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
         : DeleteDataExportJobProfilesByIdResponse.respond404WithTextPlain(format("JobProfile with id '%s' was not found", id)))
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
 
   }
 
@@ -74,7 +74,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
       .map(updated -> PutDataExportJobProfilesByIdResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
 
   }
 
@@ -85,7 +85,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
       .map(GetDataExportJobProfilesResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
 
   }
 }

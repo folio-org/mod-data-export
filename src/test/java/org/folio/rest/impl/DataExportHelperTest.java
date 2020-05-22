@@ -53,7 +53,7 @@ public class DataExportHelperTest {
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
     // then
-    linkFuture.setHandler(ar -> {
+    linkFuture.onComplete(ar -> {
       assertTrue(ar.succeeded());
       assertEquals(url, ar.result().getLink());
     });
@@ -75,7 +75,7 @@ public class DataExportHelperTest {
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), exportedFile.getFileId(), TENANT);
     // then
-    linkFuture.setHandler(ar -> {
+    linkFuture.onComplete(ar -> {
       assertTrue(ar.failed());
     });
   }
@@ -91,7 +91,7 @@ public class DataExportHelperTest {
     // when
     Future<FileDownload> linkFuture = helper.getDownloadLink(UUID.randomUUID().toString(), UUID.randomUUID().toString(), TENANT);
     // then
-    linkFuture.setHandler(ar -> {
+    linkFuture.onComplete(ar -> {
       assertTrue(ar.failed());
     });
   }

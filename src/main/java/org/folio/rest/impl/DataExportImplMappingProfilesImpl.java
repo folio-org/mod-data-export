@@ -34,7 +34,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
       .compose(ar -> mappingProfileService.save(entity, tenantId))
       .map(mappingProfile -> (Response) PostDataExportMappingProfilesResponse.respond201WithApplicationJson(mappingProfile, PostDataExportMappingProfilesResponse.headersFor201()))
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   @Override
@@ -44,7 +44,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
       .map(GetDataExportMappingProfilesResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   @Override
@@ -54,7 +54,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
       .map(GetDataExportMappingProfilesByIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   @Override
@@ -66,7 +66,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
         : DeleteDataExportMappingProfilesByIdResponse.respond404WithTextPlain(format("MappingProfile with id '%s' was not found", id)))
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   @Override
@@ -76,6 +76,6 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
       .map(PutDataExportMappingProfilesByIdResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 }

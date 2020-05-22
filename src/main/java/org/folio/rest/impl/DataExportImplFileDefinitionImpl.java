@@ -77,7 +77,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       }
       responseFuture.map(Response.class::cast)
         .otherwise(ExceptionToResponseMapper::map)
-        .setHandler(asyncResultHandler);
+        .onComplete(asyncResultHandler);
     } catch (Exception e) {
       asyncResultHandler.handle(succeededFuture(map(e)));
     }
@@ -93,7 +93,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       .map(PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
 
@@ -105,7 +105,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       .map(GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
 
   }
 

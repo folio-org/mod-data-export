@@ -64,7 +64,7 @@ public class MappingProfileServiceUnitTest {
     Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, TENANT_ID);
     // then
     verify(mappingProfileDao, times(1)).getById(MAPPING_PROFILE_ID, TENANT_ID);
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.assertTrue(ar.failed());
       Assert.assertEquals(ar.cause().getMessage(), errorMessage);
       async.complete();
@@ -81,7 +81,7 @@ public class MappingProfileServiceUnitTest {
     Future<MappingProfile> future = mappingProfileService.save(expectedMappingProfile, TENANT_ID);
     // then
     verify(mappingProfileDao, times(1)).save(expectedMappingProfile, TENANT_ID);
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.assertTrue(ar.succeeded());
       Assert.assertNotNull(ar.result().getId());
       async.complete();

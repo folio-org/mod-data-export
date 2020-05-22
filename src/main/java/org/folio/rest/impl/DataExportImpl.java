@@ -52,7 +52,7 @@ public class DataExportImpl implements DataExport {
       succeededFuture()
         .map(PostDataExportExportResponse.respond204())
         .map(Response.class::cast)
-        .setHandler(asyncResultHandler);
+        .onComplete(asyncResultHandler);
     } catch (Exception exception) {
       asyncResultHandler.handle(succeededFuture(map(exception)));
     }
@@ -65,7 +65,7 @@ public class DataExportImpl implements DataExport {
       .map(GetDataExportJobExecutionsResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler));
+      .onComplete(asyncResultHandler));
   }
 
   @Override
@@ -76,7 +76,7 @@ public class DataExportImpl implements DataExport {
       .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
 }
