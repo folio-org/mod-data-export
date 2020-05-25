@@ -37,6 +37,7 @@ class RuleFactoryTest {
     // then
     Assert.assertEquals(rules.size(), defaultRules.size());
     Assert.assertEquals(rules.get(0).getField(), defaultRules.get(0).getField());
+    Assert.assertEquals(rules.get(0).getDescription(), defaultRules.get(0).getDescription());
   }
 
   @Test
@@ -51,6 +52,7 @@ class RuleFactoryTest {
     // then
     Assert.assertEquals(rules.size(), defaultRules.size());
     Assert.assertEquals(rules.get(0).getField(), defaultRules.get(0).getField());
+    Assert.assertEquals(rules.get(0).getDescription(), defaultRules.get(0).getDescription());
   }
 
   @Test
@@ -65,6 +67,7 @@ class RuleFactoryTest {
     // then
     Assert.assertEquals(rules.size(), defaultRules.size());
     Assert.assertEquals(rules.get(0).getField(), defaultRules.get(0).getField());
+    Assert.assertEquals(rules.get(0).getDescription(), defaultRules.get(0).getDescription());
   }
 
 }
