@@ -53,7 +53,7 @@ public abstract class RestVerticleTestBase {
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
   private static final String HOST = "http://localhost:";
   protected static final int PORT = NetworkUtils.nextFreePort();
-  private static final String OKAPI_HEADER_URL = "X-Okapi-Url";
+  protected static final String OKAPI_HEADER_URL = "x-okapi-url";
   protected static final String BASE_OKAPI_URL = HOST + PORT;
   protected static RequestSpecification jsonRequestSpecification;
   protected static Vertx vertx;
@@ -66,8 +66,7 @@ public abstract class RestVerticleTestBase {
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
-  protected static final String NON_EXISTED_ID = "invalid-aaaa-500a-aaaa-11111111111";
-  protected static final String DELIMITER = "/";
+
 
   @BeforeAll
   public static void setUpClass() throws Exception {

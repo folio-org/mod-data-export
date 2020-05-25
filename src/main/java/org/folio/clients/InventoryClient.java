@@ -1,8 +1,14 @@
 package org.folio.clients;
 
+import static org.folio.clients.ClientUtil.buildQueryEndpoint;
+import static org.folio.clients.ClientUtil.getRequest;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.USERS;
+import static org.folio.util.ExternalPathResolver.resourcesPathWithId;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
@@ -18,10 +24,14 @@ import org.springframework.stereotype.Component;
 public class InventoryClient {
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
+  private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
+  private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 200;
+  private static final int HOLDINGS_LIMIT = 1000;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
-    return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize, QUERY_PATTERN_INVENTORY);
+    return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+        QUERY_PATTERN_INVENTORY);
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
@@ -35,7 +45,8 @@ public class InventoryClient {
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
-    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, url);
+    String queryEndpoint = ClientUtil.buildQueryEndpoint(url, params.getOkapiUrl());
+    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, queryEndpoint);
     Map<String, JsonObject> map = new HashMap<>();
     responseBody.ifPresent(rb -> {
       if (rb.containsKey(field)) {
@@ -48,6 +59,17 @@ public class InventoryClient {
     });
 
     return map;
+  }
+
+  public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, OkapiConnectionParams params) {
+    String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+        params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
+    return getRequest(params, endpoint);
+  }
+
+  public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, OkapiConnectionParams params) {
+    return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+        QUERY_PATTERN_ITEM);
   }
 
 }

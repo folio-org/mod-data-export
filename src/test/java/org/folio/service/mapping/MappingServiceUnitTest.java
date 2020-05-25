@@ -23,14 +23,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class MappingServiceUnitTest {
+class MappingServiceUnitTest {
+
   @Mock
   private ReferenceDataProvider referenceDataProvider;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceData();
 
-  public MappingServiceUnitTest() {
+  MappingServiceUnitTest() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
   }
@@ -60,7 +61,7 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldReturnEmptyRecords_for_emptyInstances() {
+  void shouldReturnEmptyRecords_for_emptyInstances() {
     // given
     MappingService mappingService = new MappingServiceImpl(referenceDataProvider);
     List<JsonObject> givenInstances = Collections.emptyList();
@@ -73,7 +74,7 @@ public class MappingServiceUnitTest {
   }
 
   @Test
-  public void shouldMapInstance_to_marcRecord() {
+  void shouldMapInstance_to_marcRecord() {
     // given
     MappingService mappingService = new MappingServiceImpl(referenceDataProvider);
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));

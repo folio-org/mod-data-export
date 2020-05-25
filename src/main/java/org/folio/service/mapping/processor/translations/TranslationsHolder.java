@@ -33,12 +33,15 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_IDENTIFIER() {
     @Override
     public String apply(String identifierValue, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      List<String> identifierTypeIds = (List<String>) metadata.getData().get("identifierTypeId").getData();
-      if (!identifierTypeIds.isEmpty()) {
-        String identifierTypeId = identifierTypeIds.get(currentIndex);
-        JsonObject identifierType = referenceData.getIdentifierTypes().get(identifierTypeId);
-        if (identifierType != null && identifierType.getString("name").equals(translation.getParameter("type"))) {
-          return identifierValue;
+      Object metadataIdentifierTypeIds = metadata.getData().get("identifierTypeId").getData();
+      if (metadataIdentifierTypeIds != null) {
+        List<String> identifierTypeIds = (List<String>) metadataIdentifierTypeIds;
+        if (!identifierTypeIds.isEmpty()) {
+          String identifierTypeId = identifierTypeIds.get(currentIndex);
+          JsonObject identifierType = referenceData.getIdentifierTypes().get(identifierTypeId);
+          if (identifierType != null && identifierType.getString("name").equals(translation.getParameter("type"))) {
+            return identifierValue;
+          }
         }
       }
       return StringUtils.EMPTY;

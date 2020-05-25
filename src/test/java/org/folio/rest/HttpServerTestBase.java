@@ -7,6 +7,8 @@ import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +33,7 @@ public abstract class HttpServerTestBase {
   private static final String HOST = "http://localhost:";
   private static HttpServer httpServer;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpHttpServer() throws InterruptedException, ExecutionException, TimeoutException {
     vertx = Vertx.vertx();
     int port = NetworkUtils.nextFreePort();
@@ -55,7 +57,7 @@ public abstract class HttpServerTestBase {
     okapiConnectionParams = new OkapiConnectionParams(okapiHeaders);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass() {
     httpServer.close();
   }

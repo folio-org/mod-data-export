@@ -19,11 +19,11 @@ import java.util.Collections;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TranslationFunctionUnitTest {
+class TranslationFunctionUnitTest {
   private static ReferenceData referenceData = new ReferenceData();
 
   @BeforeAll
-  public static void setUp() {
+  static void setUp() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
   }
@@ -45,7 +45,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetValue_shouldSetGivenValue() {
+  void SetValue_shouldSetGivenValue() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_value");
     String value = "field value";
@@ -58,7 +58,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetNatureOfContentTerm_shouldReturnTermName() {
+  void SetNatureOfContentTerm_shouldReturnTermName() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "44cd89f3-2e76-469f-a955-cc57cb9e0395";
@@ -69,7 +69,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetNatureOfContentTerm_shouldReturnEmptyString() {
+  void SetNatureOfContentTerm_shouldReturnEmptyString() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_nature_of_content_term");
     String value = "non-existing-id";
@@ -80,7 +80,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetIdentifier_shouldReturnIdentifierValue() {
+  void SetIdentifier_shouldReturnIdentifierValue() {
     // given
     String value = "value";
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_identifier");
@@ -99,7 +99,7 @@ public class TranslationFunctionUnitTest {
   }
 
   @Test
-  public void SetIdentifier_shouldReturnEmptyString_whenMetadataIsEmpty() {
+  void SetIdentifier_shouldReturnEmptyString_whenMetadataIsEmpty() {
     // given
     String value = "value";
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_identifier");

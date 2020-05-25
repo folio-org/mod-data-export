@@ -22,19 +22,19 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RuleProcessorTest {
+class RuleProcessorTest {
   private static JsonObject entity;
   private static List<Rule> rules;
   private ReferenceData referenceData = null;
 
   @BeforeAll
-  public static void setup() {
+  static void setup() {
     entity = new JsonObject(readFileContentFromResources("processor/given_entity.json"));
     rules = Arrays.asList(Json.decodeValue(readFileContentFromResources("processor/test_rules.json"), Rule[].class));
   }
 
   @Test
-  public void shouldMapEntityTo_MarcRecord() {
+  void shouldMapEntityTo_MarcRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);
@@ -47,7 +47,7 @@ public class RuleProcessorTest {
   }
 
   @Test
-  public void shouldMapEntityTo_JsonRecord() {
+  void shouldMapEntityTo_JsonRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);
@@ -60,7 +60,7 @@ public class RuleProcessorTest {
   }
 
   @Test
-  public void shouldMapEntityTo_XmlRecord() {
+  void shouldMapEntityTo_XmlRecord() {
     // given
     RuleProcessor ruleProcessor = new RuleProcessor(rules);
     EntityReader reader = new JPathSyntaxEntityReader(entity);

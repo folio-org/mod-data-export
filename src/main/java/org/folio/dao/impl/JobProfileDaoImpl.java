@@ -1,14 +1,10 @@
 package org.folio.dao.impl;
 
-import static org.folio.util.HelperUtils.constructCriteria;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.UpdateResult;
-import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobProfileDao;
 import org.folio.rest.jaxrs.model.JobProfile;
@@ -20,6 +16,12 @@ import org.folio.rest.persist.interfaces.Results;
 import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import javax.ws.rs.NotFoundException;
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
+
+import static org.folio.util.HelperUtils.constructCriteria;
 
 
 @Repository
@@ -61,8 +63,25 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
   @Override
   public Future<JobProfile> update(JobProfile jobProfile, String tenantId) {
-    Promise<UpdateResult> promise = Promise.promise();
-    pgClientFactory.getInstance(tenantId).update(TABLE, jobProfile, jobProfile.getId(), promise);
+    Promise<JobProfile> promise = Promise.promise();
+    try {
+      Criteria idCrit = constructCriteria(ID_FIELD, jobProfile.getId());
+      pgClientFactory.getInstance(tenantId).update(TABLE, jobProfile, new Criterion(idCrit), true, updateResult -> {
+        if (updateResult.failed()) {
+          LOGGER.error("Could not update jobProfile with id {}", jobProfile.getId(), updateResult.cause().getMessage());
+          promise.fail(updateResult.cause());
+        } else if (updateResult.result().getUpdated() != 1) {
+          String errorMessage = String.format("JobProfile with id '%s' was not found", jobProfile.getId());
+          LOGGER.error(errorMessage);
+          promise.fail(new NotFoundException(errorMessage));
+        } else {
+          promise.complete(jobProfile);
+        }
+      });
+    } catch (Exception e) {
+      LOGGER.error("Error updating jobExecution", e);
+      promise.fail(e);
+    }
     return promise.future().map(jobProfile);
   }
 

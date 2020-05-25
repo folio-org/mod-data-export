@@ -26,4 +26,20 @@ public interface RecordLoaderService {
    * @return collection of json objects
    */
   List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams okapiConnectionParams, int partitionSize);
+
+  /**
+   * Retrieve all the holdings for a given instance UUID
+   *
+   * @param string
+   * @param params
+   */
+  List<JsonObject>  getHoldingsForInstance(String instanceId, OkapiConnectionParams params);
+
+  /**
+   * Retrieve all Items for the list of holding UUIDs
+   * @param holdingIds
+   * @param params
+   * @return
+   */
+  List<JsonObject> getAllItemsForHolding(List<String> holdingIds, OkapiConnectionParams params);
 }

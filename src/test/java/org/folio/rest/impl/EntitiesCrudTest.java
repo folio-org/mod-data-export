@@ -1,16 +1,9 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.equalTo;
-
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.stream.Stream;
-import kotlin.text.Charsets;
-import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.util.TestEntities;
@@ -21,8 +14,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.equalTo;
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class EntitiesCrudTest extends RestVerticleTestBase{
+class EntitiesCrudTest extends RestVerticleTestBase {
 
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
   private String sample = null;
@@ -42,7 +41,7 @@ class EntitiesCrudTest extends RestVerticleTestBase{
       .log()
       .all()
       .statusCode(200)
-      .body("totalRecords", equalTo(0));
+      .body("totalRecords", equalTo(1));
   }
 
   @ParameterizedTest
@@ -64,12 +63,12 @@ class EntitiesCrudTest extends RestVerticleTestBase{
   @Order(3)
   @EnumSource(TestEntities.class)
   void testVerifyCollectionQuantity(TestEntities testEntity) throws MalformedURLException {
-    logger.info(String.format("--- mod-data-export %s test: Verifying only 1 record was created ... ", testEntity.name()));
+    logger.info(String.format("--- mod-data-export %s test: Verifying only 1 record was created, 2 records in total with default... ", testEntity.name()));
     getRequest(testEntity.getEndpoint()).then()
-    .log()
-    .all()
-    .statusCode(200)
-    .body("totalRecords", equalTo(1));
+      .log()
+      .all()
+      .statusCode(200)
+      .body("totalRecords", equalTo(2));
 
   }
 
@@ -88,6 +87,21 @@ class EntitiesCrudTest extends RestVerticleTestBase{
 
   @ParameterizedTest
   @Order(5)
+  @EnumSource(value = TestEntities.class, names = {"MAPPINGPROFILE", "JOBPROFILE"})
+  void testGetByQuery(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-data-export %s test: Fetching %s with ID by ID query: %s", testEntity.name(), testEntity.name(),
+      testEntity.getId()));
+    String idJsonPath = testEntity.getEndpoint().split("/")[2] + "[0].id";
+    getRequest(testEntity.getEndpointWithIdQuery(testEntity.getId())).then()
+      .log()
+      .ifValidationFails()
+      .statusCode(200)
+      .body(idJsonPath, equalTo(testEntity.getId()))
+      .body("totalRecords", equalTo(1));
+  }
+
+  @ParameterizedTest
+  @Order(6)
   @EnumSource(TestEntities.class)
   void testPutById(TestEntities testEntity) throws IOException {
     logger.info(String.format("--- mod-data-export %s test: Editing %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -103,7 +117,7 @@ class EntitiesCrudTest extends RestVerticleTestBase{
   }
 
   @ParameterizedTest
-  @Order(6)
+  @Order(7)
   @EnumSource(value = TestEntities.class, names = {"MAPPINGPROFILE"})
   void testDeleteEndpoint_foreginKeyFailure(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-data-exports %s test failure with Foreign Key Constraint: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -115,7 +129,7 @@ class EntitiesCrudTest extends RestVerticleTestBase{
   }
 
   @ParameterizedTest
-  @Order(7)
+  @Order(8)
   @MethodSource("deleteOrder")
   void testDeleteEndpoint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-data-exports %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -127,7 +141,7 @@ class EntitiesCrudTest extends RestVerticleTestBase{
   }
 
   @ParameterizedTest
-  @Order(8)
+  @Order(9)
   @EnumSource(TestEntities.class)
   void testVerifyDelete(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-data-exports %s test: Verify %s is deleted with ID: %s", testEntity.name(),

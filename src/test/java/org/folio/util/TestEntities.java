@@ -35,6 +35,10 @@ public enum TestEntities {
     return endpoint + "/{id}";
   }
 
+  public String getEndpointWithIdQuery(String id) {
+    return endpoint + "?query=id==" + id;
+  }
+
   public String getSampleFileName() {
     return sampleFileName;
   }
