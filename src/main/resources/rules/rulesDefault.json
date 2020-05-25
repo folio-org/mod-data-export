@@ -25,6 +25,228 @@
     ]
   },
   {
+    "field": "010",
+    "description": "Identifier LCCN",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "LCCN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "020",
+    "description": "Identifier ISBN",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISBN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "022",
+    "description": "Identifier ISSN",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISSN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "035",
+    "description": "Identifier System Control Number",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "System control number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "035",
+    "description": "Identifier OCLC",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "OCLC"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "field": "074",
+    "description": "Identifier GPO",
+    "dataSources": [
+      {
+        "from": "$.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "GPO item number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+    }
+  },
+  {
     "field": "245",
     "description": "Title",
     "dataSources": [

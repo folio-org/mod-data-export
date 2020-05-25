@@ -6,10 +6,12 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.processor.RuleFactory;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
 import org.folio.service.mapping.settings.MappingSettingsProvider;
 import org.folio.service.mapping.settings.Settings;
+import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
@@ -25,7 +27,7 @@ public class MappingServiceImpl implements MappingService {
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
   @Autowired
-  private MappingSettingsProvider settingsProvider;
+  private ReferenceDataProvider referenceDataProvider;
 
   public MappingServiceImpl() {
     this.ruleProcessor = new RuleProcessor();
@@ -38,19 +40,19 @@ public class MappingServiceImpl implements MappingService {
       return Collections.emptyList();
     }
     List<String> records = new ArrayList<>();
-    Settings settings = settingsProvider.getSettings(jobExecutionId, connectionParams);
+    ReferenceData referenceData = settingsProvider.getSettings(jobExecutionId, connectionParams);
     List<Rule> rules = ruleFactory.create(mappingProfile);
     for (JsonObject instance : instances) {
-      String record = runDefaultMapping(instance, settings, rules);
+      String record = runDefaultMapping(instance, referenceData, rules);
       records.add(record);
     }
     return records;
   }
 
-  private String runDefaultMapping(JsonObject instance, Settings settings, List<Rule> rules) {
+  private String runDefaultMapping(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return this.ruleProcessor.process(entityReader, recordWriter, settings, rules);
+    return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
   }
 
 }

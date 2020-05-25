@@ -4,6 +4,7 @@ import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.HOLDING;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
@@ -23,7 +24,7 @@ public class InventoryClient {
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
-  private static final int SETTING_LIMIT = 200;
+  private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
@@ -32,13 +33,18 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + "?limit=" + SETTING_LIMIT;
-    return getSettingsByUrl(endpoint, params, CONTENT_TERMS);
+    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + "?limit=" + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, CONTENT_TERMS);
   }
 
-  private Map<String, JsonObject> getSettingsByUrl(String url, OkapiConnectionParams params, String field) {
-    String endpoint = buildQueryEndpoint(url, params.getOkapiUrl());
-    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, endpoint);
+  public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
+  }
+
+  private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
+    String queryEndpoint = ClientUtil.buildQueryEndpoint(url, params.getOkapiUrl());
+    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, queryEndpoint);
     Map<String, JsonObject> map = new HashMap<>();
     responseBody.ifPresent(rb -> {
       if (rb.containsKey(field)) {
