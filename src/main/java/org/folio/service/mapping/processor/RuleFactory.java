@@ -2,9 +2,9 @@ package org.folio.service.mapping.processor;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,16 +24,16 @@ import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNoneBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.folio.service.mapping.profiles.RecordType.HOLDINGS;
 import static org.folio.service.mapping.profiles.RecordType.INSTANCE;
+
 
 public class RuleFactory {
 
   public static final int TAG_INDEX = 0;
 
   static final Map<String, String> TRANSLATIONS_MAP = ImmutableMap.of(
-    "materialTypeId", "set_material_type",
     "electronicAccess.relationshipId", "set_electronic_access_relationship"
   );
 
@@ -53,11 +54,11 @@ public class RuleFactory {
   private List<Rule> createByMappingFields(List<MappingProfileRule> mappingProfileRules) {
     List<Rule> rules = new ArrayList<>();
     for (MappingProfileRule mappingProfileRule : mappingProfileRules) {
-      if (mappingProfileRule.isEnabled() && isNoneBlank(mappingProfileRule.getPath())) {
+      if (mappingProfileRule.isEnabled() && isNotBlank(mappingProfileRule.getPath())) {
         if (INSTANCE.equals(mappingProfileRule.getRecordType()) && isBlank(mappingProfileRule.getTransformation())) {
           for (Rule defaultRule : getDefaultRules()) {
             for (DataSource dataSource : defaultRule.getDataSources()) {
-              if (isNoneBlank(dataSource.getFrom()) && mappingProfileRule.getPath().equals(dataSource.getFrom())) {
+              if (isNotBlank(dataSource.getFrom()) && mappingProfileRule.getPath().equals(dataSource.getFrom())) {
                 rules.add(defaultRule);
               }
             }
@@ -105,26 +106,35 @@ public class RuleFactory {
   }
 
   private Rule buildRuleByMappingProfileField(MappingProfileRule mappingProfileRule) {
-    List<String> transformationParts = Splitter.on(StringUtils.SPACE).trimResults().splitToList(mappingProfileRule.getTransformation());
+    List<String> transformationParts = Lists.newArrayList(Splitter.on(" ").trimResults().split(mappingProfileRule.getTransformation()));
     Rule rule = new Rule();
     rule.setTag(transformationParts.get(TAG_INDEX));
+    addDataSources(mappingProfileRule, transformationParts, rule);
+    return rule;
+  }
+
+  private void addDataSources(MappingProfileRule mappingProfileRule, List<String> transformationParts, Rule rule) {
     List<DataSource> dataSources = new ArrayList<>();
+    addFromDataSource(mappingProfileRule, transformationParts, dataSources);
+    addEmptyIndicators(dataSources);
+    rule.setDataSources(dataSources);
+  }
+
+  private void addFromDataSource(MappingProfileRule mappingProfileRule, List<String> transformationParts, List<DataSource> dataSources) {
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingProfileRule.getPath());
     fromDataSource = addTranslationToDataSource(fromDataSource, mappingProfileRule.getId());
-    if (transformationParts.size() > 1) {
-      if (transformationParts.size() == 2) {
-        fromDataSource.setSubfield(transformationParts.get(2).replace("$", EMPTY));
-      } else if (transformationParts.size() == 3) {
-        fromDataSource.setSubfield(transformationParts.get(3).replace("$", EMPTY));
-        List<String> indicators = Splitter.fixedLength(2).trimResults().splitToList(transformationParts.get(2));
-        dataSources.add(createIndicatorDataSource(indicators.get(0)));
-        dataSources.add(createIndicatorDataSource(indicators.get(1)));
-      }
-    }
+    fromDataSource.setSubfield(transformationParts.get(1).replace("$", EMPTY));
     dataSources.add(fromDataSource);
-    rule.setDataSources(dataSources);
-    return rule;
+  }
+
+  private void addEmptyIndicators(List<DataSource> dataSources) {
+    DataSource indicator1 = createEmptyIndicatorDataSource();
+    indicator1.setIndicator("1");
+    dataSources.add(indicator1);
+    DataSource indicator2 = createEmptyIndicatorDataSource();
+    indicator2.setIndicator("2");
+    dataSources.add(indicator2);
   }
 
   private DataSource addTranslationToDataSource(DataSource dataSource, String fieldName) {
@@ -137,12 +147,14 @@ public class RuleFactory {
   }
 
 
-  private DataSource createIndicatorDataSource(String indicatorValue) {
+  private DataSource createEmptyIndicatorDataSource() {
     DataSource indicatorDataSource = new DataSource();
-    indicatorDataSource.setIndicator(indicatorValue);
-    Translation firstIndicatorTranslation = new Translation();
-    firstIndicatorTranslation.setFunction("set_value");
-    indicatorDataSource.setTranslation(firstIndicatorTranslation);
+    Translation indicatorTranslation = new Translation();
+    indicatorTranslation.setFunction("set_value");
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("value", " ");
+    indicatorTranslation.setParameters(parameters);
+    indicatorDataSource.setTranslation(indicatorTranslation);
     return indicatorDataSource;
   }
 }
