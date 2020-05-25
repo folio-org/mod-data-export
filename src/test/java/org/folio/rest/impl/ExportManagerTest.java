@@ -28,7 +28,7 @@ class ExportManagerTest extends RestVerticleTestBase {
     // given
     ExportRequest exportRequest = new ExportRequest()
       .withFileDefinitionId(UUID.randomUUID().toString())
-      .withJobProfileId(UUID.randomUUID().toString());
+      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -56,6 +56,25 @@ class ExportManagerTest extends RestVerticleTestBase {
     // then
     context.verify(() -> {
       assertEquals(HttpStatus.SC_UNPROCESSABLE_ENTITY, response.getStatusCode());
+      context.completeNow();
+    });
+  }
+  @Test
+  void shouldReturn_400Status_ifJobProfileNotFound(VertxTestContext context) {
+    // given
+    ExportRequest exportRequest = new ExportRequest()
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(UUID.randomUUID().toString());
+    // when
+    Response response = RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(exportRequest)
+        .encode())
+      .when()
+      .post(EXPORT_URL);
+    // then
+    context.verify(() -> {
+      assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
       context.completeNow();
     });
   }

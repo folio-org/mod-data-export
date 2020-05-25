@@ -1,6 +1,7 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface MappingService {
    * @param connectionParams okapi connection parameters
    * @return marc records
    */
-  List<String> map(List<JsonObject> records, String jobExecutionId, OkapiConnectionParams connectionParams);
+  List<String> map(List<JsonObject> records, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
 }

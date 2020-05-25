@@ -1,27 +1,29 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.succeededFuture;
-import static org.folio.util.ExceptionToResponseMapper.map;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import javax.ws.rs.core.Response;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.input.InputDataManager;
+import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.ws.rs.core.Response;
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+
+import static io.vertx.core.Future.succeededFuture;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -29,6 +31,12 @@ public class DataExportImpl implements DataExport {
 
   @Autowired
   private JobExecutionService jobExecutionService;
+
+  @Autowired
+  private JobProfileService jobProfileService;
+
+  @Autowired
+  private MappingProfileService mappingProfileService;
 
   @Autowired
   private DataExportHelper dataExportHelper;
@@ -46,16 +54,25 @@ public class DataExportImpl implements DataExport {
   @Override
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    try {
-      LOGGER.info("Starting the data-export process, request: {}", entity);
-      inputDataManager.init(JsonObject.mapFrom(entity), okapiHeaders);
-      succeededFuture()
-        .map(PostDataExportExportResponse.respond204())
-        .map(Response.class::cast)
-        .setHandler(asyncResultHandler);
-    } catch (Exception exception) {
-      asyncResultHandler.handle(succeededFuture(map(exception)));
-    }
+    LOGGER.info("Starting the data-export process, request: {}", entity);
+    jobProfileService.getById(entity.getJobProfileId(), tenantId)
+      .onSuccess(jobProfile ->
+        mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
+          .onSuccess(mappingProfile -> {
+            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(mappingProfile), okapiHeaders);
+            succeededFuture()
+              .map(PostDataExportExportResponse.respond204())
+              .map(Response.class::cast)
+              .onComplete(asyncResultHandler);
+          })
+          .onFailure(ar -> {
+            String errorMessage = "MappingProfile was not found with id" + entity.getJobProfileId();
+            failToFetchProfileHelper(errorMessage, asyncResultHandler);
+          }))
+      .onFailure(ar -> {
+        String errorMessage = "Job profile was not found with id" + entity.getJobProfileId();
+        failToFetchProfileHelper(errorMessage, asyncResultHandler);
+      });
   }
 
   @Override
@@ -77,6 +94,14 @@ public class DataExportImpl implements DataExport {
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .setHandler(asyncResultHandler);
+  }
+
+  private void failToFetchProfileHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {
+    LOGGER.error(errorMessage);
+    succeededFuture()
+      .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
+      .map(Response.class::cast)
+      .onComplete(asyncResultHandler);
   }
 
 }

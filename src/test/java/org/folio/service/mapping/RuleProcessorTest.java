@@ -36,11 +36,11 @@ class RuleProcessorTest {
   @Test
   void shouldMapEntityTo_MarcRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new MarcRecordWriter();
     // when
-    String actualMarcRecord = ruleProcessor.process(reader, writer, settings);
+    String actualMarcRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedMarcRecord = readFileContentFromResources("processor/mapped_marc_record.mrc");
     assertEquals(expectedMarcRecord, actualMarcRecord);
@@ -49,11 +49,11 @@ class RuleProcessorTest {
   @Test
   void shouldMapEntityTo_JsonRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new JsonRecordWriter();
     // when
-    String actualJsonRecord = ruleProcessor.process(reader, writer, settings);
+    String actualJsonRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedJsonRecord = readFileContentFromResources("processor/mapped_json_record.json");
     assertEquals(expectedJsonRecord, actualJsonRecord);
@@ -62,11 +62,11 @@ class RuleProcessorTest {
   @Test
   void shouldMapEntityTo_XmlRecord() {
     // given
-    RuleProcessor ruleProcessor = new RuleProcessor(rules);
+    RuleProcessor ruleProcessor = new RuleProcessor();
     EntityReader reader = new JPathSyntaxEntityReader(entity);
     RecordWriter writer = new XmlRecordWriter();
     // when
-    String actualXmlRecord = ruleProcessor.process(reader, writer, settings);
+    String actualXmlRecord = ruleProcessor.process(reader, writer, settings, rules);
     // then
     String expectedXmlRecord = readFileContentFromResources("processor/mapped_xml_record.xml");
     assertEquals(expectedXmlRecord, actualXmlRecord);

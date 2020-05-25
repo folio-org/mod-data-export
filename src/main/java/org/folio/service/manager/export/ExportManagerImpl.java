@@ -84,6 +84,7 @@ public class ExportManagerImpl implements ExportManager {
   protected void exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
+    MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
@@ -92,22 +93,16 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
 
-    MappingProfile mappingProfile = getMappingProfile();
     if(mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS)|| mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
       instances = fetchHoldingsAndItems(instances, params);
     }
-    List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params);
+    List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
-  }
-
-  // Dummy method, will be replaced in MDEXP-171
-   MappingProfile getMappingProfile() {
-    return new MappingProfile();
   }
 
   /**

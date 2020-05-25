@@ -2,11 +2,15 @@ package org.folio.service.mapping.processor;
 
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
-import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.processor.translations.TranslationFunction;
 import org.folio.service.mapping.processor.translations.TranslationsHolder;
 import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.values.*;
+import org.folio.service.mapping.reader.values.CompositeValue;
+import org.folio.service.mapping.reader.values.ListValue;
+import org.folio.service.mapping.reader.values.RuleValue;
+import org.folio.service.mapping.reader.values.SimpleValue;
+import org.folio.service.mapping.reader.values.StringValue;
+import org.folio.service.mapping.settings.Settings;
 import org.folio.service.mapping.writer.RecordWriter;
 
 import java.util.ArrayList;
@@ -29,14 +33,9 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  */
 public final class RuleProcessor {
   private static final String LEADER_FIELD = "leader";
-  private List<Rule> rules;
 
-  public RuleProcessor(List<Rule> rules) {
-    this.rules = rules;
-  }
-
-  public String process(EntityReader reader, RecordWriter writer, Settings settings) {
-    this.rules.forEach(rule -> {
+  public String process(EntityReader reader, RecordWriter writer, Settings settings, List<Rule> rules) {
+    rules.forEach(rule -> {
       if (LEADER_FIELD.equals(rule.getField())) {
         rule.getDataSources().forEach(dataSource -> writer.writeLeader(dataSource.getTranslation()));
       } else {

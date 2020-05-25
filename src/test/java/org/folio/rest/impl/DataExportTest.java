@@ -72,26 +72,25 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS);
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition();
-    //when
+    // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
+    vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          context.verify(() -> {
-            FileDefinition fileExportDefinition = optionalFileDefinition.get();
-            assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
-            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-            validateExternalCalls();
-            context.completeNow();
-          });
-
+      JobExecution jobExecution = optionalJobExecution.get();
+      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+        context.verify(() -> {
+          FileDefinition fileExportDefinition = optionalFileDefinition.get();
+          assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
+          assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
+          validateExternalCalls();
+          context.completeNow();
         });
+
       });
-    });
+    }));
   }
 
   @Test
@@ -150,7 +149,7 @@ class DataExportTest extends RestVerticleTestBase {
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition) {
     return new ExportRequest()
       .withFileDefinitionId(uploadedFileDefinition.getId())
-      .withJobProfileId(UUID.randomUUID().toString());
+      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
   }
 
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition) {
