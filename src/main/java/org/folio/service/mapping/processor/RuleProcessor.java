@@ -64,7 +64,7 @@ public final class RuleProcessor {
     return writer.getResult();
   }
 
-  private void translate(SimpleValue simpleValue, ReferenceData referenceData, Metadata metadata) {
+  private <S extends SimpleValue> void translate(S simpleValue, ReferenceData referenceData, Metadata metadata) {
     Translation translation = simpleValue.getDataSource().getTranslation();
     if (translation != null) {
       TranslationFunction translationFunction = TranslationsHolder.lookup(translation.getFunction());

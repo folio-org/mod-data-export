@@ -7,8 +7,6 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.USERS;
-import static org.folio.util.ExternalPathResolver.resourcesPathWithId;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
