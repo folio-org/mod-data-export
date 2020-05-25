@@ -71,9 +71,9 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, JsonObject mProfile, Map<String, String> params) {
+  public void init(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
-      initBlocking(request, mProfile, params);
+      initBlocking(request, mappingProfileJson, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
@@ -86,9 +86,9 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject mProfile, Map<String, String> params) {
+  protected void initBlocking(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
-    MappingProfile mappingProfile = mProfile.mapTo(MappingProfile.class);
+    MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
     fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition ->
