@@ -6,10 +6,10 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.settings.Settings;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.reader.EntityReader;
 import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
-import org.folio.service.mapping.settings.MappingSettingsProvider;
+import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
@@ -31,15 +31,15 @@ import java.util.List;
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private RuleProcessor ruleProcessor;
-  private MappingSettingsProvider settingsProvider;
+  private ReferenceDataProvider referenceDataProvider;
 
-  public MappingServiceImpl(@Autowired MappingSettingsProvider mappingSettingsProvider) {
+  public MappingServiceImpl(@Autowired ReferenceDataProvider referenceDataProvider) {
     try {
       URL url = Resources.getResource("rules/rulesDefault.json");
       String stringRules = Resources.toString(url, StandardCharsets.UTF_8);
       List<Rule> rules = Arrays.asList(Json.decodeValue(stringRules, Rule[].class));
       this.ruleProcessor = new RuleProcessor(rules);
-      this.settingsProvider = mappingSettingsProvider;
+      this.referenceDataProvider = referenceDataProvider;
     } catch (IOException exception) {
       LOGGER.error("Exception occurred while initializing MappingService", exception);
     }
@@ -51,17 +51,17 @@ public class MappingServiceImpl implements MappingService {
       return Collections.emptyList();
     }
     List<String> records = new ArrayList<>();
-    Settings settings = settingsProvider.getSettings(jobExecutionId, connectionParams);
+    ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     for (JsonObject instance : instances) {
-      String record = runDefaultMapping(instance, settings);
+      String record = runDefaultMapping(instance, referenceData);
       records.add(record);
     }
     return records;
   }
 
-  private String runDefaultMapping(JsonObject instance, Settings settings) {
+  private String runDefaultMapping(JsonObject instance, ReferenceData referenceData) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return this.ruleProcessor.process(entityReader, recordWriter, settings);
+    return this.ruleProcessor.process(entityReader, recordWriter, referenceData);
   }
 }

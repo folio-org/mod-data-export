@@ -2,6 +2,7 @@ package org.folio.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.SRS;
 import static org.folio.util.ExternalPathResolver.USERS;
@@ -40,8 +41,9 @@ public class MockServer {
   private static final String HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in000005.json";
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
   private static final String SRS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
-  private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
+  private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
+  private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -93,6 +95,7 @@ public class MockServer {
     router.get(resourcesPath(INSTANCE)).handler(ctx -> handleGetInstanceRecord(ctx));
     router.get(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
+    router.get(resourcesPath(IDENTIFIER_TYPES)).handler(ctx -> handleGetIdentifierTypesRecord(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
@@ -104,9 +107,9 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject instance = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE, instance);
-      serverResponse(ctx, 200, APPLICATION_JSON, instance.encodePrettily());
+      JsonObject item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, ITEM, item);
+      serverResponse(ctx, 200, APPLICATION_JSON, item.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
@@ -118,9 +121,9 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject instance = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE, instance);
-      serverResponse(ctx, 200, APPLICATION_JSON, instance.encodePrettily());
+      JsonObject holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, HOLDING, holding);
+      serverResponse(ctx, 200, APPLICATION_JSON, holding.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
@@ -181,14 +184,29 @@ public class MockServer {
     }
   }
 
+  private void handleGetIdentifierTypesRecord(RoutingContext ctx) {
+    logger.info("handleGet Identifier types Record got: " + ctx.request()
+      .path());
+    try {
+      JsonObject identifierTypes = new JsonObject(RestVerticleTestBase.getMockData(IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, IDENTIFIER_TYPES, identifierTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, identifierTypes.encodePrettily());
+    } catch (IOException e) {
+      System.err.println(e);
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
 
   private void handleGetUsersRecord(RoutingContext ctx) {
     logger.info("handleGetUsersRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject instance = new JsonObject(RestVerticleTestBase.getMockData(USERS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, USERS, instance);
-      serverResponse(ctx, 200, APPLICATION_JSON, instance.encodePrettily());
+      JsonObject user = new JsonObject(RestVerticleTestBase.getMockData(USERS_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, USERS, user);
+      serverResponse(ctx, 200, APPLICATION_JSON, user.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

@@ -1,4 +1,4 @@
-package org.folio.service.mapping.settings;
+package org.folio.service.mapping.referencedata;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
