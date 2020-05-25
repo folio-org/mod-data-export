@@ -65,14 +65,8 @@ public class DataExportImpl implements DataExport {
               .map(Response.class::cast)
               .onComplete(asyncResultHandler);
           })
-          .onFailure(ar -> {
-            String errorMessage = "MappingProfile was not found with id" + entity.getJobProfileId();
-            failToFetchProfileHelper(errorMessage, asyncResultHandler);
-          }))
-      .onFailure(ar -> {
-        String errorMessage = "Job profile was not found with id" + entity.getJobProfileId();
-        failToFetchProfileHelper(errorMessage, asyncResultHandler);
-      });
+          .onFailure(ar -> failToFetchProfileHelper(ar.getMessage(), asyncResultHandler)))
+      .onFailure(ar -> failToFetchProfileHelper(ar.getMessage(), asyncResultHandler));
   }
 
   @Override

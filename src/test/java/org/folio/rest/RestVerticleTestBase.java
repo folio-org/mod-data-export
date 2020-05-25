@@ -1,6 +1,5 @@
 package org.folio.rest;
 
-import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
@@ -16,7 +15,6 @@ import io.vertx.core.logging.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -66,8 +64,6 @@ public abstract class RestVerticleTestBase {
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
-  protected static final String NON_EXISTED_ID = "invalid-aaaa-500a-aaaa-11111111111";
-  protected static final String DELIMITER = "/";
   protected static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
 
   @BeforeAll
