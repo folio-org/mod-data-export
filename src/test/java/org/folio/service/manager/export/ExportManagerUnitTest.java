@@ -1,6 +1,5 @@
 package org.folio.service.manager.export;
 
-import org.folio.TestUtil;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -59,13 +58,13 @@ class ExportManagerUnitTest {
     Map<String, String> params = new HashMap<>();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     // when
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
+    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", new MappingProfile());
     exportManager.exportBlocking(exportPayload);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(50)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(recordLoaderService, Mockito.times(3)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
-    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(mappingService, Mockito.times(1)).map(anyList(), any(MappingProfile.class), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
   }
 
@@ -83,9 +82,9 @@ class ExportManagerUnitTest {
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
+    MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Arrays.asList(RecordType.HOLDINGS, RecordType.INSTANCE));
     // when
-    Mockito.when(exportManager.getMappingProfile()).thenReturn(new MappingProfile().withRecordTypes(Arrays.asList(RecordType.HOLDINGS, RecordType.INSTANCE)));
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId");
+    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     exportManager.exportBlocking(exportPayload);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), any(OkapiConnectionParams.class));

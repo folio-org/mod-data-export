@@ -20,6 +20,8 @@ import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.job.JobExecutionServiceImpl;
@@ -70,6 +72,8 @@ class InputDataManagerUnitTest {
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String TENANT_ID = "diku";
   private static final String JOB_EXECUTION_ID = "jobExecutionId";
+  private static final String JOB_PROFILE_ID = "jobProfileId";
+  private static final String MAPPING_PROFILE_ID = "jobExecutionId";
   private static final String EXPORT_FILE_DEFINITION_NAME = "exportFileDefinition";
   private static final String FILE_DIRECTORY = "src/test/resources/";
   private static final String SPRING_CONTEXT_NAME = "springContext";
@@ -136,6 +140,7 @@ class InputDataManagerUnitTest {
   private Map<String, String> requestParams;
   private FileDefinition fileExportDefinition;
   private JobExecution jobExecution;
+  private MappingProfile mappingProfile;
 
   @BeforeEach
   public void setup() {
@@ -145,6 +150,7 @@ class InputDataManagerUnitTest {
     exportRequest = createExportRequest();
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
     jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW).withHrId("1");
+    mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
@@ -162,7 +168,7 @@ class InputDataManagerUnitTest {
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(sourceReader).close();
@@ -182,9 +188,8 @@ class InputDataManagerUnitTest {
     doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
     when(fileDefinitionService.getById(eq(exportRequest.getFileDefinitionId()), eq(TENANT_ID))).thenReturn(Future.succeededFuture(requestFileDefinition));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
-
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -204,7 +209,7 @@ class InputDataManagerUnitTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -226,7 +231,7 @@ class InputDataManagerUnitTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -252,7 +257,7 @@ class InputDataManagerUnitTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -370,7 +375,7 @@ class InputDataManagerUnitTest {
       .thenReturn(Future.failedFuture(String.format("File definition not found with id %s", requestFileDefinition.getId())));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(mappingProfile), requestParams);
 
     //then
     verify(jobExecutionService, never()).update(jobExecution, TENANT_ID);
@@ -407,6 +412,7 @@ class InputDataManagerUnitTest {
   private ExportRequest createExportRequest() {
     return new ExportRequest()
       .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
       .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
   }
 

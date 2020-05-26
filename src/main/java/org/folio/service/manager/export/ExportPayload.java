@@ -1,6 +1,7 @@
 package org.folio.service.manager.export;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
 
 import java.util.List;
@@ -15,18 +16,20 @@ public class ExportPayload {
   private FileDefinition fileExportDefinition;
   private OkapiConnectionParams okapiConnectionParams;
   private String jobExecutionId;
+  private MappingProfile mappingProfile;
   private int exportedRecordsNumber;
   private int failedRecordsNumber;
 
   public ExportPayload() {
   }
 
-  public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams, String jobExecutionId) {
+  public ExportPayload(List<String> identifiers, boolean last, FileDefinition fileExportDefinition, OkapiConnectionParams okapiConnectionParams, String jobExecutionId, MappingProfile mappingProfile) {
     this.identifiers = identifiers;
     this.last = last;
     this.fileExportDefinition = fileExportDefinition;
     this.okapiConnectionParams = okapiConnectionParams;
     this.jobExecutionId = jobExecutionId;
+    this.mappingProfile = mappingProfile;
   }
 
   public List<String> getIdentifiers() {
@@ -68,6 +71,10 @@ public class ExportPayload {
   public void setJobExecutionId(String jobExecutionId) {
     this.jobExecutionId = jobExecutionId;
   }
+
+  public MappingProfile getMappingProfile() { return mappingProfile; }
+
+  public void setMappingProfile(MappingProfile mappingProfile) { this.mappingProfile = mappingProfile; }
 
   public int getExportedRecordsNumber() {
     return exportedRecordsNumber;
