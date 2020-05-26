@@ -60,8 +60,10 @@ public enum TranslationsHolder implements TranslationFunction {
    * The time requires 8 numeric characters in the pattern hhmmss.f, expressed in terms of the 24-hour (00-23) clock.
    */
   SET_TRANSACTION_DATETIME() {
-    private DateTimeFormatter originFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private DateTimeFormatter targetFormatter = new DateTimeFormatterBuilder()
+    private transient DateTimeFormatter originFormatter = new DateTimeFormatterBuilder()
+      .appendPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+      .toFormatter();
+    private transient DateTimeFormatter targetFormatter = new DateTimeFormatterBuilder()
       .appendPattern("yyyyMMddhhmmss")
       .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 1, true)
       .toFormatter();
