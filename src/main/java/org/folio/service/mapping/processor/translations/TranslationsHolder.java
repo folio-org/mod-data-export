@@ -8,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.List;
 
 public enum TranslationsHolder implements TranslationFunction {
@@ -45,6 +49,27 @@ public enum TranslationsHolder implements TranslationFunction {
         }
       }
       return StringUtils.EMPTY;
+    }
+  },
+
+  /**
+   * Sixteen characters that indicate the date and time of the latest record transaction
+   * and serve as a version identifier for the record.
+   * They are recorded according to Representation of Dates and Times (ISO 8601).
+   * The date requires 8 numeric characters in the pattern yyyymmdd.
+   * The time requires 8 numeric characters in the pattern hhmmss.f, expressed in terms of the 24-hour (00-23) clock.
+   */
+  SET_TRANSACTION_DATETIME() {
+    private DateTimeFormatter originFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private DateTimeFormatter targetFormatter = new DateTimeFormatterBuilder()
+      .appendPattern("yyyyMMddhhmmss")
+      .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 1, true)
+      .toFormatter();
+
+    @Override
+    public String apply(String updatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      ZonedDateTime originDateTime = ZonedDateTime.parse(updatedDate, originFormatter);
+      return targetFormatter.format(originDateTime);
     }
   };
 

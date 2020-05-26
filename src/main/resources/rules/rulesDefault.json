@@ -25,6 +25,18 @@
     ]
   },
   {
+    "field": "005",
+    "description": "Date and Time of Latest Transaction",
+    "dataSources": [
+      {
+        "from": "$.metadata.updatedDate",
+        "translation": {
+          "function": "set_transaction_datetime"
+        }
+      }
+    ]
+  },
+  {
     "field": "010",
     "description": "Identifier LCCN",
     "dataSources": [
