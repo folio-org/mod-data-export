@@ -14,6 +14,7 @@ import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
@@ -70,9 +71,9 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, Map<String, String> params) {
+  public void init(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
-      initBlocking(request, params);
+      initBlocking(request, mappingProfileJson, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
@@ -85,8 +86,9 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void initBlocking(JsonObject request, Map<String, String> params) {
+  protected void initBlocking(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
+    MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
     fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition ->
@@ -97,7 +99,7 @@ class InputDataManagerImpl implements InputDataManager {
         if (sourceReader.hasNext()) {
           fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
             initInputDataContext(sourceReader, jobExecutionId);
-            ExportPayload exportPayload = createExportPayload(okapiConnectionParams, savedFileExportDefinition, jobExecutionId);
+            ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
             LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
             Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
             if (optionalUser.isPresent()) {
@@ -180,11 +182,12 @@ class InputDataManagerImpl implements InputDataManager {
     return succeededFuture();
   }
 
-  private ExportPayload createExportPayload(OkapiConnectionParams okapiParams, FileDefinition fileExportDefinition, String jobExecutionId) {
+  private ExportPayload createExportPayload(FileDefinition fileExportDefinition, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams okapiParams) {
     ExportPayload exportPayload = new ExportPayload();
-    exportPayload.setOkapiConnectionParams(okapiParams);
     exportPayload.setFileExportDefinition(fileExportDefinition);
+    exportPayload.setMappingProfile(mappingProfile);
     exportPayload.setJobExecutionId(jobExecutionId);
+    exportPayload.setOkapiConnectionParams(okapiParams);
     return exportPayload;
   }
 

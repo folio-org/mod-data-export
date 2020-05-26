@@ -5,6 +5,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.util.Map;
+
 import org.folio.service.manager.export.ExportResult;
 
 @ProxyGen
@@ -26,7 +27,7 @@ public interface InputDataManager {  //NOSONAR
    *                      filedefinition, jobProfile, etc.
    * @param params   - okapi headers and connection parameters
    */
-  void init(JsonObject exportRequest, Map<String, String> params);
+  void init(JsonObject exportRequest, JsonObject mappingProfile, Map<String, String> params);
 
   /**
    * Publish the next chunk of uuids to be exported. If there is no more uuids to read,

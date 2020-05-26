@@ -34,14 +34,9 @@ import static org.folio.service.mapping.reader.values.SimpleValue.SubType.STRING
  */
 public final class RuleProcessor {
   private static final String LEADER_FIELD = "leader";
-  private List<Rule> rules;
 
-  public RuleProcessor(List<Rule> rules) {
-    this.rules = rules;
-  }
-
-  public String process(EntityReader reader, RecordWriter writer, ReferenceData referenceData) {
-    this.rules.forEach(rule -> {
+  public String process(EntityReader reader, RecordWriter writer, ReferenceData referenceData, List<Rule> rules) {
+    rules.forEach(rule -> {
       if (LEADER_FIELD.equals(rule.getField())) {
         rule.getDataSources().forEach(dataSource -> writer.writeLeader(dataSource.getTranslation()));
       } else {
