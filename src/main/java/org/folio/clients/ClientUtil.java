@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -66,6 +67,7 @@ public final class ClientUtil {
     requestBase.setHeader((HttpHeaders.ACCEPT), MediaType.APPLICATION_JSON);
   }
 
+  @NotNull
   private static URI prepareFullUriWithQuery(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
     String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
@@ -74,11 +76,6 @@ public final class ClientUtil {
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
     }
-  }
-
-  private static URI prepareFullUri(OkapiConnectionParams params, String endpoint) {
-      String uri = String.format(endpoint, params.getOkapiUrl());
-      return URI.create(uri);
   }
 
   private static JsonObject getResponseEntity(CloseableHttpResponse response) {
