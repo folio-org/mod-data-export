@@ -14,9 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(MockitoJUnitRunner.class)
 class TranslationFunctionUnitTest {
@@ -113,6 +116,30 @@ class TranslationFunctionUnitTest {
     String result = translationFunction.apply(value, 0, translation, referenceData, metadata);
     // then
     Assert.assertEquals(StringUtils.EMPTY, result);
+  }
+
+
+  @Test
+  void SetTransactionDatetime_shouldReturnFormattedDate() {
+    // given
+    String updatedDate = "2020-05-22T01:46:42.915+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_transaction_datetime");
+    // when
+    String result = translationFunction.apply(updatedDate, 0, null, null, null);
+    // then
+    Assert.assertNotNull(result);
+    Assert.assertEquals("20200522014642.9", result);
+  }
+
+  @Test
+  void SetTransactionDatetime_shouldThrowException() {
+    // given
+    String updatedDate = "date in wrong format";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_transaction_datetime");
+    // when
+    assertThrows(DateTimeParseException.class, () ->
+      translationFunction.apply(updatedDate, 0, null, null, null)
+    );
   }
 
 }
