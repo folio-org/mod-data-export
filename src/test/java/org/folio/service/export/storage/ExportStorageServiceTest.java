@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class ExportStorageServiceTest {
+class ExportStorageServiceTest {
 
   @Mock
   private AmazonFactory amazonFactory;
@@ -48,17 +48,17 @@ public class ExportStorageServiceTest {
 
 
   @BeforeEach
-  public void setUp() {
+  void setUp() {
     System.setProperty("bucket.name", BUCKET_NAME);
   }
 
   @AfterEach
-  public void tearDown() {
+  void tearDown() {
     System.clearProperty("bucket.name");
   }
 
   @Test
-  public void storeFile_shouldPass() throws InterruptedException {
+  void storeFile_shouldPass() throws InterruptedException {
     // given
     String jobId = UUID.randomUUID().toString();
     String parentFolder = TENANT_ID + "/" + jobId;
@@ -92,7 +92,7 @@ public class ExportStorageServiceTest {
   }
 
   @Test
-  public void storeFile_shouldFailIfBucketNameIsNotSet() {
+  void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty("bucket.name");
     FileDefinition exportFileDefinition = new FileDefinition()
@@ -106,7 +106,7 @@ public class ExportStorageServiceTest {
   }
 
   @Test
-  public void storeFile_shouldFailOnUploadDirectory() {
+  void storeFile_shouldFailOnUploadDirectory() {
     // given
     FileDefinition exportFileDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -123,7 +123,7 @@ public class ExportStorageServiceTest {
   }
 
   @Test
-  public void testSuccessfulGenerateURL(VertxTestContext testContext) throws MalformedURLException {
+  void testSuccessfulGenerateURL(VertxTestContext testContext) throws MalformedURLException {
     // given
     String tenantId = "testAWS";
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
@@ -148,7 +148,7 @@ public class ExportStorageServiceTest {
   }
 
   @Test
-  public void testbucketNameNotFoundInS3(VertxTestContext testContext) {
+  void testbucketNameNotFoundInS3(VertxTestContext testContext) {
     // given
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
@@ -172,7 +172,7 @@ public class ExportStorageServiceTest {
   }
 
   @Test
-  public void testbucketNameNotProvidedInSystemProperty() {
+  void testbucketNameNotProvidedInSystemProperty() {
     System.clearProperty("bucket.name");
 
     AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);

@@ -25,7 +25,9 @@ public class ModTenantAPI extends TenantAPI {
   private static final String LOAD_DEFAULT_DATA_PARAMETER = "loadDefaultData";
   private static final String DATA = "data";
   private static final String MAPPING_PROFILES = "mappingProfiles";
+  private static final String JOB_PROFILES = "jobProfiles";
   private static final String MAPPING_PROFILES_URI = "data-export/mappingProfiles";
+  private static final String JOB_PROFILES_URI = "data-export/jobProfiles";
 
   @Autowired
   private StorageCleanupService storageCleanupService;
@@ -83,7 +85,8 @@ public class ModTenantAPI extends TenantAPI {
   private void buildDataLoadingParameters(TenantLoading tenantLoading) {
     tenantLoading.withKey(LOAD_DEFAULT_DATA_PARAMETER)
       .withLead(DATA)
-      .add(MAPPING_PROFILES, MAPPING_PROFILES_URI);
+      .add(MAPPING_PROFILES, MAPPING_PROFILES_URI)
+      .add(JOB_PROFILES, JOB_PROFILES_URI);
   }
 
 }

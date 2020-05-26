@@ -1,14 +1,15 @@
 package org.folio.service.file.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import java.io.UncheckedIOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class LocalStorageCsvSourceReaderUnitTest {
+class LocalStorageCsvSourceReaderUnitTest {
 
   private static final int BATCH_SIZE = 2;
   private static final String NONEXISTING_FILE_NAME = "nonexistingfile";
@@ -16,15 +17,15 @@ public class LocalStorageCsvSourceReaderUnitTest {
   private static final long TOTAL_COUNT_5 = 5L;
   private static final long TOTAL_COUNT_0 = 0L;
 
-  private LocalStorageCsvSourceReader reader;
+  private static LocalStorageCsvSourceReader reader;
 
-  @Before
-  public void setUp() {
+  @BeforeAll
+  public static void setUp() {
     reader = new LocalStorageCsvSourceReader();
   }
 
   @Test
-  public void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
+  void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
     //when
     long actualTotalCount = reader.totalCount();
     //then
@@ -32,7 +33,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldReturnTotalCountZero_whenReaderInitializedWithNonExistingFile() {
+  void shouldReturnTotalCountZero_whenReaderInitializedWithNonExistingFile() {
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(NONEXISTING_FILE_NAME);
     //when
@@ -43,7 +44,7 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldReturnTotalCountFive_whenReaderInitialized() {
+  void shouldReturnTotalCountFive_whenReaderInitialized() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
@@ -55,19 +56,23 @@ public class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  public void shouldNotThrowException_whenCloseNotInitializedReader() {
-    reader.close();
+  void shouldNotThrowException_whenCloseNotInitializedReader() {
+    assertDoesNotThrow(() -> reader.close());
   }
 
-  @Test(expected = UncheckedIOException.class)
-  public void shouldThrowUncheckedIOException_whenReadNextAfterClose() {
+  @Test
+  void shouldThrowUncheckedIOException_whenReadNextAfterClose() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
     //when
     reader.init(fileDefinition, BATCH_SIZE);
     reader.close();
-    reader.readNext();
+    //then
+    Assertions.assertThrows(UncheckedIOException.class, () -> {
+      reader.readNext();
+    });
+
   }
 
 }

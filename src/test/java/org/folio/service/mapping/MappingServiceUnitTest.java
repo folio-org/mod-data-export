@@ -1,37 +1,44 @@
 package org.folio.service.mapping;
 
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.mockito.ArgumentMatchers.any;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.folio.service.mapping.settings.MappingSettingsProvider;
-import org.folio.service.mapping.settings.Settings;
+import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.service.mapping.referencedata.ReferenceData;
+import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.mockito.ArgumentMatchers.any;
+
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class MappingServiceUnitTest {
+class MappingServiceUnitTest {
 
+  @InjectMocks
+  private MappingServiceImpl mappingService;
   @Mock
-  private MappingSettingsProvider mappingSettingsProvider;
+  private ReferenceDataProvider referenceDataProvider;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
-  Settings settings = new Settings();
-  public MappingServiceUnitTest() {
-    settings.addNatureOfContentTerms(getNatureOfContentTerms());
+  private ReferenceData referenceData = new ReferenceData();
+
+  MappingServiceUnitTest() {
+    referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
+    referenceData.addIdentifierTypes(getIdentifierTypes());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -46,29 +53,38 @@ public class MappingServiceUnitTest {
     return map;
   }
 
-  @Test
-  public void shouldReturnEmptyRecords_for_emptyInstances() {
-    // given
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
-    List<JsonObject> givenInstances = Collections.emptyList();
-
-    // when
-    List<String> actualRecords = mappingService.map(givenInstances, jobExecutionId, params);
-    // then
-    Assert.assertNotNull(actualRecords);
-    Assert.assertEquals(0, actualRecords.size());
-    Mockito.verify(mappingSettingsProvider, Mockito.never()).getSettings(any(String.class), any(OkapiConnectionParams.class));
+  private Map<String, JsonObject> getIdentifierTypes() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_identifier_types_response.json"))
+        .getJsonArray("identifierTypes");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
   }
 
   @Test
-  public void shouldMapInstance_to_marcRecord() {
+  void shouldReturnEmptyRecords_for_emptyInstances() {
     // given
-    MappingService mappingService = new MappingServiceImpl(mappingSettingsProvider);
+    List<JsonObject> givenInstances = Collections.emptyList();
+    // when
+    List<String> actualRecords = mappingService.map(givenInstances, new MappingProfile(), jobExecutionId, params);
+    // then
+    Assert.assertNotNull(actualRecords);
+    Assert.assertEquals(0, actualRecords.size());
+    Mockito.verify(referenceDataProvider, Mockito.never()).get(any(String.class), any(OkapiConnectionParams.class));
+  }
+
+  @Test
+  void shouldMapInstance_to_marcRecord() {
+    // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
-    Mockito.when(mappingSettingsProvider.getSettings(jobExecutionId, params)).thenReturn(settings);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params)).thenReturn(referenceData);
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, jobExecutionId, params);
+    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);

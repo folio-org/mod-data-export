@@ -31,6 +31,12 @@ public class DataExportImpl implements DataExport {
   private JobExecutionService jobExecutionService;
 
   @Autowired
+  private JobProfileService jobProfileService;
+
+  @Autowired
+  private MappingProfileService mappingProfileService;
+
+  @Autowired
   private DataExportHelper dataExportHelper;
 
   private InputDataManager inputDataManager;
@@ -46,16 +52,19 @@ public class DataExportImpl implements DataExport {
   @Override
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    try {
-      LOGGER.info("Starting the data-export process, request: {}", entity);
-      inputDataManager.init(JsonObject.mapFrom(entity), okapiHeaders);
-      succeededFuture()
-        .map(PostDataExportExportResponse.respond204())
-        .map(Response.class::cast)
-        .onComplete(asyncResultHandler);
-    } catch (Exception exception) {
-      asyncResultHandler.handle(succeededFuture(map(exception)));
-    }
+    LOGGER.info("Starting the data-export process, request: {}", entity);
+    jobProfileService.getById(entity.getJobProfileId(), tenantId)
+      .onSuccess(jobProfile ->
+        mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
+          .onSuccess(mappingProfile -> {
+            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(mappingProfile), okapiHeaders);
+            succeededFuture()
+              .map(PostDataExportExportResponse.respond204())
+              .map(Response.class::cast)
+              .onComplete(asyncResultHandler);
+          })
+          .onFailure(ar -> failToFetchProfileHelper(ar.getMessage(), asyncResultHandler)))
+      .onFailure(ar -> failToFetchProfileHelper(ar.getMessage(), asyncResultHandler));
   }
 
   @Override
@@ -76,6 +85,14 @@ public class DataExportImpl implements DataExport {
       .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
+      .onComplete(asyncResultHandler);
+  }
+
+  private void failToFetchProfileHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {
+    LOGGER.error(errorMessage);
+    succeededFuture()
+      .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
+      .map(Response.class::cast)
       .onComplete(asyncResultHandler);
   }
 

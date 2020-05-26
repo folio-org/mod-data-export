@@ -14,11 +14,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class ExceptionToResponseMapperUnitTest {
+class ExceptionToResponseMapperUnitTest {
 
 
   @Test
-  public void shouldReturnBadRequestResponse() {
+  void shouldReturnBadRequestResponse() {
     Response response = ExceptionToResponseMapper.map(new BadRequestException("Bad request message"));
     assertNotNull(response);
     assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
@@ -27,7 +27,7 @@ public class ExceptionToResponseMapperUnitTest {
   }
 
   @Test
-  public void shouldReturnNotFoundResponse() {
+  void shouldReturnNotFoundResponse() {
     Response response = ExceptionToResponseMapper.map(new NotFoundException("Not found message"));
     assertNotNull(response);
     assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatus());
@@ -36,7 +36,7 @@ public class ExceptionToResponseMapperUnitTest {
   }
 
   @Test
-  public void shouldReturnInternalServerErrorResponse() {
+  void shouldReturnInternalServerErrorResponse() {
     Response response = ExceptionToResponseMapper.map(new InternalServerErrorException("Internal server error message"));
     assertNotNull(response);
     assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatus());
@@ -46,7 +46,7 @@ public class ExceptionToResponseMapperUnitTest {
 
 
   @Test
-  public void shouldReturnHTTPResponse() {
+  void shouldReturnHTTPResponse() {
     Response response = ExceptionToResponseMapper.map(new ServiceException(org.folio.HttpStatus.HTTP_BAD_REQUEST, "Testing Http Exception"));
     assertNotNull(response);
     assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());

@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class ExportServiceUnitTest {
+class ExportServiceUnitTest {
   @Mock
   private FileStorage fileStorage;
   @Mock
@@ -34,7 +34,7 @@ public class ExportServiceUnitTest {
   private static final String TENANT = "tenant";
 
   @Test
-  public void shouldPassExportFor_1_SrsRecord() {
+  void shouldPassExportFor_1_SrsRecord() {
     // given
     String response = TestUtil.readFileContentFromResources("mockData/srs/get_records_response.json");
     String jsonRecord = new JsonObject(response).getJsonArray("records").getJsonObject(0).toString();
@@ -47,7 +47,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void shouldPassExportFor_NULL_SrsRecords() {
+  void shouldPassExportFor_NULL_SrsRecords() {
     // given
     List<String> marcRecords = null;
     FileDefinition fileDefinition = new FileDefinition();
@@ -58,7 +58,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void shouldPassExportFor_1_InventoryRecord() {
+  void shouldPassExportFor_1_InventoryRecord() {
     // given
     String inventoryRecord = "testRecord";
     FileDefinition fileDefinition = new FileDefinition();
@@ -70,7 +70,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void shouldPassExportFor_NULL_InventoryRecords() {
+  void shouldPassExportFor_NULL_InventoryRecords() {
     // given
     List<String> inventoryRecords = null;
     FileDefinition fileDefinition = new FileDefinition();
@@ -81,7 +81,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void postExport_shouldStoreFile() {
+  void postExport_shouldStoreFile() {
     // given
     FileDefinition fileDefinition = new FileDefinition().withSourcePath("generatedBinaryFile.mrc");
     // when
@@ -91,7 +91,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
+  void postExport_shouldNotStoreFileFor_Null_FileDefinition() {
     // given
     FileDefinition fileDefinition = null;
     // when
@@ -103,7 +103,7 @@ public class ExportServiceUnitTest {
   }
 
   @Test
-  public void postExport_shouldNotStoreFileFor_Null_SourcePath() {
+  void postExport_shouldNotStoreFileFor_Null_SourcePath() {
     // given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(null);

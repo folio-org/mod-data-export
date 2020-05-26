@@ -22,13 +22,13 @@ import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-public class FileStorageUnitTest {
+class FileStorageUnitTest {
 
   private Vertx vertx = Vertx.vertx();
   private FileStorage fileStorage = new LocalFileSystemStorage(vertx);
 
   @Test
-  public void shouldSaveFileDataBlocking() throws IOException {
+  void shouldSaveFileDataBlocking() throws IOException {
     // given
     String fileContent = "01240cas a2200397   45000010007000000050";
     FileDefinition givenFileDefinition = new FileDefinition()
@@ -46,7 +46,7 @@ public class FileStorageUnitTest {
   }
 
   @Test
-  public void shouldSaveFileDataAsynchronously(VertxTestContext  testContext) {
+  void shouldSaveFileDataAsynchronously(VertxTestContext  testContext) {
     // given
     String fileContent = "01240cas a2200397   45000010007000000050";
     FileDefinition givenFileDefinition = new FileDefinition()
@@ -76,7 +76,7 @@ public class FileStorageUnitTest {
   }
 
   @Test
-  public void shouldThrowExceptionIfWrongFileDefinitionPassed() {
+  void shouldThrowExceptionIfWrongFileDefinitionPassed() {
     // given
     FileDefinition givenFileDefinition = new FileDefinition();
     // when

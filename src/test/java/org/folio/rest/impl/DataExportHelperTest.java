@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-public class DataExportHelperTest {
+class DataExportHelperTest {
   @Mock
   private ExportStorageService exportStorageService;
   @Mock
@@ -41,7 +41,7 @@ public class DataExportHelperTest {
 
 
   @Test
-  public void getDownloadLink_shouldSuccessfulGetDownloadLink() throws MalformedURLException {
+  void getDownloadLink_shouldSuccessfulGetDownloadLink() throws MalformedURLException {
     // given
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
@@ -60,7 +60,7 @@ public class DataExportHelperTest {
   }
 
   @Test
-  public void getDownloadLink_shouldFailGetFileDownloadLink() throws MalformedURLException {
+  void getDownloadLink_shouldFailGetFileDownloadLink() throws MalformedURLException {
     // given
     Mockito
       .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
@@ -81,7 +81,7 @@ public class DataExportHelperTest {
   }
 
   @Test
-  public void getDownloadLink_shouldFailIfFileIdNotFound() throws MalformedURLException {
+  void getDownloadLink_shouldFailIfFileIdNotFound() throws MalformedURLException {
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));
     Mockito

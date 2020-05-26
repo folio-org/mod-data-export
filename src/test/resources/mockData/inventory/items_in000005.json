@@ -1,0 +1,132 @@
+{
+  "items" : [ {
+    "id" : "1b6d3338-186e-4e35-9e75-1b886b0da53e",
+    "status" : {
+      "name" : "Checked out"
+    },
+    "title" : "Bridget Jones's Baby: the diaries",
+    "callNumber" : "PR6056.I4588 B749 2016",
+    "hrid" : "item000000000008",
+    "contributorNames" : [ {
+      "name" : "Fielding, Helen"
+    } ],
+    "formerIds" : [ ],
+    "discoverySuppress" : null,
+    "holdingsRecordId" : "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+    "barcode" : "453987605438",
+    "copyNumber" : "Copy 1",
+    "notes" : [ {
+      "itemNoteTypeId" : "8d0a5eca-25de-4391-81a9-236eeefdd20b",
+      "note" : "Signed by the author",
+      "staffOnly" : false
+    } ],
+    "circulationNotes" : [ ],
+    "numberOfPieces" : "1",
+    "tags" : {
+      "tagList" : [ ]
+    },
+    "yearCaption" : [ ],
+    "electronicAccess" : [ ],
+    "statisticalCodeIds" : [ ],
+    "purchaseOrderLineIdentifier" : null,
+    "materialType" : {
+      "id" : "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+      "name" : "book"
+    },
+    "permanentLoanType" : {
+      "id" : "2b94c631-fca9-4892-a730-03ee529ffe27",
+      "name" : "Can circulate"
+    },
+    "temporaryLoanType" : {
+      "id" : "e8b311a6-3b21-43f2-a269-dd9310cb2d0e",
+      "name" : "Course reserves"
+    },
+    "metadata" : {
+      "createdDate" : "2020-05-20T01:28:26.398+0000",
+      "updatedDate" : "2020-05-20T01:28:26.398+0000"
+    },
+    "effectiveCallNumberComponents" : {
+      "callNumber" : "PR6056.I4588 B749 2016",
+      "prefix" : null,
+      "suffix" : null,
+      "typeId" : null
+    },
+    "effectiveLocation" : {
+      "id" : "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "name" : "Main Library"
+    }
+  }, {
+    "id" : "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+    "status" : {
+      "name" : "Available"
+    },
+    "title" : "Bridget Jones's Baby: the diaries",
+    "callNumber" : "PR6056.I4588 B749 2016",
+    "hrid" : "item000000000009",
+    "contributorNames" : [ {
+      "name" : "Fielding, Helen"
+    } ],
+    "formerIds" : [ ],
+    "discoverySuppress" : null,
+    "holdingsRecordId" : "fb7b70f1-b898-4924-a991-0e4b6312bb5f",
+    "barcode" : "4539876054382",
+    "copyNumber" : "Copy 2",
+    "notes" : [ {
+      "itemNoteTypeId" : "8d0a5eca-25de-4391-81a9-236eeefdd20b",
+      "note" : "Missing pages; p 10-13",
+      "staffOnly" : false
+    }, {
+      "itemNoteTypeId" : "0e40884c-3523-4c6d-8187-d578e3d2794e",
+      "note" : "My action note",
+      "staffOnly" : false
+    }, {
+      "itemNoteTypeId" : "1dde7141-ec8a-4dae-9825-49ce14c728e7",
+      "note" : "My copy note",
+      "staffOnly" : false
+    }, {
+      "itemNoteTypeId" : "c3a539b9-9576-4e3a-b6de-d910200b2919",
+      "note" : "My provenance",
+      "staffOnly" : false
+    }, {
+      "itemNoteTypeId" : "acb3a58f-1d72-461d-97c3-0e7119e8d544",
+      "note" : "My reproduction",
+      "staffOnly" : false
+    } ],
+    "circulationNotes" : [ ],
+    "numberOfPieces" : "1",
+    "tags" : {
+      "tagList" : [ ]
+    },
+    "yearCaption" : [ ],
+    "electronicAccess" : [ ],
+    "statisticalCodeIds" : [ ],
+    "purchaseOrderLineIdentifier" : null,
+    "materialType" : {
+      "id" : "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+      "name" : "book"
+    },
+    "permanentLoanType" : {
+      "id" : "2b94c631-fca9-4892-a730-03ee529ffe27",
+      "name" : "Can circulate"
+    },
+    "temporaryLoanType" : {
+      "id" : "e8b311a6-3b21-43f2-a269-dd9310cb2d0e",
+      "name" : "Course reserves"
+    },
+    "metadata" : {
+      "createdDate" : "2020-05-20T01:28:26.459+0000",
+      "updatedDate" : "2020-05-20T01:28:26.459+0000"
+    },
+    "effectiveCallNumberComponents" : {
+      "callNumber" : "PR6056.I4588 B749 2016",
+      "prefix" : null,
+      "suffix" : null,
+      "typeId" : null
+    },
+    "effectiveLocation" : {
+      "id" : "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "name" : "Main Library"
+    }
+  } ],
+  "totalRecords" : 2
+}

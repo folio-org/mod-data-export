@@ -34,8 +34,10 @@ public final class ClientUtil {
 
   public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
     HttpGet httpGet = new HttpGet();
-    ClientUtil.setCommonHeaders(httpGet, params);
-    httpGet.setURI(prepareFullUriWithQuery(ids, params, endpoint, queryPattern));
+    setCommonHeaders(httpGet, params);
+    URI uri = prepareFullUriWithQuery(ids, params, endpoint, queryPattern);
+    httpGet.setURI(uri);
+    LOGGER.info("Calling GET By IDs {}", uri);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
@@ -46,8 +48,9 @@ public final class ClientUtil {
 
   public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) {
     HttpGet httpGet = new HttpGet();
-    ClientUtil.setCommonHeaders(httpGet, params);
-    httpGet.setURI(prepareFullUri(params, endpoint));
+    setCommonHeaders(httpGet, params);
+    httpGet.setURI(URI.create(endpoint));
+    LOGGER.info("Calling GET {}", endpoint);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
@@ -56,7 +59,7 @@ public final class ClientUtil {
     }
   }
 
-  public static void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
+  private static void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
     requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getToken());
     requestBase.setHeader(OKAPI_HEADER_TENANT, params.getTenantId());
     requestBase.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -88,5 +91,9 @@ public final class ClientUtil {
       }
     }
     return null;
+  }
+
+  static String buildQueryEndpoint(String endpoint, Object... params) {
+    return String.format(endpoint, params);
   }
 }

@@ -1,66 +1,54 @@
 package org.folio.clients;
 
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
+
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.rest.HttpServerTestBase;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.collections4.map.HashedMap;
+import org.folio.rest.RestVerticleTestBase;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
-
 @RunWith(VertxUnitRunner.class)
-public class InventoryClientUnitTest extends HttpServerTestBase {
-  private static final String GET_INSTANCES_RESPONSE = "clients/inventory/get_instances_response.json";
+class InventoryClientUnitTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
-  private static final String GET_NATURE_OF_CONTENT_TERMS_RESPONSE = "mockData/inventory/get_nature_of_content_terms_response.json";
+  private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
   public static void beforeClass() throws Exception {
-    setUpHttpServer();
-    setUpMocks();
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
+    okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
-  private static void setUpMocks() {
-    router.route(resourcesPath(INSTANCE)).method(HttpMethod.GET).handler(routingContext -> {
-      String responseData = readFileContentFromResources(GET_INSTANCES_RESPONSE);
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(responseData);
-    });
-    router.route(resourcesPath(CONTENT_TERMS)).method(HttpMethod.GET).handler(routingContext -> {
-      String responseData = readFileContentFromResources(GET_NATURE_OF_CONTENT_TERMS_RESPONSE);
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(responseData);
-    });
-  }
 
   @Test
-  public void shouldRetrieveExistingInstances() {
+  void shouldRetrieveExistingInstances() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
-    List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    List<String> uuids = Arrays.asList("7fbd5d84-62d1-44c6-9c45-6cb173998bbd", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     // when
     Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesByIds(uuids, okapiConnectionParams, LIMIT);
     // then
     Assert.assertTrue(inventoryResponse.isPresent());
-    Assert.assertEquals(2, inventoryResponse.get().getJsonArray("instances").getList().size());
+    Assert.assertEquals(1, inventoryResponse.get().getJsonArray("instances").getList().size());
   }
 
   @Test
-  public void shouldRetrieveNatureOfContentTerms() {
+  void shouldRetrieveNatureOfContentTerms() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     // when
@@ -68,5 +56,29 @@ public class InventoryClientUnitTest extends HttpServerTestBase {
     // then
     Assert.assertFalse(natureOfContentTerms.isEmpty());
     Assert.assertEquals(2, natureOfContentTerms.size());
+  }
+
+  @Test
+  void shouldRetrieveExistingHoldings() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    String instanceID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
+    // when
+    Optional<JsonObject> holdingsResponse = inventoryClient.getHoldingsByInstanceId(instanceID, okapiConnectionParams);
+    // then
+    Assert.assertTrue(holdingsResponse.isPresent());
+    Assert.assertEquals(2, holdingsResponse.get().getJsonArray("holdingsRecords").getList().size());
+  }
+
+  @Test
+  void shouldRetrieveExistingItems() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    List<String> holdingIDs = Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61");
+    // when
+    Optional<JsonObject> itemsResponse = inventoryClient.getItemsByHoldingIds(holdingIDs, okapiConnectionParams);
+    // then
+    Assert.assertTrue(itemsResponse.isPresent());
+    Assert.assertEquals(2, itemsResponse.get().getJsonArray("items").getList().size());
   }
 }

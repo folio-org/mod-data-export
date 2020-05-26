@@ -1,9 +1,9 @@
 package org.folio.rest.impl;
 
 import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
@@ -72,26 +72,24 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS);
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition();
-    //when
+    // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
+    vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          context.verify(() -> {
-            FileDefinition fileExportDefinition = optionalFileDefinition.get();
-            assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
-            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-            validateExternalCalls();
-            context.completeNow();
-          });
-
+      JobExecution jobExecution = optionalJobExecution.get();
+      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+        context.verify(() -> {
+          FileDefinition fileExportDefinition = optionalFileDefinition.get();
+          assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_2, TOTAL_NUMBER_2);
+          assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
+          validateExternalCalls();
+          context.completeNow();
         });
       });
-    });
+    }));
   }
 
   @Test
@@ -150,7 +148,7 @@ class DataExportTest extends RestVerticleTestBase {
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition) {
     return new ExportRequest()
       .withFileDefinitionId(uploadedFileDefinition.getId())
-      .withJobProfileId(UUID.randomUUID().toString());
+      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
   }
 
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition) {
@@ -170,12 +168,14 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS));
+    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES));
   }
 
   private void validateExternalCallsForInventory() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
+    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES).size());
   }
 
   @Configuration

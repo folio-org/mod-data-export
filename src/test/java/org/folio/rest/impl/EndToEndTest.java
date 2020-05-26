@@ -94,7 +94,7 @@ class EndToEndTest extends RestVerticleTestBase {
 //    SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @Disabled
+  @Disabled("This test class will be removed in the future")
   public void before() {
     when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());

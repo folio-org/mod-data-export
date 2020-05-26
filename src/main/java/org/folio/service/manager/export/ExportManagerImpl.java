@@ -7,12 +7,15 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
@@ -29,12 +32,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The ExportManager is a central part of the data-export.
  * Runs the main export process calling other internal services along the way.
  */
-@SuppressWarnings({"java:S1172", "java:S125"})
 @Service
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -81,20 +84,51 @@ public class ExportManagerImpl implements ExportManager {
   protected void exportBlocking(ExportPayload exportPayload) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
+    MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
     exportService.exportSrsRecord(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    LOGGER.info("Number of not found instances: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    List<String> mappedMarcRecords = mappingService.map(instances, exportPayload.getJobExecutionId(), params);
+    LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
+
+    if (mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS) || mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
+      instances = fetchHoldingsAndItems(instances, params);
+    }
+    List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+  }
+
+  /**
+   * For Each instance UUID fetches all the holdings and also items for each holding and appends it to a single record
+   *
+   * @param instances list of instance objects
+   * @param params
+   */
+  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, OkapiConnectionParams params) {
+    List<JsonObject> instancesWithHoldingsAndItems = new ArrayList<>();
+    for (JsonObject instance : instances) {
+      JsonObject instanceWithHoldingsAndItems = new JsonObject();
+      instanceWithHoldingsAndItems.put("instance", instance);
+      List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
+      instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
+      List<String> holdingIds = holdings.stream()
+        .map(jo -> jo.getString("id"))
+        .collect(Collectors.toList());
+      List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
+      instanceWithHoldingsAndItems.put("items", new JsonArray(items));
+
+      instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
+    }
+
+    return instancesWithHoldingsAndItems;
+
   }
 
   /**
@@ -157,7 +191,7 @@ public class ExportManagerImpl implements ExportManager {
 
   private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export is failed, cause: " + asyncResult.cause().getMessage());
+      LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
         return ExportResult.failed(serviceException.getErrorCode());
