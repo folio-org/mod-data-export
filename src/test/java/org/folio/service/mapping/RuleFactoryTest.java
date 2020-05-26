@@ -17,7 +17,6 @@ import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 class RuleFactoryTest {
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
   private static List<Rule> defaultRules;
 
@@ -33,21 +32,6 @@ class RuleFactoryTest {
   void shouldReturnDefaultRules_whenMappingProfileIsNull() {
     // when
     List<Rule> rules = ruleFactory.create(null);
-
-    // then
-    Assert.assertEquals(rules.size(), defaultRules.size());
-    Assert.assertEquals(rules.get(0).getField(), defaultRules.get(0).getField());
-    Assert.assertEquals(rules.get(0).getDescription(), defaultRules.get(0).getDescription());
-  }
-
-  @Test
-  void shouldReturnDefaultRules_whenMappingProfileIsDefault() {
-    // given
-    MappingProfile mappingProfile = new MappingProfile()
-      .withId(DEFAULT_MAPPING_PROFILE_ID);
-
-    // when
-    List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
     Assert.assertEquals(rules.size(), defaultRules.size());

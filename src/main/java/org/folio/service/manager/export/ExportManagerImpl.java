@@ -93,7 +93,7 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
 
-    if(mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS)|| mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
+    if (mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS) || mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
       instances = fetchHoldingsAndItems(instances, params);
     }
     List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);

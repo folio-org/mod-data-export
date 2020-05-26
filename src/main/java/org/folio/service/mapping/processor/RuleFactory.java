@@ -22,12 +22,11 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   private List<Rule> defaultRules;
 
   public List<Rule> create(MappingProfile mappingProfile) {
-    if (mappingProfile == null || DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfile.getId()) || isEmpty(mappingProfile.getTransformations())) {
+    if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
       return getDefaultRules();
     }
     return new ArrayList<>(createByMappingFields(mappingProfile.getTransformations()));
