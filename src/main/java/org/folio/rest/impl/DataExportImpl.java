@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.util.ExceptionToResponseMapper.map;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -17,6 +16,8 @@ import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.input.InputDataManager;
+import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.slf4j.Logger;
