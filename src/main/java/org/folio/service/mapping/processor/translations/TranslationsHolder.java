@@ -60,18 +60,18 @@ public enum TranslationsHolder implements TranslationFunction {
    * The time requires 8 numeric characters in the pattern hhmmss.f, expressed in terms of the 24-hour (00-23) clock.
    */
   SET_TRANSACTION_DATETIME() {
-    private transient DateTimeFormatter originFormatter = new DateTimeFormatterBuilder()
+    private final DateTimeFormatter ORIGIN_FORMATTER = new DateTimeFormatterBuilder()
       .appendPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
       .toFormatter();
-    private transient DateTimeFormatter targetFormatter = new DateTimeFormatterBuilder()
+    private final DateTimeFormatter TARGET_FORMATTER = new DateTimeFormatterBuilder()
       .appendPattern("yyyyMMddhhmmss")
       .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 1, true)
       .toFormatter();
 
     @Override
     public String apply(String updatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      ZonedDateTime originDateTime = ZonedDateTime.parse(updatedDate, originFormatter);
-      return targetFormatter.format(originDateTime);
+      ZonedDateTime originDateTime = ZonedDateTime.parse(updatedDate, ORIGIN_FORMATTER);
+      return TARGET_FORMATTER.format(originDateTime);
     }
   };
 
