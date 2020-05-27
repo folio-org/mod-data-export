@@ -58,7 +58,7 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
     //then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         assertEquals(ar.cause().getMessage(), errorMessage);
@@ -77,7 +77,7 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 5, 1, TENANT_ID);
     //then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.succeeded());
         assertEquals(15, job.getProgress().getExported().intValue());
@@ -96,7 +96,7 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
 
       context.verify(() -> {
         assertTrue(ar.failed());
@@ -116,7 +116,7 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
     //then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         assertEquals(ar.cause().getMessage(), errorMessage);
@@ -144,7 +144,7 @@ class JobExecutionServiceUnitTest {
     Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, TENANT_ID);
 
     //then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.succeeded());
         JobExecution updatedJobExecution = ar.result();

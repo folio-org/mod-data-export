@@ -4,8 +4,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.UpdateResult;
-
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import java.lang.invoke.MethodHandles;
 import java.util.Date;
 import java.util.List;
@@ -79,16 +79,16 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
 
   @Override
   public Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId) {
-    Promise<UpdateResult> promise = Promise.promise();
+    Promise<RowSet<Row>> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).update(TABLE, fileDefinition, fileDefinition.getId(), promise);
     return promise.future().map(fileDefinition);
   }
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
-    Promise<UpdateResult> promise = Promise.promise();
+    Promise<RowSet<Row>> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
-    return promise.future().map(updateResult -> updateResult.getUpdated() == 1);
+    return promise.future().map(updateResult -> updateResult.rowCount() == 1);
   }
 
 

@@ -137,7 +137,7 @@ class ExportStorageServiceTest {
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
     // then
-    linkFuture.setHandler(ar -> {
+    linkFuture.onComplete(ar -> {
       testContext.verify(()-> {
         assertTrue(ar.succeeded());
         assertEquals(response.toString(), ar.result());
@@ -161,7 +161,7 @@ class ExportStorageServiceTest {
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, TENANT_ID);
     // then
-    linkFuture.setHandler(ar -> {
+    linkFuture.onComplete(ar -> {
       testContext.verify(() -> {
         assertTrue(ar.failed());
         assertEquals("Bucket Not Found", ar.cause().getMessage());

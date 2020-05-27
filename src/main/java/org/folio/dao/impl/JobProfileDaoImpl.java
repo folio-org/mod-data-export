@@ -1,10 +1,15 @@
 package org.folio.dao.impl;
 
+import static org.folio.util.HelperUtils.constructCriteria;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.UpdateResult;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobProfileDao;
 import org.folio.rest.jaxrs.model.JobProfile;
@@ -18,10 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.ws.rs.NotFoundException;
-import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 
-import static org.folio.util.HelperUtils.constructCriteria;
 
 
 @Repository
@@ -70,7 +72,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
         if (updateResult.failed()) {
           LOGGER.error("Could not update jobProfile with id {}", jobProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
-        } else if (updateResult.result().getUpdated() != 1) {
+        } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("JobProfile with id '%s' was not found", jobProfile.getId());
           LOGGER.error(errorMessage);
           promise.fail(new NotFoundException(errorMessage));
@@ -87,9 +89,9 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
-    Promise<UpdateResult> promise = Promise.promise();
+    Promise<RowSet<Row>> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
-    return promise.future().map(updateResult -> updateResult.getUpdated() == 1);
+    return promise.future().map(updateResult -> updateResult.rowCount() == 1);
   }
 
 
