@@ -92,10 +92,7 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-
-    if (mappingProfile.getRecordTypes().contains(RecordType.HOLDINGS) || mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
-      instances = fetchHoldingsAndItems(instances, params);
-    }
+    instances = fetchHoldingsAndItems(instances, mappingProfile.getRecordTypes(), params);
     List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
@@ -111,22 +108,24 @@ public class ExportManagerImpl implements ExportManager {
    * @param instances list of instance objects
    * @param params
    */
-  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, OkapiConnectionParams params) {
+  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, List<RecordType> recordTypes, OkapiConnectionParams params) {
     List<JsonObject> instancesWithHoldingsAndItems = new ArrayList<>();
     for (JsonObject instance : instances) {
       JsonObject instanceWithHoldingsAndItems = new JsonObject();
       instanceWithHoldingsAndItems.put("instance", instance);
-      List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
-      instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
-      List<String> holdingIds = holdings.stream()
-        .map(jo -> jo.getString("id"))
-        .collect(Collectors.toList());
-      List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
-      instanceWithHoldingsAndItems.put("items", new JsonArray(items));
-
+      if(recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM)) {
+        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
+        instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
+        if (recordTypes.contains(RecordType.ITEM)) {
+          List<String> holdingIds = holdings.stream()
+            .map(jo -> jo.getString("id"))
+            .collect(Collectors.toList());
+          List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
+          instanceWithHoldingsAndItems.put("items", new JsonArray(items));
+        }
+      }
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
-
     return instancesWithHoldingsAndItems;
 
   }
