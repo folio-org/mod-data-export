@@ -1,20 +1,31 @@
 package org.folio.service.profiles;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.folio.TestUtil;
+import org.folio.clients.UsersClient;
 import org.folio.dao.impl.JobProfileDaoImpl;
+import org.folio.rest.HttpServerTestBase;
+import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.jobprofile.JobProfileServiceImpl;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -26,6 +37,8 @@ import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,18 +46,20 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class JobProfileServiceUnitTest {
+class JobProfileServiceUnitTest extends HttpServerTestBase {
   private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
-  private JobProfile expectedJobProfile;
+  private static JobProfile expectedJobProfile;
   @Spy
   @InjectMocks
   private JobProfileServiceImpl jobProfileService;
   @Mock
   private JobProfileDaoImpl jobProfileDao;
+  @Mock
+  UsersClient usersClient;
 
   @BeforeEach
-  public void setUp() {
+  public void beforeEach() throws Exception {
     expectedJobProfile = new JobProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")
@@ -60,7 +75,7 @@ class JobProfileServiceUnitTest {
     // when
     Future<JobProfile> future = jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID);
     // then
-    future.setHandler(ar -> context.verify(() -> {
+    future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.failed());
       verify(jobProfileDao).getById(eq(JOB_PROFILE_ID), eq(TENANT_ID));
       assertTrue(ar.cause() instanceof NotFoundException);
@@ -74,9 +89,9 @@ class JobProfileServiceUnitTest {
     expectedJobProfile.setId(null);
     when(jobProfileDao.save(expectedJobProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedJobProfile));
     // when
-    Future<JobProfile> future = jobProfileService.save(expectedJobProfile, TENANT_ID);
+    Future<JobProfile> future = jobProfileService.save(expectedJobProfile, okapiConnectionParams);
     // then
-    future.setHandler(ar -> context.verify(() -> {
+    future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(jobProfileDao).save(eq(expectedJobProfile), eq(TENANT_ID));
       Assert.assertNotNull(ar.result().getId());
@@ -91,7 +106,7 @@ class JobProfileServiceUnitTest {
     // when
     Future<Boolean> future = jobProfileService.deleteById(expectedJobProfile.getId(), TENANT_ID);
     // then
-    future.setHandler(ar -> context.verify(() -> {
+    future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(jobProfileDao).deleteById(eq(expectedJobProfile.getId()), eq(TENANT_ID));
       context.completeNow();
@@ -103,9 +118,9 @@ class JobProfileServiceUnitTest {
     // given
     when(jobProfileDao.update(expectedJobProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedJobProfile));
     // when
-    Future<JobProfile> future = jobProfileService.update(expectedJobProfile, TENANT_ID);
+    Future<JobProfile> future = jobProfileService.update(expectedJobProfile, okapiConnectionParams);
     // then
-    future.setHandler(ar -> context.verify(() -> {
+    future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(jobProfileDao).update(eq(expectedJobProfile), eq(TENANT_ID));
       context.completeNow();
@@ -122,7 +137,7 @@ class JobProfileServiceUnitTest {
     // when
     Future<JobProfileCollection> future = jobProfileService.get(query, 0, 10, TENANT_ID);
     // then
-    future.setHandler(ar -> context.verify(() -> {
+    future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(jobProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
       context.completeNow();

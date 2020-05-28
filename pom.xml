@@ -27,7 +27,7 @@
     <sonar.exclusions>**/InputDataContext.java</sonar.exclusions>
     <sonar.exclusions>**/InitAPIImpl.java</sonar.exclusions>
   </properties>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -76,6 +76,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-service-proxy</artifactId>
+      <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-web-client</artifactId>
       <version>${vertx.version}</version>
     </dependency>
 

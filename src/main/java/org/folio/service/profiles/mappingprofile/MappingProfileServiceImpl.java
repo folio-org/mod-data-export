@@ -3,9 +3,11 @@ package org.folio.service.profiles.mappingprofile;
 import io.vertx.core.Future;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.clients.UsersClient;
 import org.folio.dao.MappingProfileDao;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
+  @Autowired
+  private UsersClient usersClient;
 
   @Override
   public Future<MappingProfileCollection> get(String query, int offset, int limit, String tenantId) {
@@ -32,21 +36,31 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<MappingProfile> save(MappingProfile mappingProfile, String tenantId) {
+  public Future<MappingProfile> save(MappingProfile mappingProfile, OkapiConnectionParams params) {
     if (mappingProfile.getId() == null) {
       mappingProfile.setId(UUID.randomUUID().toString());
     }
-    return mappingProfileDao.save(mappingProfile, tenantId);
+    if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getCreatedByUserId() != null) {
+      return usersClient.getUserInfoAsync(mappingProfile.getMetadata().getCreatedByUserId(), params)
+        .compose(userInfo -> mappingProfileDao.save(mappingProfile.withUserInfo(userInfo), params.getTenantId()));
+    } else {
+      return mappingProfileDao.save(mappingProfile, params.getTenantId());
+    }
   }
 
   @Override
-  public Future<MappingProfile> update(MappingProfile mappingProfile, String tenantId) {
-    return mappingProfileDao.update(mappingProfile, tenantId);
+  public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
+    if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getUpdatedByUserId() != null) {
+      return usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
+        .compose(userInfo -> mappingProfileDao.update(mappingProfile.withUserInfo(userInfo), params.getTenantId()));
+    } else {
+      return mappingProfileDao.update(mappingProfile, params.getTenantId());
+    }
+
   }
 
   @Override
   public Future<MappingProfile> getById(String mappingProfileId, String tenantId) {
-
     return mappingProfileDao.getById(mappingProfileId, tenantId)
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {
