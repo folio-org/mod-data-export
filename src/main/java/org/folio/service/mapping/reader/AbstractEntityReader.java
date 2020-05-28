@@ -10,7 +10,7 @@ public abstract class AbstractEntityReader implements EntityReader {
   @Override
   public RuleValue read(Rule rule) {
     if (isSimpleRule(rule)) {
-      return readSimpleValue(rule.getDataSources().get(0));
+      return readSimpleValue(rule);
     } else if (isCompositeRule(rule)) {
       return readCompositeValue(rule);
     }
@@ -27,5 +27,5 @@ public abstract class AbstractEntityReader implements EntityReader {
 
   protected abstract RuleValue readCompositeValue(Rule rule);
 
-  protected abstract RuleValue readSimpleValue(DataSource dataSource);
+  protected abstract RuleValue readSimpleValue(Rule rule);
 }

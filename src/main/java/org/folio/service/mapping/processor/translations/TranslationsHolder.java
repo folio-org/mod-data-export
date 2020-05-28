@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public enum TranslationsHolder implements TranslationFunction {
 
   SET_VALUE() {
@@ -72,6 +74,45 @@ public enum TranslationsHolder implements TranslationFunction {
     public String apply(String updatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
       ZonedDateTime originDateTime = ZonedDateTime.parse(updatedDate, originFormatter);
       return targetFormatter.format(originDateTime);
+    }
+  },
+
+  /**
+   * Forty character positions (00-39) that provide coded information about the record as a whole and about special
+   * bibliographic aspects of the item being cataloged.
+   * These coded data elements are potentially useful for retrieval and data management purposes.
+   */
+  SET_FIXED_LENGTH_DATA_ELEMENTS() {
+    private DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+    private String fieldPattern = "%s|%s%s||||||||       ||||%s||";
+
+    @Override
+    public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      String createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+
+      String publicationDate0Param = "||||";
+      String publicationDate1Param = "||||";
+      if (metadata.getData().containsKey("datesOfPublication")) {
+        List<String> publicationDates = (List<String>) metadata.getData().get("datesOfPublication").getData();
+        if (publicationDates.size() == 1) {
+          publicationDate0Param = publicationDates.get(0);
+        } else if (publicationDates.size() > 1) {
+          publicationDate0Param = publicationDates.get(0);
+          publicationDate1Param = publicationDates.get(1);
+        }
+      }
+
+      String languageParam = "und";
+      if (metadata.getData().containsKey("languages")) {
+        List<String> languages = (List<String>) metadata.getData().get("languages").getData();
+        if (languages.size() == 1) {
+          languageParam = languages.get(0);
+        } else if (languages.size() > 1) {
+          languageParam = "mul";
+        }
+      }
+      return format(fieldPattern, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
     }
   };
 

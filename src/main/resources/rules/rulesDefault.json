@@ -37,6 +37,22 @@
     ]
   },
   {
+    "field": "008",
+    "description": "Fixed-Length Data Elements",
+    "dataSources": [
+      {
+        "from": "$.metadata.createdDate",
+        "translation": {
+          "function": "set_fixed_length_data_elements"
+        }
+      }
+    ],
+    "metadata": {
+      "datesOfPublication": "$.publication[*].dateOfPublication",
+      "languages": "$.languages"
+    }
+  },
+  {
     "field": "010",
     "description": "Identifier LCCN",
     "dataSources": [

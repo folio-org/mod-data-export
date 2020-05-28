@@ -62,7 +62,12 @@
     "Politicians",
     "Scotland"
   ],
+  "languages": [
+    "eng",
+    "lat"
+  ],
   "metadata": {
+    "createdDate": "2019-08-07T03:12:01.011+0000",
     "updatedDate": "2020-05-22T01:46:42.915+0000"
   }
 }
