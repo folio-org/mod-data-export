@@ -2,6 +2,6 @@
   "fieldId": "electronicAccess.linkText",
   "path": "Json path for electronicAccess[*].linkText",
   "transformation": "001",
-  "enabled": "true",
+  "enabled": true,
   "recordType": "INSTANCE"
 }
