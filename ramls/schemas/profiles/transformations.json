@@ -15,7 +15,8 @@
     },
     "enabled": {
       "description": "Indicates whether field should be mapped",
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     "transformation": {
       "description": "Mapping expression",
