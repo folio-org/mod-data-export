@@ -438,6 +438,108 @@
     ]
   },
   {
+    "field": "700",
+    "description": "Contributors - Personal Name Not Primary",
+    "dataSources": [
+      {
+        "from": "$.contributors[*].name",
+        "subfield": "a",
+        "translation": {
+          "function": "set_contributor",
+          "parameters": {
+            "type": "Personal name"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "1"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "field": "710",
+    "description": "Contributors - Corporate Name Not Primary",
+    "dataSources": [
+      {
+        "from": "$.contributors[*].name",
+        "subfield": "a",
+        "translation": {
+          "function": "set_contributor",
+          "parameters": {
+            "type": "Corporate name"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "field": "711",
+    "description": "Contributors - Meeting Name Not Primary",
+    "dataSources": [
+      {
+        "from": "$.contributors[*].name",
+        "subfield": "a",
+        "translation": {
+          "function": "set_contributor",
+          "parameters": {
+            "type": "Meeting name"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "field": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [

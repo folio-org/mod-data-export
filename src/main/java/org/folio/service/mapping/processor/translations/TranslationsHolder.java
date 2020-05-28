@@ -51,6 +51,12 @@ public enum TranslationsHolder implements TranslationFunction {
       return StringUtils.EMPTY;
     }
   },
+  SET_CONTRIBUTOR() {
+    @Override
+    public String apply(String identifierValue, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      return StringUtils.EMPTY;
+    }
+  },
 
   /**
    * Sixteen characters that indicate the date and time of the latest record transaction
