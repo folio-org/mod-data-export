@@ -29,7 +29,7 @@
     "description": "Date and Time of Latest Transaction",
     "dataSources": [
       {
-        "from": "$.metadata.updatedDate",
+        "from": "$.instance.metadata.updatedDate",
         "translation": {
           "function": "set_transaction_datetime"
         }

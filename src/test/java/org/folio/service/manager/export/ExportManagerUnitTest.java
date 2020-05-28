@@ -82,7 +82,7 @@ class ExportManagerUnitTest {
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
-    MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Arrays.asList(RecordType.HOLDINGS, RecordType.INSTANCE));
+    MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Arrays.asList(RecordType.HOLDINGS, RecordType.ITEM));
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     exportManager.exportBlocking(exportPayload);

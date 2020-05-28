@@ -1,5 +1,6 @@
 package org.folio.service.mapping.processor;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
@@ -33,6 +34,8 @@ import static org.apache.commons.lang3.StringUtils.substring;
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
+
   private static final String SET_VALUE_TRANSLATION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String INDICATOR_1 = "1";
@@ -45,14 +48,16 @@ public class RuleFactory {
     if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
       return getDefaultRules();
     }
-    return buildByTransformations(mappingProfile.getTransformations());
+    List<Rule> rules = getDefaultRules();
+    rules.addAll(buildByTransformations(mappingProfile.getTransformations()));
+    return rules;
   }
 
-  private List<Rule> getDefaultRules() {
+  protected List<Rule> getDefaultRules() {
     if (Objects.nonNull(this.defaultRules)) {
       return this.defaultRules;
     }
-    URL url = Resources.getResource("rules/rulesDefault.json");
+    URL url = Resources.getResource(DEFAULT_RULES_PATH);
     String stringRules = null;
     try {
       stringRules = Resources.toString(url, StandardCharsets.UTF_8);
@@ -60,14 +65,14 @@ public class RuleFactory {
       LOGGER.error("Failed to fetch default rules for export");
       throw new NotFoundException(e);
     }
-    this.defaultRules = Arrays.asList(Json.decodeValue(stringRules, Rule[].class));
+    this.defaultRules = Lists.newArrayList(Json.decodeValue(stringRules, Rule[].class));
     return this.defaultRules;
   }
 
   private List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
     List<Rule> rules = new ArrayList<>();
     for (Transformations mappingTransformation : mappingTransformations) {
-      if (Boolean.valueOf(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
+      if (mappingTransformation.getEnabled() && isNotBlank(mappingTransformation.getPath())
         && isNotBlank(mappingTransformation.getTransformation())) {
         rules.add(buildByTransformation(mappingTransformation));
       }
@@ -87,6 +92,7 @@ public class RuleFactory {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
+    dataSources.add(fromDataSource);
     String transformation = mappingTransformation.getTransformation();
     Pattern pattern = Pattern.compile(SUBFIELD_REGEX);
     Matcher matcher = pattern.matcher(transformation);
@@ -95,7 +101,6 @@ public class RuleFactory {
       dataSources.add(buildEmptyIndicatorDataSource(INDICATOR_1));
       dataSources.add(buildEmptyIndicatorDataSource(INDICATOR_2));
     }
-    dataSources.add(fromDataSource);
     return dataSources;
   }
 
