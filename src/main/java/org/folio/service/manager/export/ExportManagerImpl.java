@@ -118,7 +118,7 @@ public class ExportManagerImpl implements ExportManager {
         instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
         if (recordTypes.contains(RecordType.ITEM)) {
           List<String> holdingIds = holdings.stream()
-            .map(jo -> jo.getString("id"))
+            .map(record -> record.getString("id"))
             .collect(Collectors.toList());
           List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
           instanceWithHoldingsAndItems.put("items", new JsonArray(items));

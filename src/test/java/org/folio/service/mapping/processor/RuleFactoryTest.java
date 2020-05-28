@@ -1,8 +1,9 @@
 package org.folio.service.mapping.processor;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.StringUtils;
+import io.vertx.core.json.Json;
 import org.assertj.core.util.Lists;
+import org.folio.TestUtil;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
@@ -16,6 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,6 +42,7 @@ class RuleFactoryTest {
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
+  private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
 
   @InjectMocks
   @Spy
@@ -49,14 +52,7 @@ class RuleFactoryTest {
 
   @BeforeEach
   public void setUp() {
-    DataSource dataSource = new DataSource();
-    dataSource.setFrom(DEFAULT_RULE_FROM_VALUE);
-    Rule defaultRule = new Rule();
-    defaultRule.setField(DEFAULT_RULE_FIELD_VALUE);
-    defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
-    defaultRule.setDataSources(Lists.newArrayList(dataSource));
-    defaultRules = Lists.newArrayList(defaultRule);
-
+    setUpDefaultRules();
     doReturn(defaultRules).when(ruleFactory).getDefaultRules();
   }
 
@@ -83,9 +79,9 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 1);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -102,9 +98,9 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 1);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -122,9 +118,9 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 1);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -143,9 +139,9 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 1);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -164,11 +160,11 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 2);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
-    assertEquals(rules.get(1).getField(), TRANSFORMATION_FIELD_VALUE_1);
-    assertEquals(rules.get(1).getDataSources().get(0).getFrom(), TRANSFORMATIONS_PATH_1);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -191,13 +187,13 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 3);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
-    assertEquals(rules.get(1).getField(), TRANSFORMATION_FIELD_VALUE_1);
-    assertEquals(rules.get(1).getDataSources().get(0).getFrom(), TRANSFORMATIONS_PATH_1);
-    assertEquals(rules.get(2).getField(), TRANSFORMATION_FIELD_VALUE_2);
-    assertEquals(rules.get(2).getDataSources().get(0).getFrom(), TRANSFORMATIONS_PATH_2);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(2).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(2).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -216,18 +212,28 @@ class RuleFactoryTest {
 
     // then
     assertEquals(rules.size(), 2);
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
-    assertEquals(rules.get(1).getField(), TRANSFORMATION_FIELD_VALUE_1);
-    assertEquals(rules.get(1).getDataSources().get(0).getFrom(), TRANSFORMATIONS_PATH_1);
-    assertEquals(rules.get(1).getDataSources().get(0).getSubfield(), SUBFIELD_A);
-    assertEquals(rules.get(1).getDataSources().get(1).getIndicator(), FIRST_INDICATOR);
-    assertEquals(rules.get(1).getDataSources().get(1).getTranslation().getFunction(), SET_VALUE_FUNCTION);
-    assertEquals(rules.get(1).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER), SPACE);
-    assertEquals(rules.get(1).getDataSources().get(2).getIndicator(), SECOND_INDICATOR);
-    assertEquals(rules.get(1).getDataSources().get(2).getTranslation().getFunction(), SET_VALUE_FUNCTION);
-    assertEquals(rules.get(1).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER), SPACE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SUBFIELD_A, rules.get(1).getDataSources().get(0).getSubfield());
+    assertEquals(FIRST_INDICATOR, rules.get(1).getDataSources().get(1).getIndicator());
+    assertEquals(SET_VALUE_FUNCTION, rules.get(1).getDataSources().get(1).getTranslation().getFunction());
+    assertEquals(SPACE, rules.get(1).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(SECOND_INDICATOR, rules.get(1).getDataSources().get(2).getIndicator());
+    assertEquals(SET_VALUE_FUNCTION, rules.get(1).getDataSources().get(2).getTranslation().getFunction());
+    assertEquals(SPACE, rules.get(1).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
+  }
+
+  private void setUpDefaultRules() {
+    DataSource dataSource = new DataSource();
+    dataSource.setFrom(DEFAULT_RULE_FROM_VALUE);
+    Rule defaultRule = new Rule();
+    defaultRule.setField(DEFAULT_RULE_FIELD_VALUE);
+    defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
+    defaultRule.setDataSources(Lists.newArrayList(dataSource));
+    defaultRules = Lists.newArrayList(defaultRule);
   }
 
 }
