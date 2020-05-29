@@ -81,6 +81,18 @@ public enum TranslationsHolder implements TranslationFunction {
    * Forty character positions (00-39) that provide coded information about the record as a whole and about special
    * bibliographic aspects of the item being cataloged.
    * These coded data elements are potentially useful for retrieval and data management purposes.
+   * Format:
+   * 00-05 - Metadata.createdDate field in yymmdd format
+   * 06 is set to | (pipe character)
+   * 07-10 to publication[0] dateOfPublication if can be formatted else |||| (four pipe characters)
+   * 11-14 to publication[1] dateOfPublication if can be formatted else |||| (four pipe characters)
+   * 18-22 - each field set to |
+   * 23-29 - each field to be blank
+   * 30-34 - each field set to |
+   * 35-37 - if instance.languages array is empty set it to "und",
+   * if one element, use it to populate the field (it should be 3 letter language code),
+   * if the array contains more than one language, then set it to "mul"
+   * 38-39 - each field set to |
    */
   SET_FIXED_LENGTH_DATA_ELEMENTS() {
     private DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
