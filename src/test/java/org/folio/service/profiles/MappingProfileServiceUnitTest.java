@@ -1,18 +1,12 @@
 package org.folio.service.profiles;
 
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.folio.TestUtil;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
 import org.folio.rest.HttpServerTestBase;
-import org.folio.rest.RestVerticleTestBase;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -21,7 +15,6 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,16 +42,16 @@ class MappingProfileServiceUnitTest extends HttpServerTestBase {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static MappingProfile expectedMappingProfile;
+  @Mock
+  UsersClient usersClient;
   @Spy
   @InjectMocks
   private MappingProfileServiceImpl mappingProfileService;
   @Mock
   private MappingProfileDaoImpl mappingProfileDao;
-  @Mock
-  UsersClient usersClient;
 
   @BeforeEach
-  public void beforeClass() throws Exception {
+  public void beforeEach() {
     expectedMappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")

@@ -61,10 +61,6 @@ class DataExportTest extends RestVerticleTestBase {
   private JobExecutionDao jobExecutionDao;
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
-  @Autowired
-  private JobProfileService jobProfileService;
-  @Autowired
-  private MappingProfileService mappingProfileService;
 
   public DataExportTest() {
     Context vertxContext = vertx.getOrCreateContext();
