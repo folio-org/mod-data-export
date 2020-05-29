@@ -152,7 +152,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|||||||||||||||||       ||||und||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||und||", result);
   }
 
   @Test
@@ -165,7 +166,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|||||||||||||||||       ||||lat||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||lat||", result);
   }
 
   @Test
@@ -178,7 +180,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|||||||||||||||||       ||||mul||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||mul||", result);
   }
 
   @Test
@@ -191,7 +194,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|2015||||||||||||       ||||und||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|2015||||||||||||       |||||und||", result);
   }
 
   @Test
@@ -204,7 +208,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|20152016||||||||       ||||und||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|20152016||||||||       |||||und||", result);
   }
 
   @Test
@@ -218,7 +223,8 @@ class TranslationFunctionUnitTest {
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
-    Assert.assertEquals("190807|20152016||||||||       ||||mul||", result);
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|20152016||||||||       |||||mul||", result);
   }
 
   @Test
