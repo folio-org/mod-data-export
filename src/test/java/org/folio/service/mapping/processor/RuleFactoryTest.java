@@ -43,7 +43,6 @@ class RuleFactoryTest {
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
 
-  @InjectMocks
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
 
