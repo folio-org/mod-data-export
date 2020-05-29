@@ -95,8 +95,8 @@ public enum TranslationsHolder implements TranslationFunction {
    * 38-39 - each field set to |
    */
   SET_FIXED_LENGTH_DATA_ELEMENTS() {
-    private DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    private DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+    private transient DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private transient DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
     private String fieldPattern = "%s|%s%s||||||||       |||||%s||";
 
     @Override

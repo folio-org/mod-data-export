@@ -1,6 +1,5 @@
 package org.folio.service.mapping.reader;
 
-import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.reader.values.MissingValue;
 import org.folio.service.mapping.reader.values.RuleValue;
