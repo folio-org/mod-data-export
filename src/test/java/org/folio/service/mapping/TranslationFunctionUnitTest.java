@@ -29,6 +29,7 @@ class TranslationFunctionUnitTest {
   static void setUp() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
+    referenceData.addContributorNameTypes(getContributorNameTypes());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -45,6 +46,14 @@ class TranslationFunctionUnitTest {
         .getJsonArray("identifierTypes")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getContributorNameTypes() {
+    JsonObject contributorNameTypes =
+        new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
+          .getJsonArray("contributorNameTypes")
+          .getJsonObject(0);
+      return Collections.singletonMap(contributorNameTypes.getString("id"), contributorNameTypes);
   }
 
   @Test
@@ -141,5 +150,25 @@ class TranslationFunctionUnitTest {
       translationFunction.apply(updatedDate, 0, null, null, null)
     );
   }
+
+  @Test
+  void SetContributor_shouldReturnContributorNameValue() {
+    // given
+    String value = "value";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_contributor");
+
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("type", "Personal name"));
+
+    Metadata metadata = new Metadata();
+    metadata.addData("contributorNameTypeId",
+      new Metadata.Entry("$.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId",
+        Arrays.asList("2b94c631-fca9-4892-a730-03ee529ffe2a", "2e48e713-17f3-4c13-a9f8-23845bb210aa")));
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, metadata);
+    // then
+    Assert.assertEquals(value, result);
+  }
+
 
 }
