@@ -3,10 +3,11 @@ package org.folio.dao.profiles;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.JobProfileDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.JobProfile;
@@ -44,7 +45,7 @@ class JobProfileDaoUnitTest {
   @Mock
   private PostgresClient postgresClient;
   @Mock
-  private AsyncResult<UpdateResult> updateResult;
+  private AsyncResult<RowSet<Row>> updateResult;
 
   @BeforeAll
   public static void setUp() {
@@ -63,7 +64,7 @@ class JobProfileDaoUnitTest {
     Future<JobProfile> future = jobProfileDao.update(jobProfile, TENANT_ID);
 
     // then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
@@ -79,7 +80,7 @@ class JobProfileDaoUnitTest {
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doAnswer(invocationOnMock -> {
-      Handler<AsyncResult<UpdateResult>> replyHandler = invocationOnMock.getArgument(4);
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(4);
       replyHandler.handle(updateResult);
       return null;
     }).when(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
@@ -88,7 +89,7 @@ class JobProfileDaoUnitTest {
     Future<JobProfile> future = jobProfileDao.update(jobProfile, TENANT_ID);
 
     // then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));

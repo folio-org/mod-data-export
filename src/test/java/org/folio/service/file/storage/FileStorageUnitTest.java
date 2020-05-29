@@ -55,7 +55,7 @@ class FileStorageUnitTest {
     // when
     Future<FileDefinition> future = fileStorage.saveFileDataAsync(fileContent.getBytes(), givenFileDefinition);
     // then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       testContext.verify(() -> {
         assertTrue(ar.succeeded());
         FileDefinition savedFileDefinition = ar.result();
