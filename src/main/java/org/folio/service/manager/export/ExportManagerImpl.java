@@ -11,11 +11,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
@@ -33,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -92,7 +96,7 @@ public class ExportManagerImpl implements ExportManager {
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    instances = fetchHoldingsAndItems(instances, mappingProfile.getRecordTypes(), params);
+    instances = fetchHoldingsAndItems(instances, mappingProfile, params);
     List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
@@ -108,12 +112,14 @@ public class ExportManagerImpl implements ExportManager {
    * @param instances list of instance objects
    * @param params
    */
-  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, List<RecordType> recordTypes, OkapiConnectionParams params) {
+  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, MappingProfile mappingProfile, OkapiConnectionParams params) {
     List<JsonObject> instancesWithHoldingsAndItems = new ArrayList<>();
     for (JsonObject instance : instances) {
       JsonObject instanceWithHoldingsAndItems = new JsonObject();
       instanceWithHoldingsAndItems.put("instance", instance);
-      if(recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM)) {
+      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
+      List<Transformations> transformations = mappingProfile.getTransformations();
+      if (isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM))) {
         List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
         instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
         if (recordTypes.contains(RecordType.ITEM)) {
