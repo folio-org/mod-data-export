@@ -1,7 +1,16 @@
 package org.folio.service.mapping;
 
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.TestUtil.getFileFromResources;
+import static org.mockito.ArgumentMatchers.any;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import java.io.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
@@ -10,19 +19,16 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.marc4j.MarcJsonReader;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamWriter;
+import org.marc4j.MarcWriter;
+import org.marc4j.marc.Record;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -92,18 +98,40 @@ class MappingServiceUnitTest {
   }
 
   @Test
-  void shouldMapInstance_to_marcRecord() {
+  void shouldMapInstance_to_marcRecord() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
-    Mockito.when(referenceDataProvider.get(jobExecutionId, params)).thenReturn(referenceData);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
-    String expectedMarcRecord = readFileContentFromResources("mapping/expected_marc_record.mrc");
+    String expectedMarcRecord = getExpectedMarcFromJson();
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+
+  }
+
+  /**
+   * This method fetches the expected value from Json file and converts it into MARC
+   *
+   * @return expected Json converted to marc format
+   * @throws FileNotFoundException
+   */
+  private String getExpectedMarcFromJson() throws FileNotFoundException {
+    InputStream inputStream = new FileInputStream(getFileFromResources("mapping/expected_marc.json"));
+    MarcReader marcReader = new MarcJsonReader(inputStream);
+    OutputStream outputStream = new ByteArrayOutputStream();
+    MarcWriter writer = new MarcStreamWriter(outputStream);
+    while (marcReader.hasNext()) {
+      Record record = marcReader.next();
+      writer.write(record);
+    }
+
+    writer.close();
+    return outputStream.toString();
   }
 }
 
