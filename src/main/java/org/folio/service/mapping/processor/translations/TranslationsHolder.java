@@ -89,7 +89,7 @@ public enum TranslationsHolder implements TranslationFunction {
    * 18-22 - each field set to |
    * 23-29 - each field to be blank
    * 30-34 - each field set to |
-   * 35-37 - if instance.languages array is empty set it to "und",
+   * 35-37 - if languages array is empty set it to "und",
    * if one element, use it to populate the field (it should be 3 letter language code),
    * if the array contains more than one language, then set it to "mul"
    * 38-39 - each field set to |
