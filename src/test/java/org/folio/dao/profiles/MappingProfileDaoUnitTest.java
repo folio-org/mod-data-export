@@ -3,10 +3,11 @@ package org.folio.dao.profiles;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.MappingProfileDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,7 +46,7 @@ class MappingProfileDaoUnitTest {
   @Mock
   private PostgresClient postgresClient;
   @Mock
-  private AsyncResult<UpdateResult> updateResult;
+  private AsyncResult<RowSet<Row>> updateResult;
 
   @BeforeAll
   public static void setUp() {
@@ -63,7 +65,7 @@ class MappingProfileDaoUnitTest {
     Future<MappingProfile> future = mappingProfileDao.update(mappingProfile, TENANT_ID);
 
     // then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
@@ -79,7 +81,7 @@ class MappingProfileDaoUnitTest {
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doAnswer(invocationOnMock -> {
-      Handler<AsyncResult<UpdateResult>> replyHandler = invocationOnMock.getArgument(4);
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(4);
       replyHandler.handle(updateResult);
       return null;
     }).when(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
@@ -88,7 +90,7 @@ class MappingProfileDaoUnitTest {
     Future<MappingProfile> future = mappingProfileDao.update(mappingProfile, TENANT_ID);
 
     // then
-    future.setHandler(ar -> {
+    future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));

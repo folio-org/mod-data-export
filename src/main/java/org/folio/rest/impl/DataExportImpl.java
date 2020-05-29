@@ -1,10 +1,15 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
@@ -18,12 +23,6 @@ import org.folio.util.ExceptionToResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.ws.rs.core.Response;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-
-import static io.vertx.core.Future.succeededFuture;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -76,7 +75,7 @@ public class DataExportImpl implements DataExport {
       .map(GetDataExportJobExecutionsResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler));
+      .onComplete(asyncResultHandler));
   }
 
   @Override
@@ -87,7 +86,7 @@ public class DataExportImpl implements DataExport {
       .map(GetDataExportJobExecutionsDownloadByJobExecutionIdAndExportFileIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
-      .setHandler(asyncResultHandler);
+      .onComplete(asyncResultHandler);
   }
 
   private void failToFetchProfileHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {

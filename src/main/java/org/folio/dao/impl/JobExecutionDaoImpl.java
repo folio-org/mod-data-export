@@ -55,7 +55,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
         if (getHrIdResult.succeeded()) {
           jobExecution.withId(UUID.randomUUID().toString())
-            .setHrId(getHrIdResult.result().getList().get(0).toString());
+            .setHrId(String.valueOf(getHrIdResult.result().getLong(0)));
           pgClientFactory.getInstance(tenantId)
             .save(TABLE, jobExecution.getId(), jobExecution, promise);
         } else {
@@ -76,7 +76,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
         if (updateResult.failed()) {
           LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
-        } else if (updateResult.result().getUpdated() != 1) {
+        } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("JobExecution with id '%s' was not found", jobExecution.getId());
           LOGGER.error(errorMessage);
           promise.fail(new NotFoundException(errorMessage));
