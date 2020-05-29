@@ -27,5 +27,5 @@ public abstract class AbstractEntityReader implements EntityReader {
 
   protected abstract RuleValue readCompositeValue(Rule rule);
 
-  protected abstract <S extends SimpleValue> S readSimpleValue(Rule rule);
+  protected abstract <S> S readSimpleValue(Rule rule);
 }
