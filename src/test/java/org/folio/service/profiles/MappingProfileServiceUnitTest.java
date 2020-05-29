@@ -4,9 +4,9 @@ import io.vertx.core.Future;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -14,8 +14,9 @@ import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -25,11 +26,13 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.NotFoundException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Collections.singletonList;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -38,20 +41,22 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class MappingProfileServiceUnitTest extends RestVerticleTestBase {
+class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static MappingProfile expectedMappingProfile;
-  @Mock
-  UsersClient usersClient;
+
   @Spy
   @InjectMocks
   private MappingProfileServiceImpl mappingProfileService;
   @Mock
   private MappingProfileDaoImpl mappingProfileDao;
+  @Mock
+  UsersClient usersClient;
+  private static OkapiConnectionParams okapiConnectionParams;
 
-  @BeforeEach
-  public void beforeEach() {
+  @BeforeAll
+  static void beforeEach() {
     expectedMappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")
@@ -62,6 +67,9 @@ class MappingProfileServiceUnitTest extends RestVerticleTestBase {
       .withMetadata(new Metadata()
         .withCreatedByUserId(UUID.randomUUID().toString())
         .withUpdatedByUserId(UUID.randomUUID().toString()));
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
   @Test

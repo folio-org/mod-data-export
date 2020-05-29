@@ -4,15 +4,17 @@ import io.vertx.core.Future;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.JobProfileDaoImpl;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.jobprofile.JobProfileServiceImpl;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +25,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.NotFoundException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.vertx.core.Future.succeededFuture;
 import static java.util.Collections.singletonList;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,26 +42,33 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class JobProfileServiceUnitTest extends RestVerticleTestBase {
+class JobProfileServiceUnitTest {
   private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static JobProfile expectedJobProfile;
-  @Mock
-  UsersClient usersClient;
+
   @Spy
   @InjectMocks
   private JobProfileServiceImpl jobProfileService;
   @Mock
   private JobProfileDaoImpl jobProfileDao;
+  @Mock
+  private UsersClient usersClient;
+  private static OkapiConnectionParams okapiConnectionParams;
 
-  @BeforeEach
-  public void beforeEach() {
+  @BeforeAll
+  static void beforeEach() {
     expectedJobProfile = new JobProfile()
       .withId(UUID.randomUUID().toString())
       .withDescription("Description")
       .withMappingProfileId(UUID.randomUUID().toString())
       .withUserInfo(new UserInfo())
-      .withMetadata(new Metadata());
+      .withMetadata(new Metadata()
+        .withCreatedByUserId(UUID.randomUUID().toString())
+        .withUpdatedByUserId(UUID.randomUUID().toString()));
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
   @Test
@@ -76,6 +90,8 @@ class JobProfileServiceUnitTest extends RestVerticleTestBase {
   void save_shouldCallDaoSave_addUuidToTheJobProfile(VertxTestContext context) {
     // given
     expectedJobProfile.setId(null);
+    when(usersClient.getUserInfoAsync(anyString(), any(OkapiConnectionParams.class)))
+      .thenReturn(succeededFuture(new UserInfo()));
     when(jobProfileDao.save(expectedJobProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedJobProfile));
     // when
     Future<JobProfile> future = jobProfileService.save(expectedJobProfile, okapiConnectionParams);
@@ -105,6 +121,8 @@ class JobProfileServiceUnitTest extends RestVerticleTestBase {
   @Test
   void update_shouldCallDaoUpdate(VertxTestContext context) {
     // given
+    when(usersClient.getUserInfoAsync(anyString(), any(OkapiConnectionParams.class)))
+      .thenReturn(succeededFuture(new UserInfo()));
     when(jobProfileDao.update(expectedJobProfile, TENANT_ID)).thenReturn(Future.succeededFuture(expectedJobProfile));
     // when
     Future<JobProfile> future = jobProfileService.update(expectedJobProfile, okapiConnectionParams);
