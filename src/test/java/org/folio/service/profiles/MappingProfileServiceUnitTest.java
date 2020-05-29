@@ -6,7 +6,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
-import org.folio.rest.HttpServerTestBase;
+import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class MappingProfileServiceUnitTest extends HttpServerTestBase {
+class MappingProfileServiceUnitTest extends RestVerticleTestBase {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static MappingProfile expectedMappingProfile;

@@ -6,7 +6,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.JobProfileDaoImpl;
-import org.folio.rest.HttpServerTestBase;
+import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class JobProfileServiceUnitTest extends HttpServerTestBase {
+class JobProfileServiceUnitTest extends RestVerticleTestBase {
   private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static JobProfile expectedJobProfile;
