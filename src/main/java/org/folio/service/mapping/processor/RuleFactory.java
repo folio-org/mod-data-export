@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import static java.lang.Boolean.TRUE;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
 
@@ -37,8 +36,8 @@ public class RuleFactory {
 
   private static final String SET_VALUE_TRANSLATION = "set_value";
   private static final String VALUE_PARAMETER = "value";
-  private static final String INDICATOR_1 = "1";
-  private static final String INDICATOR_2 = "2";
+  private static final String INDICATOR_NAME_1 = "1";
+  private static final String INDICATOR_NAME_2 = "2";
   private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
 
   private List<Rule> defaultRules;
@@ -97,18 +96,20 @@ public class RuleFactory {
     Matcher matcher = pattern.matcher(transformation);
     if (matcher.find()) {
       fromDataSource.setSubfield(matcher.group());
-      dataSources.add(buildEmptyIndicatorDataSource(INDICATOR_1));
-      dataSources.add(buildEmptyIndicatorDataSource(INDICATOR_2));
+      String indicator1 = substring(mappingTransformation.getTransformation(), 3, 4);
+      String indicator2 = substring(mappingTransformation.getTransformation(), 4, 5);
+      dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_1, indicator1));
+      dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_2, indicator2));
     }
     return dataSources;
   }
 
 
-  private DataSource buildEmptyIndicatorDataSource(String indicatorName) {
+  private DataSource buildIndicatorDataSource(String indicatorName, String indicatorValue) {
     Translation indicatorTranslation = new Translation();
     indicatorTranslation.setFunction(SET_VALUE_TRANSLATION);
     Map<String, String> parameters = new HashMap<>();
-    parameters.put(VALUE_PARAMETER, SPACE);
+    parameters.put(VALUE_PARAMETER, indicatorValue);
     DataSource indicatorDataSource = new DataSource();
     indicatorTranslation.setParameters(parameters);
     indicatorDataSource.setTranslation(indicatorTranslation);

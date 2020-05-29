@@ -34,7 +34,7 @@ class RuleFactoryTest {
   private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
   private static final String TRANSFORMATIONS_PATH_1 = "transformationsPath1";
   private static final String TRANSFORMATION_FIELD_VALUE_1 = "002";
-  private static final String TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD = "002 $a";
+  private static final String TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD = "002  $a";
   private static final String TRANSFORMATIONS_PATH_2 = "transformationsPath2";
   private static final String TRANSFORMATION_FIELD_VALUE_2 = "003";
   private static final String SUBFIELD_A = "a";
@@ -196,7 +196,7 @@ class RuleFactoryTest {
   }
 
   @Test
-  void shouldReturnDefaultRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithSubfield() {
+  void shouldReturnDefaultRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() {
     // given
     Transformations transformations = new Transformations()
       .withEnabled(true)

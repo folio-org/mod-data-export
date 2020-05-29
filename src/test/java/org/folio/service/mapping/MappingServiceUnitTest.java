@@ -116,14 +116,14 @@ class MappingServiceUnitTest {
 
   private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
     List<Transformations> transformations = new ArrayList<>();
-    transformations.add(createTransformations("callNumber", "$.holdings[*].callNumber", "900 $a", HOLDINGS));
-    transformations.add(createTransformations("callNumberPrefix", "$.holdings[*].callNumberPrefix", "901 $a", HOLDINGS));
-    transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902 $a", HOLDINGS));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903 $a", HOLDINGS));
-    transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "904 $a", HOLDINGS));
-    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905 $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906 $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "907 $a", ITEM));
+    transformations.add(createTransformations("callNumber", "$.holdings[*].callNumber", "900  $a", HOLDINGS));
+    transformations.add(createTransformations("callNumberPrefix", "$.holdings[*].callNumberPrefix", "901  $a", HOLDINGS));
+    transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
+    transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "904  $a", HOLDINGS));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "907  $a", ITEM));
     return transformations;
   }
 
