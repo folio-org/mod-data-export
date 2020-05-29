@@ -3,6 +3,7 @@ package org.folio.service.profiles.mappingprofile;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
+import org.folio.util.OkapiConnectionParams;
 
 public interface MappingProfileService {
 
@@ -20,19 +21,19 @@ public interface MappingProfileService {
    * Saves {@link MappingProfile} to database
    *
    * @param mappingProfile {@link MappingProfile} to save
-   * @param tenantId       tenant id
+   * @param params         okapi headers and connection parameters
    * @return future with saved {@link MappingProfile}
    */
-  Future<MappingProfile> save(MappingProfile mappingProfile, String tenantId);
+  Future<MappingProfile> save(MappingProfile mappingProfile, OkapiConnectionParams params);
 
   /**
    * Updates {@link MappingProfile}
    *
    * @param mappingProfile {@link MappingProfile} to update
-   * @param tenantId       tenant id
+   * @param params         okapi headers and connection parameters
    * @return future with {@link MappingProfile}
    */
-  Future<MappingProfile> update(MappingProfile mappingProfile, String tenantId);
+  Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params);
 
   /**
    * Delete {@link MappingProfile} by id

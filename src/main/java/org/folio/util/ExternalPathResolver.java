@@ -21,6 +21,7 @@ public class ExternalPathResolver {
 
   private static final Map<String, String> EXTERNAL_APIS;
   private static final Map<String, String> EXTERNAL_APIS_WITH_PREFIX;
+  private static final Map<String, String> EXTERNAL_APIS_WITH_SUFFIX;
   private static final Map<String, String> EXTERNAL_APIS_WITH_ID;
 
   static {
@@ -37,6 +38,9 @@ public class ExternalPathResolver {
     EXTERNAL_APIS_WITH_PREFIX = Collections.unmodifiableMap(apis.entrySet()
       .stream()
       .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue())));
+    EXTERNAL_APIS_WITH_SUFFIX = Collections.unmodifiableMap(apis.entrySet()
+      .stream()
+      .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue() + "/%s")));
     EXTERNAL_APIS_WITH_ID = Collections.unmodifiableMap(apis.entrySet()
         .stream()
         .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue() + "/%s")));
@@ -49,6 +53,10 @@ public class ExternalPathResolver {
 
   public static String resourcesPathWithPrefix(String field) {
     return EXTERNAL_APIS_WITH_PREFIX.get(field);
+  }
+
+  public static String resourcesPathWithSuffix(String field) {
+    return EXTERNAL_APIS_WITH_SUFFIX.get(field);
   }
 
   public static String resourcesPathWithId(String field) {

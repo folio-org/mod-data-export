@@ -2,6 +2,7 @@ package org.folio.rest;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.rest.tools.client.Response.*;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -92,7 +93,11 @@ public abstract class RestVerticleTestBase {
         tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
         try {
           tenantClient.postTenant(tenantAttributes, res2 -> {
-            deploymentComplete.complete(res.result());
+            if (isSuccess(res2.statusCode())){
+              deploymentComplete.complete(res.result());
+            } else {
+              deploymentComplete.completeExceptionally(new Exception(res2.statusMessage()));
+            }
           });
         } catch (Exception e) {
           deploymentComplete.completeExceptionally(e);

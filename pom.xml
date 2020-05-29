@@ -27,7 +27,7 @@
     <sonar.exclusions>**/InputDataContext.java</sonar.exclusions>
     <sonar.exclusions>**/InitAPIImpl.java</sonar.exclusions>
   </properties>
-  
+
   <dependencyManagement>
     <dependencies>
       <dependency>

@@ -3,6 +3,7 @@ package org.folio.service.profiles.jobprofile;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
+import org.folio.util.OkapiConnectionParams;
 
 public interface JobProfileService {
 
@@ -29,19 +30,19 @@ public interface JobProfileService {
    * Saves {@link JobProfile} to database
    *
    * @param jobProfile {@link JobProfile} to save
-   * @param tenantId       tenant id
+   * @param params     okapi headers and connection parameters
    * @return future with saved {@link JobProfile}
    */
-  Future<JobProfile> save(JobProfile jobProfile, String tenantId);
+  Future<JobProfile> save(JobProfile jobProfile, OkapiConnectionParams params);
 
   /**
    * Updates {@link JobProfile}
    *
    * @param jobProfile {@link JobProfile} to update
-   * @param tenantId       tenant id
+   * @param params     okapi headers and connection parameters
    * @return future with {@link JobProfile}
    */
-  Future<JobProfile> update(JobProfile jobProfile, String tenantId);
+  Future<JobProfile> update(JobProfile jobProfile, OkapiConnectionParams params);
 
   /**
    * Deletes a {@link JobProfile} by id
