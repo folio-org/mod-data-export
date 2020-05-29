@@ -3,6 +3,7 @@ package org.folio.rest;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.SRS;
 import static org.folio.util.ExternalPathResolver.USERS;
@@ -44,6 +45,7 @@ public class MockServer {
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
   private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
+  private static final String CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_contributor_name_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -96,12 +98,14 @@ public class MockServer {
     router.get(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
     router.get(resourcesPath(IDENTIFIER_TYPES)).handler(ctx -> handleGetIdentifierTypesRecord(ctx));
+    router.get(resourcesPath(CONTRIBUTOR_NAME_TYPES)).handler(ctx -> handleGetContributorNameTypesRecord(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
 
     return router;
   }
+
 
   private void handleGetItemRecord(RoutingContext ctx) {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
@@ -198,6 +202,22 @@ public class MockServer {
         .end();
     }
   }
+
+
+  private void handleGetContributorNameTypesRecord(RoutingContext ctx) {
+    logger.info("handleGet ContributorName types Record got: " + ctx.request()
+    .path());
+  try {
+    JsonObject contributorTypes = new JsonObject(RestVerticleTestBase.getMockData(CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH));
+    addServerRqRsData(HttpMethod.GET, CONTRIBUTOR_NAME_TYPES, contributorTypes);
+    serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
+  } catch (IOException e) {
+    System.err.println(e);
+    ctx.response()
+      .setStatusCode(500)
+      .end();
+  }
+}
 
 
   private void handleGetUsersRecord(RoutingContext ctx) {

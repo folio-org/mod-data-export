@@ -5,6 +5,7 @@ import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
@@ -68,6 +69,11 @@ public class InventoryClient {
   public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, OkapiConnectionParams params) {
     return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
         QUERY_PATTERN_ITEM);
+  }
+
+  public Map<String, JsonObject> getContributorNameTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, CONTRIBUTOR_NAME_TYPES);
   }
 
 }

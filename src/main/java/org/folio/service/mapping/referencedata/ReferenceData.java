@@ -8,6 +8,13 @@ import java.util.Map;
 public class ReferenceData {
   private Map<String, JsonObject> natureOfContentTerms = new HashMap<>();
   private Map<String, JsonObject> identifierTypes = new HashMap<>();
+  private Map<String, JsonObject> contributorNameTypes = new HashMap<>();
+
+
+
+  public void addContributorNameTypes(Map<String, JsonObject> contributorNameTypes) {
+    this.contributorNameTypes = contributorNameTypes;
+  }
 
   public void addNatureOfContentTerms(Map<String, JsonObject> natureOfContentTerms) {
     this.natureOfContentTerms.putAll(natureOfContentTerms);
@@ -24,4 +31,9 @@ public class ReferenceData {
   public Map<String, JsonObject> getIdentifierTypes() {
     return identifierTypes;
   }
+
+  public Map<String, JsonObject> getContributorNameTypes() {
+    return contributorNameTypes;
+  }
+
 }

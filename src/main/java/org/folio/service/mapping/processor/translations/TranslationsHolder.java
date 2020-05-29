@@ -54,6 +54,17 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_CONTRIBUTOR() {
     @Override
     public String apply(String identifierValue, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      Object metadataContributorNameTypeIds = metadata.getData().get("contributorNameTypeId").getData();
+      if (metadataContributorNameTypeIds != null) {
+        List<String> contributorNameTypeIds = (List<String>) metadataContributorNameTypeIds;
+        if (!contributorNameTypeIds.isEmpty()) {
+          String contributorNameTypeId = contributorNameTypeIds.get(currentIndex);
+          JsonObject contributorNameType = referenceData.getContributorNameTypes().get(contributorNameTypeId);
+          if (contributorNameType != null && contributorNameType.getString("name").equals(translation.getParameter("type"))) {
+            return identifierValue;
+          }
+        }
+      }
       return StringUtils.EMPTY;
     }
   },

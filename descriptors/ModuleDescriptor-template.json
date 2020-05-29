@@ -29,6 +29,10 @@
     {
       "id": "identifier-types",
       "version": "1.2"
+    },
+    {
+     "id": "contributor-name-types",
+      "version": "1.2"
     }
   ],
   "provides": [
@@ -51,7 +55,8 @@
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
-            "inventory-storage.identifier-types.collection.get"
+            "inventory-storage.identifier-types.collection.get",
+            "inventory-storage.contributor-name-types.collection.get"
           ]
         },
         {

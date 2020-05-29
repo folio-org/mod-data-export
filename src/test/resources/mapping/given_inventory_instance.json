@@ -35,10 +35,6 @@
       "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
     },
     {
-      "value": "9781447294130",
-      "identifierTypeId": "8261054f-be78-422d-bd51-4ed9f33c3422"
-    },
-    {
       "value": "0262012103",
       "identifierTypeId": "913300b2-03ed-469a-8179-c1092c991227"
     },
@@ -54,6 +50,21 @@
       "value": "0552142352",
       "identifierTypeId": "351ebc1c-3aae-4825-8765-c6d50dbf011f"
     }
+  ],
+  "contributors": [
+        {
+          "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+          "name": "Fielding, Helen",
+          "contributorTypeId": null,
+          "contributorTypeText": null,
+          "primary": true
+        },
+        {
+          "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+          "name": "Meeting, Don",
+          "contributorTypeId": null,
+          "contributorTypeText": null
+        }
   ],
   "subjects": [
     "Politicians--Scotland--Biography",
