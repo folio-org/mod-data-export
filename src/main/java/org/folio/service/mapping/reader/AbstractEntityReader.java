@@ -3,6 +3,7 @@ package org.folio.service.mapping.reader;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.reader.values.MissingValue;
 import org.folio.service.mapping.reader.values.RuleValue;
+import org.folio.service.mapping.reader.values.SimpleValue;
 
 public abstract class AbstractEntityReader implements EntityReader {
 
@@ -26,5 +27,5 @@ public abstract class AbstractEntityReader implements EntityReader {
 
   protected abstract RuleValue readCompositeValue(Rule rule);
 
-  protected abstract RuleValue readSimpleValue(Rule rule);
+  protected abstract <S extends SimpleValue> S readSimpleValue(Rule rule);
 }
