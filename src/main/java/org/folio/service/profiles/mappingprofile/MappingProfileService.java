@@ -21,7 +21,7 @@ public interface MappingProfileService {
    * Saves {@link MappingProfile} to database
    *
    * @param mappingProfile {@link MappingProfile} to save
-   * @param tenantId       tenant id
+   * @param params         okapi headers and connection parameters
    * @return future with saved {@link MappingProfile}
    */
   Future<MappingProfile> save(MappingProfile mappingProfile, OkapiConnectionParams params);
@@ -30,7 +30,7 @@ public interface MappingProfileService {
    * Updates {@link MappingProfile}
    *
    * @param mappingProfile {@link MappingProfile} to update
-   * @param tenantId       tenant id
+   * @param params         okapi headers and connection parameters
    * @return future with {@link MappingProfile}
    */
   Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params);

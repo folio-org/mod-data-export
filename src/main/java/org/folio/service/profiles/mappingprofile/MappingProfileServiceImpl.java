@@ -1,6 +1,7 @@
 package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.clients.UsersClient;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the MappingProfileService, calls MappingProfileDao to access MappingProfile metadata.
@@ -40,23 +42,40 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     if (mappingProfile.getId() == null) {
       mappingProfile.setId(UUID.randomUUID().toString());
     }
+    Promise<MappingProfile> mappingProfilePromise = Promise.promise();
     if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getCreatedByUserId() != null) {
-      return usersClient.getUserInfoAsync(mappingProfile.getMetadata().getCreatedByUserId(), params)
-        .compose(userInfo -> mappingProfileDao.save(mappingProfile.withUserInfo(userInfo), params.getTenantId()));
+      usersClient.getUserInfoAsync(mappingProfile.getMetadata().getCreatedByUserId(), params)
+        .onComplete(userInfoAr -> {
+          if (userInfoAr.succeeded()) {
+            mappingProfile.withUserInfo(userInfoAr.result());
+          }
+          mappingProfileDao.save(mappingProfile, params.getTenantId())
+            .onSuccess(mappingProfilePromise::complete)
+            .onFailure(mappingProfilePromise::fail);
+        });
     } else {
       return mappingProfileDao.save(mappingProfile, params.getTenantId());
     }
+    return mappingProfilePromise.future();
   }
 
   @Override
   public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
-    if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getUpdatedByUserId() != null) {
-      return usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
-        .compose(userInfo -> mappingProfileDao.update(mappingProfile.withUserInfo(userInfo), params.getTenantId()));
+    Promise<MappingProfile> mappingProfilePromise = Promise.promise();
+    if (mappingProfile.getMetadata() != null && isNotEmpty(mappingProfile.getMetadata().getUpdatedByUserId())) {
+      usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
+        .onComplete(userInfoAr -> {
+          if (userInfoAr.succeeded()) {
+            mappingProfile.withUserInfo(userInfoAr.result());
+          }
+          mappingProfileDao.update(mappingProfile, params.getTenantId())
+            .onSuccess(mappingProfilePromise::complete)
+            .onFailure(mappingProfilePromise::fail);
+        });
     } else {
       return mappingProfileDao.update(mappingProfile, params.getTenantId());
     }
-
+    return mappingProfilePromise.future();
   }
 
   @Override

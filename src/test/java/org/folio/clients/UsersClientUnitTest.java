@@ -48,7 +48,7 @@ class UsersClientUnitTest extends HttpServerTestBase {
   @Test
   void shouldReturnUserById() {
     // given
-    UsersClient usersClient = new UsersClient(new ClientAsync(vertx));
+    UsersClient usersClient = new UsersClient();
     // when
     Optional<JsonObject> optionalUser = usersClient.getById(UUID.randomUUID().toString(), okapiConnectionParams);
     // then
@@ -58,7 +58,7 @@ class UsersClientUnitTest extends HttpServerTestBase {
   @Test
   void shouldReturnUserInfoById(VertxTestContext context) {
     // given
-    UsersClient usersClient = new UsersClient(new ClientAsync(vertx));
+    UsersClient usersClient = new UsersClient();
     // when
     Future<UserInfo> userInfo = usersClient.getUserInfoAsync(UUID.randomUUID().toString(), okapiConnectionParams);
     // then

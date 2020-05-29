@@ -30,7 +30,7 @@ public interface JobProfileService {
    * Saves {@link JobProfile} to database
    *
    * @param jobProfile {@link JobProfile} to save
-   * @param params     okapi connection parameters
+   * @param params     okapi headers and connection parameters
    * @return future with saved {@link JobProfile}
    */
   Future<JobProfile> save(JobProfile jobProfile, OkapiConnectionParams params);
@@ -39,7 +39,7 @@ public interface JobProfileService {
    * Updates {@link JobProfile}
    *
    * @param jobProfile {@link JobProfile} to update
-   * @param params     okapi connection parameters
+   * @param params     okapi headers and connection parameters
    * @return future with {@link JobProfile}
    */
   Future<JobProfile> update(JobProfile jobProfile, OkapiConnectionParams params);

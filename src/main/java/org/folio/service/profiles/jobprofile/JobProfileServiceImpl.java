@@ -1,6 +1,7 @@
 package org.folio.service.profiles.jobprofile;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.clients.UsersClient;
@@ -48,22 +49,40 @@ public class JobProfileServiceImpl implements JobProfileService {
     if (jobProfile.getId() == null) {
       jobProfile.setId(UUID.randomUUID().toString());
     }
+    Promise<JobProfile> jobProfilePromise = Promise.promise();
     if (jobProfile.getMetadata() != null && isNotEmpty(jobProfile.getMetadata().getCreatedByUserId())) {
-      return usersClient.getUserInfoAsync(jobProfile.getMetadata().getCreatedByUserId(), params)
-        .compose(userInfo -> jobProfileDao.save(jobProfile.withUserInfo(userInfo), params.getTenantId()));
+      usersClient.getUserInfoAsync(jobProfile.getMetadata().getCreatedByUserId(), params)
+        .onComplete(optionalUserInfoAr -> {
+          if (optionalUserInfoAr.succeeded()) {
+            jobProfile.withUserInfo(optionalUserInfoAr.result());
+          }
+          jobProfileDao.save(jobProfile, params.getTenantId())
+            .onSuccess(jobProfilePromise::complete)
+            .onFailure(jobProfilePromise::fail);
+        });
     } else {
       return jobProfileDao.save(jobProfile, params.getTenantId());
     }
+    return jobProfilePromise.future();
   }
 
   @Override
   public Future<JobProfile> update(JobProfile jobProfile, OkapiConnectionParams params) {
+    Promise<JobProfile> jobProfilePromise = Promise.promise();
     if (jobProfile.getMetadata() != null && isNotEmpty(jobProfile.getMetadata().getUpdatedByUserId())) {
-      return usersClient.getUserInfoAsync(jobProfile.getMetadata().getUpdatedByUserId(), params)
-        .compose(userInfo -> jobProfileDao.update(jobProfile.withUserInfo(userInfo), params.getTenantId()));
+      usersClient.getUserInfoAsync(jobProfile.getMetadata().getUpdatedByUserId(), params)
+        .onComplete(optionalUserInfoAr -> {
+          if (optionalUserInfoAr.succeeded()) {
+            jobProfile.withUserInfo(optionalUserInfoAr.result());
+          }
+          jobProfileDao.update(jobProfile, params.getTenantId())
+            .onSuccess(jobProfilePromise::complete)
+            .onFailure(jobProfilePromise::fail);
+        });
     } else {
       return jobProfileDao.update(jobProfile, params.getTenantId());
     }
+    return jobProfilePromise.future();
   }
 
   @Override
