@@ -42,7 +42,6 @@ class RuleFactoryTest {
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
-  private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
 
   @InjectMocks
   @Spy
@@ -62,7 +61,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(null);
 
     // then
-    assertEquals(rules.size(), 1);
+    assertEquals(1, rules.size());
     assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
     assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
     assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
@@ -78,7 +77,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 1);
+    assertEquals(1, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -97,7 +96,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 1);
+    assertEquals(1, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -117,7 +116,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 1);
+    assertEquals(1, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -138,7 +137,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 1);
+    assertEquals(1, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -159,7 +158,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 2);
+    assertEquals(2, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -186,7 +185,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 3);
+    assertEquals(3, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -211,7 +210,7 @@ class RuleFactoryTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(rules.size(), 2);
+    assertEquals(2, rules.size());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
