@@ -62,9 +62,9 @@ class RuleFactoryTest {
 
     // then
     assertEquals(1, rules.size());
-    assertEquals(rules.get(0).getField(), DEFAULT_RULE_FIELD_VALUE);
-    assertEquals(rules.get(0).getDescription(), DEFAULT_RULE_DESCRIPTION);
-    assertEquals(rules.get(0).getDataSources().get(0).getFrom(), DEFAULT_RULE_FROM_VALUE);
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
