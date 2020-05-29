@@ -5,8 +5,6 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.ext.web.Router;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 

@@ -29,6 +29,8 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
 import org.junit.jupiter.api.Test;

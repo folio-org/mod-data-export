@@ -30,7 +30,7 @@ public interface RecordLoaderService {
   /**
    * Retrieve all the holdings for a given instance UUID
    *
-   * @param string
+   * @param instanceId
    * @param params
    */
   List<JsonObject>  getHoldingsForInstance(String instanceId, OkapiConnectionParams params);

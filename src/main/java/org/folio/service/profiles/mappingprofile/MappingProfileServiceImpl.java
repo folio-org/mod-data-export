@@ -1,11 +1,14 @@
 package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.clients.UsersClient;
 import org.folio.dao.MappingProfileDao;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,7 @@ import java.util.UUID;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the MappingProfileService, calls MappingProfileDao to access MappingProfile metadata.
@@ -25,6 +29,8 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
+  @Autowired
+  private UsersClient usersClient;
 
   @Override
   public Future<MappingProfileCollection> get(String query, int offset, int limit, String tenantId) {
@@ -32,21 +38,48 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<MappingProfile> save(MappingProfile mappingProfile, String tenantId) {
+  public Future<MappingProfile> save(MappingProfile mappingProfile, OkapiConnectionParams params) {
     if (mappingProfile.getId() == null) {
       mappingProfile.setId(UUID.randomUUID().toString());
     }
-    return mappingProfileDao.save(mappingProfile, tenantId);
+    Promise<MappingProfile> mappingProfilePromise = Promise.promise();
+    if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getCreatedByUserId() != null) {
+      usersClient.getUserInfoAsync(mappingProfile.getMetadata().getCreatedByUserId(), params)
+        .onComplete(userInfoAr -> {
+          if (userInfoAr.succeeded()) {
+            mappingProfile.withUserInfo(userInfoAr.result());
+          }
+          mappingProfileDao.save(mappingProfile, params.getTenantId())
+            .onSuccess(mappingProfilePromise::complete)
+            .onFailure(mappingProfilePromise::fail);
+        });
+    } else {
+      return mappingProfileDao.save(mappingProfile, params.getTenantId());
+    }
+    return mappingProfilePromise.future();
   }
 
   @Override
-  public Future<MappingProfile> update(MappingProfile mappingProfile, String tenantId) {
-    return mappingProfileDao.update(mappingProfile, tenantId);
+  public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
+    Promise<MappingProfile> mappingProfilePromise = Promise.promise();
+    if (mappingProfile.getMetadata() != null && isNotEmpty(mappingProfile.getMetadata().getUpdatedByUserId())) {
+      usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
+        .onComplete(userInfoAr -> {
+          if (userInfoAr.succeeded()) {
+            mappingProfile.withUserInfo(userInfoAr.result());
+          }
+          mappingProfileDao.update(mappingProfile, params.getTenantId())
+            .onSuccess(mappingProfilePromise::complete)
+            .onFailure(mappingProfilePromise::fail);
+        });
+    } else {
+      return mappingProfileDao.update(mappingProfile, params.getTenantId());
+    }
+    return mappingProfilePromise.future();
   }
 
   @Override
   public Future<MappingProfile> getById(String mappingProfileId, String tenantId) {
-
     return mappingProfileDao.getById(mappingProfileId, tenantId)
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {

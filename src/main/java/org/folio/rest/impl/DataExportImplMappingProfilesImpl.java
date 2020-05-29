@@ -10,6 +10,7 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
@@ -31,7 +32,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
   @Override
   public void postDataExportMappingProfiles(String lang, MappingProfile entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar -> mappingProfileService.save(entity, tenantId))
+      .compose(ar -> mappingProfileService.save(entity, new OkapiConnectionParams(okapiHeaders)))
       .map(mappingProfile -> (Response) PostDataExportMappingProfilesResponse.respond201WithApplicationJson(mappingProfile, PostDataExportMappingProfilesResponse.headersFor201()))
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler);
@@ -72,7 +73,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
   @Override
   public void putDataExportMappingProfilesById(String id, String lang, MappingProfile entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar -> mappingProfileService.update(entity, tenantId))
+      .compose(ar -> mappingProfileService.update(entity, new OkapiConnectionParams(okapiHeaders)))
       .map(PutDataExportMappingProfilesByIdResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

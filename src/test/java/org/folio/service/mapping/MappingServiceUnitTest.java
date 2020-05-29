@@ -2,16 +2,17 @@ package org.folio.service.mapping;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.TestUtil.getFileFromResources;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.mockito.ArgumentMatchers.any;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.io.*;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
@@ -98,7 +99,7 @@ class MappingServiceUnitTest {
   }
 
   @Test
-  void shouldMapInstance_to_marcRecord() throws FileNotFoundException {
+  void shouldMapInstance_to_marcRecord_whenMappingProfileTransformationsEmpty() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
@@ -112,6 +113,47 @@ class MappingServiceUnitTest {
     String expectedMarcRecord = getExpectedMarcFromJson();
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
 
+  }
+
+
+  @Test
+  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params)).thenReturn(referenceData);
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+    String expectedMarcRecord = readFileContentFromResources("mapping/expected_marc_record_with_holdings_and_items.mrc");
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
+  private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
+    List<Transformations> transformations = new ArrayList<>();
+    transformations.add(createTransformations("callNumber", "$.holdings[*].callNumber", "900ff$a", HOLDINGS));
+    transformations.add(createTransformations("callNumberPrefix", "$.holdings[*].callNumberPrefix", "901  $a", HOLDINGS));
+    transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
+    transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9071 $a", ITEM));
+    return transformations;
+  }
+
+  private Transformations createTransformations(String fieldId, String fieldPath, String value, RecordType recordType) {
+    Transformations transformations = new Transformations();
+    transformations.setEnabled(true);
+    transformations.setFieldId(fieldId);
+    transformations.setPath(fieldPath);
+    transformations.setTransformation(value);
+    transformations.setRecordType(recordType);
+    return transformations;
   }
 
   /**
@@ -133,5 +175,6 @@ class MappingServiceUnitTest {
     writer.close();
     return outputStream.toString();
   }
+
 }
 
