@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class InventoryClient {
+  private static final String LIMIT_PATTERN = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
@@ -34,12 +35,12 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, CONTENT_TERMS);
   }
 
   public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
   }
 
@@ -72,7 +73,7 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getContributorNameTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, CONTRIBUTOR_NAME_TYPES);
   }
 
