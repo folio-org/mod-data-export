@@ -7,6 +7,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
@@ -40,6 +41,11 @@ public class InventoryClient {
   public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
+  }
+
+  public Map<String, JsonObject> getLocations(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(LOCATIONS) + "?limit=" + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, LOCATIONS);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
