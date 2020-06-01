@@ -1,5 +1,5 @@
 {
-  "leader": "00000nam a22000003c 4500",
+  "leader": "00957nam a22003373c 4500",
   "fields": [
     {
       "001": "1"
@@ -12,6 +12,17 @@
         "subfields": [
           {
             "a": "1447294130"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "020": {
+        "subfields": [
+          {
+            "a": "9781447294130"
           }
         ],
         "ind1": " ",
@@ -88,13 +99,13 @@
       "264": {
         "subfields": [
           {
-            "a": "New York"
+            "a": "Edinburgh"
           },
           {
-            "b": "Alfred A. Knopf"
+            "b": "Birlinn"
           },
           {
-            "c": "2016"
+            "c": "2015"
           }
         ],
         "ind1": " ",
@@ -105,13 +116,13 @@
       "264": {
         "subfields": [
           {
-            "a": "Edinburgh"
+            "a": "New York"
           },
           {
-            "b": "Birlinn"
+            "b": "Alfred A. Knopf"
           },
           {
-            "c": "2015"
+            "c": "2016"
           }
         ],
         "ind1": " ",
@@ -166,7 +177,7 @@
       "653": {
         "subfields": [
           {
-            "a": "Politicians--Scotland--Biography"
+            "a": "Politicians"
           }
         ],
         "ind1": " ",
@@ -177,7 +188,7 @@
       "653": {
         "subfields": [
           {
-            "a": "Scotland--Politics and government--21st century"
+            "a": "Politicians--Scotland--Biography"
           }
         ],
         "ind1": " ",
@@ -199,7 +210,7 @@
       "653": {
         "subfields": [
           {
-            "a": "Politicians"
+            "a": "Scotland"
           }
         ],
         "ind1": " ",
@@ -210,7 +221,7 @@
       "653": {
         "subfields": [
           {
-            "a": "Scotland"
+            "a": "Scotland--Politics and government--21st century"
           }
         ],
         "ind1": " ",
@@ -221,7 +232,7 @@
       "655": {
         "subfields": [
           {
-            "a": "textbook"
+            "a": "newspaper"
           }
         ],
         "ind1": " ",
@@ -232,7 +243,7 @@
       "655": {
         "subfields": [
           {
-            "a": "newspaper"
+            "a": "textbook"
           }
         ],
         "ind1": " ",

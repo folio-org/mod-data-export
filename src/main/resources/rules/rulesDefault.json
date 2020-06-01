@@ -263,7 +263,7 @@
     "description": "Contributors - Personal Name  and Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?(@.primary && @.primary == true)].name",
+        "from": "$.instance.contributors[?(@.primary && @.primary == true)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -292,7 +292,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?(@.primary && @.primary == true)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?(@.primary && @.primary == true)].contributorNameTypeId"
     }
   },
   {
@@ -300,7 +300,7 @@
     "description": "Contributors - Corporate Name  and Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?((@.primary) && @.primary == true)].name",
+        "from": "$.instance.contributors[?((@.primary) && @.primary == true)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -329,7 +329,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?((@.primary) && @.primary == true)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?((@.primary) && @.primary == true)].contributorNameTypeId"
     }
   },
   {
@@ -337,7 +337,7 @@
     "description": "Contributors - Meeting Name and Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?((@.primary) && @.primary == true)].name",
+        "from": "$.instance.contributors[?((@.primary) && @.primary == true)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -366,7 +366,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?((@.primary) && @.primary == true)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?((@.primary) && @.primary == true)].contributorNameTypeId"
     }
   },
   {
@@ -553,7 +553,7 @@
     "description": "Contributors - Personal Name Not Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?(!(@.primary) || @.primary == false)].name",
+        "from": "$.instance.contributors[?(!(@.primary) || @.primary == false)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -582,7 +582,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
     }
   },
   {
@@ -590,7 +590,7 @@
     "description": "Contributors - Corporate Name Not Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?(!(@.primary) || @.primary == false)].name",
+        "from": "$.instance.contributors[?(!(@.primary) || @.primary == false)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -619,7 +619,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
     }
   },
   {
@@ -627,7 +627,7 @@
     "description": "Contributors - Meeting Name Not Primary",
     "dataSources": [
       {
-        "from": "$.contributors[?(!(@.primary) || @.primary == false)].name",
+        "from": "$.instance.contributors[?(!(@.primary) || @.primary == false)].name",
         "subfield": "a",
         "translation": {
           "function": "set_contributor",
@@ -656,7 +656,7 @@
       }
     ],
     "metadata": {
-      "contributorNameTypeId": "$.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
+      "contributorNameTypeId": "$.instance.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId"
     }
   },
   {

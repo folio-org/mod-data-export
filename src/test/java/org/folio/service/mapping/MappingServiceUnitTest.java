@@ -99,7 +99,7 @@ class MappingServiceUnitTest {
   }
 
   @Test
-  void shouldMapInstance_to_marcRecord_whenMappingProfileTransformationsEmpty() {
+  void shouldMapInstance_to_marcRecord_whenMappingProfileTransformationsEmpty() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
