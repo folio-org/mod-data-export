@@ -17,6 +17,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class RuleFactory {
     if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
       return getDefaultRules();
     }
-    List<Rule> rules = getDefaultRules();
+    List<Rule> rules = Lists.newArrayList(getDefaultRules());
     rules.addAll(buildByTransformations(mappingProfile.getTransformations()));
     return rules;
   }
@@ -63,7 +64,7 @@ public class RuleFactory {
       LOGGER.error("Failed to fetch default rules for export");
       throw new NotFoundException(e);
     }
-    this.defaultRules = Lists.newArrayList(Json.decodeValue(stringRules, Rule[].class));
+    this.defaultRules = Arrays.asList(Json.decodeValue(stringRules, Rule[].class));
     return this.defaultRules;
   }
 

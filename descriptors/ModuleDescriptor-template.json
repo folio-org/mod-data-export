@@ -123,6 +123,7 @@
             "data-export.job-profiles.item.post"
           ],
           "modulePermissions": [
+            "users.item.get"
           ]
         },
         {
@@ -156,6 +157,7 @@
             "data-export.job-profiles.item.put"
           ],
           "modulePermissions": [
+            "users.item.get"
           ]
         },
         {
@@ -178,6 +180,7 @@
             "data-export.mapping-profiles.item.post"
           ],
           "modulePermissions": [
+            "users.item.get"
           ]
         },
         {
@@ -211,6 +214,7 @@
             "data-export.mapping-profiles.item.put"
           ],
           "modulePermissions": [
+            "users.item.get"
           ]
         },
         {
