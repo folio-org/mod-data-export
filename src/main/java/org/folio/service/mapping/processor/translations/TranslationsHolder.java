@@ -105,18 +105,24 @@ public enum TranslationsHolder implements TranslationFunction {
 
       String publicationDate0Param = "||||";
       String publicationDate1Param = "||||";
-      if (metadata.getData().containsKey("datesOfPublication")) {
+      if (metadata != null && metadata.getData().containsKey("datesOfPublication")) {
         List<String> publicationDates = (List<String>) metadata.getData().get("datesOfPublication").getData();
-        if (publicationDates.size() == 1) {
+        if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
           publicationDate0Param = publicationDates.get(0);
         } else if (publicationDates.size() > 1) {
-          publicationDate0Param = publicationDates.get(0);
-          publicationDate1Param = publicationDates.get(1);
+          String publicationDate0 = publicationDates.get(0);
+          if (publicationDate0.length() == 4) {
+            publicationDate0Param = publicationDate0;
+          }
+          String publicationDate1 = publicationDates.get(1);
+          if (publicationDate1.length() == 4) {
+            publicationDate1Param = publicationDate1;
+          }
         }
       }
 
       String languageParam = "und";
-      if (metadata.getData().containsKey("languages")) {
+      if (metadata != null && metadata.getData().containsKey("languages")) {
         List<String> languages = (List<String>) metadata.getData().get("languages").getData();
         if (languages.size() == 1) {
           languageParam = languages.get(0);
