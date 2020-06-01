@@ -1,4 +1,4 @@
-package org.folio.service.mapping;
+package org.folio.service.mapping.processor;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.junit.Assert.assertEquals;

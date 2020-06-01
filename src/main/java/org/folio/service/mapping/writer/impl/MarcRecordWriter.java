@@ -9,6 +9,7 @@ import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.impl.SortedMarcFactoryImpl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public class MarcRecordWriter extends AbstractRecordWriter {
   protected String encoding = StandardCharsets.UTF_8.name();
-  private MarcFactory factory = MarcFactory.newInstance();
+  private MarcFactory factory = new SortedMarcFactoryImpl();
   protected Record record = factory.newRecord();
 
   @Override
