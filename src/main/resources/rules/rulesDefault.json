@@ -41,15 +41,15 @@
     "description": "Fixed-Length Data Elements",
     "dataSources": [
       {
-        "from": "$.metadata.createdDate",
+        "from": "$.instance.metadata.createdDate",
         "translation": {
           "function": "set_fixed_length_data_elements"
         }
       }
     ],
     "metadata": {
-      "datesOfPublication": "$.publication[*].dateOfPublication",
-      "languages": "$.languages"
+      "datesOfPublication": "$.instance.publication[*].dateOfPublication",
+      "languages": "$.instance.languages"
     }
   },
   {
