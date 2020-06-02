@@ -37,6 +37,7 @@ public class JPathSyntaxEntityReader extends AbstractEntityReader {
 
   @Override
   protected RuleValue readCompositeValue(Rule rule) {
+    populateMetadata(rule);
     List<SimpleEntry<DataSource, JSONArray>> matrix = new ArrayList<>();
     for (DataSource dataSource : rule.getDataSources()) {
       if (dataSource.getFrom() == null) {
@@ -71,7 +72,6 @@ public class JPathSyntaxEntityReader extends AbstractEntityReader {
         }
         compositeValue.addEntry(entry);
       }
-      populateMetadata(rule);
       return compositeValue;
     }
   }
@@ -91,7 +91,9 @@ public class JPathSyntaxEntityReader extends AbstractEntityReader {
   }
 
   @Override
-  protected RuleValue readSimpleValue(DataSource dataSource) {
+  protected RuleValue readSimpleValue(Rule rule) {
+    populateMetadata(rule);
+    DataSource dataSource = rule.getDataSources().get(0);
     String path = dataSource.getFrom();
     Object readValue = documentContext.read(path);
     if (readValue instanceof String) {
