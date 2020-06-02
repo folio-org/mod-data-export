@@ -73,7 +73,7 @@ class MappingServiceUnitTest {
 
   private Map<String, JsonObject> getLocations() {
     JsonArray identifierTypesArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_locations.json"))
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_locations_response.json"))
         .getJsonArray("locations");
     Map<String, JsonObject> map = new HashMap<>();
     for (Object object : identifierTypesArray) {
