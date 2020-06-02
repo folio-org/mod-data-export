@@ -1,6 +1,5 @@
 package org.folio.service.mapping.reader;
 
-import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.reader.values.MissingValue;
 import org.folio.service.mapping.reader.values.RuleValue;
@@ -10,7 +9,7 @@ public abstract class AbstractEntityReader implements EntityReader {
   @Override
   public RuleValue read(Rule rule) {
     if (isSimpleRule(rule)) {
-      return readSimpleValue(rule.getDataSources().get(0));
+      return readSimpleValue(rule);
     } else if (isCompositeRule(rule)) {
       return readCompositeValue(rule);
     }
@@ -27,5 +26,5 @@ public abstract class AbstractEntityReader implements EntityReader {
 
   protected abstract RuleValue readCompositeValue(Rule rule);
 
-  protected abstract RuleValue readSimpleValue(DataSource dataSource);
+  protected abstract <S> S readSimpleValue(Rule rule);
 }

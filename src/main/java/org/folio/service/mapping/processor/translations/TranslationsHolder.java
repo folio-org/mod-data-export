@@ -14,6 +14,8 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.List;
 
+import static java.lang.String.format;
+
 public enum TranslationsHolder implements TranslationFunction {
 
   SET_VALUE() {
@@ -72,6 +74,63 @@ public enum TranslationsHolder implements TranslationFunction {
     public String apply(String updatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
       ZonedDateTime originDateTime = ZonedDateTime.parse(updatedDate, originFormatter);
       return targetFormatter.format(originDateTime);
+    }
+  },
+
+  /**
+   * Forty character positions (00-39) that provide coded information about the record as a whole and about special
+   * bibliographic aspects of the item being cataloged.
+   * These coded data elements are potentially useful for retrieval and data management purposes.
+   * Format:
+   * 00-05 - Metadata.createdDate field in yymmdd format
+   * 06 is set to | (pipe character)
+   * 07-10 to publication[0] dateOfPublication if can be formatted else |||| (four pipe characters)
+   * 11-14 to publication[1] dateOfPublication if can be formatted else |||| (four pipe characters)
+   * 18-22 - each field set to |
+   * 23-29 - each field to be blank
+   * 30-34 - each field set to |
+   * 35-37 - if languages array is empty set it to "und",
+   * if one element, use it to populate the field (it should be 3 letter language code),
+   * if the array contains more than one language, then set it to "mul"
+   * 38-39 - each field set to |
+   */
+  SET_FIXED_LENGTH_DATA_ELEMENTS() {
+    private transient DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private transient DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+    private String fieldPattern = "%s|%s%s||||||||       |||||%s||";
+
+    @Override
+    public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      String createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+
+      String publicationDate0Param = "||||";
+      String publicationDate1Param = "||||";
+      if (metadata != null && metadata.getData().containsKey("datesOfPublication")) {
+        List<String> publicationDates = (List<String>) metadata.getData().get("datesOfPublication").getData();
+        if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
+          publicationDate0Param = publicationDates.get(0);
+        } else if (publicationDates.size() > 1) {
+          String publicationDate0 = publicationDates.get(0);
+          if (publicationDate0.length() == 4) {
+            publicationDate0Param = publicationDate0;
+          }
+          String publicationDate1 = publicationDates.get(1);
+          if (publicationDate1.length() == 4) {
+            publicationDate1Param = publicationDate1;
+          }
+        }
+      }
+
+      String languageParam = "und";
+      if (metadata != null && metadata.getData().containsKey("languages")) {
+        List<String> languages = (List<String>) metadata.getData().get("languages").getData();
+        if (languages.size() == 1) {
+          languageParam = languages.get(0);
+        } else if (languages.size() > 1) {
+          languageParam = "mul";
+        }
+      }
+      return format(fieldPattern, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
     }
   };
 

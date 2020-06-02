@@ -13,7 +13,7 @@ import org.folio.service.mapping.referencedata.ReferenceData;
 @FunctionalInterface
 public interface TranslationFunction {
   /**
-   * Applies data transformation for the given value
+   * Applies translation for the given value
    *
    * @param value         value of subfield or indicator
    * @param currentIndex  position of the value in parent list, applicable for composite values and list values
