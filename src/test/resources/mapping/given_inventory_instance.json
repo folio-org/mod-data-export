@@ -1,73 +1,130 @@
 {
-  "id": "c8b50e3f-0446-429c-960e-03774b88223f",
-  "hrid": "1",
-  "title": "The Journal of ecclesiastical history",
-  "series": [
-    "Cooperative information systems",
-    "The lateral history"
-  ],
-  "physicalDescriptions": [
-    "xx, 238 p. : ill. ; 24 cm.",
-    "xxix, 224 Seiten Illustrationen"
-  ],
-  "natureOfContentTermIds": [
-    "44cd89f3-2e76-469f-a955-cc57cb9e0395",
-    "ebbbdef1-00e1-428b-bc11-314dc0705074",
-    "none-existing-id"
-  ],
-  "publication": [
+  "holdings": [
     {
-      "publisher": "Alfred A. Knopf",
-      "place": "New York",
-      "dateOfPublication": "2016",
-      "role": null
-    },
-    {
-      "publisher": "Birlinn",
-      "place": "Edinburgh",
-      "dateOfPublication": "2015",
-      "role": "Publication"
+      "id": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "instanceId": "c8b50e3f-0446-429c-960e-03774b88223f",
+      "callNumber": "6056.I4588 B749 ",
+      "callNumberPrefix": "PR",
+      "callNumberSuffix": "2016",
+      "electronicAccess": [
+        {
+          "linkText": "holdingsLinkText1",
+          "uri": "holdingsUri1"
+        },
+        {
+          "linkText": "holdingsLinkText2",
+          "uri": "holdingsUri2"
+        }
+      ]
     }
   ],
-  "identifiers": [
+  "items": [
     {
-      "value": "1447294130",
-      "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+      "id": "0b96a642-5e7f-452d-9cae-9cee66c9a892",
+      "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "effectiveCallNumberComponents": {
+        "callNumber": "6066.I4588 B749 "
+      },
+      "electronicAccess": [
+        {
+          "linkText": "itemLinkText1",
+          "uri": "itemUri1"
+        },
+        {
+          "linkText": "itemLinkText2",
+          "uri": "itemUri2"
+        }
+      ]
     },
     {
-      "value": "9781447294130",
-      "identifierTypeId": "8261054f-be78-422d-bd51-4ed9f33c3422"
-    },
-    {
-      "value": "0262012103",
-      "identifierTypeId": "913300b2-03ed-469a-8179-c1092c991227"
-    },
-    {
-      "value": "9780262012102",
-      "identifierTypeId": "439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef"
-    },
-    {
-      "value": "2003065165",
-      "identifierTypeId": "7e591197-f335-4afb-bc6d-a6d76ca3bace"
-    },
-    {
-      "value": "0552142352",
-      "identifierTypeId": "351ebc1c-3aae-4825-8765-c6d50dbf011f"
+      "id": "5b31ec8c-95a7-4b91-95cc-b551a74b91ca",
+      "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "effectiveCallNumberComponents": {
+        "callNumber": "6076.I4588 B749 "
+      },
+      "electronicAccess": [
+        {
+          "linkText": "itemLinkText3",
+          "uri": "itemUri3"
+        },
+        {
+          "linkText": "itemLinkText4",
+          "uri": "itemUri4"
+        }
+      ]
     }
   ],
-  "subjects": [
-    "Politicians--Scotland--Biography",
-    "Scotland--Politics and government--21st century",
-    "Politics and government",
-    "Politicians",
-    "Scotland"
-  ],
-  "languages": [
-    "eng",
-    "lat"
-  ],
-  "metadata": {
-    "createdDate": "2019-08-07T03:12:01.011+0000",
-    "updatedDate": "2020-05-22T01:46:42.915+0000"
+  "instance": {
+    "id": "c8b50e3f-0446-429c-960e-03774b88223f",
+    "hrid": "1",
+    "title": "The Journal of ecclesiastical history",
+    "series": [
+      "Cooperative information systems",
+      "The lateral history"
+    ],
+    "physicalDescriptions": [
+      "xx, 238 p. : ill. ; 24 cm.",
+      "xxix, 224 Seiten Illustrationen"
+    ],
+    "natureOfContentTermIds": [
+      "44cd89f3-2e76-469f-a955-cc57cb9e0395",
+      "ebbbdef1-00e1-428b-bc11-314dc0705074",
+      "none-existing-id"
+    ],
+    "publication": [
+      {
+        "publisher": "Alfred A. Knopf",
+        "place": "New York",
+        "dateOfPublication": "2016",
+        "role": null
+      },
+      {
+        "publisher": "Birlinn",
+        "place": "Edinburgh",
+        "dateOfPublication": "2015",
+        "role": "Publication"
+      }
+    ],
+    "identifiers": [
+      {
+        "value": "1447294130",
+        "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+      },
+      {
+        "value": "9781447294130",
+        "identifierTypeId": "8261054f-be78-422d-bd51-4ed9f33c3422"
+      },
+      {
+        "value": "0262012103",
+        "identifierTypeId": "913300b2-03ed-469a-8179-c1092c991227"
+      },
+      {
+        "value": "9780262012102",
+        "identifierTypeId": "439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef"
+      },
+      {
+        "value": "2003065165",
+        "identifierTypeId": "7e591197-f335-4afb-bc6d-a6d76ca3bace"
+      },
+      {
+        "value": "0552142352",
+        "identifierTypeId": "351ebc1c-3aae-4825-8765-c6d50dbf011f"
+      }
+    ],
+    "subjects": [
+      "Politicians--Scotland--Biography",
+      "Scotland--Politics and government--21st century",
+      "Politics and government",
+      "Politicians",
+      "Scotland"
+    ],
+    "languages": [
+      "eng",
+      "lat"
+    ],
+    "metadata": {
+      "createdDate": "2019-08-07T03:12:01.011+0000",
+      "updatedDate": "2020-05-22T01:46:42.915+0000"
+    }
   }
 }

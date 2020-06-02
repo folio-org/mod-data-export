@@ -15,6 +15,7 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
@@ -33,7 +34,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
   @Override
   public void postDataExportJobProfiles(String lang, JobProfile entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> jobProfileService.save(entity, tenantId))
+    succeededFuture().compose(ar -> jobProfileService.save(entity, new OkapiConnectionParams(okapiHeaders)))
       .map(jobProfileRes -> PostDataExportJobProfilesResponse.respond201WithApplicationJson(jobProfileRes,
           PostDataExportJobProfilesResponse.headersFor201()
             .withLocation(JOBPROFILE_LOCATION_PREFIX)))
@@ -69,7 +70,7 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
   @Override
   public void putDataExportJobProfilesById(String id, String lang, JobProfile entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> jobProfileService.update(entity, tenantId))
+    succeededFuture().compose(ar -> jobProfileService.update(entity, new OkapiConnectionParams(okapiHeaders)))
       .map(updated -> PutDataExportJobProfilesByIdResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

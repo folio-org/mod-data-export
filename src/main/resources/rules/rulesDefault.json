@@ -20,7 +20,7 @@
     "description": "The human readable ID",
     "dataSources": [
       {
-        "from": "$.hrid"
+        "from": "$.instance.hrid"
       }
     ]
   },
@@ -29,7 +29,7 @@
     "description": "Date and Time of Latest Transaction",
     "dataSources": [
       {
-        "from": "$.metadata.updatedDate",
+        "from": "$.instance.metadata.updatedDate",
         "translation": {
           "function": "set_transaction_datetime"
         }
@@ -57,7 +57,7 @@
     "description": "Identifier LCCN",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -86,7 +86,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -94,7 +94,7 @@
     "description": "Identifier ISBN",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -123,7 +123,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -131,7 +131,7 @@
     "description": "Identifier ISSN",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -160,7 +160,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -168,7 +168,7 @@
     "description": "Identifier System Control Number",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -197,7 +197,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -205,7 +205,7 @@
     "description": "Identifier OCLC",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -234,7 +234,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -242,7 +242,7 @@
     "description": "Identifier GPO",
     "dataSources": [
       {
-        "from": "$.identifiers[*].value",
+        "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
@@ -271,7 +271,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.identifiers[*].identifierTypeId"
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
     }
   },
   {
@@ -279,7 +279,7 @@
     "description": "Title",
     "dataSources": [
       {
-        "from": "$.title",
+        "from": "$.instance.title",
         "subfield": "a"
       },
       {
@@ -307,15 +307,15 @@
     "description": "Publication",
     "dataSources": [
       {
-        "from": "$.publication[*].place",
+        "from": "$.instance.publication[*].place",
         "subfield": "a"
       },
       {
-        "from": "$.publication[*].publisher",
+        "from": "$.instance.publication[*].publisher",
         "subfield": "b"
       },
       {
-        "from": "$.publication[*].dateOfPublication",
+        "from": "$.instance.publication[*].dateOfPublication",
         "subfield": "c"
       },
       {
@@ -343,7 +343,7 @@
     "description": "Physical Descriptions",
     "dataSources": [
       {
-        "from": "$.physicalDescriptions",
+        "from": "$.instance.physicalDescriptions",
         "subfield": "a"
       },
       {
@@ -371,7 +371,7 @@
     "description": "Series",
     "dataSources": [
       {
-        "from": "$.series",
+        "from": "$.instance.series",
         "subfield": "a"
       },
       {
@@ -399,7 +399,7 @@
     "description": "Physical Descriptions",
     "dataSources": [
       {
-        "from": "$.subjects",
+        "from": "$.instance.subjects",
         "subfield": "a"
       },
       {
@@ -427,7 +427,7 @@
     "description": "Nature of content terms",
     "dataSources": [
       {
-        "from": "$.natureOfContentTermIds",
+        "from": "$.instance.natureOfContentTermIds",
         "subfield": "a",
         "translation": {
           "function": "set_nature_of_content_term"
@@ -458,7 +458,7 @@
     "description": "Unique ID of the instance record",
     "dataSources": [
       {
-        "from": "$.id",
+        "from": "$.instance.id",
         "subfield": "i"
       },
       {
