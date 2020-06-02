@@ -27,6 +27,7 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
+  private static final String LIMIT_PARAMETER = "?limit=";
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
     return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
@@ -34,17 +35,17 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, CONTENT_TERMS);
   }
 
   public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
   }
 
   public Map<String, JsonObject> getLocations(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(LOCATIONS) + "?limit=" + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(LOCATIONS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, LOCATIONS);
   }
 
