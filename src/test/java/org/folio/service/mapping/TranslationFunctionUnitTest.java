@@ -242,6 +242,18 @@ class TranslationFunctionUnitTest {
   }
 
   @Test
+  void SetFixedLengthDataElements_metadataIsNull() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, null);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||und||", result);
+  }
+
+  @Test
   void SetFixedLengthDataElements_shouldThrowException() {
     // given
     String createdDate = "date in wrong format";
