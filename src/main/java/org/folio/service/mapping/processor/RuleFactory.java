@@ -1,5 +1,6 @@
 package org.folio.service.mapping.processor;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
@@ -35,11 +36,16 @@ public class RuleFactory {
 
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
 
-  private static final String SET_VALUE_TRANSLATION = "set_value";
+  private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String INDICATOR_NAME_1 = "1";
   private static final String INDICATOR_NAME_2 = "2";
   private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
+
+  private static final Map<String, String> translationFunctions = ImmutableMap.of(
+    "permanentLocationId", "set_location",
+    "temporaryLocationId", "set_location"
+  );
 
   private List<Rule> defaultRules;
 
@@ -91,6 +97,11 @@ public class RuleFactory {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
+    if(translationFunctions.containsKey(mappingTransformation.getFieldId())) {
+      Translation translation = new Translation();
+      translation.setFunction(translationFunctions.get(mappingTransformation.getFieldId()));
+      fromDataSource.setTranslation(translation);
+    }
     dataSources.add(fromDataSource);
     String transformation = mappingTransformation.getTransformation();
     Pattern pattern = Pattern.compile(SUBFIELD_REGEX);
@@ -108,7 +119,7 @@ public class RuleFactory {
 
   private DataSource buildIndicatorDataSource(String indicatorName, String indicatorValue) {
     Translation indicatorTranslation = new Translation();
-    indicatorTranslation.setFunction(SET_VALUE_TRANSLATION);
+    indicatorTranslation.setFunction(SET_VALUE_FUNCTION);
     Map<String, String> parameters = new HashMap<>();
     parameters.put(VALUE_PARAMETER, indicatorValue);
     DataSource indicatorDataSource = new DataSource();

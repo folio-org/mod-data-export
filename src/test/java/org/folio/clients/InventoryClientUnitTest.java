@@ -59,6 +59,17 @@ class InventoryClientUnitTest extends RestVerticleTestBase {
   }
 
   @Test
+  void shouldRetrieveLocations() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> locations = inventoryClient.getLocations(okapiConnectionParams);
+    // then
+    Assert.assertFalse(locations.isEmpty());
+    Assert.assertEquals(2, locations.size());
+  }
+
+  @Test
   void shouldRetrieveExistingHoldings() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
