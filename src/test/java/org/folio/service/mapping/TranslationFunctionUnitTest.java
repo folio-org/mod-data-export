@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ class TranslationFunctionUnitTest {
   static void setUp() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
+    referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
   }
 
@@ -47,6 +49,14 @@ class TranslationFunctionUnitTest {
         .getJsonArray("identifierTypes")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getContributorNameTypes() {
+    JsonObject contributorNameTypes =
+        new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
+          .getJsonArray("contributorNameTypes")
+          .getJsonObject(0);
+      return Collections.singletonMap(contributorNameTypes.getString("id"), contributorNameTypes);
   }
 
   private static Map<String, JsonObject> getLocations() {
@@ -128,27 +138,6 @@ class TranslationFunctionUnitTest {
     Assert.assertEquals(StringUtils.EMPTY, result);
   }
 
-  @Test
-  void SetLocation_shouldReturnLocationValue() {
-    // given
-    TranslationFunction translationFunction = TranslationsHolder.lookup("set_location");
-    String value = "d9cd0bed-1b49-4b5e-a7bd-064b8d177231";
-    // when
-    String result = translationFunction.apply(value, 0, null, referenceData, null);
-    // then
-    Assert.assertEquals("Miller General Stacks", result);
-  }
-
-  @Test
-  void SetLocation_shouldReturnEmptyString() {
-    // given
-    TranslationFunction translationFunction = TranslationsHolder.lookup("set_location");
-    String value = "non-existing-id";
-    // when
-    String result = translationFunction.apply(value, 0, null, referenceData, null);
-    // then
-    Assert.assertEquals(StringUtils.EMPTY, result);
-  }
 
   @Test
   void SetTransactionDatetime_shouldReturnFormattedDate() {
@@ -172,6 +161,43 @@ class TranslationFunctionUnitTest {
       translationFunction.apply(updatedDate, 0, null, null, null)
     );
   }
+
+  @Test
+  void SetContributor_shouldReturnContributorNameValue() {
+    // given
+    String value = "value";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_contributor");
+
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("type", "Personal name"));
+
+    Metadata metadata = new Metadata();
+    metadata.addData("contributorNameTypeId",
+      new Metadata.Entry("$.contributors[?(!(@.primary) || @.primary == false)].contributorNameTypeId",
+        Arrays.asList("2b94c631-fca9-4892-a730-03ee529ffe2a", "2e48e713-17f3-4c13-a9f8-23845bb210aa")));
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, metadata);
+    // then
+    Assert.assertEquals(value, result);
+  }
+
+  @Test
+  void setContributor_shouldReturnEmptyString_whenMetadataIsEmpty() {
+    // given
+    String value = "value";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_contributor");
+
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("type", "Personal name"));
+
+    Metadata metadata = new Metadata();
+    metadata.addData("contributorNameTypeId", new Metadata.Entry("$.instance.contributors[?(@.primary && @.primary == true)].contributorNameTypeId", Collections.emptyList()));
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, metadata);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
+  }
+
 
   @Test
   void SetFixedLengthDataElements_noDatesOfPublication_noLanguages_specified() {

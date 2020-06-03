@@ -36,6 +36,7 @@ public class ReferenceDataProvider {
     ReferenceData referenceData = new ReferenceData();
     referenceData.addNatureOfContentTerms(inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
     referenceData.addIdentifierTypes(inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    referenceData.addContributorNameTypes(inventoryClient.getContributorNameTypes(okapiConnectionParams));
     referenceData.addLocations(inventoryClient.getLocations(okapiConnectionParams));
     return referenceData;
   }

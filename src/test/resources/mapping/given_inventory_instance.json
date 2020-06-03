@@ -113,6 +113,27 @@
         "identifierTypeId": "351ebc1c-3aae-4825-8765-c6d50dbf011f"
       }
     ],
+     "contributors": [
+        {
+          "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+          "name": "Fielding, Helen",
+          "contributorTypeId": null,
+          "contributorTypeText": null,
+          "primary": true
+        },
+        {
+          "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+          "name": "Draper, Don",
+          "contributorTypeId": null,
+          "contributorTypeText": null
+        },
+        {
+          "contributorNameTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+          "name": "Sterling, Roger",
+          "contributorTypeId": null,
+          "contributorTypeText": null
+        }
+  ],
     "subjects": [
       "Politicians--Scotland--Biography",
       "Scotland--Politics and government--21st century",

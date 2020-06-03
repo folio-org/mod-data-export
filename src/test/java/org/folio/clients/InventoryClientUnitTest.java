@@ -1,12 +1,7 @@
 package org.folio.clients;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
 
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import java.util.Arrays;
@@ -91,5 +86,16 @@ class InventoryClientUnitTest extends RestVerticleTestBase {
     // then
     Assert.assertTrue(itemsResponse.isPresent());
     Assert.assertEquals(2, itemsResponse.get().getJsonArray("items").getList().size());
+  }
+
+  @Test
+  void shouldRetrieveContributorNameTypes() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> contributorNameTypes = inventoryClient.getContributorNameTypes(okapiConnectionParams);
+    // then
+    Assert.assertFalse(contributorNameTypes.isEmpty());
+    Assert.assertEquals(3, contributorNameTypes.size());
   }
 }
