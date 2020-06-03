@@ -70,6 +70,18 @@ public enum TranslationsHolder implements TranslationFunction {
       return StringUtils.EMPTY;
     }
   },
+  SET_LOCATION() {
+    @Override
+    public String apply(String locationId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getLocations().get(locationId);
+      if (entry == null) {
+        LOGGER.error("Location is not found by the given id: {}", locationId);
+        return StringUtils.EMPTY;
+      } else {
+        return entry.getString("name");
+      }
+    }
+  },
 
   /**
    * Sixteen characters that indicate the date and time of the latest record transaction

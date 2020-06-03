@@ -47,6 +47,7 @@ class MappingServiceUnitTest {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
     referenceData.addContributorNameTypes(getContributorNameTypes());
+    referenceData.addLocations(getLocations());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -73,6 +74,17 @@ class MappingServiceUnitTest {
     return map;
   }
 
+  private Map<String, JsonObject> getLocations() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_locations_response.json"))
+        .getJsonArray("locations");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
 
   private Map<String, JsonObject> getContributorNameTypes() {
     JsonArray identifierTypesArray =
@@ -140,9 +152,11 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
-    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9071 $a", ITEM));
+    transformations.add(createTransformations("permanentLocationId", "$.holdings[*].permanentLocationId", "905  $a", HOLDINGS));
+    transformations.add(createTransformations("temporaryLocationId", "$.holdings[*].temporaryLocationId", "906  $b", HOLDINGS));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));
     return transformations;
   }
 

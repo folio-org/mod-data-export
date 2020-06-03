@@ -1,9 +1,7 @@
 package org.folio.service.mapping.processor;
 
 import com.google.common.collect.ImmutableList;
-import io.vertx.core.json.Json;
 import org.assertj.core.util.Lists;
-import org.folio.TestUtil;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
@@ -12,12 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +38,11 @@ class RuleFactoryTest {
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
+  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
+  private static final String PERMANENT_LOCATION_PATH = "$.holdings[*].permanentLocationId";
+  private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
+  private static final String TEMPORARY_LOCATION_PATH = "$.holdings[*].temporaryLocationId";
+  private static final String SET_LOCATION_FUNCTION = "set_location";
 
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
@@ -222,6 +223,56 @@ class RuleFactoryTest {
     assertEquals(SECOND_INDICATOR, rules.get(1).getDataSources().get(2).getIndicator());
     assertEquals(SET_VALUE_FUNCTION, rules.get(1).getDataSources().get(2).getTranslation().getFunction());
     assertEquals(SPACE, rules.get(1).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
+  }
+
+  @Test
+  void shouldReturnTransformationRuleWithPermanentLocationTranslation() {
+    // given
+    Transformations permanentLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(permanentLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnTransformationRuleWithTemporaryLocationTranslation() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(TEMPORARY_LOCATION_FIELD_ID)
+      .withPath(TEMPORARY_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
   }
 
   private void setUpDefaultRules() {

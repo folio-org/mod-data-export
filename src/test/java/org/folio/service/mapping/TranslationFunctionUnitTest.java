@@ -32,6 +32,7 @@ class TranslationFunctionUnitTest {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
     referenceData.addContributorNameTypes(getContributorNameTypes());
+    referenceData.addLocations(getLocations());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -56,6 +57,14 @@ class TranslationFunctionUnitTest {
           .getJsonArray("contributorNameTypes")
           .getJsonObject(0);
       return Collections.singletonMap(contributorNameTypes.getString("id"), contributorNameTypes);
+  }
+
+  private static Map<String, JsonObject> getLocations() {
+    JsonObject identifierType =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_locations_response.json"))
+        .getJsonArray("locations")
+        .getJsonObject(0);
+    return Collections.singletonMap(identifierType.getString("id"), identifierType);
   }
 
   @Test

@@ -15,6 +15,7 @@ public class ExternalPathResolver {
   public static final String CONTENT_TERMS = "natureOfContentTerms";
   public static final String IDENTIFIER_TYPES = "identifierTypes";
   public static final String CONTRIBUTOR_NAME_TYPES = "contributorNameTypes";
+  public static final String LOCATIONS = "locations";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -34,6 +35,7 @@ public class ExternalPathResolver {
     apis.put(CONTENT_TERMS, "/nature-of-content-terms");
     apis.put(IDENTIFIER_TYPES, "/identifier-types");
     apis.put(CONTRIBUTOR_NAME_TYPES, "/contributor-name-types");
+    apis.put(LOCATIONS, "/locations");
     apis.put(USERS, "/users");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);

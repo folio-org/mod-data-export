@@ -8,6 +8,7 @@ import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class InventoryClient {
-  private static final String LIMIT_PATTERN = "?limit=";
+  private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
@@ -35,13 +36,18 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, CONTENT_TERMS);
   }
 
   public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
+  }
+
+  public Map<String, JsonObject> getLocations(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(LOCATIONS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, LOCATIONS);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
@@ -73,7 +79,7 @@ public class InventoryClient {
   }
 
   public Map<String, JsonObject> getContributorNameTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + LIMIT_PATTERN + REFERENCE_DATA_LIMIT;
+    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, CONTRIBUTOR_NAME_TYPES);
   }
 

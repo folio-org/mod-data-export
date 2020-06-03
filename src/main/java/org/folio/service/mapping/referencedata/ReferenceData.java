@@ -9,6 +9,7 @@ public class ReferenceData {
   private Map<String, JsonObject> natureOfContentTerms = new HashMap<>();
   private Map<String, JsonObject> identifierTypes = new HashMap<>();
   private Map<String, JsonObject> contributorNameTypes = new HashMap<>();
+  private Map<String, JsonObject> locations = new HashMap<>();
 
 
 
@@ -24,6 +25,10 @@ public class ReferenceData {
     this.identifierTypes.putAll(identifierTypes);
   }
 
+  public void addLocations(Map<String, JsonObject> locations) {
+    this.locations.putAll(locations);
+  }
+
   public Map<String, JsonObject> getNatureOfContentTerms() {
     return natureOfContentTerms;
   }
@@ -36,4 +41,8 @@ public class ReferenceData {
     return contributorNameTypes;
   }
 
+
+  public Map<String, JsonObject> getLocations() {
+    return locations;
+  }
 }
