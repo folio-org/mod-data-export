@@ -20,10 +20,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.marc4j.MarcJsonReader;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamWriter;
-import org.marc4j.MarcWriter;
+import org.marc4j.*;
 import org.marc4j.marc.Record;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -122,26 +119,30 @@ class MappingServiceUnitTest {
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
-    String expectedMarcRecord = getExpectedMarcFromJson();
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
+    String expectedMarcRecord = getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
 
   }
 
 
   @Test
-  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() {
+  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
-    Mockito.when(referenceDataProvider.get(jobExecutionId, params)).thenReturn(referenceData);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
-    String expectedMarcRecord = readFileContentFromResources("mapping/expected_marc_record_with_holdings_and_items.mrc");
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
+    String expectedMarcRecord = getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -176,8 +177,8 @@ class MappingServiceUnitTest {
    * @return expected Json converted to marc format
    * @throws FileNotFoundException
    */
-  private String getExpectedMarcFromJson() throws FileNotFoundException {
-    InputStream inputStream = new FileInputStream(getFileFromResources("mapping/expected_marc.json"));
+  private String getExpectedMarcFromJson(File expectedFile) throws FileNotFoundException {
+    InputStream inputStream = new FileInputStream(expectedFile);
     MarcReader marcReader = new MarcJsonReader(inputStream);
     OutputStream outputStream = new ByteArrayOutputStream();
     MarcWriter writer = new MarcStreamWriter(outputStream);
