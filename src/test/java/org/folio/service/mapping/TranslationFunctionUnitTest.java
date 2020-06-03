@@ -30,6 +30,7 @@ class TranslationFunctionUnitTest {
   static void setUp() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
+    referenceData.addLocations(getLocations());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -44,6 +45,14 @@ class TranslationFunctionUnitTest {
     JsonObject identifierType =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_identifier_types_response.json"))
         .getJsonArray("identifierTypes")
+        .getJsonObject(0);
+    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getLocations() {
+    JsonObject identifierType =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_locations_response.json"))
+        .getJsonArray("locations")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
   }
@@ -119,6 +128,27 @@ class TranslationFunctionUnitTest {
     Assert.assertEquals(StringUtils.EMPTY, result);
   }
 
+  @Test
+  void SetLocation_shouldReturnLocationValue() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_location");
+    String value = "d9cd0bed-1b49-4b5e-a7bd-064b8d177231";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals("Miller General Stacks", result);
+  }
+
+  @Test
+  void SetLocation_shouldReturnEmptyString() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_location");
+    String value = "non-existing-id";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
+  }
 
   @Test
   void SetTransactionDatetime_shouldReturnFormattedDate() {
