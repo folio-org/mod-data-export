@@ -53,6 +53,7 @@ public class RuleFactory {
     PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
     TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
     EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION
+    "materialTypeId", "set_material_type"
   );
 
   private List<Rule> defaultRules;
