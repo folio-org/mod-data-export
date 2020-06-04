@@ -74,7 +74,7 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-  private List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
+  public List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
     List<Rule> rules = new ArrayList<>();
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())

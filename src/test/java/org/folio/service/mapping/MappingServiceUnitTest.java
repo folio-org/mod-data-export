@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.io.*;
 import java.util.*;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
@@ -34,6 +35,8 @@ class MappingServiceUnitTest {
 
   @InjectMocks
   private MappingServiceImpl mappingService;
+  @Mock
+  private ConfigurationsClient configurationsClient;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
@@ -114,6 +117,8 @@ class MappingServiceUnitTest {
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(MappingProfile.class), any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
@@ -147,6 +152,8 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(MappingProfile.class), any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
