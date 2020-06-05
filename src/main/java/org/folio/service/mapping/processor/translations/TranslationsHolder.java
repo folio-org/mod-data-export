@@ -11,10 +11,12 @@ import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public enum TranslationsHolder implements TranslationFunction {
 
@@ -126,16 +128,27 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_FIXED_LENGTH_DATA_ELEMENTS() {
     private transient DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private transient DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
+    private String datesOfPublicationPattern = "datesOfPublication";
+    private String languagesPattern = "languages";
     private String fieldPattern = "%s|%s%s||||||||       |||||%s||";
 
     @Override
     public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      String createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+      String createdDateParam = "||||||";
+      if (isNotEmpty(originCreatedDate)) {
+        try {
+          createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+        } catch (DateTimeParseException e) {
+          LOGGER.error("Failed to parse createdDate field, the current time value will be used");
+          createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.now());
+        }
+      }
 
       String publicationDate0Param = "||||";
       String publicationDate1Param = "||||";
-      if (metadata != null && metadata.getData().containsKey("datesOfPublication")) {
-        List<String> publicationDates = (List<String>) metadata.getData().get("datesOfPublication").getData();
+      if (metadata != null && metadata.getData().containsKey(datesOfPublicationPattern)
+        && metadata.getData().get(datesOfPublicationPattern) != null) {
+        List<String> publicationDates = (List<String>) metadata.getData().get(datesOfPublicationPattern).getData();
         if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
           publicationDate0Param = publicationDates.get(0);
         } else if (publicationDates.size() > 1) {
@@ -151,9 +164,10 @@ public enum TranslationsHolder implements TranslationFunction {
       }
 
       String languageParam = "und";
-      if (metadata != null && metadata.getData().containsKey("languages")) {
-        List<String> languages = (List<String>) metadata.getData().get("languages").getData();
-        if (languages.size() == 1) {
+      if (metadata != null && metadata.getData().containsKey(languagesPattern)
+        && metadata.getData().get(languagesPattern) != null) {
+        List<String> languages = (List<String>) metadata.getData().get(languagesPattern).getData();
+        if (languages.size() == 1 && isNotEmpty(languages.get(0))) {
           languageParam = languages.get(0);
         } else if (languages.size() > 1) {
           languageParam = "mul";
