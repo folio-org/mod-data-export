@@ -134,7 +134,7 @@ public enum TranslationsHolder implements TranslationFunction {
 
     @Override
     public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      String createdDateParam = "||||||";
+      String createdDateParam;
       if (isNotEmpty(originCreatedDate)) {
         try {
           createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
@@ -142,6 +142,8 @@ public enum TranslationsHolder implements TranslationFunction {
           LOGGER.error("Failed to parse createdDate field, the current time value will be used");
           createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.now());
         }
+      } else {
+        createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.now());
       }
 
       String publicationDate0Param = "||||";
