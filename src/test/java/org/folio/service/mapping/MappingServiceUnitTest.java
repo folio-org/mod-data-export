@@ -170,6 +170,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));
+    transformations.add(createTransformations("effectiveLocationId", "$.items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 
