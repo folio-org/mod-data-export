@@ -45,13 +45,15 @@ public class RuleFactory {
   private static final String INDICATOR_NAME_2 = "2";
   private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
   private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
+  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
+  private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
+  private static final String SET_LOCATION_FUNCTION = "set_location";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.of(
-    "permanentLocationId", "set_location",
-    "temporaryLocationId", "set_location",
-    "effectiveLocationId", "set_location"
+    PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
+    TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
+    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION
   );
-  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
 
   private List<Rule> defaultRules;
 
@@ -85,11 +87,9 @@ public class RuleFactory {
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
-        && isNotBlank(mappingTransformation.getTransformation())) {
-        if (!(isHoldingsPermanentLocation(mappingTransformation)
-          && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
+        && isNotBlank(mappingTransformation.getTransformation())
+        && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
           rules.add(buildByTransformation(mappingTransformation));
-        }
       }
     }
     return rules;
