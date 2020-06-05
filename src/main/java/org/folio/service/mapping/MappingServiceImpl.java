@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 @Service
 public class MappingServiceImpl implements MappingService {
   private final RuleFactory ruleFactory;
@@ -57,8 +59,15 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
-    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(mappingProfile, params);
-    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : rulesFromConfig;
+    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(params);
+    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : appendRulesFromProfile(rulesFromConfig, mappingProfile);
+  }
+
+  private List<Rule> appendRulesFromProfile(List<Rule> rulesFromConfig, MappingProfile mappingProfile) {
+    if (mappingProfile != null && isNotEmpty(mappingProfile.getTransformations())) {
+      rulesFromConfig.addAll(ruleFactory.buildByTransformations(mappingProfile.getTransformations()));
+    }
+    return rulesFromConfig;
   }
 
 }

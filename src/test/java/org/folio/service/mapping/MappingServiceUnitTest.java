@@ -6,14 +6,21 @@ import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.mockito.ArgumentMatchers.any;
 
+import com.google.common.io.Resources;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import org.assertj.core.util.Lists;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
@@ -117,7 +124,7 @@ class MappingServiceUnitTest {
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(MappingProfile.class), any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
@@ -152,8 +159,30 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(MappingProfile.class), any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
+    String expectedMarcRecord = getExpectedMarcFromJson(expectedJsonRecords);
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
+  @Test
+  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmptyAndRulesFromModConfig() throws IOException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+      .thenReturn(getDefaultRules());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
@@ -188,6 +217,12 @@ class MappingServiceUnitTest {
     transformations.setTransformation(value);
     transformations.setRecordType(recordType);
     return transformations;
+  }
+
+  private List<Rule> getDefaultRules() throws IOException {
+    URL url = Resources.getResource("rules/rulesDefault.json");
+    String stringRules = Resources.toString(url, StandardCharsets.UTF_8);
+    return Lists.newArrayList(Json.decodeValue(stringRules, Rule[].class));
   }
 
   /**
