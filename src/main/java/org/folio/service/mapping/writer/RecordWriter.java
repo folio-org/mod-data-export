@@ -1,9 +1,11 @@
 package org.folio.service.mapping.writer;
 
+import java.util.List;
 import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.reader.values.CompositeValue;
 import org.folio.service.mapping.reader.values.RuleValue;
 import org.folio.service.mapping.reader.values.SimpleValue;
+import org.marc4j.marc.VariableField;
 
 /**
  * The root interface for writers.
@@ -44,4 +46,6 @@ public interface RecordWriter {
    * @return underlying record in string representation
    */
   String getResult();
+
+  List<VariableField> getFields();
 }

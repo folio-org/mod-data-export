@@ -1,10 +1,10 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import java.util.List;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
-
-import java.util.List;
+import org.marc4j.marc.VariableField;
 
 public interface MappingService {
 
@@ -17,4 +17,7 @@ public interface MappingService {
    * @return marc records
    */
   List<String> map(List<JsonObject> records, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
+
+  List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
+
 }

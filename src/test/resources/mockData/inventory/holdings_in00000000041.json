@@ -1,0 +1,72 @@
+{
+    "holdingsRecords": [
+        {
+            "id": "68872d8a-bf16-420b-829f-206da38f6c10",
+            "hrid": "hold000000000008",
+            "formerIds": [],
+            "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226",
+            "permanentLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+            "electronicAccess": [
+                {
+                  "linkText": "holdingsLinkText1",
+                  "uri": "holdingsUri1"
+                 },
+                 {
+                  "linkText": "holdingsLinkText2",
+                  "uri": "holdingsUri2"
+                 }
+            ],
+            "callNumber": "testHolding1-callnumber",
+            "callNumberPrefix": "TEST",
+            "callNumberSuffix": "2020",
+            "notes": [],
+            "holdingsStatements": [
+                {
+                    "statement": "Line 1b"
+                },
+                {
+                    "statement": "Line 2b"
+                }
+            ],
+            "holdingsStatementsForIndexes": [],
+            "holdingsStatementsForSupplements": [],
+            "statisticalCodeIds": [],
+            "holdingsItems": [],
+            "bareHoldingsItems": [],
+            "metadata": {
+                "createdDate": "2020-06-08T01:27:43.192+0000",
+                "updatedDate": "2020-06-08T01:27:43.192+0000"
+            }
+        },
+        {
+            "id": "c9dd55da-7f48-478b-982c-a527b7cf9ec3",
+            "hrid": "ho00000000004",
+            "formerIds": [],
+            "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226",
+            "permanentLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+            "callNumber": "testHolding2-callnumber",
+            "callNumberPrefix": "TEST",
+            "callNumberSuffix": "2021",
+            "electronicAccess": [],
+            "notes": [],
+            "holdingsStatements": [],
+            "holdingsStatementsForIndexes": [],
+            "holdingsStatementsForSupplements": [],
+            "statisticalCodeIds": [],
+            "holdingsItems": [],
+            "bareHoldingsItems": [],
+            "metadata": {
+                "createdDate": "2020-06-08T16:33:30.699+0000",
+                "createdByUserId": "443c07e9-3fa0-575b-bcca-fcc60f9eb865",
+                "updatedDate": "2020-06-08T16:33:30.699+0000",
+                "updatedByUserId": "443c07e9-3fa0-575b-bcca-fcc60f9eb865"
+            }
+        }
+    ],
+    "totalRecords": 2,
+    "resultInfo": {
+        "totalRecords": 2,
+        "facets": [],
+        "diagnostics": []
+    }
+}

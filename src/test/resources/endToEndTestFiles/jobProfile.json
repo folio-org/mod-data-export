@@ -1,0 +1,7 @@
+{
+  "id": "fb2d3d3b-8acd-41bd-96e6-0a6e90fe1e04",
+  "name": "IT Test job profile",
+  "destination": "fileSystem",
+  "description": "Job profile description",
+  "mappingProfileId": "e40d9f2a-ae89-4c77-ace7-c87265288ed3",
+}

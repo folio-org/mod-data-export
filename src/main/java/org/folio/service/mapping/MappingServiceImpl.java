@@ -1,6 +1,12 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.processor.RuleFactory;
@@ -13,12 +19,9 @@ import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
+import org.marc4j.marc.VariableField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -51,6 +54,15 @@ public class MappingServiceImpl implements MappingService {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+  }
+
+  @Override
+  public List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
+    ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+    EntityReader entityReader = new JPathSyntaxEntityReader(record);
+    RecordWriter recordWriter = new MarcRecordWriter();
+    return this.ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
   }
 
 }

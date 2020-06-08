@@ -51,6 +51,7 @@ public class RuleFactory {
 
   public List<Rule> create(MappingProfile mappingProfile) {
     if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
+      LOGGER.info("No Mapping rules specified, using default mapping rules");
       return getDefaultRules();
     }
     List<Rule> rules = Lists.newArrayList(getDefaultRules());
@@ -79,6 +80,7 @@ public class RuleFactory {
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
         && isNotBlank(mappingTransformation.getTransformation())) {
+        LOGGER.info("Mapping rules specified, appending the specified mapping rules");
         rules.add(buildByTransformation(mappingTransformation));
       }
     }

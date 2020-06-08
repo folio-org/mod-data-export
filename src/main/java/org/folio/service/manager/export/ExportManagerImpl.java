@@ -11,7 +11,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -24,6 +23,7 @@ import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.MappingService;
+import org.folio.service.mapping.convertor.SrsRecordConvertorService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -60,6 +60,8 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private JobExecutionService jobExecutionService;
   @Autowired
+  private SrsRecordConvertorService srsRecordService;
+  @Autowired
   private Vertx vertx;
 
   public ExportManagerImpl() {
@@ -92,7 +94,10 @@ public class ExportManagerImpl implements ExportManager {
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
     LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
-    exportService.exportSrsRecord(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
+
+    List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
+          exportPayload.getJobExecutionId(), params);
+    exportService.exportSrsRecord(marcToExport, fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
@@ -117,25 +122,34 @@ public class ExportManagerImpl implements ExportManager {
     for (JsonObject instance : instances) {
       JsonObject instanceWithHoldingsAndItems = new JsonObject();
       instanceWithHoldingsAndItems.put("instance", instance);
-      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
-      List<Transformations> transformations = mappingProfile.getTransformations();
-      if (isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM))) {
-        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
-        instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
-        if (recordTypes.contains(RecordType.ITEM)) {
-          List<String> holdingIds = holdings.stream()
-            .map(record -> record.getString("id"))
-            .collect(Collectors.toList());
-          List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
-          instanceWithHoldingsAndItems.put("items", new JsonArray(items));
-        }
-      }
+      appendHoldingsAndItems(mappingProfile, params, instance.getString("id"), instanceWithHoldingsAndItems);
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     return instancesWithHoldingsAndItems;
 
   }
 
+  private void appendHoldingsAndItems(MappingProfile mappingProfile, OkapiConnectionParams params, String instanceUUID,
+      JsonObject appendHoldingsItems) {
+    if (isTransformationRequired(mappingProfile)) {
+      List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, params);
+      appendHoldingsItems.put("holdings", new JsonArray(holdings));
+      if (mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
+        List<String> holdingIds = holdings.stream()
+          .map(record -> record.getString("id"))
+          .collect(Collectors.toList());
+        List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
+        appendHoldingsItems.put("items", new JsonArray(items));
+      }
+    }
+  }
+
+  private boolean isTransformationRequired(MappingProfile mappingProfile) {
+    List<Transformations> transformations = mappingProfile.getTransformations();
+    List<RecordType> recordTypes = mappingProfile.getRecordTypes();
+    return isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM));
+
+  }
   /**
    * Loads marc records from SRS by the given instance identifiers
    *

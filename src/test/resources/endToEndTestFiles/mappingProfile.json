@@ -1,0 +1,19 @@
+{
+  "id": "e40d9f2a-ae89-4c77-ace7-c87265288ed3",
+  "name": "IT Mapping profile",
+  "description": "Mapping profile for Testing Int Tests",
+  "recordTypes": [
+    "HOLDINGS",
+    "ITEMS"
+  ],
+  "outputFormat": "MARC",
+  "transformations": [
+    {
+      "fieldId": "callNumber",
+      "path": "$.holdings[*].callNumber",
+      "transformation": "900ff$a",
+      "enabled": true,
+      "recordType": "HOLDING"
+    }
+  ]
+}
