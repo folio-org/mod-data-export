@@ -128,9 +128,9 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_FIXED_LENGTH_DATA_ELEMENTS() {
     private transient DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private transient DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
-    private String datesOfPublicationPattern = "datesOfPublication";
-    private String languagesPattern = "languages";
-    private String fieldPattern = "%s|%s%s||||||||       |||||%s||";
+    private static final String DATES_OF_PUBLICATION = "datesOfPublication";
+    private static final String LANGUAGES = "languages";
+    private static final String FIELD_PATTERN = "%s|%s%s||||||||       |||||%s||";
 
     @Override
     public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
@@ -148,9 +148,9 @@ public enum TranslationsHolder implements TranslationFunction {
 
       String publicationDate0Param = "||||";
       String publicationDate1Param = "||||";
-      if (metadata != null && metadata.getData().containsKey(datesOfPublicationPattern)
-        && metadata.getData().get(datesOfPublicationPattern) != null) {
-        List<String> publicationDates = (List<String>) metadata.getData().get(datesOfPublicationPattern).getData();
+      if (metadata != null && metadata.getData().containsKey(DATES_OF_PUBLICATION)
+        && metadata.getData().get(DATES_OF_PUBLICATION) != null) {
+        List<String> publicationDates = (List<String>) metadata.getData().get(DATES_OF_PUBLICATION).getData();
         if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
           publicationDate0Param = publicationDates.get(0);
         } else if (publicationDates.size() > 1) {
@@ -166,16 +166,16 @@ public enum TranslationsHolder implements TranslationFunction {
       }
 
       String languageParam = "und";
-      if (metadata != null && metadata.getData().containsKey(languagesPattern)
-        && metadata.getData().get(languagesPattern) != null) {
-        List<String> languages = (List<String>) metadata.getData().get(languagesPattern).getData();
+      if (metadata != null && metadata.getData().containsKey(LANGUAGES)
+        && metadata.getData().get(LANGUAGES) != null) {
+        List<String> languages = (List<String>) metadata.getData().get(LANGUAGES).getData();
         if (languages.size() == 1 && isNotEmpty(languages.get(0))) {
           languageParam = languages.get(0);
         } else if (languages.size() > 1) {
           languageParam = "mul";
         }
       }
-      return format(fieldPattern, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
+      return format(FIELD_PATTERN, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
     }
   };
 
