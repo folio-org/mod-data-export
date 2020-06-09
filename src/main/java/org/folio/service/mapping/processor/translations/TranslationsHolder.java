@@ -84,10 +84,10 @@ public enum TranslationsHolder implements TranslationFunction {
   },
   SET_MATERIAL_TYPE() {
     @Override
-    public String apply(String locationId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getMaterialTypes().get(locationId);
+    public String apply(String materialTypeId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getMaterialTypes().get(materialTypeId);
       if (entry == null) {
-        LOGGER.error("Location is not found by the given id: {}", locationId);
+        LOGGER.error("Material type is not found by the given id: {}", materialTypeId);
         return StringUtils.EMPTY;
       } else {
         return entry.getString("name");
