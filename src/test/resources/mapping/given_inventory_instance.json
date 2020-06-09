@@ -37,6 +37,7 @@
           "uri": "itemUri2"
         }
       ],
+      "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
       "effectiveLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d"
     },
     {
@@ -54,7 +55,8 @@
           "linkText": "itemLinkText4",
           "uri": "itemUri4"
         }
-      ]
+      ],
+      "materialTypeId": "5ee11d91-f7e8-481d-b079-65d708582ccc"
     }
   ],
   "instance": {

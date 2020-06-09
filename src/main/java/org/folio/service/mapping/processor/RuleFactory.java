@@ -48,11 +48,14 @@ public class RuleFactory {
   private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
   private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
   private static final String SET_LOCATION_FUNCTION = "set_location";
+  private static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
+  private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.of(
     PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
     TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION
+    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
+    MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION
   );
 
   private List<Rule> defaultRules;

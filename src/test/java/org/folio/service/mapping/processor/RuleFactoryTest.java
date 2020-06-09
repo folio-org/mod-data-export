@@ -46,6 +46,10 @@ class RuleFactoryTest {
   private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
   private static final String EFFECTIVE_LOCATION_PATH = "$.items[*].effectiveLocationId";
   private static final String SET_LOCATION_FUNCTION = "set_location";
+  private static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
+  private static final String MATERIAL_TYPE_PATH = "$.items[*].materialTypeId";
+  private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
+
 
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
@@ -335,6 +339,31 @@ class RuleFactoryTest {
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
     assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
     assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnTransformationRuleWithMaterialTypeTranslation() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(MATERIAL_TYPE_FIELD_ID)
+      .withPath(MATERIAL_TYPE_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(MATERIAL_TYPE_PATH, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
   }
 
   private void setUpDefaultRules() {
