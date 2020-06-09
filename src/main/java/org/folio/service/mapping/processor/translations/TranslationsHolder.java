@@ -151,15 +151,15 @@ public enum TranslationsHolder implements TranslationFunction {
       if (metadata != null && metadata.getData().containsKey(DATES_OF_PUBLICATION)
         && metadata.getData().get(DATES_OF_PUBLICATION) != null) {
         List<String> publicationDates = (List<String>) metadata.getData().get(DATES_OF_PUBLICATION).getData();
-        if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
+        if (publicationDates.size() == 1 && isNotEmpty(publicationDates.get(0)) && publicationDates.get(0).length() == 4) {
           publicationDate0Param = publicationDates.get(0);
         } else if (publicationDates.size() > 1) {
           String publicationDate0 = publicationDates.get(0);
-          if (publicationDate0.length() == 4) {
+          if (isNotEmpty(publicationDate0) && publicationDate0.length() == 4) {
             publicationDate0Param = publicationDate0;
           }
           String publicationDate1 = publicationDates.get(1);
-          if (publicationDate1.length() == 4) {
+          if (isNotEmpty(publicationDate1) && publicationDate1.length() == 4) {
             publicationDate1Param = publicationDate1;
           }
         }
