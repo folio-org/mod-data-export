@@ -4,7 +4,7 @@
   "description": "Mapping profile for Testing Int Tests",
   "recordTypes": [
     "HOLDINGS",
-    "ITEMS"
+    "ITEM"
   ],
   "outputFormat": "MARC",
   "transformations": [
@@ -13,7 +13,7 @@
       "path": "$.holdings[*].callNumber",
       "transformation": "900ff$a",
       "enabled": true,
-      "recordType": "HOLDING"
+      "recordType": "HOLDINGS"
     }
   ]
 }

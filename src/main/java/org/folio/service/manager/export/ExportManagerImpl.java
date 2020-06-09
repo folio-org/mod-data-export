@@ -93,7 +93,7 @@ public class ExportManagerImpl implements ExportManager {
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
+    LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
     List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
           exportPayload.getJobExecutionId(), params);

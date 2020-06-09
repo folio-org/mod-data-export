@@ -8,8 +8,10 @@ import static org.mockito.ArgumentMatchers.any;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
+import org.folio.TestUtil;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
@@ -20,11 +22,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.marc4j.MarcJsonReader;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamWriter;
-import org.marc4j.MarcWriter;
-import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -124,7 +121,7 @@ class MappingServiceUnitTest {
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
-    String expectedMarcRecord = getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
 
   }
@@ -146,7 +143,7 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
-    String expectedMarcRecord = getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -188,26 +185,6 @@ class MappingServiceUnitTest {
     transformations.setTransformation(value);
     transformations.setRecordType(recordType);
     return transformations;
-  }
-
-  /**
-   * This method fetches the expected value from Json file and converts it into MARC
-   *
-   * @return expected Json converted to marc format
-   * @throws FileNotFoundException
-   */
-  private String getExpectedMarcFromJson(File expectedFile) throws FileNotFoundException {
-    InputStream inputStream = new FileInputStream(expectedFile);
-    MarcReader marcReader = new MarcJsonReader(inputStream);
-    OutputStream outputStream = new ByteArrayOutputStream();
-    MarcWriter writer = new MarcStreamWriter(outputStream);
-    while (marcReader.hasNext()) {
-      Record record = marcReader.next();
-      writer.write(record);
-    }
-
-    writer.close();
-    return outputStream.toString();
   }
 
 }

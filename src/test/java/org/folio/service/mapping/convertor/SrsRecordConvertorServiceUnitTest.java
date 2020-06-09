@@ -6,12 +6,11 @@ import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.*;
 import java.util.*;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -25,11 +24,6 @@ import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.marc4j.MarcJsonReader;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamWriter;
-import org.marc4j.MarcWriter;
-import org.marc4j.marc.Record;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -121,7 +115,7 @@ class SrsRecordConvertorServiceUnitTest {
     .thenReturn(referenceData);
 
     JsonArray holdingRecords =
-        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00000000041.json"))
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
           .getJsonArray("holdingsRecords");
     List<JsonObject> result = new ArrayList<>();
     for (Object holding : holdingRecords) {
@@ -153,7 +147,7 @@ class SrsRecordConvertorServiceUnitTest {
     .thenReturn(referenceData);
 
     JsonArray holdingRecords =
-        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00000000041.json"))
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
           .getJsonArray("holdingsRecords");
     List<JsonObject> result = new ArrayList<>();
     for (Object holding : holdingRecords) {
@@ -189,7 +183,7 @@ class SrsRecordConvertorServiceUnitTest {
     .thenReturn(referenceData);
 
     JsonArray holdingRecords =
-        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00000000041.json"))
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
           .getJsonArray("holdingsRecords");
     List<JsonObject> result = new ArrayList<>();
     for (Object holding : holdingRecords) {

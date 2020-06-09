@@ -1,7 +1,6 @@
 package org.folio.service.file.cleanup;
 
 import static java.util.Objects.nonNull;
-import static org.drools.core.util.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -219,7 +219,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   @Test
   void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
-    fileDefinition1.withSourcePath(EMPTY)
+    fileDefinition1.withSourcePath(StringUtils.EMPTY)
       .getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
 
@@ -243,7 +243,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   @Test
   void shouldNotRemoveFileDefinition_whenSourcePathEmpty_andFileDefinitionWasUpdatedEarlierThanHourAgo(VertxTestContext context) {
     // given
-    fileDefinition1.withSourcePath(EMPTY)
+    fileDefinition1.withSourcePath(StringUtils.EMPTY)
       .getMetadata()
       .withUpdatedDate(new Date(new Date().getTime() - FIFTY_NINE_MINUTES_IN_MILLIS));
 
