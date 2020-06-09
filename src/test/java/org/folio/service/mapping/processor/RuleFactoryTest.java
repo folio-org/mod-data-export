@@ -3,6 +3,7 @@ package org.folio.service.mapping.processor;
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.util.Lists;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
@@ -42,6 +43,8 @@ class RuleFactoryTest {
   private static final String PERMANENT_LOCATION_PATH = "$.holdings[*].permanentLocationId";
   private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
   private static final String TEMPORARY_LOCATION_PATH = "$.holdings[*].temporaryLocationId";
+  private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
+  private static final String EFFECTIVE_LOCATION_PATH = "$.items[*].effectiveLocationId";
   private static final String SET_LOCATION_FUNCTION = "set_location";
 
   @Spy
@@ -232,7 +235,8 @@ class RuleFactoryTest {
       .withEnabled(true)
       .withFieldId(PERMANENT_LOCATION_FIELD_ID)
       .withPath(PERMANENT_LOCATION_PATH)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(permanentLocationTransformations));
@@ -251,13 +255,46 @@ class RuleFactoryTest {
   }
 
   @Test
+  void shouldNotReturnTransformationRuleWithPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation() {
+    // given
+    Transformations permanentLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(TEMPORARY_LOCATION_FIELD_ID)
+      .withPath(TEMPORARY_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(permanentLocationTransformations, temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
   void shouldReturnTransformationRuleWithTemporaryLocationTranslation() {
     // given
     Transformations temporaryLocationTransformations = new Transformations()
       .withEnabled(true)
       .withFieldId(TEMPORARY_LOCATION_FIELD_ID)
       .withPath(TEMPORARY_LOCATION_PATH)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
@@ -272,6 +309,31 @@ class RuleFactoryTest {
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
     assertEquals(TEMPORARY_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnTransformationRuleWithEffectiveLocationTranslation() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(EFFECTIVE_LOCATION_FIELD_ID)
+      .withPath(EFFECTIVE_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
+    assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
     assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
   }
 

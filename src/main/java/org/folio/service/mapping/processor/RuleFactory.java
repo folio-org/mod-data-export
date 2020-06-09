@@ -6,6 +6,7 @@ import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,7 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -41,10 +44,15 @@ public class RuleFactory {
   private static final String INDICATOR_NAME_1 = "1";
   private static final String INDICATOR_NAME_2 = "2";
   private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
+  private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
+  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
+  private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
+  private static final String SET_LOCATION_FUNCTION = "set_location";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.of(
-    "permanentLocationId", "set_location",
-    "temporaryLocationId", "set_location"
+    PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
+    TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
+    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION
   );
 
   private List<Rule> defaultRules;
@@ -76,14 +84,32 @@ public class RuleFactory {
 
   private List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
     List<Rule> rules = new ArrayList<>();
+    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
-        && isNotBlank(mappingTransformation.getTransformation())) {
-        rules.add(buildByTransformation(mappingTransformation));
+        && isNotBlank(mappingTransformation.getTransformation())
+        && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
+          rules.add(buildByTransformation(mappingTransformation));
       }
     }
     return rules;
   }
+
+  private String getTemporaryLocationTransformation(List<Transformations> mappingTransformations) {
+    Optional<Transformations> temporaryLocationTransformation = mappingTransformations.stream()
+      .filter(transformations -> HOLDINGS.equals(transformations.getRecordType()))
+      .filter(transformations -> TEMPORARY_LOCATION_FIELD_ID.equals(transformations.getFieldId()))
+      .findFirst();
+    if (temporaryLocationTransformation.isPresent()) {
+      return temporaryLocationTransformation.get().getTransformation();
+    }
+    return StringUtils.EMPTY;
+  }
+
+  private boolean isHoldingsPermanentLocation(Transformations mappingTransformation) {
+    return HOLDINGS.equals(mappingTransformation.getRecordType()) && PERMANENT_LOCATION_FIELD_ID.equals(mappingTransformation.getFieldId());
+  }
+
 
   private Rule buildByTransformation(Transformations mappingTransformation) {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
@@ -97,7 +123,7 @@ public class RuleFactory {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
-    if(translationFunctions.containsKey(mappingTransformation.getFieldId())) {
+    if (translationFunctions.containsKey(mappingTransformation.getFieldId())) {
       Translation translation = new Translation();
       translation.setFunction(translationFunctions.get(mappingTransformation.getFieldId()));
       fromDataSource.setTranslation(translation);
