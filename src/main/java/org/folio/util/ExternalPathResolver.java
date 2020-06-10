@@ -20,6 +20,7 @@ public class ExternalPathResolver {
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
+  public static final String CONFIGURATIONS = "configurations";
 
 
   private static final Map<String, String> EXTERNAL_APIS;
@@ -39,6 +40,7 @@ public class ExternalPathResolver {
     apis.put(LOCATIONS, "/locations");
     apis.put(MATERIAL_TYPES, "/material-types");
     apis.put(USERS, "/users");
+    apis.put(CONFIGURATIONS, "/configurations/entries");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);
     EXTERNAL_APIS_WITH_PREFIX = Collections.unmodifiableMap(apis.entrySet()

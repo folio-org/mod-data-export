@@ -1,14 +1,10 @@
 package org.folio.clients;
 
-import static org.folio.util.ExternalPathResolver.SRS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
-
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.TestUtil;
-import org.folio.rest.HttpServerTestBase;
+import org.apache.commons.collections4.map.HashedMap;
+import org.folio.rest.RestVerticleTestBase;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,27 +12,22 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+
 @RunWith(VertxUnitRunner.class)
-class SourceRecordStorageUnitTest extends HttpServerTestBase {
-  protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
+class SourceRecordStorageUnitTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
+  private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
-  public static void beforeClass() throws Exception {
-    setUpHttpServer();
-    setUpMocks();
-  }
-
-  private static void setUpMocks() {
-    String json = TestUtil.readFileContentFromResources(SRS_RESPONSE_JSON);
-    JsonObject data = new JsonObject(json);
-    router.route(resourcesPath(SRS)).method(HttpMethod.GET).handler(routingContext -> {
-      HttpServerResponse response = routingContext.response();
-      response.putHeader("content-type", "application/json");
-      response.end(data.toBuffer());
-    });
+  public static void beforeClass() {
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
+    okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
   @Test

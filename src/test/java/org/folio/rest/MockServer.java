@@ -1,6 +1,7 @@
 package org.folio.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -16,6 +17,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.google.common.io.Resources;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
@@ -28,6 +30,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -49,6 +53,7 @@ public class MockServer {
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
   private static final String CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_contributor_name_types_response.json";
   private static final String LOCATIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_locations_response.json";
+  private static final String CONFIGURATIONS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "configurations/get_configuration_response.json";
   private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
@@ -108,10 +113,10 @@ public class MockServer {
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
+    router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
 
     return router;
   }
-
 
   private void handleGetItemRecord(RoutingContext ctx) {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
@@ -177,7 +182,6 @@ public class MockServer {
         .end();
     }
   }
-
 
   private void handleGetContentTermsRecord(RoutingContext ctx) {
     logger.info("handleGet Nature of content terms Record got: " + ctx.request()
@@ -254,7 +258,6 @@ public class MockServer {
   }
 }
 
-
   private void handleGetUsersRecord(RoutingContext ctx) {
     logger.info("handleGetUsersRecord got: " + ctx.request()
       .path());
@@ -269,6 +272,26 @@ public class MockServer {
     }
   }
 
+  private void handleGetConfigurations(RoutingContext ctx) {
+    logger.info("handleGetRulesFromModConfigurations got: " + ctx.request()
+      .path());
+    try {
+      JsonObject rulesFromConfig = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
+      URL url = Resources.getResource("rules/rulesDefault.json");
+      String rules = Resources.toString(url, StandardCharsets.UTF_8);
+      rulesFromConfig.getJsonArray("configs")
+        .stream()
+        .map(object -> (JsonObject) object)
+        .forEach(obj -> obj.put("value", rules));
+
+      addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, rulesFromConfig);
+      serverResponse(ctx, 200, APPLICATION_JSON, rulesFromConfig.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
 
   private void serverResponse(RoutingContext ctx, int statusCode, String contentType, String body) {
     ctx.response()

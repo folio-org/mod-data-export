@@ -8,10 +8,14 @@ import org.folio.rest.tools.client.Response;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.util.OkapiConnectionParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.function.Function;
 
 public final class ClientUtilAsync {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private ClientUtilAsync() {
   }
@@ -19,10 +23,12 @@ public final class ClientUtilAsync {
   public static Future<JsonObject> getRequest(String endpoint, OkapiConnectionParams params) {
     Promise<JsonObject> promise = Promise.promise();
     final HttpClientInterface httpClient = getHttpClient(params);
+    LOGGER.info("Calling GET {}", endpoint);
     try {
       httpClient.request(endpoint, params.getHeaders())
         .whenComplete(((response, throwable) -> processResponse(promise, response, throwable, Response::getBody)));
     } catch (Exception e) {
+      LOGGER.error("Exception while calling {}", endpoint, e);
       promise.fail(e);
     }
     return promise.future();

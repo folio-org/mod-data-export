@@ -85,7 +85,7 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-  private List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
+  public List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
     List<Rule> rules = new ArrayList<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
