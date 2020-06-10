@@ -14,9 +14,12 @@ import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +28,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
 public class MappingServiceImpl implements MappingService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
   @Autowired
@@ -46,13 +50,13 @@ public class MappingServiceImpl implements MappingService {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, connectionParams);
     for (JsonObject instance : instances) {
-      String record = runDefaultMapping(instance, referenceData, rules);
+      String record = runMappingProcess(instance, referenceData, rules);
       records.add(record);
     }
     return records;
   }
 
-  private String runDefaultMapping(JsonObject instance, ReferenceData referenceData, List<Rule> rules)                                                                                          {
+  private String runMappingProcess(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
@@ -65,6 +69,7 @@ public class MappingServiceImpl implements MappingService {
 
   private List<Rule> appendRulesFromProfile(List<Rule> rulesFromConfig, MappingProfile mappingProfile) {
     if (mappingProfile != null && isNotEmpty(mappingProfile.getTransformations())) {
+      LOGGER.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
       rulesFromConfig.addAll(ruleFactory.buildByTransformations(mappingProfile.getTransformations()));
     }
     return rulesFromConfig;

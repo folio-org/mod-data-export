@@ -3,8 +3,8 @@
     {
       "id":"0ee722ff-3dd3-44a2-ae93-8d75297db753",
       "module":"EXPORT",
-      "configName":"specific_rules",
-      "code":"DATA_EXPORT",
+      "configName":"mapping_rules",
+      "code":"RULES_OVERRIDE",
       "enabled":true,
       "value":""
     }

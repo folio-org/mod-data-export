@@ -1,6 +1,7 @@
 package org.folio.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -275,17 +276,16 @@ public class MockServer {
     logger.info("handleGetRulesFromModConfigurations got: " + ctx.request()
       .path());
     try {
-      JsonObject configs = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
+      JsonObject rulesFromConfig = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
       URL url = Resources.getResource("rules/rulesDefault.json");
       String rules = Resources.toString(url, StandardCharsets.UTF_8);
-      JsonObject jsonrules = new JsonObject().put("value", rules);
-      configs.getJsonArray("configs")
+      rulesFromConfig.getJsonArray("configs")
         .stream()
         .map(object -> (JsonObject) object)
         .forEach(obj -> obj.put("value", rules));
 
-      addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, configs);
-      serverResponse(ctx, 200, APPLICATION_JSON, configs.encodePrettily());
+      addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, rulesFromConfig);
+      serverResponse(ctx, 200, APPLICATION_JSON, rulesFromConfig.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

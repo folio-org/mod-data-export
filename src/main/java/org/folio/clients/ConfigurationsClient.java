@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.util.OkapiConnectionParams;
+import org.folio.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
@@ -24,17 +26,18 @@ import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 @Component
 public class ConfigurationsClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String QUERY_EXPORT_PATTERN = "?query=code=DATA_EXPORT";
+  private static final String QUERY = "?query=";
+  private static final String QUERY_VALUE = "code=RULES_OVERRIDE AND enabled==true";
 
   /**
    * Fetch rules for the mapping process from mod-configuration. If there are no rules provided in mod-configuration
-   * or the rules are failed to decode, an empty list will return, and default rules will be used
+   * or the rules are failed to decode or they are not enabled, an empty list will return, and default rules will be used
    *
    * @param params okapi headers and connection parameters
    * @return list of {@link Rule}
    */
   public List<Rule> getRulesFromConfiguration(OkapiConnectionParams params) {
-    String endpoint = ClientUtil.buildQueryEndpoint(resourcesPathWithPrefix(CONFIGURATIONS) + QUERY_EXPORT_PATTERN, params.getOkapiUrl());
+    String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(QUERY_VALUE);
     Optional<JsonObject> rulesFromConfig = ClientUtil.getRequest(params, endpoint);
     return rulesFromConfig.map(entries -> constructRulesFromJson(entries, params.getTenantId())).orElse(emptyList());
   }
@@ -62,7 +65,7 @@ public class ConfigurationsClient {
         .stream()
         .map(object -> (JsonObject) object)
         .forEach(element ->
-          rulesFromConfig.add(Json.decodeValue(String.format(element.toString(), StandardCharsets.UTF_8), Rule.class)));
+          rulesFromConfig.add(Json.decodeValue(format(element.toString(), StandardCharsets.UTF_8), Rule.class)));
 
       return rulesFromConfig;
     } catch (DecodeException e) {

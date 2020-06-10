@@ -97,11 +97,11 @@ at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker/).
 ### Configure your own mapping rules
 
 To configure your own rules, you need to add it to the [mod-configuration module](https://github.com/folio-org/mod-configuration).
-"Code" value to use in the request - "DATA_EXPORT".
+"Code" value to use in the request - "RULES_OVERRIDE".
 "Value" field represents the rules, create your rules in the proper format(the example of default data-export rules - https://github.com/folio-org/mod-data-export/blob/master/src/main/resources/rules/rulesDefault.json).
 Convert the rules to the String format (you can use online [converter](https://tools.knowledgewalls.com/jsontostring)). Put the result string to the "value" field in the request body. 
 The description of how to create a configuration in mod-configuration module - https://github.com/folio-org/mod-configuration/blob/master/README.md.
-`If there are rules in mod-configuration, they always will be used for the mapping process for a given tenant.`
+`If there are rules in mod-configuration, and they are enabled, they always will be used for the mapping process for a given tenant.`
 
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
