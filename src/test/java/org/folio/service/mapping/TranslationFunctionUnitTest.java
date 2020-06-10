@@ -33,6 +33,7 @@ class TranslationFunctionUnitTest {
     referenceData.addIdentifierTypes(getIdentifierTypes());
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
+    referenceData.addMaterialTypes(getMaterialTypes());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -63,6 +64,14 @@ class TranslationFunctionUnitTest {
     JsonObject identifierType =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_locations_response.json"))
         .getJsonArray("locations")
+        .getJsonObject(0);
+    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getMaterialTypes() {
+    JsonObject identifierType =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
+        .getJsonArray("mtypes")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
   }
@@ -138,6 +147,28 @@ class TranslationFunctionUnitTest {
     Assert.assertEquals(StringUtils.EMPTY, result);
   }
 
+
+  @Test
+  void SetMaterialType_shouldReturnMaterialTypeValue() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_material_type");
+    String value = "1a54b431-2e4f-452d-9cae-9cee66c9a892";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals("book", result);
+  }
+
+  @Test
+  void SetMaterialType_shouldReturnEmptyString() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_material_type");
+    String value = "non-existing-id";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
+  }
 
   @Test
   void SetTransactionDatetime_shouldReturnFormattedDate() {

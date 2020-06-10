@@ -485,6 +485,39 @@
       }
     },
     {
+      "910": {
+        "subfields": [
+          {
+            "a": "book"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "dvd"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "911": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "999": {
         "subfields": [
           {
