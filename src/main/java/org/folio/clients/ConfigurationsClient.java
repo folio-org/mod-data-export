@@ -27,7 +27,7 @@ import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 public class ConfigurationsClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String QUERY = "?query=";
-  private static final String QUERY_VALUE = "code=RULES_OVERRIDE AND enabled==true";
+  private static final String QUERY_VALUE = "code=\"RULES_OVERRIDE\" AND enabled==true";
 
   /**
    * Fetch rules for the mapping process from mod-configuration. If there are no rules provided in mod-configuration
