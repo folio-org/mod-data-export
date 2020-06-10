@@ -329,6 +329,78 @@ class TranslationFunctionUnitTest {
   }
 
   @Test
+  void SetFixedLengthDataElements_datesOfPublication_isNull_noLanguages_specified() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    Metadata metadata = new Metadata();
+    metadata.addData("datesOfPublication",  null);
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||und||", result);
+  }
+
+  @Test
+  void SetFixedLengthDataElements_datesOfPublication_isNull_languagesIsNull() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    Metadata metadata = new Metadata();
+    metadata.addData("datesOfPublication",  null);
+    metadata.addData("languages", null);
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||und||", result);
+  }
+
+  @Test
+  void SetFixedLengthDataElements_datesOfPublication_isNull_languagesIsEmpty() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    Metadata metadata = new Metadata();
+    metadata.addData("datesOfPublication",  null);
+    metadata.addData("languages", new Metadata.Entry("$.languages", singletonList(StringUtils.EMPTY)));
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||||||||||||||       |||||und||", result);
+  }
+
+  @Test
+  void SetFixedLengthDataElements_datesOfPublicationFirstParam_isNull_noLanguages_specified() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    Metadata metadata = new Metadata();
+    metadata.addData("datesOfPublication",  new Metadata.Entry("$.publication[*].dateOfPublication", asList(null, "2016")));
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|||||2016||||||||       |||||und||", result);
+  }
+
+  @Test
+  void SetFixedLengthDataElements_datesOfPublicationSecondParam_isNull_noLanguages_specified() {
+    // given
+    String createdDate = "2019-08-07T03:12:01.011+0000";
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    Metadata metadata = new Metadata();
+    metadata.addData("datesOfPublication",  new Metadata.Entry("$.publication[*].dateOfPublication", asList( "2016", null)));
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(40, result.length());
+    Assert.assertEquals("190807|2016||||||||||||       |||||und||", result);
+  }
+
+  @Test
   void SetFixedLengthDataElements_metadataIsNull() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
@@ -341,14 +413,25 @@ class TranslationFunctionUnitTest {
   }
 
   @Test
-  void SetFixedLengthDataElements_shouldThrowException() {
+  void SetFixedLengthDataElements_metadataIsNull_createdDateIsNull() {
+    // given
+    String createdDate = null;
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
+    // when
+    String result = translationFunction.apply(createdDate, 0, null, null, null);
+    // then
+    Assert.assertEquals(40, result.length());
+  }
+
+  @Test
+  void SetFixedLengthDataElements_metadataIsNull_createdDateIsIncorrect() {
     // given
     String createdDate = "date in wrong format";
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_fixed_length_data_elements");
     // when
-    assertThrows(DateTimeParseException.class, () ->
-      translationFunction.apply(createdDate, 0, null, null, null)
-    );
+    String result = translationFunction.apply(createdDate, 0, null, null, null);
+    // then
+    Assert.assertEquals(40, result.length());
   }
 
 }
