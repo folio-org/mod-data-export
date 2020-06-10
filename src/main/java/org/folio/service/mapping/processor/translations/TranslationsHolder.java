@@ -11,10 +11,12 @@ import java.lang.invoke.MethodHandles;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public enum TranslationsHolder implements TranslationFunction {
 
@@ -82,6 +84,18 @@ public enum TranslationsHolder implements TranslationFunction {
       }
     }
   },
+  SET_MATERIAL_TYPE() {
+    @Override
+    public String apply(String materialTypeId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getMaterialTypes().get(materialTypeId);
+      if (entry == null) {
+        LOGGER.error("Material type is not found by the given id: {}", materialTypeId);
+        return StringUtils.EMPTY;
+      } else {
+        return entry.getString("name");
+      }
+    }
+  },
 
   /**
    * Sixteen characters that indicate the date and time of the latest record transaction
@@ -126,40 +140,54 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_FIXED_LENGTH_DATA_ELEMENTS() {
     private transient DateTimeFormatter originCreatedDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private transient DateTimeFormatter targetCreatedDateFormatter = DateTimeFormatter.ofPattern("yyMMdd");
-    private String fieldPattern = "%s|%s%s||||||||       |||||%s||";
+    private static final String DATES_OF_PUBLICATION = "datesOfPublication";
+    private static final String LANGUAGES = "languages";
+    private static final String FIELD_PATTERN = "%s|%s%s||||||||       |||||%s||";
 
     @Override
     public String apply(String originCreatedDate, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      String createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+      String createdDateParam;
+      if (isNotEmpty(originCreatedDate)) {
+        try {
+          createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.parse(originCreatedDate, originCreatedDateFormatter));
+        } catch (DateTimeParseException e) {
+          LOGGER.error("Failed to parse createdDate field, the current time value will be used");
+          createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.now());
+        }
+      } else {
+        createdDateParam = targetCreatedDateFormatter.format(ZonedDateTime.now());
+      }
 
       String publicationDate0Param = "||||";
       String publicationDate1Param = "||||";
-      if (metadata != null && metadata.getData().containsKey("datesOfPublication")) {
-        List<String> publicationDates = (List<String>) metadata.getData().get("datesOfPublication").getData();
-        if (publicationDates.size() == 1 && publicationDates.get(0).length() == 4) {
+      if (metadata != null && metadata.getData().containsKey(DATES_OF_PUBLICATION)
+        && metadata.getData().get(DATES_OF_PUBLICATION) != null) {
+        List<String> publicationDates = (List<String>) metadata.getData().get(DATES_OF_PUBLICATION).getData();
+        if (publicationDates.size() == 1 && isNotEmpty(publicationDates.get(0)) && publicationDates.get(0).length() == 4) {
           publicationDate0Param = publicationDates.get(0);
         } else if (publicationDates.size() > 1) {
           String publicationDate0 = publicationDates.get(0);
-          if (publicationDate0.length() == 4) {
+          if (isNotEmpty(publicationDate0) && publicationDate0.length() == 4) {
             publicationDate0Param = publicationDate0;
           }
           String publicationDate1 = publicationDates.get(1);
-          if (publicationDate1.length() == 4) {
+          if (isNotEmpty(publicationDate1) && publicationDate1.length() == 4) {
             publicationDate1Param = publicationDate1;
           }
         }
       }
 
       String languageParam = "und";
-      if (metadata != null && metadata.getData().containsKey("languages")) {
-        List<String> languages = (List<String>) metadata.getData().get("languages").getData();
-        if (languages.size() == 1) {
+      if (metadata != null && metadata.getData().containsKey(LANGUAGES)
+        && metadata.getData().get(LANGUAGES) != null) {
+        List<String> languages = (List<String>) metadata.getData().get(LANGUAGES).getData();
+        if (languages.size() == 1 && isNotEmpty(languages.get(0))) {
           languageParam = languages.get(0);
         } else if (languages.size() > 1) {
           languageParam = "mul";
         }
       }
-      return format(fieldPattern, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
+      return format(FIELD_PATTERN, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
     }
   };
 

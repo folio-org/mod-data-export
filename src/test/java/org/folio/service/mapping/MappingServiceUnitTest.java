@@ -55,6 +55,7 @@ class MappingServiceUnitTest {
     referenceData.addIdentifierTypes(getIdentifierTypes());
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
+    referenceData.addMaterialTypes(getMaterialTypes());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -97,6 +98,18 @@ class MappingServiceUnitTest {
     JsonArray identifierTypesArray =
       new JsonObject(readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
         .getJsonArray("contributorNameTypes");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
+  private Map<String, JsonObject> getMaterialTypes() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
+        .getJsonArray("mtypes");
     Map<String, JsonObject> map = new HashMap<>();
     for (Object object : identifierTypesArray) {
       JsonObject jsonObject = JsonObject.mapFrom(object);
@@ -206,6 +219,8 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));
+    transformations.add(createTransformations("materialTypeId", "$.items[*].materialTypeId", "910  $a", ITEM));
+    transformations.add(createTransformations("effectiveLocationId", "$.items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 

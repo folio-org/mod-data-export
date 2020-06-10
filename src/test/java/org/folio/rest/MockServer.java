@@ -1,5 +1,19 @@
 package org.folio.rest;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
+import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
+import static org.folio.util.ExternalPathResolver.SRS;
+import static org.folio.util.ExternalPathResolver.USERS;
+import static org.folio.util.ExternalPathResolver.HOLDING;
+import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
+import static org.junit.Assert.fail;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.io.Resources;
@@ -14,7 +28,6 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -24,20 +37,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.util.ExternalPathResolver.HOLDING;
-import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.LOCATIONS;
-import static org.folio.util.ExternalPathResolver.SRS;
-import static org.folio.util.ExternalPathResolver.USERS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
-import static org.junit.Assert.fail;
 
 public class MockServer {
   private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
@@ -54,6 +53,7 @@ public class MockServer {
   private static final String CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_contributor_name_types_response.json";
   private static final String LOCATIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_locations_response.json";
   private static final String CONFIGURATIONS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "configurations/get_configuration_response.json";
+  private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -108,6 +108,7 @@ public class MockServer {
     router.get(resourcesPath(IDENTIFIER_TYPES)).handler(ctx -> handleGetIdentifierTypesRecord(ctx));
     router.get(resourcesPath(LOCATIONS)).handler(ctx -> handleGetLocationsRecord(ctx));
     router.get(resourcesPath(CONTRIBUTOR_NAME_TYPES)).handler(ctx -> handleGetContributorNameTypesRecord(ctx));
+    router.get(resourcesPath(MATERIAL_TYPES)).handler(ctx -> handleGetMaterialTypesRecord(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
@@ -218,6 +219,21 @@ public class MockServer {
       JsonObject locations = new JsonObject(RestVerticleTestBase.getMockData(LOCATIONS_RECORDS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, LOCATIONS, locations);
       serverResponse(ctx, 200, APPLICATION_JSON, locations.encodePrettily());
+    } catch (IOException e) {
+      System.err.println(e);
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetMaterialTypesRecord(RoutingContext ctx) {
+    logger.info("handleGet Material types Record: " + ctx.request()
+      .path());
+    try {
+      JsonObject materialTypes = new JsonObject(RestVerticleTestBase.getMockData(MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, MATERIAL_TYPES, materialTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, materialTypes.encodePrettily());
     } catch (IOException e) {
       System.err.println(e);
       ctx.response()
