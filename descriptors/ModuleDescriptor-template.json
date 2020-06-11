@@ -37,6 +37,14 @@
     {
       "id": "locations",
       "version": "3.0"
+    },
+    {
+      "id": "material-types",
+      "version": "2.2"
+    },
+    {
+      "id": "configuration",
+      "version": "2.0"
     }
   ],
   "provides": [
@@ -61,7 +69,9 @@
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
-            "inventory-storage.locations.collection.get"
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.material-types.collection.get",
+            "configuration.entries.collection.get"
           ]
         },
         {

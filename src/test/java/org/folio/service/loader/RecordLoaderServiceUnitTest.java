@@ -1,5 +1,27 @@
 package org.folio.service.loader;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import org.folio.clients.InventoryClient;
+import org.folio.clients.SourceRecordStorageClient;
+import org.folio.rest.RestVerticleTestBase;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,27 +32,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import java.util.*;
-import org.folio.clients.InventoryClient;
-import org.folio.clients.SourceRecordStorageClient;
-import org.folio.rest.HttpServerTestBase;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class RecordLoaderServiceUnitTest extends HttpServerTestBase {
+class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
@@ -49,8 +54,7 @@ class RecordLoaderServiceUnitTest extends HttpServerTestBase {
   static JsonObject dataFromInventory;
   static JsonObject dataFromInventoryHoldings;
 
-  @BeforeAll
-  public static void setUp() {
+  RecordLoaderServiceUnitTest() {
     String json = readFileContentFromResources(SRS_RESPONSE_JSON);
     dataFromSRS = new JsonObject(json);
     String instancesJson = readFileContentFromResources(INVENTORY_RESPONSE_JSON);

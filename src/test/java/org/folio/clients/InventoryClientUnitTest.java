@@ -22,7 +22,7 @@ class InventoryClientUnitTest extends RestVerticleTestBase {
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
-  public static void beforeClass() throws Exception {
+  static void beforeClass() {
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
     headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
@@ -62,6 +62,17 @@ class InventoryClientUnitTest extends RestVerticleTestBase {
     // then
     Assert.assertFalse(locations.isEmpty());
     Assert.assertEquals(2, locations.size());
+  }
+
+  @Test
+  void shouldRetrieveMaterialTypes() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> materialTypes = inventoryClient.getMaterialTypes(okapiConnectionParams);
+    // then
+    Assert.assertFalse(materialTypes.isEmpty());
+    Assert.assertEquals(2, materialTypes.size());
   }
 
   @Test
