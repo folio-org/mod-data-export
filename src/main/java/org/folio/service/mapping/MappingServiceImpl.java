@@ -1,5 +1,7 @@
 package org.folio.service.mapping;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.processor.RuleFactory;
 import org.folio.service.mapping.processor.RuleProcessor;
@@ -20,16 +23,8 @@ import org.folio.service.mapping.writer.RecordWriter;
 import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
 import org.marc4j.marc.VariableField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -67,10 +62,14 @@ public class MappingServiceImpl implements MappingService {
     return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
   }
 
+  /**
+   * This method specifically returns additional records mapped to variable Field format that can be
+   * later appended to SRS records.
+   */
   @Override
   public List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
-    List<Rule> rules = ruleFactory.create(mappingProfile);
+    List<Rule> rules = getRules(mappingProfile, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);

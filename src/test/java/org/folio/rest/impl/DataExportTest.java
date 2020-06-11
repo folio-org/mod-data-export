@@ -143,7 +143,7 @@ class DataExportTest extends RestVerticleTestBase {
           FileDefinition fileExportDefinition = optionalFileDefinition.get();
           assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_1, TOTAL_NUMBER_1);
           assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "expected_marc_MappingTransformations.json");
-          validateExternalCalls();
+          validateExternalCallsForMappingProfileTransformations();
           context.completeNow();
         });
       });
@@ -235,6 +235,16 @@ class DataExportTest extends RestVerticleTestBase {
   private void validateExternalCallsForInventory() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+    validateExternalCallsForReferenceData();
+  }
+
+  private void validateExternalCallsForMappingProfileTransformations() {
+    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.SRS).size());
+    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
+    validateExternalCallsForReferenceData();
+  }
+
+  private void validateExternalCallsForReferenceData(){
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTRIBUTOR_NAME_TYPES).size());

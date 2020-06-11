@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.*;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
@@ -43,6 +44,8 @@ class SrsRecordConvertorServiceUnitTest {
   private RecordLoaderService recordLoaderService;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private ConfigurationsClient configurationsClient;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceData();
@@ -121,8 +124,7 @@ class SrsRecordConvertorServiceUnitTest {
     for (Object holding : holdingRecords) {
       result.add(JsonObject.mapFrom(holding));
     }
-    Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", params))
-    .thenReturn(result);
+
     //when
     List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));

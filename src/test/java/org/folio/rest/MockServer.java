@@ -33,11 +33,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 public class MockServer {
   private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
@@ -181,17 +184,25 @@ public class MockServer {
     logger.info("handleGetSRSRecord got: " + ctx.request()
       .path());
     String query = ctx.request()
-      .query();
+      .getParam("query");
     try {
       JsonObject srsRecords;
-      if (query.contains("7fbd5d84-62d1-44c6-9c45-6cb173998bbd")) {
-        srsRecords = buildEmptyCollection("records");
-        } else if (query.contains("b84653c8-1baf-488b-8616-0f4dbaf8119e")) {
-          JsonArray ar = new JsonArray(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
-          srsRecords = ar.getJsonObject(0);
-      } else {
-        srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      //fetch the ids from the query and remove them from the mock if not in the request
+      List<String> instanceIds = Arrays.stream(query.split("or"))
+        .map(st -> st.split("==")[1].trim().replace(")", ""))
+        .collect(Collectors.toList());
+
+      final Iterator iterator = srsRecords.getJsonArray("records")
+        .iterator();
+      while (iterator.hasNext()) {
+        JsonObject srsRec = (JsonObject) iterator.next();
+        if (!instanceIds.contains(srsRec.getJsonObject("externalIdsHolder")
+          .getString("instanceId"))) {
+          iterator.remove();
+        }
       }
+
       addServerRqRsData(HttpMethod.GET, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {

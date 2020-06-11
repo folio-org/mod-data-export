@@ -34,7 +34,7 @@ class SourceRecordStorageUnitTest extends RestVerticleTestBase {
   void shouldReturnExistingMarcRecords() {
     // given
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
-    List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
+    List<String> uuids = Arrays.asList("ae573875-fbc8-40e7-bda7-0ac283354226", "5fc04e92-70dd-46b8-97ea-194015762a60");
     // when
     Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, okapiConnectionParams, LIMIT);
     // then
