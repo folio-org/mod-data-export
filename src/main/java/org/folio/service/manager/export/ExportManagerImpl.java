@@ -147,7 +147,7 @@ public class ExportManagerImpl implements ExportManager {
    * @param exportPayload payload of the export request
    * @return return future
    */
-  private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+  private Future<Void> handleExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
@@ -164,7 +164,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setIdentifiers(Collections.emptyList());
   }
 
-  private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
+  private ExportResult getExportResult(AsyncResult<Object> asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {

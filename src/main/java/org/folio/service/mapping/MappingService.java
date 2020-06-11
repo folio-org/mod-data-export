@@ -18,6 +18,16 @@ public interface MappingService {
    */
   List<String> map(List<JsonObject> records, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
 
+  /**
+   * This method specifically returns additional records mapped to variable Field format that can be
+   * later appended to SRS records.
+   *
+   * @param record
+   * @param mappingProfile
+   * @param jobExecutionId
+   * @param connectionParams
+   * @return Variable Field
+   */
   List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
 
 }
