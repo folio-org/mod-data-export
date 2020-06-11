@@ -7,23 +7,20 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.jaxrs.model.RecordType;
-import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
-import org.folio.service.mapping.MappingService;
+import org.folio.service.mapping.convertor.InventoryRecordConvertorService;
+import org.folio.service.mapping.convertor.SrsRecordConvertorService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -34,9 +31,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -56,9 +50,11 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private ExportService exportService;
   @Autowired
-  private MappingService mappingService;
-  @Autowired
   private JobExecutionService jobExecutionService;
+  @Autowired
+  private SrsRecordConvertorService srsRecordService;
+  @Autowired
+  private InventoryRecordConvertorService inventoryRecordService;
   @Autowired
   private Vertx vertx;
 
@@ -91,13 +87,16 @@ public class ExportManagerImpl implements ExportManager {
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    LOGGER.info("Records that are not presenting in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
-    exportService.exportSrsRecord(srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition);
+    LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
+
+    List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
+          exportPayload.getJobExecutionId(), params);
+    exportService.exportSrsRecord(marcToExport, fileExportDefinition);
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
     LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
-    instances = fetchHoldingsAndItems(instances, mappingProfile, params);
-    List<String> mappedMarcRecords = mappingService.map(instances, mappingProfile, exportPayload.getJobExecutionId(), params);
+
+    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
@@ -106,35 +105,6 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
   }
 
-  /**
-   * For Each instance UUID fetches all the holdings and also items for each holding and appends it to a single record
-   *
-   * @param instances list of instance objects
-   * @param params
-   */
-  private List<JsonObject> fetchHoldingsAndItems(List<JsonObject> instances, MappingProfile mappingProfile, OkapiConnectionParams params) {
-    List<JsonObject> instancesWithHoldingsAndItems = new ArrayList<>();
-    for (JsonObject instance : instances) {
-      JsonObject instanceWithHoldingsAndItems = new JsonObject();
-      instanceWithHoldingsAndItems.put("instance", instance);
-      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
-      List<Transformations> transformations = mappingProfile.getTransformations();
-      if (isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM))) {
-        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instance.getString("id"), params);
-        instanceWithHoldingsAndItems.put("holdings", new JsonArray(holdings));
-        if (recordTypes.contains(RecordType.ITEM)) {
-          List<String> holdingIds = holdings.stream()
-            .map(record -> record.getString("id"))
-            .collect(Collectors.toList());
-          List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
-          instanceWithHoldingsAndItems.put("items", new JsonArray(items));
-        }
-      }
-      instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
-    }
-    return instancesWithHoldingsAndItems;
-
-  }
 
   /**
    * Loads marc records from SRS by the given instance identifiers
@@ -177,7 +147,7 @@ public class ExportManagerImpl implements ExportManager {
    * @param exportPayload payload of the export request
    * @return return future
    */
-  private Future<Void> handleExportResult(AsyncResult asyncResult, ExportPayload exportPayload) {
+  private Future<Void> handleExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
@@ -194,7 +164,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setIdentifiers(Collections.emptyList());
   }
 
-  private ExportResult getExportResult(AsyncResult asyncResult, boolean isLast) {
+  private ExportResult getExportResult(AsyncResult<Object> asyncResult, boolean isLast) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {

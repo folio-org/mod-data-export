@@ -33,11 +33,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 public class MockServer {
   private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
@@ -47,6 +50,8 @@ public class MockServer {
   private static final String INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_response_in000005.json";
   private static final String HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in000005.json";
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
+  private static final String HOLDING_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in00041.json";
+  private static final String ITEM_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in00041.json";
   private static final String SRS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
   private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
@@ -122,7 +127,14 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_MOCK_DATA_PATH));
+      JsonObject item;
+      if (ctx.request()
+        .getParam("query")
+        .contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
+        item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_IN00041_MOCK_DATA_PATH));
+      } else {
+        item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_MOCK_DATA_PATH));
+      }
       addServerRqRsData(HttpMethod.GET, ITEM, item);
       serverResponse(ctx, 200, APPLICATION_JSON, item.encodePrettily());
     } catch (IOException e) {
@@ -136,7 +148,14 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_MOCK_DATA_PATH));
+      JsonObject holding;
+      if (ctx.request()
+        .getParam("query")
+        .contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
+        holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_IN00041_MOCK_DATA_PATH));
+      } else {
+        holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_MOCK_DATA_PATH));
+      }
       addServerRqRsData(HttpMethod.GET, HOLDING, holding);
       serverResponse(ctx, 200, APPLICATION_JSON, holding.encodePrettily());
     } catch (IOException e) {
@@ -165,14 +184,25 @@ public class MockServer {
     logger.info("handleGetSRSRecord got: " + ctx.request()
       .path());
     String query = ctx.request()
-      .query();
+      .getParam("query");
     try {
       JsonObject srsRecords;
-      if (query.contains("7fbd5d84-62d1-44c6-9c45-6cb173998bbd")) {
-        srsRecords = buildEmptyCollection("records");
-        } else {
-        srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      //fetch the ids from the query and remove them from the mock if not in the request
+      List<String> instanceIds = Arrays.stream(query.split("or"))
+        .map(st -> st.split("==")[1].trim().replace(")", ""))
+        .collect(Collectors.toList());
+
+      final Iterator iterator = srsRecords.getJsonArray("records")
+        .iterator();
+      while (iterator.hasNext()) {
+        JsonObject srsRec = (JsonObject) iterator.next();
+        if (!instanceIds.contains(srsRec.getJsonObject("externalIdsHolder")
+          .getString("instanceId"))) {
+          iterator.remove();
+        }
       }
+
       addServerRqRsData(HttpMethod.GET, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {

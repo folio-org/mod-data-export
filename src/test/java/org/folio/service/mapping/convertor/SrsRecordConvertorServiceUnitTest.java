@@ -1,36 +1,30 @@
-package org.folio.service.mapping;
+package org.folio.service.mapping.convertor;
 
-import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
-import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.service.loader.RecordLoaderService;
+import org.folio.service.mapping.MappingService;
+import org.folio.service.mapping.MappingServiceImpl;
 import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.marc4j.marc.VariableField;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,24 +33,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class MappingServiceUnitTest {
+class SrsRecordConvertorServiceUnitTest {
 
   @InjectMocks
-  private MappingServiceImpl mappingService;
+  SrsRecordConvertorService srsRecordConvertorService;
+  @InjectMocks
+  private MappingService mappingService = Mockito.spy(new MappingServiceImpl());
+
   @Mock
-  private ConfigurationsClient configurationsClient;
+  private RecordLoaderService recordLoaderService;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private ConfigurationsClient configurationsClient;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceData();
 
-  MappingServiceUnitTest() {
+  SrsRecordConvertorServiceUnitTest() {
     referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
     referenceData.addIdentifierTypes(getIdentifierTypes());
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
-    referenceData.addMaterialTypes(getMaterialTypes());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -107,109 +105,101 @@ class MappingServiceUnitTest {
     return map;
   }
 
-  private Map<String, JsonObject> getMaterialTypes() {
-    JsonArray identifierTypesArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
-        .getJsonArray("mtypes");
-    Map<String, JsonObject> map = new HashMap<>();
-    for (Object object : identifierTypesArray) {
-      JsonObject jsonObject = JsonObject.mapFrom(object);
-      map.put(jsonObject.getString("id"), jsonObject);
+  @Test
+  void shouldNotTransformSRSRecords_for_MappingProfileWithNoTransformations() {
+    MappingProfile mappingProfile = new MappingProfile();
+
+    //given
+    JsonArray srsRecords =
+        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+          .getJsonArray("records");
+    JsonObject srsRecord = srsRecords.getJsonObject(0);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+    .thenReturn(referenceData);
+
+    JsonArray holdingRecords =
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
+          .getJsonArray("holdingsRecords");
+    List<JsonObject> result = new ArrayList<>();
+    for (Object holding : holdingRecords) {
+      result.add(JsonObject.mapFrom(holding));
     }
-    return map;
+
+    //when
+    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    JsonObject afterJson = new JsonObject(afterConversion.get(0));
+
+    //Then
+    //As no transfomation is applied both should have same fields and leader
+    assertEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
   }
 
   @Test
-  void shouldReturnEmptyRecords_for_emptyInstances() {
-    // given
-    List<JsonObject> givenInstances = Collections.emptyList();
-    // when
-    List<String> actualRecords = mappingService.map(givenInstances, new MappingProfile(), jobExecutionId, params);
-    // then
-    Assert.assertNotNull(actualRecords);
-    Assert.assertEquals(0, actualRecords.size());
-    Mockito.verify(referenceDataProvider, Mockito.never()).get(any(String.class), any(OkapiConnectionParams.class));
-  }
-
-  @Test
-  void shouldMapInstance_to_marcRecord_whenMappingProfileTransformationsEmpty() throws FileNotFoundException {
-    // given
-    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
-    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
-      .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
-      .thenReturn(Collections.emptyList());
-    // when
-    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
-    // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
-    File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
-    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
-
-  }
-
-
-  @Test
-  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() throws FileNotFoundException {
-    // given
-    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+  void shouldTransformSRSRecords_for_CustomMappingProfile() {
+    //given
     MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(Arrays.asList(RecordType.HOLDINGS));
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
-    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
-      .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
-      .thenReturn(Collections.emptyList());
-    // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
-    // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
 
-    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
-    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    JsonArray srsRecords =
+        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+          .getJsonArray("records");
+    JsonObject srsRecord = srsRecords.getJsonObject(0);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+    .thenReturn(referenceData);
+
+    JsonArray holdingRecords =
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
+          .getJsonArray("holdingsRecords");
+    List<JsonObject> result = new ArrayList<>();
+    for (Object holding : holdingRecords) {
+      result.add(JsonObject.mapFrom(holding));
+    }
+    //when
+    Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", params))
+    .thenReturn(result);
+    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    JsonObject afterJson = new JsonObject(afterConversion.get(0));
+
+    //then
+    //Holdings are fetched, and not items
+    Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(0)).getAllItemsForHolding(anyList(), any(OkapiConnectionParams.class));
+    //New transfomations must be applied
+    assertNotEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
+
   }
+
 
   @Test
-  void shouldReturnVariableFieldsForHoldingsAndItem_whenMappingProfileTransformationsAreProvided() throws FileNotFoundException {
-    // given
-    JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
+  void shouldTransformSRSRecords_for_CustomMappingProfileWithHoldingsItems() {
     MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(Arrays.asList(RecordType.HOLDINGS, RecordType.ITEM));
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+
+    JsonArray srsRecords =
+        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+          .getJsonArray("records");
+    JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
-      .thenReturn(referenceData);
-    // when
-    List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
-    // then
-    System.out.print(appendedMarcRecords);
-    Assert.assertEquals(19, appendedMarcRecords.size());
+    .thenReturn(referenceData);
+
+    JsonArray holdingRecords =
+        new JsonObject(readFileContentFromResources("mockData/inventory/holdings_in00041.json"))
+          .getJsonArray("holdingsRecords");
+    List<JsonObject> result = new ArrayList<>();
+    for (Object holding : holdingRecords) {
+      result.add(JsonObject.mapFrom(holding));
+    }
+    Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", params))
+    .thenReturn(result);
+    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    JsonObject afterJson = new JsonObject(afterConversion.get(0));
+    assertNotEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
+    Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(1)).getAllItemsForHolding(anyList(), any(OkapiConnectionParams.class));
   }
 
-  @Test
-  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmptyAndRulesFromModConfig() throws IOException {
-    // given
-    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
-    MappingProfile mappingProfile = new MappingProfile();
-    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
-    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
-      .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
-      .thenReturn(getDefaultRules());
-    // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
-    // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
-
-    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
-    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
-  }
 
   private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
     List<Transformations> transformations = new ArrayList<>();
@@ -223,8 +213,6 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));
-    transformations.add(createTransformations("materialTypeId", "$.items[*].materialTypeId", "910  $a", ITEM));
-    transformations.add(createTransformations("effectiveLocationId", "$.items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 
@@ -236,12 +224,6 @@ class MappingServiceUnitTest {
     transformations.setTransformation(value);
     transformations.setRecordType(recordType);
     return transformations;
-  }
-
-  private List<Rule> getDefaultRules() throws IOException {
-    URL url = Resources.getResource("rules/rulesDefault.json");
-    String stringRules = Resources.toString(url, StandardCharsets.UTF_8);
-    return Lists.newArrayList(Json.decodeValue(stringRules, Rule[].class));
   }
 
 }

@@ -2,9 +2,12 @@ package org.folio;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-
-import java.io.File;
-import java.io.IOException;
+import org.marc4j.MarcJsonReader;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamWriter;
+import org.marc4j.MarcWriter;
+import org.marc4j.marc.Record;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -33,5 +36,25 @@ public final class TestUtil {
       e.printStackTrace();
       throw new IllegalStateException(e);
     }
+  }
+
+  /**
+   * This method fetches the expected value from Json file and converts it into MARC
+   *
+   * @return expected Json converted to marc format
+   * @throws FileNotFoundException
+   */
+  public static String getExpectedMarcFromJson(File expectedFile) throws FileNotFoundException {
+    InputStream inputStream = new FileInputStream(expectedFile);
+    MarcReader marcReader = new MarcJsonReader(inputStream);
+    OutputStream outputStream = new ByteArrayOutputStream();
+    MarcWriter writer = new MarcStreamWriter(outputStream);
+    while (marcReader.hasNext()) {
+      Record record = marcReader.next();
+      writer.write(record);
+    }
+
+    writer.close();
+    return outputStream.toString();
   }
 }
