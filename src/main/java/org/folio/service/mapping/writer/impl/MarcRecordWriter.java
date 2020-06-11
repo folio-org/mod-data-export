@@ -1,20 +1,17 @@
 package org.folio.service.mapping.writer.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import org.folio.service.mapping.processor.translations.Translation;
 import org.folio.service.mapping.writer.fields.RecordControlField;
 import org.folio.service.mapping.writer.fields.RecordDataField;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
-import org.marc4j.marc.ControlField;
-import org.marc4j.marc.DataField;
-import org.marc4j.marc.MarcFactory;
-import org.marc4j.marc.Record;
+import org.marc4j.marc.*;
 import org.marc4j.marc.impl.SortedMarcFactoryImpl;
-
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class MarcRecordWriter extends AbstractRecordWriter {
   protected String encoding = StandardCharsets.UTF_8.name();
@@ -56,5 +53,10 @@ public class MarcRecordWriter extends AbstractRecordWriter {
     writer.write(record);
     writer.close();
     return outputStream.toString();
+  }
+
+  @Override
+  public List<VariableField> getFields() {
+    return record.getVariableFields();
   }
 }

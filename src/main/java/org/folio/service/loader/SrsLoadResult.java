@@ -1,17 +1,18 @@
 package org.folio.service.loader;
 
+import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SrsLoadResult {
-  private List<String> underlyingMarcRecords = new ArrayList<>();
+  private List<JsonObject> underlyingMarcRecords = new ArrayList<>();
   private List<String> instanceIdsWithoutSrs = new ArrayList<>();
 
-  public List<String> getUnderlyingMarcRecords() {
+  public List<JsonObject> getUnderlyingMarcRecords() {
     return underlyingMarcRecords;
   }
 
-  public void setUnderlyingMarcRecords(List<String> underlyingMarcRecords) {
+  public void setUnderlyingMarcRecords(List<JsonObject> underlyingMarcRecords) {
     this.underlyingMarcRecords = underlyingMarcRecords;
   }
 

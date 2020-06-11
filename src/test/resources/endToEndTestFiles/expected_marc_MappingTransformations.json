@@ -1,0 +1,535 @@
+{
+  "leader": "00000nam a2200000 a 4500",
+  "fields": [
+    {
+      "001": "in00041"
+    },
+    {
+      "005": "20171004205343.0"
+    },
+    {
+      "008": "890224c19429999mnuuu l       0    2eng  "
+    },
+    {
+      "010": {
+        "subfields": [
+          {
+            "z": "   42022330 "
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "035": {
+        "subfields": [
+          {
+            "a": "(NIC)notisAHJ5096"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "035": {
+        "subfields": [
+          {
+            "a": "(OCoLC)10724092"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "035": {
+        "subfields": [
+          {
+            "a": "1567726"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "040": {
+        "subfields": [
+          {
+            "a": "DLC"
+          },
+          {
+            "b": "eng"
+          },
+          {
+            "c": "DLC"
+          },
+          {
+            "d": "OCLCQ"
+          },
+          {
+            "d": "OCLCF"
+          },
+          {
+            "d": "OCLCO"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "043": {
+        "subfields": [
+          {
+            "a": "n-us---"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "050": {
+        "subfields": [
+          {
+            "a": "KF6365"
+          },
+          {
+            "b": ".M4"
+          }
+        ],
+        "ind1": "1",
+        "ind2": "0"
+      }
+    },
+    {
+      "082": {
+        "subfields": [
+          {
+            "a": "336.2402673"
+          },
+          {
+            "2": "19"
+          }
+        ],
+        "ind1": "0",
+        "ind2": "4"
+      }
+    },
+    {
+      "245": {
+        "subfields": [
+          {
+            "a": "The Law of Federal income taxation."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "4"
+      }
+    },
+    {
+      "246": {
+        "subfields": [
+          {
+            "a": "Mertens law of federal income taxation"
+          }
+        ],
+        "ind1": "3",
+        "ind2": " "
+      }
+    },
+    {
+      "246": {
+        "subfields": [
+          {
+            "a": "Mertens the law of federal income taxation"
+          }
+        ],
+        "ind1": "3",
+        "ind2": " "
+      }
+    },
+    {
+      "260": {
+        "subfields": [
+          {
+            "a": "[St. Paul] :"
+          },
+          {
+            "b": "West Group,"
+          },
+          {
+            "c": "1942-"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "300": {
+        "subfields": [
+          {
+            "a": "v. (loose-leaf)"
+          },
+          {
+            "c": "26 cm."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "\"Current tax highlights\" are periodically transferred from section 3 of the Current materials volume to unnumbered Highlights volume."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Description based on: T.p., 1997-1998 rulings."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Includes \"Complete internal revenue code\" issued as soft-bound supplement."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Includes separately numbered Regulations volumes (1985- ). Regulations volumes continued by Mertens federal tax regulations which consists of: regulations issued annually in softbound format; Regulations preambles; Proposed regulations preambles; Current developments and status table."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Includes unnumbered volumes: Tables, Table of cases, Regulations preambles, Proposed regulations preambles, Current materials, Index, and Rulings."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Originally issued in bound format and kept up to date by pocket supplements and revised volumes."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Published in Chicago, Ill. and Wilmette, Ill. by Callaghan (1942-1991); Deerfield, IL : Clark Boardman Callaghan (1991-1997)."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "Some volumes have title: Mertens law of federal income taxation; Mertens the law of federal income taxation."
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "500": {
+        "subfields": [
+          {
+            "a": "The service is divided into five parts: Treatise, by Jacob Mertens, Jr. and others (loose-leaf); Code, current volume (loose-leaf) and bound volumes, 1954-1958-- ; Code commentary (loose-leaf); Regulations, 1954-1982 (bound volumes), 1983-1984 (loose-leaf) ; Rulings, current volume (loose-leaf) and bound volumes, 1954-1957--"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "650": {
+        "subfields": [
+          {
+            "a": "Income tax"
+          },
+          {
+            "x": "Law and legislation"
+          },
+          {
+            "z": "United States."
+          }
+        ],
+        "ind1": " ",
+        "ind2": "0"
+      }
+    },
+    {
+      "650": {
+        "subfields": [
+          {
+            "a": "Income tax"
+          },
+          {
+            "x": "Law and legislation."
+          },
+          {
+            "2": "fast"
+          },
+          {
+            "0": "(OCoLC)fst00968749"
+          }
+        ],
+        "ind1": " ",
+        "ind2": "7"
+      }
+    },
+    {
+      "651": {
+        "subfields": [
+          {
+            "a": "United States."
+          },
+          {
+            "2": "fast"
+          },
+          {
+            "0": "(OCoLC)fst01204155"
+          }
+        ],
+        "ind1": " ",
+        "ind2": "7"
+      }
+    },
+    {
+      "700": {
+        "subfields": [
+          {
+            "a": "Mertens, Jacob,"
+          },
+          {
+            "d": "1896-"
+          }
+        ],
+        "ind1": "1",
+        "ind2": " "
+      }
+    },
+    {
+      "710": {
+        "subfields": [
+          {
+            "a": "Callaghan and Company."
+          }
+        ],
+        "ind1": "2",
+        "ind2": " "
+      }
+    },
+    {
+      "710": {
+        "subfields": [
+          {
+            "a": "Clark Boardman Callaghan."
+          }
+        ],
+        "ind1": "2",
+        "ind2": " "
+      }
+    },
+    {
+      "710": {
+        "subfields": [
+          {
+            "a": "West Group."
+          }
+        ],
+        "ind1": "2",
+        "ind2": " "
+      }
+    },
+    {
+      "740": {
+        "subfields": [
+          {
+            "a": "Complete internal revenue code."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "2"
+      }
+    },
+    {
+      "740": {
+        "subfields": [
+          {
+            "a": "Current tax highlights."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "2"
+      }
+    },
+    {
+      "740": {
+        "subfields": [
+          {
+            "a": "Mertens federal tax regulations."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "2"
+      }
+    },
+    {
+      "740": {
+        "subfields": [
+          {
+            "a": "Mertens federal tax regulations."
+          },
+          {
+            "p": "Proposed regulations preambles."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "2"
+      }
+    },
+    {
+      "740": {
+        "subfields": [
+          {
+            "a": "Mertens federal tax regulations."
+          },
+          {
+            "p": "Regulations preambles."
+          }
+        ],
+        "ind1": "0",
+        "ind2": "2"
+      }
+    },
+    {
+      "776": {
+        "subfields": [
+          {
+            "i": "Online version:"
+          },
+          {
+            "t": "Law of Federal income taxation"
+          },
+          {
+            "w": "(OCoLC)755250706"
+          }
+        ],
+        "ind1": "0",
+        "ind2": "8"
+      }
+    },
+    {
+      "900": {
+        "subfields": [
+          {
+            "a": "testHolding1-callnumber"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "900": {
+        "subfields": [
+          {
+            "a": "testHolding2-callnumber"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "905": {
+        "subfields": [
+          {
+            "a": "19890224120000.0"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "948": {
+        "subfields": [
+          {
+            "a": "20171004"
+          },
+          {
+            "b": "m"
+          },
+          {
+            "d": "paj3"
+          },
+          {
+            "e": "law"
+          },
+          {
+            "f": "?"
+          }
+        ],
+        "ind1": "2",
+        "ind2": " "
+      }
+    },
+    {
+      "999": {
+        "subfields": [
+          {
+            "s": "bc5caa84-e85c-4c98-9956-50ccdaad7115"
+          },
+          {
+            "i": "ae573875-fbc8-40e7-bda7-0ac283354226"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    }
+  ]
+}

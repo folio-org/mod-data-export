@@ -110,4 +110,5 @@ public abstract class AbstractRecordWriter implements RecordWriter {
   private boolean isSubFieldSource(DataSource dataSource) {
     return dataSource.getSubfield() != null;
   }
+
 }

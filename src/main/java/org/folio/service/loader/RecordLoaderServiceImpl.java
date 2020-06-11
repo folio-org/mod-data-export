@@ -51,11 +51,11 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {
     JsonArray records = underlyingRecords.getJsonArray("records");
-    List<String> marcRecords = new ArrayList<>();
+    List<JsonObject> marcRecords = new ArrayList<>();
     Set<String> singleInstanceIdentifiersSet = new HashSet<>(uuids);
     for (Object o : records) {
       JsonObject record = (JsonObject) o;
-      marcRecords.add(getRecordContent(record));
+      marcRecords.add(record);
       JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
       if (externalIdsHolder != null) {
         String instanceId = externalIdsHolder.getString("instanceId");
@@ -80,10 +80,6 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
       result.add(JsonObject.mapFrom(instance));
     }
     return result;
-  }
-
-  private String getRecordContent(JsonObject record) {
-    return record.getJsonObject("parsedRecord").getJsonObject("content").encode();
   }
 
   @Override
