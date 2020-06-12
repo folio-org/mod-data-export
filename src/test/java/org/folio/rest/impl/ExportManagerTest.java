@@ -24,25 +24,6 @@ class ExportManagerTest extends RestVerticleTestBase {
   private static final String EXPORT_URL = "/data-export/export";
 
   @Test
-  void shouldReturn_204Status_forHappyPath(VertxTestContext context) {
-    // given
-    ExportRequest exportRequest = new ExportRequest()
-      .withFileDefinitionId(UUID.randomUUID().toString())
-      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
-    // when
-    Response response = RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(exportRequest).encode())
-      .when()
-      .post(EXPORT_URL);
-    // then
-    context.verify(()->{
-        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusCode());
-        context.completeNow();
-    });
-  }
-
-  @Test
   void shouldReturn_422Status_ifRequestIsWrong(VertxTestContext context) {
     // given
     ExportRequest exportRequest = new ExportRequest();
@@ -74,6 +55,25 @@ class ExportManagerTest extends RestVerticleTestBase {
       .post(EXPORT_URL);
     // then
     context.verify(() -> {
+      assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
+      context.completeNow();
+    });
+  }
+
+  @Test
+  void shouldReturn_400Status_ifFileDefinitionNotFound(VertxTestContext context) {
+    // given
+    ExportRequest exportRequest = new ExportRequest()
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
+    // when
+    Response response = RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(exportRequest).encode())
+      .when()
+      .post(EXPORT_URL);
+    // then
+    context.verify(()->{
       assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusCode());
       context.completeNow();
     });

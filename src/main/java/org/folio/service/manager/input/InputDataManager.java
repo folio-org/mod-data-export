@@ -27,7 +27,7 @@ public interface InputDataManager {  //NOSONAR
    *                      filedefinition, jobProfile, etc.
    * @param params   - okapi headers and connection parameters
    */
-  void init(JsonObject exportRequest, JsonObject mappingProfile, Map<String, String> params);
+  void init(JsonObject exportRequest, JsonObject requestFileDefinition, JsonObject mappingProfile, Map<String, String> params);
 
   /**
    * Publish the next chunk of uuids to be exported. If there is no more uuids to read,
