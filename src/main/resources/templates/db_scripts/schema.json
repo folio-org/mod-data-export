@@ -9,13 +9,13 @@
     },
     {
       "tableName": "mapping_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-1.2.0",
       "withMetadata": true,
       "withAuditing": false
     },
     {
       "tableName": "job_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-1.2.0",
       "withMetadata": true,
       "withAuditing": false,
       "foreignKeys": [
@@ -57,7 +57,7 @@
     {
       "run": "after",
       "snippetPath": "migration_scripts/rename_progress_current_to_exported.sql",
-      "fromModuleVersion": "mod-data-export-2.0.0"
+      "fromModuleVersion": "mod-data-export-1.2.0"
     }
   ]
 }
