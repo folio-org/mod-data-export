@@ -16,7 +16,7 @@ FOLIO data export module.
 #### Important notes
 
 ## LIMITATIONS OF THE MODULE
-For Q1 release, the only supported file storage to store the exported MARC files is S3. 
+For Q1/Q2 2020 release, the only supported file storage to store the exported MARC files is S3. 
 This means that it is expected that AWS credentials are properly configured in a hosting environment as per:https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
 The credential chain looks for the credentials in multiple places and the order of precedence in case it is specified in multiple places is given here: https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html
 
