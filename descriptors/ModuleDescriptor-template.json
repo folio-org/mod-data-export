@@ -20,7 +20,7 @@
     },
     {
       "id": "item-storage",
-      "version": "8.3"
+      "version": "8.4"
     },
     {
       "id": "nature-of-content-terms",
@@ -50,7 +50,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": [
