@@ -3,7 +3,7 @@ The major changes in this release include, generating MARC records on the fly fo
 transformations for holdings and items, and corresponding job profiles to trigger export job. There is also ability to transform existing MARC records
 on the fly by specifying transformations
 
-[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.1.2...v1.2.0)
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v1.1.2...v2.0.0)
 
 ### Stories
 * [MDEXP-179](https://issues.folio.org/browse/MDEXP-179) - Final verification migration scripts before release Q2 2020
