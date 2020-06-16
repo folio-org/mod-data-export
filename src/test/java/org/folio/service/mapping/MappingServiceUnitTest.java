@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -186,7 +187,9 @@ class MappingServiceUnitTest {
     // when
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
-    Assert.assertEquals(18, appendedMarcRecords.size());
+    //all transformations provided in the mapping profile must be mapped
+    Assert.assertEquals(11, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(20, appendedMarcRecords.size());
   }
 
   @Test
