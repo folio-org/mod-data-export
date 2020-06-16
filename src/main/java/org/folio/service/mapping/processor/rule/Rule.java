@@ -42,9 +42,4 @@ public class Rule {
   public void setMetadata(Map<String, String> metadata) {
     this.metadata = new Metadata(metadata);
   }
-
-  @Override
-  public String toString() {
-    return field+description+dataSources+metadata;
-  }
 }
