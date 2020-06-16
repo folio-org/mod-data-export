@@ -186,8 +186,7 @@ class MappingServiceUnitTest {
     // when
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
-    System.out.print(appendedMarcRecords);
-    Assert.assertEquals(19, appendedMarcRecords.size());
+    Assert.assertEquals(18, appendedMarcRecords.size());
   }
 
   @Test
