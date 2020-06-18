@@ -71,9 +71,9 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
+  public void init(JsonObject request, JsonObject requestFileDefinition, JsonObject mappingProfileJson, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
-      initBlocking(request, mappingProfileJson, params);
+      initBlocking(request, requestFileDefinition, mappingProfileJson, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
@@ -86,36 +86,36 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject mappingProfileJson, Map<String, String> params) {
+  protected void initBlocking(JsonObject request, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
+    FileDefinition requestFileDefinition = requestFileDefinitionJson.mapTo(FileDefinition.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
-    fileDefinitionService.getById(exportRequest.getFileDefinitionId(), tenantId).onSuccess(requestFileDefinition ->
-      jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId).onSuccess(jobExecution -> {
-        String jobExecutionId = jobExecution.getId();
-        FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
-        SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
-        if (sourceReader.hasNext()) {
-          fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
-            initInputDataContext(sourceReader, jobExecutionId);
-            ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
-            LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
-            Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
-            if (optionalUser.isPresent()) {
-              JsonObject user = optionalUser.get();
-              jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
-              exportNextChunk(exportPayload, sourceReader);
-            } else {
-              finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
-            }
-          });
-        } else {
-          fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-          jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
-          sourceReader.close();
-        }
-      }));
+    jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId).onSuccess(jobExecution -> {
+      String jobExecutionId = jobExecution.getId();
+      FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
+      SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
+      if (sourceReader.hasNext()) {
+        fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
+          initInputDataContext(sourceReader, jobExecutionId);
+          ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
+          Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
+          if (optionalUser.isPresent()) {
+            JsonObject user = optionalUser.get();
+            jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
+            exportNextChunk(exportPayload, sourceReader);
+          } else {
+            finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+          }
+        });
+      } else {
+        fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
+        jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+        sourceReader.close();
+      }
+    });
   }
 
   protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {
