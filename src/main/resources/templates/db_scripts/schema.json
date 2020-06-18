@@ -58,6 +58,11 @@
       "run": "after",
       "snippetPath": "migration_scripts/rename_progress_current_to_exported.sql",
       "fromModuleVersion": "mod-data-export-2.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/add_job_profile_name.sql",
+      "fromModuleVersion": "mod-data-export-2.1.0"
     }
   ]
 }

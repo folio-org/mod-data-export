@@ -2,11 +2,11 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
-
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.Progress;
 
 /**
@@ -61,6 +61,23 @@ public interface JobExecutionService {
   void updateJobStatusById(String id, JobExecution.Status status, String tenantId);
 
   /**
+   * Updates status of {@link JobExecution}
+   *
+   * @param jobExecution to update
+   * @param status       new status
+   * @param tenantId     tenant id
+   */
+  void updateJobStatus(JobExecution jobExecution, JobExecution.Status status, String tenantId);
+
+  /**
+   * Populate job profile info for {@link JobExecution}
+   *
+   * @param jobExecution to update
+   * @param jobProfile   {@link JobProfile} related to the job execution
+   */
+  void populateJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile);
+
+  /**
    * Updates {@link JobExecution} status with IN-PROGRESS && updates exported files && updates started date
    *
    * @param id                   job execution id
@@ -68,7 +85,7 @@ public interface JobExecutionService {
    * @param user                 user represented in json object
    * @param tenantId             tenant id
    */
-  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
+  Future<JobExecution> prepareJobForExport(String id, JobProfile jobProfile, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}

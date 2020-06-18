@@ -73,7 +73,8 @@ class InputDataManagerUnitTest {
   private static final String TENANT_ID = "diku";
   private static final String JOB_EXECUTION_ID = "jobExecutionId";
   private static final String JOB_PROFILE_ID = "jobProfileId";
-  private static final String MAPPING_PROFILE_ID = "jobExecutionId";
+  private static final String JOB_PROFILE_NAME = "Job profile name";
+  private static final String MAPPING_PROFILE_ID = "mappingProfileId";
   private static final String EXPORT_FILE_DEFINITION_NAME = "exportFileDefinition";
   private static final String FILE_DIRECTORY = "src/test/resources/";
   private static final String SPRING_CONTEXT_NAME = "springContext";
@@ -141,6 +142,7 @@ class InputDataManagerUnitTest {
   private FileDefinition fileExportDefinition;
   private JobExecution jobExecution;
   private MappingProfile mappingProfile;
+  private JobProfile jobProfile;
 
   @BeforeEach
   public void setup() {
@@ -151,6 +153,7 @@ class InputDataManagerUnitTest {
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
     jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW).withHrId("1");
     mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
+    jobProfile = new JobProfile().withId(JOB_PROFILE_ID).withName("Job profile name");
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
@@ -165,9 +168,10 @@ class InputDataManagerUnitTest {
   void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(false);
-    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatus(any(JobExecution.class), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatus(any(JobExecution.class), eq(JobExecution.Status.SUCCESS), eq(TENANT_ID));
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), requestParams);
 
     //then
     verify(sourceReader).close();
@@ -184,10 +188,11 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(JobProfile.class), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).populateJobProfileInfo(eq(jobExecution), any(JobProfile.class));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -202,11 +207,12 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(JobProfile.class), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).populateJobProfileInfo(eq(jobExecution), any(JobProfile.class));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -221,13 +227,14 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(JobProfile.class), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).populateJobProfileInfo(eq(jobExecution), any(JobProfile.class));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -246,13 +253,14 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_4);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_4), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(JobProfile.class), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_4), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).populateJobProfileInfo(eq(jobExecution), any(JobProfile.class));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -272,6 +280,7 @@ class InputDataManagerUnitTest {
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatus(any(JobExecution.class), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -281,7 +290,7 @@ class InputDataManagerUnitTest {
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.failed(ErrorCode.NO_FILE_GENERATED));
 
     //then
-    verify(jobExecutionService).update(jobExecution, TENANT_ID);
+    verify(jobExecutionService).update(any(JobExecution.class), eq(TENANT_ID));
     assertJobStatus(JobExecution.Status.FAIL);
     assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
@@ -296,6 +305,7 @@ class InputDataManagerUnitTest {
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.SUCCESS), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatus(any(JobExecution.class), eq(JobExecution.Status.SUCCESS), eq(TENANT_ID));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -321,6 +331,7 @@ class InputDataManagerUnitTest {
     ExportPayload exportPayload = createExportPayload();
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatus(any(JobExecution.class), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(null);
@@ -421,6 +432,8 @@ class InputDataManagerUnitTest {
     assertTrue(jobExecution.getExportedFiles().stream()
       .anyMatch(exportedFile -> exportedFile.getFileName().equals(fileName)));
     assertEquals(JobExecution.Status.IN_PROGRESS, jobExecution.getStatus());
+    assertEquals(JOB_PROFILE_ID, jobExecution.getJobProfileId());
+    assertEquals(JOB_PROFILE_NAME, jobExecution.getJobProfileName());
     assertNotNull(jobExecution.getStartedDate());
   }
 

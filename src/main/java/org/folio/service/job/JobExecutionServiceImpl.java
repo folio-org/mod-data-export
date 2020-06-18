@@ -2,16 +2,20 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.RunBy;
+import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
@@ -36,6 +38,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
+  @Autowired
+  private JobProfileService jobProfileService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
@@ -54,35 +58,60 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<JobExecution> getById(final String jobExecutionId, final String tenantId) {
-    return jobExecutionDao.getById(jobExecutionId, tenantId)
-      .compose(optionalJobExecution -> {
-        if (optionalJobExecution.isPresent()) {
-          return succeededFuture(optionalJobExecution.get());
+    Promise<JobExecution> jobExecutionPromise = Promise.promise();
+    jobExecutionDao.getById(jobExecutionId, tenantId)
+      .onComplete(optionalJobExecution -> {
+        if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
+          JobExecution jobExecution = optionalJobExecution.result().get();
+          jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+            .onSuccess(jobProfile -> {
+              jobExecution.setJobProfileName(jobProfile.getName());
+              jobExecutionPromise.complete(jobExecution);
+            }).onFailure(ar -> {
+            if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
+              LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+              jobExecution.setJobProfileName("default");
+            } else {
+              LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+            }
+            jobExecutionPromise.complete(jobExecution);
+          });
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
           LOGGER.error(errorMessage);
-          return failedFuture(new NotFoundException(errorMessage));
+          jobExecutionPromise.fail(new NotFoundException(errorMessage));
         }
       });
+    return jobExecutionPromise.future();
   }
 
   @Override
   public void updateJobStatusById(String id, JobExecution.Status status, String tenantId) {
-    getById(id, tenantId).onSuccess(jobExecution -> {
-      jobExecution.setStatus(status);
-      jobExecution.setCompletedDate(new Date());
-      update(jobExecution, tenantId);
-    });
+    getById(id, tenantId).onSuccess(jobExecution -> updateJobStatus(jobExecution, status, tenantId));
   }
 
   @Override
-  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
+  public void updateJobStatus(JobExecution jobExecution, JobExecution.Status status, String tenantId) {
+    jobExecution.setStatus(status);
+    jobExecution.setCompletedDate(new Date());
+    update(jobExecution, tenantId);
+  }
+
+  @Override
+  public void populateJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile) {
+    jobExecution.setJobProfileId(jobProfile.getId());
+    jobExecution.setJobProfileName(jobProfile.getName());
+  }
+
+  @Override
+  public Future<JobExecution> prepareJobForExport(String id, JobProfile jobProfile, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
       ExportedFile exportedFile = new ExportedFile()
         .withFileId(UUID.randomUUID().toString())
         .withFileName(fileExportDefinition.getFileName());
       Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
       exportedFiles.add(exportedFile);
+      populateJobProfileInfo(jobExecution, jobProfile);
       jobExecution.setExportedFiles(exportedFiles);
       jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
       if (Objects.isNull(jobExecution.getStartedDate())) {

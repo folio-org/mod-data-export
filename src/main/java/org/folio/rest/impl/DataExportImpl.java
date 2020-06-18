@@ -65,7 +65,7 @@ public class DataExportImpl implements DataExport {
           .onSuccess(jobProfile ->
             mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
               .onSuccess(mappingProfile -> {
-                inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), okapiHeaders);
+                inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), okapiHeaders);
                 succeededFuture()
                   .map(PostDataExportExportResponse.respond204())
                   .map(Response.class::cast)
