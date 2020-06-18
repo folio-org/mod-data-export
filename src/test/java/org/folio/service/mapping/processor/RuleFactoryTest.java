@@ -15,13 +15,16 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.mockito.Mockito.doReturn;
 import static org.junit.Assert.assertEquals;
+import static org.folio.TestUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -39,16 +42,6 @@ class RuleFactoryTest {
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
-  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
-  private static final String PERMANENT_LOCATION_PATH = "$.holdings[*].permanentLocationId";
-  private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
-  private static final String TEMPORARY_LOCATION_PATH = "$.holdings[*].temporaryLocationId";
-  private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
-  private static final String EFFECTIVE_LOCATION_PATH = "$.items[*].effectiveLocationId";
-  private static final String SET_LOCATION_FUNCTION = "set_location";
-  private static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
-  private static final String MATERIAL_TYPE_PATH = "$.items[*].materialTypeId";
-  private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
 
 
   @Spy
@@ -365,6 +358,75 @@ class RuleFactoryTest {
     assertEquals(MATERIAL_TYPE_PATH, rules.get(1).getDataSources().get(0).getFrom());
     assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
   }
+
+  @Test
+  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldsWithSameFieldId() {
+    // given
+    Transformations transformation1 = new Transformations()
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_FIELD_ID)
+      .withPath(CALLNUMBER_FIELD_PATH)
+      .withTransformation("900ff$a");
+    Transformations transformation2 = new Transformations()
+        .withEnabled(true)
+        .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
+        .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
+        .withTransformation("900ff$b");
+    Transformations transformation3 = new Transformations()
+        .withEnabled(true)
+        .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
+        .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
+        .withTransformation("900ff$c");
+    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
+    MappingProfile mappingProfile = new MappingProfile()
+        .withId(UUID.randomUUID().toString())
+        .withTransformations(transformations);
+    //when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    //then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).collect(Collectors.toList());
+    assertEquals(1, ruleList.size());
+    //3 data sources for subfields $a, $b, $c and 2 for indicators
+    assertEquals(5, ruleList.get(0).getDataSources().size());
+
+  }
+
+  @Test
+  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldsWithSameFieldIdDifferentIndicators() {
+    // given
+    Transformations transformation1 = new Transformations()
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_FIELD_ID)
+      .withPath(CALLNUMBER_FIELD_PATH)
+      .withTransformation("900ff$a");
+    Transformations transformation2 = new Transformations()
+        .withEnabled(true)
+        .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
+        .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
+        .withTransformation("900  $b");
+    Transformations transformation3 = new Transformations()
+        .withEnabled(true)
+        .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
+        .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
+        .withTransformation("90011$c");
+    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
+    MappingProfile mappingProfile = new MappingProfile()
+        .withId(UUID.randomUUID().toString())
+        .withTransformations(transformations);
+    //when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    //then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).collect(Collectors.toList());
+    assertEquals(1, ruleList.size());
+    //3 data sources for subfields $a, $b, $c and 2 for indicators
+    assertEquals(5, ruleList.get(0).getDataSources().size());
+    //the first field's indicators are used
+    assertEquals(2, ruleList.get(0).getDataSources().stream().
+        filter(ds -> ds.getIndicator()!=null && ds.getTranslation().getParameter("value").equals("f")).count());
+  }
+
 
   private void setUpDefaultRules() {
     DataSource dataSource = new DataSource();

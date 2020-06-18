@@ -1,38 +1,31 @@
 package org.folio.service.mapping.processor;
 
+import static java.lang.Boolean.TRUE;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
-
-import javax.ws.rs.NotFoundException;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.Boolean.TRUE;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
-import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -86,14 +79,14 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-   public List<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
-    List<Rule> rules = new ArrayList<>();
+   public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
+    Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
         && isNotBlank(mappingTransformation.getTransformation())
         && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
-          rules.add(buildByTransformation(mappingTransformation));
+          rules.add(buildByTransformation(mappingTransformation, rules));
       }
     }
     return rules;
@@ -114,16 +107,27 @@ public class RuleFactory {
     return HOLDINGS.equals(mappingTransformation.getRecordType()) && PERMANENT_LOCATION_FIELD_ID.equals(mappingTransformation.getFieldId());
   }
 
-
-  private Rule buildByTransformation(Transformations mappingTransformation) {
+  private Rule buildByTransformation(Transformations mappingTransformation, Set<Rule> rules) {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
-    Rule rule = new Rule();
-    rule.setField(field);
-    rule.setDataSources(buildDataSources(mappingTransformation));
+    Rule rule;
+    Optional<Rule> existingRule = rules.stream()
+      .filter(tagRule -> tagRule.getField()
+        .equals(field))
+      .findFirst();
+    //If there is already an existing rule, then just append the subfield, without indicators
+    if (existingRule.isPresent()) {
+      rule = existingRule.get();
+      rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
+    } else {
+      rule = new Rule();
+      rule.setField(field);
+      rule.getDataSources().addAll(buildDataSources(mappingTransformation, true));
+    }
+
     return rule;
   }
 
-  private List<DataSource> buildDataSources(Transformations mappingTransformation) {
+  private List<DataSource> buildDataSources(Transformations mappingTransformation, boolean setIndicators) {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
@@ -138,10 +142,13 @@ public class RuleFactory {
     Matcher matcher = pattern.matcher(transformation);
     if (matcher.find()) {
       fromDataSource.setSubfield(matcher.group());
-      String indicator1 = substring(mappingTransformation.getTransformation(), 3, 4);
-      String indicator2 = substring(mappingTransformation.getTransformation(), 4, 5);
-      dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_1, indicator1));
-      dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_2, indicator2));
+      //set indicator fields only for a unique rule
+      if (setIndicators) {
+        String indicator1 = substring(mappingTransformation.getTransformation(), 3, 4);
+        String indicator2 = substring(mappingTransformation.getTransformation(), 4, 5);
+        dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_1, indicator1));
+        dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_2, indicator2));
+      }
     }
     return dataSources;
   }

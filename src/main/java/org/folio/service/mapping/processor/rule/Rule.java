@@ -1,13 +1,14 @@
 package org.folio.service.mapping.processor.rule;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class Rule {
   private String field;
   private String description;
-  private List<DataSource> dataSources;
+  private List<DataSource> dataSources = new ArrayList<>();
   private Metadata metadata;
 
   public String getField() {
