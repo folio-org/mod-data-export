@@ -2,9 +2,11 @@ package org.folio.clients;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
@@ -13,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
@@ -30,17 +31,14 @@ public class SourceRecordStorageClient {
   public Optional<JsonObject> getRecordsByInstanceIds(List<String> ids, OkapiConnectionParams params) {
     HttpPost httpPost = new HttpPost(format(GET_RECORDS_QUERY, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
-    try {
+    try (CloseableHttpClient client = HttpClients.createDefault()) {
       httpPost.setEntity(new StringEntity(body));
       ClientUtil.setCommonHeaders(httpPost, params);
-      try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpPost)) {
-        return Optional.ofNullable(getResponseEntity(response));
-      } catch (IOException e) {
-        LOGGER.error("Exception while calling {}", httpPost.getURI(), e);
-        return Optional.empty();
-      }
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException("Exception while building a query", e);
+      CloseableHttpResponse response = client.execute(httpPost);
+      return Optional.ofNullable(getResponseEntity(response));
+    } catch (IOException e) {
+      LOGGER.error("Exception while calling {}", httpPost.getURI(), e);
+      return Optional.empty();
     }
   }
 }
