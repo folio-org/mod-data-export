@@ -67,9 +67,9 @@ class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(srsClient.getRecordsByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromSRS));
+    when(srsClient.getRecordsByInstanceIds(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), okapiConnectionParams, LIMIT);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
   }
@@ -79,9 +79,9 @@ class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
-    when(srsClient.getRecordsByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(emptyResponse));
+    when(srsClient.getRecordsByInstanceIds(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams, LIMIT);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getInstanceIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
