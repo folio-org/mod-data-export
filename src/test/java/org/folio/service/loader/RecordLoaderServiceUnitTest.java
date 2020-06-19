@@ -78,7 +78,7 @@ class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
   void shouldReturnNotFoundInstanceIds() {
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
-    JsonObject emptyResponse = new JsonObject().put("records", new JsonArray());
+    JsonObject emptyResponse = new JsonObject().put("sourceRecords", new JsonArray());
     when(srsClient.getRecordsByInstanceIds(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, okapiConnectionParams);
