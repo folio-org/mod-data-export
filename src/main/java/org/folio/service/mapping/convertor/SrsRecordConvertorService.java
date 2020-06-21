@@ -103,6 +103,7 @@ public class SrsRecordConvertorService extends RecordConvertor {
     return records.parallelStream()
       .map(jo -> jo.getJsonObject("parsedRecord")
         .getJsonObject("content")
+        .getJsonObject("map")
         .encode())
       .collect(Collectors.toList());
   }
