@@ -7,6 +7,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
@@ -54,6 +55,11 @@ public class InventoryClient {
   public Map<String, JsonObject> getMaterialTypes(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(MATERIAL_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, MATERIAL_TYPES);
+  }
+
+  public Map<String, JsonObject> getInstanceTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(INSTANCE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, INSTANCE_TYPES);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
