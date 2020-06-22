@@ -14,7 +14,6 @@ import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
@@ -72,9 +71,9 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   @Override
-  public void init(JsonObject request, JsonObject requestFileDefinition, JsonObject mappingProfile, JsonObject jobProfile, Map<String, String> params) {
+  public void init(JsonObject request, JsonObject requestFileDefinition, JsonObject mappingProfileJson, JsonObject jobExecution, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
-      initBlocking(request, requestFileDefinition, mappingProfile, jobProfile, params);
+      initBlocking(request, requestFileDefinition, mappingProfileJson, jobExecution, params);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
@@ -87,38 +86,35 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, JsonObject jobProfileJson, Map<String, String> params) {
+  protected void initBlocking(JsonObject request, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, JsonObject jobExecutionJson, Map<String, String> params) {
     ExportRequest exportRequest = request.mapTo(ExportRequest.class);
     MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
-    JobProfile jobProfile = jobProfileJson.mapTo(JobProfile.class);
     FileDefinition requestFileDefinition = requestFileDefinitionJson.mapTo(FileDefinition.class);
+    JobExecution jobExecution = jobExecutionJson.mapTo(JobExecution.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
-    jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId).onSuccess(jobExecution -> {
-      String jobExecutionId = jobExecution.getId();
-      FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
-      SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
-      if (sourceReader.hasNext()) {
-        fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
-          initInputDataContext(sourceReader, jobExecutionId);
-          ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
-          LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
-          Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
-          if (optionalUser.isPresent()) {
-            JsonObject user = optionalUser.get();
-            jobExecutionService.prepareJobForExport(jobExecutionId, jobProfile, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
-            exportNextChunk(exportPayload, sourceReader);
-          } else {
-            finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
-          }
-        });
-      } else {
-        jobExecutionService.populateJobProfileInfo(jobExecution, jobProfile);
-        fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-        jobExecutionService.updateJobStatus(jobExecution, JobExecution.Status.FAIL, tenantId);
-        sourceReader.close();
-      }
-    });
+    String jobExecutionId = jobExecution.getId();
+    FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
+    SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
+    if (sourceReader.hasNext()) {
+      fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
+        initInputDataContext(sourceReader, jobExecutionId);
+        ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+        LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
+        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
+        if (optionalUser.isPresent()) {
+          JsonObject user = optionalUser.get();
+          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
+          exportNextChunk(exportPayload, sourceReader);
+        } else {
+          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+        }
+      });
+    } else {
+      fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
+      jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+      sourceReader.close();
+    }
   }
 
   protected void proceedBlocking(JsonObject payloadJson, ExportResult exportResult) {

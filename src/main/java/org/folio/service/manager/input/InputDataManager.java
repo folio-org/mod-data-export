@@ -4,12 +4,10 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.JobProfile;
-import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.service.manager.export.ExportResult;
-
 import java.util.Map;
+
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.manager.export.ExportResult;
 
 @ProxyGen
 public interface InputDataManager {  //NOSONAR
@@ -30,10 +28,10 @@ public interface InputDataManager {  //NOSONAR
    *                              fileDefinition, jobProfile, etc.
    * @param requestFileDefinition - {@link FileDefinition}
    * @param mappingProfile        - {@link MappingProfile}
-   * @param jobProfile            - {@link JobProfile}
+   * @param jobExecution          - {@link JobExecution}
    * @param params                - okapi headers and connection parameters
    */
-  void init(JsonObject exportRequest, JsonObject requestFileDefinition, JsonObject mappingProfile, JsonObject jobProfile, Map<String, String> params);
+  void init(JsonObject exportRequest, JsonObject requestFileDefinition, JsonObject mappingProfile, JsonObject jobExecution, Map<String, String> params);
 
   /**
    * Publish the next chunk of uuids to be exported. If there is no more uuids to read,

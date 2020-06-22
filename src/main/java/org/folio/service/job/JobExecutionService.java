@@ -61,21 +61,13 @@ public interface JobExecutionService {
   void updateJobStatusById(String id, JobExecution.Status status, String tenantId);
 
   /**
-   * Updates status of {@link JobExecution}
+   * Populate {@link JobProfile} name and id to {@link JobExecution}
    *
-   * @param jobExecution to update
-   * @param status       new status
+   * @param jobExecution job execution to update
+   * @param jobProfile   to populate from
    * @param tenantId     tenant id
    */
-  void updateJobStatus(JobExecution jobExecution, JobExecution.Status status, String tenantId);
-
-  /**
-   * Populate job profile info for {@link JobExecution}
-   *
-   * @param jobExecution to update
-   * @param jobProfile   {@link JobProfile} related to the job execution
-   */
-  void populateJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile);
+  Future<JobExecution> updateJobExecutionWithJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile, String tenantId);
 
   /**
    * Updates {@link JobExecution} status with IN-PROGRESS && updates exported files && updates started date
@@ -85,7 +77,7 @@ public interface JobExecutionService {
    * @param user                 user represented in json object
    * @param tenantId             tenant id
    */
-  Future<JobExecution> prepareJobForExport(String id, JobProfile jobProfile, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
+  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}

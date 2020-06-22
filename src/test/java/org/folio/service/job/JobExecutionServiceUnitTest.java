@@ -197,7 +197,7 @@ class JobExecutionServiceUnitTest {
     when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
 
     //when
-    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, jobProfile, fileDefinition, user, TOTAL_COUNT_LONG, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, TENANT_ID);
 
     //then
     future.onComplete(ar -> {

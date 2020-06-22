@@ -64,13 +64,18 @@ public class DataExportImpl implements DataExport {
         jobProfileService.getById(entity.getJobProfileId(), tenantId)
           .onSuccess(jobProfile ->
             mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
-              .onSuccess(mappingProfile -> {
-                inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobProfile), okapiHeaders);
-                succeededFuture()
-                  .map(PostDataExportExportResponse.respond204())
-                  .map(Response.class::cast)
-                  .onComplete(asyncResultHandler);
-              })
+              .onSuccess(mappingProfile ->
+                jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
+                  .onSuccess(jobExecution ->
+                    jobExecutionService.updateJobExecutionWithJobProfileInfo(jobExecution, jobProfile, tenantId)
+                      .onSuccess(updatedJobExecution -> {
+                        inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                        succeededFuture()
+                          .map(PostDataExportExportResponse.respond204())
+                          .map(Response.class::cast)
+                          .onComplete(asyncResultHandler);
+                      }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+                  .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
               .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
           .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
       .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));

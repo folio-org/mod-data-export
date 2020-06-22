@@ -87,31 +87,28 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public void updateJobStatusById(String id, JobExecution.Status status, String tenantId) {
-    getById(id, tenantId).onSuccess(jobExecution -> updateJobStatus(jobExecution, status, tenantId));
+    getById(id, tenantId).onSuccess(jobExecution -> {
+      jobExecution.setStatus(status);
+      jobExecution.setCompletedDate(new Date());
+      update(jobExecution, tenantId);
+    });
   }
 
   @Override
-  public void updateJobStatus(JobExecution jobExecution, JobExecution.Status status, String tenantId) {
-    jobExecution.setStatus(status);
-    jobExecution.setCompletedDate(new Date());
-    update(jobExecution, tenantId);
-  }
-
-  @Override
-  public void populateJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile) {
+  public Future<JobExecution> updateJobExecutionWithJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile, String tenantId) {
     jobExecution.setJobProfileId(jobProfile.getId());
     jobExecution.setJobProfileName(jobProfile.getName());
+    return update(jobExecution, tenantId);
   }
 
   @Override
-  public Future<JobExecution> prepareJobForExport(String id, JobProfile jobProfile, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
+  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
       ExportedFile exportedFile = new ExportedFile()
         .withFileId(UUID.randomUUID().toString())
         .withFileName(fileExportDefinition.getFileName());
       Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
       exportedFiles.add(exportedFile);
-      populateJobProfileInfo(jobExecution, jobProfile);
       jobExecution.setExportedFiles(exportedFiles);
       jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
       if (Objects.isNull(jobExecution.getStartedDate())) {
