@@ -9,7 +9,7 @@
     },
     {
       "tableName": "mapping_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-2.0.1",
       "withMetadata": true,
       "withAuditing": false,
       "uniqueIndex": [{
@@ -19,7 +19,7 @@
     },
     {
       "tableName": "job_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-2.0.1",
       "withMetadata": true,
       "withAuditing": false,
       "foreignKeys": [
