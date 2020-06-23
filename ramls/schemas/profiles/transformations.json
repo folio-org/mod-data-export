@@ -26,6 +26,11 @@
       "description": "Mapping Profile type",
       "type": "string",
       "$ref": "recordTypes.json"
+    },
+    "metadataParameters": {
+      "description": "Additional parameters used for mapping",
+      "type": "object",
+      "$ref": "../../raml-util/schemas/parameters.schema"
     }
   },
   "required": [

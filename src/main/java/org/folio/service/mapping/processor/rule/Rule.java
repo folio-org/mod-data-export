@@ -6,10 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 public class Rule {
+  private String id;
   private String field;
   private String description;
   private List<DataSource> dataSources = new ArrayList<>();
   private Metadata metadata;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public String getField() {
     return field;

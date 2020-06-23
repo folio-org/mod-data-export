@@ -1,5 +1,6 @@
 [
   {
+    "id": "leader",
     "field": "leader",
     "description": "Leader",
     "dataSources": [
@@ -16,6 +17,7 @@
     ]
   },
   {
+    "id": "hrid",
     "field": "001",
     "description": "The human readable ID",
     "dataSources": [
@@ -25,6 +27,7 @@
     ]
   },
   {
+    "id": "metadata.updatedDate",
     "field": "005",
     "description": "Date and Time of Latest Transaction",
     "dataSources": [
@@ -37,6 +40,7 @@
     ]
   },
   {
+    "id": "metadata.createdDate",
     "field": "008",
     "description": "Fixed-Length Data Elements",
     "dataSources": [
@@ -53,6 +57,7 @@
     }
   },
   {
+    "id": "identifiers.lccn",
     "field": "010",
     "description": "Identifier LCCN",
     "dataSources": [
@@ -90,6 +95,7 @@
     }
   },
   {
+    "id": "identifiers.isbn",
     "field": "020",
     "description": "Identifier ISBN",
     "dataSources": [
@@ -127,6 +133,7 @@
     }
   },
   {
+    "id": "identifiers.issn",
     "field": "022",
     "description": "Identifier ISSN",
     "dataSources": [
@@ -164,6 +171,7 @@
     }
   },
   {
+    "id": "identifiers.systemcontrolnumber",
     "field": "035",
     "description": "Identifier System Control Number",
     "dataSources": [
@@ -201,6 +209,7 @@
     }
   },
   {
+    "id": "identifiers.oclc",
     "field": "035",
     "description": "Identifier OCLC",
     "dataSources": [
@@ -238,6 +247,7 @@
     }
   },
   {
+    "id": "identifiers.gpoitemnumber",
     "field": "074",
     "description": "Identifier GPO",
     "dataSources": [
@@ -275,6 +285,7 @@
     }
   },
   {
+    "id": "contributors.primary.personalname",
     "field": "100",
     "description": "Contributors - Personal Name  and Primary",
     "dataSources": [
@@ -312,6 +323,7 @@
     }
   },
   {
+    "id": "contributors.primary.corporatename",
     "field": "110",
     "description": "Contributors - Corporate Name  and Primary",
     "dataSources": [
@@ -349,6 +361,7 @@
     }
   },
   {
+    "id": "contributors.primary.meetingname",
     "field": "111",
     "description": "Contributors - Meeting Name and Primary",
     "dataSources": [
@@ -386,6 +399,7 @@
     }
   },
   {
+    "id": "title",
     "field": "245",
     "description": "Title",
     "dataSources": [
@@ -414,6 +428,7 @@
     ]
   },
   {
+    "id": "publication",
     "field": "264",
     "description": "Publication",
     "dataSources": [
@@ -450,6 +465,7 @@
     ]
   },
   {
+    "id": "physicalDescriptions",
     "field": "300",
     "description": "Physical Descriptions",
     "dataSources": [
@@ -478,6 +494,7 @@
     ]
   },
   {
+    "id": "series",
     "field": "490",
     "description": "Series",
     "dataSources": [
@@ -506,8 +523,9 @@
     ]
   },
   {
+    "id": "subjects",
     "field": "653",
-    "description": "Physical Descriptions",
+    "description": "List of subject headings",
     "dataSources": [
       {
         "from": "$.instance.subjects",
@@ -534,6 +552,7 @@
     ]
   },
   {
+    "id": "natureOfContentTermIds",
     "field": "655",
     "description": "Nature of content terms",
     "dataSources": [
@@ -565,6 +584,7 @@
     ]
   },
   {
+    "id": "contributors.notprimary.personalname",
     "field": "700",
     "description": "Contributors - Personal Name Not Primary",
     "dataSources": [
@@ -602,6 +622,7 @@
     }
   },
   {
+    "id": "contributors.notprimary.corporatename",
     "field": "710",
     "description": "Contributors - Corporate Name Not Primary",
     "dataSources": [
@@ -639,6 +660,7 @@
     }
   },
   {
+    "id": "contributors.notprimary.meetingname",
     "field": "711",
     "description": "Contributors - Meeting Name Not Primary",
     "dataSources": [
@@ -676,6 +698,7 @@
     }
   },
   {
+    "id": "id",
     "field": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [

@@ -1,31 +1,45 @@
 package org.folio.service.mapping.processor;
 
-import static java.lang.Boolean.TRUE;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
-import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.ws.rs.NotFoundException;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.MetadataParameter;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.rule.DataSource;
 import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.service.mapping.processor.translations.Translation;
+
+import javax.ws.rs.NotFoundException;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substring;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -54,17 +68,58 @@ public class RuleFactory {
   private List<Rule> defaultRules;
 
   public List<Rule> create(MappingProfile mappingProfile) {
+    return create(mappingProfile, getDefaultRulesFromFile());
+  }
+
+  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules) {
     if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
       LOGGER.info("No Mapping rules specified, using default mapping rules");
-      return getDefaultRules();
+      return defaultRules;
     }
-    List<Rule> rules = Lists.newArrayList(getDefaultRules());
-    rules.addAll(buildByTransformations(mappingProfile.getTransformations()));
+    ArrayList<Rule> rules = Lists.newArrayList(createDefaultByTransfromations(mappingProfile.getTransformations(), defaultRules));
+    rules.addAll(createByTransformations(mappingProfile.getTransformations(), defaultRules));
     return rules;
   }
 
-  protected List<Rule> getDefaultRules() {
-    if (Objects.nonNull(this.defaultRules)) {
+  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations) {
+    return createByTransformations(mappingTransformations, getDefaultRulesFromFile());
+  }
+
+  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
+    Set<Rule> rules = new LinkedHashSet<>();
+    addRuleById(rules, defaultRules, "leader");
+    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
+    for (Transformations mappingTransformation : mappingTransformations) {
+      if (TRUE.equals(mappingTransformation.getEnabled())
+        && isNotBlank(mappingTransformation.getPath())
+        && isNotBlank(mappingTransformation.getFieldId())
+        && isNotBlank(mappingTransformation.getTransformation())
+        && !(isHoldingsPermanentLocation(mappingTransformation)
+        && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
+        rules.add(buildByTransformation(mappingTransformation, rules));
+      }
+    }
+    return rules;
+  }
+
+  public List<Rule> createDefaultByTransfromations(List<Transformations> mappingTransformations) {
+    return createDefaultByTransfromations(mappingTransformations, getDefaultRulesFromFile());
+  }
+
+  public List<Rule> createDefaultByTransfromations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
+    List<Rule> rules = new ArrayList<>();
+    for (Transformations mappingTransformation : mappingTransformations) {
+      if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getFieldId())
+        && RecordType.INSTANCE.equals(mappingTransformation.getRecordType())
+        && isBlank(mappingTransformation.getTransformation())) {
+        addRuleById(rules, defaultRules, mappingTransformation.getFieldId());
+      }
+    }
+    return rules;
+  }
+
+  protected List<Rule> getDefaultRulesFromFile() {
+    if (nonNull(this.defaultRules)) {
       return this.defaultRules;
     }
     URL url = Resources.getResource(DEFAULT_RULES_PATH);
@@ -79,17 +134,14 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-   public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
-    Set<Rule> rules = new LinkedHashSet<>();
-    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
-    for (Transformations mappingTransformation : mappingTransformations) {
-      if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
-        && isNotBlank(mappingTransformation.getTransformation())
-        && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
-          rules.add(buildByTransformation(mappingTransformation, rules));
-      }
-    }
-    return rules;
+  private void addRuleById(Collection<Rule> rules, Collection<Rule> defaultRules, String fieldId) {
+    Optional<Rule> ruleOptional = defaultRules.stream()
+      .filter(rule -> nonNull(rule.getId()))
+      .filter(rule -> rule.getId().equals(fieldId))
+      .findFirst();
+    ruleOptional.ifPresent(rule -> {
+      rules.add(rule);
+    });
   }
 
   private String getTemporaryLocationTransformation(List<Transformations> mappingTransformations) {
@@ -123,7 +175,13 @@ public class RuleFactory {
       rule.setField(field);
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, true));
     }
-
+    if (CollectionUtils.isNotEmpty(mappingTransformation.getMetadataParameters())) {
+      Map<String, String> metadata = new HashMap<>();
+      for (MetadataParameter metadataParameter : mappingTransformation.getMetadataParameters()) {
+        metadata.put(metadataParameter.getKey(), metadataParameter.getValue());
+      }
+      rule.setMetadata(metadata);
+    }
     return rule;
   }
 

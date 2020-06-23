@@ -30,4 +30,6 @@ public interface MappingService {
    */
   List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams);
 
+  List<String> getFieldIdsWithoutTransformations(MappingProfile mappingProfile, OkapiConnectionParams connectionParams);
+
 }

@@ -1,7 +1,6 @@
 package org.folio.service.mapping;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
+import com.google.common.collect.Lists;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -9,9 +8,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.processor.RuleFactory;
 import org.folio.service.mapping.processor.RuleProcessor;
 import org.folio.service.mapping.processor.rule.Rule;
@@ -69,23 +71,37 @@ public class MappingServiceImpl implements MappingService {
   @Override
   public List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
-    List<Rule> rules = getRules(mappingProfile, connectionParams);
+    List<Rule> rules = getTransformationRules(mappingProfile, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
     return this.ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
   }
 
-  private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
-    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(params);
-    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : appendRulesFromProfile(rulesFromConfig, mappingProfile);
+  @Override
+  public List<String> getFieldIdsWithoutTransformations(MappingProfile mappingProfile, OkapiConnectionParams connectionParams) {
+    List<Rule> selectedRules = getSelectedRules(mappingProfile, connectionParams);
+    return selectedRules.stream()
+      .map(rule -> rule.getId())
+      .collect(Collectors.toList());
   }
 
-  private List<Rule> appendRulesFromProfile(List<Rule> rulesFromConfig, MappingProfile mappingProfile) {
-    if (mappingProfile != null && isNotEmpty(mappingProfile.getTransformations())) {
-      LOGGER.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
-      rulesFromConfig.addAll(ruleFactory.buildByTransformations(mappingProfile.getTransformations()));
-    }
-    return rulesFromConfig;
+  private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
+    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(params);
+    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : ruleFactory.create(mappingProfile, rulesFromConfig);
+  }
+
+  private List<Rule> getTransformationRules(MappingProfile mappingProfile, OkapiConnectionParams connectionParams) {
+    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(connectionParams);
+    List<Transformations> transformations = mappingProfile.getTransformations();
+    return Lists.newArrayList(CollectionUtils.isEmpty(rulesFromConfig) ?  ruleFactory.createByTransformations(transformations)
+      : ruleFactory.createByTransformations(transformations, rulesFromConfig));
+  }
+
+  private List<Rule> getSelectedRules(MappingProfile mappingProfile, OkapiConnectionParams connectionParams) {
+    List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(connectionParams);
+    List<Transformations> transformations = mappingProfile.getTransformations();
+    return CollectionUtils.isEmpty(rulesFromConfig) ?  ruleFactory.createDefaultByTransfromations(transformations)
+      : ruleFactory.createDefaultByTransfromations(transformations, rulesFromConfig);
   }
 
 }

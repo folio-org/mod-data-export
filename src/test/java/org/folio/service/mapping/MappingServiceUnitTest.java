@@ -3,6 +3,7 @@ package org.folio.service.mapping;
 import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.mockito.ArgumentMatchers.any;
 import static org.folio.TestUtil.*;
@@ -19,6 +20,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -160,7 +163,7 @@ class MappingServiceUnitTest {
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
-    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    mappingProfile.setTransformations(createSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
@@ -181,7 +184,7 @@ class MappingServiceUnitTest {
     // given
     JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
     MappingProfile mappingProfile = new MappingProfile();
-    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    mappingProfile.setTransformations(createSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     // when
@@ -198,7 +201,7 @@ class MappingServiceUnitTest {
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
-    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    mappingProfile.setTransformations(createSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
@@ -214,8 +217,9 @@ class MappingServiceUnitTest {
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
-  private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
+  private List<Transformations> createSimpleFieldTransformations() {
     List<Transformations> transformations = new ArrayList<>();
+    transformations.add(createTransformations("identifiers.lccn", "$.instance.identifiers[*].value", StringUtils.EMPTY, INSTANCE));
     transformations.add(createTransformations(CALLNUMBER_FIELD_ID, CALLNUMBER_FIELD_PATH, "900ff$a", HOLDINGS));
     transformations.add(createTransformations(CALLNUMBER_PREFIX_FIELD_ID,CALLNUMBER_PREFIX_FIELD_PATH , "900ff$b", HOLDINGS));
     transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID,CALLNUMBER_SUFFIX_FIELD_PATH , "902  $a", HOLDINGS));
