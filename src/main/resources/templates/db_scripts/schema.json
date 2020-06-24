@@ -9,13 +9,17 @@
     },
     {
       "tableName": "mapping_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-2.0.1",
       "withMetadata": true,
-      "withAuditing": false
+      "withAuditing": false,
+      "uniqueIndex": [{
+          "fieldName": "name"
+        }
+      ]
     },
     {
       "tableName": "job_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.0",
+      "fromModuleVersion": "mod-data-export-2.0.1",
       "withMetadata": true,
       "withAuditing": false,
       "foreignKeys": [
@@ -24,11 +28,15 @@
           "targetTable": "mapping_profiles",
           "tOps": "ADD"
         }
+      ],
+      "uniqueIndex": [{
+          "fieldName": "name"
+        }
       ]
     },
     {
       "tableName" : "job_executions",
-      "fromModuleVersion": "mod-data-export-1.1.0",
+      "fromModuleVersion": "mod-data-export-2.0.1",
       "withAuditing": false,
       "index": [{
           "fieldName" : "status",
