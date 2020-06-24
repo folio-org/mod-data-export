@@ -35,6 +35,7 @@ import static java.util.Objects.nonNull;
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String DEFAULT = "default";
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
@@ -43,7 +44,34 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
-    return jobExecutionDao.get(query, offset, limit, tenantId);
+    Promise<JobExecutionCollection> jobExecutionPromise = Promise.promise();
+    jobExecutionDao.get(query, offset, limit, tenantId)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          JobExecutionCollection jobExecutionCollection = ar.result();
+          jobExecutionCollection.getJobExecutions().forEach(jobExecution -> {
+            if (StringUtils.isNotEmpty(jobExecution.getJobProfileId())) {
+              jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+                .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))
+                .onFailure(async -> {
+                if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
+                  LOGGER.error("Failed to get Job Profile with id {} while get Job Executions by query with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+                  jobExecution.setJobProfileName(DEFAULT);
+                } else {
+                  LOGGER.error("Failed to get Job Profile with id {} while get Job Executions by query with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+                }
+              });
+            } else {
+              LOGGER.error("JobProfileId is not present in jobExecution with id {} while get JobExecution by query, the default name will be used", jobExecution.getId());
+              jobExecution.setJobProfileName(DEFAULT);
+            }
+          });
+          jobExecutionPromise.complete(jobExecutionCollection);
+        } else {
+          jobExecutionPromise.fail(ar.cause());
+        }
+      });
+    return jobExecutionPromise.future();
   }
 
   @Override
@@ -63,19 +91,21 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .onComplete(optionalJobExecution -> {
         if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
           JobExecution jobExecution = optionalJobExecution.result().get();
-          jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
-            .onSuccess(jobProfile -> {
-              jobExecution.setJobProfileName(jobProfile.getName());
-              jobExecutionPromise.complete(jobExecution);
-            }).onFailure(ar -> {
-            if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
-              LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-              jobExecution.setJobProfileName("default");
-            } else {
-              LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-            }
-            jobExecutionPromise.complete(jobExecution);
-          });
+          if (StringUtils.isNotEmpty(jobExecution.getJobProfileId())) {
+            jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+              .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())).onFailure(ar -> {
+              if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
+                LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+                jobExecution.setJobProfileName(DEFAULT);
+              } else {
+                LOGGER.error("Failed to get Job Profile with id {} while get Job Execution with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
+              }
+            });
+          } else {
+            LOGGER.error("JobProfileId is not present in jobExecution with id {} while get JobExecution by id, the default name will be used", jobExecution.getId());
+            jobExecution.setJobProfileName(DEFAULT);
+          }
+          jobExecutionPromise.complete(jobExecution);
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
           LOGGER.error(errorMessage);
@@ -92,13 +122,6 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       jobExecution.setCompletedDate(new Date());
       update(jobExecution, tenantId);
     });
-  }
-
-  @Override
-  public Future<JobExecution> updateJobExecutionWithJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile, String tenantId) {
-    jobExecution.setJobProfileId(jobProfile.getId());
-    jobExecution.setJobProfileName(jobProfile.getName());
-    return update(jobExecution, tenantId);
   }
 
   @Override

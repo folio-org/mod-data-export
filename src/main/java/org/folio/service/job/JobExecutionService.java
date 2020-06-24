@@ -61,15 +61,6 @@ public interface JobExecutionService {
   void updateJobStatusById(String id, JobExecution.Status status, String tenantId);
 
   /**
-   * Populate {@link JobProfile} name and id to {@link JobExecution}
-   *
-   * @param jobExecution job execution to update
-   * @param jobProfile   to populate from
-   * @param tenantId     tenant id
-   */
-  Future<JobExecution> updateJobExecutionWithJobProfileInfo(JobExecution jobExecution, JobProfile jobProfile, String tenantId);
-
-  /**
    * Updates {@link JobExecution} status with IN-PROGRESS && updates exported files && updates started date
    *
    * @param id                   job execution id

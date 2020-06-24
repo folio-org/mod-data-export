@@ -36,7 +36,8 @@
     },
     "jobProfileName": {
       "description": "Related JobProfile name",
-      "type": "string"
+      "type": "string",
+      "readonly": true
     },
     "progress": {
       "description": "Execution progress of the job",
