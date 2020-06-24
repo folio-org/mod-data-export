@@ -111,7 +111,7 @@ public class MockServer {
       .handler(BodyHandler.create());
 
     router.get(resourcesPath(INSTANCE)).handler(ctx -> handleGetInstanceRecord(ctx));
-    router.get(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
+    router.post(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
     router.get(resourcesPath(IDENTIFIER_TYPES)).handler(ctx -> handleGetIdentifierTypesRecord(ctx));
     router.get(resourcesPath(LOCATIONS)).handler(ctx -> handleGetLocationsRecord(ctx));
@@ -186,17 +186,12 @@ public class MockServer {
   private void handleGetSRSRecord(RoutingContext ctx) {
     logger.info("handleGetSRSRecord got: " + ctx.request()
       .path());
-    String query = ctx.request()
-      .getParam("query");
     try {
-      JsonObject srsRecords;
-      srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
+      JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
       //fetch the ids from the query and remove them from the mock if not in the request
-      List<String> instanceIds = Arrays.stream(query.split("or"))
-        .map(st -> st.split("==")[1].trim().replace(")", ""))
-        .collect(Collectors.toList());
+      List<String> instanceIds = ctx.getBodyAsJsonArray().getList();
 
-      final Iterator iterator = srsRecords.getJsonArray("records")
+      final Iterator iterator = srsRecords.getJsonArray("sourceRecords")
         .iterator();
       while (iterator.hasNext()) {
         JsonObject srsRec = (JsonObject) iterator.next();
@@ -206,7 +201,7 @@ public class MockServer {
         }
       }
 
-      addServerRqRsData(HttpMethod.GET, SRS, srsRecords);
+      addServerRqRsData(HttpMethod.POST, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {
       System.err.println(e);

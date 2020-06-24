@@ -116,7 +116,7 @@ public class ExportManagerImpl implements ExportManager {
   private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, OkapiConnectionParams params) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params, SRS_LOAD_PARTITION_SIZE);
+      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
       srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
     });

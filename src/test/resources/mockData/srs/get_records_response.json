@@ -1,17 +1,11 @@
 {
-  "records": [
+  "sourceRecords": [
     {
-      "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
+      "recordId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
       "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "matchedId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
-      "generation": 0,
       "recordType": "MARC",
-      "rawRecord": {
-        "id": "ca631e20-e4c0-4c3e-9b24-70564c1bc7e5",
-        "content": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92 content"
-      },
       "parsedRecord": {
-        "id": "812eaaa7-5d67-4c1a-a6dc-6050e6f08c92",
+        "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
         "content": {
           "fields": [
             {
@@ -545,17 +539,11 @@
       }
     },
     {
-      "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
+      "recordId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
       "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "matchedId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
-      "generation": 0,
       "recordType": "MARC",
-      "rawRecord": {
-        "id": "4f559f73-c37c-4420-93d5-3e354c6f89f5",
-        "content": "content"
-      },
       "parsedRecord": {
-        "id": "29e6f38b-3267-493e-b734-f3992818edb1",
+        "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
         "content": {
           "fields": [
             {

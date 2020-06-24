@@ -4,8 +4,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import io.vertx.core.json.JsonObject;
+
 import java.util.Collections;
 import java.util.List;
+
 import org.folio.TestUtil;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -37,7 +39,7 @@ class ExportServiceUnitTest {
   void shouldPassExportFor_1_SrsRecord() {
     // given
     String response = TestUtil.readFileContentFromResources("mockData/srs/get_records_response.json");
-    String jsonRecord = new JsonObject(response).getJsonArray("records").getJsonObject(0).toString();
+    String jsonRecord = new JsonObject(response).getJsonArray("sourceRecords").getJsonObject(0).toString();
     FileDefinition fileDefinition = new FileDefinition();
     Mockito.when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when

@@ -60,7 +60,7 @@ public final class ClientUtil {
     }
   }
 
-  private static void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
+  public static void setCommonHeaders(HttpRequestBase requestBase, OkapiConnectionParams params) {
     requestBase.setHeader(OKAPI_HEADER_TOKEN, params.getToken());
     requestBase.setHeader(OKAPI_HEADER_TENANT, params.getTenantId());
     requestBase.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
@@ -78,7 +78,7 @@ public final class ClientUtil {
     }
   }
 
-  private static JsonObject getResponseEntity(CloseableHttpResponse response) {
+  public static JsonObject getResponseEntity(CloseableHttpResponse response) {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
       try {
