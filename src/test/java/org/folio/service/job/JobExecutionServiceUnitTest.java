@@ -11,6 +11,7 @@ import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.profiles.jobprofile.JobProfileService;
@@ -25,7 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -77,6 +80,58 @@ class JobExecutionServiceUnitTest {
   }
 
   @Test
+  void getById_shouldReturnSucceededFuture_withUpdatedJobProfileName_whenJobProfileIsPresent(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    JobProfile jobProfile = new JobProfile()
+      .withId(JOB_PROFILE_ID)
+      .withName(JOB_PROFILE_NAME);
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(jobProfile));
+    //when
+    Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        JobExecution fetchedJobExecution = ar.result();
+        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withUpdatedJobProfileName_whenJobProfileIsPresent(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    JobProfile jobProfile = new JobProfile()
+      .withId(JOB_PROFILE_ID)
+      .withName(JOB_PROFILE_NAME);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+      .withJobExecutions(singletonList(jobExecution))));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(jobProfile));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
   void getById_shouldReturnSucceededFuture_withDefaultJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
@@ -91,6 +146,29 @@ class JobExecutionServiceUnitTest {
       context.verify(() -> {
         assertTrue(ar.succeeded());
         JobExecution fetchedJobExecution = ar.result();
+        assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withDefaultJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+    .withJobExecutions(singletonList(jobExecution))));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
         assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
         context.completeNow();
       });
@@ -113,6 +191,30 @@ class JobExecutionServiceUnitTest {
       context.verify(() -> {
         assertTrue(ar.succeeded());
         JobExecution fetchedJobExecution = ar.result();
+        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withExistingJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(JOB_PROFILE_NAME);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+      .withJobExecutions(singletonList(jobExecution))));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
         assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
         context.completeNow();
       });

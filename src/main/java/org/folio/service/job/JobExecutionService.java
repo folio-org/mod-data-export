@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.Progress;
 
 /**
