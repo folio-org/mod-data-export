@@ -3,8 +3,8 @@
   "name": "Data Export Module",
   "requires": [
     {
-      "id": "source-storage-records",
-      "version": "1.0"
+      "id": "source-storage-source-records",
+      "version": "2.0"
     },
     {
       "id": "users",
@@ -62,7 +62,7 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.records.get",
+            "source-storage.sourceRecords.get",
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",

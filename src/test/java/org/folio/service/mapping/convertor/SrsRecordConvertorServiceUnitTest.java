@@ -112,7 +112,7 @@ class SrsRecordConvertorServiceUnitTest {
     //given
     JsonArray srsRecords =
         new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
-          .getJsonArray("records");
+          .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
     .thenReturn(referenceData);
@@ -143,7 +143,7 @@ class SrsRecordConvertorServiceUnitTest {
 
     JsonArray srsRecords =
         new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
-          .getJsonArray("records");
+          .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
     .thenReturn(referenceData);
@@ -179,7 +179,7 @@ class SrsRecordConvertorServiceUnitTest {
 
     JsonArray srsRecords =
         new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
-          .getJsonArray("records");
+          .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
     .thenReturn(referenceData);
