@@ -6,6 +6,7 @@ import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.SRS;
@@ -60,6 +61,7 @@ public class MockServer {
   private static final String LOCATIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_locations_response.json";
   private static final String CONFIGURATIONS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "configurations/get_configuration_response.json";
   private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
+  private static final String INSTANCE_FORMATS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_formats_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -115,6 +117,7 @@ public class MockServer {
     router.get(resourcesPath(LOCATIONS)).handler(ctx -> handleGetLocationsRecord(ctx));
     router.get(resourcesPath(CONTRIBUTOR_NAME_TYPES)).handler(ctx -> handleGetContributorNameTypesRecord(ctx));
     router.get(resourcesPath(MATERIAL_TYPES)).handler(ctx -> handleGetMaterialTypesRecord(ctx));
+    router.get(resourcesPath(INSTANCE_FORMATS)).handler(ctx -> handleGetInstanceFormats(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
@@ -265,6 +268,21 @@ public class MockServer {
       JsonObject materialTypes = new JsonObject(RestVerticleTestBase.getMockData(MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, MATERIAL_TYPES, materialTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, materialTypes.encodePrettily());
+    } catch (IOException e) {
+      System.err.println(e);
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetInstanceFormats(RoutingContext ctx) {
+    logger.info("handleGet Material types Record: " + ctx.request()
+      .path());
+    try {
+      JsonObject instanceFormats = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_FORMATS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, INSTANCE_FORMATS, instanceFormats);
+      serverResponse(ctx, 200, APPLICATION_JSON, instanceFormats.encodePrettily());
     } catch (IOException e) {
       System.err.println(e);
       ctx.response()

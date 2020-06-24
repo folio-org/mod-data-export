@@ -13,9 +13,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public enum TranslationsHolder implements TranslationFunction {
@@ -188,6 +190,29 @@ public enum TranslationsHolder implements TranslationFunction {
         }
       }
       return format(FIELD_PATTERN, createdDateParam, publicationDate0Param, publicationDate1Param, languageParam);
+    }
+  },
+
+  SET_INSTANCE_FORMAT_ID() {
+    private static final String REGEX = "--";
+
+    @Override
+    public String apply(String instanceFormatId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getInstanceFormats().get(instanceFormatId);
+      if (entry == null) {
+        LOGGER.error("Instance format is not found by the given id: {}", instanceFormatId);
+        return StringUtils.EMPTY;
+      } else {
+        String instanceFormatIdValue = entry.getString("name");
+        List<String> instanceFormatsResult = Arrays.asList(instanceFormatIdValue.split(REGEX));
+        if (translation.getParameter("value").equals("0") && isNotBlank(instanceFormatsResult.get(0))) {
+          return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(0).trim();
+        } else if (translation.getParameter("value").equals("1")) {
+          return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(1).trim();
+        } else {
+          return StringUtils.EMPTY;
+        }
+      }
     }
   };
 

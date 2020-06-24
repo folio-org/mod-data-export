@@ -17,6 +17,7 @@ public class ExternalPathResolver {
   public static final String CONTRIBUTOR_NAME_TYPES = "contributorNameTypes";
   public static final String LOCATIONS = "locations";
   public static final String MATERIAL_TYPES = "mtypes";
+  public static final String INSTANCE_FORMATS = "instanceFormats";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -39,6 +40,7 @@ public class ExternalPathResolver {
     apis.put(CONTRIBUTOR_NAME_TYPES, "/contributor-name-types");
     apis.put(LOCATIONS, "/locations");
     apis.put(MATERIAL_TYPES, "/material-types");
+    apis.put(INSTANCE_FORMATS, "/instance-formats");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 

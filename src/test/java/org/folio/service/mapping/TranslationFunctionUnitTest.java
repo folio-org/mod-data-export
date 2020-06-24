@@ -34,6 +34,7 @@ class TranslationFunctionUnitTest {
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
     referenceData.addMaterialTypes(getMaterialTypes());
+    referenceData.addInstanceFormats(getInstanceFormats());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -72,6 +73,14 @@ class TranslationFunctionUnitTest {
     JsonObject identifierType =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
         .getJsonArray("mtypes")
+        .getJsonObject(0);
+    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getInstanceFormats() {
+    JsonObject identifierType =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_instance_formats_response.json"))
+        .getJsonArray("instanceFormats")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
   }
@@ -163,6 +172,30 @@ class TranslationFunctionUnitTest {
   void SetMaterialType_shouldReturnEmptyString() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_material_type");
+    String value = "non-existing-id";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
+  }
+
+  @Test
+  void SetInstanceFormatId_shouldReturnInstanceFormatIdValue() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_format_id");
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("value", "0"));
+    String value = "7fde4e21-00b5-4de4-a90a-08a84a601aeb";
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, null);
+    // then
+    Assert.assertEquals("audio", result);
+  }
+
+  @Test
+  void SetInstanceFormatId_shouldReturnEmptyString() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_format_id");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
