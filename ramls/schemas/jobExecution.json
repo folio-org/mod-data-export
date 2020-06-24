@@ -34,6 +34,11 @@
       "type": "string",
       "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
+    "jobProfileName": {
+      "description": "Related JobProfile name",
+      "type": "string",
+      "readonly": true
+    },
     "progress": {
       "description": "Execution progress of the job",
       "type": "object",

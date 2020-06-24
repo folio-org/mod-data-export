@@ -2,6 +2,7 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -12,6 +13,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.RunBy;
+import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 
@@ -33,13 +33,33 @@ import static java.util.Objects.nonNull;
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String DEFAULT = "default";
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
+  @Autowired
+  private JobProfileService jobProfileService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
-    return jobExecutionDao.get(query, offset, limit, tenantId);
+    Promise<JobExecutionCollection> jobExecutionPromise = Promise.promise();
+    jobExecutionDao.get(query, offset, limit, tenantId)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          JobExecutionCollection jobExecutionCollection = ar.result();
+          jobProfileService.get(null, 0, 9999, tenantId)
+            .onSuccess(jobProfileCollection -> jobExecutionCollection.getJobExecutions()
+              .forEach(jobExecution -> jobProfileCollection.getJobProfiles()
+                .stream()
+                .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
+                .findFirst()
+                .ifPresent(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))));
+          jobExecutionPromise.complete(jobExecutionCollection);
+        } else {
+          jobExecutionPromise.fail(ar.cause());
+        }
+      });
+    return jobExecutionPromise.future();
   }
 
   @Override
@@ -54,16 +74,21 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<JobExecution> getById(final String jobExecutionId, final String tenantId) {
-    return jobExecutionDao.getById(jobExecutionId, tenantId)
-      .compose(optionalJobExecution -> {
-        if (optionalJobExecution.isPresent()) {
-          return succeededFuture(optionalJobExecution.get());
+    Promise<JobExecution> jobExecutionPromise = Promise.promise();
+    jobExecutionDao.getById(jobExecutionId, tenantId)
+      .onComplete(optionalJobExecution -> {
+        if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
+          JobExecution jobExecution = optionalJobExecution.result().get();
+          jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+            .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()));
+          jobExecutionPromise.complete(jobExecution);
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
           LOGGER.error(errorMessage);
-          return failedFuture(new NotFoundException(errorMessage));
+          jobExecutionPromise.fail(new NotFoundException(errorMessage));
         }
       });
+    return jobExecutionPromise.future();
   }
 
   @Override
