@@ -19,7 +19,6 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 @RunWith(VertxUnitRunner.class)
 class SourceRecordStorageUnitTest extends RestVerticleTestBase {
-  private static final int LIMIT = 20;
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
@@ -36,9 +35,9 @@ class SourceRecordStorageUnitTest extends RestVerticleTestBase {
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
     List<String> uuids = Arrays.asList("ae573875-fbc8-40e7-bda7-0ac283354226", "5fc04e92-70dd-46b8-97ea-194015762a60");
     // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, okapiConnectionParams, LIMIT);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByInstanceIds(uuids, okapiConnectionParams);
     // then
     Assert.assertTrue(srsResponse.isPresent());
-    Assert.assertEquals(2, srsResponse.get().getJsonArray("records").getList().size());
+    Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
   }
 }

@@ -17,7 +17,7 @@ public interface RecordLoaderService {
    * @param instanceIds inventory instances identifiers
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams, int partitionSize);
+  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
 
   /**
    * Retrieves Inventory instances using blocking http client
