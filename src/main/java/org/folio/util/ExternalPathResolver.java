@@ -31,7 +31,7 @@ public class ExternalPathResolver {
 
   static {
     Map<String, String> apis = new HashMap<>();
-    apis.put(SRS, "/source-storage/records");
+    apis.put(SRS, "/source-storage/source-records");
     apis.put(INSTANCE, "/instance-storage/instances");
     apis.put(HOLDING, "/holdings-storage/holdings");
     apis.put(ITEM, "/item-storage/items");

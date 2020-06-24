@@ -32,8 +32,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams, int partitionSize) {
-    Optional<JsonObject> optionalRecords = srsClient.getRecordsByIds(uuids, okapiConnectionParams, partitionSize);
+  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, OkapiConnectionParams okapiConnectionParams) {
+    Optional<JsonObject> optionalRecords = srsClient.getRecordsByInstanceIds(uuids, okapiConnectionParams);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
       populateLoadResultFromSRS(uuids, optionalRecords.get(), srsLoadResult);
@@ -50,7 +50,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {
-    JsonArray records = underlyingRecords.getJsonArray("records");
+    JsonArray records = underlyingRecords.getJsonArray("sourceRecords");
     List<JsonObject> marcRecords = new ArrayList<>();
     Set<String> singleInstanceIdentifiersSet = new HashSet<>(uuids);
     for (Object o : records) {
