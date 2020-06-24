@@ -48,23 +48,20 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .onComplete(ar -> {
         if (ar.succeeded()) {
           JobExecutionCollection jobExecutionCollection = ar.result();
-          jobExecutionCollection.getJobExecutions().forEach(jobExecution -> {
-            if (StringUtils.isNotEmpty(jobExecution.getJobProfileId())) {
-              jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
-                .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))
-                .onFailure(async -> {
-                if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
-                  LOGGER.error("Failed to get Job Profile with id {} while get Job Executions by query with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-                  jobExecution.setJobProfileName(DEFAULT);
-                } else {
-                  LOGGER.error("Failed to get Job Profile with id {} while get Job Executions by query with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-                }
-              });
-            } else {
-              LOGGER.error("JobProfileId is not present in jobExecution with id {} while get JobExecution by query, the default name will be used", jobExecution.getId());
-              jobExecution.setJobProfileName(DEFAULT);
-            }
-          });
+          jobProfileService.get(null, 0, 9999, tenantId)
+            .onSuccess(jobProfileCollection -> jobExecutionCollection.getJobExecutions()
+              .forEach(jobExecution -> jobProfileCollection.getJobProfiles()
+                .stream()
+                .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
+                .findFirst()
+                .ifPresent(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))))
+            .onFailure(async -> {
+              LOGGER.error("Failed to get jobProfiles from DB while get Job Executions by query for tenant {}, the default name will be used for those jobExecutions, that don`t have jobProfileName", tenantId);
+              jobExecutionCollection.getJobExecutions()
+                .stream()
+                .filter(jobExecution -> StringUtils.isEmpty(jobExecution.getJobProfileName()))
+                .forEach(jobExecution -> jobExecution.setJobProfileName(DEFAULT));
+            });
           jobExecutionPromise.complete(jobExecutionCollection);
         } else {
           jobExecutionPromise.fail(ar.cause());
