@@ -25,7 +25,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_VALUE() {
     @Override
     public String apply(String value, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      return translation.getParameter("value");
+      return translation.getParameter(VALUE);
     }
   },
   SET_NATURE_OF_CONTENT_TERM() {
@@ -205,9 +205,9 @@ public enum TranslationsHolder implements TranslationFunction {
       } else {
         String instanceFormatIdValue = entry.getString("name");
         List<String> instanceFormatsResult = Arrays.asList(instanceFormatIdValue.split(REGEX));
-        if (translation.getParameter("value").equals("0") && isNotBlank(instanceFormatsResult.get(0))) {
+        if (translation.getParameter(VALUE).equals("0") && isNotBlank(instanceFormatsResult.get(0))) {
           return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(0).trim();
-        } else if (translation.getParameter("value").equals("1")) {
+        } else if (translation.getParameter(VALUE).equals("1")) {
           return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(1).trim();
         } else {
           return StringUtils.EMPTY;
@@ -221,6 +221,7 @@ public enum TranslationsHolder implements TranslationFunction {
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String VALUE = "value";
 
 
 }
