@@ -42,7 +42,7 @@ import static java.util.Objects.nonNull;
 @Service
 class InputDataManagerImpl implements InputDataManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int POOL_SIZE = 1;
+  private static final int POOL_SIZE = 2;
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
   private static final String DELIMITER = "-";

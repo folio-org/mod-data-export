@@ -6,10 +6,15 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.processor.RuleFactory;
@@ -29,6 +34,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final int MAPPING_POOL_SIZE = 4;
+  private ExecutorService mappingThreadPool;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
   @Autowired
@@ -39,6 +46,7 @@ public class MappingServiceImpl implements MappingService {
   public MappingServiceImpl() {
     this.ruleProcessor = new RuleProcessor();
     this.ruleFactory = new RuleFactory();
+    this.mappingThreadPool = Executors.newWorkStealingPool(MAPPING_POOL_SIZE);
   }
 
   @Override
@@ -46,20 +54,36 @@ public class MappingServiceImpl implements MappingService {
     if (CollectionUtils.isEmpty(instances)) {
       return Collections.emptyList();
     }
-    List<String> records = new ArrayList<>();
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, connectionParams);
-    for (JsonObject instance : instances) {
-      String record = runMappingProcess(instance, referenceData, rules);
-      records.add(record);
+    return mapInstances(instances, referenceData, rules);
+  }
+
+  private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules) {
+    List<String> records = null;
+    try {
+      records = mappingThreadPool.submit(() -> instances.parallelStream()
+        .map(instance -> mapInstance(instance, referenceData, rules))
+        .collect(Collectors.toList()))
+        .get();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      LOGGER.warn("Interrupting the current thread {}", Thread.currentThread().getName());
+    } catch (ExecutionException e) {
+      LOGGER.error("Exception occurred while run mapping {}", e);
     }
     return records;
   }
 
-  private String runMappingProcess(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
-    EntityReader entityReader = new JPathSyntaxEntityReader(instance);
-    RecordWriter recordWriter = new MarcRecordWriter();
-    return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+  private String mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+    try {
+      EntityReader entityReader = new JPathSyntaxEntityReader(instance);
+      RecordWriter recordWriter = new MarcRecordWriter();
+      return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+    } catch (Exception e) {
+      LOGGER.error("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
+      return StringUtils.EMPTY;
+    }
   }
 
   /**

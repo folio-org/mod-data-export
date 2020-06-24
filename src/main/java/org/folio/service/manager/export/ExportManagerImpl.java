@@ -39,7 +39,7 @@ import java.util.List;
 @Service
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int POOL_SIZE = 1;
+  private static final int POOL_SIZE = 2;
   private static final int SRS_LOAD_PARTITION_SIZE = 20;
   private static final int INVENTORY_LOAD_PARTITION_SIZE = 20;
   /* WorkerExecutor provides a worker pool for export process */
