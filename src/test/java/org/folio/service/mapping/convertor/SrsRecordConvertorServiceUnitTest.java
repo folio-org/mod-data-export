@@ -131,7 +131,7 @@ class SrsRecordConvertorServiceUnitTest {
 
     //Then
     //As no transfomation is applied both should have same fields and leader
-    assertEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content").getJsonObject("map"), afterJson);
+    assertEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
   }
 
   @Test
