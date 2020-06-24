@@ -31,6 +31,7 @@ import java.util.UUID;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -95,14 +96,12 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result();
-        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -126,20 +125,18 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
-        assertEquals(JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
+      assertEquals(JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
-  void getById_shouldReturnSucceededFuture_withDefaultJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+  void getById_shouldReturnSucceededFuture_withAbsentJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
       .withId(JOB_EXECUTION_ID)
@@ -149,18 +146,16 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result();
-        assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertNull(fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
-  void getByQuery_shouldReturnSucceededFuture_withDefaultJobProfileName_whenJobProfilesNotFound(VertxTestContext context) {
+  void getByQuery_shouldReturnSucceededFuture_withCorrectJobProfileName_whenJobProfilesNotFound(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
       .withId(JOB_EXECUTION_ID)
@@ -176,16 +171,14 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-        assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
-        assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertNull(fetchedJobExecution.getJobProfileName());
+      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
+      assertEquals(StringUtils.EMPTY, fetchedSecondJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -200,14 +193,12 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result();
-        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -224,14 +215,12 @@ class JobExecutionServiceUnitTest {
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
-    future.onComplete(ar -> {
-      context.verify(() -> {
-        assertTrue(ar.succeeded());
-        JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-        assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-        context.completeNow();
-      });
-    });
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test

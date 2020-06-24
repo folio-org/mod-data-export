@@ -6,7 +6,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -54,14 +53,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
                 .stream()
                 .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
                 .findFirst()
-                .ifPresent(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))))
-            .onFailure(async -> {
-              LOGGER.error("Failed to get jobProfiles from DB while get Job Executions by query for tenant {}, the default name will be used for those jobExecutions, that don`t have jobProfileName", tenantId);
-              jobExecutionCollection.getJobExecutions()
-                .stream()
-                .filter(jobExecution -> StringUtils.isEmpty(jobExecution.getJobProfileName()))
-                .forEach(jobExecution -> jobExecution.setJobProfileName(DEFAULT));
-            });
+                .ifPresent(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))));
           jobExecutionPromise.complete(jobExecutionCollection);
         } else {
           jobExecutionPromise.fail(ar.cause());
@@ -87,20 +79,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .onComplete(optionalJobExecution -> {
         if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
           JobExecution jobExecution = optionalJobExecution.result().get();
-          if (StringUtils.isNotEmpty(jobExecution.getJobProfileId())) {
-            jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
-              .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())).onFailure(ar -> {
-              if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
-                LOGGER.error("Failed to get Job Profile with id {} while querying Job Execution with id {}, the default name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-                jobExecution.setJobProfileName(DEFAULT);
-              } else {
-                LOGGER.error("Failed to get Job Profile with id {} while get Job Execution with id {}, the existing name will be used", jobExecution.getJobProfileId(), jobExecution.getId());
-              }
-            });
-          } else {
-            LOGGER.error("JobProfileId is not present in jobExecution with id {} while get JobExecution by id, the default name will be used", jobExecution.getId());
-            jobExecution.setJobProfileName(DEFAULT);
-          }
+          jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+            .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()));
           jobExecutionPromise.complete(jobExecution);
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
