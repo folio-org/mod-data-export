@@ -6,6 +6,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.util.Map;
 
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.manager.export.ExportResult;
 
 @ProxyGen
@@ -23,11 +24,14 @@ public interface InputDataManager {  //NOSONAR
   /**
    * Initialize and start an export process of uuids chunks are read from the file storage
    *
-   * @param exportRequest - entity that contains request parameters, such as
-   *                      filedefinition, jobProfile, etc.
-   * @param params   - okapi headers and connection parameters
+   * @param exportRequest         - entity that contains request parameters, such as
+   *                              fileDefinition, jobProfile, etc.
+   * @param requestFileDefinition - {@link FileDefinition}
+   * @param mappingProfile        - {@link MappingProfile}
+   * @param jobExecution          - {@link JobExecution}
+   * @param params                - okapi headers and connection parameters
    */
-  void init(JsonObject exportRequest, JsonObject requestFileDefinition, JsonObject mappingProfile, Map<String, String> params);
+  void init(JsonObject exportRequest, JsonObject requestFileDefinition, JsonObject mappingProfile, JsonObject jobExecution, Map<String, String> params);
 
   /**
    * Publish the next chunk of uuids to be exported. If there is no more uuids to read,
