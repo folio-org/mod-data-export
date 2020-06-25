@@ -2,7 +2,6 @@ package org.folio.service.job;
 
 
 import io.vertx.core.Future;
-
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
