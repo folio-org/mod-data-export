@@ -5,12 +5,17 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Sets;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -19,11 +24,14 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +40,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(VertxExtension.class)
 class JobExecutionServiceUnitTest {
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
+  private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
+  private static final String JOB_PROFILE_NAME = "Job profile";
+  private static final String DEFAULT_JOB_PROFILE_NAME = "default";
   private static final String TENANT_ID = "diku";
   private static final String FILE_DEFINITION_FILE_NAME = "fileName";
   private static final String PERSONAL_KEY = "personal";
@@ -48,6 +59,8 @@ class JobExecutionServiceUnitTest {
 
   @Mock
   private JobExecutionDaoImpl jobExecutionDao;
+  @Mock
+  private JobProfileService jobProfileService;
 
 
   @Test
@@ -66,6 +79,148 @@ class JobExecutionServiceUnitTest {
       });
 
     });
+  }
+
+  @Test
+  void getById_shouldReturnSucceededFuture_withUpdatedJobProfileName_whenJobProfileIsPresent(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    JobProfile jobProfile = new JobProfile()
+      .withId(JOB_PROFILE_ID)
+      .withName(JOB_PROFILE_NAME);
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(jobProfile));
+    //when
+    Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withUpdatedJobProfileName_whenJobProfilesIsPresent(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    JobExecution secondJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    JobProfile jobProfile = new JobProfile()
+      .withId(JOB_PROFILE_ID)
+      .withName(JOB_PROFILE_NAME);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution))));
+    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(singletonList(jobProfile))));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
+      assertEquals(JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getById_shouldReturnSucceededFuture_withAbsentJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID);
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertNull(fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withCorrectJobProfileName_whenJobProfilesNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID);
+    JobExecution secondJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution))));
+    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertNull(fetchedJobExecution.getJobProfileName());
+      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
+      assertEquals(StringUtils.EMPTY, fetchedSecondJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getById_shouldReturnSucceededFuture_withExistingJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(JOB_PROFILE_NAME);
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecution> future = jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result();
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withExistingJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(JOB_PROFILE_NAME);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
+      .withJobExecutions(singletonList(jobExecution))));
+    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
+      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
   }
 
   @Test
@@ -130,13 +285,18 @@ class JobExecutionServiceUnitTest {
   void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
-      .withExportedFiles(Sets.newHashSet());
+      .withExportedFiles(Sets.newHashSet())
+      .withJobProfileId(JOB_PROFILE_ID);
     FileDefinition fileDefinition = new FileDefinition()
       .withFileName(FILE_DEFINITION_FILE_NAME);
     JsonObject user = new JsonObject()
       .put(PERSONAL_KEY, new JsonObject()
         .put(FIRST_NAME_KEY, FIRST_NAME_VALUE)
         .put(LAST_NAME_KEY, LAST_NAME_VALUE));
+    JobProfile jobProfile = new JobProfile()
+      .withId(JOB_PROFILE_ID)
+      .withName(JOB_PROFILE_NAME);
+    when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(jobProfile));
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
 
@@ -157,6 +317,7 @@ class JobExecutionServiceUnitTest {
           .getLastName());
         assertEquals(TOTAL_COUNT_STRING, updatedJobExecution.getProgress()
           .getTotal());
+        assertEquals(JOB_PROFILE_NAME, jobExecution.getJobProfileName());
         context.completeNow();
       });
     });
