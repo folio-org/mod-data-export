@@ -8,13 +8,13 @@ import io.vertx.core.logging.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.processor.RuleFactory;
@@ -64,6 +64,8 @@ public class MappingServiceImpl implements MappingService {
     try {
       records = mappingThreadPool.submit(() -> instances.parallelStream()
         .map(instance -> mapInstance(instance, referenceData, rules))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .collect(Collectors.toList()))
         .get();
     } catch (InterruptedException e) {
@@ -75,14 +77,15 @@ public class MappingServiceImpl implements MappingService {
     return records;
   }
 
-  private String mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
     try {
       EntityReader entityReader = new JPathSyntaxEntityReader(instance);
       RecordWriter recordWriter = new MarcRecordWriter();
-      return this.ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+      String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+      return Optional.of(record);
     } catch (Exception e) {
       LOGGER.error("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
-      return StringUtils.EMPTY;
+      return Optional.empty();
     }
   }
 
