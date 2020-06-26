@@ -167,7 +167,7 @@ class InputDataManagerUnitTest {
     when(sourceReader.hasNext()).thenReturn(false);
     doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(sourceReader).close();
@@ -187,7 +187,7 @@ class InputDataManagerUnitTest {
     doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -206,7 +206,7 @@ class InputDataManagerUnitTest {
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
@@ -227,7 +227,7 @@ class InputDataManagerUnitTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
@@ -252,7 +252,7 @@ class InputDataManagerUnitTest {
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), requestParams);
+    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());

@@ -9,7 +9,7 @@
     },
     {
       "tableName": "mapping_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.1",
+      "fromModuleVersion": "mod-data-export-2.1.0",
       "withMetadata": true,
       "withAuditing": false,
       "uniqueIndex": [{
@@ -19,7 +19,7 @@
     },
     {
       "tableName": "job_profiles",
-      "fromModuleVersion": "mod-data-export-2.0.1",
+      "fromModuleVersion": "mod-data-export-2.1.0",
       "withMetadata": true,
       "withAuditing": false,
       "foreignKeys": [
@@ -36,7 +36,7 @@
     },
     {
       "tableName" : "job_executions",
-      "fromModuleVersion": "mod-data-export-2.0.1",
+      "fromModuleVersion": "mod-data-export-2.1.0",
       "withAuditing": false,
       "index": [{
           "fieldName" : "status",
@@ -66,6 +66,11 @@
       "run": "after",
       "snippetPath": "migration_scripts/rename_progress_current_to_exported.sql",
       "fromModuleVersion": "mod-data-export-2.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/add_job_profile_id.sql",
+      "fromModuleVersion": "mod-data-export-2.1.0"
     }
   ]
 }
