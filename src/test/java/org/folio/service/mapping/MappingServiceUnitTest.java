@@ -60,6 +60,7 @@ class MappingServiceUnitTest {
     referenceData.addLocations(getLocations());
     referenceData.addMaterialTypes(getMaterialTypes());
     referenceData.addInstanceTypes(getInstanceTypes());
+    referenceData.addInstanceFormats(getInstanceFormats());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -126,6 +127,18 @@ class MappingServiceUnitTest {
     JsonArray identifierTypesArray =
       new JsonObject(readFileContentFromResources("mockData/inventory/get_instance_types_response.json"))
         .getJsonArray("instanceTypes");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
+  private Map<String, JsonObject> getInstanceFormats() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_instance_formats_response.json"))
+        .getJsonArray("instanceFormats");
     Map<String, JsonObject> map = new HashMap<>();
     for (Object object : identifierTypesArray) {
       JsonObject jsonObject = JsonObject.mapFrom(object);

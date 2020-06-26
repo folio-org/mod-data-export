@@ -12,6 +12,7 @@ public class ReferenceData {
   private Map<String, JsonObject> locations = new HashMap<>();
   private Map<String, JsonObject> materialTypes = new HashMap<>();
   private Map<String, JsonObject> instanceTypes = new HashMap<>();
+  private Map<String, JsonObject> instanceFormats = new HashMap<>();
 
 
 
@@ -39,6 +40,8 @@ public class ReferenceData {
     this.materialTypes.putAll(materialTypes);
   }
 
+  public void addInstanceFormats(Map<String, JsonObject> instanceFormats) { this.instanceFormats.putAll(instanceFormats); }
+
   public Map<String, JsonObject> getNatureOfContentTerms() {
     return natureOfContentTerms;
   }
@@ -58,4 +61,6 @@ public class ReferenceData {
   public Map<String, JsonObject> getMaterialTypes() { return materialTypes; }
 
   public Map<String, JsonObject> getInstanceTypes() { return instanceTypes; }
+
+  public Map<String, JsonObject> getInstanceFormats() { return instanceFormats; }
 }
