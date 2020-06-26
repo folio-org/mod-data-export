@@ -11,6 +11,7 @@ public class ReferenceData {
   private Map<String, JsonObject> contributorNameTypes = new HashMap<>();
   private Map<String, JsonObject> locations = new HashMap<>();
   private Map<String, JsonObject> materialTypes = new HashMap<>();
+  private Map<String, JsonObject> instanceTypes = new HashMap<>();
   private Map<String, JsonObject> instanceFormats = new HashMap<>();
 
 
@@ -31,6 +32,10 @@ public class ReferenceData {
     this.locations.putAll(locations);
   }
 
+  public void addInstanceTypes(Map<String, JsonObject> instanceTypes) {
+    this.instanceTypes.putAll(instanceTypes);
+  }
+
   public void addMaterialTypes(Map<String, JsonObject> materialTypes) {
     this.materialTypes.putAll(materialTypes);
   }
@@ -49,14 +54,13 @@ public class ReferenceData {
     return contributorNameTypes;
   }
 
-
   public Map<String, JsonObject> getLocations() {
     return locations;
   }
 
-  public Map<String, JsonObject> getMaterialTypes() {
-    return materialTypes;
-  }
+  public Map<String, JsonObject> getMaterialTypes() { return materialTypes; }
+
+  public Map<String, JsonObject> getInstanceTypes() { return instanceTypes; }
 
   public Map<String, JsonObject> getInstanceFormats() { return instanceFormats; }
 }

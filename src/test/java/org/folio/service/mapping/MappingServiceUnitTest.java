@@ -59,6 +59,7 @@ class MappingServiceUnitTest {
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
     referenceData.addMaterialTypes(getMaterialTypes());
+    referenceData.addInstanceTypes(getInstanceTypes());
     referenceData.addInstanceFormats(getInstanceFormats());
   }
 
@@ -114,6 +115,18 @@ class MappingServiceUnitTest {
     JsonArray identifierTypesArray =
       new JsonObject(readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
         .getJsonArray("mtypes");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
+  private Map<String, JsonObject> getInstanceTypes() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_instance_types_response.json"))
+        .getJsonArray("instanceTypes");
     Map<String, JsonObject> map = new HashMap<>();
     for (Object object : identifierTypesArray) {
       JsonObject jsonObject = JsonObject.mapFrom(object);

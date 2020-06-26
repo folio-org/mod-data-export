@@ -36,7 +36,7 @@ public enum TranslationsHolder implements TranslationFunction {
         LOGGER.error("Nature of content term is not found by the given id: {}", id);
         return StringUtils.EMPTY;
       } else {
-        return entry.getString("name");
+        return entry.getString(NAME);
       }
     }
   },
@@ -82,7 +82,7 @@ public enum TranslationsHolder implements TranslationFunction {
         LOGGER.error("Location is not found by the given id: {}", locationId);
         return StringUtils.EMPTY;
       } else {
-        return entry.getString("name");
+        return entry.getString(NAME);
       }
     }
   },
@@ -94,7 +94,7 @@ public enum TranslationsHolder implements TranslationFunction {
         LOGGER.error("Material type is not found by the given id: {}", materialTypeId);
         return StringUtils.EMPTY;
       } else {
-        return entry.getString("name");
+        return entry.getString(NAME);
       }
     }
   },
@@ -193,6 +193,19 @@ public enum TranslationsHolder implements TranslationFunction {
     }
   },
 
+  SET_INSTANCE_TYPE_ID() {
+    @Override
+    public String apply(String instanceTypeId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getInstanceTypes().get(instanceTypeId);
+      if (entry == null) {
+        LOGGER.error("Instance type id is not found by the given id: {}", instanceTypeId);
+        return StringUtils.EMPTY;
+      } else {
+        return entry.getString(NAME);
+      }
+    }
+  },
+
   SET_INSTANCE_FORMAT_ID() {
     private static final String REGEX = "--";
 
@@ -221,6 +234,7 @@ public enum TranslationsHolder implements TranslationFunction {
   }
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String NAME = "name";
   private static final String VALUE = "value";
 
 
