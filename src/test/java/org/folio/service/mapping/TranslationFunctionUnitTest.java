@@ -1,5 +1,6 @@
 package org.folio.service.mapping;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.TestUtil;
@@ -17,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
@@ -79,19 +81,23 @@ class TranslationFunctionUnitTest {
   }
 
   private static Map<String, JsonObject> getInstanceTypes() {
-    JsonObject identifierType =
+    JsonObject instanceTypes =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_instance_types_response.json"))
         .getJsonArray("instanceTypes")
         .getJsonObject(0);
-    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+    return Collections.singletonMap(instanceTypes.getString("id"), instanceTypes);
   }
 
   private static Map<String, JsonObject> getInstanceFormats() {
-    JsonObject identifierType =
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray instanceFormats =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_instance_formats_response.json"))
-        .getJsonArray("instanceFormats")
-        .getJsonObject(0);
-    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+        .getJsonArray("instanceFormats");
+    instanceFormats.stream().forEach(instanceFormat -> {
+      JsonObject jsonObject = new JsonObject(instanceFormat.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
   }
 
   @Test
@@ -221,6 +227,32 @@ class TranslationFunctionUnitTest {
     String result = translationFunction.apply(value, 0, translation, referenceData, null);
     // then
     Assert.assertEquals("audio", result);
+  }
+
+  @Test
+  void SetInstanceFormatId_shouldReturnInstanceFormatIdValue_IfNoRegexFromInventory() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_format_id");
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("value", "0"));
+    String value = "485e3e1d-9f46-42b6-8c65-6bb7bd4b37f8";
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, null);
+    // then
+    Assert.assertEquals("microform", result);
+  }
+
+  @Test
+  void SetInstanceFormatId_shouldReturnEmptyString_IfNoRegexFromInventory() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_format_id");
+    Translation translation = new Translation();
+    translation.setParameters(Collections.singletonMap("value", "1"));
+    String value = "485e3e1d-9f46-42b6-8c65-6bb7bd4b37f8";
+    // when
+    String result = translationFunction.apply(value, 0, translation, referenceData, null);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
   }
 
   @Test

@@ -207,7 +207,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.POST, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -222,7 +221,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.GET, CONTENT_TERMS, contentTerms);
       serverResponse(ctx, 200, APPLICATION_JSON, contentTerms.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -237,7 +235,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.GET, IDENTIFIER_TYPES, identifierTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, identifierTypes.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -252,7 +249,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.GET, LOCATIONS, locations);
       serverResponse(ctx, 200, APPLICATION_JSON, locations.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -267,7 +263,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.GET, MATERIAL_TYPES, materialTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, materialTypes.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -282,7 +277,6 @@ public class MockServer {
       addServerRqRsData(HttpMethod.GET, INSTANCE_TYPES, instanceTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, instanceTypes.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -290,14 +284,13 @@ public class MockServer {
   }
 
   private void handleGetInstanceFormats(RoutingContext ctx) {
-    logger.info("handleGet Material types Record: " + ctx.request()
+    logger.info("handleGet Instance formats Record: " + ctx.request()
       .path());
     try {
       JsonObject instanceFormats = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_FORMATS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, INSTANCE_FORMATS, instanceFormats);
       serverResponse(ctx, 200, APPLICATION_JSON, instanceFormats.encodePrettily());
     } catch (IOException e) {
-      System.err.println(e);
       ctx.response()
         .setStatusCode(500)
         .end();
@@ -312,7 +305,6 @@ public class MockServer {
     addServerRqRsData(HttpMethod.GET, CONTRIBUTOR_NAME_TYPES, contributorTypes);
     serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
   } catch (IOException e) {
-    System.err.println(e);
     ctx.response()
       .setStatusCode(500)
       .end();

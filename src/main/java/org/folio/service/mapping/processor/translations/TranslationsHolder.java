@@ -217,11 +217,11 @@ public enum TranslationsHolder implements TranslationFunction {
         return StringUtils.EMPTY;
       } else {
         String instanceFormatIdValue = entry.getString("name");
-        List<String> instanceFormatsResult = Arrays.asList(instanceFormatIdValue.split(REGEX));
-        if (translation.getParameter(VALUE).equals("0") && isNotBlank(instanceFormatsResult.get(0))) {
-          return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(0).trim();
-        } else if (translation.getParameter(VALUE).equals("1")) {
-          return Arrays.asList(instanceFormatIdValue.split(REGEX)).get(1).trim();
+        String[] instanceFormatsResult = instanceFormatIdValue.split(REGEX);
+        if (translation.getParameter(VALUE).equals("0") && isNotBlank(instanceFormatsResult[0])) {
+          return instanceFormatsResult[0].trim();
+        } else if (translation.getParameter(VALUE).equals("1") && instanceFormatsResult.length > 1 && isNotBlank(instanceFormatsResult[1])) {
+          return instanceFormatsResult[1].trim();
         } else {
           return StringUtils.EMPTY;
         }
