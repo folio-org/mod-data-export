@@ -478,6 +478,37 @@
     ]
   },
   {
+    "field": "336",
+    "description": "InstanceTypeID",
+    "dataSources": [
+      {
+        "from": "$.instance.instanceTypeId",
+        "subfield": "a",
+        "translation": {
+          "function": "set_instance_type_id"
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "field": "490",
     "description": "Series",
     "dataSources": [
