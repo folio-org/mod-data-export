@@ -1,3 +1,20 @@
+## 06/25/2020 v2.1.0 Released
+The major change in this release is the interface dependency change to "source-storage-source-records" for performance reasons.
+Also other minor changes include jobprofile association with job execution and MARC field combining on Transformations
+ 
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.0.0...v2.1.0)
+
+### Stories
+* [MDEXP-199](https://issues.folio.org/browse/MDEXP-199) - Update dependency on SRS v4.0.0
+* [MDEXP-194](https://issues.folio.org/browse/MDEXP-194) - Provide information for UI about the job profile associated with the executed job
+* [MDEXP-193](https://issues.folio.org/browse/MDEXP-193) - Mapping profile - combine subfields in one MARC field
+
+
+
+### Bug Fixes
+* [MDEXP-200](https://issues.folio.org/browse/MDEXP-200) - GoldenRod upgrade issues on jobExecution table
+* [MDEXP-186](https://issues.folio.org/browse/MDEXP-186) - Invalid fileDefinition returns success for /export
+
 ## 06/12/2020 v2.0.0 Released
 The major changes in this release include, generating MARC records on the fly for Instances, being able to define mapping profiles with 
 transformations for holdings and items, and corresponding job profiles to trigger export job. There is also ability to transform existing MARC records
