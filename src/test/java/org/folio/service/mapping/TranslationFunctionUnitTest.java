@@ -34,6 +34,7 @@ class TranslationFunctionUnitTest {
     referenceData.addContributorNameTypes(getContributorNameTypes());
     referenceData.addLocations(getLocations());
     referenceData.addMaterialTypes(getMaterialTypes());
+    referenceData.addInstanceTypes(getInstanceTypes());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -72,6 +73,14 @@ class TranslationFunctionUnitTest {
     JsonObject identifierType =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_material_types_response.json"))
         .getJsonArray("mtypes")
+        .getJsonObject(0);
+    return Collections.singletonMap(identifierType.getString("id"), identifierType);
+  }
+
+  private static Map<String, JsonObject> getInstanceTypes() {
+    JsonObject identifierType =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_instance_types_response.json"))
+        .getJsonArray("instanceTypes")
         .getJsonObject(0);
     return Collections.singletonMap(identifierType.getString("id"), identifierType);
   }
@@ -163,6 +172,28 @@ class TranslationFunctionUnitTest {
   void SetMaterialType_shouldReturnEmptyString() {
     // given
     TranslationFunction translationFunction = TranslationsHolder.lookup("set_material_type");
+    String value = "non-existing-id";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals(StringUtils.EMPTY, result);
+  }
+
+  @Test
+  void SetInstanceTypeId_shouldReturnInstanceTypeIdValue() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_type_id");
+    String value = "6312d172-f0cf-40f6-b27d-9fa8feaf332f";
+    // when
+    String result = translationFunction.apply(value, 0, null, referenceData, null);
+    // then
+    Assert.assertEquals("text", result);
+  }
+
+  @Test
+  void SetInstanceTypeId_shouldReturnEmptyString() {
+    // given
+    TranslationFunction translationFunction = TranslationsHolder.lookup("set_instance_type_id");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
