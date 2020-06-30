@@ -84,7 +84,7 @@ public class MappingServiceImpl implements MappingService {
       String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
       return Optional.of(record);
     } catch (Exception e) {
-      LOGGER.error("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
+      LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
       return Optional.empty();
     }
   }
