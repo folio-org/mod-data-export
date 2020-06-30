@@ -16,6 +16,7 @@ import java.time.temporal.ChronoField;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public enum TranslationsHolder implements TranslationFunction {
@@ -23,7 +24,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_VALUE() {
     @Override
     public String apply(String value, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      return translation.getParameter("value");
+      return translation.getParameter(VALUE);
     }
   },
   SET_NATURE_OF_CONTENT_TERM() {
@@ -202,6 +203,29 @@ public enum TranslationsHolder implements TranslationFunction {
         return entry.getString(NAME);
       }
     }
+  },
+
+  SET_INSTANCE_FORMAT_ID() {
+    private static final String REGEX = "--";
+
+    @Override
+    public String apply(String instanceFormatId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      JsonObject entry = referenceData.getInstanceFormats().get(instanceFormatId);
+      if (entry == null) {
+        LOGGER.error("Instance format is not found by the given id: {}", instanceFormatId);
+        return StringUtils.EMPTY;
+      } else {
+        String instanceFormatIdValue = entry.getString("name");
+        String[] instanceFormatsResult = instanceFormatIdValue.split(REGEX);
+        if (translation.getParameter(VALUE).equals("0") && isNotBlank(instanceFormatsResult[0])) {
+          return instanceFormatsResult[0].trim();
+        } else if (translation.getParameter(VALUE).equals("1") && instanceFormatsResult.length > 1 && isNotBlank(instanceFormatsResult[1])) {
+          return instanceFormatsResult[1].trim();
+        } else {
+          return StringUtils.EMPTY;
+        }
+      }
+    }
   };
 
   public static TranslationFunction lookup(String function) {
@@ -210,6 +234,7 @@ public enum TranslationsHolder implements TranslationFunction {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String NAME = "name";
+  private static final String VALUE = "value";
 
 
 }

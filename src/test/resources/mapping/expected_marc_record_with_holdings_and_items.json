@@ -166,6 +166,61 @@
       }
     },
     {
+      "337": {
+        "subfields": [
+          {
+            "a": "audio"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "337": {
+        "subfields": [
+          {
+            "a": "computer"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "337": {
+        "subfields": [
+          {
+            "a": "microform"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "338": {
+        "subfields": [
+          {
+            "a": "audio roll"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "338": {
+        "subfields": [
+          {
+            "a": "online resource"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "490": {
         "subfields": [
           {
