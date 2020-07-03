@@ -31,8 +31,9 @@ import java.util.UUID;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.when;
 class JobExecutionServiceUnitTest {
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
+  private static final String SECOND_JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String JOB_PROFILE_NAME = "Job profile";
   private static final String DEFAULT_JOB_PROFILE_NAME = "default";
   private static final String TENANT_ID = "diku";
@@ -114,14 +116,24 @@ class JobExecutionServiceUnitTest {
     JobExecution secondJobExecution = new JobExecution()
       .withId(UUID.randomUUID().toString())
       .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName("Job");
+    JobExecution thirdJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
+      .withJobProfileId(SECOND_JOB_PROFILE_ID)
       .withJobProfileName(StringUtils.EMPTY);
     JobProfile jobProfile = new JobProfile()
       .withId(JOB_PROFILE_ID)
       .withName(JOB_PROFILE_NAME);
+    JobProfile secondJobProfile = new JobProfile()
+      .withId(SECOND_JOB_PROFILE_ID)
+      .withName(DEFAULT_JOB_PROFILE_NAME);
+    JobProfile third = new JobProfile()
+      .withId(UUID.randomUUID().toString())
+      .withName(DEFAULT_JOB_PROFILE_NAME);
     String query = "id=" + jobExecution.getId();
     when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution))));
-    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(singletonList(jobProfile))));
+      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution, thirdJobExecution))));
+    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(Arrays.asList(third, secondJobProfile, jobProfile, secondJobProfile))));
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
@@ -131,6 +143,8 @@ class JobExecutionServiceUnitTest {
       assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
       JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
       assertEquals(JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
+      JobExecution fetchedThirdJobExecution = ar.result().getJobExecutions().get(2);
+      assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedThirdJobExecution.getJobProfileName());
       context.completeNow();
     }));
   }
@@ -149,7 +163,7 @@ class JobExecutionServiceUnitTest {
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       JobExecution fetchedJobExecution = ar.result();
-      assertNull(fetchedJobExecution.getJobProfileName());
+      assertEquals(StringUtils.EMPTY, fetchedJobExecution.getJobProfileName());
       context.completeNow();
     }));
   }
@@ -167,14 +181,14 @@ class JobExecutionServiceUnitTest {
     String query = "id=" + jobExecution.getId();
     when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
       .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution))));
-    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.failedFuture(StringUtils.EMPTY));
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-      assertNull(fetchedJobExecution.getJobProfileName());
+      assertEquals(StringUtils.EMPTY, fetchedJobExecution.getJobProfileName());
       JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
       assertEquals(StringUtils.EMPTY, fetchedSecondJobExecution.getJobProfileName());
       context.completeNow();
@@ -211,7 +225,7 @@ class JobExecutionServiceUnitTest {
     String query = "id=" + jobExecution.getId();
     when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
       .withJobExecutions(singletonList(jobExecution))));
-    when(jobProfileService.get(null, 0, 9999, TENANT_ID)).thenReturn(Future.failedFuture(StringUtils.EMPTY));
+    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.failedFuture(StringUtils.EMPTY));
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then

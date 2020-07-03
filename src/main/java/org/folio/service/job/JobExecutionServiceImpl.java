@@ -6,6 +6,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -23,6 +24,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -33,7 +35,6 @@ import static java.util.Objects.nonNull;
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String DEFAULT = "default";
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
@@ -47,14 +48,22 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .onComplete(ar -> {
         if (ar.succeeded()) {
           JobExecutionCollection jobExecutionCollection = ar.result();
-          jobProfileService.get(null, 0, 9999, tenantId)
-            .onSuccess(jobProfileCollection -> jobExecutionCollection.getJobExecutions()
-              .forEach(jobExecution -> jobProfileCollection.getJobProfiles()
-                .stream()
-                .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
-                .findFirst()
-                .ifPresent(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))));
-          jobExecutionPromise.complete(jobExecutionCollection);
+          jobProfileService.get(getAssociatedJobProfileIdsQuery(jobExecutionCollection), 0, limit, tenantId)
+            .onSuccess(jobProfileCollection -> {
+              LOGGER.info("Successfully fetched jobProfiles while querying job execution for tenant {}", tenantId);
+              jobExecutionCollection.getJobExecutions().forEach(jobExecution ->
+                jobProfileCollection.getJobProfiles()
+                  .stream()
+                  .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
+                  .forEach(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())));
+              jobExecutionPromise.complete(jobExecutionCollection);
+            })
+            .onFailure(async -> {
+              LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. An empty jobProfileName will be used for those jobs that do not have jobProfileName", tenantId);
+              jobExecutionCollection.getJobExecutions()
+                .forEach(JobExecutionServiceImpl::populateEmptyJobProfileName);
+              jobExecutionPromise.complete(jobExecutionCollection);
+            });
         } else {
           jobExecutionPromise.fail(ar.cause());
         }
@@ -80,7 +89,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
           JobExecution jobExecution = optionalJobExecution.result().get();
           jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
-            .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()));
+            .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))
+            .onFailure(ar -> {
+              LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. " +
+                "An empty jobProfileName will be used for jobExecution with id {}", tenantId, jobExecution.getId());
+              populateEmptyJobProfileName(jobExecution);
+            });
           jobExecutionPromise.complete(jobExecution);
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
@@ -122,7 +136,6 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     });
   }
 
-
   @Override
   public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, String tenantId) {
     return jobExecutionDao.getById(jobExecutionId, tenantId)
@@ -140,4 +153,20 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         return Future.failedFuture(format("Job execution with id %s doesn't exist", jobExecutionId));
       });
   }
+
+  private static void populateEmptyJobProfileName(JobExecution jobExecution) {
+    if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
+      jobExecution.setJobProfileName(StringUtils.EMPTY);
+    }
+  }
+
+  private String getAssociatedJobProfileIdsQuery(JobExecutionCollection jobExecutionCollection) {
+    return String.format("(%s)", jobExecutionCollection
+      .getJobExecutions()
+      .stream()
+      .filter(jobExecution -> StringUtils.isNotEmpty(jobExecution.getJobProfileId()))
+      .map(jobExecution -> "id==" + jobExecution.getJobProfileId())
+      .collect(Collectors.joining(" or ")));
+  }
+
 }
