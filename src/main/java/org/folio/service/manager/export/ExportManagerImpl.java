@@ -39,7 +39,7 @@ import java.util.List;
 @Service
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int POOL_SIZE = 1;
+  private static final int POOL_SIZE = 2;
   private static final int SRS_LOAD_PARTITION_SIZE = 20;
   private static final int INVENTORY_LOAD_PARTITION_SIZE = 20;
   /* WorkerExecutor provides a worker pool for export process */
@@ -98,11 +98,11 @@ public class ExportManagerImpl implements ExportManager {
 
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
-    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
   }
 
 
@@ -152,7 +152,7 @@ public class ExportManagerImpl implements ExportManager {
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     clearIdentifiers(exportPayload);
-    incrementCurrentProgress(exportPayload, exportResult)
+    incrementCurrentProgress(exportPayload)
       .onComplete(handler -> {
         getInputDataManager().proceed(exportPayloadJson, exportResult);
         promise.complete();
@@ -181,14 +181,11 @@ public class ExportManagerImpl implements ExportManager {
     }
   }
 
-  private Future<JobExecution> incrementCurrentProgress(ExportPayload exportPayload, ExportResult exportResult) {
-    if (!exportResult.isFailed()) {
-      String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-      int exported = exportPayload.getExportedRecordsNumber();
-      int failed = exportPayload.getFailedRecordsNumber();
-      return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, tenantId);
-    }
-    return Future.succeededFuture();
+  private Future<JobExecution> incrementCurrentProgress(ExportPayload exportPayload) {
+    String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
+    int exported = exportPayload.getExportedRecordsNumber();
+    int failed = exportPayload.getFailedRecordsNumber();
+    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, tenantId);
   }
 
   private InputDataManager getInputDataManager() {
