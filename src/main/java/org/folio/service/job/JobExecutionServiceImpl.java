@@ -26,8 +26,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the JobExecutionService, calls JobExecutionDao to access JobExecution metadata.
@@ -83,26 +86,18 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<JobExecution> getById(final String jobExecutionId, final String tenantId) {
-    Promise<JobExecution> jobExecutionPromise = Promise.promise();
-    jobExecutionDao.getById(jobExecutionId, tenantId)
-      .onComplete(optionalJobExecution -> {
-        if (optionalJobExecution.succeeded() && optionalJobExecution.result().isPresent()) {
-          JobExecution jobExecution = optionalJobExecution.result().get();
-          jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
-            .onSuccess(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName()))
-            .onFailure(ar -> {
-              LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. " +
-                "An empty jobProfileName will be used for jobExecution with id {}", tenantId, jobExecution.getId());
-              populateEmptyJobProfileName(jobExecution);
-            });
-          jobExecutionPromise.complete(jobExecution);
+    return jobExecutionDao.getById(jobExecutionId, tenantId)
+      .compose(optionalJobExecution -> {
+        if (optionalJobExecution.isPresent()) {
+          return isNotEmpty(optionalJobExecution.get().getJobProfileId())
+            ? populateJobProfileNameIfNecessary(optionalJobExecution.get(), tenantId)
+            : succeededFuture(optionalJobExecution.get());
         } else {
           String errorMessage = String.format("Job execution not found with id %s", jobExecutionId);
           LOGGER.error(errorMessage);
-          jobExecutionPromise.fail(new NotFoundException(errorMessage));
+          return failedFuture(new NotFoundException(errorMessage));
         }
       });
-    return jobExecutionPromise.future();
   }
 
   @Override
@@ -148,10 +143,26 @@ public class JobExecutionServiceImpl implements JobExecutionService {
             progress.setFailed(progress.getFailed() + failed);
             return jobExecutionDao.update(jobExecution, tenantId);
           }
-          return Future.failedFuture(format("Unable to update progress of job execution with id %s", jobExecutionId));
+          return failedFuture(format("Unable to update progress of job execution with id %s", jobExecutionId));
         }
-        return Future.failedFuture(format("Job execution with id %s doesn't exist", jobExecutionId));
+        return failedFuture(format("Job execution with id %s doesn't exist", jobExecutionId));
       });
+  }
+
+  private Future<JobExecution> populateJobProfileNameIfNecessary(JobExecution jobExecution, String tenantId) {
+    Promise<JobExecution> jobExecutionPromise = Promise.promise();
+    jobProfileService.getById(jobExecution.getJobProfileId(), tenantId)
+      .onSuccess(jobProfile -> {
+        jobExecution.setJobProfileName(jobProfile.getName());
+        jobExecutionPromise.complete(jobExecution);
+      })
+      .onFailure(ar -> {
+        LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. " +
+          "An empty jobProfileName will be used for jobExecution with id {}", tenantId, jobExecution.getId());
+        populateEmptyJobProfileName(jobExecution);
+        jobExecutionPromise.complete(jobExecution);
+      });
+    return jobExecutionPromise.future();
   }
 
   private static void populateEmptyJobProfileName(JobExecution jobExecution) {
@@ -164,7 +175,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     return String.format("(%s)", jobExecutionCollection
       .getJobExecutions()
       .stream()
-      .filter(jobExecution -> StringUtils.isNotEmpty(jobExecution.getJobProfileId()))
+      .filter(jobExecution -> isNotEmpty(jobExecution.getJobProfileId()))
       .map(jobExecution -> "id==" + jobExecution.getJobProfileId())
       .collect(Collectors.joining(" or ")));
   }
