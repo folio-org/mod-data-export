@@ -13,13 +13,14 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.*;
 import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.ReferenceData;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.mapping.MappingService;
 import org.folio.service.mapping.MappingServiceImpl;
-import org.folio.service.mapping.referencedata.ReferenceData;
+import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
@@ -48,13 +49,13 @@ class SrsRecordConvertorServiceUnitTest {
   private ConfigurationsClient configurationsClient;
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
-  private ReferenceData referenceData = new ReferenceData();
+  private ReferenceData referenceData = new ReferenceDataImpl();
 
   SrsRecordConvertorServiceUnitTest() {
-    referenceData.addNatureOfContentTerms(getNatureOfContentTerms());
-    referenceData.addIdentifierTypes(getIdentifierTypes());
-    referenceData.addContributorNameTypes(getContributorNameTypes());
-    referenceData.addLocations(getLocations());
+    referenceData.put("natureOfContentTerms",getNatureOfContentTerms());
+    referenceData.put("identifierTypes",getIdentifierTypes());
+    referenceData.put("contributorNameTypes",getContributorNameTypes());
+    referenceData.put("locations",getLocations());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {

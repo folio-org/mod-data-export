@@ -1,6 +1,7 @@
 package org.folio.service.mapping.referencedata;
 
 import org.folio.clients.InventoryClient;
+import org.folio.processor.ReferenceData;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,15 +33,15 @@ public class ReferenceDataProvider {
     }
   }
 
-  private ReferenceData load(OkapiConnectionParams okapiConnectionParams) {
-    ReferenceData referenceData = new ReferenceData();
-    referenceData.addNatureOfContentTerms(inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
-    referenceData.addIdentifierTypes(inventoryClient.getIdentifierTypes(okapiConnectionParams));
-    referenceData.addContributorNameTypes(inventoryClient.getContributorNameTypes(okapiConnectionParams));
-    referenceData.addLocations(inventoryClient.getLocations(okapiConnectionParams));
-    referenceData.addMaterialTypes(inventoryClient.getMaterialTypes(okapiConnectionParams));
-    referenceData.addInstanceTypes(inventoryClient.getInstanceTypes(okapiConnectionParams));
-    referenceData.addInstanceFormats(inventoryClient.getInstanceFormats(okapiConnectionParams));
+  private ReferenceDataImpl load(OkapiConnectionParams okapiConnectionParams) {
+    ReferenceDataImpl referenceData = new ReferenceDataImpl();
+    referenceData.put("natureOfContentTerms", inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
+    referenceData.put("identifierTypes", inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    referenceData.put("contributorNameTypes", inventoryClient.getContributorNameTypes(okapiConnectionParams));
+    referenceData.put("locations", inventoryClient.getLocations(okapiConnectionParams));
+    referenceData.put("materialTypes", inventoryClient.getMaterialTypes(okapiConnectionParams));
+    referenceData.put("instanceTypes", inventoryClient.getInstanceTypes(okapiConnectionParams));
+    referenceData.put("instanceFormats", inventoryClient.getInstanceFormats(okapiConnectionParams));
     return referenceData;
   }
 }
