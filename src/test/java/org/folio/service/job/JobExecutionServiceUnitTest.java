@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Sets;
 import org.folio.dao.impl.JobExecutionDaoImpl;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,6 +34,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -191,6 +194,29 @@ class JobExecutionServiceUnitTest {
       assertEquals(StringUtils.EMPTY, fetchedJobExecution.getJobProfileName());
       JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
       assertEquals(StringUtils.EMPTY, fetchedSecondJobExecution.getJobProfileName());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getByQuery_shouldReturnSucceededFuture_withEmptyJobExecutionCollection_whenDaoReturnedEmptyCollection(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withJobProfileId(JOB_PROFILE_ID);
+    JobExecution secondJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withJobProfileName(StringUtils.EMPTY);
+    String query = "id=" + jobExecution.getId();
+    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()));
+    //when
+    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      assertTrue(CollectionUtils.isEmpty(ar.result().getJobExecutions()));
+      Mockito.verify(jobProfileService, Mockito.never()).get(anyString(), anyInt(), anyInt(), anyString());
       context.completeNow();
     }));
   }
