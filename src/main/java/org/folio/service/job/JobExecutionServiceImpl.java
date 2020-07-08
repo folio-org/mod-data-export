@@ -6,6 +6,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ExportedFile;
@@ -51,22 +52,26 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .onComplete(ar -> {
         if (ar.succeeded()) {
           JobExecutionCollection jobExecutionCollection = ar.result();
-          jobProfileService.get(getAssociatedJobProfileIdsQuery(jobExecutionCollection), 0, limit, tenantId)
-            .onSuccess(jobProfileCollection -> {
-              LOGGER.info("Successfully fetched jobProfiles while querying job execution for tenant {}", tenantId);
-              jobExecutionCollection.getJobExecutions().forEach(jobExecution ->
-                jobProfileCollection.getJobProfiles()
-                  .stream()
-                  .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
-                  .forEach(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())));
-              jobExecutionPromise.complete(jobExecutionCollection);
-            })
-            .onFailure(async -> {
-              LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. An empty jobProfileName will be used for those jobs that do not have jobProfileName", tenantId);
-              jobExecutionCollection.getJobExecutions()
-                .forEach(JobExecutionServiceImpl::populateEmptyJobProfileName);
-              jobExecutionPromise.complete(jobExecutionCollection);
-            });
+          if (CollectionUtils.isEmpty(jobExecutionCollection.getJobExecutions())) {
+            jobExecutionPromise.complete(jobExecutionCollection);
+          } else {
+            jobProfileService.get(getAssociatedJobProfileIdsQuery(jobExecutionCollection), 0, limit, tenantId)
+              .onSuccess(jobProfileCollection -> {
+                LOGGER.info("Successfully fetched jobProfiles while querying job execution for tenant {}", tenantId);
+                jobExecutionCollection.getJobExecutions().forEach(jobExecution ->
+                  jobProfileCollection.getJobProfiles()
+                    .stream()
+                    .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
+                    .forEach(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())));
+                jobExecutionPromise.complete(jobExecutionCollection);
+              })
+              .onFailure(async -> {
+                LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. An empty jobProfileName will be used for those jobs that do not have jobProfileName", tenantId);
+                jobExecutionCollection.getJobExecutions()
+                  .forEach(JobExecutionServiceImpl::populateEmptyJobProfileName);
+                jobExecutionPromise.complete(jobExecutionCollection);
+              });
+          }
         } else {
           jobExecutionPromise.fail(ar.cause());
         }
@@ -157,7 +162,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         jobExecutionPromise.complete(jobExecution);
       })
       .onFailure(ar -> {
-        LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. " +
+        LOGGER.error("Failed to fetch job profiles while getting job executions by id for tenant {}. " +
           "An empty jobProfileName will be used for jobExecution with id {}", tenantId, jobExecution.getId());
         populateEmptyJobProfileName(jobExecution);
         jobExecutionPromise.complete(jobExecution);
