@@ -330,7 +330,7 @@
         "translation": {
           "function": "set_value",
           "parameters": {
-            "value": "1"
+            "value": "2"
           }
         }
       },
@@ -367,7 +367,7 @@
         "translation": {
           "function": "set_value",
           "parameters": {
-            "value": "1"
+            "value": "2"
           }
         }
       },
