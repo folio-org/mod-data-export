@@ -5,7 +5,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.processor.rule.Rule;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
 import org.slf4j.Logger;
