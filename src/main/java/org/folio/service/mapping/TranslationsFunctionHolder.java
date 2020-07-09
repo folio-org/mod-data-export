@@ -1,6 +1,7 @@
 package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.ReferenceData;
 import org.folio.processor.rule.Metadata;
@@ -18,11 +19,14 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
@@ -236,6 +240,26 @@ public enum TranslationsFunctionHolder implements TranslationFunction, Translati
           return StringUtils.EMPTY;
         }
       }
+    }
+  },
+
+  SET_ELECTRONIC_ACCESS_INDICATOR() {
+    @Override
+    public String apply(String value, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      List<String> relationshipIds = (List<String>) metadata.getData().get("relationshipId").getData();
+      if(CollectionUtils.isNotEmpty(relationshipIds)) {
+        String relationshipId = relationshipIds.get(currentIndex);
+        JsonObject relationship = referenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS).get(relationshipId);
+        if(relationship != null) {
+          String relationshipName = relationship.getString("name");
+          for(Map.Entry<String,String> parameter : translation.getParameters().entrySet()) {
+            if(relationshipName.equals(parameter.getKey())) {
+              return parameter.getValue();
+            }
+          }
+        }
+      }
+      return StringUtils.SPACE;
     }
   };
 

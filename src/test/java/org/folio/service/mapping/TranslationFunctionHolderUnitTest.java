@@ -3,6 +3,7 @@ package org.folio.service.mapping;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Lists;
 import org.folio.TestUtil;
 import org.folio.processor.ReferenceData;
 import org.folio.processor.rule.Metadata;
@@ -24,6 +25,7 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
@@ -45,6 +47,7 @@ class TranslationFunctionHolderUnitTest {
     referenceData.put(MATERIAL_TYPES, getMaterialTypes());
     referenceData.put(INSTANCE_TYPES, getInstanceTypes());
     referenceData.put(INSTANCE_FORMATS, getInstanceFormats());
+    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, getElectronicAccessRelationships());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -101,6 +104,18 @@ class TranslationFunctionHolderUnitTest {
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_instance_formats_response.json"))
         .getJsonArray("instanceFormats");
     instanceFormats.stream().forEach(instanceFormat -> {
+      JsonObject jsonObject = new JsonObject(instanceFormat.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
+  private static Map<String, JsonObject> getElectronicAccessRelationships() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray electronicAccessRelationships =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_electronic_access_relationships_response.json"))
+        .getJsonArray("electronicAccessRelationships");
+    electronicAccessRelationships.stream().forEach(instanceFormat -> {
       JsonObject jsonObject = new JsonObject(instanceFormat.toString());
       stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
     });
@@ -536,5 +551,62 @@ class TranslationFunctionHolderUnitTest {
     // then
     Assert.assertEquals(40, result.length());
   }
+
+  @Test
+  void SetElectronicAccessIndicator_shouldReturnEmptyIndicator_whenRelationshipIdsEmpty() {
+    // given
+    Metadata metadata = new Metadata();
+    metadata.addData("relationshipId", new Metadata.Entry("$.instance.electronicAccess[*].relationshipId", Lists.emptyList()));
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_electronic_access_indicator");
+    // when
+    String result = translationFunction.apply(null, 0, null, null, metadata);
+    // then
+    Assert.assertEquals(StringUtils.SPACE, result);
+  }
+
+  @Test
+  void SetElectronicAccessIndicator_shouldReturnEmptyIndicator_whenRelationshipIdNotExist() {
+    // given
+    Metadata metadata = new Metadata();
+    metadata.addData("relationshipId", new Metadata.Entry("$.instance.electronicAccess[*].relationshipId", Arrays.asList("non-existing-id")));
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_electronic_access_indicator");
+    // when
+    String result = translationFunction.apply(null, 0, null, referenceData, metadata);
+    // then
+    Assert.assertEquals(StringUtils.SPACE, result);
+  }
+
+  @Test
+  void SetElectronicAccessIndicator_shouldReturnEmptyIndicator_whenRelationshipNotEqualTranslationParameterKey() {
+    // given
+    Metadata metadata = new Metadata();
+    metadata.addData("relationshipId", new Metadata.Entry("$.instance.electronicAccess[*].relationshipId", Arrays.asList("f50c90c9-bae0-4add-9cd0-db9092dbc9dd")));
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("Resource", "0");
+    Translation translation = new Translation();
+    translation.setParameters(parameters);
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_electronic_access_indicator");
+    // when
+    String result = translationFunction.apply(null, 0, translation, referenceData, metadata);
+    // then
+    Assert.assertEquals(StringUtils.SPACE, result);
+  }
+
+  @Test
+  void SetElectronicAccessIndicator_shouldReturnParameterIndicator_whenRelationshipEqualsTranslationParameterKey() {
+    // given
+    Metadata metadata = new Metadata();
+    metadata.addData("relationshipId", new Metadata.Entry("$.instance.electronicAccess[*].relationshipId", Arrays.asList("f5d0068e-6272-458e-8a81-b85e7b9a14aa")));
+    Map<String, String> parameters = new HashMap<>();
+    parameters.put("Resource", "0");
+    Translation translation = new Translation();
+    translation.setParameters(parameters);
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_electronic_access_indicator");
+    // when
+    String result = translationFunction.apply(null, 0, translation, referenceData, metadata);
+    // then
+    Assert.assertEquals("0", result);
+  }
+
 
 }
