@@ -23,21 +23,28 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(MockitoJUnitRunner.class)
-class TranslationFunctionUnitTest {
+class TranslationFunctionHolderUnitTest {
   private static ReferenceData referenceData = new ReferenceDataImpl();
 
   @BeforeAll
   static void setUp() {
-    referenceData.put("natureOfContentTerms",getNatureOfContentTerms());
-    referenceData.put("identifierTypes",getIdentifierTypes());
-    referenceData.put("contributorNameTypes",getContributorNameTypes());
-    referenceData.put("locations",getLocations());
-    referenceData.put("materialTypes",getMaterialTypes());
-    referenceData.put("instanceTypes",getInstanceTypes());
-    referenceData.put("instanceFormats",getInstanceFormats());
+    referenceData.put(NATURE_OF_CONTENT_TERMS, getNatureOfContentTerms());
+    referenceData.put(IDENTIFIER_TYPES, getIdentifierTypes());
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, getContributorNameTypes());
+    referenceData.put(LOCATIONS, getLocations());
+    referenceData.put(MATERIAL_TYPES, getMaterialTypes());
+    referenceData.put(INSTANCE_TYPES, getInstanceTypes());
+    referenceData.put(INSTANCE_FORMATS, getInstanceFormats());
   }
 
   private static Map<String, JsonObject> getNatureOfContentTerms() {
@@ -58,10 +65,10 @@ class TranslationFunctionUnitTest {
 
   private static Map<String, JsonObject> getContributorNameTypes() {
     JsonObject contributorNameTypes =
-        new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
-          .getJsonArray("contributorNameTypes")
-          .getJsonObject(0);
-      return Collections.singletonMap(contributorNameTypes.getString("id"), contributorNameTypes);
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
+        .getJsonArray("contributorNameTypes")
+        .getJsonObject(0);
+    return Collections.singletonMap(contributorNameTypes.getString("id"), contributorNameTypes);
   }
 
   private static Map<String, JsonObject> getLocations() {
@@ -103,7 +110,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetValue_shouldSetGivenValue() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_value");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_value");
     String value = "field value";
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("value", value));
@@ -116,7 +123,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetNatureOfContentTerm_shouldReturnTermName() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_nature_of_content_term");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_nature_of_content_term");
     String value = "44cd89f3-2e76-469f-a955-cc57cb9e0395";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -127,7 +134,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetNatureOfContentTerm_shouldReturnEmptyString() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_nature_of_content_term");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_nature_of_content_term");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -139,7 +146,7 @@ class TranslationFunctionUnitTest {
   void SetIdentifier_shouldReturnIdentifierValue() {
     // given
     String value = "value";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_identifier");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_identifier");
 
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("type", "LCCN"));
@@ -158,7 +165,7 @@ class TranslationFunctionUnitTest {
   void SetIdentifier_shouldReturnEmptyString_whenMetadataIsEmpty() {
     // given
     String value = "value";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_identifier");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_identifier");
 
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("type", "LCCN"));
@@ -175,7 +182,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetMaterialType_shouldReturnMaterialTypeValue() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_material_type");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_material_type");
     String value = "1a54b431-2e4f-452d-9cae-9cee66c9a892";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -186,7 +193,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetMaterialType_shouldReturnEmptyString() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_material_type");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_material_type");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -197,7 +204,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceTypeId_shouldReturnInstanceTypeIdValue() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_type_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_type_id");
     String value = "6312d172-f0cf-40f6-b27d-9fa8feaf332f";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -208,7 +215,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceTypeId_shouldReturnEmptyString() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_type_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_type_id");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -219,7 +226,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceFormatId_shouldReturnInstanceFormatIdValue() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_format_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_format_id");
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("value", "0"));
     String value = "7fde4e21-00b5-4de4-a90a-08a84a601aeb";
@@ -232,7 +239,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceFormatId_shouldReturnInstanceFormatIdValue_IfNoRegexFromInventory() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_format_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_format_id");
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("value", "0"));
     String value = "485e3e1d-9f46-42b6-8c65-6bb7bd4b37f8";
@@ -245,7 +252,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceFormatId_shouldReturnEmptyString_IfNoRegexFromInventory() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_format_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_format_id");
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("value", "1"));
     String value = "485e3e1d-9f46-42b6-8c65-6bb7bd4b37f8";
@@ -258,7 +265,7 @@ class TranslationFunctionUnitTest {
   @Test
   void SetInstanceFormatId_shouldReturnEmptyString() {
     // given
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_instance_format_id");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_instance_format_id");
     String value = "non-existing-id";
     // when
     String result = translationFunction.apply(value, 0, null, referenceData, null);
@@ -270,7 +277,7 @@ class TranslationFunctionUnitTest {
   void SetTransactionDatetime_shouldReturnFormattedDate() {
     // given
     String updatedDate = "2020-05-22T01:46:42.915+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_transaction_datetime");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_transaction_datetime");
     // when
     String result = translationFunction.apply(updatedDate, 0, null, null, null);
     // then
@@ -282,7 +289,7 @@ class TranslationFunctionUnitTest {
   void SetTransactionDatetime_shouldThrowException() {
     // given
     String updatedDate = "date in wrong format";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_transaction_datetime");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_transaction_datetime");
     // when
     assertThrows(DateTimeParseException.class, () ->
       translationFunction.apply(updatedDate, 0, null, null, null)
@@ -293,7 +300,7 @@ class TranslationFunctionUnitTest {
   void SetContributor_shouldReturnContributorNameValue() {
     // given
     String value = "value";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_contributor");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_contributor");
 
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("type", "Personal name"));
@@ -312,7 +319,7 @@ class TranslationFunctionUnitTest {
   void setContributor_shouldReturnEmptyString_whenMetadataIsEmpty() {
     // given
     String value = "value";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_contributor");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_contributor");
 
     Translation translation = new Translation();
     translation.setParameters(Collections.singletonMap("type", "Personal name"));
@@ -330,7 +337,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_noDatesOfPublication_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
@@ -343,7 +350,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_noDatesOfPublication_language_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("languages", new Metadata.Entry("$.languages", singletonList("lat")));
     // when
@@ -357,7 +364,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_noDatesOfPublication_multipleLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("languages", new Metadata.Entry("$.languages", asList("lat", "ita")));
     // when
@@ -371,7 +378,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_1dateOfPublication_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", singletonList("2015")));
     // when
@@ -385,7 +392,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_2datesOfPublication_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", asList("2015", "2016")));
     // when
@@ -399,7 +406,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_2datesOfPublication_multipleLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", asList("2015", "2016")));
     metadata.addData("languages", new Metadata.Entry("$.languages", asList("lat", "ita")));
@@ -414,7 +421,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_2incorrectDatesOfPublication_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
     metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", asList("123", "456")));
     // when
@@ -428,9 +435,9 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_datesOfPublication_isNull_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
-    metadata.addData("datesOfPublication",  null);
+    metadata.addData("datesOfPublication", null);
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
@@ -442,9 +449,9 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_datesOfPublication_isNull_languagesIsNull() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
-    metadata.addData("datesOfPublication",  null);
+    metadata.addData("datesOfPublication", null);
     metadata.addData("languages", null);
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
@@ -457,9 +464,9 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_datesOfPublication_isNull_languagesIsEmpty() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
-    metadata.addData("datesOfPublication",  null);
+    metadata.addData("datesOfPublication", null);
     metadata.addData("languages", new Metadata.Entry("$.languages", singletonList(StringUtils.EMPTY)));
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
@@ -472,9 +479,9 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_datesOfPublicationFirstParam_isNull_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
-    metadata.addData("datesOfPublication",  new Metadata.Entry("$.publication[*].dateOfPublication", asList(null, "2016")));
+    metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", asList(null, "2016")));
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
@@ -486,9 +493,9 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_datesOfPublicationSecondParam_isNull_noLanguages_specified() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     Metadata metadata = new Metadata();
-    metadata.addData("datesOfPublication",  new Metadata.Entry("$.publication[*].dateOfPublication", asList( "2016", null)));
+    metadata.addData("datesOfPublication", new Metadata.Entry("$.publication[*].dateOfPublication", asList("2016", null)));
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, metadata);
     // then
@@ -500,7 +507,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_metadataIsNull() {
     // given
     String createdDate = "2019-08-07T03:12:01.011+0000";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, null);
     // then
@@ -512,7 +519,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_metadataIsNull_createdDateIsNull() {
     // given
     String createdDate = null;
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, null);
     // then
@@ -523,7 +530,7 @@ class TranslationFunctionUnitTest {
   void SetFixedLengthDataElements_metadataIsNull_createdDateIsIncorrect() {
     // given
     String createdDate = "date in wrong format";
-    TranslationFunction translationFunction = TranslationsFunctionImpl.SET_VALUE.lookup("set_fixed_length_data_elements");
+    TranslationFunction translationFunction = TranslationsFunctionHolder.SET_VALUE.lookup("set_fixed_length_data_elements");
     // when
     String result = translationFunction.apply(createdDate, 0, null, null, null);
     // then

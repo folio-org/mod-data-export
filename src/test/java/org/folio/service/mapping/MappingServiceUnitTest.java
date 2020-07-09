@@ -1,24 +1,10 @@
 package org.folio.service.mapping;
 
-import static org.folio.TestUtil.getFileFromResources;
-import static org.folio.TestUtil.readFileContentFromResources;
-import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.RecordType.ITEM;
-import static org.mockito.ArgumentMatchers.any;
-import static org.folio.TestUtil.*;
-
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
@@ -40,6 +26,53 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
+import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_PATH;
+import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_PATH;
+import static org.folio.TestUtil.EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID;
+import static org.folio.TestUtil.EFFECTIVE_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.EFFECTIVE_LOCATION_PATH;
+import static org.folio.TestUtil.ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID;
+import static org.folio.TestUtil.ELECTRONIC_ACCESS_URI_FIELD_ID;
+import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
+import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_URI_PATH;
+import static org.folio.TestUtil.ITEMS_EFFECTIVE_CALL_NUMBER_PATH;
+import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
+import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_URI_PATH;
+import static org.folio.TestUtil.MATERIALTYPE_FIELD_ID;
+import static org.folio.TestUtil.MATERIAL_TYPE_ID_PATH;
+import static org.folio.TestUtil.PERMANENT_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.PERMANENT_LOCATION_PATH;
+import static org.folio.TestUtil.TEMPORARY_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.TEMPORARY_LOCATION_PATH;
+import static org.folio.TestUtil.getFileFromResources;
+import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.mockito.ArgumentMatchers.any;
+
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class MappingServiceUnitTest {
@@ -55,13 +88,13 @@ class MappingServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   MappingServiceUnitTest() {
-    referenceData.put("natureOfContentTerms",getNatureOfContentTerms());
-    referenceData.put("identifierTypes",getIdentifierTypes());
-    referenceData.put("contributorNameTypes",getContributorNameTypes());
-    referenceData.put("locations",getLocations());
-    referenceData.put("materialTypes",getMaterialTypes());
-    referenceData.put("instanceTypes",getInstanceTypes());
-    referenceData.put("instanceFormats",getInstanceFormats());
+    referenceData.put(NATURE_OF_CONTENT_TERMS, getNatureOfContentTerms());
+    referenceData.put(IDENTIFIER_TYPES, getIdentifierTypes());
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, getContributorNameTypes());
+    referenceData.put(LOCATIONS, getLocations());
+    referenceData.put(MATERIAL_TYPES, getMaterialTypes());
+    referenceData.put(INSTANCE_TYPES, getInstanceTypes());
+    referenceData.put(INSTANCE_FORMATS, getInstanceFormats());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {
@@ -244,8 +277,8 @@ class MappingServiceUnitTest {
   private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
     List<Transformations> transformations = new ArrayList<>();
     transformations.add(createTransformations(CALLNUMBER_FIELD_ID, CALLNUMBER_FIELD_PATH, "900ff$a", HOLDINGS));
-    transformations.add(createTransformations(CALLNUMBER_PREFIX_FIELD_ID,CALLNUMBER_PREFIX_FIELD_PATH , "900ff$b", HOLDINGS));
-    transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID,CALLNUMBER_SUFFIX_FIELD_PATH , "902  $a", HOLDINGS));
+    transformations.add(createTransformations(CALLNUMBER_PREFIX_FIELD_ID, CALLNUMBER_PREFIX_FIELD_PATH, "900ff$b", HOLDINGS));
+    transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID, CALLNUMBER_SUFFIX_FIELD_PATH, "902  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "903  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90412$a", HOLDINGS));
     transformations.add(createTransformations(PERMANENT_LOCATION_FIELD_ID, PERMANENT_LOCATION_PATH, "905  $a", HOLDINGS));

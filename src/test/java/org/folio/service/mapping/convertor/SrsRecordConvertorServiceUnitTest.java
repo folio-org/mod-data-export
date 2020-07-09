@@ -4,6 +4,10 @@ import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.junit.Assert.assertEquals;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -52,10 +56,10 @@ class SrsRecordConvertorServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   SrsRecordConvertorServiceUnitTest() {
-    referenceData.put("natureOfContentTerms",getNatureOfContentTerms());
-    referenceData.put("identifierTypes",getIdentifierTypes());
-    referenceData.put("contributorNameTypes",getContributorNameTypes());
-    referenceData.put("locations",getLocations());
+    referenceData.put(NATURE_OF_CONTENT_TERMS,getNatureOfContentTerms());
+    referenceData.put(IDENTIFIER_TYPES,getIdentifierTypes());
+    referenceData.put(CONTRIBUTOR_NAME_TYPES,getContributorNameTypes());
+    referenceData.put(LOCATIONS,getLocations());
   }
 
   private Map<String, JsonObject> getNatureOfContentTerms() {

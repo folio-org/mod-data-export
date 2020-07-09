@@ -6,6 +6,14 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+
 /**
  * The component is responsible to provide reference data.
  * Caches data for the given job id.
@@ -35,13 +43,13 @@ public class ReferenceDataProvider {
 
   private ReferenceDataImpl load(OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
-    referenceData.put("natureOfContentTerms", inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
-    referenceData.put("identifierTypes", inventoryClient.getIdentifierTypes(okapiConnectionParams));
-    referenceData.put("contributorNameTypes", inventoryClient.getContributorNameTypes(okapiConnectionParams));
-    referenceData.put("locations", inventoryClient.getLocations(okapiConnectionParams));
-    referenceData.put("materialTypes", inventoryClient.getMaterialTypes(okapiConnectionParams));
-    referenceData.put("instanceTypes", inventoryClient.getInstanceTypes(okapiConnectionParams));
-    referenceData.put("instanceFormats", inventoryClient.getInstanceFormats(okapiConnectionParams));
+    referenceData.put(NATURE_OF_CONTENT_TERMS, inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
+    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(okapiConnectionParams));
+    referenceData.put(LOCATIONS, inventoryClient.getLocations(okapiConnectionParams));
+    referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
+    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
+    referenceData.put(INSTANCE_FORMATS, inventoryClient.getInstanceFormats(okapiConnectionParams));
     return referenceData;
   }
 }

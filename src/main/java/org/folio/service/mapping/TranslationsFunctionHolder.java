@@ -22,7 +22,7 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-public enum TranslationsFunctionImpl implements TranslationFunction, TranslationHolder {
+public enum TranslationsFunctionHolder implements TranslationFunction, TranslationHolder {
 
   SET_VALUE() {
     @Override

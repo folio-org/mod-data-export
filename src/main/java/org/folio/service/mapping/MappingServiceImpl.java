@@ -43,7 +43,7 @@ public class MappingServiceImpl implements MappingService {
   private ConfigurationsClient configurationsClient;
 
   public MappingServiceImpl() {
-    this.ruleProcessor = new RuleProcessor(TranslationsFunctionImpl.SET_VALUE);
+    this.ruleProcessor = new RuleProcessor(TranslationsFunctionHolder.SET_VALUE);
     this.ruleFactory = new RuleFactory();
     this.mappingThreadPool = Executors.newWorkStealingPool(MAPPING_POOL_SIZE);
   }
