@@ -1,3 +1,17 @@
+## 07/09/2020 v2.1.1 Released
+This release includes minor bug fixes related to job profile name and minor performance improvement for generating instances on the fly
+ 
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.0...v2.1.1)
+
+### Stories
+* [MDEXP-166](https://issues.folio.org/browse/MDEXP-166) - Make records processing parallel
+
+### Bug Fixes
+* [MDEXP-214](https://issues.folio.org/browse/MDEXP-214) - Incorrect indicators for Corporate and Meeting primary contributors
+* [MDEXP-208](https://issues.folio.org/browse/MDEXP-208) - JobProfileName field not populating while getting job execution
+* [MDEXP-203](https://issues.folio.org/browse/MDEXP-203) - Incorrect number of errors reported
+
+
 ## 06/25/2020 v2.1.0 Released
 The major change in this release is the interface dependency change to "source-storage-source-records" for performance reasons.
 Also other minor changes include jobprofile association with job execution and MARC field combining on Transformations
