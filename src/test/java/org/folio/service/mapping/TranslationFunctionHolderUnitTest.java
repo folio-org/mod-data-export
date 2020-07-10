@@ -115,8 +115,8 @@ class TranslationFunctionHolderUnitTest {
     JsonArray electronicAccessRelationships =
       new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_electronic_access_relationships_response.json"))
         .getJsonArray("electronicAccessRelationships");
-    electronicAccessRelationships.stream().forEach(instanceFormat -> {
-      JsonObject jsonObject = new JsonObject(instanceFormat.toString());
+    electronicAccessRelationships.stream().forEach(electronicAccessRelationship -> {
+      JsonObject jsonObject = new JsonObject(electronicAccessRelationship.toString());
       stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
     });
     return stringJsonObjectMap;

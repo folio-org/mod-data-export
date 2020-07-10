@@ -314,12 +314,12 @@ public class MockServer {
   }
 
   private void handleGetElectronicAccessRelationships(RoutingContext ctx) {
-    logger.info("handleGet ContributorName types Record got: " + ctx.request()
+    logger.info("handleGet Electronic access relationship types Record: " + ctx.request()
       .path());
     try {
-      JsonObject contributorTypes = new JsonObject(RestVerticleTestBase.getMockData(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ELECTRONIC_ACCESS_RELATIONSHIPS, contributorTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
+      JsonObject electronicAccessRelationship = new JsonObject(RestVerticleTestBase.getMockData(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, ELECTRONIC_ACCESS_RELATIONSHIPS, electronicAccessRelationship);
+      serverResponse(ctx, 200, APPLICATION_JSON, electronicAccessRelationship.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
