@@ -9,6 +9,8 @@ import io.vertx.core.logging.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
@@ -45,7 +47,7 @@ public class RecordConvertor {
        LOGGER.debug("Fetching holdings/items for instance");
        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, params);
        appendHoldingsItems.put("holdings", new JsonArray(holdings));
-       if (mappingProfile.getRecordTypes().contains(RecordType.ITEM)) {
+       if (mappingProfile.getRecordTypes().contains(RecordType.ITEM) && CollectionUtils.isNotEmpty(holdings)) {
          List<String> holdingIds = holdings.stream()
            .map(record -> record.getString("id"))
            .collect(Collectors.toList());
