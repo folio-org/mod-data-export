@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int MAPPING_POOL_SIZE = 4;
+  private static final int MAPPING_POOL_SIZE = 1;
   private ExecutorService mappingThreadPool;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
