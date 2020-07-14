@@ -1,3 +1,14 @@
+## 07/13/2020 v2.1.2 Released
+This bugfix release includes fixes to concurrency issues while exporting jobs and also fixes empty query sent to 
+inventory which was causing un responsive module
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.1...v2.1.2)
+
+### Bug Fixes
+* [MDEXP-220](https://issues.folio.org/browse/MDEXP-220) - Inconsistent results when exporting the same dataset with default mapping profile
+* [MDEXP-219](https://issues.folio.org/browse/MDEXP-219) - Export job with custom mapping profile gets stuck when retrieving data from inventory
+
+
 ## 07/09/2020 v2.1.1 Released
 This release includes minor bug fixes related to job profile name and minor performance improvement for generating instances on the fly
  
