@@ -3,6 +3,7 @@ package org.folio.clients;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -66,6 +67,11 @@ public class InventoryClient {
   public Map<String, JsonObject> getInstanceFormats(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(INSTANCE_FORMATS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, INSTANCE_FORMATS);
+  }
+
+  public Map<String, JsonObject> getElectronicAccessRelationships(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(ELECTRONIC_ACCESS_RELATIONSHIPS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, ELECTRONIC_ACCESS_RELATIONSHIPS);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
