@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final int MAPPING_POOL_SIZE = 1;
+  private static final int MAPPING_POOL_SIZE = 4;
   private ExecutorService mappingThreadPool;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
@@ -59,10 +59,11 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules) {
+    List<Rule> synchronizedRules = Collections.synchronizedList(rules);
     List<String> records = null;
     try {
       records = mappingThreadPool.submit(() -> instances.parallelStream()
-        .map(instance -> mapInstance(instance, referenceData, rules))
+        .map(instance -> mapInstance(instance, referenceData, synchronizedRules))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList()))
@@ -98,7 +99,7 @@ public class MappingServiceImpl implements MappingService {
     List<Rule> rules = getRules(mappingProfile, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return this.ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
