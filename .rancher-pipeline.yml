@@ -3,7 +3,7 @@ stages:
     steps:
       - runScriptConfig:
           image: maven:3-openjdk-8
-          shellScript: mvn package -DskipTests
+          shellScript: mvn package
   - name: Build Docker with DIND
     steps:
       - publishImageConfig:
