@@ -1,9 +1,10 @@
 package org.folio.dao;
 
 import io.vertx.core.Future;
-
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-
+import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 
@@ -48,4 +49,6 @@ public interface JobExecutionDao {
    * @return future
    */
   Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId);
+
+  Future<List<JobExecution>> getExpiredEntries(Date lastUpdateDate, String tenantId);
 }

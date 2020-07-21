@@ -79,4 +79,6 @@ public interface JobExecutionService {
    * @return future
    */
   Future<JobExecution> incrementCurrentProgress(String jobExecutionId, final int exported, final int failed, String tenantId);
+
+  Future<Void> expireJobs(String tenantId);
 }

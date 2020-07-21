@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
+import java.util.Date;
 import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
@@ -108,6 +109,16 @@ public class DataExportImpl implements DataExport {
       .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
       .map(Response.class::cast)
       .onComplete(asyncResultHandler);
+  }
+
+  @Override
+  public void postDataExportExpireJobs(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler,
+      Context vertxContext) {
+    vertxContext.runOnContext(v -> jobExecutionService.expireJobs(tenantId)
+        .map(PostDataExportExpireJobsResponse::respond204)
+        .map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler));
   }
 
 }

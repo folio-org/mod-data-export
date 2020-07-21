@@ -126,6 +126,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
       if (Objects.isNull(jobExecution.getStartedDate())) {
         jobExecution.setStartedDate(new Date());
+        jobExecution.setLastUpdatedDate(new Date());
       }
       JsonObject personal = user.getJsonObject("personal");
       jobExecution.setRunBy(new RunBy()
@@ -146,6 +147,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           if (nonNull(progress)) {
             progress.setExported(progress.getExported() + exported);
             progress.setFailed(progress.getFailed() + failed);
+            jobExecution.setLastUpdatedDate(new Date());
             return jobExecutionDao.update(jobExecution, tenantId);
           }
           return failedFuture(format("Unable to update progress of job execution with id %s", jobExecutionId));
@@ -183,6 +185,23 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .filter(jobExecution -> isNotEmpty(jobExecution.getJobProfileId()))
       .map(jobExecution -> "id==" + jobExecution.getJobProfileId())
       .collect(Collectors.joining(" or ")));
+  }
+
+  @Override
+  public Future<Void> expireJobs(String tenantId) {
+    Promise<Void> jobExecutionPromise = Promise.promise();
+    //expire entries that have last updated date greater then 1 hr
+    jobExecutionDao.getExpiredEntries(new Date(new Date().getTime() - 3600_000), tenantId)
+      .onSuccess(jobExes -> {
+        jobExes.stream()
+          .forEach(jobExe -> {
+            jobExe.setStatus(JobExecution.Status.FAIL);
+            jobExecutionDao.update(jobExe, tenantId);
+          });
+
+        jobExecutionPromise.complete();
+      });
+    return jobExecutionPromise.future();
   }
 
 }

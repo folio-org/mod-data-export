@@ -37,6 +37,7 @@
     {
       "tableName" : "job_executions",
       "fromModuleVersion": "mod-data-export-2.1.0",
+      "withMetadata": true,
       "withAuditing": false,
       "index": [{
           "fieldName" : "status",
