@@ -40,8 +40,8 @@ import java.util.List;
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 2;
-  private static final int SRS_LOAD_PARTITION_SIZE = 50;
-  private static final int INVENTORY_LOAD_PARTITION_SIZE = 50;
+  private static final int SRS_LOAD_PARTITION_SIZE = 5;
+  private static final int INVENTORY_LOAD_PARTITION_SIZE = 5;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
@@ -86,20 +86,33 @@ public class ExportManagerImpl implements ExportManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
-    List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
-          exportPayload.getJobExecutionId(), params);
-    exportService.exportSrsRecord(marcToExport, fileExportDefinition);
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
-    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
+    //Export srs results at once get the first partition of the records
+    Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).stream().forEach(partition -> {
+      SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params);
+      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
+      List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
+        exportPayload.getJobExecutionId(), params);
+      exportService.exportSrsRecord(marcToExport, fileExportDefinition);
 
-    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
-    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
-    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+      //Move increment of the progress at once srs results exported for one partition
+      jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), srsLoadResult.getUnderlyingMarcRecords().size(), 0, params.getTenantId());
+
+      //Map and export instances at once the first partition of the records
+      Lists.partition(srsLoadResult.getInstanceIdsWithoutSrs(), INVENTORY_LOAD_PARTITION_SIZE).forEach(inventoryPartition -> {
+          List<JsonObject> instances = recordLoaderService.loadInventoryInstancesBlocking(inventoryPartition, params, INVENTORY_LOAD_PARTITION_SIZE);
+          LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
+          LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
+
+          List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
+          exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
+
+          //Move increment of the progress at once mapped records exported for one partition
+          int failed = identifiers.size() - (srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+          jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), mappedMarcRecords.size(), failed, params.getTenantId());
+        }
+      );
+    });
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
@@ -152,11 +165,8 @@ public class ExportManagerImpl implements ExportManager {
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
     clearIdentifiers(exportPayload);
-    incrementCurrentProgress(exportPayload)
-      .onComplete(handler -> {
-        getInputDataManager().proceed(exportPayloadJson, exportResult);
-        promise.complete();
-      });
+    getInputDataManager().proceed(exportPayloadJson, exportResult);
+    promise.complete();
     return promise.future();
   }
 
