@@ -95,10 +95,11 @@ public class ExportManagerImpl implements ExportManager {
         exportPayload.getJobExecutionId(), params);
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
 
-      //Move increment of the progress at once srs results exported for one partition
-      jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), srsLoadResult.getUnderlyingMarcRecords().size(), 0, params.getTenantId());
+      //Move increment of the progress at once srs results exported for one
+      int failedSrsRecords = partition.size() - srsLoadResult.getUnderlyingMarcRecords().size();
+      jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), srsLoadResult.getUnderlyingMarcRecords().size(), failedSrsRecords, params.getTenantId());
 
-      //Map and export instances at once the first partition of the records
+      //Map and export instances at once get the first partition of the records
       Lists.partition(srsLoadResult.getInstanceIdsWithoutSrs(), INVENTORY_LOAD_PARTITION_SIZE).forEach(inventoryPartition -> {
           List<JsonObject> instances = recordLoaderService.loadInventoryInstancesBlocking(inventoryPartition, params, INVENTORY_LOAD_PARTITION_SIZE);
           LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
@@ -108,8 +109,8 @@ public class ExportManagerImpl implements ExportManager {
           exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
 
           //Move increment of the progress at once mapped records exported for one partition
-          int failed = identifiers.size() - (srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
-          jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), mappedMarcRecords.size(), failed, params.getTenantId());
+          int failedMappedRecords = inventoryPartition.size() -  mappedMarcRecords.size();
+          jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), mappedMarcRecords.size(), failedMappedRecords, params.getTenantId());
         }
       );
     });
