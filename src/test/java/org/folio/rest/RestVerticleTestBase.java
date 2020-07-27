@@ -16,6 +16,7 @@ import io.vertx.core.logging.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,6 +30,7 @@ import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.client.TenantClient;
+import org.folio.rest.impl.StorageTestSuite;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
@@ -73,46 +75,33 @@ public abstract class RestVerticleTestBase {
   public static void setUpClass() throws Exception {
     vertx = Vertx.vertx();
 
-    mockServer = new MockServer(mockPort);
-    mockServer.start();
 
-    runDatabase();
+
     deployVerticle();
   }
 
-  private static void runDatabase() throws Exception {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+  @BeforeAll
+  public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    Vertx vertx = StorageTestSuite.getVertx();
+    if (vertx == null) {
+      invokeStorageTestSuiteAfter = true;
+      StorageTestSuite.before();
+    }
   }
 
-  private static void deployVerticle() throws InterruptedException, ExecutionException, TimeoutException {
-    TenantClient tenantClient = new TenantClient(BASE_OKAPI_URL, TENANT_ID, TOKEN);
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT));
-    CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if (res.succeeded()) {
-        TenantAttributes tenantAttributes = new TenantAttributes();
-        tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
-        try {
-          tenantClient.postTenant(tenantAttributes, res2 -> {
-            if (isSuccess(res2.statusCode())){
-              deploymentComplete.complete(res.result());
-            } else {
-              deploymentComplete.completeExceptionally(new Exception(res2.statusMessage()));
-            }
-          });
-        } catch (Exception e) {
-          deploymentComplete.completeExceptionally(e);
-        }
+  @AfterAll
+  public static void testBaseAfterClass()
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException,
+    MalformedURLException {
 
-      } else {
-        deploymentComplete.completeExceptionally(res.cause());
-      }
-    });
-    deploymentComplete.get(60, TimeUnit.SECONDS);
-
-
+    if (invokeStorageTestSuiteAfter) {
+      StorageTestSuite.after();
+    }
   }
+
+
 
   @AfterEach
   public void tearDown() throws Exception {

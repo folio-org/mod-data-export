@@ -6,7 +6,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
-import org.folio.rest.RestVerticleTestBase;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
+class RecordLoaderServiceUnitTest{
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
@@ -50,6 +50,7 @@ class RecordLoaderServiceUnitTest extends RestVerticleTestBase {
   @InjectMocks
   RecordLoaderServiceImpl recordLoaderService;
 
+  protected OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams();
   static JsonObject dataFromSRS;
   static JsonObject dataFromInventory;
   static JsonObject dataFromInventoryHoldings;
