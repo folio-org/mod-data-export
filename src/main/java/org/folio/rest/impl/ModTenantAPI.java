@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static io.vertx.core.Future.succeededFuture;
+
 public class ModTenantAPI extends TenantAPI {
   private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantAPI.class);
 
@@ -36,6 +38,7 @@ public class ModTenantAPI extends TenantAPI {
         handlers.handle(asyncResult);
       } else {
         initStorageCleanupService(headers, context);
+        handlers.handle(succeededFuture(PostTenantResponse.respond201WithApplicationJson("Post tenant is complete")));
       }
     }, context);
   }
