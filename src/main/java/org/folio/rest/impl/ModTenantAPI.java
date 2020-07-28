@@ -7,9 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -18,16 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static io.vertx.core.Future.succeededFuture;
+
 public class ModTenantAPI extends TenantAPI {
   private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantAPI.class);
 
   private static final long DELAY_TIME_BETWEEN_CLEANUP_VALUE_MILLIS = 3600_000;
-  private static final String LOAD_DEFAULT_DATA_PARAMETER = "loadDefaultData";
-  private static final String DATA = "data";
-  private static final String MAPPING_PROFILES = "mappingProfiles";
-  private static final String JOB_PROFILES = "jobProfiles";
-  private static final String MAPPING_PROFILES_URI = "data-export/mappingProfiles";
-  private static final String JOB_PROFILES_URI = "data-export/jobProfiles";
 
   @Autowired
   private StorageCleanupService storageCleanupService;
@@ -44,7 +38,7 @@ public class ModTenantAPI extends TenantAPI {
         handlers.handle(asyncResult);
       } else {
         initStorageCleanupService(headers, context);
-        initDefaultData(entity, headers, handlers, context);
+        handlers.handle(succeededFuture(PostTenantResponse.respond201WithApplicationJson("Post tenant is complete")));
       }
     }, context);
   }
@@ -65,28 +59,4 @@ public class ModTenantAPI extends TenantAPI {
         }
       });
   }
-
-  private void initDefaultData(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
-    TenantLoading tenantLoading = new TenantLoading();
-    Parameter parameter = new Parameter().withKey(LOAD_DEFAULT_DATA_PARAMETER).withValue("true");
-    entity.getParameters().add(parameter);
-    buildDataLoadingParameters(tenantLoading);
-    tenantLoading.perform(entity, headers, context.owner(), response -> {
-      if (response.failed()) {
-        handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-          .respond500WithTextPlain(response.cause().getLocalizedMessage())));
-        return;
-      }
-      handlers.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-        .respond201WithApplicationJson("")));
-    });
-  }
-
-  private void buildDataLoadingParameters(TenantLoading tenantLoading) {
-    tenantLoading.withKey(LOAD_DEFAULT_DATA_PARAMETER)
-      .withLead(DATA)
-      .add(MAPPING_PROFILES, MAPPING_PROFILES_URI)
-      .add(JOB_PROFILES, JOB_PROFILES_URI);
-  }
-
 }
