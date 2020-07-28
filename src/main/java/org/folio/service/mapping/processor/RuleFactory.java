@@ -1,4 +1,4 @@
-package org.folio.service.mapping;
+package org.folio.service.mapping.processor;
 
 import static java.lang.Boolean.TRUE;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
@@ -21,11 +21,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.processor.rule.DataSource;
-import org.folio.processor.rule.Rule;
-import org.folio.processor.translations.Translation;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.processor.rule.DataSource;
+import org.folio.service.mapping.processor.rule.Rule;
+import org.folio.service.mapping.processor.translations.Translation;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -121,7 +121,7 @@ public class RuleFactory {
     } else {
       rule = new Rule();
       rule.setField(field);
-      rule.setDataSources(buildDataSources(mappingTransformation, true));
+      rule.getDataSources().addAll(buildDataSources(mappingTransformation, true));
     }
 
     return rule;

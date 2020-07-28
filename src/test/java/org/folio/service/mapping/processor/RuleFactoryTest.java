@@ -1,12 +1,12 @@
-package org.folio.service.mapping;
+package org.folio.service.mapping.processor;
 
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.util.Lists;
-import org.folio.processor.rule.DataSource;
-import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.processor.rule.DataSource;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

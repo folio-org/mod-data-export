@@ -1,5 +1,22 @@
 package org.folio.rest;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
+import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
+import static org.folio.util.ExternalPathResolver.SRS;
+import static org.folio.util.ExternalPathResolver.USERS;
+import static org.folio.util.ExternalPathResolver.HOLDING;
+import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.resourcesPath;
+import static org.junit.Assert.fail;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import com.google.common.io.Resources;
@@ -14,35 +31,18 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
-import static org.folio.util.ExternalPathResolver.HOLDING;
-import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
-import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
-import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.LOCATIONS;
-import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.SRS;
-import static org.folio.util.ExternalPathResolver.USERS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
-import static org.junit.Assert.fail;
+import java.util.stream.Collectors;
 
 public class MockServer {
   private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
@@ -64,7 +64,6 @@ public class MockServer {
   private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
   private static final String INSTANCE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_types_response.json";
   private static final String INSTANCE_FORMATS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_formats_response.json";
-  private static final String ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_electronic_access_relationships_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -122,7 +121,6 @@ public class MockServer {
     router.get(resourcesPath(MATERIAL_TYPES)).handler(ctx -> handleGetMaterialTypesRecord(ctx));
     router.get(resourcesPath(INSTANCE_TYPES)).handler(ctx -> handleGetInstanceTypes(ctx));
     router.get(resourcesPath(INSTANCE_FORMATS)).handler(ctx -> handleGetInstanceFormats(ctx));
-    router.get(resourcesPath(ELECTRONIC_ACCESS_RELATIONSHIPS)).handler(ctx -> handleGetElectronicAccessRelationships(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
@@ -301,31 +299,17 @@ public class MockServer {
 
   private void handleGetContributorNameTypesRecord(RoutingContext ctx) {
     logger.info("handleGet ContributorName types Record got: " + ctx.request()
-      .path());
-    try {
-      JsonObject contributorTypes = new JsonObject(RestVerticleTestBase.getMockData(CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CONTRIBUTOR_NAME_TYPES, contributorTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
-    } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
-    }
+    .path());
+  try {
+    JsonObject contributorTypes = new JsonObject(RestVerticleTestBase.getMockData(CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH));
+    addServerRqRsData(HttpMethod.GET, CONTRIBUTOR_NAME_TYPES, contributorTypes);
+    serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
+  } catch (IOException e) {
+    ctx.response()
+      .setStatusCode(500)
+      .end();
   }
-
-  private void handleGetElectronicAccessRelationships(RoutingContext ctx) {
-    logger.info("handleGet Electronic access relationship types Record: " + ctx.request()
-      .path());
-    try {
-      JsonObject electronicAccessRelationship = new JsonObject(RestVerticleTestBase.getMockData(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ELECTRONIC_ACCESS_RELATIONSHIPS, electronicAccessRelationship);
-      serverResponse(ctx, 200, APPLICATION_JSON, electronicAccessRelationship.encodePrettily());
-    } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
-    }
-  }
+}
 
   private void handleGetUsersRecord(RoutingContext ctx) {
     logger.info("handleGetUsersRecord got: " + ctx.request()

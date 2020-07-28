@@ -19,7 +19,6 @@ public class ExternalPathResolver {
   public static final String MATERIAL_TYPES = "mtypes";
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";
-  public static final String ELECTRONIC_ACCESS_RELATIONSHIPS = "electronicAccessRelationships";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -44,7 +43,6 @@ public class ExternalPathResolver {
     apis.put(MATERIAL_TYPES, "/material-types");
     apis.put(INSTANCE_TYPES, "/instance-types");
     apis.put(INSTANCE_FORMATS, "/instance-formats");
-    apis.put(ELECTRONIC_ACCESS_RELATIONSHIPS, "/electronic-access-relationships");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 

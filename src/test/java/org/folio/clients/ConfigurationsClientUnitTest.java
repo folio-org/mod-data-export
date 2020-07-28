@@ -2,14 +2,15 @@ package org.folio.clients;
 
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.processor.rule.Rule;
 import org.folio.rest.RestVerticleTestBase;
+import org.folio.service.mapping.processor.rule.Rule;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
