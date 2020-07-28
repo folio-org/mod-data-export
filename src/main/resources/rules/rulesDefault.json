@@ -775,6 +775,51 @@
     }
   },
   {
+    "field": "856",
+    "description": "Electronic access",
+    "dataSources": [
+      {
+        "from": "$.instance.electronicAccess[*].uri",
+        "subfield": "u"
+      },
+      {
+        "from": "$.instance.electronicAccess[*].linkText",
+        "subfield": "y"
+      },
+      {
+        "from": "$.instance.electronicAccess[*].publicNote",
+        "subfield": "z"
+      },
+      {
+        "from": "$.instance.electronicAccess[*].materialsSpecification",
+        "subfield": "3"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "4"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_electronic_access_indicator",
+          "parameters": {
+            "Resource": "0",
+            "Version of resource": "1",
+            "Related resource": "2"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "relationshipId": "$.instance.electronicAccess[*].relationshipId"
+    }
+  },
+  {
     "field": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [

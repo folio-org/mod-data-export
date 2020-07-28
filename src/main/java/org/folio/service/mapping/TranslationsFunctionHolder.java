@@ -1,9 +1,13 @@
-package org.folio.service.mapping.processor.translations;
+package org.folio.service.mapping;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.service.mapping.processor.rule.Metadata;
-import org.folio.service.mapping.referencedata.ReferenceData;
+import org.folio.processor.ReferenceData;
+import org.folio.processor.rule.Metadata;
+import org.folio.processor.translations.Translation;
+import org.folio.processor.translations.TranslationFunction;
+import org.folio.processor.translations.TranslationHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +18,21 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
 
-public enum TranslationsHolder implements TranslationFunction {
+public enum TranslationsFunctionHolder implements TranslationFunction, TranslationHolder {
 
   SET_VALUE() {
     @Override
@@ -30,7 +43,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_NATURE_OF_CONTENT_TERM() {
     @Override
     public String apply(String id, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getNatureOfContentTerms().get(id);
+      JsonObject entry = referenceData.get(NATURE_OF_CONTENT_TERMS).get(id);
       if (entry == null) {
         LOGGER.error("Nature of content term is not found by the given id: {}", id);
         return StringUtils.EMPTY;
@@ -47,7 +60,7 @@ public enum TranslationsHolder implements TranslationFunction {
         List<String> identifierTypeIds = (List<String>) metadataIdentifierTypeIds;
         if (!identifierTypeIds.isEmpty()) {
           String identifierTypeId = identifierTypeIds.get(currentIndex);
-          JsonObject identifierType = referenceData.getIdentifierTypes().get(identifierTypeId);
+          JsonObject identifierType = referenceData.get(IDENTIFIER_TYPES).get(identifierTypeId);
           if (identifierType != null && identifierType.getString("name").equals(translation.getParameter("type"))) {
             return identifierValue;
           }
@@ -64,7 +77,7 @@ public enum TranslationsHolder implements TranslationFunction {
         List<String> contributorNameTypeIds = (List<String>) metadataContributorNameTypeIds;
         if (!contributorNameTypeIds.isEmpty()) {
           String contributorNameTypeId = contributorNameTypeIds.get(currentIndex);
-          JsonObject contributorNameType = referenceData.getContributorNameTypes().get(contributorNameTypeId);
+          JsonObject contributorNameType = referenceData.get(CONTRIBUTOR_NAME_TYPES).get(contributorNameTypeId);
           if (contributorNameType != null && contributorNameType.getString("name").equals(translation.getParameter("type"))) {
             return identifierValue;
           }
@@ -76,7 +89,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_LOCATION() {
     @Override
     public String apply(String locationId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getLocations().get(locationId);
+      JsonObject entry = referenceData.get(LOCATIONS).get(locationId);
       if (entry == null) {
         LOGGER.error("Location is not found by the given id: {}", locationId);
         return StringUtils.EMPTY;
@@ -88,7 +101,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_MATERIAL_TYPE() {
     @Override
     public String apply(String materialTypeId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getMaterialTypes().get(materialTypeId);
+      JsonObject entry = referenceData.get(MATERIAL_TYPES).get(materialTypeId);
       if (entry == null) {
         LOGGER.error("Material type is not found by the given id: {}", materialTypeId);
         return StringUtils.EMPTY;
@@ -195,7 +208,7 @@ public enum TranslationsHolder implements TranslationFunction {
   SET_INSTANCE_TYPE_ID() {
     @Override
     public String apply(String instanceTypeId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getInstanceTypes().get(instanceTypeId);
+      JsonObject entry = referenceData.get(INSTANCE_TYPES).get(instanceTypeId);
       if (entry == null) {
         LOGGER.error("Instance type id is not found by the given id: {}", instanceTypeId);
         return StringUtils.EMPTY;
@@ -210,7 +223,7 @@ public enum TranslationsHolder implements TranslationFunction {
 
     @Override
     public String apply(String instanceFormatId, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
-      JsonObject entry = referenceData.getInstanceFormats().get(instanceFormatId);
+      JsonObject entry = referenceData.get(INSTANCE_FORMATS).get(instanceFormatId);
       if (entry == null) {
         LOGGER.error("Instance format is not found by the given id: {}", instanceFormatId);
         return StringUtils.EMPTY;
@@ -226,9 +239,29 @@ public enum TranslationsHolder implements TranslationFunction {
         }
       }
     }
+  },
+
+  SET_ELECTRONIC_ACCESS_INDICATOR() {
+    @Override
+    public String apply(String value, int currentIndex, Translation translation, ReferenceData referenceData, Metadata metadata) {
+      List<String> relationshipIds = (List<String>) metadata.getData().get("relationshipId").getData();
+      if (CollectionUtils.isNotEmpty(relationshipIds)) {
+        String relationshipId = relationshipIds.get(currentIndex);
+        JsonObject relationship = referenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS).get(relationshipId);
+        if (relationship != null) {
+          String relationshipName = relationship.getString("name");
+          for (Map.Entry<String, String> parameter : translation.getParameters().entrySet()) {
+            if (relationshipName.equals(parameter.getKey())) {
+              return parameter.getValue();
+            }
+          }
+        }
+      }
+      return StringUtils.SPACE;
+    }
   };
 
-  public static TranslationFunction lookup(String function) {
+  public TranslationFunction lookup(String function) {
     return valueOf(function.toUpperCase());
   }
 
