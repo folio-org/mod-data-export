@@ -16,17 +16,16 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.ReferenceData;
+import org.folio.processor.RuleProcessor;
+import org.folio.processor.rule.Rule;
+import org.folio.reader.EntityReader;
+import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.service.mapping.processor.RuleFactory;
-import org.folio.service.mapping.processor.RuleProcessor;
-import org.folio.service.mapping.processor.rule.Rule;
-import org.folio.service.mapping.reader.EntityReader;
-import org.folio.service.mapping.reader.JPathSyntaxEntityReader;
-import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
-import org.folio.service.mapping.writer.RecordWriter;
-import org.folio.service.mapping.writer.impl.MarcRecordWriter;
 import org.folio.util.OkapiConnectionParams;
+import org.folio.writer.RecordWriter;
+import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.marc.VariableField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class MappingServiceImpl implements MappingService {
   private ConfigurationsClient configurationsClient;
 
   public MappingServiceImpl() {
-    this.ruleProcessor = new RuleProcessor();
+    this.ruleProcessor = new RuleProcessor(TranslationsFunctionHolder.SET_VALUE);
     this.ruleFactory = new RuleFactory();
     this.mappingThreadPool = Executors.newWorkStealingPool(MAPPING_POOL_SIZE);
   }
@@ -60,10 +59,11 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules) {
+    List<Rule> synchronizedRules = Collections.synchronizedList(rules);
     List<String> records = null;
     try {
       records = mappingThreadPool.submit(() -> instances.parallelStream()
-        .map(instance -> mapInstance(instance, referenceData, rules))
+        .map(instance -> mapInstance(instance, referenceData, synchronizedRules))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList()))
@@ -99,7 +99,7 @@ public class MappingServiceImpl implements MappingService {
     List<Rule> rules = getRules(mappingProfile, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return this.ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
