@@ -1,3 +1,13 @@
+## 07/28/2020 v2.1.3 Released
+This is a bugfix release to address upgrade issues from v1.1.1 to current version because of the migration scripts
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.2...v2.1.3)
+
+
+### Bug Fixes
+* [MDEXP-247](https://issues.folio.org/browse/MDEXP-247) - Data Migration issue on goldenrod
+
+
 ## 07/13/2020 v2.1.2 Released
 This bugfix release includes fixes to concurrency issues while exporting jobs and also fixes empty query sent to 
 inventory which was causing un responsive module
