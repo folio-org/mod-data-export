@@ -70,12 +70,12 @@
     {
       "run": "after",
       "snippetPath": "default_data/create_default_mapping_profile.sql",
-      "fromModuleVersion": "mod-data-export-2.1.0"
+      "fromModuleVersion": "mod-data-export-2.2.0"
     },
     {
       "run": "after",
       "snippetPath": "default_data/create_default_job_profile.sql",
-      "fromModuleVersion": "mod-data-export-2.1.0"
+      "fromModuleVersion": "mod-data-export-2.2.0"
     },
     {
       "run": "after",
