@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of field names",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "fieldNames": {
+      "description": "List of field names",
+      "type": "array",
+      "id": "fieldNamesList",
+      "items": {
+        "type": "object",
+        "$ref": "fieldName.json"
+      }
+    }
+  },
+  "required": [
+    "fieldNames"
+  ]
+}

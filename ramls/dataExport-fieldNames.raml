@@ -1,0 +1,29 @@
+#%RAML 1.0
+
+title: Data export
+version: v2.0
+protocols: [ HTTP, HTTPS ]
+baseUri: https://github.com/folio-org/mod-data-export
+
+documentation:
+  - title: Data export fiel names API
+    content: API for getting field names
+
+types:
+  fieldNameCollection: !include schemas/fieldNameCollection.json
+  fieldName: !include schemas/fieldName.json
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection-get.raml
+
+traits:
+  language: !include raml-util/traits/language.raml
+  pageable:  !include raml-util/traits/pageable.raml
+
+/data-export/fieldNames:
+    displayName: Field names service
+    description: Service provides APIs for getting field names
+    type:
+      collection:
+        schemaCollection: fieldNameCollection
+        exampleCollection: !include samples/fieldNameCollection.sample

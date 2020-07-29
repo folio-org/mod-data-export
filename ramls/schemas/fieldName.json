@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Field names",
+  "type": "object",
+  "additionalProperties": false,
+    "properties": {
+      "id": {
+        "description": "UUID of this Field name",
+        "type": "string",
+        "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+      },
+      "displayNameKey": {
+        "description": "Display name key, that will show on UI",
+        "type": "string"
+      },
+      "referenceDataValue": {
+        "description": "Reference data value of the field name",
+        "type": "string"
+      },
+      "path": {
+        "description": "Json path of the field name",
+        "type": "string"
+      },
+      "recordType": {
+        "description": "Record type of the field",
+        "$ref": "profiles/recordTypes.json"
+      },
+      "metadataParameters": {
+        "description": "Additional parameters used for mapping",
+        "type": "object",
+        "javaType": "java.util.Map<String, String>"
+      }
+  },
+  "required": [
+    "id",
+    "displayName",
+    "path"
+  ]
+}
