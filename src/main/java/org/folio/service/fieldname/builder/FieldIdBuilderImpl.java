@@ -36,13 +36,9 @@ public class FieldIdBuilderImpl implements FieldIdBuilder {
       return StringUtils.EMPTY;
     }
     List<String> wordsInSettings = Arrays.asList(settingsName.split(StringUtils.SPACE));
-    if (wordsInSettings.size() > 1) {
-      return wordsInSettings.stream().map(String::toLowerCase).collect(Collectors.joining(DOT_DELIMITER));
-    } else if (wordsInSettings.size() == 1) {
-      return wordsInSettings.get(0).toLowerCase();
-    } else {
-      return StringUtils.EMPTY;
-    }
+    return wordsInSettings.size() > 1
+      ? wordsInSettings.stream().map(String::toLowerCase).collect(Collectors.joining(DOT_DELIMITER))
+      : wordsInSettings.get(0).toLowerCase();
   }
 
 }
