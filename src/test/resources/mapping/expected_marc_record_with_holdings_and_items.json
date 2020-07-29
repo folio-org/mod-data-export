@@ -342,6 +342,86 @@
       }
     },
     {
+      "856": {
+        "subfields": [
+          {
+            "u": "/uri1"
+          },
+          {
+            "y": "linkText1"
+          },
+          {
+            "z": "publicNote1"
+          },
+          {
+            "3": "materialsSpecification1"
+          }
+        ],
+        "ind1": "4",
+        "ind2": " "
+      }
+    },
+    {
+      "856": {
+        "subfields": [
+          {
+            "u": "/uri2"
+          },
+          {
+            "y": "linkText2"
+          },
+          {
+            "z": "publicNote2"
+          },
+          {
+            "3": "materialsSpecification2"
+          }
+        ],
+        "ind1": "4",
+        "ind2": "0"
+      }
+    },
+    {
+      "856": {
+        "subfields": [
+          {
+            "u": "/uri3"
+          },
+          {
+            "y": "linkText3"
+          },
+          {
+            "z": "publicNote3"
+          },
+          {
+            "3": "materialsSpecification3"
+          }
+        ],
+        "ind1": "4",
+        "ind2": "1"
+      }
+    },
+    {
+      "856": {
+        "subfields": [
+          {
+            "u": "/uri4"
+          },
+          {
+            "y": "linkText4"
+          },
+          {
+            "z": "publicNote4"
+          },
+          {
+            "3": "materialsSpecification4"
+          }
+        ],
+        "ind1": "4",
+        "ind2": "2"
+      }
+    },
+    {
       "900": {
         "subfields": [
           {
