@@ -12,9 +12,14 @@
         "type": "object",
         "$ref": "transformationField.json"
       }
+    },
+    "totalRecords": {
+      "description": "Total number of transformation fields",
+      "type": "integer"
     }
   },
   "required": [
-    "transformationFields"
+    "transformationFields",
+    "totalRecords"
   ]
 }

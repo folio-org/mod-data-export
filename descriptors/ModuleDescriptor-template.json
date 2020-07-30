@@ -264,7 +264,7 @@
           ],
           "pathPattern": "/data-export/transformationFields",
           "permissionsRequired": [
-            "data-export.transformations-fields.collection.get"
+            "data-export.transformation-fields.collection.get"
           ],
           "modulePermissions": [
             "inventory-storage.identifier-types.collection.get"

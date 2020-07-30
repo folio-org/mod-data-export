@@ -60,7 +60,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
     transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
     transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
-    promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields));
+    promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }
 

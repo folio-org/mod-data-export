@@ -29,6 +29,7 @@ import java.util.Map;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -82,6 +83,7 @@ class TransformationFieldsServiceUnitTest {
         assertTrue(ar.succeeded());
         TransformationFieldCollection transformationFieldCollection = ar.result();
         assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
+        assertNotEquals(0, (int) transformationFieldCollection.getTotalRecords());
         context.completeNow();
       }));
   }

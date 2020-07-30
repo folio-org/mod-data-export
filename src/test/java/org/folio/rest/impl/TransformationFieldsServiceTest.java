@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -32,6 +33,7 @@ class TransformationFieldsServiceTest extends RestVerticleTestBase {
       TransformationFieldCollection transformationFieldCollection = response.as(TransformationFieldCollection.class);
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
       assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
+      assertNotEquals(0, (int) transformationFieldCollection.getTotalRecords());
       context.completeNow();
     });
   }
