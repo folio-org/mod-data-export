@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.rest.RestVerticleTestBase;
+import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
-class InventoryClientUnitTest extends RestVerticleTestBase {
+public class InventoryClientTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
   private static OkapiConnectionParams okapiConnectionParams;
 

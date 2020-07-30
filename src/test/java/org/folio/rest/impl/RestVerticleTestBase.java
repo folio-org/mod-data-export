@@ -1,15 +1,15 @@
-package org.folio.rest;
+package org.folio.rest.impl;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.tools.client.Response.*;
+import static org.folio.rest.impl.StorageTestSuite.mockPort;
+import static org.folio.rest.impl.StorageTestSuite.port;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
@@ -21,20 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.impl.StorageTestSuite;
-import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -50,17 +42,12 @@ public abstract class RestVerticleTestBase {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
   }
 
-  protected static final String TENANT_ID = "diku";
-  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
   private static final String HOST = "http://localhost:";
-  protected static final int PORT = NetworkUtils.nextFreePort();
   protected static final String OKAPI_HEADER_URL = "x-okapi-url";
-  protected static final String BASE_OKAPI_URL = HOST + PORT;
+
   protected static RequestSpecification jsonRequestSpecification;
   protected static Vertx vertx;
   protected OkapiConnectionParams okapiConnectionParams;
-  private static MockServer mockServer;
-  protected static final int mockPort = NetworkUtils.nextFreePort();
   protected static final String MOCK_OKAPI_URL = HOST + mockPort;
   protected static final String EXPORT_URL = "/data-export/export";
   protected static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
@@ -70,22 +57,24 @@ public abstract class RestVerticleTestBase {
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   protected static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static boolean invokeStorageTestSuiteAfter = false;
 
-  @BeforeAll
-  public static void setUpClass() throws Exception {
-    vertx = Vertx.vertx();
+  public static final String BASE_OKAPI_URL = HOST + port;
+  public static final String TENANT_ID = "diku";
+  public static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
 
-
-
-    deployVerticle();
-  }
-
+  /**
+   * When not run from StorageTestSuite then this method invokes StorageTestSuite.before() and
+   * StorageTestSuite.after() to allow to run a single test class, for example from within an
+   * IDE during development.
+   */
   @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    Vertx vertx = StorageTestSuite.getVertx();
+    vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
       StorageTestSuite.before();
+      vertx = StorageTestSuite.getVertx();
     }
   }
 
@@ -97,11 +86,10 @@ public abstract class RestVerticleTestBase {
     MalformedURLException {
 
     if (invokeStorageTestSuiteAfter) {
+      System.out.println("Running test on own, un-initialising suite manually");
       StorageTestSuite.after();
     }
   }
-
-
 
   @AfterEach
   public void tearDown() throws Exception {
@@ -109,21 +97,10 @@ public abstract class RestVerticleTestBase {
   }
 
   @AfterAll
-  public static void tearDownClass() throws InterruptedException, ExecutionException, TimeoutException {
-    mockServer.close();
-    CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
-
-    vertx.close(res -> {
-      if (res.succeeded()) {
-        undeploymentComplete.complete(null);
-      } else {
-        undeploymentComplete.completeExceptionally(res.cause());
-      }
-    });
-
-    undeploymentComplete.get(20, TimeUnit.SECONDS);
-    PostgresClient.stopEmbeddedPostgres();
-
+  public static void tearDownClass() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+    if (invokeStorageTestSuiteAfter) {
+      StorageTestSuite.after();
+    }
   }
 
   @BeforeEach
@@ -136,7 +113,7 @@ public abstract class RestVerticleTestBase {
   private void setUpOkapiConnectionParams() {
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
-    headers.put(OKAPI_HEADER_URL, BASE_OKAPI_URL);
+    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
     this.okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
@@ -192,7 +169,7 @@ public abstract class RestVerticleTestBase {
   }
 
 
-  protected static String getMockData(String path) throws IOException {
+  public static String getMockData(String path) throws IOException {
     try (InputStream resourceAsStream = RestVerticleTestBase.class.getClassLoader().getResourceAsStream(path)) {
       if (resourceAsStream != null) {
         return IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);

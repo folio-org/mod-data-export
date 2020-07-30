@@ -33,7 +33,6 @@ import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;

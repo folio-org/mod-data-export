@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import io.restassured.RestAssured;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.http.HttpStatus;
-import org.folio.rest.RestVerticleTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 

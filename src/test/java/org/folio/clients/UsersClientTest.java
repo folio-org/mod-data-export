@@ -6,7 +6,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.rest.RestVerticleTestBase;
+import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class UsersClientUnitTest extends RestVerticleTestBase {
+public class UsersClientTest extends RestVerticleTestBase {
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll

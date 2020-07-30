@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class DataExportHelperTest {
+class DataExportHelperUnitTest {
   @Mock
   private ExportStorageService exportStorageService;
   @Mock

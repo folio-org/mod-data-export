@@ -6,7 +6,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.MockServer;
+import org.folio.clients.ConfigurationsClientTest;
+import org.folio.clients.InventoryClientTest;
+import org.folio.clients.SourceRecordStorageTest;
+import org.folio.clients.UsersClientTest;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -29,11 +32,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.folio.rest.impl.TestBase.TENANT_HEADER;
+import static org.folio.rest.impl.RestVerticleTestBase.BASE_OKAPI_URL;
+import static org.folio.rest.impl.RestVerticleTestBase.TENANT_ID;
+import static org.folio.rest.impl.RestVerticleTestBase.TOKEN;
 import static org.folio.rest.tools.client.Response.isSuccess;
-import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
-import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
-
 
 @RunWith(JUnitPlatform.class)
 
@@ -41,10 +43,11 @@ public class StorageTestSuite {
   private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
 
   private static Vertx vertx;
-  private static int port = NetworkUtils.nextFreePort();
-  public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
   private static MockServer mockServer;
-  protected static final int mockPort = NetworkUtils.nextFreePort();
+
+  public static int port = NetworkUtils.nextFreePort();
+  public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
+  public static final int mockPort = NetworkUtils.nextFreePort();
 
   private StorageTestSuite() {}
 
@@ -79,14 +82,10 @@ public class StorageTestSuite {
    // options.setWorker(true);
     //startVerticle(options);
 
-   // prepareTenant(TENANT_HEADER, false);
   }
 
   @AfterAll
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
-    logger.info("Delete tenant");
-    deleteTenant(TENANT_HEADER);
-
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
     vertx.close(res -> {
@@ -101,11 +100,14 @@ public class StorageTestSuite {
     undeploymentComplete.get(20, TimeUnit.SECONDS);
     logger.info("Stop database");
     PostgresClient.stopEmbeddedPostgres();
+    mockServer.close();
   }
 
   private static void deployVerticle() throws InterruptedException, ExecutionException, TimeoutException {
     TenantClient tenantClient = new TenantClient(BASE_OKAPI_URL, TENANT_ID, TOKEN);
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT));
+    logger.info("Starting verticle on port: "+ port);
+    DeploymentOptions options = new DeploymentOptions(); //.setConfig(new JsonObject().put("http.port", PORT));
+    options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
       if (res.succeeded()) {
@@ -132,32 +134,28 @@ public class StorageTestSuite {
 
   }
 
-  private static void startVerticle(DeploymentOptions options)
-    throws InterruptedException, ExecutionException, TimeoutException {
-
-    logger.info("Start verticle");
-
-    CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-
-    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if(res.succeeded()) {
-        deploymentComplete.complete(res.result());
-      }
-      else {
-        deploymentComplete.completeExceptionally(res.cause());
-      }
-    });
-
-    deploymentComplete.get(60, TimeUnit.SECONDS);
-  }
 
   @Nested
-  class JobExecutionServiceTestNested extends JobExecutionServiceTest{}
+  class DataExportTestNested extends DataExportTest {}
   @Nested
-  class FileUploadServiceTestNested extends FileUploadServiceTest{}
+  class EntitiesCrudTestNested extends EntitiesCrudTest{}
   @Nested
   class ExportManagerTestNested extends ExportManagerTest{}
   @Nested
-  class DataExportTestTest extends DataExportTest {}
+  class FileUploadServiceTestNested extends FileUploadServiceTest{}
+  @Nested
+  class JobExecutionServiceTestNested extends JobExecutionServiceTest{}
+  @Nested
+  class StorageCleanupServiceImplTestNested extends StorageCleanupServiceImplTest{}
+
+  @Nested
+  class ConfigurationsClientTestNested extends ConfigurationsClientTest{}
+  @Nested
+  class InventoryClientTestNested extends InventoryClientTest{}
+  @Nested
+  class SourceRecordStorageTestNested extends SourceRecordStorageTest{}
+  @Nested
+  class UsersClientTestNested extends UsersClientTest{}
+
 
 }

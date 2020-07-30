@@ -1,4 +1,4 @@
-package org.folio.service.file.cleanup;
+package org.folio.rest.impl;
 
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
@@ -19,12 +19,12 @@ import java.nio.file.Paths;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.service.ApplicationTestConfig;
+import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
