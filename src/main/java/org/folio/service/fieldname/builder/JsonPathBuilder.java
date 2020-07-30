@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 public class JsonPathBuilder implements PathBuilder {
 
   @Override
-  public String build(RecordType recordType, FieldNameConfig fieldNameConfig, String settingsId) {
-    return build(recordType, fieldNameConfig).replace("{id}", settingsId);
+  public String build(RecordType recordType, FieldNameConfig fieldNameConfig) {
+    return fieldNameConfig.getPath().replace("{recordType}", recordType.toString().toLowerCase());
   }
 
   @Override
-  public String build(RecordType recordType, FieldNameConfig fieldNameConfig) {
-    return fieldNameConfig.getPath().replace("{recordType}", recordType.toString().toLowerCase());
+  public String build(RecordType recordType, FieldNameConfig fieldNameConfig, String referenceDataId) {
+    return build(recordType, fieldNameConfig).replace("{id}", referenceDataId);
   }
 
 }

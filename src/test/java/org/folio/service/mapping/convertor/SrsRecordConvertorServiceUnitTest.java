@@ -27,6 +27,7 @@ import org.folio.service.mapping.MappingServiceImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
+import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -56,58 +57,10 @@ class SrsRecordConvertorServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   SrsRecordConvertorServiceUnitTest() {
-    referenceData.put(NATURE_OF_CONTENT_TERMS,getNatureOfContentTerms());
-    referenceData.put(IDENTIFIER_TYPES,getIdentifierTypes());
-    referenceData.put(CONTRIBUTOR_NAME_TYPES,getContributorNameTypes());
-    referenceData.put(LOCATIONS,getLocations());
-  }
-
-  private Map<String, JsonObject> getNatureOfContentTerms() {
-    JsonArray natureOfContentTermArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_nature_of_content_terms_response.json"))
-        .getJsonArray("natureOfContentTerms");
-    Map<String, JsonObject> map = new HashMap<>();
-    for (Object object : natureOfContentTermArray) {
-      JsonObject jsonObject = JsonObject.mapFrom(object);
-      map.put(jsonObject.getString("id"), jsonObject);
-    }
-    return map;
-  }
-
-  private Map<String, JsonObject> getIdentifierTypes() {
-    JsonArray identifierTypesArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_identifier_types_response.json"))
-        .getJsonArray("identifierTypes");
-    Map<String, JsonObject> map = new HashMap<>();
-    for (Object object : identifierTypesArray) {
-      JsonObject jsonObject = JsonObject.mapFrom(object);
-      map.put(jsonObject.getString("id"), jsonObject);
-    }
-    return map;
-  }
-
-  private Map<String, JsonObject> getLocations() {
-    JsonArray identifierTypesArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_locations_response.json"))
-        .getJsonArray("locations");
-    Map<String, JsonObject> map = new HashMap<>();
-    for (Object object : identifierTypesArray) {
-      JsonObject jsonObject = JsonObject.mapFrom(object);
-      map.put(jsonObject.getString("id"), jsonObject);
-    }
-    return map;
-  }
-
-  private Map<String, JsonObject> getContributorNameTypes() {
-    JsonArray identifierTypesArray =
-      new JsonObject(readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))
-        .getJsonArray("contributorNameTypes");
-    Map<String, JsonObject> map = new HashMap<>();
-    for (Object object : identifierTypesArray) {
-      JsonObject jsonObject = JsonObject.mapFrom(object);
-      map.put(jsonObject.getString("id"), jsonObject);
-    }
-    return map;
+    referenceData.put(NATURE_OF_CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
+    referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
+    referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
   }
 
   @Test

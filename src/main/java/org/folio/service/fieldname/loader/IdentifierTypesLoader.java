@@ -6,11 +6,11 @@ import org.folio.util.OkapiConnectionParams;
 
 import java.util.Map;
 
-public class IdentifierTypeIdLoader implements ReferenceDataLoader {
+public class IdentifierTypesLoader implements ReferenceDataLoader {
 
   private InventoryClient inventoryClient;
 
-  public IdentifierTypeIdLoader() {
+  public IdentifierTypesLoader() {
     this.inventoryClient = new InventoryClient();
   }
 
@@ -18,4 +18,5 @@ public class IdentifierTypeIdLoader implements ReferenceDataLoader {
   public Map<String, JsonObject> load(OkapiConnectionParams okapiConnectionParams) {
     return inventoryClient.getIdentifierTypes(okapiConnectionParams);
   }
+
 }

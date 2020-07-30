@@ -23,18 +23,17 @@ public class FieldIdBuilderImpl implements FieldIdBuilder {
   }
 
   @Override
-  public String build(FieldName.RecordType recordType, String fieldConfigId, String settingsValue) {
-    return new StringJoiner(DOT_DELIMITER)
+  public String build(FieldName.RecordType recordType, String fieldConfigId, String referenceDataName) {
+    StringJoiner stringJoiner = new StringJoiner(DOT_DELIMITER)
       .add(recordType.toString().toLowerCase())
-      .add(getFormattedName(fieldConfigId))
-      .add(getFormattedName(settingsValue))
-      .toString();
+      .add(getFormattedName(fieldConfigId));
+    return StringUtils.isNotEmpty(referenceDataName)
+      ? stringJoiner.add(getFormattedName(referenceDataName)).toString()
+      : stringJoiner.toString();
+
   }
 
   private String getFormattedName(String settingsName) {
-    if (StringUtils.isEmpty(settingsName)) {
-      return StringUtils.EMPTY;
-    }
     List<String> wordsInSettings = Arrays.asList(settingsName.split(StringUtils.SPACE));
     return wordsInSettings.size() > 1
       ? wordsInSettings.stream().map(String::toLowerCase).collect(Collectors.joining(DOT_DELIMITER))

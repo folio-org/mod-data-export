@@ -30,7 +30,7 @@ import static org.folio.service.fieldname.FieldNameConfig.IDENTIFIERS;
 @Service
 public class FiledNamesServiceImpl implements FieldNamesService {
 
-  public static final String SETTINGS_NAME_KEY = "name";
+  public static final String REFERENCE_DATA_NAME_KEY = "name";
   private static final Set<FieldNameConfig> INSTANCE_FIELD_NAME_CONFIGS = EnumSet.of(
     HR_ID,
     IDENTIFIERS,
@@ -78,7 +78,7 @@ public class FiledNamesServiceImpl implements FieldNamesService {
     Map<String, JsonObject> referenceDataEntries = fieldNameConfig.getReferenceDataLoader().load(okapiConnectionParams);
     List<FieldName> subFieldNames = new ArrayList<>();
     for (Map.Entry<String, JsonObject> referenceDataEntry : referenceDataEntries.entrySet()) {
-      String referenceDataValue = referenceDataEntry.getValue().getString(SETTINGS_NAME_KEY);
+      String referenceDataValue = referenceDataEntry.getValue().getString(REFERENCE_DATA_NAME_KEY);
       FieldName fieldName = new FieldName();
       fieldName.setRecordType(recordType);
       fieldName.setPath(pathBuilder.build(recordType, fieldNameConfig, referenceDataEntry.getKey()));

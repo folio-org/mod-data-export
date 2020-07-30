@@ -1,13 +1,13 @@
 package org.folio.service.fieldname;
 
-import org.folio.service.fieldname.loader.IdentifierTypeIdLoader;
+import org.folio.service.fieldname.loader.IdentifierTypesLoader;
 import org.folio.service.fieldname.loader.ReferenceDataLoader;
 
 import java.util.Map;
 
 public enum FieldNameConfig {
 
-  IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@identifierTypeId=={id})].value", new IdentifierTypeIdLoader()),
+  IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@identifierTypeId=={id})].value", new IdentifierTypesLoader()),
   FIXED_LENGTH_DATA_ELEMENT("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
   HR_ID("hrid", "$.{recordType}.hrid");
 

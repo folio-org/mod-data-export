@@ -12,10 +12,10 @@ public class DisplayNameKeyBuilderImpl implements DisplayNameKeyBuilder {
   public static final String DOT_DELIMITER = ".";
 
   @Override
-  public String build(FieldName.RecordType recordType, String fieldName) {
+  public String build(FieldName.RecordType recordType, String fieldConfigId) {
     return new StringJoiner(DOT_DELIMITER)
       .add(recordType.toString().toLowerCase())
-      .add(fieldName)
+      .add(fieldConfigId)
       .toString();
   }
 

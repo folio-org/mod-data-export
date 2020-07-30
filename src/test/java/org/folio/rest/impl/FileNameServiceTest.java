@@ -35,4 +35,5 @@ class FileNameServiceTest extends RestVerticleTestBase {
       context.completeNow();
     });
   }
+
 }
