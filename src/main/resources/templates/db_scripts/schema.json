@@ -5,7 +5,7 @@
       "fromModuleVersion": "mod-data-export-1.1.1",
       "withMetadata": true,
       "withAuditing": false,
-      "customSnippetPath": "job_execution_sequence.sql"
+      "customSnippetPath": "custom_snippets/job_execution_sequence.sql"
     },
     {
       "tableName": "mapping_profiles",
@@ -66,6 +66,16 @@
       "run": "after",
       "snippetPath": "migration_scripts/rename_progress_current_to_exported.sql",
       "fromModuleVersion": "mod-data-export-2.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "default_data/create_default_mapping_profile.sql",
+      "fromModuleVersion": "mod-data-export-2.1.4"
+    },
+    {
+      "run": "after",
+      "snippetPath": "default_data/create_default_job_profile.sql",
+      "fromModuleVersion": "mod-data-export-2.1.4"
     },
     {
       "run": "after",
