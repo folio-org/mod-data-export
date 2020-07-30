@@ -1,7 +1,7 @@
 package org.folio.service.fieldname.builder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.folio.rest.jaxrs.model.FieldName;
+import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -21,7 +21,7 @@ class FieldIdBuilderUnitTest {
   void shouldReturnCorrectFieldId_whenBuildWithoutReferenceData() {
 
     // when
-    String fieldIdValue = fieldIdBuilder.build(FieldName.RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID);
+    String fieldIdValue = fieldIdBuilder.build(RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID);
 
     // then
     assertEquals(FIELD_ID_CONTROL_NUMBER_RESULT, fieldIdValue);
@@ -31,7 +31,7 @@ class FieldIdBuilderUnitTest {
   void shouldReturnCorrectFieldId_whenBuildWithReferenceData() {
 
     // when
-    String fieldIdValue = fieldIdBuilder.build(FieldName.RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, REFERENCE_DATA_CONTROL_NUMBER_NAME);
+    String fieldIdValue = fieldIdBuilder.build(RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, REFERENCE_DATA_CONTROL_NUMBER_NAME);
 
     // then
     assertEquals(FIELD_ID_CONTROL_NUMBER_RESULT_WITH_REF_DATA, fieldIdValue);
@@ -41,7 +41,7 @@ class FieldIdBuilderUnitTest {
   void shouldReturnCorrectFieldId_whenBuildWithEmptyReferenceData() {
 
     // when
-    String fieldIdValue = fieldIdBuilder.build(FieldName.RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, StringUtils.EMPTY);
+    String fieldIdValue = fieldIdBuilder.build(RecordType.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, StringUtils.EMPTY);
 
     // then
     assertEquals(FIELD_ID_CONTROL_NUMBER_RESULT, fieldIdValue);

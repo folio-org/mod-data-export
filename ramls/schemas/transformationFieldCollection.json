@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of transformation fields",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "transformationFields": {
+      "description": "List of transformation fields",
+      "type": "array",
+      "id": "transformationFieldsList",
+      "items": {
+        "type": "object",
+        "$ref": "transformationField.json"
+      }
+    }
+  },
+  "required": [
+    "transformationFields"
+  ]
+}

@@ -7,7 +7,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.http.HttpStatus;
 import org.folio.rest.RestVerticleTestBase;
-import org.folio.rest.jaxrs.model.FieldNameCollection;
+import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-class FileNameServiceTest extends RestVerticleTestBase {
+class TransformationFieldsServiceTest extends RestVerticleTestBase {
 
-  private static final String FIELD_NAMES_URL = "/data-export/fieldNames";
+  private static final String FIELD_NAMES_URL = "/data-export/transformationFields";
 
   @Test
   void getFieldNamesReturned200Status(VertxTestContext context) {
@@ -29,9 +29,9 @@ class FileNameServiceTest extends RestVerticleTestBase {
       .get(FIELD_NAMES_URL);
 
     context.verify(() -> {
-      FieldNameCollection fieldNameCollection = response.as(FieldNameCollection.class);
+      TransformationFieldCollection transformationFieldCollection = response.as(TransformationFieldCollection.class);
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
-      assertFalse(fieldNameCollection.getFieldNames().isEmpty());
+      assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
       context.completeNow();
     });
   }

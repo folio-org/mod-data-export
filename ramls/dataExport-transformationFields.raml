@@ -1,0 +1,28 @@
+#%RAML 1.0
+
+title: Data export
+version: v2.0
+protocols: [ HTTP, HTTPS ]
+baseUri: https://github.com/folio-org/mod-data-export
+
+documentation:
+  - title: Data export transformation fields API
+    content: API for getting transformation fields
+
+types:
+  transformationFieldCollection: !include schemas/transformationFieldCollection.json
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection-get.raml
+
+traits:
+  language: !include raml-util/traits/language.raml
+  pageable:  !include raml-util/traits/pageable.raml
+
+/data-export/transformationFields:
+    displayName: transformation fields service
+    description: Service provides APIs for getting transformation fields
+    type:
+      collection:
+        schemaCollection: transformationFieldCollection
+        exampleCollection: !include samples/transformationFieldCollection.sample

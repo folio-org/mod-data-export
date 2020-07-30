@@ -1,24 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Field names",
+  "description": "Transformation field",
   "type": "object",
   "additionalProperties": false,
     "properties": {
-      "id": {
-        "description": "UUID of this Field name",
-        "type": "string",
-        "$ref": "../../ramls/raml-util/schemas/uuid.schema"
+      "ruleId": {
+        "description": "Mapping rule id of this field",
+        "type": "string"
       },
       "displayNameKey": {
-        "description": "Display name key, that will show on UI",
+        "description": "Display name key, that will used for localization on UI",
         "type": "string"
       },
       "referenceDataValue": {
-        "description": "Reference data value of the field name",
+        "description": "Reference data value of the field",
         "type": "string"
       },
       "path": {
-        "description": "Json path of the field name",
+        "description": "Json path of the field",
         "type": "string"
       },
       "recordType": {
@@ -32,8 +31,8 @@
       }
   },
   "required": [
-    "id",
-    "displayName",
+    "ruleId",
+    "displayNameKey",
     "path"
   ]
 }

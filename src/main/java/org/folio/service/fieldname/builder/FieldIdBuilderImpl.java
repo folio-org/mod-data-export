@@ -1,21 +1,21 @@
 package org.folio.service.fieldname.builder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.folio.rest.jaxrs.model.FieldName;
-import org.springframework.stereotype.Service;
+import org.folio.rest.jaxrs.model.TransformationField.RecordType;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class FieldIdBuilderImpl implements FieldIdBuilder {
 
   public static final String DOT_DELIMITER = ".";
 
   @Override
-  public String build(FieldName.RecordType recordType, String fieldConfigId) {
+  public String build(RecordType recordType, String fieldConfigId) {
     return new StringJoiner(DOT_DELIMITER)
       .add(recordType.toString().toLowerCase())
       .add(getFormattedName(fieldConfigId))
@@ -23,7 +23,7 @@ public class FieldIdBuilderImpl implements FieldIdBuilder {
   }
 
   @Override
-  public String build(FieldName.RecordType recordType, String fieldConfigId, String referenceDataName) {
+  public String build(RecordType recordType, String fieldConfigId, String referenceDataName) {
     StringJoiner stringJoiner = new StringJoiner(DOT_DELIMITER)
       .add(recordType.toString().toLowerCase())
       .add(getFormattedName(fieldConfigId));

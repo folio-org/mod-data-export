@@ -1,6 +1,6 @@
 package org.folio.service.fieldname.builder;
 
-import org.folio.rest.jaxrs.model.FieldName;
+import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -18,7 +18,7 @@ class DisplayNameKeyBuilderUnitTest {
   void shouldReturnCorrectDisplayNameKey_whenTypeIsInstanceAndIdIsIdentifiers() {
 
     // when
-    String displayNameKey = displayNameKeyBuilder.build(FieldName.RecordType.INSTANCE, FIELD_ID_IDENTIFIERS);
+    String displayNameKey = displayNameKeyBuilder.build(RecordType.INSTANCE, FIELD_ID_IDENTIFIERS);
 
     // then
     assertEquals(DISPLAY_NAME_RESULT_FOR_IDENTIFIERS_ID, displayNameKey);

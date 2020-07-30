@@ -1,7 +1,7 @@
 package org.folio.service.fieldname.builder;
 
-import org.folio.rest.jaxrs.model.FieldName;
-import org.folio.service.fieldname.FieldNameConfig;
+import org.folio.rest.jaxrs.model.TransformationField.RecordType;
+import org.folio.service.fieldname.TransformationFieldsConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -21,10 +21,10 @@ class JsonPathBuilderUnitTest {
   @Test
   void shouldReturnCorrectDisplayNameKey_whenTypeIsInstanceAndIdIsIdentifiers() {
     // given
-    FieldNameConfig fieldNameConfig = FieldNameConfig.HR_ID;
+    TransformationFieldsConfig transformationFieldsConfig = TransformationFieldsConfig.HR_ID;
 
     // when
-    String jsonPath = jsonPathBuilder.build(FieldName.RecordType.INSTANCE, fieldNameConfig);
+    String jsonPath = jsonPathBuilder.build(RecordType.INSTANCE, transformationFieldsConfig);
 
     // then
     assertEquals(HR_ID_JSON_PATH_RESULT, jsonPath);
@@ -33,13 +33,13 @@ class JsonPathBuilderUnitTest {
   @Test
   void shouldReturnCorrectDisplayNameKey_whenTypeIsInstanceAndIdIsIdentifiers_WithReferenceData() {
     // given
-    FieldNameConfig fieldNameConfig = FieldNameConfig.IDENTIFIERS;
+    TransformationFieldsConfig transformationFieldsConfig = TransformationFieldsConfig.IDENTIFIERS;
 
     // when
-    String jsonPath = jsonPathBuilder.build(FieldName.RecordType.INSTANCE, fieldNameConfig, IDENTIFIER_TYPES_LCCN_ID);
+    String jsonPath = jsonPathBuilder.build(RecordType.INSTANCE, transformationFieldsConfig, IDENTIFIER_TYPES_LCCN_ID);
 
     // then
-    assertNotEquals(fieldNameConfig.getPath(), jsonPath);
+    assertNotEquals(transformationFieldsConfig.getPath(), jsonPath);
     assertEquals(IDENTIFIER_JSON_PATH_RESULT, jsonPath);
   }
 

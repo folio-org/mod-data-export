@@ -6,6 +6,8 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
@@ -40,6 +42,12 @@ public class ReferenceDataProvider {
     } else {
       return cached;
     }
+  }
+
+  public ReferenceData getReferenceDataForTransformationFields(OkapiConnectionParams okapiConnectionParams) {
+    ReferenceDataImpl referenceData = new ReferenceDataImpl();
+    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    return referenceData;
   }
 
   private ReferenceDataImpl load(OkapiConnectionParams okapiConnectionParams) {
