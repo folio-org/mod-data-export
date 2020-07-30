@@ -57,18 +57,18 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     Promise<TransformationFieldCollection> promise = Promise.promise();
     List<TransformationField> transformationFields = new ArrayList<>();
     ReferenceData referenceData = referenceDataProvider.getReferenceDataForTransformationFields(okapiConnectionParams);
-    transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
-    transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
-    transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELD_NAME_CONFIGS, referenceData, okapiConnectionParams));
+    transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELD_NAME_CONFIGS, referenceData));
+    transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELD_NAME_CONFIGS, referenceData));
+    transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELD_NAME_CONFIGS, referenceData));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }
 
-  private List<TransformationField> buildTransformationFields(RecordType recordType, Set<TransformationFieldsConfig> transformationFieldsConfigs, ReferenceData referenceData, OkapiConnectionParams okapiConnectionParams) {
+  private List<TransformationField> buildTransformationFields(RecordType recordType, Set<TransformationFieldsConfig> transformationFieldsConfigs, ReferenceData referenceData) {
     List<TransformationField> transformationFields = new ArrayList<>();
     for (TransformationFieldsConfig transformationFieldsConfig : transformationFieldsConfigs) {
       if (transformationFieldsConfig.isReferenceData()) {
-        List<TransformationField> fieldNamesWithReferenceData = buildTransformationFieldsByReferenceData(recordType, transformationFieldsConfig, referenceData, okapiConnectionParams);
+        List<TransformationField> fieldNamesWithReferenceData = buildTransformationFieldsByReferenceData(recordType, transformationFieldsConfig, referenceData);
         transformationFields.addAll(fieldNamesWithReferenceData);
       } else {
         transformationFields.add(buildSimpleTransformationFields(recordType, transformationFieldsConfig));
@@ -77,7 +77,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     return transformationFields;
   }
 
-  private List<TransformationField> buildTransformationFieldsByReferenceData(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig, ReferenceData referenceData, OkapiConnectionParams okapiConnectionParams) {
+  private List<TransformationField> buildTransformationFieldsByReferenceData(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig, ReferenceData referenceData) {
     Map<String, JsonObject> referenceDataEntries = referenceData.get(transformationFieldsConfig.getReferenceDataKey());
     List<TransformationField> subTransformationFields = new ArrayList<>();
     for (Map.Entry<String, JsonObject> referenceDataEntry : referenceDataEntries.entrySet()) {
