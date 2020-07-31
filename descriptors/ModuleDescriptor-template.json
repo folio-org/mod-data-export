@@ -257,6 +257,18 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/transformationFields",
+          "permissionsRequired": [
+            "data-export.transformation-fields.collection.get"
+          ],
+          "modulePermissions": [
+            "inventory-storage.identifier-types.collection.get"
+          ]
         }
       ]
     },
@@ -362,6 +374,11 @@
       "description": "Entry point to delete Mapping Profile by id"
     },
     {
+      "permissionName": "data-export.transformation-fields.collection.get",
+      "displayName": "Data Export - get mapping transformation fields collection",
+      "description": "Entry point to get mapping transformation fields for the fields"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -381,7 +398,8 @@
         "data-export.mapping-profiles.collection.get",
         "data-export.mapping-profiles.item.get",
         "data-export.mapping-profiles.item.put",
-        "data-export.mapping-profiles.item.delete"
+        "data-export.mapping-profiles.item.delete",
+        "data-export.transformation-fields.collection.get"
       ],
       "visible": false
     }

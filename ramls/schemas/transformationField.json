@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Transformation field",
+  "type": "object",
+  "additionalProperties": false,
+    "properties": {
+      "fieldId": {
+        "description": "Mapping rule id of this field",
+        "type": "string"
+      },
+      "displayNameKey": {
+        "description": "Display name key, that will used for localization on UI",
+        "type": "string"
+      },
+      "referenceDataValue": {
+        "description": "Reference data value of the field",
+        "type": "string"
+      },
+      "path": {
+        "description": "Json path of the field",
+        "type": "string"
+      },
+      "recordType": {
+        "description": "Record type of the field",
+        "$ref": "profiles/recordTypes.json"
+      },
+      "metadataParameters": {
+        "description": "Additional parameters used for mapping",
+        "type": "object",
+        "javaType": "java.util.Map<String, String>"
+      }
+  },
+  "required": [
+    "fieldId",
+    "displayNameKey",
+    "path"
+  ]
+}
