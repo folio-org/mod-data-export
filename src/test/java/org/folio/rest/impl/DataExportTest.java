@@ -57,8 +57,8 @@ class DataExportTest extends RestVerticleTestBase {
   public static final String TOTAL_NUMBER_2 = "2";
   public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   public static final String TOTAL_NUMBER_1 = "1";
-  private String mappingProfileId;
-  private String jobProfileId;
+  private static String mappingProfileId;
+  private static String jobProfileId;
 
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
@@ -74,7 +74,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @AfterAll
-  public void after() {
+  public static void after() {
       cleanupProfiles();
   }
 
@@ -266,10 +266,18 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS).size());
   }
 
-  private void cleanupProfiles() {
-    deleteRequestById(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT,"jobProfileId");
-    deleteRequestById(DATA_EXPORT_JOB_PROFILES_ENDPOINT,"jobProfileId");
+  private static void cleanupProfiles() {
+    RestAssured.given()
+    .spec(jsonRequestSpecification)
+    .pathParam("id", mappingProfileId)
+    .when()
+    .delete(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT);
 
+    RestAssured.given()
+    .spec(jsonRequestSpecification)
+    .pathParam("id", jobProfileId)
+    .when()
+    .delete(DATA_EXPORT_JOB_PROFILES_ENDPOINT);
   }
 
   @Configuration
