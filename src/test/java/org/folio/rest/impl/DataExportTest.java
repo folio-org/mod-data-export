@@ -269,15 +269,16 @@ class DataExportTest extends RestVerticleTestBase {
   private static void cleanupProfiles() {
     RestAssured.given()
     .spec(jsonRequestSpecification)
+    .pathParam("id", jobProfileId)
+    .when()
+    .delete(DATA_EXPORT_JOB_PROFILES_ENDPOINT);
+
+    RestAssured.given()
+    .spec(jsonRequestSpecification)
     .pathParam("id", mappingProfileId)
     .when()
     .delete(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT);
 
-    RestAssured.given()
-    .spec(jsonRequestSpecification)
-    .pathParam("id", jobProfileId)
-    .when()
-    .delete(DATA_EXPORT_JOB_PROFILES_ENDPOINT);
   }
 
   @Configuration
