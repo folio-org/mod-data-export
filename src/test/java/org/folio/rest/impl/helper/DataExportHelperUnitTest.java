@@ -1,4 +1,4 @@
-package org.folio.rest.impl;
+package org.folio.rest.impl.helper;
 
 import static io.vertx.core.Future.succeededFuture;
 import static org.junit.Assert.assertEquals;
@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.UUID;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.impl.DataExportHelper;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.rest.jaxrs.model.JobExecution;

@@ -17,9 +17,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.*;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
@@ -38,7 +36,7 @@ import static org.folio.rest.impl.RestVerticleTestBase.TOKEN;
 import static org.folio.rest.tools.client.Response.isSuccess;
 
 @RunWith(JUnitPlatform.class)
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StorageTestSuite {
   private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
 
@@ -76,12 +74,6 @@ public class StorageTestSuite {
 
 
     deployVerticle();
-
-    //DeploymentOptions options = new DeploymentOptions();
-    //options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
-   // options.setWorker(true);
-    //startVerticle(options);
-
   }
 
   @AfterAll
@@ -106,8 +98,7 @@ public class StorageTestSuite {
   private static void deployVerticle() throws InterruptedException, ExecutionException, TimeoutException {
     TenantClient tenantClient = new TenantClient(BASE_OKAPI_URL, TENANT_ID, TOKEN);
     logger.info("Starting verticle on port: "+ port);
-    DeploymentOptions options = new DeploymentOptions(); //.setConfig(new JsonObject().put("http.port", PORT));
-    options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
+    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port));
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
       if (res.succeeded()) {
@@ -134,11 +125,10 @@ public class StorageTestSuite {
 
   }
 
-
-  @Nested
-  class DataExportTestNested extends DataExportTest {}
   @Nested
   class EntitiesCrudTestNested extends EntitiesCrudTest{}
+  @Nested
+  class DataExportTestNested extends DataExportTest {}
   @Nested
   class ExportManagerTestNested extends ExportManagerTest{}
   @Nested

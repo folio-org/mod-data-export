@@ -32,6 +32,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -47,6 +48,8 @@ import org.springframework.context.annotation.Primary;
 @ExtendWith(VertxExtension.class)
 class DataExportTest extends RestVerticleTestBase {
 
+  private static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/jobProfiles";
+  private static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mappingProfiles";
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
@@ -54,6 +57,9 @@ class DataExportTest extends RestVerticleTestBase {
   public static final String TOTAL_NUMBER_2 = "2";
   public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   public static final String TOTAL_NUMBER_1 = "1";
+  private String mappingProfileId;
+  private String jobProfileId;
+
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   @Autowired
@@ -65,6 +71,11 @@ class DataExportTest extends RestVerticleTestBase {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  @AfterAll
+  public void after() {
+      cleanupProfiles();
   }
 
   @Test
@@ -128,7 +139,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv");
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition();
     // when
-    String jobProfileId = buildCustomJobProfile();
+    jobProfileId = buildCustomJobProfile();
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -150,15 +161,17 @@ class DataExportTest extends RestVerticleTestBase {
 
   private String buildCustomJobProfile() {
     String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
+    mappingProfileId = new JsonObject(mappingProfile).getString("id");
     RestAssured.given()
     .spec(jsonRequestSpecification)
     .body(mappingProfile)
     .when()
-    .post("/data-export/mappingProfiles");
-    String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
+    .post(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT);
 
+
+    String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
     JsonObject jobProfilejs = new JsonObject(jobProfile);
-    Response response = postRequest(jobProfilejs, "/data-export/jobProfiles");
+    Response response = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT);
     return response.then()
         .extract()
         .path("id");
@@ -251,6 +264,12 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_FORMATS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_TYPES).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS).size());
+  }
+
+  private void cleanupProfiles() {
+    deleteRequestById(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT,"jobProfileId");
+    deleteRequestById(DATA_EXPORT_JOB_PROFILES_ENDPOINT,"jobProfileId");
+
   }
 
   @Configuration
