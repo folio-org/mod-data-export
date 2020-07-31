@@ -32,8 +32,10 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -73,10 +75,6 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @AfterAll
-  public static void after() {
-      cleanupProfiles();
-  }
 
   @Test
   void testExport_UnderlyingSrsOnly(VertxTestContext context) throws IOException {
@@ -161,13 +159,15 @@ class DataExportTest extends RestVerticleTestBase {
 
   private String buildCustomJobProfile() {
     String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
-    mappingProfileId = new JsonObject(mappingProfile).getString("id");
-    RestAssured.given()
+    Response responseMP = RestAssured.given()
     .spec(jsonRequestSpecification)
     .body(mappingProfile)
     .when()
     .post(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT);
 
+    mappingProfileId = responseMP.then()
+        .extract()
+        .path("id");
 
     String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
     JsonObject jobProfilejs = new JsonObject(jobProfile);
@@ -264,21 +264,6 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_FORMATS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_TYPES).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS).size());
-  }
-
-  private static void cleanupProfiles() {
-    RestAssured.given()
-    .spec(jsonRequestSpecification)
-    .pathParam("id", jobProfileId)
-    .when()
-    .delete(DATA_EXPORT_JOB_PROFILES_ENDPOINT);
-
-    RestAssured.given()
-    .spec(jsonRequestSpecification)
-    .pathParam("id", mappingProfileId)
-    .when()
-    .delete(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT);
-
   }
 
   @Configuration

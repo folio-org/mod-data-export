@@ -36,7 +36,6 @@ import static org.folio.rest.impl.RestVerticleTestBase.TOKEN;
 import static org.folio.rest.tools.client.Response.isSuccess;
 
 @RunWith(JUnitPlatform.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StorageTestSuite {
   private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
 
@@ -128,8 +127,6 @@ public class StorageTestSuite {
   @Nested
   class EntitiesCrudTestNested extends EntitiesCrudTest{}
   @Nested
-  class DataExportTestNested extends DataExportTest {}
-  @Nested
   class ExportManagerTestNested extends ExportManagerTest{}
   @Nested
   class FileUploadServiceTestNested extends FileUploadServiceTest{}
@@ -137,7 +134,6 @@ public class StorageTestSuite {
   class JobExecutionServiceTestNested extends JobExecutionServiceTest{}
   @Nested
   class StorageCleanupServiceImplTestNested extends StorageCleanupServiceImplTest{}
-
   @Nested
   class ConfigurationsClientTestNested extends ConfigurationsClientTest{}
   @Nested
@@ -146,6 +142,9 @@ public class StorageTestSuite {
   class SourceRecordStorageTestNested extends SourceRecordStorageTest{}
   @Nested
   class UsersClientTestNested extends UsersClientTest{}
+  @Nested
+  class DataExportTestNested extends DataExportTest {}
+
 
 
 }
