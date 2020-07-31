@@ -6,6 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.UUID;
@@ -104,6 +106,14 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     return promise.future()
       .map(Results::getResults)
       .map(jobExecutions -> jobExecutions.isEmpty() ? Optional.empty() : Optional.of(jobExecutions.get(0)));
+  }
+
+
+  @Override
+  public Future<Boolean> deleteById(String id, String tenantId) {
+    Promise<RowSet<Row>> promise = Promise.promise();
+    pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
+    return promise.future().map(updateResult -> updateResult.rowCount() == 1);
   }
 
 

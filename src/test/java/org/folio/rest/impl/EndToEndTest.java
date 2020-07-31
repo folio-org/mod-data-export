@@ -201,7 +201,7 @@ class EndToEndTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
     //when
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification(okapiConnectionParams.getTenantId());
 
  // then
     vertx.setTimer(TIMER_DELAY, handler -> {
@@ -229,7 +229,7 @@ class EndToEndTest extends RestVerticleTestBase {
 
   private FileDefinition givenUploadFile(String fileName) throws IOException {
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification(okapiConnectionParams.getTenantId());
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())

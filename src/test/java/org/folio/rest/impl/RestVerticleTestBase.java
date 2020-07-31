@@ -1,14 +1,18 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.folio.rest.impl.StorageTestSuite.port;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -17,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,6 +32,7 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.tools.PomReader;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -136,6 +142,14 @@ public abstract class RestVerticleTestBase {
       .post(path);
   }
 
+  protected Response postRequest(JsonObject body, String path, String tenantID) {
+    return RestAssured.given()
+      .spec(buildCustomJsonRequestSpecification(tenantID))
+      .body(body.encode())
+      .when()
+      .post(path);
+  }
+
   protected Response getRequest(String path) {
     return RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -183,11 +197,48 @@ public abstract class RestVerticleTestBase {
     }
   }
 
-  protected RequestSpecification buildRequestSpecification() {
+  protected RequestSpecification buildRequestSpecification(String tenantID) {
     return new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .addHeader(OKAPI_HEADER_TENANT, tenantID)
       .setBaseUri(BASE_OKAPI_URL)
       .build();
   }
+
+  public static ValidatableResponse postToTenant(Header tenantHeader) throws MalformedURLException {
+    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+    JsonObject jsonBody = new JsonObject();
+    jsonBody.put("module_to", moduleId);
+    URL url = new URL("http", "localhost", port, "/_/tenant");
+    return given()
+      .header(tenantHeader)
+      .header(URL_TO_HEADER)
+      .contentType(ContentType.JSON)
+      .body(jsonBody.encodePrettily())
+      .post(url)
+      .then();
+  }
+
+  public static void deleteTenant(Header tenantHeader)
+      throws MalformedURLException {
+      given()
+        .header(tenantHeader)
+        .contentType(ContentType.JSON)
+        .delete("/_/tenant")
+        .then()
+        .statusCode(204);
+    }
+
+
+  protected RequestSpecification buildCustomJsonRequestSpecification(String tenantId) {
+    return new RequestSpecBuilder()
+      .setContentType(ContentType.JSON)
+      .addHeader(OKAPI_HEADER_TOKEN, TOKEN)
+      .addHeader(OKAPI_HEADER_TENANT, tenantId)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .addHeader("Accept", "text/plain, application/json")
+      .build();
+  }
+
 }

@@ -125,25 +125,44 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class EntitiesCrudTestNested extends EntitiesCrudTest{}
+  class EntitiesCrudTestNested extends EntitiesCrudTest {
+  }
+
   @Nested
-  class ExportManagerTestNested extends ExportManagerTest{}
+  class ExportManagerTestNested extends ExportManagerTest {
+  }
+
   @Nested
-  class FileUploadServiceTestNested extends FileUploadServiceTest{}
+  class FileUploadServiceTestNested extends FileUploadServiceTest {
+  }
+
   @Nested
-  class JobExecutionServiceTestNested extends JobExecutionServiceTest{}
+  class JobExecutionServiceTestNested extends JobExecutionServiceTest {
+  }
+
   @Nested
-  class StorageCleanupServiceImplTestNested extends StorageCleanupServiceImplTest{}
+  class StorageCleanupServiceImplTestNested extends StorageCleanupServiceImplTest {
+  }
+
   @Nested
-  class ConfigurationsClientTestNested extends ConfigurationsClientTest{}
+  class ConfigurationsClientTestNested extends ConfigurationsClientTest {
+  }
+
   @Nested
-  class InventoryClientTestNested extends InventoryClientTest{}
+  class InventoryClientTestNested extends InventoryClientTest {
+  }
+
   @Nested
-  class SourceRecordStorageTestNested extends SourceRecordStorageTest{}
+  class SourceRecordStorageTestNested extends SourceRecordStorageTest {
+  }
+
   @Nested
-  class UsersClientTestNested extends UsersClientTest{}
+  class UsersClientTestNested extends UsersClientTest {
+  }
+
   @Nested
-  class DataExportTestNested extends DataExportTest {}
+  class DataExportTestNested extends DataExportTest {
+  }
 
 
 
