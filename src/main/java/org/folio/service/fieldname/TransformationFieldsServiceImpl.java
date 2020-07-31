@@ -85,7 +85,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
       TransformationField transformationField = new TransformationField();
       transformationField.setRecordType(recordType);
       transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry.getKey()));
-      transformationField.setRuleId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(), referenceDataValue));
+      transformationField.setFieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(), referenceDataValue));
       transformationField.setDisplayNameKey(displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
       transformationField.setReferenceDataValue(referenceDataValue);
       setMetadataParameters(transformationField, transformationFieldsConfig);
@@ -99,7 +99,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationField.setRecordType(recordType);
     transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig));
     transformationField.setDisplayNameKey(displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
-    transformationField.setRuleId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
+    transformationField.setFieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
     setMetadataParameters(transformationField, transformationFieldsConfig);
     return transformationField;
   }

@@ -4,7 +4,7 @@
   "type": "object",
   "additionalProperties": false,
     "properties": {
-      "ruleId": {
+      "fieldId": {
         "description": "Mapping rule id of this field",
         "type": "string"
       },
@@ -31,7 +31,7 @@
       }
   },
   "required": [
-    "ruleId",
+    "fieldId",
     "displayNameKey",
     "path"
   ]
