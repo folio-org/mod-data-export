@@ -6,7 +6,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.http.HttpStatus;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
