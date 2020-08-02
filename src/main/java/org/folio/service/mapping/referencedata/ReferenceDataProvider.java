@@ -42,6 +42,12 @@ public class ReferenceDataProvider {
     }
   }
 
+  public ReferenceData getReferenceDataForTransformationFields(OkapiConnectionParams okapiConnectionParams) {
+    ReferenceDataImpl referenceData = new ReferenceDataImpl();
+    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    return referenceData;
+  }
+
   private ReferenceDataImpl load(OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
     referenceData.put(NATURE_OF_CONTENT_TERMS, inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
