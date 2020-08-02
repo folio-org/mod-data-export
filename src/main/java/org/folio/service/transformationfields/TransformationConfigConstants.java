@@ -21,8 +21,8 @@ public class TransformationConfigConstants {
 
   protected static final Set<TransformationFieldsConfig> HOLDINGS_FIELDS_CONFIGS = EnumSet.of(
     ID,
-    INSTANCE_ID,
     HR_ID,
+    INSTANCE_ID,
     METADATA_CREATED_DATE,
     METADATA_UPDATED_DATE,
     METADATA_CREATED_BY_USER_ID,
