@@ -1,4 +1,4 @@
-package org.folio.service.fieldname;
+package org.folio.service.transformationfields;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.TransformationField;

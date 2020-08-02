@@ -1,4 +1,4 @@
-package org.folio.service.fieldname;
+package org.folio.service.transformationfields;
 
 import java.util.Map;
 
@@ -6,9 +6,15 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFI
 
 public enum TransformationFieldsConfig {
 
+  ID("id", "$.{recordType}.id"),
+  HR_ID("hrid", "$.{recordType}.hrid"),
   IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@identifierTypeId=={id})].value", IDENTIFIER_TYPES),
-  FIXED_LENGTH_DATA_ELEMENT("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
-  HR_ID("hrid", "$.{recordType}.hrid");
+  METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
+  INSTANCE_ID("instanceId", "$.holdings.instanceId"),
+
+  METADATA_UPDATED_DATE("metadata.updatedDate", "$.{recordType}.metadata.updatedDate"),
+  METADATA_CREATED_BY_USER_ID("metadata.createdByUserId", "$.{recordType}.metadata.createdByUserId"),
+  METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId");
 
   private final String fieldId;
   private final String path;

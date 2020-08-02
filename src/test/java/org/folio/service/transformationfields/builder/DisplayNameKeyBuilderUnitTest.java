@@ -1,4 +1,4 @@
-package org.folio.service.fieldname.builder;
+package org.folio.service.transformationfields.builder;
 
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ class DisplayNameKeyBuilderUnitTest {
 
   private static final String FIELD_ID_IDENTIFIERS = "identifiers";
   private static final String DISPLAY_NAME_RESULT_FOR_IDENTIFIERS_ID = "instance.identifiers";
-  private DisplayNameKeyBuilder displayNameKeyBuilder = new DisplayNameKeyBuilderImpl();
+  private final DisplayNameKeyBuilder displayNameKeyBuilder = new DisplayNameKeyBuilderImpl();
 
   @Test
   void shouldReturnCorrectDisplayNameKey_whenTypeIsInstanceAndIdIsIdentifiers() {

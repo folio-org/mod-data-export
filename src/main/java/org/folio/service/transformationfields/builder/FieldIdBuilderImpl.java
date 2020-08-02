@@ -1,4 +1,4 @@
-package org.folio.service.fieldname.builder;
+package org.folio.service.transformationfields.builder;
 
 import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
