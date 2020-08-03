@@ -4,8 +4,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.HttpStatus;
 import org.folio.clients.UsersClient;
 import org.folio.dao.JobProfileDao;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.util.OkapiConnectionParams;
@@ -24,6 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class JobProfileServiceImpl implements JobProfileService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
 
   @Autowired
   private JobProfileDao jobProfileDao;
@@ -69,6 +72,9 @@ public class JobProfileServiceImpl implements JobProfileService {
   @Override
   public Future<JobProfile> update(JobProfile jobProfile, OkapiConnectionParams params) {
     Promise<JobProfile> jobProfilePromise = Promise.promise();
+    if (DEFAULT_JOB_PROFILE_ID.equals(jobProfile.getId())) {
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default job profile is forbidden");
+    }
     if (jobProfile.getMetadata() != null && isNotEmpty(jobProfile.getMetadata().getUpdatedByUserId())) {
       usersClient.getUserInfoAsync(jobProfile.getMetadata().getUpdatedByUserId(), params)
         .onComplete(optionalUserInfoAr -> {
@@ -92,6 +98,9 @@ public class JobProfileServiceImpl implements JobProfileService {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
+    if (DEFAULT_JOB_PROFILE_ID.equals(id)) {
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default job profile is forbidden");
+    }
     return jobProfileDao.deleteById(id, tenantId);
   }
 
