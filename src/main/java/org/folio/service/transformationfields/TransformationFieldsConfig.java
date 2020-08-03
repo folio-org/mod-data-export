@@ -4,6 +4,9 @@ import java.util.Map;
 
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 
+/**
+ * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
+ */
 public enum TransformationFieldsConfig {
 
   ID("id", "$.{recordType}.id"),
