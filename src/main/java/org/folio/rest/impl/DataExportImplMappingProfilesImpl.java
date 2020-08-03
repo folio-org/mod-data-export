@@ -61,7 +61,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
   @Override
   public void deleteDataExportMappingProfilesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar -> mappingProfileService.delete(id, tenantId))
+      .compose(ar -> mappingProfileService.deleteById(id, tenantId))
       .map(isDeleted -> Boolean.TRUE.equals(isDeleted)
         ? DeleteDataExportMappingProfilesByIdResponse.respond204()
         : DeleteDataExportMappingProfilesByIdResponse.respond404WithTextPlain(format("MappingProfile with id '%s' was not found", id)))
