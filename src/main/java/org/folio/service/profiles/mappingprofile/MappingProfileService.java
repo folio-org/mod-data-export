@@ -42,7 +42,7 @@ public interface MappingProfileService {
    * @param tenantId         tenant id
    * @return future with {@link MappingProfile}
    */
-  Future<Boolean> delete(String mappingProfileId, String tenantId);
+  Future<Boolean> deleteById(String mappingProfileId, String tenantId);
 
   /**
    * Gets {@link MappingProfile}

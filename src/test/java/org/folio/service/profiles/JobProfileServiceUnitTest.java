@@ -7,6 +7,7 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.JobProfileDaoImpl;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -14,8 +15,8 @@ import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.jobprofile.JobProfileServiceImpl;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -46,6 +47,7 @@ class JobProfileServiceUnitTest {
   private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static JobProfile expectedJobProfile;
+  private static String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
 
   @Spy
   @InjectMocks
@@ -119,6 +121,15 @@ class JobProfileServiceUnitTest {
   }
 
   @Test
+  void delete_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      jobProfileService.deleteById(DEFAULT_JOB_PROFILE_ID, TENANT_ID);
+    });
+    context.completeNow();
+  }
+
+  @Test
   void update_shouldCallDaoUpdate(VertxTestContext context) {
     // given
     when(usersClient.getUserInfoAsync(anyString(), any(OkapiConnectionParams.class)))
@@ -132,6 +143,17 @@ class JobProfileServiceUnitTest {
       verify(jobProfileDao).update(eq(expectedJobProfile), eq(TENANT_ID));
       context.completeNow();
     }));
+  }
+
+  @Test
+  void update_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
+    // given
+    JobProfile defaultJobProfile = new JobProfile().withId(DEFAULT_JOB_PROFILE_ID);
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      jobProfileService.update(defaultJobProfile, okapiConnectionParams);
+    });
+    context.completeNow();
   }
 
   @Test
