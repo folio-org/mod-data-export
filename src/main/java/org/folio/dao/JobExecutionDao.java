@@ -1,14 +1,9 @@
 package org.folio.dao;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import java.util.Optional;
-
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
-import org.folio.rest.jaxrs.model.JobProfile;
 
 /**
  * Data access object for {@link JobExecution}
