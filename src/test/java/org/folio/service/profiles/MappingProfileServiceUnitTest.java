@@ -7,6 +7,7 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -16,6 +17,7 @@ import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +47,7 @@ class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
   private static MappingProfile expectedMappingProfile;
+  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   @Spy
   @InjectMocks
@@ -110,13 +113,22 @@ class MappingProfileServiceUnitTest {
     // given
     when(mappingProfileDao.delete(expectedMappingProfile.getId(), TENANT_ID)).thenReturn(succeededFuture(true));
     // when
-    Future<Boolean> future = mappingProfileService.delete(expectedMappingProfile.getId(), TENANT_ID);
+    Future<Boolean> future = mappingProfileService.deleteById(expectedMappingProfile.getId(), TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(mappingProfileDao).delete(eq(expectedMappingProfile.getId()), eq(TENANT_ID));
       context.completeNow();
     }));
+  }
+
+  @Test
+  void delete_shouldThrowException_ifMappingProfileIsDefault(VertxTestContext context) {
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.deleteById(DEFAULT_MAPPING_PROFILE_ID, TENANT_ID);
+    });
+    context.completeNow();
   }
 
   @Test
@@ -133,6 +145,17 @@ class MappingProfileServiceUnitTest {
       verify(mappingProfileDao).update(eq(expectedMappingProfile), eq(TENANT_ID));
       context.completeNow();
     }));
+  }
+
+  @Test
+  void update_shouldThrowException_ifMappingProfileIsDefault(VertxTestContext context) {
+    // given
+    MappingProfile defaultMappingProfile = new MappingProfile().withId(DEFAULT_MAPPING_PROFILE_ID);
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.update(defaultMappingProfile, okapiConnectionParams);
+    });
+    context.completeNow();
   }
 
   @Test
