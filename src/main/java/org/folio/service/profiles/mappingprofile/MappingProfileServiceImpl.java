@@ -4,8 +4,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.HttpStatus;
 import org.folio.clients.UsersClient;
 import org.folio.dao.MappingProfileDao;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.util.OkapiConnectionParams;
@@ -26,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Service
 public class MappingProfileServiceImpl implements MappingProfileService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
@@ -62,6 +65,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   @Override
   public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
     Promise<MappingProfile> mappingProfilePromise = Promise.promise();
+    if (DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfile.getId())) {
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
+    }
     if (mappingProfile.getMetadata() != null && isNotEmpty(mappingProfile.getMetadata().getUpdatedByUserId())) {
       usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
         .onComplete(userInfoAr -> {
@@ -93,7 +99,10 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<Boolean> delete(String mappingProfileId, String tenantId) {
+  public Future<Boolean> deleteById(String mappingProfileId, String tenantId) {
+    if (DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default mapping profile is forbidden");
+    }
     return mappingProfileDao.delete(mappingProfileId, tenantId);
   }
 }

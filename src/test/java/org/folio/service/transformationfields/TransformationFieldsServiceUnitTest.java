@@ -1,18 +1,21 @@
-package org.folio.service.fieldname;
+package org.folio.service.transformationfields;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.processor.ReferenceData;
+import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
-import org.folio.service.fieldname.builder.DisplayNameKeyBuilderImpl;
-import org.folio.service.fieldname.builder.FieldIdBuilderImpl;
-import org.folio.service.fieldname.builder.JsonPathBuilder;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.service.transformationfields.builder.DisplayNameKeyBuilderImpl;
+import org.folio.service.transformationfields.builder.FieldIdBuilderImpl;
+import org.folio.service.transformationfields.builder.JsonPathBuilder;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +27,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,6 +47,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TransformationFieldsServiceUnitTest {
 
+  private static final String EXPECTED_TRANSFORMATION_FIELDS_RESPONSE_PATH = "mapping/expectedTransformationFields.json";
+  private static final String TRANSFORMATION_FIELDS = "transformationFields";
+  private static final String FIELD_ID = "fieldId";
+  private static final String TENANT_ID = "diku";
+  private final OkapiConnectionParams okapiConnectionParams;
   @Mock
   private JsonPathBuilder pathBuilder;
   @Mock
@@ -52,19 +63,18 @@ class TransformationFieldsServiceUnitTest {
   @Spy
   @InjectMocks
   private TransformationFieldsServiceImpl filedNamesService;
-  private ReferenceData referenceData;
-
-  private OkapiConnectionParams okapiConnectionParams;
+  private Map<String, TransformationField> expectedFields;
 
   TransformationFieldsServiceUnitTest() {
     Map<String, String> headers = new HashedMap<>();
-    headers.put(OKAPI_HEADER_TENANT, "diku");
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
     okapiConnectionParams = new OkapiConnectionParams(headers);
+    expectedFields = initializeExpectedTranslationFieldsResponse();
   }
 
   @BeforeEach
   void before() {
-    referenceData = new ReferenceDataImpl();
+    ReferenceData referenceData = new ReferenceDataImpl();
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class));
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), anyString());
@@ -75,17 +85,42 @@ class TransformationFieldsServiceUnitTest {
   }
 
   @Test
-  void getFieldNamesShouldReturnFieldsWithIdentifiers(VertxTestContext context) {
+  void getFieldNamesShouldReturnValidFields(VertxTestContext context) {
+    // when
     Future<TransformationFieldCollection> transformationFieldsFuture = filedNamesService.getTransformationFields(okapiConnectionParams);
 
+    // then
     transformationFieldsFuture.onComplete(ar ->
       context.verify(() -> {
         assertTrue(ar.succeeded());
         TransformationFieldCollection transformationFieldCollection = ar.result();
+        transformationFieldCollection.getTransformationFields()
+          .forEach(transformationField -> checkIfActualFieldEqualToExpected(expectedFields.get(transformationField.getFieldId()), transformationField));
         assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
         assertNotEquals(0, (int) transformationFieldCollection.getTotalRecords());
         context.completeNow();
       }));
+  }
+
+  Map<String, TransformationField> initializeExpectedTranslationFieldsResponse() {
+    expectedFields = new HashMap<>();
+    JsonArray expectedTransformationFields =
+      new JsonObject(readFileContentFromResources(EXPECTED_TRANSFORMATION_FIELDS_RESPONSE_PATH))
+        .getJsonArray(TRANSFORMATION_FIELDS);
+    for (Object object : expectedTransformationFields) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      expectedFields.put(jsonObject.getString(FIELD_ID), jsonObject.mapTo(TransformationField.class));
+    }
+    return expectedFields;
+  }
+
+  void checkIfActualFieldEqualToExpected(TransformationField expectedField, TransformationField actualField) {
+    assertEquals(expectedField.getFieldId(), actualField.getFieldId());
+    assertEquals(expectedField.getDisplayNameKey(), actualField.getDisplayNameKey());
+    assertEquals(expectedField.getPath(), actualField.getPath());
+    assertEquals(expectedField.getReferenceDataValue(), actualField.getReferenceDataValue());
+    assertEquals(expectedField.getMetadataParameters(), actualField.getMetadataParameters());
+    assertEquals(expectedField.getRecordType(), actualField.getRecordType());
   }
 
 }
