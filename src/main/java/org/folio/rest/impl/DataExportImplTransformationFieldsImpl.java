@@ -5,7 +5,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import org.folio.rest.jaxrs.resource.DataExportTransformationFields;
-import org.folio.service.fieldname.TransformationFieldsService;
+import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.folio.util.OkapiConnectionParams;

@@ -1,8 +1,8 @@
-package org.folio.service.fieldname.builder;
+package org.folio.service.transformationfields.builder;
 
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
-import org.folio.service.fieldname.TransformationFieldsConfig;
+import org.folio.service.transformationfields.TransformationFieldsConfig;
 
 /**
  * Builder is responsible to build displayNameKey of the {@link TransformationField}

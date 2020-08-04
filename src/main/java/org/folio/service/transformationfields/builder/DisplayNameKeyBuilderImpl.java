@@ -1,4 +1,4 @@
-package org.folio.service.fieldname.builder;
+package org.folio.service.transformationfields.builder;
 
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.springframework.stereotype.Component;

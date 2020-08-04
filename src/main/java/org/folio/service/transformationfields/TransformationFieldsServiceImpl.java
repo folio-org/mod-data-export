@@ -1,4 +1,4 @@
-package org.folio.service.fieldname;
+package org.folio.service.transformationfields;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -8,16 +8,15 @@ import org.folio.processor.ReferenceData;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
-import org.folio.service.fieldname.builder.DisplayNameKeyBuilder;
-import org.folio.service.fieldname.builder.FieldIdBuilder;
-import org.folio.service.fieldname.builder.PathBuilder;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.service.transformationfields.builder.DisplayNameKeyBuilder;
+import org.folio.service.transformationfields.builder.FieldIdBuilder;
+import org.folio.service.transformationfields.builder.PathBuilder;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,24 +24,11 @@ import java.util.Set;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
-import static org.folio.service.fieldname.TransformationFieldsConfig.HR_ID;
-import static org.folio.service.fieldname.TransformationFieldsConfig.IDENTIFIERS;
 
 @Service
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
 
-  public static final String REFERENCE_DATA_NAME_KEY = "name";
-  private static final Set<TransformationFieldsConfig> INSTANCE_FIELD_NAME_CONFIGS = EnumSet.of(
-    HR_ID,
-    IDENTIFIERS
-  );
-  private static final Set<TransformationFieldsConfig> HOLDINGS_FIELD_NAME_CONFIGS = EnumSet.of(
-    HR_ID
-  );
-  private static final Set<TransformationFieldsConfig> ITEM_FIELD_NAME_CONFIGS = EnumSet.of(
-    HR_ID
-  );
-
+  private static final String REFERENCE_DATA_NAME_KEY = "name";
   @Autowired
   private PathBuilder pathBuilder;
   @Autowired
@@ -57,9 +43,9 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     Promise<TransformationFieldCollection> promise = Promise.promise();
     List<TransformationField> transformationFields = new ArrayList<>();
     ReferenceData referenceData = referenceDataProvider.getReferenceDataForTransformationFields(okapiConnectionParams);
-    transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELD_NAME_CONFIGS, referenceData));
-    transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELD_NAME_CONFIGS, referenceData));
-    transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELD_NAME_CONFIGS, referenceData));
+    transformationFields.addAll(buildTransformationFields(INSTANCE, TransformationConfigConstants.INSTANCE_FIELDS_CONFIGS, referenceData));
+    transformationFields.addAll(buildTransformationFields(HOLDINGS, TransformationConfigConstants.HOLDINGS_FIELDS_CONFIGS, referenceData));
+    transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }

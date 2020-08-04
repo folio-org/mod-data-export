@@ -1,4 +1,4 @@
-package org.folio.service.fieldname;
+package org.folio.service.transformationfields;
 
 import java.util.HashMap;
 import java.util.Map;
