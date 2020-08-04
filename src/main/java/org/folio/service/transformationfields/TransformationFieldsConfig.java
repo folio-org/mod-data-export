@@ -13,6 +13,11 @@ public enum TransformationFieldsConfig {
   HR_ID("hrid", "$.{recordType}.hrid"),
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
   IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@identifierTypeId=={id})].value", IDENTIFIER_TYPES),
+  SOURCE("source", "$.{recordType}.source"),
+  EDITIONS("editions", "$.{recordType}.editions"),
+  SUBJECTS("subjects", "$.{recordType}.subjects"),
+  LANGUAGES("languages", "$.{recordType}.languages"),
+  TITLE("title", "$.{recordType}.title"),
 
   METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
   METADATA_UPDATED_DATE("metadata.updatedDate", "$.{recordType}.metadata.updatedDate"),
