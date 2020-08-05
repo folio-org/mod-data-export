@@ -1,11 +1,9 @@
 package org.folio.service.transformationfields;
 
-import java.util.EnumSet;
-import java.util.Set;
-
 import static org.folio.service.transformationfields.TransformationFieldsConfig.*;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
+import java.util.EnumSet;
+import java.util.Set;
 
 
 public class TransformationConfigConstants {
