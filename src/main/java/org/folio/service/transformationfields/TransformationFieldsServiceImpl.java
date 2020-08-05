@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,7 @@ import java.util.Set;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
 
 @Service
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
@@ -70,13 +72,14 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
       String referenceDataValue = referenceDataEntry.getValue().getString(REFERENCE_DATA_NAME_KEY);
       TransformationField transformationField = new TransformationField();
       transformationField.setRecordType(recordType);
-      transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry.getKey()));
+      transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry));
       transformationField.setFieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(), referenceDataValue));
       transformationField.setDisplayNameKey(displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
       transformationField.setReferenceDataValue(referenceDataValue);
       setMetadataParameters(transformationField, transformationFieldsConfig);
       subTransformationFields.add(transformationField);
     }
+    subTransformationFields.sort(Comparator.comparing(TransformationField::getReferenceDataValue));
     return subTransformationFields;
   }
 

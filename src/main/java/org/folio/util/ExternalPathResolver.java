@@ -20,6 +20,9 @@ public class ExternalPathResolver {
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";
   public static final String ELECTRONIC_ACCESS_RELATIONSHIPS = "electronicAccessRelationships";
+  public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
+  public static final String ISSUANCE_MODES = "issuanceModes";
+  public static final String LOAN_TYPES = "loantypes";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -45,6 +48,9 @@ public class ExternalPathResolver {
     apis.put(INSTANCE_TYPES, "/instance-types");
     apis.put(INSTANCE_FORMATS, "/instance-formats");
     apis.put(ELECTRONIC_ACCESS_RELATIONSHIPS, "/electronic-access-relationships");
+    apis.put(ALTERNATIVE_TITLE_TYPES, "/alternative-title-types");
+    apis.put(LOAN_TYPES, "/loan-types");
+    apis.put(ISSUANCE_MODES, "/modes-of-issuance");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 

@@ -1,8 +1,11 @@
 package org.folio.service.transformationfields.builder;
 
+import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.service.transformationfields.TransformationFieldsConfig;
+
+import java.util.Map;
 
 /**
  * Builder is responsible to build jsonPath of the {@link TransformationField}.
@@ -26,6 +29,6 @@ public interface PathBuilder {
    * @param referenceDataId            id of the reference data
    * @return string with the jsonPath result
    */
-  String build(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig, String referenceDataId);
+  String build(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig, Map.Entry<String, JsonObject> referenceDataEntry);
 
 }
