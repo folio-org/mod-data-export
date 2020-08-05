@@ -8,21 +8,36 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFI
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
  */
 public enum TransformationFieldsConfig {
-
+  //Common Fields
   ID("id", "$.{recordType}.id"),
   HR_ID("hrid", "$.{recordType}.hrid"),
-  INSTANCE_ID("instanceId", "$.holdings.instanceId"),
   IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@identifierTypeId=={id})].value", IDENTIFIER_TYPES),
   SOURCE("source", "$.{recordType}.source"),
-  EDITIONS("editions", "$.{recordType}.editions"),
-  SUBJECTS("subjects", "$.{recordType}.subjects"),
-  LANGUAGES("languages", "$.{recordType}.languages"),
-  TITLE("title", "$.{recordType}.title"),
-
   METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
   METADATA_UPDATED_DATE("metadata.updatedDate", "$.{recordType}.metadata.updatedDate"),
   METADATA_CREATED_BY_USER_ID("metadata.createdByUserId", "$.{recordType}.metadata.createdByUserId"),
-  METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId");
+  METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId"),
+
+  //Instance specific fields
+  EDITIONS("editions", "$.instance.editions"),
+  LANGUAGES("languages", "$.instance.languages"),
+  SUBJECTS("subjects", "$.instance.subjects"),
+  TITLE("title", "$.instance.title"),
+
+  //Holdings specific Fields
+  INSTANCE_ID("instanceId", "$.holdings.instanceId"),
+
+  //Item specific fields
+  BARCODE("barcode", "$.item.barcode"),
+  CHRONOLOGY("chronology", "$.item.chronology"),
+  COPYNUMBER("copyNumber", "$.item.copyNumber"),
+  DESCRIPTION_OF_PIECES("descriptionOfPieces", "$.item.descriptionOfPieces"),
+  ENUMERATION("enumeration", "$.item.enumeration"),
+  HOLDINGS_ID("holdingsRecordId", "$.item.holdingsRecordId"),
+  NUMBER_OF_PIECES("numberOfPieces", "$.item.numberOfPieces"),
+  STATUS("status", "$.item.status.name"),
+  VOLUME("volume", "$.item.volume"),
+  YEARCAPTION("yearCaption", "$.item.yearCaption");
 
   private final String fieldId;
   private final String path;
