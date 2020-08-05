@@ -14,8 +14,11 @@ import io.vertx.core.Handler;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.sqlclient.PropertyKind;
 import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
+import java.util.List;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -114,6 +117,93 @@ class JobExecutionDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
+        verify(postgresClient).delete(eq(TABLE), eq(ID), any(Handler.class));
+        context.completeNow();
+      });
+    });
+  }
+
+  /**
+   *
+   * THis method can be removed once we have an API for deleting job execution
+   * @param context
+   */
+  @Test
+  void shouldSuceedDeleteJobExecution_whenPgClientReturnedSuceededFuture(VertxTestContext context) {
+    // given
+    RowSet<Row> promise = new RowSet<Row>() {
+
+      @Override
+      public int rowCount() {
+        return 1;
+      }
+
+      @Override
+      public List<String> columnsNames() {
+        return null;
+      }
+
+      @Override
+      public int size() {
+        return 0;
+      }
+
+      @Override
+      public <V> V property(PropertyKind<V> propertyKind) {
+        return null;
+      }
+
+      @Override
+      public RowSet<Row> value() {
+        return null;
+      }
+
+      @Override
+      public RowIterator<Row> iterator() {
+        return null;
+      }
+
+      @Override
+      public RowSet<Row> next() {
+        return null;
+      }
+    };
+    updateResult = new AsyncResult<RowSet<Row>>() {
+
+      @Override
+      public boolean succeeded() {
+        return true;
+      }
+
+      @Override
+      public RowSet<Row> result() {
+        return promise;
+      }
+
+      @Override
+      public boolean failed() {
+        return false;
+      }
+
+      @Override
+      public Throwable cause() {
+        return null;
+      }
+    };
+    when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
+    doAnswer(invocationOnMock -> {
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(2);
+      replyHandler.handle(updateResult);
+      return null;
+    }).when(postgresClient).delete(eq(TABLE), eq(ID), any(Handler.class));
+
+    // when
+    Future<Boolean> future = jobExecutionDao.deleteById(ID, TENANT_ID);
+
+    // then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.result());
         verify(postgresClient).delete(eq(TABLE), eq(ID), any(Handler.class));
         context.completeNow();
       });
