@@ -94,7 +94,6 @@ class TransformationFieldsServiceUnitTest {
       context.verify(() -> {
         assertTrue(ar.succeeded());
         TransformationFieldCollection transformationFieldCollection = ar.result();
-        System.out.println(transformationFieldCollection);
         transformationFieldCollection.getTransformationFields()
           .forEach(transformationField -> checkIfActualFieldEqualToExpected(expectedFields.get(transformationField.getFieldId()), transformationField));
         assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
