@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class ExportStorageServiceTest {
+class ExportStorageServiceUnitTest {
 
   @Mock
   private AmazonFactory amazonFactory;

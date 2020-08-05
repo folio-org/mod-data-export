@@ -1,9 +1,10 @@
-package org.folio.clients;
+package org.folio.rest.impl;
 
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.rule.Rule;
-import org.folio.rest.RestVerticleTestBase;
+import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +17,7 @@ import java.util.Map;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 @RunWith(VertxUnitRunner.class)
-class ConfigurationsClientUnitTest extends RestVerticleTestBase {
+class ConfigurationsClientTest extends RestVerticleTestBase {
   private static final String DEFAULT_LEADER_FIELD_NAME = "leader";
   private static final String DEFAULT_LEADER_FIELD_DESCRIPTION = "Leader";
   private static final String DEFAULT_LEADER_TRANSLATION_FUNCTION = "set_17-19_positions";

@@ -23,7 +23,6 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.util.ErrorCode;

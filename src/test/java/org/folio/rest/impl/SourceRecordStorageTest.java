@@ -1,9 +1,9 @@
-package org.folio.clients;
+package org.folio.rest.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.rest.RestVerticleTestBase;
+import org.folio.clients.SourceRecordStorageClient;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 @RunWith(VertxUnitRunner.class)
-class SourceRecordStorageUnitTest extends RestVerticleTestBase {
+class SourceRecordStorageTest extends RestVerticleTestBase {
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll

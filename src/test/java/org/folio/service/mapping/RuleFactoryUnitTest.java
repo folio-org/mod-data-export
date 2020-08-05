@@ -28,7 +28,7 @@ import static org.folio.TestUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class RuleFactoryTest {
+class RuleFactoryUnitTest {
   private static final String DEFAULT_RULE_FIELD_VALUE = "001";
   private static final String DEFAULT_RULE_DESCRIPTION = "defaultRuleDescription";
   private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
