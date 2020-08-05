@@ -1,4 +1,4 @@
-package org.folio.rest;
+package org.folio.rest.impl;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -71,13 +71,14 @@ public class MockServer {
   private final int port;
   private final Vertx vertx;
 
-  MockServer(int port) {
+  public MockServer(int port) {
     this.port = port;
     this.vertx = Vertx.vertx();
   }
 
-  void start() throws InterruptedException, ExecutionException, TimeoutException {
+  public void start() throws InterruptedException, ExecutionException, TimeoutException {
     // Setup Mock Server...
+    logger.info("Starting mock server on port: "+port);
     HttpServer server = vertx.createHttpServer();
     CompletableFuture<HttpServer> deploymentComplete = new CompletableFuture<>();
     server.requestHandler(defineRoutes())
@@ -91,7 +92,7 @@ public class MockServer {
     deploymentComplete.get(60, TimeUnit.SECONDS);
   }
 
-  void close() {
+  public void close() {
     vertx.close(res -> {
       if (res.failed()) {
         logger.error("Failed to shut down mock server", res.cause());

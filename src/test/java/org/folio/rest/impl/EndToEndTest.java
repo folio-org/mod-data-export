@@ -33,7 +33,6 @@ import org.folio.clients.SourceRecordStorageClient;
 import org.folio.clients.UsersClient;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -202,7 +201,7 @@ class EndToEndTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = givenUploadFile(FILE_WITH_ONE_BATCH_OF_UUIDS);
     //when
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + FILE_WITH_ONE_BATCH_OF_UUIDS);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification(okapiConnectionParams.getTenantId());
 
  // then
     vertx.setTimer(TIMER_DELAY, handler -> {
@@ -230,7 +229,7 @@ class EndToEndTest extends RestVerticleTestBase {
 
   private FileDefinition givenUploadFile(String fileName) throws IOException {
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification();
+    RequestSpecification binaryRequestSpecification = buildRequestSpecification(okapiConnectionParams.getTenantId());
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())

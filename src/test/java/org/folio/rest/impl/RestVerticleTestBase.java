@@ -1,38 +1,38 @@
-package org.folio.rest;
+package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.tools.client.Response.*;
+import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
+import static org.folio.rest.impl.StorageTestSuite.mockPort;
+import static org.folio.rest.impl.StorageTestSuite.port;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.folio.rest.client.TenantClient;
-import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -48,17 +48,12 @@ public abstract class RestVerticleTestBase {
     System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
   }
 
-  protected static final String TENANT_ID = "diku";
-  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
   private static final String HOST = "http://localhost:";
-  protected static final int PORT = NetworkUtils.nextFreePort();
   protected static final String OKAPI_HEADER_URL = "x-okapi-url";
-  protected static final String BASE_OKAPI_URL = HOST + PORT;
+
   protected static RequestSpecification jsonRequestSpecification;
   protected static Vertx vertx;
   protected OkapiConnectionParams okapiConnectionParams;
-  private static MockServer mockServer;
-  protected static final int mockPort = NetworkUtils.nextFreePort();
   protected static final String MOCK_OKAPI_URL = HOST + mockPort;
   protected static final String EXPORT_URL = "/data-export/export";
   protected static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
@@ -68,50 +63,38 @@ public abstract class RestVerticleTestBase {
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
   protected static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static boolean invokeStorageTestSuiteAfter = false;
 
+  public static final String BASE_OKAPI_URL = HOST + port;
+  public static final String TENANT_ID = "diku";
+  public static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
+
+  /**
+   * When not run from StorageTestSuite then this method invokes StorageTestSuite.before() and
+   * StorageTestSuite.after() to allow to run a single test class, for example from within an
+   * IDE during development.
+   */
   @BeforeAll
-  public static void setUpClass() throws Exception {
-    vertx = Vertx.vertx();
-
-    mockServer = new MockServer(mockPort);
-    mockServer.start();
-
-    runDatabase();
-    deployVerticle();
+  public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    vertx = StorageTestSuite.getVertx();
+    if (vertx == null) {
+      invokeStorageTestSuiteAfter = true;
+      StorageTestSuite.before();
+      vertx = StorageTestSuite.getVertx();
+    }
   }
 
-  private static void runDatabase() throws Exception {
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-  }
+  @AfterAll
+  public static void testBaseAfterClass()
+    throws InterruptedException,
+    ExecutionException,
+    TimeoutException,
+    MalformedURLException {
 
-  private static void deployVerticle() throws InterruptedException, ExecutionException, TimeoutException {
-    TenantClient tenantClient = new TenantClient(BASE_OKAPI_URL, TENANT_ID, TOKEN);
-    DeploymentOptions options = new DeploymentOptions().setConfig(new JsonObject().put("http.port", PORT));
-    CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if (res.succeeded()) {
-        TenantAttributes tenantAttributes = new TenantAttributes();
-        tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
-        try {
-          tenantClient.postTenant(tenantAttributes, res2 -> {
-            if (isSuccess(res2.statusCode())){
-              deploymentComplete.complete(res.result());
-            } else {
-              deploymentComplete.completeExceptionally(new Exception(res2.statusMessage()));
-            }
-          });
-        } catch (Exception e) {
-          deploymentComplete.completeExceptionally(e);
-        }
-
-      } else {
-        deploymentComplete.completeExceptionally(res.cause());
-      }
-    });
-    deploymentComplete.get(60, TimeUnit.SECONDS);
-
-
+    if (invokeStorageTestSuiteAfter) {
+      System.out.println("Running test on own, un-initialising suite manually");
+      StorageTestSuite.after();
+    }
   }
 
   @AfterEach
@@ -120,21 +103,10 @@ public abstract class RestVerticleTestBase {
   }
 
   @AfterAll
-  public static void tearDownClass() throws InterruptedException, ExecutionException, TimeoutException {
-    mockServer.close();
-    CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
-
-    vertx.close(res -> {
-      if (res.succeeded()) {
-        undeploymentComplete.complete(null);
-      } else {
-        undeploymentComplete.completeExceptionally(res.cause());
-      }
-    });
-
-    undeploymentComplete.get(20, TimeUnit.SECONDS);
-    PostgresClient.stopEmbeddedPostgres();
-
+  public static void tearDownClass() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+    if (invokeStorageTestSuiteAfter) {
+      StorageTestSuite.after();
+    }
   }
 
   @BeforeEach
@@ -147,7 +119,7 @@ public abstract class RestVerticleTestBase {
   private void setUpOkapiConnectionParams() {
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
-    headers.put(OKAPI_HEADER_URL, BASE_OKAPI_URL);
+    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
     this.okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
@@ -165,6 +137,14 @@ public abstract class RestVerticleTestBase {
   protected Response postRequest(JsonObject body, String path) {
     return RestAssured.given()
       .spec(jsonRequestSpecification)
+      .body(body.encode())
+      .when()
+      .post(path);
+  }
+
+  protected Response postRequest(JsonObject body, String path, String tenantID) {
+    return RestAssured.given()
+      .spec(buildCustomJsonRequestSpecification(tenantID))
       .body(body.encode())
       .when()
       .post(path);
@@ -203,7 +183,7 @@ public abstract class RestVerticleTestBase {
   }
 
 
-  protected static String getMockData(String path) throws IOException {
+  public static String getMockData(String path) throws IOException {
     try (InputStream resourceAsStream = RestVerticleTestBase.class.getClassLoader().getResourceAsStream(path)) {
       if (resourceAsStream != null) {
         return IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
@@ -217,11 +197,48 @@ public abstract class RestVerticleTestBase {
     }
   }
 
-  protected RequestSpecification buildRequestSpecification() {
+  protected RequestSpecification buildRequestSpecification(String tenantID) {
     return new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .addHeader(OKAPI_HEADER_TENANT, tenantID)
       .setBaseUri(BASE_OKAPI_URL)
       .build();
   }
+
+  public static ValidatableResponse postToTenant(Header tenantHeader) throws MalformedURLException {
+    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+    JsonObject jsonBody = new JsonObject();
+    jsonBody.put("module_to", moduleId);
+    URL url = new URL("http", "localhost", port, "/_/tenant");
+    return given()
+      .header(tenantHeader)
+      .header(URL_TO_HEADER)
+      .contentType(ContentType.JSON)
+      .body(jsonBody.encodePrettily())
+      .post(url)
+      .then();
+  }
+
+  public static void deleteTenant(Header tenantHeader)
+      throws MalformedURLException {
+      given()
+        .header(tenantHeader)
+        .contentType(ContentType.JSON)
+        .delete("/_/tenant")
+        .then()
+        .statusCode(204);
+    }
+
+
+  protected RequestSpecification buildCustomJsonRequestSpecification(String tenantId) {
+    return new RequestSpecBuilder()
+      .setContentType(ContentType.JSON)
+      .addHeader(OKAPI_HEADER_TOKEN, TOKEN)
+      .addHeader(OKAPI_HEADER_TENANT, tenantId)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .addHeader("Accept", "text/plain, application/json")
+      .build();
+  }
+
 }

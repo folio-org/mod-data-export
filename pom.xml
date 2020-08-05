@@ -475,6 +475,15 @@
               io.vertx.core.logging.Log4j2LogDelegateFactory
             </vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
+          <excludes>
+           <!--  The tests in these packages are run as part of a test Suite -->
+            <exclude>org/folio/rest/impl/**Test.java</exclude>
+            <exclude>org/folio/clients/**Test.java</exclude>
+          </excludes>
+          <includes>
+             <include>org/folio/rest/impl/StorageTestSuite.java</include>
+             <include>**/*Test.java</include>
+          </includes>
         </configuration>
       </plugin>
 

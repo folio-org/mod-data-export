@@ -5,7 +5,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.TestUtil;
-import org.folio.rest.RestVerticleTestBase;
 import org.folio.util.TestEntities;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
