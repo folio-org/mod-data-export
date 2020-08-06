@@ -25,7 +25,6 @@ import java.util.Set;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
 
 @Service
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
@@ -48,6 +47,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(INSTANCE, TransformationConfigConstants.INSTANCE_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(HOLDINGS, TransformationConfigConstants.HOLDINGS_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
+    Collections.sort(transformationFields, (field1,field2) -> field1.getFieldId().compareTo(field2.getFieldId()));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }

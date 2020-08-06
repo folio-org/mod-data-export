@@ -1,5 +1,69 @@
 {
-  "transformationFields": [
+	"transformationFields": [
+		{
+			"fieldId": "holdings.hrid",
+			"displayNameKey": "holdings.hrid",
+			"path": "$.holdings.hrid",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "holdings.id",
+			"displayNameKey": "holdings.id",
+			"path": "$.holdings.id",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "holdings.instanceid",
+			"displayNameKey": "holdings.instanceId",
+			"path": "$.holdings.instanceId",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "holdings.metadata.createdbyuserid",
+			"displayNameKey": "holdings.metadata.createdByUserId",
+			"path": "$.holdings.metadata.createdByUserId",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "holdings.metadata.createddate",
+			"displayNameKey": "holdings.metadata.createdDate",
+			"path": "$.holdings.metadata.createdDate",
+			"recordType": "HOLDINGS",
+			"metadataParameters": {
+				"datesOfPublication": "$.instance.publication[*].dateOfPublication",
+				"languages": "$.instance.languages"
+			}
+		},
+		{
+			"fieldId": "holdings.metadata.updatedbyuserid",
+			"displayNameKey": "holdings.metadata.updatedByUserId",
+			"path": "$.holdings.metadata.updatedByUserId",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "holdings.metadata.updateddate",
+			"displayNameKey": "holdings.metadata.updatedDate",
+			"path": "$.holdings.metadata.updatedDate",
+			"recordType": "HOLDINGS"
+		},
+		{
+			"fieldId": "instance.editions",
+			"displayNameKey": "instance.editions",
+			"path": "$.instance.editions",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.hrid",
+			"displayNameKey": "instance.hrid",
+			"path": "$.instance.hrid",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.id",
+			"displayNameKey": "instance.id",
+			"path": "$.instance.id",
+			"recordType": "INSTANCE"
+		},
     {
       "fieldId": "instance.alternativetitles.cover.title",
       "displayNameKey": "instance.alternativeTitles",
@@ -14,54 +78,48 @@
       "path": "$.instance[*].alternativeTitles[?(@.alternativeTitle==Running title)]",
       "recordType": "INSTANCE"
     },
-    {
-      "fieldId": "instance.hrid",
-      "displayNameKey": "instance.hrid",
-      "path": "$.instance.hrid",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.gpo.item.number",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "GPO item number",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==351ebc1c-3aae-4825-8765-c6d50dbf011f)].value",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.isbn",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "ISBN",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==8261054f-be78-422d-bd51-4ed9f33c3422)].value",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.issn",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "ISSN",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==913300b2-03ed-469a-8179-c1092c991227)].value",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.lccn",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "LCCN",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.oclc",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "OCLC",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef)].value",
-      "recordType": "INSTANCE"
-    },
-    {
-      "fieldId": "instance.identifiers.system.control.number",
-      "displayNameKey": "instance.identifiers",
-      "referenceDataValue": "System control number",
-      "path": "$.instance[*].identifiers[?(@.identifierTypeId==7e591197-f335-4afb-bc6d-a6d76ca3bace)].value",
-      "recordType": "INSTANCE"
-    },
+		{
+			"fieldId": "instance.identifiers.gpo.item.number",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "GPO item number",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==351ebc1c-3aae-4825-8765-c6d50dbf011f)].value",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.identifiers.isbn",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "ISBN",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==8261054f-be78-422d-bd51-4ed9f33c3422)].value",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.identifiers.issn",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "ISSN",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==913300b2-03ed-469a-8179-c1092c991227)].value",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.identifiers.lccn",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "LCCN",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.identifiers.oclc",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "OCLC",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef)].value",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.identifiers.system.control.number",
+			"displayNameKey": "instance.identifiers",
+			"referenceDataValue": "System control number",
+			"path": "$.instance[*].identifiers[?(@identifierTypeId==7e591197-f335-4afb-bc6d-a6d76ca3bace)].value",
+			"recordType": "INSTANCE"
+		},
     {
       "fieldId": "instance.instancetypeid.other",
       "displayNameKey": "instance.instanceTypeId",
@@ -90,58 +148,100 @@
       "path": "$.instance.modeOfIssuanceId",
       "recordType": "INSTANCE"
     },
-    {
-      "fieldId": "holdings.hrid",
-      "displayNameKey": "holdings.hrid",
-      "path": "$.holdings.hrid",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "holdings.id",
-      "displayNameKey": "holdings.id",
-      "path": "$.holdings.id",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "holdings.instanceid",
-      "displayNameKey": "holdings.instanceId",
-      "path": "$.holdings.instanceId",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "holdings.metadata.createddate",
-      "displayNameKey": "holdings.metadata.createdDate",
-      "path": "$.holdings.metadata.createdDate",
-      "recordType": "HOLDINGS",
-      "metadataParameters": {
-        "datesOfPublication": "$.instance.publication[*].dateOfPublication",
-        "languages": "$.instance.languages"
-      }
-    },
-    {
-      "fieldId": "holdings.metadata.createdbyuserid",
-      "displayNameKey": "holdings.metadata.createdByUserId",
-      "path": "$.holdings.metadata.createdByUserId",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "holdings.metadata.updateddate",
-      "displayNameKey": "holdings.metadata.updatedDate",
-      "path": "$.holdings.metadata.updatedDate",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "holdings.metadata.updatedbyuserid",
-      "displayNameKey": "holdings.metadata.updatedByUserId",
-      "path": "$.holdings.metadata.updatedByUserId",
-      "recordType": "HOLDINGS"
-    },
-    {
-      "fieldId": "item.hrid",
-      "displayNameKey": "item.hrid",
-      "path": "$.item.hrid",
-      "recordType": "ITEM"
-    },
+		{
+			"fieldId": "instance.languages",
+			"displayNameKey": "instance.languages",
+			"path": "$.instance.languages",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.metadata.createdbyuserid",
+			"displayNameKey": "instance.metadata.createdByUserId",
+			"path": "$.instance.metadata.createdByUserId",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.metadata.createddate",
+			"displayNameKey": "instance.metadata.createdDate",
+			"path": "$.instance.metadata.createdDate",
+			"recordType": "INSTANCE",
+			"metadataParameters": {
+				"datesOfPublication": "$.instance.publication[*].dateOfPublication",
+				"languages": "$.instance.languages"
+			}
+		},
+		{
+			"fieldId": "instance.metadata.updatedbyuserid",
+			"displayNameKey": "instance.metadata.updatedByUserId",
+			"path": "$.instance.metadata.updatedByUserId",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.metadata.updateddate",
+			"displayNameKey": "instance.metadata.updatedDate",
+			"path": "$.instance.metadata.updatedDate",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.source",
+			"displayNameKey": "instance.source",
+			"path": "$.instance.source",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "instance.subjects",
+			"displayNameKey": "instance.subjects",
+			"path": "$.instance.subjects",
+			"recordType": "INSTANCE"
+		},
+		{
+			"fieldId": "item.barcode",
+			"displayNameKey": "item.barcode",
+			"path": "$.item.barcode",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.chronology",
+			"displayNameKey": "item.chronology",
+			"path": "$.item.chronology",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.copynumber",
+			"displayNameKey": "item.copyNumber",
+			"path": "$.item.copyNumber",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.descriptionofpieces",
+			"displayNameKey": "item.descriptionOfPieces",
+			"path": "$.item.descriptionOfPieces",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.enumeration",
+			"displayNameKey": "item.enumeration",
+			"path": "$.item.enumeration",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.holdingsrecordid",
+			"displayNameKey": "item.holdingsRecordId",
+			"path": "$.item.holdingsRecordId",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.hrid",
+			"displayNameKey": "item.hrid",
+			"path": "$.item.hrid",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.id",
+			"displayNameKey": "item.id",
+			"path": "$.item.id",
+			"recordType": "ITEM"
+		},
     {
       "fieldId": "item.materialtypeid.book",
       "displayNameKey": "item.materialTypeId",
@@ -156,6 +256,40 @@
       "path": "$.item[*].materialTypeId",
       "recordType": "ITEM"
     },
+		{
+			"fieldId": "item.metadata.createdbyuserid",
+			"displayNameKey": "item.metadata.createdByUserId",
+			"path": "$.item.metadata.createdByUserId",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.metadata.createddate",
+			"displayNameKey": "item.metadata.createdDate",
+			"path": "$.item.metadata.createdDate",
+			"recordType": "ITEM",
+			"metadataParameters": {
+				"datesOfPublication": "$.instance.publication[*].dateOfPublication",
+				"languages": "$.instance.languages"
+			}
+		},
+		{
+			"fieldId": "item.metadata.updatedbyuserid",
+			"displayNameKey": "item.metadata.updatedByUserId",
+			"path": "$.item.metadata.updatedByUserId",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.metadata.updateddate",
+			"displayNameKey": "item.metadata.updatedDate",
+			"path": "$.item.metadata.updatedDate",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.numberofpieces",
+			"displayNameKey": "item.numberOfPieces",
+			"path": "$.item.numberOfPieces",
+			"recordType": "ITEM"
+		},
     {
       "fieldId": "item.permanentloantypeid.can.circulate",
       "displayNameKey": "item.permanentLoanTypeId",
@@ -169,7 +303,25 @@
       "referenceDataValue": "Reading room",
       "path": "$.item.permanentLoanTypeId",
       "recordType": "ITEM"
-    }
-  ],
-  "totalRecords": 25
+    },
+		{
+			"fieldId": "item.status",
+			"displayNameKey": "item.status",
+			"path": "$.item.status.name",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.volume",
+			"displayNameKey": "item.volume",
+			"path": "$.item.volume",
+			"recordType": "ITEM"
+		},
+		{
+			"fieldId": "item.yearcaption",
+			"displayNameKey": "item.yearCaption",
+			"path": "$.item.yearCaption",
+			"recordType": "ITEM"
+		}
+	],
+	"totalRecords": 39
 }

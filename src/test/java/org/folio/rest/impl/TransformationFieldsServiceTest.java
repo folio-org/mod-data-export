@@ -1,7 +1,9 @@
 package org.folio.rest.impl;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import io.restassured.RestAssured;
 import io.restassured.internal.path.json.JSONAssertion;
 import io.restassured.response.Response;
@@ -12,6 +14,7 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.http.HttpStatus;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -43,6 +46,7 @@ class TransformationFieldsServiceTest extends RestVerticleTestBase {
     context.verify(() -> {
       TransformationFieldCollection transformationFieldCollection = response.as(TransformationFieldCollection.class);
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+      validateCountForEachRecordType(transformationFieldCollection);
       assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
       JsonObject expectedJson = new JsonObject(readFileContentFromResources(TRANSFORMATION_FIELDS_MOCK_DATA_PATH));
       JsonObject actualJson = new JsonObject(response.body().prettyPrint());
@@ -51,6 +55,27 @@ class TransformationFieldsServiceTest extends RestVerticleTestBase {
       assertEquals((int) expectedJson.getValue(TOTAL_RECORDS), transformationFieldCollection.getTotalRecords());
       context.completeNow();
     });
+  }
+
+  private void validateCountForEachRecordType(TransformationFieldCollection transformationFieldCollection) {
+    assertEquals(16, transformationFieldCollection.getTransformationFields()
+      .stream()
+      .filter(transformationField -> transformationField.getRecordType()
+        .equals(TransformationField.RecordType.INSTANCE))
+      .count());
+
+    assertEquals(7, transformationFieldCollection.getTransformationFields()
+        .stream()
+        .filter(transformationField -> transformationField.getRecordType()
+          .equals(TransformationField.RecordType.HOLDINGS))
+        .count());
+
+    assertEquals(16, transformationFieldCollection.getTransformationFields()
+        .stream()
+        .filter(transformationField -> transformationField.getRecordType()
+          .equals(TransformationField.RecordType.ITEM))
+        .count());
+
   }
 
 }
