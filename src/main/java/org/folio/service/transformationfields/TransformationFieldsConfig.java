@@ -25,7 +25,7 @@ public enum TransformationFieldsConfig {
   METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId"),
 
   //Instance specific fields
-  ALTERNATIVE_TITLES("alternativeTitles", "$.instance[*].alternativeTitles[?(@.alternativeTitle=={value})]", ALTERNATIVE_TITLE_TYPES),
+  ALTERNATIVE_TITLES("alternativeTitleTypeId", "$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId=={id})]", ALTERNATIVE_TITLE_TYPES),
   EDITIONS("editions", "$.instance.editions"),
   IDENTIFIERS("identifiers", "$.instance[*].identifiers[?(@.identifierTypeId=={id})].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),

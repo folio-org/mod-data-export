@@ -47,17 +47,17 @@
 			"recordType": "HOLDINGS"
 		},
     {
-      "fieldId":"instance.alternativetitles.cover.title",
-      "displayNameKey":"instance.alternativeTitles",
+      "fieldId":"instance.alternativetitletypeid.cover.title",
+      "displayNameKey":"instance.alternativeTitleTypeId",
       "referenceDataValue":"Cover title",
-      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitle==Cover title)]",
+      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==5c364ce4-c8fd-4891-a28d-bb91c9bcdbfb)]",
       "recordType":"INSTANCE"
     },
     {
-      "fieldId":"instance.alternativetitles.running.title",
-      "displayNameKey":"instance.alternativeTitles",
+      "fieldId":"instance.alternativetitletypeid.running.title",
+      "displayNameKey":"instance.alternativeTitleTypeId",
       "referenceDataValue":"Running title",
-      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitle==Running title)]",
+      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==09964ad1-7aed-49b8-8223-a4c105e3ef87)]",
       "recordType":"INSTANCE"
     },
 		{
