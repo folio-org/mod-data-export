@@ -3,6 +3,7 @@ package org.folio.service.transformationfields;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import java.util.*;
 import org.apache.commons.collections4.MapUtils;
 import org.folio.processor.ReferenceData;
 import org.folio.rest.jaxrs.model.TransformationField;
@@ -15,11 +16,6 @@ import org.folio.service.transformationfields.builder.PathBuilder;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
@@ -46,6 +42,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(INSTANCE, TransformationConfigConstants.INSTANCE_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(HOLDINGS, TransformationConfigConstants.HOLDINGS_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
+    Collections.sort(transformationFields, (field1,field2) -> field1.getFieldId().compareTo(field2.getFieldId()));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }
