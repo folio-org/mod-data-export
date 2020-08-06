@@ -2,7 +2,6 @@ package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 
-import static org.folio.TestUtil.readFileContentFromResources;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -23,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 class TransformationFieldsServiceTest extends RestVerticleTestBase {
 
   private static final String FIELD_NAMES_URL = "/data-export/transformationFields";
-  private static final String TRANSFORMATION_FIELDS_MOCK_DATA_PATH = "mapping/expectedTransformationFields.json";
-  private static final String TOTAL_RECORDS = "totalRecords";
 
   @Test
   void getFieldNamesReturned200Status(VertxTestContext context) {
@@ -38,11 +34,7 @@ class TransformationFieldsServiceTest extends RestVerticleTestBase {
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
       validateCountForEachRecordType(transformationFieldCollection);
       assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
-      JsonObject expectedJson = new JsonObject(readFileContentFromResources(TRANSFORMATION_FIELDS_MOCK_DATA_PATH));
-      JsonObject actualJson = new JsonObject(response.body().prettyPrint());
-      assertEquals(expectedJson, actualJson);
       assertNotEquals(0, (int) transformationFieldCollection.getTotalRecords());
-      assertEquals((int) expectedJson.getValue(TOTAL_RECORDS), transformationFieldCollection.getTotalRecords());
       context.completeNow();
     });
   }
