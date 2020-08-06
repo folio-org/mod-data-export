@@ -53,8 +53,8 @@ import org.springframework.context.annotation.Primary;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DataExportTest extends RestVerticleTestBase {
 
-  private static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/jobProfiles";
-  private static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mappingProfiles";
+  private static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/job-profiles";
+  private static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mapping-profiles";
   private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS = "uuids.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";

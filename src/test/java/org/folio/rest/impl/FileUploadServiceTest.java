@@ -33,9 +33,6 @@ import org.junit.runner.RunWith;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 class FileUploadServiceTest extends RestVerticleTestBase {
-  private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
-  private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
-
   @Test
   void postFileDefinition_return200Status(VertxTestContext context) {
     // given

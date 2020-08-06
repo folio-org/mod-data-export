@@ -13,8 +13,6 @@ import static org.hamcrest.Matchers.is;
 
 @RunWith(VertxUnitRunner.class)
 class JobExecutionServiceTest extends RestVerticleTestBase {
-  private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
-
   @Test
   void getJobExecutions_return200Status_forHappyPath() {
     RestAssured.given()
