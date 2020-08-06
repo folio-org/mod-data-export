@@ -17,11 +17,6 @@ public enum TransformationFieldsConfig {
   //Common Fields
   ID("id", "$.{recordType}.id"),
   HR_ID("hrid", "$.{recordType}.hrid"),
-  IDENTIFIERS("identifiers", "$.{recordType}[*].identifiers[?(@.identifierTypeId=={id})].value", IDENTIFIER_TYPES),
-  INSTANCE_TYPE("instanceTypeId", "$.{recordType}.instanceTypeId", INSTANCE_TYPES),
-
-  MATERIAL_TYPE_ID("materialTypeId", "$.{recordType}[*].materialTypeId", MATERIAL_TYPES),
-  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.{recordType}.modeOfIssuanceId", MODES_OF_ISSUANCE),
 
   SOURCE("source", "$.{recordType}.source"),
   METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
@@ -30,9 +25,12 @@ public enum TransformationFieldsConfig {
   METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId"),
 
   //Instance specific fields
-  ALTERNATIVE_TITLES("alternativeTitles", "$.{recordType}[*].alternativeTitles[?(@.alternativeTitle=={value})]", ALTERNATIVE_TITLE_TYPES),
+  ALTERNATIVE_TITLES("alternativeTitles", "$.instance[*].alternativeTitles[?(@.alternativeTitle=={value})]", ALTERNATIVE_TITLE_TYPES),
   EDITIONS("editions", "$.instance.editions"),
+  IDENTIFIERS("identifiers", "$.instance[*].identifiers[?(@.identifierTypeId=={id})].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),
+  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance.modeOfIssuanceId", MODES_OF_ISSUANCE),
+  INSTANCE_TYPE("instanceTypeId", "$.instance.instanceTypeId", INSTANCE_TYPES),
   SUBJECTS("subjects", "$.instance.subjects"),
   TITLE("title", "$.instance.title"),
 
@@ -46,8 +44,9 @@ public enum TransformationFieldsConfig {
   DESCRIPTION_OF_PIECES("descriptionOfPieces", "$.item.descriptionOfPieces"),
   ENUMERATION("enumeration", "$.item.enumeration"),
   HOLDINGS_ID("holdingsRecordId", "$.item.holdingsRecordId"),
+  MATERIAL_TYPE_ID("materialTypeId", "$.item[*].materialTypeId", MATERIAL_TYPES),
   NUMBER_OF_PIECES("numberOfPieces", "$.item.numberOfPieces"),
-  PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.{recordType}.permanentLoanTypeId", LOAN_TYPES),
+  PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.item.permanentLoanTypeId", LOAN_TYPES),
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
   YEARCAPTION("yearCaption", "$.item.yearCaption");

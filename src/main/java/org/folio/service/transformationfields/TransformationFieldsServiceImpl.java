@@ -47,7 +47,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(INSTANCE, TransformationConfigConstants.INSTANCE_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(HOLDINGS, TransformationConfigConstants.HOLDINGS_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
-    Collections.sort(transformationFields, (field1,field2) -> field1.getFieldId().compareTo(field2.getFieldId()));
+    transformationFields.sort(Comparator.comparing(TransformationField::getFieldId));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
     return promise.future();
   }
@@ -79,7 +79,6 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
       setMetadataParameters(transformationField, transformationFieldsConfig);
       subTransformationFields.add(transformationField);
     }
-    subTransformationFields.sort(Comparator.comparing(TransformationField::getReferenceDataValue));
     return subTransformationFields;
   }
 
