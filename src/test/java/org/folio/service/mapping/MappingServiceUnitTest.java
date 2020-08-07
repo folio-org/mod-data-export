@@ -195,8 +195,8 @@ class MappingServiceUnitTest {
 
   private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {
     List<Transformations> transformations = new ArrayList<>();
-    transformations.add(createTransformations(CALLNUMBER_FIELD_ID, CALLNUMBER_FIELD_PATH, "900ff$a", HOLDINGS));
     transformations.add(createTransformations(CALLNUMBER_PREFIX_FIELD_ID, CALLNUMBER_PREFIX_FIELD_PATH, "900ff$b", HOLDINGS));
+    transformations.add(createTransformations(CALLNUMBER_FIELD_ID, CALLNUMBER_FIELD_PATH, "900ff$a", HOLDINGS));
     transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID, CALLNUMBER_SUFFIX_FIELD_PATH, "902  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "903  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90412$a", HOLDINGS));
