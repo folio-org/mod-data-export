@@ -16,6 +16,9 @@ public class ReferenceDataImpl implements ReferenceData {
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";
   public static final String ELECTRONIC_ACCESS_RELATIONSHIPS = "electronicAccessRelationships";
+  public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
+  public static final String MODES_OF_ISSUANCE = "issuanceModes";
+  public static final String LOAN_TYPES = "loantypes";
 
   private final Map<String, Map<String, JsonObject>> referenceDataMap = new HashMap<>();
 

@@ -32,7 +32,12 @@ import java.util.Map;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -76,8 +81,13 @@ class TransformationFieldsServiceUnitTest {
   void before() {
     ReferenceData referenceData = new ReferenceDataImpl();
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
+    referenceData.put(ALTERNATIVE_TITLE_TYPES, ReferenceDataResponseUtil.getAlternativeTitleTypes());
+    referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
+    referenceData.put(MODES_OF_ISSUANCE, ReferenceDataResponseUtil.getModeOfIssuance());
+    referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
+    referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class));
-    doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), anyString());
+    doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), any());
     doCallRealMethod().when(displayNameKeyBuilder).build(any(RecordType.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString(), anyString());

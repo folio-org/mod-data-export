@@ -6,13 +6,16 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
 
 /**
@@ -44,7 +47,12 @@ public class ReferenceDataProvider {
 
   public ReferenceData getReferenceDataForTransformationFields(OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
+    referenceData.put(ALTERNATIVE_TITLE_TYPES, inventoryClient.getAlternativeTitleTypes(okapiConnectionParams));
+    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
     referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
+    referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(okapiConnectionParams));
+    referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
+    referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
     return referenceData;
   }
 

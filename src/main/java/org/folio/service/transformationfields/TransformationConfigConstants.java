@@ -1,26 +1,28 @@
 package org.folio.service.transformationfields;
 
-import static org.folio.service.transformationfields.TransformationFieldsConfig.*;
-
 import java.util.EnumSet;
 import java.util.Set;
 
+import static org.folio.service.transformationfields.TransformationFieldsConfig.*;
 
 public class TransformationConfigConstants {
 
   protected static final Set<TransformationFieldsConfig> INSTANCE_FIELDS_CONFIGS = EnumSet.of(
-      EDITIONS,
-      HR_ID,
-      IDENTIFIERS,
-      ID,
-      LANGUAGES,
-      SOURCE,
-      SUBJECTS,
-      LANGUAGES,
-      METADATA_CREATED_DATE,
-      METADATA_UPDATED_DATE,
-      METADATA_CREATED_BY_USER_ID,
-      METADATA_UPDATED_BY_USER_ID
+    ALTERNATIVE_TITLES,
+    EDITIONS,
+    HR_ID,
+    IDENTIFIERS,
+    ID,
+    INSTANCE_TYPE,
+    MODE_OF_ISSUANCE_ID,
+    LANGUAGES,
+    SOURCE,
+    SUBJECTS,
+    LANGUAGES,
+    METADATA_CREATED_DATE,
+    METADATA_UPDATED_DATE,
+    METADATA_CREATED_BY_USER_ID,
+    METADATA_UPDATED_BY_USER_ID
   );
 
   protected static final Set<TransformationFieldsConfig> HOLDINGS_FIELDS_CONFIGS = EnumSet.of(
@@ -28,8 +30,8 @@ public class TransformationConfigConstants {
     HR_ID,
     INSTANCE_ID,
     METADATA_CREATED_DATE,
-    METADATA_UPDATED_DATE,
     METADATA_CREATED_BY_USER_ID,
+    METADATA_UPDATED_DATE,
     METADATA_UPDATED_BY_USER_ID
   );
 
@@ -46,6 +48,8 @@ public class TransformationConfigConstants {
     DESCRIPTION_OF_PIECES,
     COPYNUMBER,
     NUMBER_OF_PIECES,
+    MATERIAL_TYPE_ID,
+    PERMANENT_LOAN_TYPE_ID,
     METADATA_CREATED_DATE,
     METADATA_UPDATED_DATE,
     METADATA_CREATED_BY_USER_ID,

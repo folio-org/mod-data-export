@@ -46,6 +46,20 @@
 			"path": "$.holdings.metadata.updatedDate",
 			"recordType": "HOLDINGS"
 		},
+    {
+      "fieldId":"instance.alternativetitletypeid.cover.title",
+      "displayNameKey":"instance.alternativeTitleTypeId",
+      "referenceDataValue":"Cover title",
+      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==5c364ce4-c8fd-4891-a28d-bb91c9bcdbfb)]",
+      "recordType":"INSTANCE"
+    },
+    {
+      "fieldId":"instance.alternativetitletypeid.running.title",
+      "displayNameKey":"instance.alternativeTitleTypeId",
+      "referenceDataValue":"Running title",
+      "path":"$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==09964ad1-7aed-49b8-8223-a4c105e3ef87)]",
+      "recordType":"INSTANCE"
+    },
 		{
 			"fieldId": "instance.editions",
 			"displayNameKey": "instance.editions",
@@ -68,44 +82,58 @@
 			"fieldId": "instance.identifiers.gpo.item.number",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "GPO item number",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==351ebc1c-3aae-4825-8765-c6d50dbf011f)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==351ebc1c-3aae-4825-8765-c6d50dbf011f)].value",
 			"recordType": "INSTANCE"
 		},
 		{
 			"fieldId": "instance.identifiers.isbn",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "ISBN",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==8261054f-be78-422d-bd51-4ed9f33c3422)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==8261054f-be78-422d-bd51-4ed9f33c3422)].value",
 			"recordType": "INSTANCE"
 		},
 		{
 			"fieldId": "instance.identifiers.issn",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "ISSN",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==913300b2-03ed-469a-8179-c1092c991227)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==913300b2-03ed-469a-8179-c1092c991227)].value",
 			"recordType": "INSTANCE"
 		},
 		{
 			"fieldId": "instance.identifiers.lccn",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "LCCN",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value",
 			"recordType": "INSTANCE"
 		},
 		{
 			"fieldId": "instance.identifiers.oclc",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "OCLC",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef)].value",
 			"recordType": "INSTANCE"
 		},
 		{
 			"fieldId": "instance.identifiers.system.control.number",
 			"displayNameKey": "instance.identifiers",
 			"referenceDataValue": "System control number",
-			"path": "$.instance[*].identifiers[?(@identifierTypeId==7e591197-f335-4afb-bc6d-a6d76ca3bace)].value",
+			"path": "$.instance[*].identifiers[?(@.identifierTypeId==7e591197-f335-4afb-bc6d-a6d76ca3bace)].value",
 			"recordType": "INSTANCE"
 		},
+    {
+      "fieldId":"instance.instancetypeid.other",
+      "displayNameKey":"instance.instanceTypeId",
+      "referenceDataValue":"other",
+      "path":"$.instance.instanceTypeId",
+      "recordType":"INSTANCE"
+    },
+    {
+      "fieldId":"instance.instancetypeid.text",
+      "displayNameKey":"instance.instanceTypeId",
+      "referenceDataValue":"text",
+      "path":"$.instance.instanceTypeId",
+      "recordType":"INSTANCE"
+    },
 		{
 			"fieldId": "instance.languages",
 			"displayNameKey": "instance.languages",
@@ -140,6 +168,20 @@
 			"path": "$.instance.metadata.updatedDate",
 			"recordType": "INSTANCE"
 		},
+    {
+      "fieldId":"instance.modeofissuanceid.multipart.monograph",
+      "displayNameKey":"instance.modeOfIssuanceId",
+      "referenceDataValue":"multipart monograph",
+      "path":"$.instance.modeOfIssuanceId",
+      "recordType":"INSTANCE"
+    },
+    {
+      "fieldId":"instance.modeofissuanceid.single.unit",
+      "displayNameKey":"instance.modeOfIssuanceId",
+      "referenceDataValue":"single unit",
+      "path":"$.instance.modeOfIssuanceId",
+      "recordType":"INSTANCE"
+    },
 		{
 			"fieldId": "instance.source",
 			"displayNameKey": "instance.source",
@@ -200,6 +242,20 @@
 			"path": "$.item.id",
 			"recordType": "ITEM"
 		},
+    {
+      "fieldId":"item.materialtypeid.book",
+      "displayNameKey":"item.materialTypeId",
+      "referenceDataValue":"book",
+      "path":"$.item[*].materialTypeId",
+      "recordType":"ITEM"
+    },
+    {
+      "fieldId":"item.materialtypeid.dvd",
+      "displayNameKey":"item.materialTypeId",
+      "referenceDataValue":"dvd",
+      "path":"$.item[*].materialTypeId",
+      "recordType":"ITEM"
+    },
 		{
 			"fieldId": "item.metadata.createdbyuserid",
 			"displayNameKey": "item.metadata.createdByUserId",
@@ -234,6 +290,20 @@
 			"path": "$.item.numberOfPieces",
 			"recordType": "ITEM"
 		},
+    {
+      "fieldId":"item.permanentloantypeid.can.circulate",
+      "displayNameKey":"item.permanentLoanTypeId",
+      "referenceDataValue":"Can circulate",
+      "path":"$.item.permanentLoanTypeId",
+      "recordType":"ITEM"
+    },
+    {
+      "fieldId":"item.permanentloantypeid.reading.room",
+      "displayNameKey":"item.permanentLoanTypeId",
+      "referenceDataValue":"Reading room",
+      "path":"$.item.permanentLoanTypeId",
+      "recordType":"ITEM"
+    },
 		{
 			"fieldId": "item.status",
 			"displayNameKey": "item.status",
@@ -253,5 +323,5 @@
 			"recordType": "ITEM"
 		}
 	],
-	"totalRecords": 39
+	"totalRecords": 49
 }
