@@ -2,7 +2,13 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CALLNUMBER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
