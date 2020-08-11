@@ -321,7 +321,31 @@
 			"displayNameKey": "item.yearCaption",
 			"path": "$.item.yearCaption",
 			"recordType": "ITEM"
-		}
-	],
-	"totalRecords": 49
+		},
+    {
+      "fieldId": "item.callnumber",
+      "displayNameKey": "item.callNumber",
+      "path": "$.item.effectiveCallNumberComponents.callNumber",
+      "recordType": "ITEM"
+    },
+    {
+      "fieldId": "item.callnumberprefix",
+      "displayNameKey": "item.callNumberPrefix",
+      "path": "$.item.effectiveCallNumberComponents.prefix",
+      "recordType": "ITEM"
+    },
+    {
+      "fieldId": "item.callnumbersuffix",
+      "displayNameKey": "item.callNumberSuffix",
+      "path": "$.item.effectiveCallNumberComponents.suffix",
+      "recordType": "ITEM"
+    },
+    {
+      "fieldId": "item.callnumbertype",
+      "displayNameKey": "item.callNumberType",
+      "path": "$.item.effectiveCallNumberComponents.typeId",
+      "recordType": "ITEM"
+    }
+  ],
+	"totalRecords": 53
 }
