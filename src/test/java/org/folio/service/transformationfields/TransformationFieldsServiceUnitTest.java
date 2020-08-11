@@ -32,12 +32,7 @@ import java.util.Map;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -86,6 +81,7 @@ class TransformationFieldsServiceUnitTest {
     referenceData.put(MODES_OF_ISSUANCE, ReferenceDataResponseUtil.getModeOfIssuance());
     referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
+    referenceData.put(CALLNUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class));
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), any());
     doCallRealMethod().when(displayNameKeyBuilder).build(any(RecordType.class), anyString());

@@ -14,6 +14,7 @@ import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
+import static org.folio.util.ExternalPathResolver.CALLNUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
@@ -90,6 +91,11 @@ public class InventoryClient {
   public Map<String, JsonObject> getLoanTypes(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(LOAN_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, LOAN_TYPES);
+  }
+
+  public Map<String, JsonObject> getCallNumberTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(CALLNUMBER_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, CALLNUMBER_TYPES);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {

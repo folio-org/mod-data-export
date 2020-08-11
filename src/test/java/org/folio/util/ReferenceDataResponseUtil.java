@@ -143,4 +143,16 @@ public class ReferenceDataResponseUtil {
     return stringJsonObjectMap;
   }
 
+  public static Map<String, JsonObject> getCallNumberTypes() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray callNumberTypes =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_callnumber_types_response.json"))
+        .getJsonArray("callNumberTypes");
+    callNumberTypes.stream().forEach(loanType -> {
+      JsonObject jsonObject = new JsonObject(loanType.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
 }

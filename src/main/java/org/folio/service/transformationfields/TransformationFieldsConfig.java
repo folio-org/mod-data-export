@@ -2,12 +2,7 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -53,7 +48,7 @@ public enum TransformationFieldsConfig {
   CALLNUMBER("callNumber", "$.item.effectiveCallNumberComponents.callNumber"),
   CALLNUMBER_PREFIX("callNumberPrefix", "$.item.effectiveCallNumberComponents.prefix"),
   CALLNUMBER_SUFFIX("callNumberSuffix", "$.item.effectiveCallNumberComponents.suffix"),
-  CALLNUMBER_TYPE("callNumberType", "$.item.effectiveCallNumberComponents.typeId");
+  CALLNUMBER_TYPE("callNumberType", "$.item.effectiveCallNumberComponents.typeId", CALLNUMBER_TYPES);
 
   private final String fieldId;
   private final String path;

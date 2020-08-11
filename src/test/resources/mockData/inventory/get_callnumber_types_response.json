@@ -1,0 +1,23 @@
+{
+  "callNumberTypes" : [
+    {
+      "id" : "03dd64d0-5626-4ecd-8ece-4531e0069f35",
+      "name" : "Dewey Decimal classification",
+      "source" : "folio",
+      "metadata" : {
+        "createdDate" : "2020-08-11T01:27:13.802+0000",
+        "updatedDate" : "2020-08-11T01:27:13.802+0000"
+      }
+    },
+    {
+      "id" : "512173a7-bd09-490e-b773-17d83f2b63fe",
+      "name" : "LC Modified",
+      "source" : "folio",
+      "metadata" : {
+        "createdDate" : "2020-08-11T01:27:13.807+0000",
+        "updatedDate" : "2020-08-11T01:27:13.807+0000"
+      }
+    }
+  ],
+  "totalRecords": 2
+}
