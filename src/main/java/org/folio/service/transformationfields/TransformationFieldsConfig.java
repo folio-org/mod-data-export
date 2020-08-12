@@ -51,10 +51,10 @@ public enum TransformationFieldsConfig {
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
   YEARCAPTION("yearCaption", "$.item.yearCaption"),
-  CALLNUMBER("callNumber", "$.item.effectiveCallNumberComponents.callNumber"),
-  CALLNUMBER_PREFIX("callNumberPrefix", "$.item.effectiveCallNumberComponents.prefix"),
-  CALLNUMBER_SUFFIX("callNumberSuffix", "$.item.effectiveCallNumberComponents.suffix"),
-  CALLNUMBER_TYPE("callNumberType", "$.item.effectiveCallNumberComponents.typeId", CALLNUMBER_TYPES);
+  CALL_NUMBER("callNumber", "$.items[*].effectiveCallNumberComponents.callNumber"),
+  CALL_NUMBER_PREFIX("callNumberPrefix", "$.items[*].effectiveCallNumberComponents.prefix"),
+  CALL_NUMBER_SUFFIX("callNumberSuffix", "$.items[*].effectiveCallNumberComponents.suffix"),
+  CALL_NUMBER_TYPE("callNumberType", "$.items[?(@.effectiveCallNumberComponents.typeId=={id})].effectiveCallNumberComponents.typeId", CALLNUMBER_TYPES);
 
   private final String fieldId;
   private final String path;

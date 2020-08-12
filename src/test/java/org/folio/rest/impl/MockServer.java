@@ -371,9 +371,9 @@ public class MockServer {
   private void handleGetCallNumberTypes(RoutingContext ctx) {
     logger.info("handle Get call number types: ", ctx.request().path());
     try {
-      JsonObject loanTypes = new JsonObject(RestVerticleTestBase.getMockData(CALLNUMBER_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CALLNUMBER_TYPES, loanTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, loanTypes.encodePrettily());
+      JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALLNUMBER_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, CALLNUMBER_TYPES, callNumberTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
     } catch (IOException e) {
       ctx.response().setStatusCode(500).end();
     }
