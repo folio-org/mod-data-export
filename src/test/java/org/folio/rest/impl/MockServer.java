@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CALLNUMBER_TYPES;
+import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -140,7 +140,7 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-    router.get(resourcesPath(CALLNUMBER_TYPES)).handler(ctx -> handleGetCallNumberTypes(ctx));
+    router.get(resourcesPath(CALL_NUMBER_TYPES)).handler(ctx -> handleGetCallNumberTypes(ctx));
     return router;
   }
 
@@ -372,7 +372,7 @@ public class MockServer {
     logger.info("handle Get call number types: ", ctx.request().path());
     try {
       JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALLNUMBER_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CALLNUMBER_TYPES, callNumberTypes);
+      addServerRqRsData(HttpMethod.GET, CALL_NUMBER_TYPES, callNumberTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
     } catch (IOException e) {
       ctx.response().setStatusCode(500).end();
