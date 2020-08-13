@@ -23,7 +23,6 @@ public class ExternalPathResolver {
   public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
   public static final String ISSUANCE_MODES = "issuanceModes";
   public static final String LOAN_TYPES = "loantypes";
-  public static final String CALL_NUMBER_TYPES = "callNumberTypes";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -54,7 +53,6 @@ public class ExternalPathResolver {
     apis.put(ISSUANCE_MODES, "/modes-of-issuance");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
-    apis.put(CALL_NUMBER_TYPES, "/call-number-types");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);
     EXTERNAL_APIS_WITH_PREFIX = Collections.unmodifiableMap(apis.entrySet()
