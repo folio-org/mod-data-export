@@ -72,7 +72,6 @@ public class MockServer {
   private static final String ALTERNATIVE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_alternative_titles_response.json";
   private static final String LOAN_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_loan_types_response.json";
   private static final String ISSUANCE_MODES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_mode_of_issuance_response.json";
-  private static final String CALLNUMBER_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_callnumber_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -140,7 +139,6 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-    router.get(resourcesPath(CALL_NUMBER_TYPES)).handler(ctx -> handleGetCallNumberTypes(ctx));
     return router;
   }
 
@@ -365,17 +363,6 @@ public class MockServer {
       ctx.response()
         .setStatusCode(500)
         .end();
-    }
-  }
-
-  private void handleGetCallNumberTypes(RoutingContext ctx) {
-    logger.info("handle Get call number types: ", ctx.request().path());
-    try {
-      JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALLNUMBER_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CALL_NUMBER_TYPES, callNumberTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
-    } catch (IOException e) {
-      ctx.response().setStatusCode(500).end();
     }
   }
 

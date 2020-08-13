@@ -3,7 +3,6 @@ package org.folio.service.transformationfields;
 import java.util.Map;
 
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CALLNUMBER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
@@ -51,10 +50,10 @@ public enum TransformationFieldsConfig {
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
   YEARCAPTION("yearCaption", "$.item.yearCaption"),
-  CALL_NUMBER("callNumber", "$.items[*].effectiveCallNumberComponents.callNumber"),
-  CALL_NUMBER_PREFIX("callNumberPrefix", "$.items[*].effectiveCallNumberComponents.prefix"),
-  CALL_NUMBER_SUFFIX("callNumberSuffix", "$.items[*].effectiveCallNumberComponents.suffix"),
-  CALL_NUMBER_TYPE("callNumberType", "$.items[?(@.effectiveCallNumberComponents.typeId=={id})].effectiveCallNumberComponents.typeId", CALLNUMBER_TYPES);
+  CALL_NUMBER("callNumber", "$.item.effectiveCallNumberComponents.callNumber"),
+  CALL_NUMBER_PREFIX("callNumberPrefix", "$.item.effectiveCallNumberComponents.prefix"),
+  CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item.effectiveCallNumberComponents.suffix"),
+  CALL_NUMBER_TYPE("callNumberType", "$.item.effectiveCallNumberComponents.typeId");
 
   private final String fieldId;
   private final String path;

@@ -325,35 +325,27 @@
     {
       "fieldId": "item.callnumber",
       "displayNameKey": "item.callNumber",
-      "path": "$.items[*].effectiveCallNumberComponents.callNumber",
+      "path": "$.item.effectiveCallNumberComponents.callNumber",
       "recordType": "ITEM"
     },
     {
       "fieldId": "item.callnumberprefix",
       "displayNameKey": "item.callNumberPrefix",
-      "path": "$.items[*].effectiveCallNumberComponents.prefix",
+      "path": "$.item.effectiveCallNumberComponents.prefix",
       "recordType": "ITEM"
     },
     {
       "fieldId": "item.callnumbersuffix",
       "displayNameKey": "item.callNumberSuffix",
-      "path": "$.items[*].effectiveCallNumberComponents.suffix",
+      "path": "$.item.effectiveCallNumberComponents.suffix",
       "recordType": "ITEM"
     },
     {
-      "fieldId": "item.callnumbertype.dewey.decimal.classification",
+      "fieldId": "item.callnumbertype",
       "displayNameKey": "item.callNumberType",
-      "referenceDataValue": "Dewey Decimal classification",
-      "path": "$.items[?(@.effectiveCallNumberComponents.typeId==03dd64d0-5626-4ecd-8ece-4531e0069f35)].effectiveCallNumberComponents.typeId",
-      "recordType": "ITEM"
-    },
-    {
-      "fieldId": "item.callnumbertype.lc.modified",
-      "displayNameKey": "item.callNumberType",
-      "referenceDataValue": "LC Modified",
-      "path": "$.items[?(@.effectiveCallNumberComponents.typeId==512173a7-bd09-490e-b773-17d83f2b63fe)].effectiveCallNumberComponents.typeId",
+      "path": "$.item.effectiveCallNumberComponents.typeId",
       "recordType": "ITEM"
     }
   ],
-	"totalRecords": 54
+	"totalRecords": 53
 }

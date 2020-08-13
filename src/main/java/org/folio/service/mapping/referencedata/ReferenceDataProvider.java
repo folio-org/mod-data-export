@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CALLNUMBER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
@@ -54,7 +53,6 @@ public class ReferenceDataProvider {
     referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(okapiConnectionParams));
     referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
     referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
-    referenceData.put(CALLNUMBER_TYPES, inventoryClient.getCallNumberTypes(okapiConnectionParams));
     return referenceData;
   }
 

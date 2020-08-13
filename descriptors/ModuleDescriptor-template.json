@@ -57,10 +57,6 @@
     {
       "id": "electronic-access-relationships",
       "version": "1.0"
-    },
-    {
-      "id": "call-number-types",
-      "version":"1.0"
     }
   ],
   "provides": [
@@ -90,7 +86,6 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.instance-formats.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
-            "inventory-storage.call-number-types.collection.get",
             "configuration.entries.collection.get"
           ]
         },
