@@ -3,11 +3,13 @@ package org.folio.service.transformationfields;
 import java.util.Map;
 
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -17,15 +19,24 @@ public enum TransformationFieldsConfig {
   //Common Fields
   ID("id", "$.{recordType}.id"),
   HR_ID("hrid", "$.{recordType}.hrid"),
-
   SOURCE("source", "$.{recordType}.source"),
   METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
   METADATA_UPDATED_DATE("metadata.updatedDate", "$.{recordType}.metadata.updatedDate"),
   METADATA_CREATED_BY_USER_ID("metadata.createdByUserId", "$.{recordType}.metadata.createdByUserId"),
   METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId"),
+  ELECTRONIC_ACCESS_URI("electronic.access.uri", "$.{recordType}.electronicAccess[?(@.relationshipId=={id})].uri", ELECTRONIC_ACCESS_RELATIONSHIPS),
+  ELECTRONIC_ACCESS_LINKTEXT("electronic.access.linkText", "$.{recordType}.electronicAccess[?(@.relationshipId=={id})].linkText", ELECTRONIC_ACCESS_RELATIONSHIPS),
+  ELECTRONIC_ACCESS_MATERIALS_SPECIFIED("electronic.access.materialsSpecification", "$.{recordType}.electronicAccess[?(@.relationshipId=={id})].materialsSpecification", ELECTRONIC_ACCESS_RELATIONSHIPS),
+  ELECTRONIC_ACCESS_PUBLICNOTE("electronic.access.publicNote", "$.{recordType}.electronicAccess[?(@.relationshipId=={id})].publicNote", ELECTRONIC_ACCESS_RELATIONSHIPS),
+  ELECTRONIC_ACCESS_URI_DEFAULT("electronic.access.uri", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].uri"),
+  ELECTRONIC_ACCESS_LINKTEXT_DEFAULT("electronic.access.linkText", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText"),
+  ELECTRONIC_ACCESS_MATERIALS_SPECIFIED_DEFAULT("electronic.access.materialsSpecification", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].materialsSpecification"),
+  ELECTRONIC_ACCESS_PUBLICNOTE_DEFAULT("electronic.access.publicNote", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote"),
 
   //Instance specific fields
   ALTERNATIVE_TITLES("alternativeTitleTypeId", "$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId=={id})]", ALTERNATIVE_TITLE_TYPES),
+  CONTRIBUTOR_NAME_TYPE("contributorNameTypeId", "$.instance[*].contributorNameTypeId[?(@.contributorNameTypeId=={id} && ?(!(@.primary) || @.primary == false))]", CONTRIBUTOR_NAME_TYPES),
+  CONTRIBUTOR_NAME_TYPE_PRIMARY("contributorNameTypeId.primary", "$.instance[*].contributorNameTypeId[?(@.contributorNameTypeId=={id} && ?((@.primary) && @.primary == true))]", CONTRIBUTOR_NAME_TYPES),
   EDITIONS("editions", "$.instance.editions"),
   IDENTIFIERS("identifiers", "$.instance[*].identifiers[?(@.identifierTypeId=={id})].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),
