@@ -40,6 +40,14 @@ public final class TestUtil {
   public static final String EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID = "effectiveCallNumberComponents.callNumber";
   public static final String ELECTRONIC_ACCESS_URI_FIELD_ID = "electronicAccess.uri";
   public static final String ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID = "electronicAccess.linkText";
+  public static final String INSTANCE_HR_ID_FIELD_ID = "instance.hrid";
+  public static final String INSTANCE_HR_ID_FIELD_PATH = "$.instance.hrid";
+  public static final String INSTANCE_METADATA_UPDATED_DATE_FIELD_ID = "instance.metadata.updateddate";
+  public static final String INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH = "$.instance.metadata.updatedDate";
+  public static final String INSTANCE_METADATA_CREATED_DATE_FIELD_ID = "instance.metadata.createddate";
+  public static final String INSTANCE_METADATA_CREATED_DATE_FIELD_PATH = "$.instance.metadata.createdDate";
+  public static final String INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID = "instance.electronic.access.uri.resource";
+  public static final String INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH = "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri";
 
 
   public static String readFileContentFromResources(String path) {

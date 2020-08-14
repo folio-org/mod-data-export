@@ -1,5 +1,6 @@
 package org.folio.service.mapping;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
@@ -11,6 +12,7 @@ import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.*;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.service.transformationfields.MetadataParametersConstants;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.Assert;
@@ -29,34 +31,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_PATH;
-import static org.folio.TestUtil.EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID;
-import static org.folio.TestUtil.EFFECTIVE_LOCATION_FIELD_ID;
-import static org.folio.TestUtil.EFFECTIVE_LOCATION_PATH;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_URI_FIELD_ID;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.ITEMS_EFFECTIVE_CALL_NUMBER_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.MATERIALTYPE_FIELD_ID;
-import static org.folio.TestUtil.MATERIAL_TYPE_ID_PATH;
-import static org.folio.TestUtil.PERMANENT_LOCATION_FIELD_ID;
-import static org.folio.TestUtil.PERMANENT_LOCATION_PATH;
-import static org.folio.TestUtil.TEMPORARY_LOCATION_FIELD_ID;
-import static org.folio.TestUtil.TEMPORARY_LOCATION_PATH;
-import static org.folio.TestUtil.getFileFromResources;
-import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.TestUtil.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
@@ -125,7 +106,6 @@ class MappingServiceUnitTest {
 
   }
 
-
   @Test
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() throws FileNotFoundException {
     // given
@@ -133,6 +113,7 @@ class MappingServiceUnitTest {
     List<JsonObject> instances = Collections.singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
@@ -143,7 +124,31 @@ class MappingServiceUnitTest {
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
 
-    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_holdings_and_items.json");
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items.json");
+    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
+  @Test
+  void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty_AndSomeInstanceFieldProvided() throws FileNotFoundException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
+    mappingProfile.getTransformations().addAll(createInstanceFieldsTransformation());
+    mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items_and_instances.json");
     String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
@@ -231,6 +236,15 @@ class MappingServiceUnitTest {
     return transformations;
   }
 
+  private List<Transformations> createInstanceFieldsTransformation() {
+    List<Transformations> transformations = new ArrayList<>();
+    transformations.add(createTransformations(INSTANCE_HR_ID_FIELD_ID, INSTANCE_HR_ID_FIELD_PATH, "001", INSTANCE));
+    transformations.add(createTransformations(INSTANCE_METADATA_UPDATED_DATE_FIELD_ID, INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH, "005", INSTANCE));
+    transformations.add(createTransformationsWithMetadata(INSTANCE_METADATA_CREATED_DATE_FIELD_ID, INSTANCE_METADATA_CREATED_DATE_FIELD_PATH, "008", INSTANCE, MetadataParametersConstants.getFixedLengthDataElement()));
+    transformations.add(createTransformations(INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID, INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH, "8564 $u", INSTANCE));
+    return transformations;
+  }
+
   private Transformations createTransformations(String fieldId, String fieldPath, String value, RecordType recordType) {
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -260,6 +274,12 @@ class MappingServiceUnitTest {
           .toString())));
       });
 
+    return transformations;
+  }
+
+  private Transformations createTransformationsWithMetadata(String fieldId, String fieldPath, String value, RecordType recordType, Map<String, String> metadata) {
+    Transformations transformations = createTransformations(fieldId, fieldPath, value, recordType);
+    transformations.setMetadataParameters(metadata);
     return transformations;
   }
 

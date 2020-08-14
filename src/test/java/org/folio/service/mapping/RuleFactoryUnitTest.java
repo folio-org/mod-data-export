@@ -15,23 +15,43 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
-import static org.mockito.Mockito.doReturn;
+import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
+import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_PATH;
+import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_ID;
+import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_PATH;
+import static org.folio.TestUtil.EFFECTIVE_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.EFFECTIVE_LOCATION_PATH;
+import static org.folio.TestUtil.MATERIAL_TYPE_FIELD_ID;
+import static org.folio.TestUtil.MATERIAL_TYPE_PATH;
+import static org.folio.TestUtil.PERMANENT_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.PERMANENT_LOCATION_PATH;
+import static org.folio.TestUtil.SET_LOCATION_FUNCTION;
+import static org.folio.TestUtil.SET_MATERIAL_TYPE_FUNCTION;
+import static org.folio.TestUtil.TEMPORARY_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.TEMPORARY_LOCATION_PATH;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.junit.Assert.assertEquals;
-import static org.folio.TestUtil.*;
+import static org.mockito.Mockito.doReturn;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryUnitTest {
+  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   private static final String DEFAULT_RULE_FIELD_VALUE = "001";
   private static final String DEFAULT_RULE_DESCRIPTION = "defaultRuleDescription";
   private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
+  private static final String FIELD_ID_1 = "fieldId1";
+  private static final String FIELD_ID_2 = "fieldId2";
   private static final String TRANSFORMATIONS_PATH_1 = "transformationsPath1";
   private static final String TRANSFORMATION_FIELD_VALUE_1 = "002";
   private static final String TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD = "002  $a";
@@ -43,7 +63,6 @@ class RuleFactoryUnitTest {
   private static final String VALUE_PARAMETER = "value";
   private static final String SECOND_INDICATOR = "2";
 
-
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
 
@@ -52,13 +71,29 @@ class RuleFactoryUnitTest {
   @BeforeEach
   public void setUp() {
     setUpDefaultRules();
-    doReturn(defaultRules).when(ruleFactory).getDefaultRules();
+    doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
   }
 
   @Test
   void shouldReturnDefaultRules_whenMappingProfileIsNull() {
     // when
     List<Rule> rules = ruleFactory.create(null);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+  }
+
+  @Test
+  void shouldReturnDefaultRules_whenMappingProfileIsDefault() {
+    // given
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(DEFAULT_MAPPING_PROFILE_ID);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
     assertEquals(1, rules.size());
@@ -84,51 +119,51 @@ class RuleFactoryUnitTest {
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsNotEnabled() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled() {
     // given
     Transformations transformations = new Transformations()
-      .withEnabled(false);
+      .withEnabled(false)
+      .withRecordType(INSTANCE);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
-      .withTransformations(ImmutableList.of(transformations));
+      .withTransformations(ImmutableList.of(transformations))
+      .withRecordTypes(Collections.singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(1, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(0, rules.size());
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileTransformationsPathIsEmpty() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty() {
     // given
     Transformations transformations = new Transformations()
       .withEnabled(true)
-      .withPath(EMPTY);
+      .withPath(EMPTY)
+      .withRecordType(HOLDINGS);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
-      .withTransformations(ImmutableList.of(transformations));
+      .withTransformations(ImmutableList.of(transformations))
+      .withRecordTypes(Collections.singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(1, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(0, rules.size());
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileTransformationsValueIsEmpty() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty() {
     // given
     Transformations transformations = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
-      .withTransformation(EMPTY);
+      .withTransformation(EMPTY)
+      .withRecordType(INSTANCE)
+      .withFieldId(EMPTY);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(ImmutableList.of(transformations));
@@ -137,7 +172,29 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
+    assertEquals(0, rules.size());
+  }
+
+  @Test
+  void shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId() {
+    // given
+    Transformations transformations = new Transformations()
+      .withEnabled(true)
+      .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
+      .withTransformation(EMPTY)
+      .withRecordType(INSTANCE);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(ImmutableList.of(transformations))
+      .withRecordTypes(Collections.singletonList(INSTANCE));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
     assertEquals(1, rules.size());
+    assertEquals(FIELD_ID_1, rules.get(0).getId());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -149,6 +206,8 @@ class RuleFactoryUnitTest {
     Transformations transformations = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
+      .withRecordType(HOLDINGS)
       .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
@@ -158,12 +217,9 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -172,10 +228,12 @@ class RuleFactoryUnitTest {
     Transformations transformations1 = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
       .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
     Transformations transformations2 = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_2)
+      .withFieldId(FIELD_ID_2)
       .withTransformation(TRANSFORMATION_FIELD_VALUE_2);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
@@ -185,14 +243,11 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(3, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(2).getField());
-    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(2).getDataSources().get(0).getFrom());
+    assertEquals(2, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(1).getDataSources().get(0).getFrom());
   }
 
   @Test
@@ -201,6 +256,7 @@ class RuleFactoryUnitTest {
     Transformations transformations = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
       .withTransformation(TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
@@ -210,19 +266,16 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SUBFIELD_A, rules.get(1).getDataSources().get(0).getSubfield());
-    assertEquals(FIRST_INDICATOR, rules.get(1).getDataSources().get(1).getIndicator());
-    assertEquals(SET_VALUE_FUNCTION, rules.get(1).getDataSources().get(1).getTranslation().getFunction());
-    assertEquals(SPACE, rules.get(1).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER));
-    assertEquals(SECOND_INDICATOR, rules.get(1).getDataSources().get(2).getIndicator());
-    assertEquals(SET_VALUE_FUNCTION, rules.get(1).getDataSources().get(2).getTranslation().getFunction());
-    assertEquals(SPACE, rules.get(1).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SUBFIELD_A, rules.get(0).getDataSources().get(0).getSubfield());
+    assertEquals(FIRST_INDICATOR, rules.get(0).getDataSources().get(1).getIndicator());
+    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(1).getTranslation().getFunction());
+    assertEquals(SPACE, rules.get(0).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(SECOND_INDICATOR, rules.get(0).getDataSources().get(2).getIndicator());
+    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(2).getTranslation().getFunction());
+    assertEquals(SPACE, rules.get(0).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
   }
 
   @Test
@@ -242,13 +295,10 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(PERMANENT_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
 
   @Test
@@ -274,13 +324,10 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
 
   @Test
@@ -300,13 +347,10 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
 
   @Test
@@ -325,13 +369,10 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
 
   @Test
@@ -350,13 +391,10 @@ class RuleFactoryUnitTest {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(2, rules.size());
-    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
-    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
-    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(1).getField());
-    assertEquals(MATERIAL_TYPE_PATH, rules.get(1).getDataSources().get(0).getFrom());
-    assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(1).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(MATERIAL_TYPE_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
 
   @Test
@@ -368,19 +406,19 @@ class RuleFactoryUnitTest {
       .withPath(CALLNUMBER_FIELD_PATH)
       .withTransformation("900ff$a");
     Transformations transformation2 = new Transformations()
-        .withEnabled(true)
-        .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
-        .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
-        .withTransformation("900ff$b");
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
+      .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
+      .withTransformation("900ff$b");
     Transformations transformation3 = new Transformations()
-        .withEnabled(true)
-        .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
-        .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
-        .withTransformation("900ff$c");
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
+      .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
+      .withTransformation("900ff$c");
     List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
     MappingProfile mappingProfile = new MappingProfile()
-        .withId(UUID.randomUUID().toString())
-        .withTransformations(transformations);
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(transformations);
     //when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
@@ -389,7 +427,6 @@ class RuleFactoryUnitTest {
     assertEquals(1, ruleList.size());
     //3 data sources for subfields $a, $b, $c and 2 for indicators
     assertEquals(5, ruleList.get(0).getDataSources().size());
-
   }
 
   @Test
@@ -401,19 +438,19 @@ class RuleFactoryUnitTest {
       .withPath(CALLNUMBER_FIELD_PATH)
       .withTransformation("900ff$a");
     Transformations transformation2 = new Transformations()
-        .withEnabled(true)
-        .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
-        .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
-        .withTransformation("900  $b");
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
+      .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
+      .withTransformation("900  $b");
     Transformations transformation3 = new Transformations()
-        .withEnabled(true)
-        .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
-        .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
-        .withTransformation("90011$c");
+      .withEnabled(true)
+      .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
+      .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
+      .withTransformation("90011$c");
     List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
     MappingProfile mappingProfile = new MappingProfile()
-        .withId(UUID.randomUUID().toString())
-        .withTransformations(transformations);
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(transformations);
     //when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
@@ -424,7 +461,7 @@ class RuleFactoryUnitTest {
     assertEquals(5, ruleList.get(0).getDataSources().size());
     //the first field's indicators are used
     assertEquals(2, ruleList.get(0).getDataSources().stream().
-        filter(ds -> ds.getIndicator()!=null && ds.getTranslation().getParameter("value").equals("f")).count());
+      filter(ds -> ds.getIndicator() != null && ds.getTranslation().getParameter("value").equals("f")).count());
   }
 
 
@@ -432,6 +469,7 @@ class RuleFactoryUnitTest {
     DataSource dataSource = new DataSource();
     dataSource.setFrom(DEFAULT_RULE_FROM_VALUE);
     Rule defaultRule = new Rule();
+    defaultRule.setId(FIELD_ID_1);
     defaultRule.setField(DEFAULT_RULE_FIELD_VALUE);
     defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
     defaultRule.setDataSources(Lists.newArrayList(dataSource));

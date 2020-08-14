@@ -1,5 +1,6 @@
 [
   {
+    "id": "instance.leader",
     "field": "leader",
     "description": "Leader",
     "dataSources": [
@@ -16,6 +17,7 @@
     ]
   },
   {
+    "id": "instance.hrid",
     "field": "001",
     "description": "The human readable ID",
     "dataSources": [
@@ -25,6 +27,7 @@
     ]
   },
   {
+    "id": "instance.metadata.updateddate",
     "field": "005",
     "description": "Date and Time of Latest Transaction",
     "dataSources": [
@@ -37,6 +40,7 @@
     ]
   },
   {
+    "id": "instance.metadata.createddate",
     "field": "008",
     "description": "Fixed-Length Data Elements",
     "dataSources": [
@@ -53,6 +57,7 @@
     }
   },
   {
+    "id": "instance.identifiers.lccn",
     "field": "010",
     "description": "Identifier LCCN",
     "dataSources": [
@@ -90,6 +95,7 @@
     }
   },
   {
+    "id": "instance.identifiers.isbn",
     "field": "020",
     "description": "Identifier ISBN",
     "dataSources": [
@@ -127,6 +133,7 @@
     }
   },
   {
+    "id": "instance.identifiers.issn",
     "field": "022",
     "description": "Identifier ISSN",
     "dataSources": [
@@ -164,6 +171,7 @@
     }
   },
   {
+    "id": "instance.identifiers.systemcontrolnumber",
     "field": "035",
     "description": "Identifier System Control Number",
     "dataSources": [
@@ -201,6 +209,7 @@
     }
   },
   {
+    "id": "instance.identifiers.oclc",
     "field": "035",
     "description": "Identifier OCLC",
     "dataSources": [
@@ -238,6 +247,7 @@
     }
   },
   {
+    "id": "instance.identifiers.gpo",
     "field": "074",
     "description": "Identifier GPO",
     "dataSources": [
@@ -275,6 +285,7 @@
     }
   },
   {
+    "id": "instance.contributornametypeid.personalname.primary",
     "field": "100",
     "description": "Contributors - Personal Name  and Primary",
     "dataSources": [
@@ -312,6 +323,7 @@
     }
   },
   {
+    "id": "instance.contributornametypeid.corporatename.primary",
     "field": "110",
     "description": "Contributors - Corporate Name  and Primary",
     "dataSources": [
@@ -349,6 +361,7 @@
     }
   },
   {
+    "id": "instance.contributornametypeid.meetingname.primary",
     "field": "111",
     "description": "Contributors - Meeting Name and Primary",
     "dataSources": [
@@ -386,6 +399,7 @@
     }
   },
   {
+    "id": "instance.title",
     "field": "245",
     "description": "Title",
     "dataSources": [
@@ -414,6 +428,7 @@
     ]
   },
   {
+    "id": "instance.publication",
     "field": "264",
     "description": "Publication",
     "dataSources": [
@@ -450,6 +465,7 @@
     ]
   },
   {
+    "id": "instance.physicalDescriptions",
     "field": "300",
     "description": "Physical Descriptions",
     "dataSources": [
@@ -478,6 +494,7 @@
     ]
   },
   {
+    "id": "instance.instancetypeid",
     "field": "336",
     "description": "InstanceTypeID",
     "dataSources": [
@@ -509,6 +526,7 @@
     ]
   },
   {
+    "id": "instance.instanceformatids",
     "field": "337",
     "description": "Instance formats",
     "dataSources": [
@@ -543,6 +561,7 @@
     ]
   },
   {
+    "id": "instance.instanceformatids",
     "field": "338",
     "description": "Instance formats",
     "dataSources": [
@@ -577,6 +596,7 @@
     ]
   },
   {
+    "id": "instance.series",
     "field": "490",
     "description": "Series",
     "dataSources": [
@@ -605,6 +625,7 @@
     ]
   },
   {
+    "id": "instance.subjects",
     "field": "653",
     "description": "Physical Descriptions",
     "dataSources": [
@@ -633,6 +654,7 @@
     ]
   },
   {
+    "id": "instance.natureofcontenttermids",
     "field": "655",
     "description": "Nature of content terms",
     "dataSources": [
@@ -664,6 +686,7 @@
     ]
   },
   {
+    "id": "instance.contributornametypeid.personalname",
     "field": "700",
     "description": "Contributors - Personal Name Not Primary",
     "dataSources": [
@@ -701,6 +724,7 @@
     }
   },
   {
+    "id": "instance.contributornametypeid.corporatename",
     "field": "710",
     "description": "Contributors - Corporate Name Not Primary",
     "dataSources": [
@@ -738,6 +762,7 @@
     }
   },
   {
+    "id": "instance.contributornametypeid.meetingname",
     "field": "711",
     "description": "Contributors - Meeting Name Not Primary",
     "dataSources": [
@@ -775,6 +800,7 @@
     }
   },
   {
+    "id": "instance.electronicAccess",
     "field": "856",
     "description": "Electronic access",
     "dataSources": [
@@ -820,6 +846,7 @@
     }
   },
   {
+    "id": "instance.id",
     "field": "999",
     "description": "Unique ID of the instance record",
     "dataSources": [
