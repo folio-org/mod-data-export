@@ -27,24 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
-import static org.folio.util.ExternalPathResolver.HOLDING;
-import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
-import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
-import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
-import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
-import static org.folio.util.ExternalPathResolver.LOCATIONS;
-import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.SRS;
-import static org.folio.util.ExternalPathResolver.USERS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
+import static org.folio.util.ExternalPathResolver.*;
 import static org.junit.Assert.fail;
 
 public class MockServer {
@@ -71,6 +54,8 @@ public class MockServer {
   private static final String ALTERNATIVE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_alternative_titles_response.json";
   private static final String LOAN_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_loan_types_response.json";
   private static final String ISSUANCE_MODES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_mode_of_issuance_response.json";
+  private static final String HOLDING_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_holding_note_types_response.json";
+  private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -134,6 +119,8 @@ public class MockServer {
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetLoanTypes(ctx));
     router.get(resourcesPath(ISSUANCE_MODES)).handler(ctx -> handleGetIssuanceModes(ctx));
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetAlternativeTypes(ctx));
+    router.get(resourcesPath(HOLDING_NOTE_TYPES)).handler(ctx -> handleGetHoldingNoteTypes(ctx));
+    router.get(resourcesPath(ITEM_NOTE_TYPES)).handler(ctx -> handleGetItemNoteTypes(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
@@ -377,6 +364,28 @@ public class MockServer {
       ctx.response()
         .setStatusCode(500)
         .end();
+    }
+  }
+
+  private void handleGetHoldingNoteTypes(RoutingContext ctx) {
+    logger.info("handle Get holding note types: " + ctx.request().path());
+    try {
+      JsonObject holdingNoteTypes = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_NOTE_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, HOLDING_NOTE_TYPES, holdingNoteTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, holdingNoteTypes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response().setStatusCode(500).end();
+    }
+  }
+
+  private void handleGetItemNoteTypes(RoutingContext ctx) {
+    logger.info("handle Get item note types: " + ctx.request().path());
+    try {
+      JsonObject itemNoteTypes = new JsonObject(RestVerticleTestBase.getMockData(ITEM_NOTE_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, ITEM_NOTE_TYPES_MOCK_DATA_PATH, itemNoteTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, itemNoteTypes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response().setStatusCode(500).end();
     }
   }
 

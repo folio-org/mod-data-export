@@ -2,21 +2,7 @@ package org.folio.clients;
 
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
-import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
-import static org.folio.util.ExternalPathResolver.HOLDING;
-import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
-import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
-import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
-import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
-import static org.folio.util.ExternalPathResolver.LOCATIONS;
-import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
+import static org.folio.util.ExternalPathResolver.*;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -90,6 +76,16 @@ public class InventoryClient {
   public Map<String, JsonObject> getLoanTypes(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(LOAN_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, LOAN_TYPES);
+  }
+
+  public Map<String, JsonObject> getHoldingsNoteTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(HOLDING_NOTE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, HOLDING_NOTE_TYPES);
+  }
+
+  public Map<String, JsonObject> getItemNoteTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(ITEM_NOTE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, ITEM_NOTE_TYPES);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {

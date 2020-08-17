@@ -2,14 +2,7 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -47,6 +40,7 @@ public enum TransformationFieldsConfig {
 
   //Holdings specific Fields
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
+  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings.noteType", HOLDING_NOTE_TYPES),
 
   //Item specific fields
   BARCODE("barcode", "$.item.barcode"),
@@ -60,7 +54,8 @@ public enum TransformationFieldsConfig {
   PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.item.permanentLoanTypeId", LOAN_TYPES),
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
-  YEARCAPTION("yearCaption", "$.item.yearCaption");
+  YEARCAPTION("yearCaption", "$.item.yearCaption"),
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item.noteType", ITEM_NOTE_TYPES);
 
   private final String fieldId;
   private final String path;

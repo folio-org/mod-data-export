@@ -143,4 +143,26 @@ public class ReferenceDataResponseUtil {
     return stringJsonObjectMap;
   }
 
+  public static Map<String, JsonObject> getHoldingNoteTypes() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray holdingNoteTypes = new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_holding_note_types_response.json"))
+        .getJsonArray("holdingsNoteTypes");
+    holdingNoteTypes.stream().forEach(type -> {
+      JsonObject jsonObject = new JsonObject(type.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
+  public static Map<String, JsonObject> getItemNoteTypes() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray itemNoteTypes = new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_item_note_types_response.json"))
+      .getJsonArray("itemNoteTypes");
+    itemNoteTypes.stream().forEach(type -> {
+      JsonObject jsonObject = new JsonObject(type.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
 }
