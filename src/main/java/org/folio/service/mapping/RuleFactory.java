@@ -95,15 +95,18 @@ public class RuleFactory {
   private List<Rule> defaultRules;
 
   public List<Rule> create(MappingProfile mappingProfile) {
-    defaultRules = getDefaultRulesFromFile();
-    if (mappingProfile == null || isEmpty(mappingProfile.getTransformations()) || DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfile.getId())) {
-      LOGGER.info("No Mapping rules specified, or selected default profile, using default mapping rules");
-      return defaultRules;
-    }
-    return new ArrayList<>(createByTransformations(mappingProfile.getTransformations()));
+    return create(mappingProfile, getDefaultRulesFromFile());
   }
 
-  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations) {
+  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules) {
+    if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
+      LOGGER.info("No Mapping rules specified, using default mapping rules");
+      return defaultRules;
+    }
+    return new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
+  }
+
+  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
@@ -111,7 +114,7 @@ public class RuleFactory {
         && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
         rules.add(buildByTransformation(mappingTransformation, rules));
       } else if (isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && isBlank(mappingTransformation.getTransformation())) {
-        Rule rule = createDefaultByTransformations(mappingTransformation);
+        Rule rule = createDefaultByTransformations(mappingTransformation, defaultRules);
         if (Objects.nonNull(rule)) {
           rules.add(rule);
         }
@@ -120,7 +123,7 @@ public class RuleFactory {
     return rules;
   }
 
-  public Rule createDefaultByTransformations(Transformations mappingTransformation) {
+  public Rule createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
     return TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getFieldId())
       && RecordType.INSTANCE.equals(mappingTransformation.getRecordType())
       ? getDefaultRuleById(defaultRules, mappingTransformation.getFieldId())
