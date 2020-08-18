@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.logging.log4j.util.Strings.isNotEmpty;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
@@ -75,11 +76,19 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
       transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry));
       transformationField.setFieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(), referenceDataValue));
       transformationField.setDisplayNameKey(displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
-      transformationField.setReferenceDataValue(referenceDataValue);
+      transformationField.setReferenceDataValue(getReferenceDataValue(referenceDataValue, transformationFieldsConfig));
       setMetadataParameters(transformationField, transformationFieldsConfig);
       subTransformationFields.add(transformationField);
     }
     return subTransformationFields;
+  }
+
+  private String getReferenceDataValue(String referenceDataValue, TransformationFieldsConfig transformationFieldsConfig) {
+    if (isNotEmpty(transformationFieldsConfig.getDisplayNameCondition())) {
+      return referenceDataValue.concat(transformationFieldsConfig.getDisplayNameCondition());
+    } else {
+      return referenceDataValue;
+    }
   }
 
   private TransformationField buildSimpleTransformationFields(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig) {

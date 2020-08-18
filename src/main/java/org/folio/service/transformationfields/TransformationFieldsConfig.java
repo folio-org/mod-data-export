@@ -40,7 +40,8 @@ public enum TransformationFieldsConfig {
 
   //Holdings specific Fields
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
-  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings.noteType", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings.notes[?(@.holdingsNoteTypeId=={id}) && ?(!(@.staffOnly) || @.staffOnly == false))]", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings.notes[?(@.holdingsNoteTypeId=={id}) && ?(!(@.staffOnly) || @.staffOnly == true))]", HOLDING_NOTE_TYPES, " - Staff only"),
 
   //Item specific fields
   BARCODE("barcode", "$.item.barcode"),
@@ -55,13 +56,15 @@ public enum TransformationFieldsConfig {
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
   YEARCAPTION("yearCaption", "$.item.yearCaption"),
-  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item.noteType", ITEM_NOTE_TYPES);
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item.notes[?(@.itemNoteTypeId=={id}) && ?(!(@.staffOnly) || @.staffOnly == false))]", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item.notes[?(@.itemNoteTypeId=={id}) && ?(!(@.staffOnly) || @.staffOnly == true))]", ITEM_NOTE_TYPES, " - Staff only");
 
   private final String fieldId;
   private final String path;
   private final boolean isReferenceData;
   private String referenceDataKey;
   private Map<String, String> metadataParameters;
+  private String displayNameCondition;
 
   TransformationFieldsConfig(String fieldId, String path) {
     this.fieldId = fieldId;
@@ -76,11 +79,23 @@ public enum TransformationFieldsConfig {
     this.referenceDataKey = referenceDataKey;
   }
 
+  TransformationFieldsConfig(String fieldId, String path, String referenceDataKey, String displayNameCondition) {
+    this.fieldId = fieldId;
+    this.path = path;
+    this.isReferenceData = true;
+    this.referenceDataKey = referenceDataKey;
+    this.displayNameCondition = displayNameCondition;
+  }
+
   TransformationFieldsConfig(String fieldId, String path, Map<String, String> metadataParameters) {
     this.fieldId = fieldId;
     this.path = path;
     this.isReferenceData = false;
     this.metadataParameters = metadataParameters;
+  }
+
+  public String getDisplayNameCondition() {
+    return displayNameCondition;
   }
 
   public String getFieldId() {
