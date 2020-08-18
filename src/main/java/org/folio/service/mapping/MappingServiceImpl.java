@@ -19,6 +19,7 @@ import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.rule.Rule;
+import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.rest.jaxrs.model.MappingProfile;
