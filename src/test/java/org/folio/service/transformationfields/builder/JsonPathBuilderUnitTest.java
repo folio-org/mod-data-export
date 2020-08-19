@@ -20,7 +20,7 @@ class JsonPathBuilderUnitTest {
   private static final String HR_ID_JSON_PATH_RESULT = "$.instance.hrid";
   private static final String IDENTIFIER_TYPES_LCCN_ID = "c858e4f2-2b6b-4385-842b-60732ee14abb";
   private static final String LCCN_RESPONSE_AS_STRING = "{\"id\":\"c858e4f2-2b6b-4385-842b-60732ee14abb\",\"name\":\"LCCN\",\"source\":\"folio\"}";
-  private static final String IDENTIFIER_JSON_PATH_RESULT = "$.instance[*].identifiers[?(@.identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value";
+  private static final String IDENTIFIER_JSON_PATH_RESULT = "$.instance.identifiers[?(@.identifierTypeId=='c858e4f2-2b6b-4385-842b-60732ee14abb')].value";
   private final JsonPathBuilder jsonPathBuilder = new JsonPathBuilder();
 
   @Test
