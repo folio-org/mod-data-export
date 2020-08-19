@@ -2,7 +2,23 @@ package org.folio.clients;
 
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
-import static org.folio.util.ExternalPathResolver.*;
+import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.util.ExternalPathResolver.HOLDING;
+import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
+import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
+import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
+import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
+import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

@@ -32,7 +32,15 @@ import java.util.Map;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.HOLDING_NOTE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ITEM_NOTE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
