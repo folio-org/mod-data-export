@@ -220,7 +220,7 @@
     {
       "fieldId": "holdings.holdingnotetypeid.staffonly.copy.note",
       "displayNameKey": "holdings.holdingNoteTypeId.staffOnly",
-      "referenceDataValue": "Copy note - Staff only",
+      "referenceDataValue": "Copy note",
       "path": "$.holdings.notes[?(@.holdingsNoteTypeId==c4407cc7-d79f-4609-95bd-1cefb2e2b5c5) && ?(!(@.staffOnly) || @.staffOnly == true))]",
       "recordType": "HOLDINGS"
     },
@@ -234,7 +234,7 @@
     {
       "fieldId": "holdings.holdingnotetypeid.staffonly.electronic.bookplate",
       "displayNameKey": "holdings.holdingNoteTypeId.staffOnly",
-      "referenceDataValue": "Electronic bookplate - Staff only",
+      "referenceDataValue": "Electronic bookplate",
       "path": "$.holdings.notes[?(@.holdingsNoteTypeId==88914775-f677-4759-b57b-1a33b90b24e0) && ?(!(@.staffOnly) || @.staffOnly == true))]",
       "recordType": "HOLDINGS"
     },
@@ -852,7 +852,7 @@
     {
       "fieldId": "item.itemnotetypeid.staffonly.binding",
       "displayNameKey": "item.itemNoteTypeId.staffOnly",
-      "referenceDataValue": "Binding - Staff only",
+      "referenceDataValue": "Binding",
       "path": "$.item.notes[?(@.itemNoteTypeId==87c450be-2033-41fb-80ba-dd2409883681) && ?(!(@.staffOnly) || @.staffOnly == true))]",
       "recordType": "ITEM"
     },
@@ -866,7 +866,7 @@
     {
       "fieldId": "item.itemnotetypeid.staffonly.action.note",
       "displayNameKey": "item.itemNoteTypeId.staffOnly",
-      "referenceDataValue": "Action note - Staff only",
+      "referenceDataValue": "Action note",
       "path": "$.item.notes[?(@.itemNoteTypeId==0e40884c-3523-4c6d-8187-d578e3d2794e) && ?(!(@.staffOnly) || @.staffOnly == true))]",
       "recordType": "ITEM"
     }

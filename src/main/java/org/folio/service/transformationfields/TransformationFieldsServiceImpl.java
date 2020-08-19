@@ -76,19 +76,11 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
       transformationField.setPath(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry));
       transformationField.setFieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(), referenceDataValue));
       transformationField.setDisplayNameKey(displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()));
-      transformationField.setReferenceDataValue(getReferenceDataValue(referenceDataValue, transformationFieldsConfig));
+      transformationField.setReferenceDataValue(referenceDataValue);
       setMetadataParameters(transformationField, transformationFieldsConfig);
       subTransformationFields.add(transformationField);
     }
     return subTransformationFields;
-  }
-
-  private String getReferenceDataValue(String referenceDataValue, TransformationFieldsConfig transformationFieldsConfig) {
-    if (isNotEmpty(transformationFieldsConfig.getDisplayNameCondition())) {
-      return referenceDataValue.concat(transformationFieldsConfig.getDisplayNameCondition());
-    } else {
-      return referenceDataValue;
-    }
   }
 
   private TransformationField buildSimpleTransformationFields(RecordType recordType, TransformationFieldsConfig transformationFieldsConfig) {
