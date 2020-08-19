@@ -1,5 +1,5 @@
 {
-  "transformationFields" :[ {
+"transformationFields" : [ {
     "fieldId" : "holdings.electronic.access.linktext",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "path" : "$.holdings.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText",
@@ -8,31 +8,31 @@
     "fieldId" : "holdings.electronic.access.linktext.no.display.constant.generated",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].linkText",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].linkText",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.linktext.no.information.provided",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "referenceDataValue" : "No information provided",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].linkText",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].linkText",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.linktext.related.resource",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "referenceDataValue" : "Related resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].linkText",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.linktext.resource",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "referenceDataValue" : "Resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].linkText",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.linktext.version.of.resource",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].linkText",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].linkText",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.materialsspecification",
@@ -43,31 +43,31 @@
     "fieldId" : "holdings.electronic.access.materialsspecification.no.display.constant.generated",
     "displayNameKey" : "holdings.electronic.access.materialsSpecification",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].materialsSpecification",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].materialsSpecification",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.materialsspecification.no.information.provided",
     "displayNameKey" : "holdings.electronic.access.materialsSpecification",
     "referenceDataValue" : "No information provided",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].materialsSpecification",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].materialsSpecification",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.materialsspecification.related.resource",
     "displayNameKey" : "holdings.electronic.access.materialsSpecification",
     "referenceDataValue" : "Related resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].materialsSpecification",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].materialsSpecification",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.materialsspecification.resource",
     "displayNameKey" : "holdings.electronic.access.materialsSpecification",
     "referenceDataValue" : "Resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].materialsSpecification",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].materialsSpecification",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.materialsspecification.version.of.resource",
     "displayNameKey" : "holdings.electronic.access.materialsSpecification",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].materialsSpecification",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].materialsSpecification",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.publicnote",
@@ -78,31 +78,31 @@
     "fieldId" : "holdings.electronic.access.publicnote.no.display.constant.generated",
     "displayNameKey" : "holdings.electronic.access.publicNote",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].publicNote",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].publicNote",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.publicnote.no.information.provided",
     "displayNameKey" : "holdings.electronic.access.publicNote",
     "referenceDataValue" : "No information provided",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].publicNote",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].publicNote",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.publicnote.related.resource",
     "displayNameKey" : "holdings.electronic.access.publicNote",
     "referenceDataValue" : "Related resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].publicNote",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].publicNote",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.publicnote.resource",
     "displayNameKey" : "holdings.electronic.access.publicNote",
     "referenceDataValue" : "Resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].publicNote",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].publicNote",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.publicnote.version.of.resource",
     "displayNameKey" : "holdings.electronic.access.publicNote",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].publicNote",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].publicNote",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.uri",
@@ -113,31 +113,31 @@
     "fieldId" : "holdings.electronic.access.uri.no.display.constant.generated",
     "displayNameKey" : "holdings.electronic.access.uri",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].uri",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].uri",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.uri.no.information.provided",
     "displayNameKey" : "holdings.electronic.access.uri",
     "referenceDataValue" : "No information provided",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].uri",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].uri",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.uri.related.resource",
     "displayNameKey" : "holdings.electronic.access.uri",
     "referenceDataValue" : "Related resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].uri",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].uri",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.uri.resource",
     "displayNameKey" : "holdings.electronic.access.uri",
     "referenceDataValue" : "Resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].uri",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.electronic.access.uri.version.of.resource",
     "displayNameKey" : "holdings.electronic.access.uri",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.holdings.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].uri",
+    "path" : "$.holdings.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].uri",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.hrid",
@@ -179,16 +179,52 @@
     "path" : "$.holdings.metadata.updatedDate",
     "recordType" : "HOLDINGS"
   }, {
-    "fieldId" : "instance.alternativetitletypeid.cover.title",
-    "displayNameKey" : "instance.alternativeTitleTypeId",
+    "fieldId" : "instance.alternativeTitleTypeName.cover.title",
+    "displayNameKey" : "instance.alternativeTitleTypeName",
     "referenceDataValue" : "Cover title",
-    "path" : "$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==5c364ce4-c8fd-4891-a28d-bb91c9bcdbfb)]",
+    "path" : "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='5c364ce4-c8fd-4891-a28d-bb91c9bcdbfb')].name",
     "recordType" : "INSTANCE"
   }, {
-    "fieldId" : "instance.alternativetitletypeid.running.title",
-    "displayNameKey" : "instance.alternativeTitleTypeId",
+    "fieldId" : "instance.alternativeTitleTypeName.running.title",
+    "displayNameKey" : "instance.alternativeTitleTypeName",
     "referenceDataValue" : "Running title",
-    "path" : "$.instance[*].alternativeTitles[?(@.alternativeTitleTypeId==09964ad1-7aed-49b8-8223-a4c105e3ef87)]",
+    "path" : "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='09964ad1-7aed-49b8-8223-a4c105e3ef87')].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.corporate.name",
+    "displayNameKey" : "instance.contributorName",
+    "referenceDataValue" : "Corporate name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='2e48e713-17f3-4c13-a9f8-23845bb210aa' && (!(@.primary) || @.primary == false))].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.meeting.name",
+    "displayNameKey" : "instance.contributorName",
+    "referenceDataValue" : "Meeting name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='e8b311a6-3b21-43f2-a269-dd9310cb2d0a' && (!(@.primary) || @.primary == false))].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.personal.name",
+    "displayNameKey" : "instance.contributorName",
+    "referenceDataValue" : "Personal name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='2b94c631-fca9-4892-a730-03ee529ffe2a' && (!(@.primary) || @.primary == false))].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.primary.corporate.name",
+    "displayNameKey" : "instance.contributorName.primary",
+    "referenceDataValue" : "Corporate name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='2e48e713-17f3-4c13-a9f8-23845bb210aa' && ((@.primary) && @.primary == true))].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.primary.meeting.name",
+    "displayNameKey" : "instance.contributorName.primary",
+    "referenceDataValue" : "Meeting name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='e8b311a6-3b21-43f2-a269-dd9310cb2d0a' && ((@.primary) && @.primary == true))].name",
+    "recordType" : "INSTANCE"
+  }, {
+    "fieldId" : "instance.contributorname.primary.personal.name",
+    "displayNameKey" : "instance.contributorName.primary",
+    "referenceDataValue" : "Personal name",
+    "path" : "$.instance.contributors[?(@.contributorNameTypeId=='2b94c631-fca9-4892-a730-03ee529ffe2a' && ((@.primary) && @.primary == true))].name",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.editions",
@@ -204,31 +240,31 @@
     "fieldId" : "instance.electronic.access.linktext.no.display.constant.generated",
     "displayNameKey" : "instance.electronic.access.linkText",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].linkText",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].linkText",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.linktext.no.information.provided",
     "displayNameKey" : "instance.electronic.access.linkText",
     "referenceDataValue" : "No information provided",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].linkText",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].linkText",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.linktext.related.resource",
     "displayNameKey" : "instance.electronic.access.linkText",
     "referenceDataValue" : "Related resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].linkText",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.linktext.resource",
     "displayNameKey" : "instance.electronic.access.linkText",
     "referenceDataValue" : "Resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].linkText",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.linktext.version.of.resource",
     "displayNameKey" : "instance.electronic.access.linkText",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].linkText",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].linkText",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.materialsspecification",
@@ -239,31 +275,31 @@
     "fieldId" : "instance.electronic.access.materialsspecification.no.display.constant.generated",
     "displayNameKey" : "instance.electronic.access.materialsSpecification",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].materialsSpecification",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].materialsSpecification",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.materialsspecification.no.information.provided",
     "displayNameKey" : "instance.electronic.access.materialsSpecification",
     "referenceDataValue" : "No information provided",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].materialsSpecification",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].materialsSpecification",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.materialsspecification.related.resource",
     "displayNameKey" : "instance.electronic.access.materialsSpecification",
     "referenceDataValue" : "Related resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].materialsSpecification",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].materialsSpecification",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.materialsspecification.resource",
     "displayNameKey" : "instance.electronic.access.materialsSpecification",
     "referenceDataValue" : "Resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].materialsSpecification",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].materialsSpecification",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.materialsspecification.version.of.resource",
     "displayNameKey" : "instance.electronic.access.materialsSpecification",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].materialsSpecification",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].materialsSpecification",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.publicnote",
@@ -274,31 +310,31 @@
     "fieldId" : "instance.electronic.access.publicnote.no.display.constant.generated",
     "displayNameKey" : "instance.electronic.access.publicNote",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].publicNote",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].publicNote",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.publicnote.no.information.provided",
     "displayNameKey" : "instance.electronic.access.publicNote",
     "referenceDataValue" : "No information provided",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].publicNote",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].publicNote",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.publicnote.related.resource",
     "displayNameKey" : "instance.electronic.access.publicNote",
     "referenceDataValue" : "Related resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].publicNote",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].publicNote",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.publicnote.resource",
     "displayNameKey" : "instance.electronic.access.publicNote",
     "referenceDataValue" : "Resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].publicNote",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].publicNote",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.publicnote.version.of.resource",
     "displayNameKey" : "instance.electronic.access.publicNote",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].publicNote",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].publicNote",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.uri",
@@ -309,31 +345,31 @@
     "fieldId" : "instance.electronic.access.uri.no.display.constant.generated",
     "displayNameKey" : "instance.electronic.access.uri",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].uri",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].uri",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.uri.no.information.provided",
     "displayNameKey" : "instance.electronic.access.uri",
     "referenceDataValue" : "No information provided",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].uri",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].uri",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.uri.related.resource",
     "displayNameKey" : "instance.electronic.access.uri",
     "referenceDataValue" : "Related resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].uri",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].uri",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.uri.resource",
     "displayNameKey" : "instance.electronic.access.uri",
     "referenceDataValue" : "Resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].uri",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.electronic.access.uri.version.of.resource",
     "displayNameKey" : "instance.electronic.access.uri",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.instance.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].uri",
+    "path" : "$.instance.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].uri",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.hrid",
@@ -349,37 +385,37 @@
     "fieldId" : "instance.identifiers.gpo.item.number",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "GPO item number",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==351ebc1c-3aae-4825-8765-c6d50dbf011f)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='351ebc1c-3aae-4825-8765-c6d50dbf011f')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.identifiers.isbn",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "ISBN",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==8261054f-be78-422d-bd51-4ed9f33c3422)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='8261054f-be78-422d-bd51-4ed9f33c3422')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.identifiers.issn",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "ISSN",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==913300b2-03ed-469a-8179-c1092c991227)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='913300b2-03ed-469a-8179-c1092c991227')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.identifiers.lccn",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "LCCN",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==c858e4f2-2b6b-4385-842b-60732ee14abb)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='c858e4f2-2b6b-4385-842b-60732ee14abb')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.identifiers.oclc",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "OCLC",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.identifiers.system.control.number",
     "displayNameKey" : "instance.identifiers",
     "referenceDataValue" : "System control number",
-    "path" : "$.instance[*].identifiers[?(@.identifierTypeId==7e591197-f335-4afb-bc6d-a6d76ca3bace)].value",
+    "path" : "$.instance.identifiers[?(@.identifierTypeId=='7e591197-f335-4afb-bc6d-a6d76ca3bace')].value",
     "recordType" : "INSTANCE"
   }, {
     "fieldId" : "instance.instancetypeid.other",
@@ -473,31 +509,31 @@
     "fieldId" : "item.electronic.access.linktext.no.display.constant.generated",
     "displayNameKey" : "item.electronic.access.linkText",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].linkText",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].linkText",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.linktext.no.information.provided",
     "displayNameKey" : "item.electronic.access.linkText",
     "referenceDataValue" : "No information provided",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].linkText",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].linkText",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.linktext.related.resource",
     "displayNameKey" : "item.electronic.access.linkText",
     "referenceDataValue" : "Related resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].linkText",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.linktext.resource",
     "displayNameKey" : "item.electronic.access.linkText",
     "referenceDataValue" : "Resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].linkText",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.linktext.version.of.resource",
     "displayNameKey" : "item.electronic.access.linkText",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].linkText",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].linkText",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.materialsspecification",
@@ -508,31 +544,31 @@
     "fieldId" : "item.electronic.access.materialsspecification.no.display.constant.generated",
     "displayNameKey" : "item.electronic.access.materialsSpecification",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].materialsSpecification",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].materialsSpecification",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.materialsspecification.no.information.provided",
     "displayNameKey" : "item.electronic.access.materialsSpecification",
     "referenceDataValue" : "No information provided",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].materialsSpecification",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].materialsSpecification",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.materialsspecification.related.resource",
     "displayNameKey" : "item.electronic.access.materialsSpecification",
     "referenceDataValue" : "Related resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].materialsSpecification",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].materialsSpecification",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.materialsspecification.resource",
     "displayNameKey" : "item.electronic.access.materialsSpecification",
     "referenceDataValue" : "Resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].materialsSpecification",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].materialsSpecification",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.materialsspecification.version.of.resource",
     "displayNameKey" : "item.electronic.access.materialsSpecification",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].materialsSpecification",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].materialsSpecification",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.publicnote",
@@ -543,31 +579,31 @@
     "fieldId" : "item.electronic.access.publicnote.no.display.constant.generated",
     "displayNameKey" : "item.electronic.access.publicNote",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].publicNote",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].publicNote",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.publicnote.no.information.provided",
     "displayNameKey" : "item.electronic.access.publicNote",
     "referenceDataValue" : "No information provided",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].publicNote",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].publicNote",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.publicnote.related.resource",
     "displayNameKey" : "item.electronic.access.publicNote",
     "referenceDataValue" : "Related resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].publicNote",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].publicNote",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.publicnote.resource",
     "displayNameKey" : "item.electronic.access.publicNote",
     "referenceDataValue" : "Resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].publicNote",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].publicNote",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.publicnote.version.of.resource",
     "displayNameKey" : "item.electronic.access.publicNote",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].publicNote",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].publicNote",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.uri",
@@ -578,31 +614,31 @@
     "fieldId" : "item.electronic.access.uri.no.display.constant.generated",
     "displayNameKey" : "item.electronic.access.uri",
     "referenceDataValue" : "No display constant generated",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==ef03d582-219c-4221-8635-bc92f1107021)].uri",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].uri",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.uri.no.information.provided",
     "displayNameKey" : "item.electronic.access.uri",
     "referenceDataValue" : "No information provided",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f50c90c9-bae0-4add-9cd0-db9092dbc9dd)].uri",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].uri",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.uri.related.resource",
     "displayNameKey" : "item.electronic.access.uri",
     "referenceDataValue" : "Related resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==5bfe1b7b-f151-4501-8cfa-23b321d5cd1e)].uri",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].uri",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.uri.resource",
     "displayNameKey" : "item.electronic.access.uri",
     "referenceDataValue" : "Resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==f5d0068e-6272-458e-8a81-b85e7b9a14aa)].uri",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.uri.version.of.resource",
     "displayNameKey" : "item.electronic.access.uri",
     "referenceDataValue" : "Version of resource",
-    "path" : "$.item.electronicAccess[?(@.relationshipId==3b430592-2e09-4b48-9a0c-0636d66b9fb3)].uri",
+    "path" : "$.item.electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].uri",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.enumeration",
@@ -692,7 +728,6 @@
     "displayNameKey" : "item.yearCaption",
     "path" : "$.item.yearCaption",
     "recordType" : "ITEM"
-  } 
-  ],
-  "totalRecords" : 121
+  } ],
+  "totalRecords" : 127
 }
