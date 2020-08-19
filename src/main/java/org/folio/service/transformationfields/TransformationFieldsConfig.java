@@ -49,18 +49,18 @@ public enum TransformationFieldsConfig {
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
 
   //Item specific fields
-  BARCODE("barcode", "$.item.barcode"),
-  CHRONOLOGY("chronology", "$.item.chronology"),
-  COPYNUMBER("copyNumber", "$.item.copyNumber"),
-  DESCRIPTION_OF_PIECES("descriptionOfPieces", "$.item.descriptionOfPieces"),
-  ENUMERATION("enumeration", "$.item.enumeration"),
-  HOLDINGS_ID("holdingsRecordId", "$.item.holdingsRecordId"),
-  MATERIAL_TYPE_ID("materialTypeId", "$.item[*].materialTypeId", MATERIAL_TYPES),
-  NUMBER_OF_PIECES("numberOfPieces", "$.item.numberOfPieces"),
-  PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.item.permanentLoanTypeId", LOAN_TYPES),
-  STATUS("status", "$.item.status.name"),
-  VOLUME("volume", "$.item.volume"),
-  YEARCAPTION("yearCaption", "$.item.yearCaption");
+  BARCODE("barcode", "$.items[*].barcode"),
+  CHRONOLOGY("chronology", "$.items[*].chronology"),
+  COPYNUMBER("copyNumber", "$.items[*].copyNumber"),
+  DESCRIPTION_OF_PIECES("descriptionOfPieces", "$.items[*].descriptionOfPieces"),
+  ENUMERATION("enumeration", "$.items[*].enumeration"),
+  HOLDINGS_ID("holdingsRecordId", "$.items[*].holdingsRecordId"),
+  MATERIAL_TYPE_ID("materialTypeId", "$.items[*].materialTypeId", MATERIAL_TYPES),
+  NUMBER_OF_PIECES("numberOfPieces", "$.items[*].numberOfPieces"),
+  PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.items[*].permanentLoanTypeId", LOAN_TYPES),
+  STATUS("status", "$.items[*].status.name"),
+  VOLUME("volume", "$.items[*].volume"),
+  YEARCAPTION("yearCaption", "$.items[*].yearCaption");
 
   private final String fieldId;
   private final String path;

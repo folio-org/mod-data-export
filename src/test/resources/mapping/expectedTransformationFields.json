@@ -179,13 +179,13 @@
     "path" : "$.holdings.metadata.updatedDate",
     "recordType" : "HOLDINGS"
   }, {
-    "fieldId" : "instance.alternativeTitleTypeName.cover.title",
+    "fieldId" : "instance.alternativetitletypename.cover.title",
     "displayNameKey" : "instance.alternativeTitleTypeName",
     "referenceDataValue" : "Cover title",
     "path" : "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='5c364ce4-c8fd-4891-a28d-bb91c9bcdbfb')].name",
     "recordType" : "INSTANCE"
   }, {
-    "fieldId" : "instance.alternativeTitleTypeName.running.title",
+    "fieldId" : "instance.alternativetitletypename.running.title",
     "displayNameKey" : "instance.alternativeTitleTypeName",
     "referenceDataValue" : "Running title",
     "path" : "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='09964ad1-7aed-49b8-8223-a4c105e3ef87')].name",
@@ -483,22 +483,22 @@
   }, {
     "fieldId" : "item.barcode",
     "displayNameKey" : "item.barcode",
-    "path" : "$.item.barcode",
+    "path" : "$.items[*].barcode",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.chronology",
     "displayNameKey" : "item.chronology",
-    "path" : "$.item.chronology",
+    "path" : "$.items[*].chronology",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.copynumber",
     "displayNameKey" : "item.copyNumber",
-    "path" : "$.item.copyNumber",
+    "path" : "$.items[*].copyNumber",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.descriptionofpieces",
     "displayNameKey" : "item.descriptionOfPieces",
-    "path" : "$.item.descriptionOfPieces",
+    "path" : "$.items[*].descriptionOfPieces",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.electronic.access.linktext",
@@ -643,12 +643,12 @@
   }, {
     "fieldId" : "item.enumeration",
     "displayNameKey" : "item.enumeration",
-    "path" : "$.item.enumeration",
+    "path" : "$.items[*].enumeration",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.holdingsrecordid",
     "displayNameKey" : "item.holdingsRecordId",
-    "path" : "$.item.holdingsRecordId",
+    "path" : "$.items[*].holdingsRecordId",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.hrid",
@@ -664,13 +664,13 @@
     "fieldId" : "item.materialtypeid.book",
     "displayNameKey" : "item.materialTypeId",
     "referenceDataValue" : "book",
-    "path" : "$.item[*].materialTypeId",
+    "path" : "$.items[*].materialTypeId",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.materialtypeid.dvd",
     "displayNameKey" : "item.materialTypeId",
     "referenceDataValue" : "dvd",
-    "path" : "$.item[*].materialTypeId",
+    "path" : "$.items[*].materialTypeId",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.metadata.createdbyuserid",
@@ -699,34 +699,34 @@
   }, {
     "fieldId" : "item.numberofpieces",
     "displayNameKey" : "item.numberOfPieces",
-    "path" : "$.item.numberOfPieces",
+    "path" : "$.items[*].numberOfPieces",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.permanentloantypeid.can.circulate",
     "displayNameKey" : "item.permanentLoanTypeId",
     "referenceDataValue" : "Can circulate",
-    "path" : "$.item.permanentLoanTypeId",
+    "path" : "$.items[*].permanentLoanTypeId",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.permanentloantypeid.reading.room",
     "displayNameKey" : "item.permanentLoanTypeId",
     "referenceDataValue" : "Reading room",
-    "path" : "$.item.permanentLoanTypeId",
+    "path" : "$.items[*].permanentLoanTypeId",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.status",
     "displayNameKey" : "item.status",
-    "path" : "$.item.status.name",
+    "path" : "$.items[*].status.name",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.volume",
     "displayNameKey" : "item.volume",
-    "path" : "$.item.volume",
+    "path" : "$.items[*].volume",
     "recordType" : "ITEM"
   }, {
     "fieldId" : "item.yearcaption",
     "displayNameKey" : "item.yearCaption",
-    "path" : "$.item.yearCaption",
+    "path" : "$.items[*].yearCaption",
     "recordType" : "ITEM"
   } ],
   "totalRecords" : 127
