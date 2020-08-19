@@ -183,6 +183,30 @@
       "recordType": "HOLDINGS"
     },
     {
+      "fieldId": "holdings.callnumber",
+      "displayNameKey": "holdings.callNumber",
+      "path": "$.holdings.callNumber",
+      "recordType": "HOLDINGS"
+    },
+    {
+      "fieldId": "holdings.callnumberprefix",
+      "displayNameKey": "holdings.callNumberPrefix",
+      "path": "$.holdings.callNumberPrefix",
+      "recordType": "HOLDINGS"
+    },
+    {
+      "fieldId": "holdings.callnumbersuffix",
+      "displayNameKey": "holdings.callNumberSuffix",
+      "path": "$.holdings.callNumberSuffix",
+      "recordType": "HOLDINGS"
+    },
+    {
+      "fieldId": "holdings.callnumbertype",
+      "displayNameKey": "holdings.callNumberType",
+      "path": "$.holdings.callNumberTypeId",
+      "recordType": "HOLDINGS"
+    },
+    {
       "fieldId": "holdings.metadata.createdbyuserid",
       "displayNameKey": "holdings.metadata.createdByUserId",
       "path": "$.holdings.metadata.createdByUserId",
@@ -839,5 +863,5 @@
       "recordType": "ITEM"
     }
   ],
-  "totalRecords": 125
+  "totalRecords": 129
 }
