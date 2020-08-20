@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 @ExtendWith(VertxExtension.class)
 class TransformationFieldsServiceTest extends RestVerticleTestBase {
 
-  private static final String FIELD_NAMES_URL = "/data-export/transformationFields";
-
   @Test
   void getFieldNamesReturned200Status(VertxTestContext context) {
     Response response = RestAssured.given()
