@@ -20,10 +20,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 class ExportManagerTest extends RestVerticleTestBase {
-
-  private static final String EXPORT_URL = "/data-export/export";
-  private static final String FILE_DEFINITION_URL = "/data-export/fileDefinitions";
-
   @Test
   void shouldReturn_422Status_ifRequestIsWrong(VertxTestContext context) {
     // given
@@ -71,8 +67,8 @@ class ExportManagerTest extends RestVerticleTestBase {
     FileDefinition fileDefinition = new FileDefinition()
       .withId(exportRequest.getFileDefinitionId())
       .withFileName("fileName.csv");
-    postRequest(JsonObject.mapFrom(fileDefinition), FILE_DEFINITION_URL);
-    ;
+    postRequest(JsonObject.mapFrom(fileDefinition), FILE_DEFINITION_SERVICE_URL);
+
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)

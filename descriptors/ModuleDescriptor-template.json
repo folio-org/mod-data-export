@@ -95,7 +95,7 @@
           ],
           "pathPattern": "/data-export/file-definitions/{fileDefinitionId}",
           "permissionsRequired": [
-            "data-export..item.get"
+            "data-export.file-definitions.item.get"
           ],
           "modulePermissions": [
           ]
@@ -106,7 +106,7 @@
           ],
           "pathPattern": "/data-export/file-definitions",
           "permissionsRequired": [
-            "data-export..item.post"
+            "data-export.file-definitions.item.post"
           ],
           "modulePermissions": [
           ]
@@ -117,7 +117,7 @@
           ],
           "pathPattern": "/data-export/file-definitions/{fileDefinitionId}/upload",
           "permissionsRequired": [
-            "data-export..upload.post"
+            "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
           ]
@@ -306,7 +306,7 @@
       "description": "Entry point to start export for the given file definition using job profile"
     },
     {
-      "permissionName": "data-export..item.get",
+      "permissionName": "data-export.file-definitions.item.get",
       "displayName": "Data Export - get file definition by id",
       "description": "Entry point to get File Definition by id"
     },
@@ -316,12 +316,12 @@
       "description": "Entry point to get Job Executions by query"
     },
     {
-      "permissionName": "data-export..upload.post",
+      "permissionName": "data-export.file-definitions.upload.post",
       "displayName": "Data Export - upload file",
       "description": "Entry point to upload file"
     },
     {
-      "permissionName": "data-export..item.post",
+      "permissionName": "data-export.file-definitions.item.post",
       "displayName": "Data Export - create new file definition",
       "description": "Entry point to post File Definition"
     },
@@ -391,9 +391,9 @@
       "description": "Entire set of permissions needed to use the Data Export",
       "subPermissions": [
         "data-export.export.post",
-        "data-export..item.get",
-        "data-export..item.post",
-        "data-export..upload.post",
+        "data-export.file-definitions.item.get",
+        "data-export.file-definitions.item.post",
+        "data-export.file-definitions.upload.post",
         "data-export.job-executions.items.get",
         "data-export.job-executions.items.download.get",
         "data-export.job-profiles.item.post",

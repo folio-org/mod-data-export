@@ -50,7 +50,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // then retrieve it and verify
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
-      .get(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId());
+      .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId());
     context.verify(() -> {
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
       FileDefinition createdFileDefinition = response.as(FileDefinition.class);
@@ -107,7 +107,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
-      .get(FILE_DEFINITION_SERVICE_URL + "/" + UUID.randomUUID().toString());
+      .get(FILE_DEFINITION_SERVICE_URL + UUID.randomUUID().toString());
     // then
     context.verify(() -> {
       assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
@@ -142,7 +142,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .spec(binaryRequestSpecification)
       .when()
       .body(FileUtils.openInputStream(fileToUpload))
-      .post(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId() + "/upload")
+      .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + "/upload")
       .then()
       .statusCode(HttpStatus.SC_OK)
       .body("sourcePath", notNullValue())
