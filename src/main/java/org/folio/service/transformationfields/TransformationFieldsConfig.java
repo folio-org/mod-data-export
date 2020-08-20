@@ -49,8 +49,8 @@ public enum TransformationFieldsConfig {
 
   //Holdings specific Fields
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
-  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings.notes[?(@.holdingsNoteTypeId=='{id}') && (!(@.staffOnly) || @.staffOnly == 'false'))].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
-  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings.notes[?(@.holdingsNoteTypeId=='{id}') && (!(@.staffOnly) || @.staffOnly == 'true'))].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings.notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == 'false'))].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings.notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == 'true'))].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
 
   //Item specific fields
   BARCODE("barcode", "$.item.barcode"),
@@ -65,8 +65,8 @@ public enum TransformationFieldsConfig {
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
   YEARCAPTION("yearCaption", "$.item.yearCaption"),
-  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item.notes[?(@.itemNoteTypeId=='{id}') && (!(@.staffOnly) || @.staffOnly == 'false'))].itemNoteTypeId", ITEM_NOTE_TYPES),
-  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item.notes[?(@.itemNoteTypeId=='{id}') && (!(@.staffOnly) || @.staffOnly == 'true'))].itemNoteTypeId", ITEM_NOTE_TYPES);
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item.notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == 'false'))].itemNoteTypeId", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item.notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == 'true'))].itemNoteTypeId", ITEM_NOTE_TYPES);
 
   private final String fieldId;
   private final String path;
