@@ -1,5 +1,25 @@
 {
-"transformationFields" : [ {
+  "transformationFields" : [ {
+    "fieldId" : "holdings.callnumber",
+    "displayNameKey" : "holdings.callNumber",
+    "path" : "$.holdings[*].callNumber",
+    "recordType" : "HOLDINGS"
+  }, {
+    "fieldId" : "holdings.callnumberprefix",
+    "displayNameKey" : "holdings.callNumberPrefix",
+    "path" : "$.holdings[*].callNumberPrefix",
+    "recordType" : "HOLDINGS"
+  }, {
+    "fieldId" : "holdings.callnumbersuffix",
+    "displayNameKey" : "holdings.callNumberSuffix",
+    "path" : "$.holdings[*].callNumberSuffix",
+    "recordType" : "HOLDINGS"
+  }, {
+    "fieldId" : "holdings.callnumbertype",
+    "displayNameKey" : "holdings.callNumberType",
+    "path" : "$.holdings[*].callNumberTypeId",
+    "recordType" : "HOLDINGS"
+  }, {
     "fieldId" : "holdings.electronic.access.linktext",
     "displayNameKey" : "holdings.electronic.access.linkText",
     "path" : "$.holdings.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText",
@@ -152,7 +172,7 @@
   }, {
     "fieldId" : "holdings.instanceid",
     "displayNameKey" : "holdings.instanceId",
-    "path" : "$.holdings.instanceId",
+    "path" : "$.holdings[*].instanceId",
     "recordType" : "HOLDINGS"
   }, {
     "fieldId" : "holdings.metadata.createdbyuserid",
@@ -486,6 +506,26 @@
     "path" : "$.items[*].barcode",
     "recordType" : "ITEM"
   }, {
+    "fieldId" : "item.callnumber",
+    "displayNameKey" : "item.callNumber",
+    "path" : "$.item[*].effectiveCallNumberComponents.callNumber",
+    "recordType" : "ITEM"
+  }, {
+    "fieldId" : "item.callnumberprefix",
+    "displayNameKey" : "item.callNumberPrefix",
+    "path" : "$.item[*].effectiveCallNumberComponents.prefix",
+    "recordType" : "ITEM"
+  }, {
+    "fieldId" : "item.callnumbersuffix",
+    "displayNameKey" : "item.callNumberSuffix",
+    "path" : "$.item[*].effectiveCallNumberComponents.suffix",
+    "recordType" : "ITEM"
+  }, {
+    "fieldId" : "item.callnumbertype",
+    "displayNameKey" : "item.callNumberType",
+    "path" : "$.item[*].effectiveCallNumberComponents.typeId",
+    "recordType" : "ITEM"
+  }, {
     "fieldId" : "item.chronology",
     "displayNameKey" : "item.chronology",
     "path" : "$.items[*].chronology",
@@ -729,5 +769,5 @@
     "path" : "$.items[*].yearCaption",
     "recordType" : "ITEM"
   } ],
-  "totalRecords" : 127
+  "totalRecords" : 135
 }

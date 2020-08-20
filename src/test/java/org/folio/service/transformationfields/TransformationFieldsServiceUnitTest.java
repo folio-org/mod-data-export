@@ -69,7 +69,7 @@ class TransformationFieldsServiceUnitTest {
   private ReferenceDataProvider referenceDataProvider;
   @Spy
   @InjectMocks
-  private TransformationFieldsServiceImpl filedNamesService;
+  private TransformationFieldsServiceImpl fieldNamesService;
   private Map<String, TransformationField> expectedFields;
 
   TransformationFieldsServiceUnitTest() {
@@ -101,7 +101,7 @@ class TransformationFieldsServiceUnitTest {
   @Test
   void getFieldNamesShouldReturnValidFields(VertxTestContext context) {
     // when
-    Future<TransformationFieldCollection> transformationFieldsFuture = filedNamesService.getTransformationFields(okapiConnectionParams);
+    Future<TransformationFieldCollection> transformationFieldsFuture = fieldNamesService.getTransformationFields(okapiConnectionParams);
 
     // then
     transformationFieldsFuture.onComplete(ar ->

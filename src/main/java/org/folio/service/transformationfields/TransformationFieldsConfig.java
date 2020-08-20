@@ -46,7 +46,11 @@ public enum TransformationFieldsConfig {
   TITLE("title", "$.instance.title"),
 
   //Holdings specific Fields
-  INSTANCE_ID("instanceId", "$.holdings.instanceId"),
+  INSTANCE_ID("instanceId", "$.holdings[*].instanceId"),
+  HOLDINGS_CALL_NUMBER("callNumber", "$.holdings[*].callNumber"),
+  HOLDINGS_CALL_NUMBER_PREFIX("callNumberPrefix", "$.holdings[*].callNumberPrefix"),
+  HOLDINGS_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.holdings[*].callNumberSuffix"),
+  HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -60,7 +64,12 @@ public enum TransformationFieldsConfig {
   PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.items[*].permanentLoanTypeId", LOAN_TYPES),
   STATUS("status", "$.items[*].status.name"),
   VOLUME("volume", "$.items[*].volume"),
-  YEARCAPTION("yearCaption", "$.items[*].yearCaption");
+  YEARCAPTION("yearCaption", "$.items[*].yearCaption"),
+  ITEM_CALL_NUMBER("callNumber", "$.item[*].effectiveCallNumberComponents.callNumber"),
+  ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item[*].effectiveCallNumberComponents.prefix"),
+  ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
+  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId");
+  
 
   private final String fieldId;
   private final String path;

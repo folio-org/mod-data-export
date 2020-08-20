@@ -64,16 +64,19 @@ public class RuleFactory {
   private static final String SET_LOCATION_FUNCTION = "set_location";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
   private static final String INSTANCE_TYPE_FIELD_ID = "instanceTypeId";
+  private static final String CALL_NUMBER_TYPE_FIELD_ID = "callNumberTypeId";
   private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
   private static final String SET_INSTANCE_TYPE_ID_FUNCTION = "set_instance_type_id";
+  private static final String SET_CALL_NUMBER_TYPE_ID_FUNCTION = "set_call_number_type_id";
 
-  private static final Map<String, String> translationFunctions = ImmutableMap.of(
-    PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION,
-    INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION
-  );
+  private static final Map<String, String> translationFunctions = new ImmutableMap.Builder<String, String>()
+    .put(PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
+    .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
+    .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION) // implement 'set_call_number_type_id'
+    .build();
 
   private List<Rule> defaultRules;
 
