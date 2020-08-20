@@ -47,6 +47,10 @@ public enum TransformationFieldsConfig {
 
   //Holdings specific Fields
   INSTANCE_ID("instanceId", "$.holdings.instanceId"),
+  HOLDINGS_CALL_NUMBER("callNumber", "$.holdings.callNumber"),
+  HOLDINGS_CALL_NUMBER_PREFIX("callNumberPrefix", "$.holdings.callNumberPrefix"),
+  HOLDINGS_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.holdings.callNumberSuffix"),
+  HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings.callNumberTypeId"),
 
   //Item specific fields
   BARCODE("barcode", "$.item.barcode"),
@@ -60,7 +64,11 @@ public enum TransformationFieldsConfig {
   PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.item.permanentLoanTypeId", LOAN_TYPES),
   STATUS("status", "$.item.status.name"),
   VOLUME("volume", "$.item.volume"),
-  YEARCAPTION("yearCaption", "$.item.yearCaption");
+  YEARCAPTION("yearCaption", "$.item.yearCaption"),
+  ITEM_CALL_NUMBER("callNumber", "$.item.effectiveCallNumberComponents.callNumber"),
+  ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item.effectiveCallNumberComponents.prefix"),
+  ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item.effectiveCallNumberComponents.suffix"),
+  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item.effectiveCallNumberComponents.typeId");
 
   private final String fieldId;
   private final String path;

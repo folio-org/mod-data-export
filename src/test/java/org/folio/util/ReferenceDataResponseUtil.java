@@ -142,5 +142,4 @@ public class ReferenceDataResponseUtil {
     });
     return stringJsonObjectMap;
   }
-
 }
