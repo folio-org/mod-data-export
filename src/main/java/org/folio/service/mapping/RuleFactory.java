@@ -75,7 +75,7 @@ public class RuleFactory {
     .put(EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
     .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
     .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
-    .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION) // TODO implement 'set_call_number_type_id'
+    .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION) // implement 'set_call_number_type_id'
     .build();
 
   private List<Rule> defaultRules;
