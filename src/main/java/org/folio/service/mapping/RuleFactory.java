@@ -50,7 +50,6 @@ public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   private static final Comparator<String> SUBFIELD_COMPARATOR = Comparator.nullsLast((subField0, subField1) -> {
     // Objects with not empty subfield value should be at the top of the sorted list.
     // If the DataSource contains numeric subfields, it will follow the alphabetical subfields.
@@ -110,10 +109,10 @@ public class RuleFactory {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
-      if (isTransformationValid(mappingTransformation) && isNotBlank(mappingTransformation.getTransformation())
-        && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
+      if (isTransformationValidAndNotBlank(mappingTransformation)
+        && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
         rules.add(buildByTransformation(mappingTransformation, rules));
-      } else if (isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && isBlank(mappingTransformation.getTransformation())) {
+      } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
         Rule rule = createDefaultByTransformations(mappingTransformation, defaultRules);
         if (Objects.nonNull(rule)) {
           rules.add(rule);
@@ -130,6 +129,19 @@ public class RuleFactory {
       : null;
   }
 
+  public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
+    Set<Rule> rules = new LinkedHashSet<>();
+    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
+    for (Transformations mappingTransformation : mappingTransformations) {
+      if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
+        && isNotBlank(mappingTransformation.getTransformation())
+        && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
+        rules.add(buildByTransformation(mappingTransformation, rules));
+      }
+    }
+    return rules;
+  }
+
   private Rule getDefaultRuleById(Collection<Rule> defaultRules, String fieldId) {
     Optional<Rule> rules = defaultRules.stream()
       .filter(defaultRule -> nonNull(defaultRule.getId()) && defaultRule.getId().equals(fieldId))
@@ -142,17 +154,16 @@ public class RuleFactory {
     }
   }
 
-  public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
-    Set<Rule> rules = new LinkedHashSet<>();
-    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
-    for (Transformations mappingTransformation : mappingTransformations) {
-      if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
-        && isNotBlank(mappingTransformation.getTransformation())
-        && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
-        rules.add(buildByTransformation(mappingTransformation, rules));
-      }
-    }
-    return rules;
+  private boolean isTransformationValidAndNotBlank(Transformations mappingTransformation) {
+    return isTransformationValid(mappingTransformation) && isNotBlank(mappingTransformation.getTransformation());
+  }
+
+  private boolean isPermanentLocationNotEqualsTemporaryLocation(String temporaryLocationTransformation, Transformations mappingTransformation) {
+    return !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()));
+  }
+
+  private boolean isInstanceTransformationValidAndBlank(Transformations mappingTransformation) {
+    return isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && isBlank(mappingTransformation.getTransformation());
   }
 
   private Rule buildByTransformation(Transformations mappingTransformation, Set<Rule> rules) {
