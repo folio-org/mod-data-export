@@ -2,6 +2,7 @@ package org.folio.clients;
 
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
+import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.util.ExternalPathResolver.HOLDING;
@@ -10,7 +11,9 @@ import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
@@ -59,6 +62,11 @@ public class InventoryClient {
     return getReferenceDataByUrl(endpoint, params, MATERIAL_TYPES);
   }
 
+  public Map<String, JsonObject> getModesOfIssuance(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(ISSUANCE_MODES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, ISSUANCE_MODES);
+  }
+
   public Map<String, JsonObject> getInstanceTypes(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(INSTANCE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, INSTANCE_TYPES);
@@ -72,6 +80,16 @@ public class InventoryClient {
   public Map<String, JsonObject> getElectronicAccessRelationships(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(ELECTRONIC_ACCESS_RELATIONSHIPS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, params, ELECTRONIC_ACCESS_RELATIONSHIPS);
+  }
+
+  public Map<String, JsonObject> getAlternativeTitleTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(ALTERNATIVE_TITLE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, ALTERNATIVE_TITLE_TYPES);
+  }
+
+  public Map<String, JsonObject> getLoanTypes(OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(LOAN_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, params, LOAN_TYPES);
   }
 
   private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {

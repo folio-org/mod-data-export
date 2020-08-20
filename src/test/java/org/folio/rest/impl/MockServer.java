@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -36,7 +37,9 @@ import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
+import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.SRS;
@@ -65,6 +68,9 @@ public class MockServer {
   private static final String INSTANCE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_types_response.json";
   private static final String INSTANCE_FORMATS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_formats_response.json";
   private static final String ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_electronic_access_relationships_response.json";
+  private static final String ALTERNATIVE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_alternative_titles_response.json";
+  private static final String LOAN_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_loan_types_response.json";
+  private static final String ISSUANCE_MODES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_mode_of_issuance_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -124,11 +130,14 @@ public class MockServer {
     router.get(resourcesPath(INSTANCE_TYPES)).handler(ctx -> handleGetInstanceTypes(ctx));
     router.get(resourcesPath(INSTANCE_FORMATS)).handler(ctx -> handleGetInstanceFormats(ctx));
     router.get(resourcesPath(ELECTRONIC_ACCESS_RELATIONSHIPS)).handler(ctx -> handleGetElectronicAccessRelationships(ctx));
+    router.get(resourcesPath(ALTERNATIVE_TITLE_TYPES)).handler(ctx -> handleGetAlternativeTypes(ctx));
+    router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetLoanTypes(ctx));
+    router.get(resourcesPath(ISSUANCE_MODES)).handler(ctx -> handleGetIssuanceModes(ctx));
+    router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetAlternativeTypes(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-
     return router;
   }
 
@@ -321,6 +330,48 @@ public class MockServer {
       JsonObject electronicAccessRelationship = new JsonObject(RestVerticleTestBase.getMockData(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, ELECTRONIC_ACCESS_RELATIONSHIPS, electronicAccessRelationship);
       serverResponse(ctx, 200, APPLICATION_JSON, electronicAccessRelationship.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetAlternativeTypes(RoutingContext ctx) {
+    logger.info("handleGet Alternative types: " + ctx.request()
+      .path());
+    try {
+      JsonObject alternativeTypes = new JsonObject(RestVerticleTestBase.getMockData(ALTERNATIVE_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, ALTERNATIVE_TITLE_TYPES, alternativeTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, alternativeTypes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetLoanTypes(RoutingContext ctx) {
+    logger.info("handleGet Loan types: " + ctx.request()
+      .path());
+    try {
+      JsonObject loanTypes = new JsonObject(RestVerticleTestBase.getMockData(LOAN_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, LOAN_TYPES, loanTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, loanTypes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetIssuanceModes(RoutingContext ctx) {
+    logger.info("handleGet issuance modes: " + ctx.request()
+      .path());
+    try {
+      JsonObject issuanceModes = new JsonObject(RestVerticleTestBase.getMockData(ISSUANCE_MODES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, ISSUANCE_MODES, issuanceModes);
+      serverResponse(ctx, 200, APPLICATION_JSON, issuanceModes.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

@@ -106,4 +106,40 @@ public class ReferenceDataResponseUtil {
     });
     return stringJsonObjectMap;
   }
+
+  public static Map<String, JsonObject> getAlternativeTitleTypes() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray alternativeTitleTypes =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_alternative_titles_response.json"))
+        .getJsonArray("alternativeTitleTypes");
+    alternativeTitleTypes.stream().forEach(alternativeTitleType -> {
+      JsonObject jsonObject = new JsonObject(alternativeTitleType.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
+  public static Map<String, JsonObject> getModeOfIssuance() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray modeOfIssuances =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_mode_of_issuance_response.json"))
+        .getJsonArray("issuanceModes");
+    modeOfIssuances.stream().forEach(modeOfIssuance -> {
+      JsonObject jsonObject = new JsonObject(modeOfIssuance.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
+
+  public static Map<String, JsonObject> getLoanTypes() {
+    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
+    JsonArray loantypes =
+      new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_loan_types_response.json"))
+        .getJsonArray("loantypes");
+    loantypes.stream().forEach(loanType -> {
+      JsonObject jsonObject = new JsonObject(loanType.toString());
+      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
+    });
+    return stringJsonObjectMap;
+  }
 }

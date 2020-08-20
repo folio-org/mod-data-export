@@ -1,8 +1,10 @@
 package org.folio.service.mapping;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Comparator.comparing;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.substring;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 
@@ -12,14 +14,25 @@ import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
@@ -31,6 +44,14 @@ public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
+  private static final Comparator<String> SUBFIELD_COMPARATOR = Comparator.nullsLast((subField0, subField1) -> {
+    // Objects with not empty subfield value should be at the top of the sorted list.
+    // If the DataSource contains numeric subfields, it will follow the alphabetical subfields.
+    if (isNumeric(subField0) == isNumeric(subField1)) {
+      return subField0.compareTo(subField1);
+    }
+    return isNumeric(subField0) && !isNumeric(subField1) ? 1 : -1;
+  });
 
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
@@ -42,14 +63,20 @@ public class RuleFactory {
   private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
   private static final String SET_LOCATION_FUNCTION = "set_location";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
+  private static final String INSTANCE_TYPE_FIELD_ID = "instanceTypeId";
+  private static final String CALL_NUMBER_TYPE_FIELD_ID = "callNumberTypeId";
   private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
+  private static final String SET_INSTANCE_TYPE_ID_FUNCTION = "set_instance_type_id";
+  private static final String SET_CALL_NUMBER_TYPE_ID_FUNCTION = "set_call_number_type_id";
 
-  private static final Map<String, String> translationFunctions = ImmutableMap.of(
-    PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION,
-    MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION
-  );
+  private static final Map<String, String> translationFunctions = new ImmutableMap.Builder<String, String>()
+    .put(PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
+    .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
+    .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
+    .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION) // implement 'set_call_number_type_id'
+    .build();
 
   private List<Rule> defaultRules;
 
@@ -79,14 +106,14 @@ public class RuleFactory {
     return this.defaultRules;
   }
 
-   public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
+  public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
         && isNotBlank(mappingTransformation.getTransformation())
         && !(isHoldingsPermanentLocation(mappingTransformation) && temporaryLocationTransformation.equals(mappingTransformation.getTransformation()))) {
-          rules.add(buildByTransformation(mappingTransformation, rules));
+        rules.add(buildByTransformation(mappingTransformation, rules));
       }
     }
     return rules;
@@ -123,7 +150,7 @@ public class RuleFactory {
       rule.setField(field);
       rule.setDataSources(buildDataSources(mappingTransformation, true));
     }
-
+    rule.getDataSources().sort(comparing(DataSource::getSubfield, SUBFIELD_COMPARATOR));
     return rule;
   }
 

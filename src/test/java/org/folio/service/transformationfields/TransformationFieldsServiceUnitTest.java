@@ -32,7 +32,14 @@ import java.util.Map;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -62,7 +69,7 @@ class TransformationFieldsServiceUnitTest {
   private ReferenceDataProvider referenceDataProvider;
   @Spy
   @InjectMocks
-  private TransformationFieldsServiceImpl filedNamesService;
+  private TransformationFieldsServiceImpl fieldNamesService;
   private Map<String, TransformationField> expectedFields;
 
   TransformationFieldsServiceUnitTest() {
@@ -76,8 +83,15 @@ class TransformationFieldsServiceUnitTest {
   void before() {
     ReferenceData referenceData = new ReferenceDataImpl();
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
+    referenceData.put(ALTERNATIVE_TITLE_TYPES, ReferenceDataResponseUtil.getAlternativeTitleTypes());
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
+    referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
+    referenceData.put(MODES_OF_ISSUANCE, ReferenceDataResponseUtil.getModeOfIssuance());
+    referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
+    referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
+    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, ReferenceDataResponseUtil.getElectronicAccessRelationships());
     doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class));
-    doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), anyString());
+    doCallRealMethod().when(pathBuilder).build(any(RecordType.class), any(TransformationFieldsConfig.class), any());
     doCallRealMethod().when(displayNameKeyBuilder).build(any(RecordType.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString(), anyString());
@@ -87,13 +101,14 @@ class TransformationFieldsServiceUnitTest {
   @Test
   void getFieldNamesShouldReturnValidFields(VertxTestContext context) {
     // when
-    Future<TransformationFieldCollection> transformationFieldsFuture = filedNamesService.getTransformationFields(okapiConnectionParams);
+    Future<TransformationFieldCollection> transformationFieldsFuture = fieldNamesService.getTransformationFields(okapiConnectionParams);
 
     // then
     transformationFieldsFuture.onComplete(ar ->
       context.verify(() -> {
         assertTrue(ar.succeeded());
         TransformationFieldCollection transformationFieldCollection = ar.result();
+        System.out.print(transformationFieldCollection);
         transformationFieldCollection.getTransformationFields()
           .forEach(transformationField -> checkIfActualFieldEqualToExpected(expectedFields.get(transformationField.getFieldId()), transformationField));
         assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());
