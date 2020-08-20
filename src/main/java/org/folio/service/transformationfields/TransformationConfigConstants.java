@@ -9,6 +9,8 @@ public class TransformationConfigConstants {
 
   protected static final Set<TransformationFieldsConfig> INSTANCE_FIELDS_CONFIGS = EnumSet.of(
     ALTERNATIVE_TITLES,
+    CONTRIBUTOR_NAME,
+    CONTRIBUTOR_NAME_PRIMARY,
     EDITIONS,
     ELECTRONIC_ACCESS_URI,
     ELECTRONIC_ACCESS_LINKTEXT,
