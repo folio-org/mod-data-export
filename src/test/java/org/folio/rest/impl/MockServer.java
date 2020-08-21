@@ -144,7 +144,6 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-
     return router;
   }
 
