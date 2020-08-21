@@ -28,6 +28,7 @@ public class TransformationConfigConstants {
     LANGUAGES,
     SOURCE,
     SUBJECTS,
+    TITLE,
     LANGUAGES,
     METADATA_CREATED_DATE,
     METADATA_UPDATED_DATE,
