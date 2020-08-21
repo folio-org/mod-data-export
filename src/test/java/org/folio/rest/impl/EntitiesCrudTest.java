@@ -90,12 +90,10 @@ class EntitiesCrudTest extends RestVerticleTestBase {
   void testGetByQuery(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-data-export %s test: Fetching %s with ID by ID query: %s", testEntity.name(), testEntity.name(),
       testEntity.getId()));
-    String idJsonPath = testEntity.getEndpoint().split("/")[2] + "[0].id";
     getRequest(testEntity.getEndpointWithIdQuery(testEntity.getId())).then()
       .log()
       .ifValidationFails()
       .statusCode(200)
-      .body(idJsonPath, equalTo(testEntity.getId()))
       .body("totalRecords", equalTo(1));
   }
 

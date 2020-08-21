@@ -53,9 +53,9 @@ For all necessary file upload lifecycle operations mod-data-export provides foll
 
 | Method | URL | ContentType |Description |
 | ------ |------ | ------ |------ |
-| **POST** | /data-export/fileDefinitions | application/json | Endpoint to create file definition to use it for the file uploading |
-| **GET** |/data-export/fileDefinitions/**{fileDefinitionId}** | application/json | Endpoint to get file definition by id |
-| **POST** | /data-export/fileDefinitions/**{fileDefinitionId}**/upload | application/octet-stream | Endpoint to upload file |
+| **POST** | /data-export/file-definitions | application/json | Endpoint to create file definition to use it for the file uploading |
+| **GET** |/data-export/file-definitions/**{fileDefinitionId}** | application/json | Endpoint to get file definition by id |
+| **POST** | /data-export/file-definitions/**{fileDefinitionId}**/upload | application/octet-stream | Endpoint to upload file |
 
 #### File Upload Workflow
                          
@@ -84,7 +84,7 @@ curl -w '\n' -X POST -D -   \
    -H "x-okapi-tenant: diku"  \
    -H "x-okapi-token: {token} \
    -d @fileDefinitionRequest.json \
-   http://localhost:9130/data-export/fileDefinitions
+   http://localhost:9130/data-export/file-definitions
 ```
 
 ##### fileDefinitionRequest.json
@@ -124,7 +124,7 @@ curl -w '\n' -X POST -D -   \
    -H "x-okapi-tenant: diku"  \
    -H "x-okapi-token: {token} \
    -d @inventoryUUIDs.csv \
-   http://localhost:9130/data-export/fileDefinitions/{id}/upload
+   http://localhost:9130/data-export/file-definitions/{id}/upload
 ```
 
 ##### Response with changed UploadDefinition after upload completed
@@ -154,7 +154,7 @@ If the file is loaded, FileDefinition change status to "COMPLETED" and added new
 curl -X GET -D - -w '\n' \
   -H "x-okapi-tenant: diku"  \
   -H "x-okapi-token: {token} \
-  http://localhost:9130/data-export/fileDefinitions/{id}     
+  http://localhost:9130/data-export/file-definitions/{id}     
 ```
 
 ##### Response for getting file definition by id

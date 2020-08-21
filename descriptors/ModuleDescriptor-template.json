@@ -74,7 +74,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": [
@@ -107,7 +107,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/fileDefinitions/{fileDefinitionId}",
+          "pathPattern": "/data-export/file-definitions/{fileDefinitionId}",
           "permissionsRequired": [
             "data-export.file-definitions.item.get"
           ],
@@ -118,7 +118,7 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/data-export/fileDefinitions",
+          "pathPattern": "/data-export/file-definitions",
           "permissionsRequired": [
             "data-export.file-definitions.item.post"
           ],
@@ -129,7 +129,7 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/data-export/fileDefinitions/{fileDefinitionId}/upload",
+          "pathPattern": "/data-export/file-definitions/{fileDefinitionId}/upload",
           "permissionsRequired": [
             "data-export.file-definitions.upload.post"
           ],
@@ -140,7 +140,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/jobExecutions",
+          "pathPattern": "/data-export/job-executions",
           "permissionsRequired": [
             "data-export.job-executions.items.get"
           ],
@@ -151,7 +151,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/jobExecutions/{jobId}/download/{fileId}",
+          "pathPattern": "/data-export/job-executions/{jobId}/download/{fileId}",
           "permissionsRequired": [
             "data-export.job-executions.items.download.get"
           ],
@@ -162,7 +162,7 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/data-export/jobProfiles",
+          "pathPattern": "/data-export/job-profiles",
           "permissionsRequired": [
             "data-export.job-profiles.item.post"
           ],
@@ -174,7 +174,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/jobProfiles",
+          "pathPattern": "/data-export/job-profiles",
           "permissionsRequired": [
             "data-export.job-profiles.collection.get"
           ],
@@ -185,7 +185,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "pathPattern": "/data-export/job-profiles/{jobProfileId}",
           "permissionsRequired": [
             "data-export.job-profiles.item.get"
           ],
@@ -196,7 +196,7 @@
           "methods": [
             "PUT"
           ],
-          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "pathPattern": "/data-export/job-profiles/{jobProfileId}",
           "permissionsRequired": [
             "data-export.job-profiles.item.put"
           ],
@@ -208,7 +208,7 @@
           "methods": [
             "DELETE"
           ],
-          "pathPattern": "/data-export/jobProfiles/{jobProfileId}",
+          "pathPattern": "/data-export/job-profiles/{jobProfileId}",
           "permissionsRequired": [
             "data-export.job-profiles.item.delete"
           ],
@@ -219,7 +219,7 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/data-export/mappingProfiles",
+          "pathPattern": "/data-export/mapping-profiles",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.post"
           ],
@@ -231,7 +231,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/mappingProfiles",
+          "pathPattern": "/data-export/mapping-profiles",
           "permissionsRequired": [
             "data-export.mapping-profiles.collection.get"
           ],
@@ -242,7 +242,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.get"
           ],
@@ -253,7 +253,7 @@
           "methods": [
             "PUT"
           ],
-          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.put"
           ],
@@ -265,7 +265,7 @@
           "methods": [
             "DELETE"
           ],
-          "pathPattern": "/data-export/mappingProfiles/{mappingProfileId}",
+          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.delete"
           ],
@@ -276,7 +276,7 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/transformationFields",
+          "pathPattern": "/data-export/transformation-fields",
           "permissionsRequired": [
             "data-export.transformation-fields.collection.get"
           ],

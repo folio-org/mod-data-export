@@ -33,9 +33,6 @@ import org.junit.runner.RunWith;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 class FileUploadServiceTest extends RestVerticleTestBase {
-  private static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions";
-  private static final String JOB_EXECUTIONS_URL = "/data-export/jobExecutions";
-
   @Test
   void postFileDefinition_return200Status(VertxTestContext context) {
     // given
@@ -53,7 +50,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // then retrieve it and verify
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
-      .get(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId());
+      .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId());
     context.verify(() -> {
       assertEquals(HttpStatus.SC_OK, response.getStatusCode());
       FileDefinition createdFileDefinition = response.as(FileDefinition.class);
@@ -110,7 +107,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
-      .get(FILE_DEFINITION_SERVICE_URL + "/" + UUID.randomUUID().toString());
+      .get(FILE_DEFINITION_SERVICE_URL + UUID.randomUUID().toString());
     // then
     context.verify(() -> {
       assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusCode());
@@ -145,7 +142,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .spec(binaryRequestSpecification)
       .when()
       .body(FileUtils.openInputStream(fileToUpload))
-      .post(FILE_DEFINITION_SERVICE_URL + "/" + givenFileDefinition.getId() + "/upload")
+      .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + "/upload")
       .then()
       .statusCode(HttpStatus.SC_OK)
       .body("sourcePath", notNullValue())

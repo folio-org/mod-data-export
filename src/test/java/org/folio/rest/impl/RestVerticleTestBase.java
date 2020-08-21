@@ -56,7 +56,11 @@ public abstract class RestVerticleTestBase {
   protected OkapiConnectionParams okapiConnectionParams;
   protected static final String MOCK_OKAPI_URL = HOST + mockPort;
   protected static final String EXPORT_URL = "/data-export/export";
-  protected static final String FILE_DEFINITION_SERVICE_URL = "/data-export/fileDefinitions/";
+  protected static final String FILE_DEFINITION_SERVICE_URL = "/data-export/file-definitions/";
+  protected static final String MAPPING_PROFILE_URL = "/data-export/mapping-profiles";
+  protected static final String JOB_PROFILE_URL = "/data-export/job-profiles";
+  protected static final String JOB_EXECUTIONS_URL = "/data-export/job-executions";
+  protected static final String FIELD_NAMES_URL = "/data-export/transformation-fields";
   protected static final String UPLOAD_URL = "/upload";
   protected static final String STORAGE_DIRECTORY_PATH = "./storage";
   protected static final String FILES_FOR_UPLOAD_DIRECTORY = "endToEndTestFiles/";
