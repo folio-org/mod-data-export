@@ -1,0 +1,239 @@
+{
+  "leader": "00649nam a2200277 a 4500",
+  "fields": [
+    {
+      "900": {
+        "subfields": [
+          {
+            "a": "6056.I4588 B749 "
+          },
+          {
+            "b": "PR"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "902": {
+        "subfields": [
+          {
+            "a": "2016"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "903": {
+        "subfields": [
+          {
+            "a": "holdingsLinkText1"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "903": {
+        "subfields": [
+          {
+            "a": "holdingsLinkText2"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "904": {
+        "subfields": [
+          {
+            "a": "holdingsUri1"
+          }
+        ],
+        "ind1": "1",
+        "ind2": "2"
+      }
+    },
+    {
+      "904": {
+        "subfields": [
+          {
+            "a": "holdingsUri2"
+          }
+        ],
+        "ind1": "1",
+        "ind2": "2"
+      }
+    },
+    {
+      "905": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "906": {
+        "subfields": [
+          {
+            "b": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "907": {
+        "subfields": [
+          {
+            "a": "6066.I4588 B749 "
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "907": {
+        "subfields": [
+          {
+            "a": "6076.I4588 B749 "
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "908": {
+        "subfields": [
+          {
+            "a": "itemLinkText1"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "908": {
+        "subfields": [
+          {
+            "a": "itemLinkText2"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "908": {
+        "subfields": [
+          {
+            "a": "itemLinkText3"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "908": {
+        "subfields": [
+          {
+            "a": "itemLinkText4"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "itemUri1"
+          }
+        ],
+        "ind1": "1",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "itemUri2"
+          }
+        ],
+        "ind1": "1",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "itemUri3"
+          }
+        ],
+        "ind1": "1",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "itemUri4"
+          }
+        ],
+        "ind1": "1",
+        "ind2": " "
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "book"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "dvd"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "911": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    }
+  ]
+}

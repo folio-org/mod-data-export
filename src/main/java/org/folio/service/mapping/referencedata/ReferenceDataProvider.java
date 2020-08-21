@@ -17,6 +17,8 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATION
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
 
 /**
  * The component is responsible to provide reference data.
@@ -55,7 +57,8 @@ public class ReferenceDataProvider {
     referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(okapiConnectionParams));
     referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
     referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
-
+    referenceData.put(HOLDING_NOTE_TYPES, inventoryClient.getHoldingsNoteTypes(okapiConnectionParams));
+    referenceData.put(ITEM_NOTE_TYPES, inventoryClient.getItemNoteTypes(okapiConnectionParams));
     return referenceData;
   }
 
@@ -69,6 +72,7 @@ public class ReferenceDataProvider {
     referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
     referenceData.put(INSTANCE_FORMATS, inventoryClient.getInstanceFormats(okapiConnectionParams));
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
+    referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
     return referenceData;
   }
 }

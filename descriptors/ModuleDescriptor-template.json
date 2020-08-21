@@ -57,6 +57,18 @@
     {
       "id": "electronic-access-relationships",
       "version": "1.0"
+    },
+    {
+      "id": "modes-of-issuance",
+      "version": "1.1"
+    },
+    {
+      "id": "holdings-note-types",
+      "version": "1.0"
+    },
+    {
+      "id": "item-note-types",
+      "version": "1.0"
     }
   ],
   "provides": [
@@ -86,7 +98,9 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.instance-formats.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
-            "configuration.entries.collection.get"
+            "configuration.entries.collection.get",
+            "inventory-storage.holdings-note-types.collection.get",
+            "inventory-storage.item-note-types.collection.get"
           ]
         },
         {

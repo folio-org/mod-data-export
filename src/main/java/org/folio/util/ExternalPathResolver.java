@@ -23,6 +23,8 @@ public class ExternalPathResolver {
   public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
   public static final String ISSUANCE_MODES = "issuanceModes";
   public static final String LOAN_TYPES = "loantypes";
+  public static final String HOLDING_NOTE_TYPES = "holdingNoteTypes";
+  public static final String ITEM_NOTE_TYPES = "itemNoteTypes";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
@@ -51,6 +53,9 @@ public class ExternalPathResolver {
     apis.put(ALTERNATIVE_TITLE_TYPES, "/alternative-title-types");
     apis.put(LOAN_TYPES, "/loan-types");
     apis.put(ISSUANCE_MODES, "/modes-of-issuance");
+    apis.put(HOLDING_NOTE_TYPES, "/holdings-note-types");
+    apis.put(ITEM_NOTE_TYPES, "/item-note-types");
+
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 
