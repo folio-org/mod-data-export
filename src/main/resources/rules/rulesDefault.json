@@ -171,7 +171,7 @@
     }
   },
   {
-    "id": "instance.identifiers.systemcontrolnumber",
+    "id": "instance.identifiers.system.control.number",
     "field": "035",
     "description": "Identifier System Control Number",
     "dataSources": [
@@ -247,7 +247,7 @@
     }
   },
   {
-    "id": "instance.identifiers.gpo",
+    "id": "instance.identifiers.gpo.item.number",
     "field": "074",
     "description": "Identifier GPO",
     "dataSources": [
@@ -285,7 +285,7 @@
     }
   },
   {
-    "id": "instance.contributornametypeid.personalname.primary",
+    "id": "instance.contributorname.primary.personal.name",
     "field": "100",
     "description": "Contributors - Personal Name  and Primary",
     "dataSources": [
@@ -323,7 +323,7 @@
     }
   },
   {
-    "id": "instance.contributornametypeid.corporatename.primary",
+    "id": "instance.contributorname.primary.corporate.name",
     "field": "110",
     "description": "Contributors - Corporate Name  and Primary",
     "dataSources": [
@@ -361,7 +361,7 @@
     }
   },
   {
-    "id": "instance.contributornametypeid.meetingname.primary",
+    "id": "instance.contributorname.primary.meeting.name",
     "field": "111",
     "description": "Contributors - Meeting Name and Primary",
     "dataSources": [
@@ -686,7 +686,7 @@
     ]
   },
   {
-    "id": "instance.contributornametypeid.personalname",
+    "id": "instance.contributorname.personal.name",
     "field": "700",
     "description": "Contributors - Personal Name Not Primary",
     "dataSources": [
@@ -724,7 +724,7 @@
     }
   },
   {
-    "id": "instance.contributornametypeid.corporatename",
+    "id": "instance.contributorname.corporate.name",
     "field": "710",
     "description": "Contributors - Corporate Name Not Primary",
     "dataSources": [
@@ -762,7 +762,7 @@
     }
   },
   {
-    "id": "instance.contributornametypeid.meetingname",
+    "id": "instance.contributorname.meeting.name",
     "field": "711",
     "description": "Contributors - Meeting Name Not Primary",
     "dataSources": [
@@ -800,7 +800,7 @@
     }
   },
   {
-    "id": "instance.electronicAccess",
+    "id": "instance.electronic.access",
     "field": "856",
     "description": "Electronic access",
     "dataSources": [

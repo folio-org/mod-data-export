@@ -546,14 +546,14 @@
       "fieldId":"instance.instancetypeid.other",
       "displayNameKey":"instance.instanceTypeId",
       "referenceDataValue":"other",
-      "path":"$.instance.instanceTypeId",
+      "path":"$.instance[?(@.instanceTypeId=='a2c91e87-6bab-44d6-8adb-1fd02481fc4f')].instanceTypeId",
       "recordType":"INSTANCE"
     },
     {
       "fieldId":"instance.instancetypeid.text",
       "displayNameKey":"instance.instanceTypeId",
       "referenceDataValue":"text",
-      "path":"$.instance.instanceTypeId",
+      "path":"$.instance[?(@.instanceTypeId=='6312d172-f0cf-40f6-b27d-9fa8feaf332f')].instanceTypeId",
       "recordType":"INSTANCE"
     },
     {
@@ -594,14 +594,14 @@
       "fieldId":"instance.modeofissuanceid.multipart.monograph",
       "displayNameKey":"instance.modeOfIssuanceId",
       "referenceDataValue":"multipart monograph",
-      "path":"$.instance.modeOfIssuanceId",
+      "path":"$.instance[?(@.modeOfIssuanceId=='f5cc2ab6-bb92-4cab-b83f-5a3d09261a41')].modeOfIssuanceId",
       "recordType":"INSTANCE"
     },
     {
       "fieldId":"instance.modeofissuanceid.single.unit",
       "displayNameKey":"instance.modeOfIssuanceId",
       "referenceDataValue":"single unit",
-      "path":"$.instance.modeOfIssuanceId",
+      "path":"$.instance[?(@.modeOfIssuanceId=='9d18a02f-5897-4c31-9106-c9abb5c7ae8b')].modeOfIssuanceId",
       "recordType":"INSTANCE"
     },
     {

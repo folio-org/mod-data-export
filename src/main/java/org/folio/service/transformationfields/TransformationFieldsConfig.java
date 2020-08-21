@@ -35,8 +35,8 @@ public enum TransformationFieldsConfig {
   EDITIONS("editions", "$.instance.editions"),
   IDENTIFIERS("identifiers", "$.instance.identifiers[?(@.identifierTypeId=='{id}')].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),
-  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance.modeOfIssuanceId", MODES_OF_ISSUANCE),
-  INSTANCE_TYPE("instanceTypeId", "$.instance.instanceTypeId", INSTANCE_TYPES),
+  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", MODES_OF_ISSUANCE),
+  INSTANCE_TYPE("instanceTypeId", "$.instance[?(@.instanceTypeId=='{id}')].instanceTypeId", INSTANCE_TYPES),
   SUBJECTS("subjects", "$.instance.subjects"),
   TITLE("title", "$.instance.title"),
 

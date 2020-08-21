@@ -21,7 +21,7 @@ public final class TestUtil {
   public static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
   public static final String EFFECTIVE_LOCATION_PATH = "$.items[*].effectiveLocationId";
   public static final String SET_LOCATION_FUNCTION = "set_location";
-  public static final String MATERIAL_TYPE_FIELD_ID = "materialTypeId";
+  public static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
   public static final String MATERIAL_TYPE_PATH = "$.items[*].materialTypeId";
   public static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
   public static final String CALLNUMBER_FIELD_ID = "callNumber";
@@ -36,7 +36,7 @@ public final class TestUtil {
   public static final String ITEMS_EFFECTIVE_CALL_NUMBER_PATH = "$.items[*].effectiveCallNumberComponents.callNumber";
   public static final String HOLDINGS_ELECTRONIC_ACCESS_URI_PATH = "$.holdings[*].electronicAccess[*].uri";
   public static final String HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH = "$.holdings[*].electronicAccess[*].linkText";
-  public static final String MATERIALTYPE_FIELD_ID = "materialTypeId";
+  public static final String MATERIALTYPE_FIELD_ID = "item.materialtypeid";
   public static final String EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID = "effectiveCallNumberComponents.callNumber";
   public static final String ELECTRONIC_ACCESS_URI_FIELD_ID = "electronicAccess.uri";
   public static final String ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID = "electronicAccess.linkText";
