@@ -617,6 +617,12 @@
       "recordType":"INSTANCE"
     },
     {
+    "fieldId" : "instance.title",
+    "displayNameKey" : "instance.title",
+    "path" : "$.instance.title",
+    "recordType" : "INSTANCE"
+    },
+    {
       "fieldId":"item.barcode",
       "displayNameKey":"item.barcode",
       "path":"$.items[*].barcode",
