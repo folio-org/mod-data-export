@@ -105,15 +105,10 @@ public class MappingServiceImpl implements MappingService {
 
   private List<Rule> getRules(MappingProfile mappingProfile, OkapiConnectionParams params) {
     List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(params);
-    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : appendRulesFromProfile(rulesFromConfig, mappingProfile);
-  }
-
-  private List<Rule> appendRulesFromProfile(List<Rule> rulesFromConfig, MappingProfile mappingProfile) {
-    if (mappingProfile != null && isNotEmpty(mappingProfile.getTransformations())) {
+    if (mappingProfile != null && CollectionUtils.isNotEmpty(rulesFromConfig)) {
       LOGGER.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
-      rulesFromConfig.addAll(ruleFactory.buildByTransformations(mappingProfile.getTransformations()));
     }
-    return rulesFromConfig;
+    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : ruleFactory.create(mappingProfile, rulesFromConfig);
   }
 
 }
