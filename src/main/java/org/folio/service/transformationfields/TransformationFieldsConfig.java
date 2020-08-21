@@ -2,14 +2,9 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.HOLDING_NOTE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ITEM_NOTE_TYPES;
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -51,6 +46,8 @@ public enum TransformationFieldsConfig {
   HOLDINGS_CALL_NUMBER_PREFIX("callNumberPrefix", "$.holdings[*].callNumberPrefix"),
   HOLDINGS_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.holdings[*].callNumberSuffix"),
   HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
+  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && @.staffOnly == 'false')].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && @.staffOnly == 'true')].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -68,8 +65,10 @@ public enum TransformationFieldsConfig {
   ITEM_CALL_NUMBER("callNumber", "$.item[*].effectiveCallNumberComponents.callNumber"),
   ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item[*].effectiveCallNumberComponents.prefix"),
   ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
-  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId");
-  
+  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId"),
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'false')].itemNoteTypeId", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'true')].itemNoteTypeId", ITEM_NOTE_TYPES);
+
 
   private final String fieldId;
   private final String path;

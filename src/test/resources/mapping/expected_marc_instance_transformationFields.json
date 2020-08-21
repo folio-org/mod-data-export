@@ -1,5 +1,5 @@
 {
-  "leader": "02684nam a22009253c 4500",
+  "leader": "02738nam a22009373c 4500",
   "fields": [
     {
       "001": "1"
@@ -833,6 +833,17 @@
         "subfields": [
           {
             "a": "Scotland--Politics and government--21st century"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "952": {
+        "subfields": [
+          {
+            "a": "The Journal of ecclesiastical history"
           }
         ],
         "ind1": "f",
