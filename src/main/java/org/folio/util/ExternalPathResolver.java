@@ -23,7 +23,7 @@ public class ExternalPathResolver {
   public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
   public static final String ISSUANCE_MODES = "issuanceModes";
   public static final String LOAN_TYPES = "loantypes";
-  public static final String HOLDING_NOTE_TYPES = "holdingNoteTypes";
+  public static final String HOLDING_NOTE_TYPES = "holdingsNoteTypes";
   public static final String ITEM_NOTE_TYPES = "itemNoteTypes";
   public static final String USERS = "users";
   public static final String HOLDING = "holding";

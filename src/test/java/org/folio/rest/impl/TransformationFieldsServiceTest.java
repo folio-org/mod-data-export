@@ -44,7 +44,7 @@ class TransformationFieldsServiceTest extends RestVerticleTestBase {
         .equals(TransformationField.RecordType.INSTANCE))
       .count());
 
-    assertEquals(35, transformationFieldCollection.getTransformationFields()
+    assertEquals(39, transformationFieldCollection.getTransformationFields()
       .stream()
       .filter(transformationField -> transformationField.getRecordType()
         .equals(TransformationField.RecordType.HOLDINGS))

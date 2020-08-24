@@ -50,7 +50,7 @@ public enum TransformationFieldsConfig {
   HOLDINGS_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.holdings[*].callNumberSuffix"),
   HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
   HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", HOLDING_NOTE_TYPES),
-  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && @.staffOnly == 'true')].note", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", HOLDING_NOTE_TYPES),
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -69,8 +69,8 @@ public enum TransformationFieldsConfig {
   ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item[*].effectiveCallNumberComponents.prefix"),
   ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
   ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId"),
-  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'false')].itemNoteTypeId", ITEM_NOTE_TYPES),
-  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'true')].itemNoteTypeId", ITEM_NOTE_TYPES);
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES);
 
 
   private final String fieldId;
