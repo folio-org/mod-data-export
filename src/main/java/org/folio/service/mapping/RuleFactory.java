@@ -84,7 +84,9 @@ public class RuleFactory {
   private static final String SET_METADATA_UPDATED_DATE_FUNCTION = "set_transaction_datetime";
   private static final String SET_METADATA_CREATED_DATE_FUNCTION = "set_fixed_length_data_elements";
   private static final String MOD_OF_ISSUANCE_ID_FUNCTION = "set_mode_of_issuance_id";
-  private static final String SET_LOCATIONS_FUNCTION_NEW = "set_locations_function"; // a new function for locations, should replace old one
+  private static final String SET_LOCATIONS_FUNCTION_NEW = "set_locations_function_new"; // a new function for locations, should replace old one
+  private static final String FIELD_PARAM_KEY = "field";
+  private static final String REFERENCE_DATA_PARAM_KEY = "referenceData";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.<String, String>builder()
     .put(PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
@@ -230,7 +232,7 @@ public class RuleFactory {
     translationFunctions.forEach((key, value) -> {
       if (isNotEmpty(mappingTransformation.getFieldId()) && mappingTransformation.getFieldId().contains(key)) {
         translation.setFunction(value);
-        if(mappingTransformation.getFieldId().contains("location")) {
+        if (mappingTransformation.getFieldId().contains("location")) {
           setLocationTranslationParameters(translation, mappingTransformation.getFieldId());
         }
         fromDataSource.setTranslation(translation);
@@ -256,18 +258,18 @@ public class RuleFactory {
   private void setLocationTranslationParameters(Translation translation, String transformationFieldId) {
     List<String> locationParts = Splitter.on(".").splitToList(transformationFieldId);
     Map<String, String> parameters = new HashMap<>();
-    if(locationParts.size() == 2) {
-      parameters.put("field", locationParts.get(1));
-    } else if(locationParts.size() == 3) {
-      String referenceDataType = locationParts.get(1);
-      String field = locationParts.get(0);
-      parameters.put("field", field);
-      if("library".equals(referenceDataType)) {
-        parameters.put("referenceData", "loclibs");
-      } else if("campus".equals(referenceDataType)) {
-        parameters.put("referenceData", "loccamps");
-      } else if("institution".equals(referenceDataType)) {
-        parameters.put("referenceData", "locinsts");
+    if (locationParts.size() == 3) {
+      parameters.put(FIELD_PARAM_KEY, locationParts.get(2));
+    } else if (locationParts.size() == 4) {
+      String referenceDataType = locationParts.get(2);
+      String field = locationParts.get(3);
+      parameters.put(FIELD_PARAM_KEY, field);
+      if ("library".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "loclibs");
+      } else if ("campus".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "loccamps");
+      } else if ("institution".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "locinsts");
       }
     }
     translation.setParameters(parameters);
