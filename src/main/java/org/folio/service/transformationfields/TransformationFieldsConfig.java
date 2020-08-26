@@ -8,6 +8,9 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ITEM_NOT
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
+ * Few conventions to follow while creating fields:
+ * 1) default fields must have ".default" appeneded to the fieldname at the end
+ * 2) json filter that is used for comparing Strings(UUID included) must be enclosed in quotes
  */
 public enum TransformationFieldsConfig {
 
@@ -23,10 +26,10 @@ public enum TransformationFieldsConfig {
   ELECTRONIC_ACCESS_LINKTEXT("electronic.access.linkText", "$.{recordType}.electronicAccess[?(@.relationshipId=='{id}')].linkText", ELECTRONIC_ACCESS_RELATIONSHIPS),
   ELECTRONIC_ACCESS_MATERIALS_SPECIFIED("electronic.access.materialsSpecification", "$.{recordType}.electronicAccess[?(@.relationshipId=='{id}')].materialsSpecification", ELECTRONIC_ACCESS_RELATIONSHIPS),
   ELECTRONIC_ACCESS_PUBLICNOTE("electronic.access.publicNote", "$.{recordType}.electronicAccess[?(@.relationshipId=='{id}')].publicNote", ELECTRONIC_ACCESS_RELATIONSHIPS),
-  ELECTRONIC_ACCESS_URI_DEFAULT("electronic.access.uri", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].uri"),
-  ELECTRONIC_ACCESS_LINKTEXT_DEFAULT("electronic.access.linkText", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText"),
-  ELECTRONIC_ACCESS_MATERIALS_SPECIFIED_DEFAULT("electronic.access.materialsSpecification", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].materialsSpecification"),
-  ELECTRONIC_ACCESS_PUBLICNOTE_DEFAULT("electronic.access.publicNote", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote"),
+  ELECTRONIC_ACCESS_URI_DEFAULT("electronic.access.uri.default", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].uri"),
+  ELECTRONIC_ACCESS_LINKTEXT_DEFAULT("electronic.access.linkText.default", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText"),
+  ELECTRONIC_ACCESS_MATERIALS_SPECIFIED_DEFAULT("electronic.access.materialsSpecification.default", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].materialsSpecification"),
+  ELECTRONIC_ACCESS_PUBLICNOTE_DEFAULT("electronic.access.publicNote.default", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote"),
 
   //Instance specific fields
   ALTERNATIVE_TITLES("alternativeTitleTypeName", "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='{id}')].name", ALTERNATIVE_TITLE_TYPES),
@@ -46,8 +49,8 @@ public enum TransformationFieldsConfig {
   HOLDINGS_CALL_NUMBER_PREFIX("callNumberPrefix", "$.holdings[*].callNumberPrefix"),
   HOLDINGS_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.holdings[*].callNumberSuffix"),
   HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
-  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && @.staffOnly == 'false')].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
-  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && @.staffOnly == 'true')].holdingsNoteTypeId", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", HOLDING_NOTE_TYPES),
+  HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", HOLDING_NOTE_TYPES),
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -66,8 +69,8 @@ public enum TransformationFieldsConfig {
   ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item[*].effectiveCallNumberComponents.prefix"),
   ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
   ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId"),
-  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'false')].itemNoteTypeId", ITEM_NOTE_TYPES),
-  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && @.staffOnly == 'true')].itemNoteTypeId", ITEM_NOTE_TYPES);
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES);
 
 
   private final String fieldId;

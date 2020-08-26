@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.logging.log4j.util.Strings.isNotEmpty;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
