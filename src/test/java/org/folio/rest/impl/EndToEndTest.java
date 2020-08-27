@@ -1,7 +1,7 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -279,7 +279,7 @@ class EndToEndTest extends RestVerticleTestBase {
   private Future<Object> assertSuccessJobExecution(TestContext context, FileDefinition fileDefinition,  Optional<JobExecution> jobExecutionOptional, Integer currentNumber, String total) {
     JobExecution jobExecution = jobExecutionOptional.get();
     context.assertTrue(isFileNameContainsJobExecutionHrId(new File(fileDefinition.getSourcePath()).getName(), jobExecution.getHrId()));
-    context.assertEquals(jobExecution.getStatus(), SUCCESS);
+    context.assertEquals(jobExecution.getStatus(), COMPLETED);
     context.assertNotNull(jobExecution.getCompletedDate());
     context.assertEquals(jobExecution.getProgress().getExported(), currentNumber);
     context.assertEquals(jobExecution.getProgress().getTotal(), total);

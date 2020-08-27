@@ -2,7 +2,7 @@ package org.folio.rest.impl;
 
 import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.SUCCESS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -235,7 +235,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   private void assertSuccessJobExecution(JobExecution jobExecution, Integer numberOfExportedRecords, String totalNumberOfRecords) {
-    assertEquals(SUCCESS, jobExecution.getStatus());
+    assertEquals(COMPLETED, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
   }
