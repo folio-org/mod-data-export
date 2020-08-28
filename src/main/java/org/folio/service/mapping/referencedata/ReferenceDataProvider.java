@@ -54,8 +54,6 @@ public class ReferenceDataProvider {
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
     referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
     referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
-    referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(okapiConnectionParams));
-    referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
     referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
     referenceData.put(HOLDING_NOTE_TYPES, inventoryClient.getHoldingsNoteTypes(okapiConnectionParams));
     referenceData.put(ITEM_NOTE_TYPES, inventoryClient.getItemNoteTypes(okapiConnectionParams));

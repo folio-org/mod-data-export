@@ -887,16 +887,8 @@
          "recordType": "ITEM"
       },
       {
-         "fieldId": "item.materialtypeid.book",
+         "fieldId": "item.materialtypeid",
          "displayNameKey": "item.materialTypeId",
-         "referenceDataValue": "book",
-         "path": "$.items[*].materialTypeId",
-         "recordType": "ITEM"
-      },
-      {
-         "fieldId": "item.materialtypeid.dvd",
-         "displayNameKey": "item.materialTypeId",
-         "referenceDataValue": "dvd",
          "path": "$.items[*].materialTypeId",
          "recordType": "ITEM"
       },
@@ -935,16 +927,8 @@
          "recordType": "ITEM"
       },
       {
-         "fieldId": "item.permanentloantypeid.can.circulate",
+         "fieldId": "item.permanentloantypeid",
          "displayNameKey": "item.permanentLoanTypeId",
-         "referenceDataValue": "Can circulate",
-         "path": "$.items[*].permanentLoanTypeId",
-         "recordType": "ITEM"
-      },
-      {
-         "fieldId": "item.permanentloantypeid.reading.room",
-         "displayNameKey": "item.permanentLoanTypeId",
-         "referenceDataValue": "Reading room",
          "path": "$.items[*].permanentLoanTypeId",
          "recordType": "ITEM"
       },
