@@ -101,7 +101,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
-//      exportService.postExport(fileExportDefinition, params.getTenantId());
+      exportService.postExport(fileExportDefinition, params.getTenantId());
     }
   }
 

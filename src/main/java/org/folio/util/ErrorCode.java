@@ -11,7 +11,7 @@ public enum ErrorCode {
   USER_NOT_FOUND("userNotFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION("invalidUploadedFileExtension", "File name extension does not corresponds csv format"),
   FILE_ALREADY_UPLOADED("fileAlreadyUploaded","File already uploaded for this FileDefinition"),
-  NOTHING_TO_EXPORT("nothingToExport", "No successfully exported records, nothing to export");
+  NOTHING_TO_EXPORT("nothingToExport", "No exported records, nothing to export");
 
   private final String code;
   private final String description;
