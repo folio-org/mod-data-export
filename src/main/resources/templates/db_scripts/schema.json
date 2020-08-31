@@ -81,6 +81,11 @@
       "run": "after",
       "snippetPath": "migration_scripts/add_job_profile_id.sql",
       "fromModuleVersion": "mod-data-export-2.1.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/rename_job_statuses.sql",
+      "fromModuleVersion": "mod-data-export-2.2.0"
     }
   ]
 }

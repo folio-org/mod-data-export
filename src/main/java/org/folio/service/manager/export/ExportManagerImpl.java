@@ -101,7 +101,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
-      exportService.postExport(fileExportDefinition, params.getTenantId());
+//      exportService.postExport(fileExportDefinition, params.getTenantId());
     }
   }
 
@@ -175,7 +175,13 @@ public class ExportManagerImpl implements ExportManager {
     } else {
       LOGGER.info("Export has been successfully passed");
       if (exportPayload.isLast()) {
-        return exportPayload.getFailedRecordsNumber() == 0 ? ExportResult.completed() : ExportResult.completedWithErrors();
+        if (exportPayload.getExportedRecordsNumber() == 0) {
+          return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
+        } else if (exportPayload.getFailedRecordsNumber() > 0) {
+          return ExportResult.completedWithErrors();
+        } else {
+          return ExportResult.completed();
+        }
       }
       return ExportResult.inProgress();
     }
