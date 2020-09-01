@@ -32,8 +32,13 @@ import static org.folio.TestUtil.EFFECTIVE_LOCATION_FIELD_ID;
 import static org.folio.TestUtil.EFFECTIVE_LOCATION_PATH;
 import static org.folio.TestUtil.MATERIAL_TYPE_FIELD_ID;
 import static org.folio.TestUtil.MATERIAL_TYPE_PATH;
+import static org.folio.TestUtil.PERMANENT_LOCATION_CAMPUS_FIELD_ID;
+import static org.folio.TestUtil.PERMANENT_LOCATION_CODE_FIELD_ID;
 import static org.folio.TestUtil.PERMANENT_LOCATION_FIELD_ID;
+import static org.folio.TestUtil.PERMANENT_LOCATION_INSTITUTION_FIELD_ID;
+import static org.folio.TestUtil.PERMANENT_LOCATION_LIBRARY_FIELD_ID;
 import static org.folio.TestUtil.PERMANENT_LOCATION_PATH;
+import static org.folio.TestUtil.SET_LOCATIONS_FUNCTION_NEW;
 import static org.folio.TestUtil.SET_LOCATION_FUNCTION;
 import static org.folio.TestUtil.SET_MATERIAL_TYPE_FUNCTION;
 import static org.folio.TestUtil.TEMPORARY_LOCATION_FIELD_ID;
@@ -354,6 +359,56 @@ class RuleFactoryUnitTest {
   }
 
   @Test
+  void shouldReturnPermanentLocationRuleWithTranslationForCodeField() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_CODE_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATIONS_FUNCTION_NEW, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals("code", rules.get(0).getDataSources().get(0).getTranslation().getParameter("field"));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRuleWithTranslationForLibraryField() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_LIBRARY_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATIONS_FUNCTION_NEW, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals("name", rules.get(0).getDataSources().get(0).getTranslation().getParameter("field"));
+    assertEquals("loclibs", rules.get(0).getDataSources().get(0).getTranslation().getParameter("referenceData"));
+  }
+
+
+  @Test
   void shouldReturnTransformationRuleWithEffectiveLocationTranslation() {
     // given
     Transformations temporaryLocationTransformations = new Transformations()
@@ -374,6 +429,57 @@ class RuleFactoryUnitTest {
     assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
     assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
   }
+
+  @Test
+  void shouldReturnPermanentLocationRuleWithTranslationForCampusField() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_CAMPUS_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATIONS_FUNCTION_NEW, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals("code", rules.get(0).getDataSources().get(0).getTranslation().getParameter("field"));
+    assertEquals("loccamps", rules.get(0).getDataSources().get(0).getTranslation().getParameter("referenceData"));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRuleWithTranslationForInstitutionField() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(PERMANENT_LOCATION_INSTITUTION_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATIONS_FUNCTION_NEW, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals("code", rules.get(0).getDataSources().get(0).getTranslation().getParameter("field"));
+    assertEquals("locinsts", rules.get(0).getDataSources().get(0).getTranslation().getParameter("referenceData"));
+  }
+
 
   @Test
   void shouldReturnTransformationRuleWithMaterialTypeTranslation() {
