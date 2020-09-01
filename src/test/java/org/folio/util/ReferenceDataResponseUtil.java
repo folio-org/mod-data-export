@@ -47,6 +47,42 @@ public class ReferenceDataResponseUtil {
     return map;
   }
 
+  public static Map<String, JsonObject> getLibraries() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_libraries_response.json"))
+        .getJsonArray("loclibs");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
+  public static Map<String, JsonObject> getCampuses() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_campuses_response.json"))
+        .getJsonArray("loccamps");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
+  public static Map<String, JsonObject> getInstitutions() {
+    JsonArray identifierTypesArray =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_institutions_response.json"))
+        .getJsonArray("locinsts");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : identifierTypesArray) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
   public static Map<String, JsonObject> getContributorNameTypes() {
     JsonArray identifierTypesArray =
       new JsonObject(readFileContentFromResources("mockData/inventory/get_contributor_name_types_response.json"))

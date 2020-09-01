@@ -65,6 +65,39 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
+  void shouldRetrieveLibraries() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> libraries = inventoryClient.getLibraries(okapiConnectionParams);
+    // then
+    Assert.assertFalse(libraries.isEmpty());
+    Assert.assertEquals(2, libraries.size());
+  }
+
+  @Test
+  void shouldRetrieveCampuses() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> locations = inventoryClient.getCampuses(okapiConnectionParams);
+    // then
+    Assert.assertFalse(locations.isEmpty());
+    Assert.assertEquals(2, locations.size());
+  }
+
+  @Test
+  void shouldRetrieveInstitutions() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> locations = inventoryClient.getInstitutions(okapiConnectionParams);
+    // then
+    Assert.assertFalse(locations.isEmpty());
+    Assert.assertEquals(2, locations.size());
+  }
+
+  @Test
   void shouldRetrieveMaterialTypes() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
