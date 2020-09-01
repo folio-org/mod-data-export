@@ -166,8 +166,6 @@ class SrsRecordConvertorServiceUnitTest {
     transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
-    transformations.add(createTransformations("permanentLocationId", "$.holdings[*].permanentLocationId", "905  $a", HOLDINGS));
-    transformations.add(createTransformations("temporaryLocationId", "$.holdings[*].temporaryLocationId", "906  $b", HOLDINGS));
     transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
     transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));

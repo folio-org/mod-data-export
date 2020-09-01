@@ -165,8 +165,8 @@ class MappingServiceUnitTest {
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(11, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(20, appendedMarcRecords.size());
+    Assert.assertEquals(8, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(17, appendedMarcRecords.size());
   }
 
   @Test
@@ -226,13 +226,10 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID, CALLNUMBER_SUFFIX_FIELD_PATH, "902  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "903  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90412$a", HOLDINGS));
-    transformations.add(createTransformations(PERMANENT_LOCATION_FIELD_ID, PERMANENT_LOCATION_PATH, "905  $a", HOLDINGS));
-    transformations.add(createTransformations(TEMPORARY_LOCATION_FIELD_ID, TEMPORARY_LOCATION_PATH, "906  $b", HOLDINGS));
     transformations.add(createTransformations(EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID, ITEMS_EFFECTIVE_CALL_NUMBER_PATH, "907  $a", ITEM));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "908  $a", ITEM));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9091 $a", ITEM));
     transformations.add(createTransformations(MATERIALTYPE_FIELD_ID, MATERIAL_TYPE_ID_PATH, "910  $a", ITEM));
-    transformations.add(createTransformations(EFFECTIVE_LOCATION_FIELD_ID, EFFECTIVE_LOCATION_PATH, "911  $a", ITEM));
     return transformations;
   }
 
