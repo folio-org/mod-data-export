@@ -32,7 +32,7 @@ public enum TransformationFieldsConfig {
   ELECTRONIC_ACCESS_PUBLICNOTE_DEFAULT("electronic.access.publicNote.default", "$.{recordType}.electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote"),
 
   //Instance specific fields
-  ALTERNATIVE_TITLES("alternativeTitleTypeName", "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='{id}')].name", ALTERNATIVE_TITLE_TYPES),
+  ALTERNATIVE_TITLES("alternativeTitleTypeName", "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='{id}')].alternativeTitle", ALTERNATIVE_TITLE_TYPES),
   CONTRIBUTOR_NAME("contributorName", "$.instance.contributors[?(@.contributorNameTypeId=='{id}' && (!(@.primary) || @.primary == false))].name", CONTRIBUTOR_NAME_TYPES),
   CONTRIBUTOR_NAME_PRIMARY("contributorName.primary", "$.instance.contributors[?(@.contributorNameTypeId=='{id}' && ((@.primary) && @.primary == true))].name", CONTRIBUTOR_NAME_TYPES),
   EDITIONS("editions", "$.instance.editions"),
@@ -51,6 +51,22 @@ public enum TransformationFieldsConfig {
   HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
   HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", HOLDING_NOTE_TYPES),
   HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", HOLDING_NOTE_TYPES),
+  HOLDING_PERMANENT_LOCATION_NAME("permanentLocation.name", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_CODE("permanentLocation.code", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", "$.holdings[*].permanentLocationId"),
+  HOLDING_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", "$.holdings[*].permanentLocationId"),
+  HOLDING_TEMPORARY_LOCATION_NAME("temporaryLocation.name", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_CODE("temporaryLocation.code", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_LIBRARY_NAME("temporaryLocation.library.name", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_LIBRARY_CODE("temporaryLocation.library.code", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_CAMPUS_NAME("temporaryLocation.campus.name", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_CAMPUS_CODE("temporaryLocation.campus.code", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_INSTITUTION_NAME("temporaryLocation.institution.name", "$.holdings[*].temporaryLocationId"),
+  HOLDING_TEMPORARY_LOCATION_INSTITUTION_CODE("temporaryLocation.institution.code", "$.holdings[*].temporaryLocationId"),
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -70,8 +86,23 @@ public enum TransformationFieldsConfig {
   ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
   ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId"),
   ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
-  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES);
-
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES),
+  ITEM_PERMANENT_LOCATION_NAME("permanentLocation.name", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_CODE("permanentLocation.code", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", "$.items[*].permanentLocationId"),
+  ITEM_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", "$.items[*].permanentLocationId"),
+  ITEM_EFFECTIVE_LOCATION_NAME("effectiveLocation.name", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_CODE("effectiveLocation.code", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_LIBRARY_NAME("effectiveLocation.library.name", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_LIBRARY_CODE("effectiveLocation.library.code", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_CAMPUS_NAME("effectiveLocation.campus.name", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_CAMPUS_CODE("effectiveLocation.campus.code", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_INSTITUTION_NAME("effectiveLocation.institution.name", "$.items[*].effectiveLocationId"),
+  ITEM_EFFECTIVE_LOCATION_INSTITUTION_CODE("effectiveLocation.institution.code", "$.items[*].effectiveLocationId");
 
   private final String fieldId;
   private final String path;

@@ -1,5 +1,6 @@
 package org.folio.service.mapping;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
@@ -72,6 +73,9 @@ public class RuleFactory {
   private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
   private static final String INSTANCE_TYPE_FIELD_ID = "instancetypeid";
   private static final String MOD_OF_ISSUANCE_ID = "modeofissuanceid";
+  private static final String PERMANENT_LOCATION_NAME = "permanentlocation";
+  private static final String TEMPORARY_LOCATION_NAME = "temporarylocation";
+  private static final String EFFECTIVE_LOCATION_NAME = "effectivelocation";
   private static final String SET_LOCATION_FUNCTION = "set_location";
   private static final String CALL_NUMBER_TYPE_FIELD_ID = "callNumberTypeId";
   private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
@@ -80,6 +84,9 @@ public class RuleFactory {
   private static final String SET_METADATA_UPDATED_DATE_FUNCTION = "set_transaction_datetime";
   private static final String SET_METADATA_CREATED_DATE_FUNCTION = "set_fixed_length_data_elements";
   private static final String MOD_OF_ISSUANCE_ID_FUNCTION = "set_mode_of_issuance_id";
+  private static final String SET_LOCATIONS_FUNCTION_NEW = "set_locations_function_new"; // a new function for locations, should replace old one
+  private static final String FIELD_PARAM_KEY = "field";
+  private static final String REFERENCE_DATA_PARAM_KEY = "referenceData";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.<String, String>builder()
     .put(PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
@@ -91,6 +98,9 @@ public class RuleFactory {
     .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_CREATED_DATE_FUNCTION)
     .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION) // implement 'set_call_number_type_id'
     .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
+    .put(PERMANENT_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)// implement new function for locations
+    .put(TEMPORARY_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)
+    .put(EFFECTIVE_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)
     .build();
 
   private List<Rule> defaultRules;
@@ -222,6 +232,9 @@ public class RuleFactory {
     translationFunctions.forEach((key, value) -> {
       if (isNotEmpty(mappingTransformation.getFieldId()) && mappingTransformation.getFieldId().contains(key)) {
         translation.setFunction(value);
+        if (mappingTransformation.getFieldId().contains("location")) {
+          setLocationTranslationParameters(translation, mappingTransformation.getFieldId());
+        }
         fromDataSource.setTranslation(translation);
       }
     });
@@ -240,6 +253,26 @@ public class RuleFactory {
       }
     }
     return dataSources;
+  }
+
+  private void setLocationTranslationParameters(Translation translation, String transformationFieldId) {
+    List<String> locationParts = Splitter.on(".").splitToList(transformationFieldId);
+    Map<String, String> parameters = new HashMap<>();
+    if (locationParts.size() == 3) {
+      parameters.put(FIELD_PARAM_KEY, locationParts.get(2));
+    } else if (locationParts.size() == 4) {
+      String referenceDataType = locationParts.get(2);
+      String field = locationParts.get(3);
+      parameters.put(FIELD_PARAM_KEY, field);
+      if ("library".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "loclibs");
+      } else if ("campus".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "loccamps");
+      } else if ("institution".equals(referenceDataType)) {
+        parameters.put(REFERENCE_DATA_PARAM_KEY, "locinsts");
+      }
+    }
+    translation.setParameters(parameters);
   }
 
   private DataSource buildIndicatorDataSource(String indicatorName, String indicatorValue) {
