@@ -153,7 +153,7 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult, exportPayload), tenantId);
+    jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
     updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
     closeSourceReader(jobExecutionId);
     removeInputDataContext(jobExecutionId);
@@ -208,7 +208,7 @@ class InputDataManagerImpl implements InputDataManager {
     return BATCH_SIZE;
   }
 
-  private JobExecution.Status getJobExecutionStatus(ExportResult exportResult, ExportPayload exportPayload) {
+  private JobExecution.Status getJobExecutionStatus(ExportResult exportResult) {
     if (exportResult.isCompleted()) {
       return JobExecution.Status.COMPLETED;
     }
