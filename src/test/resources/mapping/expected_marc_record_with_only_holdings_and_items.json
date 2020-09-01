@@ -71,28 +71,6 @@
       }
     },
     {
-      "905": {
-        "subfields": [
-          {
-            "a": "Miller General Stacks"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
-          {
-            "b": "Special Reading Room"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
       "907": {
         "subfields": [
           {
@@ -218,17 +196,6 @@
         "subfields": [
           {
             "a": "dvd"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "911": {
-        "subfields": [
-          {
-            "a": "Special Reading Room"
           }
         ],
         "ind1": " ",
