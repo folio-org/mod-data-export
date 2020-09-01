@@ -7,7 +7,14 @@ import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.Record;
-import java.io.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -15,12 +22,17 @@ import java.util.Objects;
 public final class TestUtil {
 
   public static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
+  public static final String PERMANENT_LOCATION_CODE_FIELD_ID = "holdings.permanentlocation.code";
+  public static final String PERMANENT_LOCATION_LIBRARY_FIELD_ID = "holdings.permanentlocation.library.name";
+  public static final String PERMANENT_LOCATION_CAMPUS_FIELD_ID = "holdings.permanentlocation.campus.code";
+  public static final String PERMANENT_LOCATION_INSTITUTION_FIELD_ID = "holdings.permanentlocation.institution.code";
   public static final String PERMANENT_LOCATION_PATH = "$.holdings[*].permanentLocationId";
   public static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
   public static final String TEMPORARY_LOCATION_PATH = "$.holdings[*].temporaryLocationId";
   public static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
   public static final String EFFECTIVE_LOCATION_PATH = "$.items[*].effectiveLocationId";
   public static final String SET_LOCATION_FUNCTION = "set_location";
+  public static final String SET_LOCATIONS_FUNCTION_NEW = "set_locations_function_new";
   public static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
   public static final String MATERIAL_TYPE_PATH = "$.items[*].materialTypeId";
   public static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
