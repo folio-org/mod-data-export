@@ -68,7 +68,7 @@ curl -w '\n' -X POST \
   --header "Content-Type: application/json" \
   --header "x-okapi-tenant: {tenant}" \
   --data @credentials.json \
-  https://folio-snapshot-load-okapi.aws.indexdata.com/bl-users/login
+  https://folio-snapshot-load-okapi.dev.folio.org/bl-users/login
 
   credentials.json: 
   {
