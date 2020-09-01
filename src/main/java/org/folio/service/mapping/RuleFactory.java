@@ -71,6 +71,7 @@ public class RuleFactory {
   private static final String SET_METADATA_UPDATED_DATE_FIELD_ID = "metadata.updateddate";
   private static final String SET_METADATA_CREATED_DATE_FIELD_ID = "metadata.createddate";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
+  private static final String PERMANENT_LOAN_TYPE_FIELD_ID = "permanentLoanTypeId";
   private static final String INSTANCE_TYPE_FIELD_ID = "instancetypeid";
   private static final String MOD_OF_ISSUANCE_ID = "modeofissuanceid";
   private static final String PERMANENT_LOCATION_NAME = "permanentlocation";
@@ -79,6 +80,7 @@ public class RuleFactory {
   private static final String SET_LOCATION_FUNCTION = "set_location";
   private static final String CALL_NUMBER_TYPE_FIELD_ID = "callNumberTypeId";
   private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
+  private static final String SET_LOAN_TYPE_FUNCTION = "set_loan_type";
   private static final String SET_INSTANCE_TYPE_ID_FUNCTION = "set_instance_type_id";
   private static final String SET_CALL_NUMBER_TYPE_ID_FUNCTION = "set_call_number_type_id";
   private static final String SET_METADATA_UPDATED_DATE_FUNCTION = "set_transaction_datetime";
@@ -93,6 +95,7 @@ public class RuleFactory {
     .put(TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
     .put(EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
     .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
+    .put(PERMANENT_LOAN_TYPE_FIELD_ID, SET_LOAN_TYPE_FUNCTION)
     .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
     .put(SET_METADATA_UPDATED_DATE_FIELD_ID, SET_METADATA_UPDATED_DATE_FUNCTION)
     .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_CREATED_DATE_FUNCTION)
