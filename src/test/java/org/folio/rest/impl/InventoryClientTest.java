@@ -120,4 +120,16 @@ class InventoryClientTest extends RestVerticleTestBase {
     Assert.assertFalse(electronicAccessRelationships.isEmpty());
     Assert.assertEquals(5, electronicAccessRelationships.size());
   }
+
+  @Test
+  void shouldRetrieveCallNumberTypes() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    // when
+    Map<String, JsonObject> electronicAccessRelationships = inventoryClient.getCallNumberTypes(okapiConnectionParams);
+    // then
+    Assert.assertFalse(electronicAccessRelationships.isEmpty());
+    Assert.assertEquals(2, electronicAccessRelationships.size());
+  }
+
 }
