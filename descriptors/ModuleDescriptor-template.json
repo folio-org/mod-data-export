@@ -69,6 +69,10 @@
     {
       "id": "item-note-types",
       "version": "1.0"
+    },
+    {
+      "id": "call-number-types",
+      "version": "1.0"
     }
   ],
   "provides": [
