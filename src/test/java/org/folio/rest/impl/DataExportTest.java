@@ -201,7 +201,7 @@ class DataExportTest extends RestVerticleTestBase {
       JobExecution jobExecution = optionalJobExecution.get();
       fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
         context.verify(() -> {
-          assertSuccessJobExecution(jobExecution, EXPORTED_RECORDS_NUMBER_1, TOTAL_NUMBER_1);
+          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
           validateExternalCallsForMappingProfileTransformations();
           context.completeNow();
         });
