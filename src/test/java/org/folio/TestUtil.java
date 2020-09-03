@@ -29,6 +29,7 @@ public final class TestUtil {
   public static final String PERMANENT_LOCATION_CAMPUS_CODE_FIELD_ID = "holdings.permanentlocation.campus.code";
   public static final String PERMANENT_LOCATION_INSTITUTION_NAME_FIELD_ID = "holdings.permanentlocation.institution.name";
   public static final String PERMANENT_LOCATION_INSTITUTION_CODE_FIELD_ID = "holdings.permanentlocation.institution.code";
+  public static final String ONE_WORD_LOCATION_FIELD_ID = "permanentlocation";
   public static final String PERMANENT_LOCATION_PATH = "$.holdings[*].permanentLocationId";
   public static final String TEMPORARY_LOCATION_FIELD_ID = "holdings.temporarylocation.name";
   public static final String TEMPORARY_LOCATION_PATH = "$.holdings[*].temporaryLocationId";
