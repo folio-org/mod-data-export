@@ -289,9 +289,9 @@ public class MockServer {
     logger.info("handleGet Campuses Record: " + ctx.request()
       .path());
     try {
-      JsonObject locations = new JsonObject(RestVerticleTestBase.getMockData(CAMPUSES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CAMPUSES, locations);
-      serverResponse(ctx, 200, APPLICATION_JSON, locations.encodePrettily());
+      JsonObject campuses = new JsonObject(RestVerticleTestBase.getMockData(CAMPUSES_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, CAMPUSES, campuses);
+      serverResponse(ctx, 200, APPLICATION_JSON, campuses.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
@@ -303,9 +303,9 @@ public class MockServer {
     logger.info("handleGet Institutions Record: " + ctx.request()
       .path());
     try {
-      JsonObject locations = new JsonObject(RestVerticleTestBase.getMockData(INSTITUTIONS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTITUTIONS, locations);
-      serverResponse(ctx, 200, APPLICATION_JSON, locations.encodePrettily());
+      JsonObject institutions = new JsonObject(RestVerticleTestBase.getMockData(INSTITUTIONS_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, INSTITUTIONS, institutions);
+      serverResponse(ctx, 200, APPLICATION_JSON, institutions.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

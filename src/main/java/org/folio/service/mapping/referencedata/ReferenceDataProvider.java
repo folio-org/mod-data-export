@@ -22,7 +22,6 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
-import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
 
