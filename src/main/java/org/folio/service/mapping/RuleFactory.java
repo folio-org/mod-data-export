@@ -258,9 +258,9 @@ public class RuleFactory {
     translationFunctions.forEach((key, value) -> {
       if (isNotEmpty(fieldId) && fieldId.contains(key)) {
         Translation translation;
-        String fieldName = Splitter.on(".").splitToList(mappingTransformation.getFieldId()).get(1);
-        if (translationBuilders.containsKey(fieldName)) {
-          translation = translationBuilders.get(fieldName).build(value, mappingTransformation);
+        List<String> fieldParts = Splitter.on(".").splitToList(mappingTransformation.getFieldId());
+        if (translationBuilders.containsKey(fieldParts.get(1))) {
+          translation = translationBuilders.get(fieldParts.get(1)).build(value, mappingTransformation);
         } else {
           translation = translationBuilders.get(DEFAULT).build(value, mappingTransformation);
         }
