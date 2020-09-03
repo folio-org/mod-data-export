@@ -12,6 +12,9 @@ public class ReferenceDataImpl implements ReferenceData {
   public static final String IDENTIFIER_TYPES = "identifierTypes";
   public static final String CONTRIBUTOR_NAME_TYPES = "contributorNameTypes";
   public static final String LOCATIONS = "locations";
+  public static final String LIBRARIES = "loclibs";
+  public static final String CAMPUSES = "loccamps";
+  public static final String INSTITUTIONS = "locinsts";
   public static final String MATERIAL_TYPES = "materialTypes";
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";

@@ -39,11 +39,14 @@ import static org.folio.TestUtil.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CAMPUSES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ELECTRONIC_ACCESS_RELATIONSHIPS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_FORMATS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTITUTIONS;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LIBRARIES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
@@ -72,6 +75,9 @@ class MappingServiceUnitTest {
     referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
     referenceData.put(INSTANCE_FORMATS, ReferenceDataResponseUtil.getInstanceFormats());
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, ReferenceDataResponseUtil.getElectronicAccessRelationships());
+    referenceData.put(LIBRARIES, ReferenceDataResponseUtil.getLibraries());
+    referenceData.put(CAMPUSES, ReferenceDataResponseUtil.getCampuses());
+    referenceData.put(INSTITUTIONS, ReferenceDataResponseUtil.getInstitutions());
   }
 
   @Test
@@ -165,8 +171,8 @@ class MappingServiceUnitTest {
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(8, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(17, appendedMarcRecords.size());
+    Assert.assertEquals(40, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(49, appendedMarcRecords.size());
   }
 
   @Test
@@ -223,13 +229,45 @@ class MappingServiceUnitTest {
     List<Transformations> transformations = new ArrayList<>();
     transformations.add(createTransformations(CALLNUMBER_PREFIX_FIELD_ID, CALLNUMBER_PREFIX_FIELD_PATH, "900ff$b", HOLDINGS));
     transformations.add(createTransformations(CALLNUMBER_FIELD_ID, CALLNUMBER_FIELD_PATH, "900ff$a", HOLDINGS));
-    transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID, CALLNUMBER_SUFFIX_FIELD_PATH, "902  $a", HOLDINGS));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "903  $a", HOLDINGS));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90412$a", HOLDINGS));
-    transformations.add(createTransformations(EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID, ITEMS_EFFECTIVE_CALL_NUMBER_PATH, "907  $a", ITEM));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "908  $a", ITEM));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9091 $a", ITEM));
-    transformations.add(createTransformations(MATERIALTYPE_FIELD_ID, MATERIAL_TYPE_ID_PATH, "910  $a", ITEM));
+    transformations.add(createTransformations(CALLNUMBER_SUFFIX_FIELD_ID, CALLNUMBER_SUFFIX_FIELD_PATH, "901  $a", HOLDINGS));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "902  $a", HOLDINGS));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90312$a", HOLDINGS));
+    transformations.add(createTransformations(EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID, ITEMS_EFFECTIVE_CALL_NUMBER_PATH, "904  $a", ITEM));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "905  $a", ITEM));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9061 $a", ITEM));
+    transformations.add(createTransformations(MATERIALTYPE_FIELD_ID, MATERIAL_TYPE_ID_PATH, "907  $a", ITEM));
+    transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.code", "$.holdings[*].permanentLocationId", "909  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.library.name", "$.holdings[*].permanentLocationId", "910  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.library.code", "$.holdings[*].permanentLocationId", "911  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.campus.name", "$.holdings[*].permanentLocationId", "912  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.campus.code", "$.holdings[*].permanentLocationId", "913  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.institution.name", "$.holdings[*].permanentLocationId", "914  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.permanentlocation.institution.code", "$.holdings[*].permanentLocationId", "915  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.name", "$.holdings[*].temporaryLocationId", "916  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.code", "$.holdings[*].temporaryLocationId", "917  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.library.name", "$.holdings[*].temporaryLocationId", "918  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.library.code", "$.holdings[*].temporaryLocationId", "919  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.campus.name", "$.holdings[*].temporaryLocationId", "920  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.campus.code", "$.holdings[*].temporaryLocationId", "921  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.institution.name", "$.holdings[*].temporaryLocationId", "922  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.institution.code", "$.holdings[*].temporaryLocationId", "923  $a", HOLDINGS));
+    transformations.add(createTransformations("item.permanentlocation.name", "$.items[*].permanentLocationId", "924  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.code", "$.items[*].permanentLocationId", "925  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.library.name", "$.items[*].permanentLocationId", "926  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.library.code", "$.items[*].permanentLocationId", "927  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.campus.name", "$.items[*].permanentLocationId", "928  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.campus.code", "$.items[*].permanentLocationId", "929  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.institution.name", "$.items[*].permanentLocationId", "930  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.institution.code", "$.items[*].permanentLocationId", "931  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.name", "$.items[*].effectiveLocationId", "932  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.code", "$.items[*].effectiveLocationId", "933  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.library.name", "$.items[*].effectiveLocationId", "934  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.library.code", "$.items[*].effectiveLocationId", "935  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.campus.name", "$.items[*].effectiveLocationId", "936  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.campus.code", "$.items[*].effectiveLocationId", "937  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.institution.name", "$.items[*].effectiveLocationId", "938  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.institution.code", "$.items[*].effectiveLocationId", "939  $a", ITEM));
     return transformations;
   }
 

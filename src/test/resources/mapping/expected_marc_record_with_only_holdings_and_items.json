@@ -1,5 +1,5 @@
 {
-  "leader": "00649nam a2200277 a 4500",
+  "leader": "01487nam a2200625 a 4500",
   "fields": [
     {
       "900": {
@@ -16,7 +16,7 @@
       }
     },
     {
-      "902": {
+      "901": {
         "subfields": [
           {
             "a": "2016"
@@ -27,7 +27,7 @@
       }
     },
     {
-      "903": {
+      "902": {
         "subfields": [
           {
             "a": "holdingsLinkText1"
@@ -38,7 +38,7 @@
       }
     },
     {
-      "903": {
+      "902": {
         "subfields": [
           {
             "a": "holdingsLinkText2"
@@ -49,7 +49,7 @@
       }
     },
     {
-      "904": {
+      "903": {
         "subfields": [
           {
             "a": "holdingsUri1"
@@ -60,7 +60,7 @@
       }
     },
     {
-      "904": {
+      "903": {
         "subfields": [
           {
             "a": "holdingsUri2"
@@ -71,7 +71,7 @@
       }
     },
     {
-      "907": {
+      "904": {
         "subfields": [
           {
             "a": "6066.I4588 B749 "
@@ -82,7 +82,7 @@
       }
     },
     {
-      "907": {
+      "904": {
         "subfields": [
           {
             "a": "6076.I4588 B749 "
@@ -93,7 +93,7 @@
       }
     },
     {
-      "908": {
+      "905": {
         "subfields": [
           {
             "a": "itemLinkText1"
@@ -104,7 +104,7 @@
       }
     },
     {
-      "908": {
+      "905": {
         "subfields": [
           {
             "a": "itemLinkText2"
@@ -115,7 +115,7 @@
       }
     },
     {
-      "908": {
+      "905": {
         "subfields": [
           {
             "a": "itemLinkText3"
@@ -126,7 +126,7 @@
       }
     },
     {
-      "908": {
+      "905": {
         "subfields": [
           {
             "a": "itemLinkText4"
@@ -137,7 +137,7 @@
       }
     },
     {
-      "909": {
+      "906": {
         "subfields": [
           {
             "a": "itemUri1"
@@ -148,7 +148,7 @@
       }
     },
     {
-      "909": {
+      "906": {
         "subfields": [
           {
             "a": "itemUri2"
@@ -159,7 +159,7 @@
       }
     },
     {
-      "909": {
+      "906": {
         "subfields": [
           {
             "a": "itemUri3"
@@ -170,7 +170,7 @@
       }
     },
     {
-      "909": {
+      "906": {
         "subfields": [
           {
             "a": "itemUri4"
@@ -181,7 +181,7 @@
       }
     },
     {
-      "910": {
+      "907": {
         "subfields": [
           {
             "a": "book"
@@ -192,10 +192,362 @@
       }
     },
     {
-      "910": {
+      "907": {
         "subfields": [
           {
             "a": "dvd"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "908": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "911": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "912": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "913": {
+        "subfields": [
+          {
+            "a": "RS"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "914": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "915": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "916": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "917": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "918": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "919": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "920": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "921": {
+        "subfields": [
+          {
+            "a": "OSC"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "922": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "923": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "924": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "925": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "926": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "927": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "928": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "929": {
+        "subfields": [
+          {
+            "a": "RS"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "930": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "931": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "932": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "933": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "934": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "935": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "936": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "937": {
+        "subfields": [
+          {
+            "a": "OSC"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "938": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "939": {
+        "subfields": [
+          {
+            "a": "ALR"
           }
         ],
         "ind1": " ",
