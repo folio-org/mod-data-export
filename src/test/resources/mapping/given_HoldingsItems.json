@@ -37,6 +37,8 @@
           "uri": "itemUri2"
         }
       ],
+      "permanentLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+      "effectiveLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
       "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a8925"
     },
     {
@@ -55,7 +57,6 @@
           "uri": "itemUri4"
         }
       ],
-      "effectiveLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
       "materialTypeId": "5ee11d91-f7e8-481d-b079-65d708582ccc"
     }
   ]

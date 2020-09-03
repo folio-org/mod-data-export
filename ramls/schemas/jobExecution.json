@@ -91,7 +91,8 @@
       "enum": [
         "NEW",
         "IN_PROGRESS",
-        "SUCCESS",
+        "COMPLETED",
+        "COMPLETED_WITH_ERRORS",
         "FAIL"
       ]
     },

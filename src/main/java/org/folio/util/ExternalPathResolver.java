@@ -16,6 +16,9 @@ public class ExternalPathResolver {
   public static final String IDENTIFIER_TYPES = "identifierTypes";
   public static final String CONTRIBUTOR_NAME_TYPES = "contributorNameTypes";
   public static final String LOCATIONS = "locations";
+  public static final String LIBRARIES = "loclibs";
+  public static final String CAMPUSES = "loccamps";
+  public static final String INSTITUTIONS = "locinsts";
   public static final String MATERIAL_TYPES = "mtypes";
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";
@@ -23,6 +26,7 @@ public class ExternalPathResolver {
   public static final String ALTERNATIVE_TITLE_TYPES = "alternativeTitleTypes";
   public static final String ISSUANCE_MODES = "issuanceModes";
   public static final String LOAN_TYPES = "loantypes";
+  public static final String CALL_NUMBER_TYPES = "callNumberTypes";
   public static final String HOLDING_NOTE_TYPES = "holdingsNoteTypes";
   public static final String ITEM_NOTE_TYPES = "itemNoteTypes";
   public static final String USERS = "users";
@@ -46,12 +50,16 @@ public class ExternalPathResolver {
     apis.put(IDENTIFIER_TYPES, "/identifier-types");
     apis.put(CONTRIBUTOR_NAME_TYPES, "/contributor-name-types");
     apis.put(LOCATIONS, "/locations");
+    apis.put(LIBRARIES, "/location-units/libraries");
+    apis.put(CAMPUSES, "/location-units/campuses");
+    apis.put(INSTITUTIONS, "/location-units/institutions");
     apis.put(MATERIAL_TYPES, "/material-types");
     apis.put(INSTANCE_TYPES, "/instance-types");
     apis.put(INSTANCE_FORMATS, "/instance-formats");
     apis.put(ELECTRONIC_ACCESS_RELATIONSHIPS, "/electronic-access-relationships");
     apis.put(ALTERNATIVE_TITLE_TYPES, "/alternative-title-types");
     apis.put(LOAN_TYPES, "/loan-types");
+    apis.put(CALL_NUMBER_TYPES, "/call-number-types");
     apis.put(ISSUANCE_MODES, "/modes-of-issuance");
     apis.put(HOLDING_NOTE_TYPES, "/holdings-note-types");
     apis.put(ITEM_NOTE_TYPES, "/item-note-types");
