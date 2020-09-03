@@ -150,7 +150,7 @@ public class ExportManagerImpl implements ExportManager {
   private Future<Void> handleExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
     clearIdentifiers(exportPayload);
     incrementCurrentProgress(exportPayload)
       .onComplete(handler -> {
@@ -164,7 +164,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setIdentifiers(Collections.emptyList());
   }
 
-  private ExportResult getExportResult(AsyncResult<Object> asyncResult, boolean isLast) {
+  private ExportResult getExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
@@ -174,8 +174,14 @@ public class ExportManagerImpl implements ExportManager {
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
-      if (isLast) {
-        return ExportResult.completed();
+      if (exportPayload.isLast()) {
+        if (exportPayload.getExportedRecordsNumber() == 0) {
+          return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
+        } else if (exportPayload.getFailedRecordsNumber() > 0) {
+          return ExportResult.completedWithErrors();
+        } else {
+          return ExportResult.completed();
+        }
       }
       return ExportResult.inProgress();
     }

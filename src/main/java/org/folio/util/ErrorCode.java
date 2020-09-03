@@ -10,7 +10,8 @@ public enum ErrorCode {
   NO_FILE_GENERATED("noFileGenerated", "Nothing to export: no binary file generated"),
   USER_NOT_FOUND("userNotFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION("invalidUploadedFileExtension", "File name extension does not corresponds csv format"),
-  FILE_ALREADY_UPLOADED("fileAlreadyUploaded","File already uploaded for this FileDefinition");
+  FILE_ALREADY_UPLOADED("fileAlreadyUploaded","File already uploaded for this FileDefinition"),
+  NOTHING_TO_EXPORT("nothingToExport", "No exported records, nothing to export");
 
   private final String code;
   private final String description;

@@ -11,6 +11,7 @@ import org.folio.util.ErrorCode;
 public class ExportResult {
   private static final ExportResult IN_PROGRESS = new ExportResult(ExportStatus.IN_PROGRESS);
   private static final ExportResult COMPLETED = new ExportResult(ExportStatus.COMPLETED);
+  private static final ExportResult COMPLETED_WITH_ERRORS = new ExportResult(ExportStatus.COMPLETED_WITH_ERRORS);
 
   private ExportStatus exportStatus;
   private ErrorCode errorCode;
@@ -32,6 +33,10 @@ public class ExportResult {
     return COMPLETED;
   }
 
+  public static ExportResult completedWithErrors() {
+    return COMPLETED_WITH_ERRORS;
+  }
+
   public static ExportResult inProgress() {
     return IN_PROGRESS;
   }
@@ -43,6 +48,11 @@ public class ExportResult {
   @JsonIgnore
   public boolean isCompleted() {
     return this.exportStatus == ExportStatus.COMPLETED;
+  }
+
+  @JsonIgnore
+  public boolean isCompletedWithErrors() {
+    return this.exportStatus == ExportStatus.COMPLETED_WITH_ERRORS;
   }
 
   @JsonIgnore
@@ -79,6 +89,7 @@ public class ExportResult {
 
   public enum ExportStatus {
     COMPLETED,
+    COMPLETED_WITH_ERRORS,
     IN_PROGRESS,
     FAILED
   }

@@ -295,7 +295,7 @@ class InputDataManagerUnitTest {
     //given
     jobExecution.withProgress(new Progress());
     ExportPayload exportPayload = createExportPayload();
-    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.SUCCESS), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.COMPLETED), eq(TENANT_ID));
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
@@ -306,7 +306,7 @@ class InputDataManagerUnitTest {
 
     //then
     verify(jobExecutionService).update(jobExecution, TENANT_ID);
-    assertJobStatus(JobExecution.Status.SUCCESS);
+    assertJobStatus(JobExecution.Status.COMPLETED);
     assertNotNull(jobExecution.getCompletedDate());
     FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
     assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.COMPLETED));
