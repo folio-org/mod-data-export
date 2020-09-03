@@ -17,7 +17,9 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATION
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MODES_OF_ISSUANCE;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
 
 /**
@@ -71,7 +73,8 @@ public class ReferenceDataProvider {
     referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
     referenceData.put(INSTANCE_FORMATS, inventoryClient.getInstanceFormats(okapiConnectionParams));
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
-    referenceData.put(MODES_OF_ISSUANCE, inventoryClient.getModesOfIssuance(okapiConnectionParams));
+    referenceData.put(ISSUANCE_MODES, inventoryClient.getModesOfIssuance(okapiConnectionParams));
+    referenceData.put(CALL_NUMBER_TYPES, inventoryClient.getCallNumberTypes(okapiConnectionParams));
     return referenceData;
   }
 }

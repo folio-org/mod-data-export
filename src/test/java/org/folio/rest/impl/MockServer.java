@@ -28,6 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -73,6 +74,7 @@ public class MockServer {
   private static final String ALTERNATIVE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_alternative_titles_response.json";
   private static final String LOAN_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_loan_types_response.json";
   private static final String ISSUANCE_MODES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_mode_of_issuance_response.json";
+  private static final String CALL_NUMBER_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_call_number_types_response.json";
   private static final String HOLDING_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_holding_note_types_response.json";
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
 
@@ -138,6 +140,7 @@ public class MockServer {
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetLoanTypes(ctx));
     router.get(resourcesPath(ISSUANCE_MODES)).handler(ctx -> handleGetIssuanceModes(ctx));
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetAlternativeTypes(ctx));
+    router.get(resourcesPath(CALL_NUMBER_TYPES)).handler(ctx -> handleGetCallNumberTypes(ctx));
     router.get(resourcesPath(HOLDING_NOTE_TYPES)).handler(ctx -> handleGetHoldingNoteTypes(ctx));
     router.get(resourcesPath(ITEM_NOTE_TYPES)).handler(ctx -> handleGetItemNoteTypes(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
@@ -378,6 +381,20 @@ public class MockServer {
       JsonObject issuanceModes = new JsonObject(RestVerticleTestBase.getMockData(ISSUANCE_MODES_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, ISSUANCE_MODES, issuanceModes);
       serverResponse(ctx, 200, APPLICATION_JSON, issuanceModes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetCallNumberTypes(RoutingContext ctx) {
+    logger.info("handleGet call number types: " + ctx.request()
+      .path());
+    try {
+      JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALL_NUMBER_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, CALL_NUMBER_TYPES, callNumberTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
