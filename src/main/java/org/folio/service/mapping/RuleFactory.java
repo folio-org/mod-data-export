@@ -15,6 +15,9 @@ import org.folio.processor.translations.Translation;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.translationbuilder.DefaultTranslationBuilder;
+import org.folio.service.mapping.translationbuilder.LocationTranslationBuilder;
+import org.folio.service.mapping.translationbuilder.TranslationBuilder;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
@@ -65,9 +68,8 @@ public class RuleFactory {
   private static final String INDICATOR_NAME_1 = "1";
   private static final String INDICATOR_NAME_2 = "2";
   private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
-  private static final String TEMPORARY_LOCATION_FIELD_ID = "temporaryLocationId";
-  private static final String PERMANENT_LOCATION_FIELD_ID = "permanentLocationId";
-  private static final String EFFECTIVE_LOCATION_FIELD_ID = "effectiveLocationId";
+  private static final String TEMPORARY_LOCATION_FIELD_ID = "holdings.temporarylocation.name";
+  private static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
   private static final String SET_METADATA_UPDATED_DATE_FIELD_ID = "metadata.updateddate";
   private static final String SET_METADATA_CREATED_DATE_FIELD_ID = "metadata.createddate";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
@@ -86,14 +88,9 @@ public class RuleFactory {
   private static final String SET_METADATA_UPDATED_DATE_FUNCTION = "set_transaction_datetime";
   private static final String SET_METADATA_CREATED_DATE_FUNCTION = "set_fixed_length_data_elements";
   private static final String MOD_OF_ISSUANCE_ID_FUNCTION = "set_mode_of_issuance_id";
-  private static final String SET_LOCATIONS_FUNCTION_NEW = "set_locations_function_new"; // a new function for locations, should replace old one
-  private static final String FIELD_PARAM_KEY = "field";
-  private static final String REFERENCE_DATA_PARAM_KEY = "referenceData";
+  private static final String DEFAULT = "default";
 
   private static final Map<String, String> translationFunctions = ImmutableMap.<String, String>builder()
-    .put(PERMANENT_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
-    .put(TEMPORARY_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
-    .put(EFFECTIVE_LOCATION_FIELD_ID, SET_LOCATION_FUNCTION)
     .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
     .put(PERMANENT_LOAN_TYPE_FIELD_ID, SET_LOAN_TYPE_FUNCTION)
     .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
@@ -101,9 +98,16 @@ public class RuleFactory {
     .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_CREATED_DATE_FUNCTION)
     .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION)
     .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
-    .put(PERMANENT_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)// implement new function for locations
-    .put(TEMPORARY_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)
-    .put(EFFECTIVE_LOCATION_NAME, SET_LOCATIONS_FUNCTION_NEW)
+    .put(PERMANENT_LOCATION_NAME, SET_LOCATION_FUNCTION)
+    .put(TEMPORARY_LOCATION_NAME, SET_LOCATION_FUNCTION)
+    .put(EFFECTIVE_LOCATION_NAME, SET_LOCATION_FUNCTION)
+    .build();
+
+  private static final Map<String, TranslationBuilder> translationBuilders = ImmutableMap.<String, TranslationBuilder>builder()
+    .put(PERMANENT_LOCATION_NAME, new LocationTranslationBuilder())
+    .put(TEMPORARY_LOCATION_NAME, new LocationTranslationBuilder())
+    .put(EFFECTIVE_LOCATION_NAME, new LocationTranslationBuilder())
+    .put(DEFAULT, new DefaultTranslationBuilder())
     .build();
 
   private List<Rule> defaultRules;
@@ -231,16 +235,7 @@ public class RuleFactory {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
-    Translation translation = new Translation();
-    translationFunctions.forEach((key, value) -> {
-      if (isNotEmpty(mappingTransformation.getFieldId()) && mappingTransformation.getFieldId().contains(key)) {
-        translation.setFunction(value);
-        if (mappingTransformation.getFieldId().contains("location")) {
-          setLocationTranslationParameters(translation, mappingTransformation.getFieldId());
-        }
-        fromDataSource.setTranslation(translation);
-      }
-    });
+    buildTranslation(mappingTransformation, fromDataSource);
     dataSources.add(fromDataSource);
     String transformation = mappingTransformation.getTransformation();
     Pattern pattern = Pattern.compile(SUBFIELD_REGEX);
@@ -258,24 +253,20 @@ public class RuleFactory {
     return dataSources;
   }
 
-  private void setLocationTranslationParameters(Translation translation, String transformationFieldId) {
-    List<String> locationParts = Splitter.on(".").splitToList(transformationFieldId);
-    Map<String, String> parameters = new HashMap<>();
-    if (locationParts.size() == 3) {
-      parameters.put(FIELD_PARAM_KEY, locationParts.get(2));
-    } else if (locationParts.size() == 4) {
-      String referenceDataType = locationParts.get(2);
-      String field = locationParts.get(3);
-      parameters.put(FIELD_PARAM_KEY, field);
-      if ("library".equals(referenceDataType)) {
-        parameters.put(REFERENCE_DATA_PARAM_KEY, "loclibs");
-      } else if ("campus".equals(referenceDataType)) {
-        parameters.put(REFERENCE_DATA_PARAM_KEY, "loccamps");
-      } else if ("institution".equals(referenceDataType)) {
-        parameters.put(REFERENCE_DATA_PARAM_KEY, "locinsts");
+  private void buildTranslation(Transformations mappingTransformation, DataSource fromDataSource) {
+    String fieldId = mappingTransformation.getFieldId();
+    translationFunctions.forEach((key, value) -> {
+      if (isNotEmpty(fieldId) && fieldId.contains(key)) {
+        Translation translation;
+        String fieldName = Splitter.on(".").splitToList(mappingTransformation.getFieldId()).get(1);
+        if (translationBuilders.containsKey(fieldName)) {
+          translation = translationBuilders.get(fieldName).build(value, mappingTransformation);
+        } else {
+          translation = translationBuilders.get(DEFAULT).build(value, mappingTransformation);
+        }
+        fromDataSource.setTranslation(translation);
       }
-    }
-    translation.setParameters(parameters);
+    });
   }
 
   private DataSource buildIndicatorDataSource(String indicatorName, String indicatorValue) {

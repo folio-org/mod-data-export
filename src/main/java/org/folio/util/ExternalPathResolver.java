@@ -16,6 +16,9 @@ public class ExternalPathResolver {
   public static final String IDENTIFIER_TYPES = "identifierTypes";
   public static final String CONTRIBUTOR_NAME_TYPES = "contributorNameTypes";
   public static final String LOCATIONS = "locations";
+  public static final String LIBRARIES = "loclibs";
+  public static final String CAMPUSES = "loccamps";
+  public static final String INSTITUTIONS = "locinsts";
   public static final String MATERIAL_TYPES = "mtypes";
   public static final String INSTANCE_TYPES = "instanceTypes";
   public static final String INSTANCE_FORMATS = "instanceFormats";
@@ -47,6 +50,9 @@ public class ExternalPathResolver {
     apis.put(IDENTIFIER_TYPES, "/identifier-types");
     apis.put(CONTRIBUTOR_NAME_TYPES, "/contributor-name-types");
     apis.put(LOCATIONS, "/locations");
+    apis.put(LIBRARIES, "/location-units/libraries");
+    apis.put(CAMPUSES, "/location-units/campuses");
+    apis.put(INSTITUTIONS, "/location-units/institutions");
     apis.put(MATERIAL_TYPES, "/material-types");
     apis.put(INSTANCE_TYPES, "/instance-types");
     apis.put(INSTANCE_FORMATS, "/instance-formats");
