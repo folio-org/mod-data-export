@@ -2,9 +2,8 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.HOLDING_NOTE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ITEM_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.*;
+
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -38,13 +37,12 @@ public enum TransformationFieldsConfig {
   EDITIONS("editions", "$.instance.editions"),
   IDENTIFIERS("identifiers", "$.instance.identifiers[?(@.identifierTypeId=='{id}')].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),
-  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", MODES_OF_ISSUANCE),
+  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", ISSUANCE_MODES),
   INSTANCE_TYPE("instanceTypeId", "$.instance[?(@.instanceTypeId=='{id}')].instanceTypeId", INSTANCE_TYPES),
   SUBJECTS("subjects", "$.instance.subjects"),
   TITLE("title", "$.instance.title"),
 
   //Holdings specific Fields
-  HOLDINGS_UUID("id", "$.holdings[*].id"),
   INSTANCE_ID("instanceId", "$.holdings[*].instanceId"),
   HOLDINGS_CALL_NUMBER("callNumber", "$.holdings[*].callNumber"),
   HOLDINGS_CALL_NUMBER_PREFIX("callNumberPrefix", "$.holdings[*].callNumberPrefix"),
