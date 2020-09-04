@@ -74,7 +74,6 @@ public class RuleFactory {
   private static final String SET_METADATA_CREATED_DATE_FIELD_ID = "metadata.createddate";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
   private static final String PERMANENT_LOAN_TYPE_FIELD_ID = "permanentLoanTypeId";
-  private static final String CALL_NUMBER_TYPE_FIELD_ID = "callnumbertype";
   private static final String INSTANCE_TYPE_FIELD_ID = "instancetypeid";
   private static final String MOD_OF_ISSUANCE_ID = "modeofissuanceid";
   private static final String PERMANENT_LOCATION_NAME = "permanentlocation";
