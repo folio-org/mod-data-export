@@ -1,6 +1,5 @@
 package org.folio.service.mapping;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
@@ -47,9 +46,11 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTANCE_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTITUTIONS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LIBRARIES;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOAN_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -73,6 +74,8 @@ class MappingServiceUnitTest {
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
     referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
+    referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
+    referenceData.put(CALL_NUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     referenceData.put(INSTANCE_FORMATS, ReferenceDataResponseUtil.getInstanceFormats());
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, ReferenceDataResponseUtil.getElectronicAccessRelationships());
     referenceData.put(LIBRARIES, ReferenceDataResponseUtil.getLibraries());
@@ -212,7 +215,6 @@ class MappingServiceUnitTest {
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
-    System.out.println(mappingProfile.getTransformations());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
 
@@ -221,6 +223,29 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_instance_transformationFields.json");
+    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
+  @Test
+  void shouldMapItems_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(createItemTransformationsFromTransformationFields());
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_item_transformationFields.json");
     String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
@@ -303,6 +328,22 @@ class MappingServiceUnitTest {
         readFileContentFromResources("mapping/expectedTransformationFields.json")).mapTo(TransformationFieldCollection.class);
     transformationFields.getTransformationFields().stream()
       .filter(tfn -> tfn.getRecordType().equals(TransformationField.RecordType.INSTANCE))
+      .forEach(tfn -> {
+        String idx = tag.incrementAndGet() + "ff$a";
+        transformations.add(createTransformations(tfn.getFieldId(), tfn.getPath(), idx, RecordType.fromValue(tfn.getRecordType()
+          .toString())));
+      });
+
+    return transformations;
+  }
+
+  private List<Transformations> createItemTransformationsFromTransformationFields() {
+    List<Transformations> transformations = new ArrayList<>();
+    AtomicInteger tag = new AtomicInteger(924);
+    TransformationFieldCollection transformationFields = new JsonObject(
+      readFileContentFromResources("mapping/expectedTransformationFields.json")).mapTo(TransformationFieldCollection.class);
+    transformationFields.getTransformationFields().stream()
+      .filter(tfn -> tfn.getRecordType().equals(TransformationField.RecordType.ITEM))
       .forEach(tfn -> {
         String idx = tag.incrementAndGet() + "ff$a";
         transformations.add(createTransformations(tfn.getFieldId(), tfn.getPath(), idx, RecordType.fromValue(tfn.getRecordType()

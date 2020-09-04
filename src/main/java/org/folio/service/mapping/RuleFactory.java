@@ -74,13 +74,13 @@ public class RuleFactory {
   private static final String SET_METADATA_CREATED_DATE_FIELD_ID = "metadata.createddate";
   private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
   private static final String PERMANENT_LOAN_TYPE_FIELD_ID = "permanentLoanTypeId";
+  private static final String CALL_NUMBER_TYPE_FIELD_ID = "callnumbertype";
   private static final String INSTANCE_TYPE_FIELD_ID = "instancetypeid";
   private static final String MOD_OF_ISSUANCE_ID = "modeofissuanceid";
   private static final String PERMANENT_LOCATION_NAME = "permanentlocation";
   private static final String TEMPORARY_LOCATION_NAME = "temporarylocation";
   private static final String EFFECTIVE_LOCATION_NAME = "effectivelocation";
   private static final String SET_LOCATION_FUNCTION = "set_location";
-  private static final String CALL_NUMBER_TYPE_FIELD_ID = "callNumberType";
   private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
   private static final String SET_LOAN_TYPE_FUNCTION = "set_loan_type";
   private static final String SET_INSTANCE_TYPE_ID_FUNCTION = "set_instance_type_id";

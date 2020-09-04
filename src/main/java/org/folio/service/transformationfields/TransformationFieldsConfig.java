@@ -81,7 +81,7 @@ public enum TransformationFieldsConfig {
   PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.items[*].permanentLoanTypeId"),
   STATUS("status", "$.items[*].status.name"),
   VOLUME("volume", "$.items[*].volume"),
-  YEARCAPTION("yearCaption", "$.items[*].yearCaption"),
+  YEARCAPTION("yearCaption", "$.items[*].yearCaption[*]"),
   ITEM_CALL_NUMBER("callNumber", "$.items[*].effectiveCallNumberComponents.callNumber"),
   ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.items[*].effectiveCallNumberComponents.prefix"),
   ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.items[*].effectiveCallNumberComponents.suffix"),
