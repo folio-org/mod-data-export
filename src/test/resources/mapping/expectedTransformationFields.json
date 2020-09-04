@@ -1139,7 +1139,7 @@
       {
          "fieldId":"item.yearcaption",
          "displayNameKey":"item.yearCaption",
-         "path":"$.items[*].yearCaption",
+         "path":"$.items[*].yearCaption[*]",
          "recordType":"ITEM"
       }
    ],
