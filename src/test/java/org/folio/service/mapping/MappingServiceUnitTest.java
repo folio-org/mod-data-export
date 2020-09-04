@@ -1,9 +1,26 @@
 package org.folio.service.mapping;
 
+import static org.folio.TestUtil.*;
+import static org.folio.service.mapping.referencedata.ReferenceDataImpl.MATERIAL_TYPES;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
+import static org.folio.util.ExternalPathResolver.*;
+import static org.mockito.ArgumentMatchers.any;
+
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
@@ -18,6 +35,8 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.marc4j.MarcJsonWriter;
+import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.VariableField;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -68,14 +87,14 @@ class MappingServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   MappingServiceUnitTest() {
-    referenceData.put(NATURE_OF_CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
+    referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
+    referenceData.put(CALL_NUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
     referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
     referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
-    referenceData.put(CALL_NUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     referenceData.put(INSTANCE_FORMATS, ReferenceDataResponseUtil.getInstanceFormats());
     referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, ReferenceDataResponseUtil.getElectronicAccessRelationships());
     referenceData.put(LIBRARIES, ReferenceDataResponseUtil.getLibraries());
@@ -227,6 +246,46 @@ class MappingServiceUnitTest {
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
+  /**
+   * This test makes sure if the path specified in transformation Fields, is correct and parsable,
+   * by creating the mapping profile from the transformation fields for all Holdings records
+   */
+  @Test
+  void shouldMapHoldings_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_Holdings.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(createHoldingsTransformationsFromTransformationFields());
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+
+    java.io.InputStream is = new ByteArrayInputStream(actualMarcRecord.getBytes());
+    MarcStreamReader reader = new MarcStreamReader(is);
+
+   ByteArrayOutputStream out = new ByteArrayOutputStream();
+   MarcJsonWriter writer = new MarcJsonWriter(out, MarcJsonWriter.MARC_IN_JSON);
+
+
+    while (reader.hasNext()) {
+  writer.write(reader.next());
+}
+   System.out.println(out.toString());
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_holdings_transformationFields.json");
+    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
   @Test
   void shouldMapItems_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
     // given
@@ -328,6 +387,28 @@ class MappingServiceUnitTest {
         readFileContentFromResources("mapping/expectedTransformationFields.json")).mapTo(TransformationFieldCollection.class);
     transformationFields.getTransformationFields().stream()
       .filter(tfn -> tfn.getRecordType().equals(TransformationField.RecordType.INSTANCE))
+      .forEach(tfn -> {
+        String idx = tag.incrementAndGet() + "ff$a";
+        transformations.add(createTransformations(tfn.getFieldId(), tfn.getPath(), idx, RecordType.fromValue(tfn.getRecordType()
+          .toString())));
+      });
+
+    return transformations;
+  }
+
+  /**
+   * Construct the mapping profile Transformations from the fields from the Transformation Fields
+   * (that are usually accessed on the UI via an API)
+   *
+   * @return
+   */
+  private List<Transformations> createHoldingsTransformationsFromTransformationFields() {
+    List<Transformations> transformations = new ArrayList<>();
+    AtomicInteger tag = new AtomicInteger(899);
+    TransformationFieldCollection transformationFields = new JsonObject(
+        readFileContentFromResources("mapping/expectedTransformationFields.json")).mapTo(TransformationFieldCollection.class);
+    transformationFields.getTransformationFields().stream()
+      .filter(tfn -> tfn.getRecordType().equals(TransformationField.RecordType.HOLDINGS))
       .forEach(tfn -> {
         String idx = tag.incrementAndGet() + "ff$a";
         transformations.add(createTransformations(tfn.getFieldId(), tfn.getPath(), idx, RecordType.fromValue(tfn.getRecordType()

@@ -18,7 +18,7 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.translationbuilder.DefaultTranslationBuilder;
 import org.folio.service.mapping.translationbuilder.LocationTranslationBuilder;
 import org.folio.service.mapping.translationbuilder.TranslationBuilder;
-
+import org.folio.service.transformationfields.TransformationFieldsConfig;
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -96,7 +96,7 @@ public class RuleFactory {
     .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
     .put(SET_METADATA_UPDATED_DATE_FIELD_ID, SET_METADATA_UPDATED_DATE_FUNCTION)
     .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_CREATED_DATE_FUNCTION)
-    .put(CALL_NUMBER_TYPE_FIELD_ID, SET_CALL_NUMBER_TYPE_ID_FUNCTION)
+    .put(TransformationFieldsConfig.HOLDINGS_CALL_NUMBER_TYPE.getFieldId().toLowerCase(), SET_CALL_NUMBER_TYPE_ID_FUNCTION)
     .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
     .put(PERMANENT_LOCATION_NAME, SET_LOCATION_FUNCTION)
     .put(TEMPORARY_LOCATION_NAME, SET_LOCATION_FUNCTION)

@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CAMPUSES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTITUTIONS;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LIBRARIES;
+import static org.folio.util.ExternalPathResolver.CAMPUSES;
+import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
+import static org.folio.util.ExternalPathResolver.LIBRARIES;
 
 public class LocationTranslationBuilder implements TranslationBuilder {
 
