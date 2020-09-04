@@ -213,15 +213,4 @@ public class ReferenceDataResponseUtil {
     return stringJsonObjectMap;
   }
 
-  public static Map<String, JsonObject> getCallNumberTypes() {
-    Map<String, JsonObject> stringJsonObjectMap = new HashMap<>();
-    JsonArray itemNoteTypes = new JsonObject(TestUtil.readFileContentFromResources("mockData/inventory/get_call_number_types_response.json"))
-      .getJsonArray("callNumberTypes");
-    itemNoteTypes.stream().forEach(type -> {
-      JsonObject jsonObject = new JsonObject(type.toString());
-      stringJsonObjectMap.put(jsonObject.getString("id"), jsonObject);
-    });
-    return stringJsonObjectMap;
-  }
-
 }

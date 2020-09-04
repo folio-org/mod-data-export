@@ -2,7 +2,14 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.util.ExternalPathResolver.*;
+import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
+import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
 
 
 /**
