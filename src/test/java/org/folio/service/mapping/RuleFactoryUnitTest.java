@@ -32,6 +32,7 @@ import static org.folio.TestUtil.EFFECTIVE_LOCATION_FIELD_ID;
 import static org.folio.TestUtil.EFFECTIVE_LOCATION_PATH;
 import static org.folio.TestUtil.MATERIAL_TYPE_FIELD_ID;
 import static org.folio.TestUtil.MATERIAL_TYPE_PATH;
+import static org.folio.TestUtil.ONE_WORD_LOCATION_FIELD_ID;
 import static org.folio.TestUtil.PERMANENT_LOCATION_CAMPUS_CODE_FIELD_ID;
 import static org.folio.TestUtil.PERMANENT_LOCATION_CAMPUS_NAME_FIELD_ID;
 import static org.folio.TestUtil.PERMANENT_LOCATION_CODE_FIELD_ID;
@@ -52,6 +53,7 @@ import static org.folio.service.mapping.referencedata.ReferenceDataImpl.INSTITUT
 import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LIBRARIES;
 import static org.mockito.Mockito.doReturn;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -574,6 +576,29 @@ class RuleFactoryUnitTest {
     assertEquals(INSTITUTION_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
+  @Test
+  void shouldReturnRuleWithDefaultTranslationWhenFieldIdContainsOneWord() {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations()
+      .withEnabled(true)
+      .withFieldId(ONE_WORD_LOCATION_FIELD_ID)
+      .withPath(PERMANENT_LOCATION_PATH)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertNull(rules.get(0).getDataSources().get(0).getTranslation().getParameters());
+  }
 
   @Test
   void shouldReturnTransformationRuleWithMaterialTypeTranslation() {
