@@ -4,10 +4,10 @@ import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.junit.Assert.assertEquals;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -57,7 +57,7 @@ class SrsRecordConvertorServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   SrsRecordConvertorServiceUnitTest() {
-    referenceData.put(NATURE_OF_CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
+    referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());

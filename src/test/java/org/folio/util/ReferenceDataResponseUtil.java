@@ -71,6 +71,18 @@ public class ReferenceDataResponseUtil {
     return map;
   }
 
+  public static Map<String, JsonObject> getCallNumberTypes() {
+    JsonArray callNumberTypes =
+      new JsonObject(readFileContentFromResources("mockData/inventory/get_call_number_types_response.json"))
+        .getJsonArray("callNumberTypes");
+    Map<String, JsonObject> map = new HashMap<>();
+    for (Object object : callNumberTypes) {
+      JsonObject jsonObject = JsonObject.mapFrom(object);
+      map.put(jsonObject.getString("id"), jsonObject);
+    }
+    return map;
+  }
+
   public static Map<String, JsonObject> getInstitutions() {
     JsonArray institutionsArray =
       new JsonObject(readFileContentFromResources("mockData/inventory/get_institutions_response.json"))

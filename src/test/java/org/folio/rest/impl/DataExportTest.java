@@ -35,6 +35,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -153,6 +154,7 @@ class DataExportTest extends RestVerticleTestBase {
     });
   }
 
+  @Disabled("Disabled for Q3-2020(and until futher decision is made) as we are going to generate marc on the fly for custom profiles")
   @Test
   void testExport_UnderlyingSrsWithProfileTransformations(VertxTestContext context) throws IOException {
     postToTenant(CUSTOM_TENANT_HEADER);
@@ -180,6 +182,35 @@ class DataExportTest extends RestVerticleTestBase {
       });
     }));
   }
+
+  @Test
+  void testExport_UnderlyingSrsWithProfileTransformationsNoCallToSRS(VertxTestContext context) throws IOException {
+    postToTenant(CUSTOM_TENANT_HEADER);
+    // given
+    String tenantId = CUSTOM_TEST_TENANT;
+    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", tenantId);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+      JobExecution jobExecution = optionalJobExecution.get();
+      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+        context.verify(() -> {
+          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+          validateExternalCallsForMappingProfileTransformations();
+          context.completeNow();
+        });
+      });
+    }));
+  }
+
+
+
 
   private String buildCustomJobProfile(String tenantID) {
     String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
@@ -269,9 +300,12 @@ class DataExportTest extends RestVerticleTestBase {
     validateExternalCallsForReferenceData();
   }
 
+  /**
+   * No calls to SRS to be made in case of custom profile
+   */
   private void validateExternalCallsForMappingProfileTransformations() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
-    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
+    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+    assertNull(MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS));
     validateExternalCallsForReferenceData();
   }
 
