@@ -27,13 +27,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Collections.singletonList;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -361,6 +364,28 @@ class JobExecutionServiceUnitTest {
         context.completeNow();
       });
     });
+  }
+
+  @Test
+  void expireJobExecutionsShouldSetStatusToFail(VertxTestContext context) {
+    // given
+    JobExecution jobExecution = new JobExecution()
+      .withExportedFiles(Sets.newHashSet())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withStatus(IN_PROGRESS);
+    when(jobExecutionDao.getExpiredEntries(any(Date.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(singletonList(jobExecution)));
+
+    // when
+    Future<Void> future = jobExecutionService.expireJobExecutions(TENANT_ID);
+
+    future.onComplete(ar -> {
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+
+        });
+      }
+    );
+
   }
 
   private ExportedFile getFirstExportedFile(JobExecution updatedJobExecution) {

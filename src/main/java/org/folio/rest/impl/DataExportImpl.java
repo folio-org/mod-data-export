@@ -102,6 +102,15 @@ public class DataExportImpl implements DataExport {
       .onComplete(asyncResultHandler);
   }
 
+  @Override
+  public void postDataExportJobExecutionsExpireJobs(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> jobExecutionService.expireJobExecutions(tenantId)
+      .map(PostDataExportJobExecutionsExpireJobsResponse.respond204())
+      .map(Response.class::cast)
+      .otherwise(ExceptionToResponseMapper::map)
+      .onComplete(asyncResultHandler));
+  }
+
   private void failToFetchObjectHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {
     LOGGER.error(errorMessage);
     succeededFuture()

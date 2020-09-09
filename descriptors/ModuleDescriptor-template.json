@@ -301,6 +301,17 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.modes-of-issuance.collection.get"
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/expire-jobs",
+          "permissionsRequired": [
+            "data-export.export.expire-jobs.post"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -320,6 +331,23 @@
             "DELETE"
           ],
           "pathPattern": "/_/tenant"
+        }
+      ]
+    },
+    {
+      "id": "_timer",
+      "version": "1.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/expire-jobs",
+          "modulePermissions": [
+          ],
+          "unit": "hour",
+          "delay": "6"
         }
       ]
     }
@@ -411,6 +439,11 @@
       "description": "Entry point to get mapping transformation fields for the fields"
     },
     {
+      "permissionName": "data-export.export.expire-jobs.post",
+      "displayName": "Data Export - call to expire hung jobs",
+      "description": "Entry point to stop freezing job executions"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -431,7 +464,8 @@
         "data-export.mapping-profiles.item.get",
         "data-export.mapping-profiles.item.put",
         "data-export.mapping-profiles.item.delete",
-        "data-export.transformation-fields.collection.get"
+        "data-export.transformation-fields.collection.get",
+        "data-export.export.expire-jobs.post"
       ],
       "visible": false
     }
