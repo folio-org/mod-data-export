@@ -1,412 +1,610 @@
 {
-    "leader": "01355nam a2200469 a 4500",
-    "fields": [
-        {
-            "900": {
-                "subfields": [
-                    {
-                        "a": "CallNum-value123"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "901": {
-                "subfields": [
-                    {
-                        "a": "CallNum-prefix123"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "902": {
-                "subfields": [
-                    {
-                        "a": "CallNum-suffix123"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "903": {
-                "subfields": [
-                    {
-                        "a": "National Library of Medicine classification"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "904": {
-                "subfields": [
-                    {
-                        "a": "default link text"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "907": {
-                "subfields": [
-                    {
-                        "a": "linking text"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "910": {
-                "subfields": [
-                    {
-                        "a": "default materials specified"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "913": {
-                "subfields": [
-                    {
-                        "a": "materials mapping"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "916": {
-                "subfields": [
-                    {
-                        "a": "default public note"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "919": {
-                "subfields": [
-                    {
-                        "a": "public note"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "922": {
-                "subfields": [
-                    {
-                        "a": "http://testingDefault"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "925": {
-                "subfields": [
-                    {
-                        "a": "http://test-related-resource.com"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "928": {
-                "subfields": [
-                    {
-                        "a": "action Note"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "931": {
-                "subfields": [
-                    {
-                        "a": "Binding Note- staff Only"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "932": {
-                "subfields": [
-                    {
-                        "a": "ho00000000002"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "933": {
-                "subfields": [
-                    {
-                        "a": "34d282fe-2844-48fb-9945-2f44ac6d04ae"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "934": {
-                "subfields": [
-                    {
-                        "a": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "935": {
-                "subfields": [
-                    {
-                        "a": "6c040dcb-a1aa-5880-b98b-e8c6a6112663"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "936": {
-                "subfields": [
-                    {
-                        "a": "200904|||||||||||||||||       |||||und||"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "937": {
-                "subfields": [
-                    {
-                        "a": "6c040dcb-a1aa-5880-b98b-e8c6a6112663"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "938": {
-                "subfields": [
-                    {
-                        "a": "20200904035612.2"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "939": {
-                "subfields": [
-                    {
-                        "a": "RS"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "940": {
-                "subfields": [
-                    {
-                        "a": "Riverside Campus"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "941": {
-                "subfields": [
-                    {
-                        "a": "Miller Code"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "942": {
-                "subfields": [
-                    {
-                        "a": "ML"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "943": {
-                "subfields": [
-                    {
-                        "a": "Main Library"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "944": {
-                "subfields": [
-                    {
-                        "a": "ML"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "945": {
-                "subfields": [
-                    {
-                        "a": "Main Library"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "946": {
-                "subfields": [
-                    {
-                        "a": "Miller General Stacks"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "947": {
-                "subfields": [
-                    {
-                        "a": "OSC"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "948": {
-                "subfields": [
-                    {
-                        "a": "Other Side Campus"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "949": {
-                "subfields": [
-                    {
-                        "a": "Special Reading Room Code"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "950": {
-                "subfields": [
-                    {
-                        "a": "ALR"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "951": {
-                "subfields": [
-                    {
-                        "a": "Agriculture Library Reserve"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "952": {
-                "subfields": [
-                    {
-                        "a": "ALR"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "953": {
-                "subfields": [
-                    {
-                        "a": "Agriculture Library Reserve"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        },
-        {
-            "954": {
-                "subfields": [
-                    {
-                        "a": "Special Reading Room"
-                    }
-                ],
-                "ind1": "f",
-                "ind2": "f"
-            }
-        }
-    ]
+  "leader": "02035nam a2200685 a 4500",
+  "fields": [
+    {
+      "900": {
+        "subfields": [
+          {
+            "a": "CallNum-value123"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "901": {
+        "subfields": [
+          {
+            "a": "CallNum-prefix123"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "902": {
+        "subfields": [
+          {
+            "a": "CallNum-suffix123"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "903": {
+        "subfields": [
+          {
+            "a": "National Library of Medicine classification"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "904": {
+        "subfields": [
+          {
+            "a": "default link text"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "907": {
+        "subfields": [
+          {
+            "a": "linking text"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "default materials specified"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "913": {
+        "subfields": [
+          {
+            "a": "materials mapping"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "916": {
+        "subfields": [
+          {
+            "a": "default public note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "919": {
+        "subfields": [
+          {
+            "a": "public note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "922": {
+        "subfields": [
+          {
+            "a": "http://testingDefault"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "925": {
+        "subfields": [
+          {
+            "a": "http://test-related-resource.com"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "928": {
+        "subfields": [
+          {
+            "a": "action Note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "931": {
+        "subfields": [
+          {
+            "a": "Binding Note- staff Only"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "932": {
+        "subfields": [
+          {
+            "a": "Statement public note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "932": {
+        "subfields": [
+          {
+            "a": "Statement public note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "933": {
+        "subfields": [
+          {
+            "a": "Statement staff note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "933": {
+        "subfields": [
+          {
+            "a": "Statement staff note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "934": {
+        "subfields": [
+          {
+            "a": "Line 1b"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "934": {
+        "subfields": [
+          {
+            "a": "Line 2b"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "935": {
+        "subfields": [
+          {
+            "a": "Statement indexes public note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "935": {
+        "subfields": [
+          {
+            "a": "Statement indexes public note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "936": {
+        "subfields": [
+          {
+            "a": "Statement indexes staff note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "936": {
+        "subfields": [
+          {
+            "a": "Statement indexes staff note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "937": {
+        "subfields": [
+          {
+            "a": "Line 1c"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "937": {
+        "subfields": [
+          {
+            "a": "Line 2c"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "938": {
+        "subfields": [
+          {
+            "a": "Statement supplements public note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "938": {
+        "subfields": [
+          {
+            "a": "Statement supplements public note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "939": {
+        "subfields": [
+          {
+            "a": "Statement supplements staff note"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "939": {
+        "subfields": [
+          {
+            "a": "Statement supplements staff note2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "940": {
+        "subfields": [
+          {
+            "a": "Line 1a"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "940": {
+        "subfields": [
+          {
+            "a": "Line 2a"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "941": {
+        "subfields": [
+          {
+            "a": "ho00000000002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "942": {
+        "subfields": [
+          {
+            "a": "34d282fe-2844-48fb-9945-2f44ac6d04ae"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "943": {
+        "subfields": [
+          {
+            "a": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "944": {
+        "subfields": [
+          {
+            "a": "6c040dcb-a1aa-5880-b98b-e8c6a6112663"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "945": {
+        "subfields": [
+          {
+            "a": "200904|||||||||||||||||       |||||und||"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "946": {
+        "subfields": [
+          {
+            "a": "6c040dcb-a1aa-5880-b98b-e8c6a6112663"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "947": {
+        "subfields": [
+          {
+            "a": "20200904035612.2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "948": {
+        "subfields": [
+          {
+            "a": "RS"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "949": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "950": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "951": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "952": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "953": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "954": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "955": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "956": {
+        "subfields": [
+          {
+            "a": "OSC"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "957": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "958": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "959": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "960": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "961": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "962": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "963": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    }
+  ]
 }
