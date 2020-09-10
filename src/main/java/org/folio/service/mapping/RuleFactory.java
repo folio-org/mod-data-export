@@ -70,7 +70,7 @@ public class RuleFactory {
 
   public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
     Set<Rule> rules = new LinkedHashSet<>();
-    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);;
+    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)

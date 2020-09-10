@@ -32,21 +32,21 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
   public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
     Optional<Rule> defaultRuleOptional = super.build(rules, defaultFieldId);
     if (defaultRuleOptional.isPresent()) {
-      List<DataSource> transformationDataSources = new ArrayList<>();
       Rule defaultRule = defaultRuleOptional.get();
       List<DataSource> defaultDataSources = defaultRule.getDataSources();
       Optional<DataSource> subfieldDataSource = getDataSourceByDefaultSubfield(defaultDataSources, mappingTransformation.getFieldId());
       if (subfieldDataSource.isPresent()) {
         Rule rule = new Rule();
         rule.setField(defaultRule.getField());
-        if(defaultRule.getMetadata() != null) {
+        if (defaultRule.getMetadata() != null) {
           setMetadata(defaultRule, rule);
         }
         DataSource transformationDataSource = new DataSource();
         transformationDataSource.setSubfield(subfieldDataSource.get().getSubfield());
         transformationDataSource.setFrom(mappingTransformation.getPath());
+        List<DataSource> transformationDataSources = new ArrayList<>();
         transformationDataSources.add(transformationDataSource);
-        transformationDataSources = setIndicatorDataSources(defaultDataSources, transformationDataSources);
+        setIndicatorDataSources(defaultDataSources, transformationDataSources);
         rule.setDataSources(transformationDataSources);
         return Optional.of(rule);
       } else {
@@ -60,7 +60,7 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
 
   private void setMetadata(Rule defaultRule, Rule rule) {
     Map<String, String> metadata = new HashMap<>();
-    for(Map.Entry<String, Metadata.Entry> entry : defaultRule.getMetadata().getData().entrySet()) {
+    for (Map.Entry<String, Metadata.Entry> entry : defaultRule.getMetadata().getData().entrySet()) {
       metadata.put(entry.getKey(), entry.getValue().getFrom());
     }
     rule.setMetadata(metadata);
@@ -68,19 +68,17 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
 
   private Optional<DataSource> getDataSourceByDefaultSubfield(List<DataSource> defaultDataSources, String transformationFieldId) {
     String transformationFieldKey = Splitter.on(".").splitToList(transformationFieldId).get(transformationFieldKeyIndex);
-    Optional<DataSource> subfieldDataSource = defaultDataSources.stream()
+    return defaultDataSources.stream()
       .filter(dataSource -> dataSource.getFrom().toLowerCase().contains(transformationFieldKey))
       .findFirst();
-    return subfieldDataSource;
   }
 
-  private List<DataSource> setIndicatorDataSources(List<DataSource> defaultDataSources, List<DataSource> transformationDataSources) {
+  private void setIndicatorDataSources(List<DataSource> defaultDataSources, List<DataSource> transformationDataSources) {
     for (DataSource defaultDataSource : defaultDataSources) {
       if (StringUtils.isNotEmpty(defaultDataSource.getIndicator())) {
         transformationDataSources.add(defaultDataSource);
       }
     }
-    return transformationDataSources;
   }
 
 }
