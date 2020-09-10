@@ -217,6 +217,60 @@
          "recordType":"HOLDINGS"
       },
       {
+        "fieldId": "holdings.holdingsstatements.note",
+        "displayNameKey": "holdings.holdingsStatements.note",
+        "path": "$.holdings[*].holdingsStatements[*].note",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatements.staffnote",
+        "displayNameKey": "holdings.holdingsStatements.staffNote",
+        "path": "$.holdings[*].holdingsStatements[*].staffNote",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatements.statement",
+        "displayNameKey": "holdings.holdingsStatements.statement",
+        "path": "$.holdings[*].holdingsStatements[*].statement",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforindexes.note",
+        "displayNameKey": "holdings.holdingsStatementsForIndexes.note",
+        "path": "$.holdings[*].holdingsStatementsForIndexes[*].note",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforindexes.staffnote",
+        "displayNameKey": "holdings.holdingsStatementsForIndexes.staffNote",
+        "path": "$.holdings[*].holdingsStatementsForIndexes[*].staffNote",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforindexes.statement",
+        "displayNameKey": "holdings.holdingsStatementsForIndexes.statement",
+        "path": "$.holdings[*].holdingsStatementsForIndexes[*].statement",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforsupplements.note",
+        "displayNameKey": "holdings.holdingsStatementsForSupplements.note",
+        "path": "$.holdings[*].holdingsStatementsForSupplements[*].note",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforsupplements.staffnote",
+        "displayNameKey": "holdings.holdingsStatementsForSupplements.staffNote",
+        "path": "$.holdings[*].holdingsStatementsForSupplements[*].staffNote",
+        "recordType": "HOLDINGS"
+      },
+      {
+        "fieldId": "holdings.holdingsstatementsforsupplements.statement",
+        "displayNameKey": "holdings.holdingsStatementsForSupplements.statement",
+        "path": "$.holdings[*].holdingsStatementsForSupplements[*].statement",
+        "recordType": "HOLDINGS"
+      },
+      {
          "fieldId":"holdings.hrid",
          "displayNameKey":"holdings.hrid",
          "path":"$.holdings[*].hrid",
