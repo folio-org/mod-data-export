@@ -20,7 +20,6 @@ stages:
           answers:
             image.repository: docker.dev.folio.org/mod-data-export
             image.tag: concorde-latest
-            javaOptions: -XX:MaxRAMPercentage=85.0 -XX:+UseG1GC -Dbucket.name=kruthi-test
             resources.limits.cpu: 250m
             resources.limits.memory: 1Gi
           targetNamespace: concorde
