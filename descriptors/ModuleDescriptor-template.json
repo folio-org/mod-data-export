@@ -308,7 +308,7 @@
           ],
           "pathPattern": "/data-export/expire-jobs",
           "permissionsRequired": [
-            "data-export.export.expire-jobs.post"
+            "data-export.expire-jobs.post"
           ],
           "modulePermissions": [
           ]
@@ -439,7 +439,7 @@
       "description": "Entry point to get mapping transformation fields for the fields"
     },
     {
-      "permissionName": "data-export.export.expire-jobs.post",
+      "permissionName": "data-export.expire-jobs.post",
       "displayName": "Data Export - call to expire hung jobs",
       "description": "Entry point to stop freezing job executions"
     },
@@ -465,7 +465,7 @@
         "data-export.mapping-profiles.item.put",
         "data-export.mapping-profiles.item.delete",
         "data-export.transformation-fields.collection.get",
-        "data-export.export.expire-jobs.post"
+        "data-export.expire-jobs.post"
       ],
       "visible": false
     }

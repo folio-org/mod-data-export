@@ -34,4 +34,15 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
       .body("jobExecutions", empty())
       .body("totalRecords", is(0));
   }
+
+  @Test
+  void expireJobExecutions_return204_forHappyPath() {
+    RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .post(EXPIRE_JOBS_URL)
+      .then()
+      .statusCode(HttpStatus.SC_NO_CONTENT);
+  }
+
 }

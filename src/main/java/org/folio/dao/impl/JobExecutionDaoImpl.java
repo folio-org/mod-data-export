@@ -34,6 +34,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String TABLE = "job_executions";
   private static final String ID_FIELD = "'id'";
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
+  private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -121,7 +122,6 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   @Override
   public Future<List<JobExecution>> getExpiredEntries(Date expirationDate, String tenantId) {
-
     Promise<Results<JobExecution>> promise = Promise.promise();
     try {
       Criterion expiredEntriesCriterion = constructExpiredEntriesCriterion(expirationDate);
@@ -137,7 +137,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private Criterion constructExpiredEntriesCriterion(Date expirationDate) {
     Criterion criterion = new Criterion();
     Criteria lastUpdateDateCriteria = new Criteria();
-    lastUpdateDateCriteria.addField("lastUpdatedDate")
+    lastUpdateDateCriteria.addField(LAST_UPDATED_DATE_FIELD)
       .setOperation("<=")
       .setVal(expirationDate.toString());
     criterion.addCriterion(lastUpdateDateCriteria);

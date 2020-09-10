@@ -92,26 +92,25 @@ resourceTypes:
              body:
                text/plain:
                  example: "Internal server error, contact Administrator"
-
-    /expire-jobs:
-        displayName: Expire Jobs
-        description: Method to expire long running jobs
-        post:
-          is: [validate]
-          responses:
-            204:
-            400:
-              description: "Bad request"
-              body:
-                 text/plain:
-                   example: "Bad request"
-            422:
-              description: "Unprocessable Entity"
-              body:
-                application/json:
-                  type: errors
-            500:
-              description: "Internal server error"
-              body:
-                text/plain:
-                  example: "Internal server error"
+  /expire-jobs:
+      displayName: Expire JobExecutions
+      description: Method to expire long running jobs
+      post:
+        is: [validate]
+        responses:
+          204:
+          400:
+            description: "Bad request"
+            body:
+               text/plain:
+                 example: "Bad request"
+          422:
+            description: "Unprocessable Entity"
+            body:
+              application/json:
+                type: errors
+          500:
+            description: "Internal server error"
+            body:
+              text/plain:
+                example: "Internal server error"

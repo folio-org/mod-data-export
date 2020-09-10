@@ -103,9 +103,9 @@ public class DataExportImpl implements DataExport {
   }
 
   @Override
-  public void postDataExportJobExecutionsExpireJobs(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postDataExportExpireJobs(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> jobExecutionService.expireJobExecutions(tenantId)
-      .map(PostDataExportJobExecutionsExpireJobsResponse.respond204())
+      .map(PostDataExportExpireJobsResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler));
