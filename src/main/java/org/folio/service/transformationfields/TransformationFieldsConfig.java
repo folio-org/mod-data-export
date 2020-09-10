@@ -73,6 +73,17 @@ public enum TransformationFieldsConfig {
   HOLDING_TEMPORARY_LOCATION_CAMPUS_CODE("temporaryLocation.campus.code", "$.holdings[*].temporaryLocationId"),
   HOLDING_TEMPORARY_LOCATION_INSTITUTION_NAME("temporaryLocation.institution.name", "$.holdings[*].temporaryLocationId"),
   HOLDING_TEMPORARY_LOCATION_INSTITUTION_CODE("temporaryLocation.institution.code", "$.holdings[*].temporaryLocationId"),
+  HOLDINGS_STATEMENT("holdingsStatements.statement", "$.holdings[*].holdingsStatements[*].statement"),
+  HOLDINGS_STATEMENT_NOTE("holdingsStatements.note", "$.holdings[*].holdingsStatements[*].note"),
+  HOLDINGS_STATEMENT_NOTE_STAFF("holdingsStatements.staffNote", "$.holdings[*].holdingsStatements[*].staffNote"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS("holdingsStatementsForSupplements.statement", "$.holdings[*].holdingsStatementsForSupplements[*].statement"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS_NOTE("holdingsStatementsForSupplements.note", "$.holdings[*].holdingsStatementsForSupplements[*].note"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS_NOTE_STAFF("holdingsStatementsForSupplements.staffNote", "$.holdings[*].holdingsStatementsForSupplements[*].staffNote"),
+  HOLDINGS_STATEMENT_INDEXES("holdingsStatementsForIndexes.statement", "$.holdings[*].holdingsStatementsForIndexes[*].statement"),
+  HOLDINGS_STATEMENT_INDEXES_NOTE("holdingsStatementsForIndexes.note", "$.holdings[*].holdingsStatementsForIndexes[*].note"),
+  HOLDINGS_STATEMENT_INDEXES_NOTE_STAFF("holdingsStatementsForIndexes.staffNote", "$.holdings[*].holdingsStatementsForIndexes[*].staffNote"),
+
+
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),

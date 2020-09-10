@@ -39,9 +39,42 @@
                     "holdingsNoteTypeId": "88914775-f677-4759-b57b-1a33b90b24e0"
                 }
             ],
-            "holdingsStatements": [],
-            "holdingsStatementsForIndexes": [],
-            "holdingsStatementsForSupplements": [],
+            "holdingsStatements": [
+              {
+                "statement": "Line 1b",
+                "note": "Statement public note",
+                "staffNote": "Statement staff note"
+              },
+              {
+                "statement": "Line 2b",
+                "note": "Statement public note2",
+                "staffNote": "Statement staff note2"
+              }
+            ],
+            "holdingsStatementsForIndexes": [
+              {
+                "statement": "Line 1c",
+                "note": "Statement indexes public note",
+                "staffNote": "Statement indexes staff note"
+              },
+              {
+                "statement": "Line 2c",
+                "note": "Statement indexes public note2",
+                "staffNote": "Statement indexes staff note2"
+              }
+            ],
+            "holdingsStatementsForSupplements": [
+              {
+                "statement": "Line 1a",
+                "note": "Statement supplements public note",
+                "staffNote": "Statement supplements staff note"
+              },
+              {
+                "statement": "Line 2a",
+                "note": "Statement supplements public note2",
+                "staffNote": "Statement supplements staff note2"
+              }
+            ],
             "statisticalCodeIds": [],
             "holdingsItems": [],
             "bareHoldingsItems": [],
