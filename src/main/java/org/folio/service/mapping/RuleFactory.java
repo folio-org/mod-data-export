@@ -43,13 +43,13 @@ public class RuleFactory {
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
   private static final String TEMPORARY_LOCATION_FIELD_ID = "holdings.temporarylocation.name";
   private static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
-  private static final String DEFAULT_BUILDER_KEY = "default";
-  private static final String TRANSFORMATION_BUILDER_KEY = "transformation";
-  private static final String INSTANCE_ELECTRONIC_ACCESS = "instance.electronic.access";
+  private static final String DEFAULT_BUILDER_KEY = "default.builder";
+  private static final String TRANSFORMATION_BUILDER_KEY = "transformation.builder";
+  private static final String INSTANCE_ELECTRONIC_ACCESS_ID = "instance.electronic.access";
 
   private static final Map<String, RuleBuilder> ruleBuilders = ImmutableMap
     .<String, RuleBuilder>builder()
-    .put(INSTANCE_ELECTRONIC_ACCESS, new CombinedRuleBuilder(3, INSTANCE_ELECTRONIC_ACCESS))
+    .put(INSTANCE_ELECTRONIC_ACCESS_ID, new CombinedRuleBuilder(3, INSTANCE_ELECTRONIC_ACCESS_ID))
     .put(TRANSFORMATION_BUILDER_KEY, new TransformationRuleBuilder())
     .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
     .build();
