@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -55,7 +56,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryUnitTest {
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
@@ -91,7 +92,7 @@ class RuleFactoryUnitTest {
   @BeforeEach
   public void setUp() {
     setUpDefaultRules();
-    doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
+    Mockito.lenient().doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
   }
 
   @Test
@@ -221,7 +222,7 @@ class RuleFactoryUnitTest {
   }
 
   @Test
-  void shouldReturnDefaultRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
+  void shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
     // given
     Transformations transformations = new Transformations()
       .withEnabled(true)
@@ -243,7 +244,7 @@ class RuleFactoryUnitTest {
   }
 
   @Test
-  void shouldReturnDefaultRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
+  void shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
     // given
     Transformations transformations1 = new Transformations()
       .withEnabled(true)
@@ -271,7 +272,7 @@ class RuleFactoryUnitTest {
   }
 
   @Test
-  void shouldReturnDefaultRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() {
+  void shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() {
     // given
     Transformations transformations = new Transformations()
       .withEnabled(true)
@@ -689,6 +690,76 @@ class RuleFactoryUnitTest {
       filter(ds -> ds.getIndicator() != null && ds.getTranslation().getParameter("value").equals("f")).count());
   }
 
+  @Test
+  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields() {
+    // given
+    List<Rule> defaultRules = setUpElectorincAccesDefaultRuleWithIdicators();
+    doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
+    Transformations transformation = new Transformations()
+      .withEnabled(true)
+      .withFieldId("instance.electronic.access.linktext.related.resource")
+      .withPath("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText")
+      .withTransformation(EMPTY)
+      .withRecordType(INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(transformations);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals("856", rules.get(0).getField());
+    assertEquals("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText", rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals("y", rules.get(0).getDataSources().get(0).getSubfield());
+    assertEquals("1", rules.get(0).getDataSources().get(1).getIndicator());
+    assertEquals("2", rules.get(0).getDataSources().get(2).getIndicator());
+  }
+
+  @Test
+  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField() {
+    // given
+    Transformations transformation = new Transformations()
+      .withEnabled(true)
+      .withFieldId("instance.electronic.access.linktext.related.resource")
+      .withPath("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText")
+      .withTransformation(EMPTY)
+      .withRecordType(INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(transformations);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(0, rules.size());
+  }
+
+  @Test
+  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId() {
+    // given
+    Transformations transformation = new Transformations()
+      .withEnabled(true)
+      .withFieldId("instance.electronic.access.nonexistingsubfield")
+      .withPath("$.instance.electronicAccess.nonexistingsubfield")
+      .withTransformation(EMPTY)
+      .withRecordType(INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withTransformations(transformations);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(0, rules.size());
+  }
+
 
   private void setUpDefaultRules() {
     DataSource dataSource = new DataSource();
@@ -699,6 +770,25 @@ class RuleFactoryUnitTest {
     defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
     defaultRule.setDataSources(Lists.newArrayList(dataSource));
     defaultRules = Lists.newArrayList(defaultRule);
+  }
+
+  private List<Rule> setUpElectorincAccesDefaultRuleWithIdicators() {
+    DataSource linkTextDataSource = new DataSource();
+    linkTextDataSource.setFrom("$.instance.electronicAccess[*].linkText");
+    linkTextDataSource.setSubfield("y");
+    DataSource uriDataSource = new DataSource();
+    uriDataSource.setFrom("$.instance.electronicAccess[*].uri");
+    uriDataSource.setSubfield("u");
+    DataSource indicator1DataSource = new DataSource();
+    indicator1DataSource.setIndicator("1");
+    DataSource indicator2DataSource = new DataSource();
+    indicator2DataSource.setIndicator("2");
+    Rule defaultRule = new Rule();
+    defaultRule.setId("instance.electronic.access");
+    defaultRule.setField("856");
+    defaultRule.setDescription("Electronic access");
+    defaultRule.setDataSources(Lists.newArrayList(linkTextDataSource, indicator1DataSource, indicator2DataSource));
+    return Lists.newArrayList(defaultRule);
   }
 
 }

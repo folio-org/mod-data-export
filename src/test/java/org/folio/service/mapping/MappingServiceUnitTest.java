@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
 import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
 import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
@@ -52,6 +54,8 @@ import static org.folio.TestUtil.ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID;
 import static org.folio.TestUtil.ELECTRONIC_ACCESS_URI_FIELD_ID;
 import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
 import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_URI_PATH;
+import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID;
+import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
 import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID;
 import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH;
 import static org.folio.TestUtil.INSTANCE_HR_ID_FIELD_ID;
@@ -366,6 +370,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations(INSTANCE_METADATA_UPDATED_DATE_FIELD_ID, INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH, "005", INSTANCE));
     transformations.add(createTransformationsWithMetadata(INSTANCE_METADATA_CREATED_DATE_FIELD_ID, INSTANCE_METADATA_CREATED_DATE_FIELD_PATH, "008", INSTANCE, MetadataParametersConstants.getFixedLengthDataElement()));
     transformations.add(createTransformations(INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID, INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH, "8564 $u", INSTANCE));
+    transformations.add(createTransformations(INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID, INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH, EMPTY, INSTANCE));
     return transformations;
   }
 
