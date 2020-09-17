@@ -65,6 +65,11 @@
       "type": "string",
       "format": "date-time"
     },
+    "lastUpdatedDate": {
+      "description": "Date and time when the job execution was last updated",
+      "type": "string",
+      "format": "date-time"
+    },
     "startedDate": {
       "description": "Date and time when the job execution started",
       "type": "string",

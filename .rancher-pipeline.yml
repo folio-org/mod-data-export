@@ -16,10 +16,12 @@ stages:
     steps:
       - applyAppConfig:
           catalogTemplate: p-rlq5p:concorde-helmcharts-mod-data-export
-          version: 0.1.10
+          version: 0.1.26
           answers:
             image.repository: docker.dev.folio.org/mod-data-export
             image.tag: concorde-latest
+            resources.limits.cpu: 250m
+            resources.limits.memory: 1Gi
           targetNamespace: concorde
           name: mod-data-export
 timeout: 60

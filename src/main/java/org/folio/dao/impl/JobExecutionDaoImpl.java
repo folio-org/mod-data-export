@@ -1,28 +1,32 @@
 package org.folio.dao.impl;
 
-import static org.folio.util.HelperUtils.constructCriteria;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
-import java.lang.invoke.MethodHandles;
-import java.util.Optional;
-import java.util.UUID;
-import javax.ws.rs.NotFoundException;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.Criteria.GroupedCriterias;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import javax.ws.rs.NotFoundException;
+import java.lang.invoke.MethodHandles;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.folio.util.HelperUtils.constructCriteria;
 
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
@@ -31,6 +35,8 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String TABLE = "job_executions";
   private static final String ID_FIELD = "'id'";
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
+  private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
+  private static final String STATUS_FIELD = "'status'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -116,6 +122,33 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     return promise.future().map(updateResult -> updateResult.rowCount() == 1);
   }
 
+  @Override
+  public Future<List<JobExecution>> getExpiredEntries(Date expirationDate, String tenantId) {
+    Promise<Results<JobExecution>> promise = Promise.promise();
+    try {
+      Criterion expiredEntriesCriterion = constructExpiredEntriesCriterion(expirationDate);
+      pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, expiredEntriesCriterion, false, promise);
+    } catch (Exception e) {
+      LOGGER.error("Error during getting fileDefinition entries by expired date", e);
+      promise.fail(e);
+    }
+    return promise.future().map(Results::getResults);
 
+  }
+
+  private Criterion constructExpiredEntriesCriterion(Date expirationDate) {
+    Criterion criterion = new Criterion();
+    Criteria lastUpdateDateCriteria = new Criteria();
+    lastUpdateDateCriteria.addField(LAST_UPDATED_DATE_FIELD)
+      .setOperation("<=")
+      .setVal(expirationDate.toString());
+    Criteria statusIsProgressCriteria = new Criteria();
+    statusIsProgressCriteria.addField(STATUS_FIELD)
+      .setOperation("=")
+      .setVal(String.valueOf(JobExecution.Status.IN_PROGRESS));
+    criterion.addCriterion(lastUpdateDateCriteria);
+    criterion.addCriterion(statusIsProgressCriteria);
+    return criterion;
+  }
 
 }

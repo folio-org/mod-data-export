@@ -26,17 +26,23 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
@@ -135,8 +141,8 @@ class JobExecutionServiceUnitTest {
       .withName(DEFAULT_JOB_PROFILE_NAME);
     String query = "id=" + jobExecution.getId();
     when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution, thirdJobExecution))));
-    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(Arrays.asList(third, secondJobProfile, jobProfile, secondJobProfile))));
+      .withJobExecutions(asList(jobExecution, secondJobExecution, thirdJobExecution))));
+    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(asList(third, secondJobProfile, jobProfile, secondJobProfile))));
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
     //then
@@ -183,7 +189,7 @@ class JobExecutionServiceUnitTest {
       .withJobProfileName(StringUtils.EMPTY);
     String query = "id=" + jobExecution.getId();
     when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(Arrays.asList(jobExecution, secondJobExecution))));
+      .withJobExecutions(asList(jobExecution, secondJobExecution))));
     when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.failedFuture(StringUtils.EMPTY));
     //when
     Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
@@ -361,6 +367,32 @@ class JobExecutionServiceUnitTest {
         context.completeNow();
       });
     });
+  }
+
+  @Test
+  void expireJobExecutionsShouldSetStatusToFail(VertxTestContext context) {
+    // given
+    JobExecution jobExecution = new JobExecution()
+      .withExportedFiles(Sets.newHashSet())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withStatus(IN_PROGRESS);
+    JobExecution secondJobExecution = new JobExecution()
+      .withExportedFiles(Sets.newHashSet())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withStatus(NEW);
+    when(jobExecutionDao.getExpiredEntries(any(Date.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(asList(jobExecution, secondJobExecution)));
+
+    // when
+    Future<Void> future = jobExecutionService.expireJobExecutions(TENANT_ID);
+
+    future.onComplete(ar ->
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        verify(jobExecutionDao).update(eq(jobExecution.withStatus(FAIL)), eq(TENANT_ID));
+        verify(jobExecutionDao).update(eq(secondJobExecution.withStatus(FAIL)), eq(TENANT_ID));
+        context.completeNow();
+      })
+    );
   }
 
   private ExportedFile getFirstExportedFile(JobExecution updatedJobExecution) {
