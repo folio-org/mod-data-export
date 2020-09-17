@@ -12,6 +12,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.Criteria.GroupedCriterias;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.folio.util.HelperUtils;
@@ -35,6 +36,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String ID_FIELD = "'id'";
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
   private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
+  private static final String STATUS_FIELD = "'status'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -140,7 +142,12 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     lastUpdateDateCriteria.addField(LAST_UPDATED_DATE_FIELD)
       .setOperation("<=")
       .setVal(expirationDate.toString());
+    Criteria statusIsProgressCriteria = new Criteria();
+    statusIsProgressCriteria.addField(STATUS_FIELD)
+      .setOperation("=")
+      .setVal(String.valueOf(JobExecution.Status.IN_PROGRESS));
     criterion.addCriterion(lastUpdateDateCriteria);
+    criterion.addCriterion(statusIsProgressCriteria);
     return criterion;
   }
 
