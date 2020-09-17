@@ -1,24 +1,20 @@
 package org.folio.service.mapping;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
-import org.folio.processor.translations.Translation;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
-import org.folio.service.mapping.translationbuilder.DefaultTranslationBuilder;
-import org.folio.service.mapping.translationbuilder.LocationTranslationBuilder;
-import org.folio.service.mapping.translationbuilder.TranslationBuilder;
-import org.folio.service.transformationfields.TransformationFieldsConfig;
+import org.folio.service.mapping.rulebuilder.CombinedRuleBuilder;
+import org.folio.service.mapping.rulebuilder.DefaultRuleBuilder;
+import org.folio.service.mapping.rulebuilder.RuleBuilder;
+import org.folio.service.mapping.rulebuilder.TransformationRuleBuilder;
+
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -26,87 +22,36 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isNumeric;
-import static org.apache.commons.lang3.StringUtils.substring;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
-  private static final Comparator<String> SUBFIELD_COMPARATOR = Comparator.nullsLast((subField0, subField1) -> {
-    // Objects with not empty subfield value should be at the top of the sorted list.
-    // If the DataSource contains numeric subfields, it will follow the alphabetical subfields.
-    if (isNumeric(subField0) == isNumeric(subField1)) {
-      return subField0.compareTo(subField1);
-    }
-    return isNumeric(subField0) && !isNumeric(subField1) ? 1 : -1;
-  });
-
-  private static final String SET_VALUE_FUNCTION = "set_value";
-  private static final String VALUE_PARAMETER = "value";
-  private static final String INDICATOR_NAME_1 = "1";
-  private static final String INDICATOR_NAME_2 = "2";
-  private static final String SUBFIELD_REGEX = "(?<=\\$).{1}";
   private static final String TEMPORARY_LOCATION_FIELD_ID = "holdings.temporarylocation.name";
   private static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
-  private static final String SET_METADATA_UPDATED_DATE_FIELD_ID = "metadata.updateddate";
-  private static final String SET_METADATA_CREATED_DATE_FIELD_ID = "metadata.createddate";
-  private static final String MATERIAL_TYPE_FIELD_ID = "materialtypeid";
-  private static final String PERMANENT_LOAN_TYPE_FIELD_ID = "permanentLoanTypeId";
-  private static final String INSTANCE_TYPE_FIELD_ID = "instancetypeid";
-  private static final String MOD_OF_ISSUANCE_ID = "modeofissuanceid";
-  private static final String PERMANENT_LOCATION_NAME = "permanentlocation";
-  private static final String TEMPORARY_LOCATION_NAME = "temporarylocation";
-  private static final String EFFECTIVE_LOCATION_NAME = "effectivelocation";
-  private static final String SET_LOCATION_FUNCTION = "set_location";
-  private static final String SET_MATERIAL_TYPE_FUNCTION = "set_material_type";
-  private static final String SET_LOAN_TYPE_FUNCTION = "set_loan_type";
-  private static final String SET_INSTANCE_TYPE_ID_FUNCTION = "set_instance_type_id";
-  private static final String SET_CALL_NUMBER_TYPE_ID_FUNCTION = "set_call_number_type_id";
-  private static final String SET_METADATA_UPDATED_DATE_FUNCTION = "set_transaction_datetime";
-  private static final String SET_METADATA_CREATED_DATE_FUNCTION = "set_fixed_length_data_elements";
-  private static final String MOD_OF_ISSUANCE_ID_FUNCTION = "set_mode_of_issuance_id";
-  private static final String DEFAULT = "default";
+  private static final String DEFAULT_BUILDER_KEY = "default.builder";
+  private static final String TRANSFORMATION_BUILDER_KEY = "transformation.builder";
+  private static final String INSTANCE_ELECTRONIC_ACCESS_ID = "instance.electronic.access";
 
-  private static final Map<String, String> translationFunctions = ImmutableMap.<String, String>builder()
-    .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
-    .put(PERMANENT_LOAN_TYPE_FIELD_ID, SET_LOAN_TYPE_FUNCTION)
-    .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
-    .put(SET_METADATA_UPDATED_DATE_FIELD_ID, SET_METADATA_UPDATED_DATE_FUNCTION)
-    .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_CREATED_DATE_FUNCTION)
-    .put(TransformationFieldsConfig.HOLDINGS_CALL_NUMBER_TYPE.getFieldId().toLowerCase(), SET_CALL_NUMBER_TYPE_ID_FUNCTION)
-    .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
-    .put(PERMANENT_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .put(TEMPORARY_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .put(EFFECTIVE_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .build();
-
-  private static final Map<String, TranslationBuilder> translationBuilders = ImmutableMap.<String, TranslationBuilder>builder()
-    .put(PERMANENT_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(TEMPORARY_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(EFFECTIVE_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(DEFAULT, new DefaultTranslationBuilder())
+  private static final Map<String, RuleBuilder> ruleBuilders = ImmutableMap
+    .<String, RuleBuilder>builder()
+    .put(INSTANCE_ELECTRONIC_ACCESS_ID, new CombinedRuleBuilder(3, INSTANCE_ELECTRONIC_ACCESS_ID))
+    .put(TRANSFORMATION_BUILDER_KEY, new TransformationRuleBuilder())
+    .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
     .build();
 
   private List<Rule> defaultRules;
@@ -126,50 +71,35 @@ public class RuleFactory {
   public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
+    Optional<Rule> rule = Optional.empty();
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
-        rules.add(buildByTransformation(mappingTransformation, rules));
+        rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation);
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
-        Rule rule = createDefaultByTransformations(mappingTransformation, defaultRules);
-        if (Objects.nonNull(rule)) {
-          rules.add(rule);
+        rule = createDefaultByTransformations(mappingTransformation, defaultRules);
+      }
+      if (rule.isPresent()) {
+        rules.add(rule.get());
+      }
+    }
+    return rules;
+  }
+
+  public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
+    RecordType recordType = mappingTransformation.getRecordType();
+    if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getFieldId())
+      && RecordType.INSTANCE.equals(recordType)) {
+      for (Map.Entry<String, RuleBuilder> ruleBuilderEntry : ruleBuilders.entrySet()) {
+        if (mappingTransformation.getFieldId().contains(ruleBuilderEntry.getKey())) {
+          return ruleBuilderEntry.getValue().build(defaultRules, mappingTransformation);
         }
       }
+      return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation);
+    } else if(HOLDINGS.equals(recordType) || ITEM.equals(recordType) ) {
+      LOGGER.error("Transformation with empty value is not available for record types Holdings and Item");
     }
-    return rules;
-  }
-
-  public Rule createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
-    return TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getFieldId())
-      && RecordType.INSTANCE.equals(mappingTransformation.getRecordType())
-      ? getDefaultRuleById(defaultRules, mappingTransformation.getFieldId())
-      : null;
-  }
-
-  public Set<Rule> buildByTransformations(List<Transformations> mappingTransformations) {
-    Set<Rule> rules = new LinkedHashSet<>();
-    String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
-    for (Transformations mappingTransformation : mappingTransformations) {
-      if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath())
-        && isNotBlank(mappingTransformation.getTransformation())
-        && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
-        rules.add(buildByTransformation(mappingTransformation, rules));
-      }
-    }
-    return rules;
-  }
-
-  private Rule getDefaultRuleById(Collection<Rule> defaultRules, String fieldId) {
-    Optional<Rule> rules = defaultRules.stream()
-      .filter(defaultRule -> nonNull(defaultRule.getId()) && defaultRule.getId().equals(fieldId))
-      .findFirst();
-    if (rules.isPresent()) {
-      return rules.get();
-    } else {
-      LOGGER.error("Can not find default rule with field id {}", fieldId);
-      return null;
-    }
+    return Optional.empty();
   }
 
   private boolean isTransformationValidAndNotBlank(Transformations mappingTransformation) {
@@ -182,33 +112,6 @@ public class RuleFactory {
 
   private boolean isInstanceTransformationValidAndBlank(Transformations mappingTransformation) {
     return isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && isBlank(mappingTransformation.getTransformation());
-  }
-
-  private Rule buildByTransformation(Transformations mappingTransformation, Set<Rule> rules) {
-    String field = substring(mappingTransformation.getTransformation(), 0, 3);
-    Rule rule;
-    Optional<Rule> existingRule = rules.stream()
-      .filter(tagRule -> tagRule.getField()
-        .equals(field))
-      .findFirst();
-    //If there is already an existing rule, then just append the subfield, without indicators
-    if (existingRule.isPresent()) {
-      rule = existingRule.get();
-      rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
-    } else {
-      rule = new Rule();
-      rule.setField(field);
-      setDataSources(rule, mappingTransformation);
-    }
-    if (MapUtils.isNotEmpty(mappingTransformation.getMetadataParameters())) {
-      Map<String, String> metadata = new HashMap<>();
-      for (Map.Entry<String, String> metadataParameter : mappingTransformation.getMetadataParameters().entrySet()) {
-        metadata.put(metadataParameter.getKey(), metadataParameter.getValue());
-      }
-      rule.setMetadata(metadata);
-    }
-    rule.getDataSources().sort(comparing(DataSource::getSubfield, SUBFIELD_COMPARATOR));
-    return rule;
   }
 
   private String getTemporaryLocationTransformation(List<Transformations> mappingTransformations) {
@@ -228,64 +131,6 @@ public class RuleFactory {
 
   private boolean isTransformationValid(Transformations mappingTransformation) {
     return TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath());
-  }
-
-  private List<DataSource> buildDataSources(Transformations mappingTransformation, boolean setIndicators) {
-    List<DataSource> dataSources = new ArrayList<>();
-    DataSource fromDataSource = new DataSource();
-    fromDataSource.setFrom(mappingTransformation.getPath());
-    buildTranslation(mappingTransformation, fromDataSource);
-    dataSources.add(fromDataSource);
-    String transformation = mappingTransformation.getTransformation();
-    Pattern pattern = Pattern.compile(SUBFIELD_REGEX);
-    Matcher matcher = pattern.matcher(transformation);
-    if (matcher.find()) {
-      fromDataSource.setSubfield(matcher.group());
-      //set indicator fields only for a unique rule
-      if (setIndicators) {
-        String indicator1 = substring(mappingTransformation.getTransformation(), 3, 4);
-        String indicator2 = substring(mappingTransformation.getTransformation(), 4, 5);
-        dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_1, indicator1));
-        dataSources.add(buildIndicatorDataSource(INDICATOR_NAME_2, indicator2));
-      }
-    }
-    return dataSources;
-  }
-
-  private void buildTranslation(Transformations mappingTransformation, DataSource fromDataSource) {
-    String fieldId = mappingTransformation.getFieldId();
-    translationFunctions.forEach((key, value) -> {
-      if (isNotEmpty(fieldId) && fieldId.contains(key)) {
-        Translation translation;
-        List<String> fieldParts = Splitter.on(".").splitToList(mappingTransformation.getFieldId());
-        if (fieldParts.size() > 1 && translationBuilders.containsKey(fieldParts.get(1))) {
-          translation = translationBuilders.get(fieldParts.get(1)).build(value, mappingTransformation);
-        } else {
-          translation = translationBuilders.get(DEFAULT).build(value, mappingTransformation);
-        }
-        fromDataSource.setTranslation(translation);
-      }
-    });
-  }
-
-  private DataSource buildIndicatorDataSource(String indicatorName, String indicatorValue) {
-    Translation indicatorTranslation = new Translation();
-    indicatorTranslation.setFunction(SET_VALUE_FUNCTION);
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put(VALUE_PARAMETER, indicatorValue);
-    DataSource indicatorDataSource = new DataSource();
-    indicatorTranslation.setParameters(parameters);
-    indicatorDataSource.setTranslation(indicatorTranslation);
-    indicatorDataSource.setIndicator(indicatorName);
-    return indicatorDataSource;
-  }
-
-  private void setDataSources(Rule rule, Transformations mappingTransformation) {
-    if (CollectionUtils.isNotEmpty(rule.getDataSources())) {
-      rule.getDataSources().addAll(buildDataSources(mappingTransformation, true));
-    } else {
-      rule.setDataSources(buildDataSources(mappingTransformation, true));
-    }
   }
 
   protected List<Rule> getDefaultRulesFromFile() {

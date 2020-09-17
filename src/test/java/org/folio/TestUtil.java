@@ -63,6 +63,8 @@ public final class TestUtil {
   public static final String INSTANCE_METADATA_CREATED_DATE_FIELD_PATH = "$.instance.metadata.createdDate";
   public static final String INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID = "instance.electronic.access.uri.resource";
   public static final String INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH = "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri";
+  public static final String INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID = "instance.electronic.access.linktext.resource";
+  public static final String INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH = "$.instance.electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText";
 
 
   public static String readFileContentFromResources(String path) {
