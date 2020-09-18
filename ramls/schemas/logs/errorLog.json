@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "File that should be exported",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "$ref": "../../raml-util/schemas/uuid.schema"
+    },
+    "jobExecutionId": {
+      "description": "UUID of the related job execution",
+      "$ref": "../../raml-util/schemas/uuid.schema"
+    },
+    "createdData": {
+      "description": "Creation datetime",
+      "type": "date-time"
+    },
+    "logLevel": {
+      "description": "Log level",
+      "type": "string",
+      "enum": [
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR"
+      ],
+      "default": "ERROR"
+    },
+    "reason": {
+      "description": "Error reason",
+      "type": "string"
+    },
+    "affectedRecord": {
+      "type": "object",
+      "description": "Affected record log",
+      "$ref": "recordLog.json"
+    },
+    "metadata": {
+      "description": "Metadata provided by the server",
+      "type": "object",
+      "$ref": "../../raml-util/schemas/metadata.schema",
+      "readonly": true
+    }
+  },
+  "required": [
+    "createdData",
+    "logLevel",
+    "affectedRecord"
+  ]
+}

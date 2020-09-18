@@ -1,0 +1,41 @@
+#%RAML 1.0
+
+title: Data export
+version: v1.0
+protocols: [ HTTP, HTTPS ]
+baseUri: https://github.com/folio-org/mod-data-export
+
+documentation:
+  - title: Data export Error Logs API
+    content: APIs for managing Error Logs
+
+types:
+  errors: !include raml-util/schemas/errors.schema
+  errorLogCollection: !include schemas/logs/errorLogCollection.json
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection-get.raml
+
+traits:
+  validate: !include raml-util/traits/validation.raml
+  pageable:  !include raml-util/traits/pageable.raml
+
+/data-export/logs:
+  /{jobExecutionID}:
+    uriParameters:
+      jobExecutionID:
+        description: The UUID of a job execution
+        type: UUID
+    description: Service provides APIs supporting Error logs
+    type:
+      collection:
+        schemaCollection: errorLogCollection
+        exampleCollection: !include samples/logs/errorLogCollection.sample
+    get:
+      is: [
+        pageable,
+        validate
+      ]
