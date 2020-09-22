@@ -298,11 +298,7 @@
          "fieldId":"holdings.metadata.createddate",
          "displayNameKey":"holdings.metadata.createdDate",
          "path":"$.holdings[*].metadata.createdDate",
-         "recordType":"HOLDINGS",
-         "metadataParameters":{
-            "datesOfPublication":"$.instance.publication[*].dateOfPublication",
-            "languages":"$.instance.languages"
-         }
+         "recordType":"HOLDINGS"
       },
       {
          "fieldId":"holdings.metadata.updatedbyuserid",
@@ -722,11 +718,7 @@
          "fieldId":"instance.metadata.createddate",
          "displayNameKey":"instance.metadata.createdDate",
          "path":"$.instance.metadata.createdDate",
-         "recordType":"INSTANCE",
-         "metadataParameters":{
-            "datesOfPublication":"$.instance.publication[*].dateOfPublication",
-            "languages":"$.instance.languages"
-         }
+         "recordType":"INSTANCE"
       },
       {
          "fieldId":"instance.metadata.updatedbyuserid",
@@ -1100,11 +1092,7 @@
          "fieldId":"item.metadata.createddate",
          "displayNameKey":"item.metadata.createdDate",
          "path":"$.items[*].metadata.createdDate",
-         "recordType":"ITEM",
-         "metadataParameters":{
-            "datesOfPublication":"$.instance.publication[*].dateOfPublication",
-            "languages":"$.instance.languages"
-         }
+         "recordType":"ITEM"
       },
       {
          "fieldId":"item.metadata.updatedbyuserid",

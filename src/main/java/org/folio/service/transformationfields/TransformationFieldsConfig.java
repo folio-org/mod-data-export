@@ -24,7 +24,7 @@ public enum TransformationFieldsConfig {
   ID("id", "$.{recordType}.id"),
   HR_ID("hrid", "$.{recordType}.hrid"),
   SOURCE("source", "$.{recordType}.source"),
-  METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate", MetadataParametersConstants.getFixedLengthDataElement()),
+  METADATA_CREATED_DATE("metadata.createdDate", "$.{recordType}.metadata.createdDate"),
   METADATA_UPDATED_DATE("metadata.updatedDate", "$.{recordType}.metadata.updatedDate"),
   METADATA_CREATED_BY_USER_ID("metadata.createdByUserId", "$.{recordType}.metadata.createdByUserId"),
   METADATA_UPDATED_BY_USER_ID("metadata.updatedByUserId", "$.{recordType}.metadata.updatedByUserId"),
