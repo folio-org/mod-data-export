@@ -4,10 +4,10 @@ import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.junit.Assert.assertEquals;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.IDENTIFIER_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.LOCATIONS;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.NATURE_OF_CONTENT_TERMS;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.LOCATIONS;
+import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -57,7 +57,7 @@ class SrsRecordConvertorServiceUnitTest {
   private ReferenceData referenceData = new ReferenceDataImpl();
 
   SrsRecordConvertorServiceUnitTest() {
-    referenceData.put(NATURE_OF_CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
+    referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
@@ -166,9 +166,13 @@ class SrsRecordConvertorServiceUnitTest {
     transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
-    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "907  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "908  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9091 $a", ITEM));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9071 $a", ITEM));
+    transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.temporarylocation.name", "$.holdings[*].temporaryLocationId", "909  $a", HOLDINGS));
+    transformations.add(createTransformations("item.permanentlocation.name", "$.items[*].permanentLocationId", "910  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.name", "$.items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 

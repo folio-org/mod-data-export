@@ -28,6 +28,8 @@ import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.util.ExternalPathResolver.CAMPUSES;
+import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -38,9 +40,11 @@ import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
 import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.LIBRARIES;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
@@ -65,6 +69,9 @@ public class MockServer {
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
   private static final String CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_contributor_name_types_response.json";
   private static final String LOCATIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_locations_response.json";
+  private static final String LIBRARIES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_libraries_response.json";
+  private static final String CAMPUSES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_campuses_response.json";
+  private static final String INSTITUTIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_institutions_response.json";
   private static final String CONFIGURATIONS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "configurations/get_configuration_response.json";
   private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
   private static final String INSTANCE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_types_response.json";
@@ -73,6 +80,7 @@ public class MockServer {
   private static final String ALTERNATIVE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_alternative_titles_response.json";
   private static final String LOAN_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_loan_types_response.json";
   private static final String ISSUANCE_MODES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_mode_of_issuance_response.json";
+  private static final String CALL_NUMBER_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_call_number_types_response.json";
   private static final String HOLDING_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_holding_note_types_response.json";
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
 
@@ -129,6 +137,9 @@ public class MockServer {
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
     router.get(resourcesPath(IDENTIFIER_TYPES)).handler(ctx -> handleGetIdentifierTypesRecord(ctx));
     router.get(resourcesPath(LOCATIONS)).handler(ctx -> handleGetLocationsRecord(ctx));
+    router.get(resourcesPath(LIBRARIES)).handler(ctx -> handleGetLibrariesRecord(ctx));
+    router.get(resourcesPath(CAMPUSES)).handler(ctx -> handleGetCampusesRecord(ctx));
+    router.get(resourcesPath(INSTITUTIONS)).handler(ctx -> handleGetInstitutionsRecord(ctx));
     router.get(resourcesPath(CONTRIBUTOR_NAME_TYPES)).handler(ctx -> handleGetContributorNameTypesRecord(ctx));
     router.get(resourcesPath(MATERIAL_TYPES)).handler(ctx -> handleGetMaterialTypesRecord(ctx));
     router.get(resourcesPath(INSTANCE_TYPES)).handler(ctx -> handleGetInstanceTypes(ctx));
@@ -138,6 +149,7 @@ public class MockServer {
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetLoanTypes(ctx));
     router.get(resourcesPath(ISSUANCE_MODES)).handler(ctx -> handleGetIssuanceModes(ctx));
     router.get(resourcesPath(LOAN_TYPES)).handler(ctx -> handleGetAlternativeTypes(ctx));
+    router.get(resourcesPath(CALL_NUMBER_TYPES)).handler(ctx -> handleGetCallNumberTypes(ctx));
     router.get(resourcesPath(HOLDING_NOTE_TYPES)).handler(ctx -> handleGetHoldingNoteTypes(ctx));
     router.get(resourcesPath(ITEM_NOTE_TYPES)).handler(ctx -> handleGetItemNoteTypes(ctx));
     router.get(resourcesPath(USERS) + "/:id").handler(ctx -> handleGetUsersRecord(ctx));
@@ -252,6 +264,48 @@ public class MockServer {
       JsonObject identifierTypes = new JsonObject(RestVerticleTestBase.getMockData(IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, IDENTIFIER_TYPES, identifierTypes);
       serverResponse(ctx, 200, APPLICATION_JSON, identifierTypes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetLibrariesRecord(RoutingContext ctx) {
+    logger.info("handleGet Libraries Record: " + ctx.request()
+      .path());
+    try {
+      JsonObject libraries = new JsonObject(RestVerticleTestBase.getMockData(LIBRARIES_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, LIBRARIES, libraries);
+      serverResponse(ctx, 200, APPLICATION_JSON, libraries.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetCampusesRecord(RoutingContext ctx) {
+    logger.info("handleGet Campuses Record: " + ctx.request()
+      .path());
+    try {
+      JsonObject campuses = new JsonObject(RestVerticleTestBase.getMockData(CAMPUSES_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, CAMPUSES, campuses);
+      serverResponse(ctx, 200, APPLICATION_JSON, campuses.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetInstitutionsRecord(RoutingContext ctx) {
+    logger.info("handleGet Institutions Record: " + ctx.request()
+      .path());
+    try {
+      JsonObject institutions = new JsonObject(RestVerticleTestBase.getMockData(INSTITUTIONS_RECORDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, INSTITUTIONS, institutions);
+      serverResponse(ctx, 200, APPLICATION_JSON, institutions.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)
@@ -378,6 +432,20 @@ public class MockServer {
       JsonObject issuanceModes = new JsonObject(RestVerticleTestBase.getMockData(ISSUANCE_MODES_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, ISSUANCE_MODES, issuanceModes);
       serverResponse(ctx, 200, APPLICATION_JSON, issuanceModes.encodePrettily());
+    } catch (IOException e) {
+      ctx.response()
+        .setStatusCode(500)
+        .end();
+    }
+  }
+
+  private void handleGetCallNumberTypes(RoutingContext ctx) {
+    logger.info("handleGet call number types: " + ctx.request()
+      .path());
+    try {
+      JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALL_NUMBER_TYPES_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, CALL_NUMBER_TYPES, callNumberTypes);
+      serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

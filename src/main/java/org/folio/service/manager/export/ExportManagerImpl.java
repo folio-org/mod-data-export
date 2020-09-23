@@ -86,15 +86,27 @@ public class ExportManagerImpl implements ExportManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
-    LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
+    SrsLoadResult srsLoadResult = new SrsLoadResult();
+    /**
+     * For Q3-2020, if a custom mapping profile is used, never fetch the underlying SRS records, always generate marc records on the
+     * fly
+     */
+    if (isTransformationEmpty(mappingProfile)) {
+      srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
+      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
-    List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
+      List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
           exportPayload.getJobExecutionId(), params);
-    exportService.exportSrsRecord(marcToExport, fileExportDefinition);
+      exportService.exportSrsRecord(marcToExport, fileExportDefinition);
+      LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs()
+        .size());
+    } else {
+      srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
+    }
+
     List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    LOGGER.info("Number of instances not found either in SRS or Inventory Storage: {}", srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size());
+    LOGGER.info("Number of instances not found in Inventory Storage: {}", instances.size());
 
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
@@ -105,6 +117,10 @@ public class ExportManagerImpl implements ExportManager {
     }
   }
 
+
+  private boolean isTransformationEmpty(MappingProfile mappingProfile) {
+    return mappingProfile.getTransformations().isEmpty();
+  }
 
   /**
    * Loads marc records from SRS by the given instance identifiers
@@ -150,7 +166,7 @@ public class ExportManagerImpl implements ExportManager {
   private Future<Void> handleExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
-    ExportResult exportResult = getExportResult(asyncResult, exportPayload.isLast());
+    ExportResult exportResult = getExportResult(asyncResult, exportPayload);
     clearIdentifiers(exportPayload);
     incrementCurrentProgress(exportPayload)
       .onComplete(handler -> {
@@ -164,7 +180,7 @@ public class ExportManagerImpl implements ExportManager {
     exportPayload.setIdentifiers(Collections.emptyList());
   }
 
-  private ExportResult getExportResult(AsyncResult<Object> asyncResult, boolean isLast) {
+  private ExportResult getExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
@@ -174,8 +190,14 @@ public class ExportManagerImpl implements ExportManager {
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
-      if (isLast) {
-        return ExportResult.completed();
+      if (exportPayload.isLast()) {
+        if (exportPayload.getExportedRecordsNumber() == 0) {
+          return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
+        } else if (exportPayload.getFailedRecordsNumber() > 0) {
+          return ExportResult.completedWithErrors();
+        } else {
+          return ExportResult.completed();
+        }
       }
       return ExportResult.inProgress();
     }

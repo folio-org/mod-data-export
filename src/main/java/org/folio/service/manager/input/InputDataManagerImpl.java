@@ -210,7 +210,10 @@ class InputDataManagerImpl implements InputDataManager {
 
   private JobExecution.Status getJobExecutionStatus(ExportResult exportResult) {
     if (exportResult.isCompleted()) {
-      return JobExecution.Status.SUCCESS;
+      return JobExecution.Status.COMPLETED;
+    }
+    if (exportResult.isCompletedWithErrors()) {
+      return JobExecution.Status.COMPLETED_WITH_ERRORS;
     }
     return JobExecution.Status.FAIL;
   }

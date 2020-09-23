@@ -73,10 +73,19 @@ public interface JobExecutionService {
    * Increment current value in {@link Progress} of {@link JobExecution}
    *
    * @param jobExecutionId id of a job
-   * @param exported exported records number
-   * @param failed   number of records failed on export
+   * @param exported       exported records number
+   * @param failed         number of records failed on export
    * @param tenantId       tenant id
    * @return future
    */
   Future<JobExecution> incrementCurrentProgress(String jobExecutionId, final int exported, final int failed, String tenantId);
+
+  /**
+   * Update status of expired job executions to fail
+   *
+   * @param tenantId tenant id
+   * @return void future
+   */
+  Future<Void> expireJobExecutions(String tenantId);
+
 }

@@ -2,9 +2,15 @@ package org.folio.service.transformationfields;
 
 import java.util.Map;
 
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.*;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.HOLDING_NOTE_TYPES;
-import static org.folio.service.mapping.referencedata.ReferenceDataImpl.ITEM_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
+import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
+import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
+import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
+import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
+import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
+import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
+import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
+
 
 /**
  * Initial data for the transformation field. While extending the enum, put new values in alphabetical order
@@ -38,7 +44,7 @@ public enum TransformationFieldsConfig {
   EDITIONS("editions", "$.instance.editions"),
   IDENTIFIERS("identifiers", "$.instance.identifiers[?(@.identifierTypeId=='{id}')].value", IDENTIFIER_TYPES),
   LANGUAGES("languages", "$.instance.languages"),
-  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", MODES_OF_ISSUANCE),
+  MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", ISSUANCE_MODES),
   INSTANCE_TYPE("instanceTypeId", "$.instance[?(@.instanceTypeId=='{id}')].instanceTypeId", INSTANCE_TYPES),
   SUBJECTS("subjects", "$.instance.subjects"),
   TITLE("title", "$.instance.title"),
@@ -67,6 +73,17 @@ public enum TransformationFieldsConfig {
   HOLDING_TEMPORARY_LOCATION_CAMPUS_CODE("temporaryLocation.campus.code", "$.holdings[*].temporaryLocationId"),
   HOLDING_TEMPORARY_LOCATION_INSTITUTION_NAME("temporaryLocation.institution.name", "$.holdings[*].temporaryLocationId"),
   HOLDING_TEMPORARY_LOCATION_INSTITUTION_CODE("temporaryLocation.institution.code", "$.holdings[*].temporaryLocationId"),
+  HOLDINGS_STATEMENT("holdingsStatements.statement", "$.holdings[*].holdingsStatements[*].statement"),
+  HOLDINGS_STATEMENT_NOTE("holdingsStatements.note", "$.holdings[*].holdingsStatements[*].note"),
+  HOLDINGS_STATEMENT_NOTE_STAFF("holdingsStatements.staffNote", "$.holdings[*].holdingsStatements[*].staffNote"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS("holdingsStatementsForSupplements.statement", "$.holdings[*].holdingsStatementsForSupplements[*].statement"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS_NOTE("holdingsStatementsForSupplements.note", "$.holdings[*].holdingsStatementsForSupplements[*].note"),
+  HOLDINGS_STATEMENT_SUPPLEMENTS_NOTE_STAFF("holdingsStatementsForSupplements.staffNote", "$.holdings[*].holdingsStatementsForSupplements[*].staffNote"),
+  HOLDINGS_STATEMENT_INDEXES("holdingsStatementsForIndexes.statement", "$.holdings[*].holdingsStatementsForIndexes[*].statement"),
+  HOLDINGS_STATEMENT_INDEXES_NOTE("holdingsStatementsForIndexes.note", "$.holdings[*].holdingsStatementsForIndexes[*].note"),
+  HOLDINGS_STATEMENT_INDEXES_NOTE_STAFF("holdingsStatementsForIndexes.staffNote", "$.holdings[*].holdingsStatementsForIndexes[*].staffNote"),
+
+
 
   //Item specific fields
   BARCODE("barcode", "$.items[*].barcode"),
@@ -80,13 +97,13 @@ public enum TransformationFieldsConfig {
   PERMANENT_LOAN_TYPE_ID("permanentLoanTypeId", "$.items[*].permanentLoanTypeId"),
   STATUS("status", "$.items[*].status.name"),
   VOLUME("volume", "$.items[*].volume"),
-  YEARCAPTION("yearCaption", "$.items[*].yearCaption"),
-  ITEM_CALL_NUMBER("callNumber", "$.item[*].effectiveCallNumberComponents.callNumber"),
-  ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.item[*].effectiveCallNumberComponents.prefix"),
-  ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.item[*].effectiveCallNumberComponents.suffix"),
-  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.item[*].effectiveCallNumberComponents.typeId"),
-  ITEM_NOTE_TYPE("itemNoteTypeId", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
-  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.item[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES),
+  YEARCAPTION("yearCaption", "$.items[*].yearCaption[*]"),
+  ITEM_CALL_NUMBER("callNumber", "$.items[*].effectiveCallNumberComponents.callNumber"),
+  ITEM_CALL_NUMBER_PREFIX("callNumberPrefix", "$.items[*].effectiveCallNumberComponents.prefix"),
+  ITEM_CALL_NUMBER_SUFFIX("callNumberSuffix", "$.items[*].effectiveCallNumberComponents.suffix"),
+  ITEM_CALL_NUMBER_TYPE("callNumberType", "$.items[*].effectiveCallNumberComponents.typeId"),
+  ITEM_NOTE_TYPE("itemNoteTypeId", "$.items[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
+  ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.items[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES),
   ITEM_PERMANENT_LOCATION_NAME("permanentLocation.name", "$.items[*].permanentLocationId"),
   ITEM_PERMANENT_LOCATION_CODE("permanentLocation.code", "$.items[*].permanentLocationId"),
   ITEM_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", "$.items[*].permanentLocationId"),
