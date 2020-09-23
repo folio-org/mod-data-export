@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Collection of Mapping Profiles",
+  "description": "Collection of Error Logs",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -19,7 +19,7 @@
     }
   },
   "required": [
-    "errorLog",
+    "errorLogs",
     "totalRecords"
   ]
 }

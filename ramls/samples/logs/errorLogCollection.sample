@@ -6,12 +6,12 @@
             "createdData": "2019-07-22T11:22:07Z",
             "logLevel": "ERROR",
             "reason": 200,
-            "affectedRecord": {
+            "affectedRecords": [{
                 "id": "57c79d87-6510-4354-b212-96832fbf3fa1",
                 "hrid": "200",
                 "title": "Record title",
                 "recordType": "INSTANCE"
-            },
+            }],
             "metadata": {
                 "createdDate": "2019-09-15T11:22:07Z",
                 "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",

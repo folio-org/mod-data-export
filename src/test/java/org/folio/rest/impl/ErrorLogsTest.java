@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
+import com.google.common.collect.Lists;
 import io.restassured.response.Response;
 import io.vertx.core.Context;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -11,11 +11,11 @@ import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.service.ApplicationTestConfig;
 import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
+@ExtendWith(MockitoExtension.class)
 public class ErrorLogsTest extends RestVerticleTestBase {
 
   @Autowired
@@ -32,7 +33,7 @@ public class ErrorLogsTest extends RestVerticleTestBase {
 
   public ErrorLogsTest() {
     Context vertxContext = vertx.getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
@@ -45,21 +46,22 @@ public class ErrorLogsTest extends RestVerticleTestBase {
       .withHrid("instance hrid")
       .withTitle("instance title");
     AffectedRecord holdingRecord = new AffectedRecord()
-      .withAffectedRecord(instanceRecord)
+      .withAffectedRecords(Lists.newArrayList(instanceRecord))
       .withRecordType(AffectedRecord.RecordType.HOLDINGS)
       .withHrid("holdings hrid")
       .withId(UUID.randomUUID().toString())
       .withTitle("holdings title");
+    String jobExecutionId = UUID.randomUUID().toString();
     ErrorLog errorLog1 = new ErrorLog()
       .withCreatedData(new Date())
-      .withJobExecutionId(UUID.randomUUID().toString())
+      .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())
       .withReason("Error reason")
       .withAffectedRecord(holdingRecord);
     ErrorLog errorLog2 = new ErrorLog()
       .withCreatedData(new Date())
-      .withJobExecutionId(errorLog1.getJobExecutionId())
+      .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())
       .withReason("Error reason")
@@ -72,18 +74,13 @@ public class ErrorLogsTest extends RestVerticleTestBase {
       });
 
 
-    vertx.setTimer(1000, handler -> {
-      Response response = RestAssured.given()
-        .spec(jsonRequestSpecification)
-        .when()
-        .get(ERROR_LOGS_SERVICE_URL + errorLog1.getJobExecutionId());
+    vertx.setTimer(3000, handler -> {
+      Response response = getRequest(ERROR_LOGS_SERVICE_URL + "?query=jobExecutionId=" + jobExecutionId);
       // then
       context.verify(() -> {
         ErrorLogCollection errorLogCollection = response.as(ErrorLogCollection.class);
         assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         assertEquals(2, errorLogCollection.getTotalRecords().intValue());
-        assertEquals(errorLog1, errorLogCollection.getErrorLogs().get(0));
-        assertEquals(errorLog2, errorLogCollection.getErrorLogs().get(0));
         context.completeNow();
       });
     });

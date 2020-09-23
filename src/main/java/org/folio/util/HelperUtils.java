@@ -3,7 +3,6 @@ package org.folio.util;
 import org.folio.cql2pgjson.CQL2PgJSON;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
@@ -18,7 +17,7 @@ public class HelperUtils {
    * Builds criteria by which db result is filtered
    *
    * @param jsonbField - json key name
-   * @param value - value corresponding to the key
+   * @param value      - value corresponding to the key
    * @return - Criteria object
    */
   public static Criteria constructCriteria(String jsonbField, String value) {
@@ -27,17 +26,6 @@ public class HelperUtils {
     criteria.setOperation("=");
     criteria.setVal(value);
     return criteria;
-  }
-
-  public static Criterion constructCriterionWithLimitAndOffset(String jsonbField,  String value,  int offset, int limit) {
-    Criteria criteria = new Criteria();
-    criteria.addField(jsonbField);
-    criteria.setOperation("=");
-    criteria.setVal(value);
-    return new Criterion()
-      .addCriterion(criteria)
-      .setLimit(new Limit(limit))
-      .setOffset(new Offset(offset));
   }
 
 

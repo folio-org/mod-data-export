@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "File that should be exported",
+  "description": "Error log with all details",
   "type": "object",
   "properties": {
     "id": {
@@ -13,7 +13,8 @@
     },
     "createdData": {
       "description": "Creation datetime",
-      "type": "date-time"
+      "type": "string",
+      "format": "date-time"
     },
     "logLevel": {
       "description": "Log level",

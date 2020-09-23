@@ -6,17 +6,19 @@ import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Autowired
   private ErrorLogDao errorLogDao;
 
   @Override
-  public Future<ErrorLogCollection> getByJobExecutionId(String jobExecutionid, int offset, int limit, String tenantId) {
-    return errorLogDao.getByJobExecutionId(jobExecutionid, offset, limit, tenantId);
+  public Future<ErrorLogCollection> getByJobExecutionId(String query, int offset, int limit, String tenantId) {
+    return errorLogDao.getByJobExecutionId(query, offset, limit, tenantId);
   }
 
   @Override

@@ -9,11 +9,8 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.Criteria.Limit;
-import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,25 +21,25 @@ import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 
 import static org.folio.util.HelperUtils.constructCriteria;
-import static org.folio.util.HelperUtils.constructCriterionWithLimitAndOffset;
+import static org.folio.util.HelperUtils.getCQLWrapper;
 
 @Repository
 public class ErrorLogDaoImpl implements ErrorLogDao {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "error_logs";
-  private static final String JOB_EXECUTION_ID_FIELD = "'jobExecutionId'";
   private static final String ID_FIELD = "'id'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
 
   @Override
-  public Future<ErrorLogCollection> getByJobExecutionId(String jobExecutionId, int offset, int limit, String tenantId) {
+  public Future<ErrorLogCollection> getByJobExecutionId(String query, int offset, int limit, String tenantId) {
     Promise<Results<ErrorLog>> promise = Promise.promise();
     try {
-      Criterion criterion = constructCriterionWithLimitAndOffset(JOB_EXECUTION_ID_FIELD, jobExecutionId, offset, limit);
-      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, criterion, false, promise);
+      String[] fieldList = {"*"};
+      CQLWrapper cql = getCQLWrapper(TABLE, query, limit, offset);
+      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, fieldList, cql, true, false, promise);
     } catch (Exception e) {
       LOGGER.error(e);
       promise.fail(e);

@@ -57,6 +57,7 @@ public abstract class RestVerticleTestBase {
   protected static final String MOCK_OKAPI_URL = HOST + mockPort;
   protected static final String EXPORT_URL = "/data-export/export";
   protected static final String FILE_DEFINITION_SERVICE_URL = "/data-export/file-definitions/";
+  protected static final String ERROR_LOGS_SERVICE_URL = "/data-export/logs";
   protected static final String JOB_EXECUTIONS_URL = "/data-export/job-executions";
   protected static final String EXPIRE_JOBS_URL = "/data-export/expire-jobs";
   protected static final String FIELD_NAMES_URL = "/data-export/transformation-fields";

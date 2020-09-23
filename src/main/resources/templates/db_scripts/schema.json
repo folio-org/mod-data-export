@@ -65,9 +65,12 @@
       "fromModuleVersion": "mod-data-export-2.2.0",
       "withMetadata": true,
       "withAuditing": false,
-      "uniqueIndex": [{
-        "fieldName": "jobExecutionId"
-      }
+      "foreignKeys": [
+        {
+          "fieldName": "jobProfileId",
+          "targetTable": "job_profiles",
+          "tOps": "ADD"
+        }
       ]
     }
   ],

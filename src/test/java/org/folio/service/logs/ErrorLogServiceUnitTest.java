@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 public class ErrorLogServiceUnitTest {
-  private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
+  private static final String QUERY = "query";
   private static final String TENANT_ID = "diku";
 
 
@@ -74,9 +74,9 @@ public class ErrorLogServiceUnitTest {
   @Test
   void getByJobExecutionId_shouldReturnFailedFuture_whenErrorLogDoesNotExist(VertxTestContext context) {
     // given
-    when(errorLogDao.getByJobExecutionId(JOB_EXECUTION_ID, 0, 0, TENANT_ID)).thenReturn(failedFuture("Error"));
+    when(errorLogDao.getByJobExecutionId(QUERY, 0, 0, TENANT_ID)).thenReturn(failedFuture("Error"));
     // when
-    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(JOB_EXECUTION_ID, 0, 0, TENANT_ID);
+    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(QUERY, 0, 0, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.failed());
@@ -87,9 +87,9 @@ public class ErrorLogServiceUnitTest {
   @Test
   void getByJobExecutionId_shouldCallDaoGet(VertxTestContext context) {
     // given
-    when(errorLogDao.getByJobExecutionId(JOB_EXECUTION_ID, 5, 10, TENANT_ID)).thenReturn(succeededFuture(errorLogCollection));
+    when(errorLogDao.getByJobExecutionId(QUERY, 5, 10, TENANT_ID)).thenReturn(succeededFuture(errorLogCollection));
     // when
-    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(JOB_EXECUTION_ID, 5, 10, TENANT_ID);
+    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(QUERY, 5, 10, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());

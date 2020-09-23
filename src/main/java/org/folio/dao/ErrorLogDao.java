@@ -3,7 +3,6 @@ package org.folio.dao;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.rest.jaxrs.model.JobExecution;
 
 import java.util.Optional;
 

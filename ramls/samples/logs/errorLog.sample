@@ -9,12 +9,12 @@
        "hrid": "200",
        "title": "Holdings record",
        "recordType": "HOLDINGS",
-       "associatedRecord": {
+       "affectedRecords": [{
          "id": "e50c1f7f-1174-476c-88b7-a2e2fa8e657d",
          "hrid": "201",
          "title": "Instance record",
          "recordType": "INSTANCE"
-       }
+       }]
    },
    "metadata": 
     {
