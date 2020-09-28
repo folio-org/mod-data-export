@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
@@ -16,7 +15,6 @@ import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
-import org.folio.service.transformationfields.MetadataParametersConstants;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.Assert;
@@ -38,7 +36,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -368,7 +365,7 @@ class MappingServiceUnitTest {
     List<Transformations> transformations = new ArrayList<>();
     transformations.add(createTransformations(INSTANCE_HR_ID_FIELD_ID, INSTANCE_HR_ID_FIELD_PATH, "001", INSTANCE));
     transformations.add(createTransformations(INSTANCE_METADATA_UPDATED_DATE_FIELD_ID, INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH, "005", INSTANCE));
-    transformations.add(createTransformationsWithMetadata(INSTANCE_METADATA_CREATED_DATE_FIELD_ID, INSTANCE_METADATA_CREATED_DATE_FIELD_PATH, "008", INSTANCE, MetadataParametersConstants.getFixedLengthDataElement()));
+    transformations.add(createTransformations(INSTANCE_METADATA_CREATED_DATE_FIELD_ID, INSTANCE_METADATA_CREATED_DATE_FIELD_PATH, "008", INSTANCE));
     transformations.add(createTransformations(INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID, INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH, "8564 $u", INSTANCE));
     transformations.add(createTransformations(INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID, INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH, EMPTY, INSTANCE));
     return transformations;
@@ -441,12 +438,6 @@ class MappingServiceUnitTest {
           .toString())));
       });
 
-    return transformations;
-  }
-
-  private Transformations createTransformationsWithMetadata(String fieldId, String fieldPath, String value, RecordType recordType, Map<String, String> metadata) {
-    Transformations transformations = createTransformations(fieldId, fieldPath, value, recordType);
-    transformations.setMetadataParameters(metadata);
     return transformations;
   }
 
