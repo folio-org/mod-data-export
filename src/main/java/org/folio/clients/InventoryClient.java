@@ -1,10 +1,23 @@
 package org.folio.clients;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.util.OkapiConnectionParams;
+import org.folio.util.StringUtil;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
+import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
@@ -12,6 +25,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
@@ -24,15 +38,6 @@ import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.folio.util.OkapiConnectionParams;
-import org.springframework.stereotype.Component;
-
 @Component
 public class InventoryClient {
   private static final String LIMIT_PARAMETER = "?limit=";
@@ -40,12 +45,22 @@ public class InventoryClient {
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
+  private static final String QUERY = "?(query=";
+  private static final String QUERY_VALUE = "(languages=\"eng\")";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
     return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
-        QUERY_PATTERN_INVENTORY);
+      QUERY_PATTERN_INVENTORY);
+  }
+
+  public Optional<JsonObject> getInstancesBulkUUIDs(String query, OkapiConnectionParams params) {
+    if (StringUtils.isEmpty(query)) {
+      return Optional.empty();
+    }
+    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query) + ")";
+    return ClientUtil.getRequest(params, endpoint);
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
@@ -147,13 +162,13 @@ public class InventoryClient {
 
   public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-        params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
+      params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
     return getRequest(params, endpoint);
   }
 
   public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, OkapiConnectionParams params) {
     return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-        QUERY_PATTERN_ITEM);
+      QUERY_PATTERN_ITEM);
   }
 
   public Map<String, JsonObject> getContributorNameTypes(OkapiConnectionParams params) {

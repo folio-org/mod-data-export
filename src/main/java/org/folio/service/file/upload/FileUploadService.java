@@ -3,6 +3,7 @@ package org.folio.service.file.upload;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.file.storage.FileStorage;
+import org.folio.util.OkapiConnectionParams;
 
 /**
  * File upload service. Provides lifecycle methods for file uploading functionality.
@@ -22,10 +23,17 @@ public interface FileUploadService {
    *
    * @param fileDefinition {@link FileDefinition}
    * @param data           array of file bytes
-   * @param tenantId       tenant id
    * @return {@link FileDefinition}
    */
   Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId);
+
+  /**
+   * Saves given file data to the {@link FileStorage}
+   *
+   * @param fileDefinition {@link FileDefinition}
+   * @return {@link FileDefinition}
+   */
+  Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params);
 
   /**
    * Completes uploading for the given {@link FileDefinition}

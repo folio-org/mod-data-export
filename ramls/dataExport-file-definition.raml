@@ -80,6 +80,11 @@ traits:
           description: Method to upload file
           body:
               application/octet-stream:
+          queryParameters:
+            isCQLFile:
+              description: is true, then export by using CQL query, otherwise - by file with uuids
+              type: boolean
+              default: false
           responses:
             200:
               body:
