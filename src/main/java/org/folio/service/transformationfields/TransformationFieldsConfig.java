@@ -140,13 +140,6 @@ public enum TransformationFieldsConfig {
     this.referenceDataKey = referenceDataKey;
   }
 
-  TransformationFieldsConfig(String fieldId, String path, Map<String, String> metadataParameters) {
-    this.fieldId = fieldId;
-    this.path = path;
-    this.isReferenceData = false;
-    this.metadataParameters = metadataParameters;
-  }
-
   public String getFieldId() {
     return fieldId;
   }
