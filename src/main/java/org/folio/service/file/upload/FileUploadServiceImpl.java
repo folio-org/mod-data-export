@@ -67,6 +67,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     List<String> list = new ArrayList<>();
     if (instancesUUIDs.isPresent()) {
       JsonArray array = instancesUUIDs.get().getJsonArray("ids");
+      // possibly a good place to use parralel stream.
       array.stream().forEach(var -> {
         String a = ((JsonObject) var).getString("id");
         list.add(a);
