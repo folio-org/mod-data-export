@@ -46,7 +46,6 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final String QUERY = "?(query=";
-  private static final String QUERY_VALUE = "(languages=\"eng\")";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
