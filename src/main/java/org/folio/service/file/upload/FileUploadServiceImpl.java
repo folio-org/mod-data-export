@@ -67,7 +67,9 @@ public class FileUploadServiceImpl implements FileUploadService {
     List<String> list = new ArrayList<>();
     if (instancesUUIDs.isPresent()) {
       JsonArray array = instancesUUIDs.get().getJsonArray("ids");
-      // possibly a good place to use parralel stream.
+      // possibly a good place to use parralel stream. Also, worth thinking to add some additional field to file definition, for example 'format'
+      // with possible values: csv || cql. Then we can create a job execution with progress here, set total to the array size, and while export,
+      // avoid count of lines in file for calculate total field if format is cql.
       array.stream().forEach(var -> {
         String a = ((JsonObject) var).getString("id");
         list.add(a);
