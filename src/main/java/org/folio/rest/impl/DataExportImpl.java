@@ -50,10 +50,6 @@ public class DataExportImpl implements DataExport {
   private String tenantId;
 
   public DataExportImpl(Vertx vertx, String tenantId) {
-    System.setProperty("aws.region", "eu-west-2");
-    System.setProperty("aws.accessKeyId", "AKIAYI337D5FHL6T5Q5A");
-    System.setProperty("aws.secretKey", "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");
-    System.setProperty("bucket.name", "mod-export-1");
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
     this.inputDataManager = vertx.getOrCreateContext().get(InputDataManager.class.getName());
