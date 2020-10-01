@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of Error Logs",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "errorLogs": {
+      "description": "List of Error Logs",
+      "type": "array",
+      "id": "errorLogList",
+      "items": {
+        "type": "object",
+        "$ref": "errorLog.json"
+      }
+    },
+    "totalRecords": {
+      "description": "Total number of Error Logs",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "errorLogs",
+    "totalRecords"
+  ]
+}
