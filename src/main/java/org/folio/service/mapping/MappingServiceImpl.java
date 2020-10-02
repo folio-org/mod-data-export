@@ -1,10 +1,29 @@
 package org.folio.service.mapping;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.ReferenceData;
+import org.folio.processor.RuleProcessor;
+import org.folio.processor.rule.Rule;
+import org.folio.processor.translations.TranslationsFunctionHolder;
+import org.folio.reader.EntityReader;
+import org.folio.reader.JPathSyntaxEntityReader;
+import org.folio.rest.jaxrs.model.AffectedRecord;
+import org.folio.rest.jaxrs.model.ErrorLog;
+import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.service.logs.ErrorLogService;
+import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.util.OkapiConnectionParams;
+import org.folio.writer.RecordWriter;
+import org.folio.writer.impl.MarcRecordWriter;
+import org.marc4j.marc.VariableField;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
@@ -14,34 +33,27 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.folio.clients.ConfigurationsClient;
-import org.folio.processor.ReferenceData;
-import org.folio.processor.RuleProcessor;
-import org.folio.processor.rule.Rule;
-import org.folio.processor.translations.TranslationsFunctionHolder;
-import org.folio.reader.EntityReader;
-import org.folio.reader.JPathSyntaxEntityReader;
-import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.service.mapping.referencedata.ReferenceDataProvider;
-import org.folio.util.OkapiConnectionParams;
-import org.folio.writer.RecordWriter;
-import org.folio.writer.impl.MarcRecordWriter;
-import org.marc4j.marc.VariableField;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
 
 @Service
 public class MappingServiceImpl implements MappingService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final int MAPPING_POOL_SIZE = 4;
+  private static final String HRID_KEY = "hrid";
+  private static final String ID_KEY = "id";
+  private static final String TITLE_KEY = "title";
+  private static final String INSTANCE_KEY = "instance";
+
   private ExecutorService mappingThreadPool;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
+
   @Autowired
   private ReferenceDataProvider referenceDataProvider;
   @Autowired
   private ConfigurationsClient configurationsClient;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   public MappingServiceImpl() {
     this.ruleProcessor = new RuleProcessor(TranslationsFunctionHolder.SET_VALUE);
@@ -56,15 +68,15 @@ public class MappingServiceImpl implements MappingService {
     }
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, connectionParams);
-    return mapInstances(instances, referenceData, rules);
+    return mapInstances(instances, referenceData, rules, jobExecutionId, connectionParams);
   }
 
-  private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules) {
+  private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     List<Rule> synchronizedRules = Collections.synchronizedList(rules);
     List<String> records = null;
     try {
       records = mappingThreadPool.submit(() -> instances.parallelStream()
-        .map(instance -> mapInstance(instance, referenceData, synchronizedRules))
+        .map(instance -> mapInstance(instance, referenceData, synchronizedRules, jobExecutionId, connectionParams))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList()))
@@ -78,16 +90,21 @@ public class MappingServiceImpl implements MappingService {
     return records;
   }
 
-  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     try {
-      EntityReader entityReader = new JPathSyntaxEntityReader(instance);
-      RecordWriter recordWriter = new MarcRecordWriter();
-      String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
-      return Optional.of(record);
+      return mapInstance(instance, referenceData, rules);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
+      populateMappingErrorLog(instance, jobExecutionId, connectionParams);
       return Optional.empty();
     }
+  }
+
+  protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+    EntityReader entityReader = new JPathSyntaxEntityReader(instance);
+    RecordWriter recordWriter = new MarcRecordWriter();
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+    return Optional.of(record);
   }
 
   /**
@@ -109,6 +126,11 @@ public class MappingServiceImpl implements MappingService {
       LOGGER.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
     }
     return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : ruleFactory.create(mappingProfile, rulesFromConfig);
+  }
+
+  private void populateMappingErrorLog(JsonObject record, String jobExecutionId, OkapiConnectionParams connectionParams) {
+    JsonObject instance = record.getJsonObject(INSTANCE_KEY);
+    errorLogService.saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, connectionParams.getTenantId());
   }
 
 }

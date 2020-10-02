@@ -104,7 +104,7 @@ public class ErrorLogServiceUnitTest {
     errorLog.setId(null);
     when(errorLogDao.save(errorLog, TENANT_ID)).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.save(errorLog, okapiConnectionParams);
+    Future<ErrorLog> future = errorLogService.save(errorLog, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -133,7 +133,7 @@ public class ErrorLogServiceUnitTest {
     // given
     when(errorLogDao.update(errorLog, TENANT_ID)).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.update(errorLog, okapiConnectionParams);
+    Future<ErrorLog> future = errorLogService.update(errorLog, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());

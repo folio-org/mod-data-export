@@ -1,9 +1,9 @@
 package org.folio.service.logs;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.util.OkapiConnectionParams;
 
 public interface ErrorLogService {
 
@@ -19,19 +19,19 @@ public interface ErrorLogService {
    * Saves {@link ErrorLog} to database
    *
    * @param errorLog {@link ErrorLog} to save
-   * @param params   okapi headers and connection parameters
+   * @param tenantId  id of specific tenant
    * @return future with saved {@link ErrorLog}
    */
-  Future<ErrorLog> save(ErrorLog errorLog, OkapiConnectionParams params);
+  Future<ErrorLog> save(ErrorLog errorLog, String tenantId);
 
   /**
    * Updates {@link ErrorLog}
    *
    * @param errorLog {@link ErrorLog} to update
-   * @param params   okapi headers and connection parameters
+   * @param tenantId  id of specific tenant
    * @return future with {@link ErrorLog}
    */
-  Future<ErrorLog> update(ErrorLog errorLog, OkapiConnectionParams params);
+  Future<ErrorLog> update(ErrorLog errorLog, String tenantId);
 
   /**
    * Delete {@link ErrorLog} by id
@@ -41,4 +41,9 @@ public interface ErrorLogService {
    * @return future with {@link ErrorLog}
    */
   Future<Boolean> deleteById(String id, String tenantId);
+
+  Future<ErrorLog> saveGeneralError(String reason, String jobExecutionId, String tenantId);
+
+  Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, String tenantId);
+
 }
