@@ -8,6 +8,7 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 * [Introduction](#introduction)
 * [Compiling](#compiling)
 * [Docker](#docker)
+* [System requirements](#system-requirements)
 
 ## Introduction
 
@@ -102,6 +103,20 @@ To configure your own rules, you need to add it to the [mod-configuration module
 Convert the rules to the String format (you can use online [converter](https://tools.knowledgewalls.com/jsontostring)). Put the result string to the "value" field in the request body. 
 The description of how to create a configuration in mod-configuration module - https://github.com/folio-org/mod-configuration/blob/master/README.md.
 `If there are rules in mod-configuration, and they are enabled, they always will be used for the mapping process for a given tenant.`
+
+## System requirements
+
+Testing was done with a mod-data-export docker image memory limit = 512 MiB.
+
+#### Default mapping profile
+
+For default mapping profile, the max usage of memory is 270 MiB during the process of export 1 million records.
+The average memory usage is ~200 MiB.
+
+#### Custom mapping profile with holdings and items
+For Custom mapping profile, the max usage of memory is 250 MiB during the process of export 1 million records.
+The average memory usage is ~190 MiB.
+
 
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
