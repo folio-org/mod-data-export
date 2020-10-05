@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.SdkClientException;
@@ -141,6 +142,7 @@ class ExportStorageServiceUnitTest {
       testContext.verify(()-> {
         assertTrue(ar.succeeded());
         assertEquals(response.toString(), ar.result());
+        verify(s3ClientMock).shutdown();
         testContext.completeNow();
       });
 
@@ -165,6 +167,7 @@ class ExportStorageServiceUnitTest {
       testContext.verify(() -> {
         assertTrue(ar.failed());
         assertEquals("Bucket Not Found", ar.cause().getMessage());
+        verify(s3ClientMock).shutdown();
         testContext.completeNow();
       });
 
