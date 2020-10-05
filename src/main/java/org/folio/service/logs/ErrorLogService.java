@@ -36,14 +36,31 @@ public interface ErrorLogService {
   /**
    * Delete {@link ErrorLog} by id
    *
-   * @param id       errorLof id
+   * @param id  errorLog id
    * @param tenantId tenant id
    * @return future with {@link ErrorLog}
    */
   Future<Boolean> deleteById(String id, String tenantId);
 
+  /**
+   * Creates and saves {@link ErrorLog} to database
+   *
+   * @param reason the reason of the error
+   * @param jobExecutionId  id of specific job execution
+   * @param tenantId  id of specific tenant
+   * @return future with saved {@link ErrorLog}
+   */
   Future<ErrorLog> saveGeneralError(String reason, String jobExecutionId, String tenantId);
 
+  /**
+   * Creates and saves {@link ErrorLog} to database
+
+   * @param record {@link JsonObject} inventory record that is cause of the error
+   * @param reason the reason of the error
+   * @param jobExecutionId  id of specific job execution
+   * @param tenantId  id of specific tenant
+   * @return future with saved {@link ErrorLog}
+   */
   Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, String tenantId);
 
 }

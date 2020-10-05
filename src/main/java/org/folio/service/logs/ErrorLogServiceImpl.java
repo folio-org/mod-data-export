@@ -61,13 +61,13 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, String tenantId) {
     AffectedRecord instanceRecord = new AffectedRecord()
       .withRecordType(INSTANCE);
-    if(StringUtils.isNotBlank(record.getString(HRID_KEY))) {
+    if (StringUtils.isNotBlank(record.getString(HRID_KEY))) {
       instanceRecord.setHrid(record.getString(HRID_KEY));
     }
-    if(StringUtils.isNotBlank(record.getString(ID_KEY))) {
+    if (StringUtils.isNotBlank(record.getString(ID_KEY))) {
       instanceRecord.setId(record.getString(ID_KEY));
     }
-    if(StringUtils.isNotBlank(record.getString(TITLE_KEY))) {
+    if (StringUtils.isNotBlank(record.getString(TITLE_KEY))) {
       instanceRecord.setTitle(record.getString(TITLE_KEY));
     }
     ErrorLog errorLog = new ErrorLog()

@@ -3,7 +3,6 @@ package org.folio.service.export;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
@@ -26,7 +25,6 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Service
