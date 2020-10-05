@@ -26,7 +26,7 @@ public class DefaultRuleBuilder implements RuleBuilder {
     if (rule.isPresent()) {
       return rule;
     } else {
-      LOGGER.error("Can not find default rule with field id {}", fieldId);
+      LOGGER.error("Cannot find default rule with field id {}", fieldId);
       return Optional.empty();
     }
   }

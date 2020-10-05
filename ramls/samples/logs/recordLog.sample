@@ -1,0 +1,12 @@
+{
+    "id": "57c79d87-6510-4354-b212-96832fbf3fa1",
+    "hrid": "200",
+    "title": "Holdings record",
+    "recordType": "HOLDINGS",
+    "affectedRecords": [{
+        "id": "e50c1f7f-1174-476c-88b7-a2e2fa8e657d",
+        "hrid": "201",
+        "title": "Instance record",
+        "recordType": "INSTANCE"
+    }]
+}

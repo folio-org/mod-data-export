@@ -17,7 +17,7 @@ public class HelperUtils {
    * Builds criteria by which db result is filtered
    *
    * @param jsonbField - json key name
-   * @param value - value corresponding to the key
+   * @param value      - value corresponding to the key
    * @return - Criteria object
    */
   public static Criteria constructCriteria(String jsonbField, String value) {

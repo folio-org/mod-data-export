@@ -323,6 +323,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/logs",
+          "permissionsRequired": [
+            "data-export.logs.collection.get"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -460,6 +471,11 @@
       "description": "Entry point to stop freezing job executions"
     },
     {
+      "permissionName": "data-export.logs.collection.get",
+      "displayName": "Data Export - get error logs collection",
+      "description": "Entry point to get error logs by job execution id"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -482,7 +498,8 @@
         "data-export.mapping-profiles.item.put",
         "data-export.mapping-profiles.item.delete",
         "data-export.transformation-fields.collection.get",
-        "data-export.expire-jobs.post"
+        "data-export.expire-jobs.post",
+        "data-export.logs.collection.get"
       ],
       "visible": false
     }

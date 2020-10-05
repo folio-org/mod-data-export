@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "File that should be exported",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Record UUID",
+      "type": "string"
+    },
+    "hrid": {
+      "description": "Record HRID",
+      "type": "string"
+    },
+    "title": {
+      "description": "Record title",
+      "type": "string"
+    },
+    "recordType": {
+      "description": "Record type",
+      "type": "object",
+      "$ref": "../profiles/recordTypes.json"
+    },
+    "affectedRecords": {
+      "description": "Affected record",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "recordLog.json"
+      }
+    }
+  },
+  "required": [
+    "hrid",
+    "recordType"
+  ]
+}

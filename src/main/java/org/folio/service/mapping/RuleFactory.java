@@ -78,6 +78,8 @@ public class RuleFactory {
         rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation);
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
+      } else if(HOLDINGS.equals(mappingTransformation.getRecordType()) || ITEM.equals(mappingTransformation.getRecordType()) ) {
+        LOGGER.error("Transformation with empty value is not available for record types Holdings and Item");
       }
       if (rule.isPresent()) {
         rules.add(rule.get());
@@ -96,8 +98,6 @@ public class RuleFactory {
         }
       }
       return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation);
-    } else if(HOLDINGS.equals(recordType) || ITEM.equals(recordType) ) {
-      LOGGER.error("Transformation with empty value is not available for record types Holdings and Item");
     }
     return Optional.empty();
   }

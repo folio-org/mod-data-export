@@ -59,6 +59,19 @@
           "tOps": "ADD"
         }
       ]
+    },
+    {
+      "tableName": "error_logs",
+      "fromModuleVersion": "mod-data-export-2.2.0",
+      "withMetadata": true,
+      "withAuditing": false,
+      "foreignKeys": [
+        {
+          "fieldName": "jobProfileId",
+          "targetTable": "job_profiles",
+          "tOps": "ADD"
+        }
+      ]
     }
   ],
   "scripts": [
