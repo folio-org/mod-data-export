@@ -18,6 +18,7 @@ import io.vertx.sqlclient.PropertyKind;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.desc.ColumnDescriptor;
 import java.util.List;
 import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
@@ -165,6 +166,11 @@ class JobExecutionDaoUnitTest {
 
       @Override
       public RowSet<Row> next() {
+        return null;
+      }
+
+      @Override
+      public List<ColumnDescriptor> columnDescriptors() {
         return null;
       }
     };
