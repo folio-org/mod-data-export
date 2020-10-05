@@ -16,6 +16,9 @@ types:
   jobExecutionCollection: !include schemas/jobExecutionCollection.json
   jobExecution: !include schemas/jobExecution.json
   fileDownload: !include schemas/fileDownload.json
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 
 traits:
   validate: !include raml-util/traits/validation.raml
@@ -71,6 +74,33 @@ resourceTypes:
         pageable,
         validate
       ]
+    /{id}:
+      uriParameters:
+        id:
+          description: The UUID of a job Execution
+          type: UUID
+      description: Delete a specific job Execution
+      delete:
+       responses:
+        204:
+         description: "Item deleted successfully"
+        400:
+          description: "Bad request"
+          body:
+            text/plain:
+              example: |
+                "unable to delete JobExecution -- constraint violation"
+        404:
+          description: "Item with a given ID not found"
+          body:
+            text/plain:
+              example: |
+                "JobExecution not found"
+        500:
+          description: "Internal server error, e.g. due to misconfiguration"
+          body:
+            text/plain:
+              example: "Internal server error, contact administrator"
     /{jobExecutionId}/download/{exportFileId}:
        displayName: File Download Link
        description: API for getting the link to download files

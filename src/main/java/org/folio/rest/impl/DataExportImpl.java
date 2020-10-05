@@ -19,12 +19,12 @@ import org.folio.util.ExceptionToResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -117,6 +117,19 @@ public class DataExportImpl implements DataExport {
       .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
       .map(Response.class::cast)
       .onComplete(asyncResultHandler);
+  }
+
+  @Override
+  public void deleteDataExportJobExecutionsById(String id, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    succeededFuture().compose(ar -> jobExecutionService.deleteById(id, tenantId))
+        .map(isDeleted -> Boolean.TRUE.equals(isDeleted)
+            ? DeleteDataExportJobExecutionsByIdResponse.respond204()
+            : DeleteDataExportJobExecutionsByIdResponse
+                .respond404WithTextPlain(format("JobExecution with id '%s' was not found", id)))
+        .map(Response.class::cast).otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler);
+
   }
 
 }
