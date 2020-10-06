@@ -59,17 +59,21 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
       .withExpiration(getExpiration());
-    vertx.executeBlocking(blockingFuture -> {
-      URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
-      blockingFuture.complete(url.toString());
-    }, asyncResult -> {
-      if (asyncResult.failed()) {
-        promise.fail(asyncResult.cause());
-      } else {
-        String url = (String)asyncResult.result();
-        promise.complete(url);
-      }
-    });
+    try {
+      vertx.executeBlocking(blockingFuture -> {
+        URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+        blockingFuture.complete(url.toString());
+      }, asyncResult -> {
+        if (asyncResult.failed()) {
+          promise.fail(asyncResult.cause());
+        } else {
+          String url = (String) asyncResult.result();
+          promise.complete(url);
+        }
+      });
+    } finally {
+      s3Client.shutdown();
+    }
     return promise.future();
   }
 
