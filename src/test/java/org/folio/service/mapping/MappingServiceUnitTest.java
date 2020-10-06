@@ -7,24 +7,33 @@ import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
+import org.folio.processor.RuleProcessor;
 import org.folio.processor.rule.Rule;
+import org.folio.reader.EntityReader;
+import org.folio.rest.jaxrs.model.AffectedRecord;
+import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
+import org.folio.writer.RecordWriter;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.marc4j.marc.VariableField;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -85,20 +94,32 @@ import static org.folio.util.ExternalPathResolver.LIBRARIES;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class MappingServiceUnitTest {
 
   @InjectMocks
-  private MappingServiceImpl mappingService;
+  @Spy
+  private MappingServiceImpl mappingService = new MappingServiceImpl();
   @Mock
   private ConfigurationsClient configurationsClient;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private ErrorLogService errorLogService;
+
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceDataImpl();
+
+  @Captor
+  private ArgumentCaptor<ErrorLog> errorLogArgumentCaptor;
 
   MappingServiceUnitTest() {
     referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
@@ -125,7 +146,7 @@ class MappingServiceUnitTest {
     // then
     Assert.assertNotNull(actualRecords);
     Assert.assertEquals(0, actualRecords.size());
-    Mockito.verify(referenceDataProvider, Mockito.never()).get(any(String.class), any(OkapiConnectionParams.class));
+    verify(referenceDataProvider, Mockito.never()).get(any(String.class), any(OkapiConnectionParams.class));
   }
 
   @Test
@@ -146,6 +167,23 @@ class MappingServiceUnitTest {
     String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
 
+  }
+
+
+  @Test
+  void shouldPopulateErrorLog_whenMappingFailed() throws FileNotFoundException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+    doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyList());
+    // when
+    mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    // then
+    verify(errorLogService).saveWithAffectedRecord(instance.getJsonObject("instance"), "Error during mapping", jobExecutionId, params.getTenantId());
   }
 
   @Test

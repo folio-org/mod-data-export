@@ -24,7 +24,7 @@ public interface ExportService {
    * @param inventoryRecords collection of marc inventory records
    * @param fileDefinition   definition of file on export
    */
-  void exportInventoryRecords(List<String> inventoryRecords, FileDefinition fileDefinition);
+  void exportInventoryRecords(List<String> inventoryRecords, FileDefinition fileDefinition, String tenantId);
 
   /**
    * Performs post export logic

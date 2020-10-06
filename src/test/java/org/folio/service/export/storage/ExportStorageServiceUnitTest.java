@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.SdkClientException;
@@ -18,18 +19,39 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.ErrorLog;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.logs.ErrorLogService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.UUID;
-import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -38,10 +60,15 @@ class ExportStorageServiceUnitTest {
 
   @Mock
   private AmazonFactory amazonFactory;
+  @Mock
+  private ErrorLogService errorLogService;
   @Spy
   private Vertx vertx = Vertx.vertx();
   @InjectMocks
   private ExportStorageService exportStorageService = new AWSStorageServiceImpl();
+
+  @Captor
+  private ArgumentCaptor<ErrorLog> errorLogCaptor;
 
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "testBucket";
@@ -141,6 +168,7 @@ class ExportStorageServiceUnitTest {
       testContext.verify(()-> {
         assertTrue(ar.succeeded());
         assertEquals(response.toString(), ar.result());
+        verify(s3ClientMock).shutdown();
         testContext.completeNow();
       });
 
@@ -165,6 +193,7 @@ class ExportStorageServiceUnitTest {
       testContext.verify(() -> {
         assertTrue(ar.failed());
         assertEquals("Bucket Not Found", ar.cause().getMessage());
+        verify(s3ClientMock).shutdown();
         testContext.completeNow();
       });
 
