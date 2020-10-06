@@ -109,7 +109,7 @@ public class ExportManagerImpl implements ExportManager {
     LOGGER.info("Number of instances not found in Inventory Storage: {}", instances.size());
 
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
-    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition);
+    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
