@@ -91,7 +91,7 @@ public interface JobExecutionService {
   /**
    * Deletes a {@link JobExecution} by id
    *
-   * @param id       JobExecution id
+   * @param id JobExecution id
    * @param tenantId tenant id
    * @return future with Boolean
    */

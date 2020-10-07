@@ -117,11 +117,11 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
           .statusCode(HttpStatus.SC_NO_CONTENT);
 
       //verify the jobexecution is not present
-      vertx.setTimer(3000L, ar -> jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
+      jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
           .onComplete(jobExec -> context.verify(() -> {
             Assertions.assertEquals(true, jobExec.failed());
             context.completeNow();
-          })));
+          }));
     });
 
   }
