@@ -203,4 +203,10 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .collect(Collectors.joining(" or ")));
   }
 
+  @Override
+  public Future<Boolean> deleteById(String id, String tenantId) {
+    return jobExecutionDao.deleteById(id, tenantId);
+
+  }
+
 }
