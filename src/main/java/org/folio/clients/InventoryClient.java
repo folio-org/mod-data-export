@@ -28,6 +28,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
@@ -48,6 +49,7 @@ public class InventoryClient {
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
+  private static final String QUERY = "?(query=";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
@@ -65,7 +67,15 @@ public class InventoryClient {
     }
   }
 
-  public Map<String, JsonObject> getNatureOfContentTerms(String jobExecutionId, OkapiConnectionParams params) {
+  public Optional<JsonObject> getInstancesBulkUUIDs(String query, OkapiConnectionParams params) {
+    if (StringUtils.isEmpty(query)) {
+      return Optional.empty();
+    }
+    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query) + ")";
+    return ClientUtil.getRequest(params, endpoint);
+  }
+
+  public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTENT_TERMS);
   }
@@ -177,7 +187,7 @@ public class InventoryClient {
 
   public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-        params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
+      params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
     try {
       return Optional.of(getRequest(params, endpoint));
     } catch (HttpClientException exception) {

@@ -1,16 +1,25 @@
 package org.folio.service.file.upload;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.folio.HttpStatus;
+import org.folio.clients.InventoryClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.service.job.JobExecutionService;
-import org.folio.util.ErrorCode;
+import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.storage.FileStorage;
+import org.folio.service.job.JobExecutionService;
+import org.folio.util.ErrorCode;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
@@ -22,9 +31,11 @@ public class FileUploadServiceImpl implements FileUploadService {
   private FileDefinitionService fileDefinitionService;
   private JobExecutionService jobExecutionService;
   private FileStorage fileStorage;
+  @Autowired
+  private InventoryClient inventoryClient;
 
   public FileUploadServiceImpl(@Autowired FileStorage fileStorage, @Autowired FileDefinitionService fileDefinitionService,
-  @Autowired JobExecutionService jobExecutionService) {
+                               @Autowired JobExecutionService jobExecutionService) {
     this.fileStorage = fileStorage;
     this.fileDefinitionService = fileDefinitionService;
     this.jobExecutionService = jobExecutionService;
@@ -43,14 +54,34 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
-    return fileStorage.saveFileDataAsync(data, fileDefinition);
+    if (data.length > 0) {
+      return fileStorage.saveFileDataAsync(data, fileDefinition)
+        .compose(ar -> updateFileDefinitionWithJobExeution(new JobExecution(), fileDefinition, tenantId));
+    }
+    return Future.succeededFuture(fileDefinition);
   }
 
   @Override
   public Future<FileDefinition> completeUploading(FileDefinition fileDefinition, String tenantId) {
-    JobExecution jobExecution = new JobExecution();
-    return jobExecutionService.save(jobExecution, tenantId).compose(savedJob ->
-      fileDefinitionService.update(fileDefinition.withStatus(COMPLETED).withJobExecutionId(savedJob.getId()), tenantId));
+    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), tenantId);
+  }
+
+  @Override
+  public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
+    Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
+    List<String> ids = new ArrayList<>();
+    if (instancesUUIDs.isPresent()) {
+      JsonArray jsonIds = instancesUUIDs.get().getJsonArray("ids");
+      if (jsonIds.size() > 0) {
+        for (Object id : jsonIds) {
+          ids.add((String) id);
+        }
+        return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+          .compose(ar -> updateFileDefinitionWithJobExeution(getJobExecutionWithProgress(jsonIds.size()),
+            fileDefinition, params.getTenantId()));
+      }
+    }
+    return Future.succeededFuture(fileDefinition);
   }
 
   @Override
@@ -58,5 +89,18 @@ public class FileUploadServiceImpl implements FileUploadService {
     return fileDefinitionService.getById(fileDefinitionId, tenantId)
       .compose(fileDefinition -> fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId));
   }
+
+
+  private Future<FileDefinition> updateFileDefinitionWithJobExeution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
+    return jobExecutionService.save(jobExecution, tenantId)
+      .compose(savedJob -> fileDefinitionService.update(fileDefinition.withJobExecutionId(savedJob.getId()), tenantId));
+  }
+
+  private JobExecution getJobExecutionWithProgress(int total) {
+    return new JobExecution().
+      withProgress(new Progress()
+        .withTotal(String.valueOf(total)));
+  }
+
 
 }

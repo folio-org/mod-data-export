@@ -203,6 +203,7 @@ public abstract class RestVerticleTestBase {
     return new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
       .addHeader(OKAPI_HEADER_TENANT, tenantID)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
       .setBaseUri(BASE_OKAPI_URL)
       .build();
   }

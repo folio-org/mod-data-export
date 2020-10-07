@@ -19,6 +19,7 @@ import org.folio.service.file.upload.FileUploadService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExceptionToResponseMapper;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
@@ -33,6 +34,7 @@ import static org.folio.util.ExceptionToResponseMapper.map;
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
   public static final String CSV_FORMAT_EXTENSION = "csv";
+  public static final String CQL_FORMAT_EXTENSION = "cql";
   @Autowired
   private FileDefinitionService fileDefinitionService;
 
@@ -53,6 +55,30 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
     this.tenantId = TenantTool.calculateTenantId(tenantId);
   }
 
+  @Override
+  @Validate
+  public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
+                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+      .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+      .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
+      .map(Response.class::cast)
+      .otherwise(ExceptionToResponseMapper::map)
+      .onComplete(asyncResultHandler);
+  }
+
+
+  @Override
+  @Validate
+  public void getDataExportFileDefinitionsByFileDefinitionId(String fileDefinitionId, Map<String, String> okapiHeaders,
+                                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
+      .map(DataExportFileDefinitions.GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
+      .map(Response.class::cast)
+      .otherwise(ExceptionToResponseMapper::map)
+      .onComplete(asyncResultHandler);
+
+  }
 
   @Stream
   @Override
@@ -62,14 +88,14 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       if (okapiHeaders.containsKey(STREAM_ABORT)) {
         responseFuture = fileUploadService.errorUploading(fileDefinitionId, tenantId)
           .map(String.format("Upload stream for the file [id = '%s'] has been interrupted", fileDefinitionId))
-          .map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond400WithTextPlain);
+          .map(DataExportFileDefinitions.PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond400WithTextPlain);
       } else {
         byte[] data = IOUtils.toByteArray(entity);
         if (fileUploadStateFuture == null) {
           fileUploadStateFuture = fileUploadService.startUploading(fileDefinitionId, tenantId);
         }
         fileUploadStateFuture = fileUploadStateFuture
-          .compose(fileDefinition -> fileUploadService.saveFileChunk(fileDefinition, data, tenantId))
+          .compose(fileDefinition -> saveFileDependsOnFileExtension(fileDefinition, data, new OkapiConnectionParams(okapiHeaders)))
           .compose(fileDefinition -> data.length == 0
             ? fileUploadService.completeUploading(fileDefinition, tenantId)
             : succeededFuture(fileDefinition));
@@ -83,34 +109,14 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
     }
   }
 
-
-  @Override
-  @Validate
-  public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
-                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
-      .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
-      .map(PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
-      .map(Response.class::cast)
-      .otherwise(ExceptionToResponseMapper::map)
-      .onComplete(asyncResultHandler);
-  }
-
-
-  @Override
-  @Validate
-  public void getDataExportFileDefinitionsByFileDefinitionId(String fileDefinitionId, Map<String, String> okapiHeaders,
-                                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> fileDefinitionService.getById(fileDefinitionId, tenantId))
-      .map(GetDataExportFileDefinitionsByFileDefinitionIdResponse::respond200WithApplicationJson)
-      .map(Response.class::cast)
-      .otherwise(ExceptionToResponseMapper::map)
-      .onComplete(asyncResultHandler);
-
+  private Future<FileDefinition> saveFileDependsOnFileExtension(FileDefinition fileDefinition, byte[] data, OkapiConnectionParams params) {
+    return FileDefinition.Format.CQL.equals(fileDefinition.getFormat())
+      ? fileUploadService.saveUUIDsByCQL(fileDefinition, new String(data), params)
+      : fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
   }
 
   private Future<Void> validateFileNameExtension(String fileName) {
-    if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION)) {
+    if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION) && !FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION)) {
       throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION);
     }
     return succeededFuture();

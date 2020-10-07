@@ -1,12 +1,5 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -16,11 +9,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.io.File;
-import java.io.IOException;
-import java.util.Objects;
-import java.util.UUID;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpStatus;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -29,16 +17,36 @@ import org.folio.util.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import javax.validation.constraints.NotNull;
+import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.UUID;
+
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.rest.jaxrs.model.FileDefinition.Format.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.Format.CSV;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
+@ExtendWith(MockitoExtension.class)
 class FileUploadServiceTest extends RestVerticleTestBase {
+
   @Test
   void postFileDefinition_return200Status(VertxTestContext context) {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("InventoryUUIDs.csv");
+      .withFileName("InventoryUUIDs.csv")
+      .withFormat(CSV);
     // when created a new entity
     RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -67,7 +75,8 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // given
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("InventoryUUIDs.txt");
+      .withFileName("InventoryUUIDs.txt")
+      .withFormat(CSV);
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -117,18 +126,20 @@ class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldUploadFile_return200Status(VertxTestContext context) throws IOException {
+  void shouldUploadCSVFile_return200Status(VertxTestContext context) throws IOException {
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
       .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
       .setBaseUri(BASE_OKAPI_URL)
       .build();
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("InventoryUUIDs.csv");
+      .withFileName("InventoryUUIDs.csv")
+      .withFormat(CSV);
     // when created a new file definition
     RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -140,8 +151,8 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     // then we can start file uploading and assert response body and check file content
     FileDefinition uploadedFileDefinition = RestAssured.given()
       .spec(binaryRequestSpecification)
-      .when()
       .body(FileUtils.openInputStream(fileToUpload))
+      .when()
       .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + "/upload")
       .then()
       .statusCode(HttpStatus.SC_OK)
@@ -165,6 +176,64 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
       assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
       context.completeNow();
+    });
+
+    // clean up storage
+    FileUtils.deleteDirectory(new File("./storage"));
+  }
+
+  @Test
+  void shouldUploadCQLFile_return200Status(VertxTestContext context) throws IOException {
+    // given fileToUpload, binaryRequestSpecification and fileDefinition
+    File fileToUpload = getFileByName("InventoryUUIDs.cql");
+    RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TOKEN, TOKEN)
+      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .build();
+
+    FileDefinition givenFileDefinition = new FileDefinition()
+      .withId(UUID.randomUUID().toString())
+      .withFileName("InventoryUUIDs.csv")
+      .withFormat(CQL);
+    // when created a new file definition
+    RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(givenFileDefinition).encode())
+      .when()
+      .post(FILE_DEFINITION_SERVICE_URL)
+      .then()
+      .statusCode(HttpStatus.SC_CREATED);
+    // then we can start file uploading and assert response body and check file content
+    FileDefinition uploadedFileDefinition = RestAssured.given()
+      .spec(binaryRequestSpecification)
+      .body(FileUtils.openInputStream(fileToUpload))
+      .when()
+      .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + "/upload")
+      .then()
+      .statusCode(HttpStatus.SC_OK)
+      .body("sourcePath", notNullValue())
+      .body("metadata.createdDate", notNullValue())
+      .body("status", is(FileDefinition.Status.COMPLETED.name()))
+      .extract().body().as(FileDefinition.class);
+    // and then created job execution for current upload file definition
+    JobExecutionCollection jobExecutions = RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .get(JOB_EXECUTIONS_URL + "/" + "?query=id=" + uploadedFileDefinition.getJobExecutionId())
+      .then()
+      .statusCode(HttpStatus.SC_OK)
+      .extract().body().as(JobExecutionCollection.class);
+
+    vertx.setTimer(3000, handler -> {
+      File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
+      context.verify(() -> {
+        assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
+        assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
+        context.completeNow();
+      });
     });
 
     // clean up storage

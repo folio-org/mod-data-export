@@ -1,13 +1,7 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
@@ -17,6 +11,13 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 @RunWith(VertxUnitRunner.class)
 class InventoryClientTest extends RestVerticleTestBase {
@@ -43,6 +44,18 @@ class InventoryClientTest extends RestVerticleTestBase {
     // then
     Assert.assertTrue(inventoryResponse.isPresent());
     Assert.assertEquals(1, inventoryResponse.get().getJsonArray("instances").getList().size());
+  }
+
+  @Test
+  void shouldRetrieveInstanceBulkUUIDS() {
+    // given
+    InventoryClient inventoryClient = new InventoryClient();
+    String query = "cql query";
+    // when
+    Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesBulkUUIDs(query, okapiConnectionParams);
+    // then
+    Assert.assertTrue(inventoryResponse.isPresent());
+    Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
   }
 
   @Test
