@@ -1,11 +1,13 @@
 package org.folio.service.logs;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.folio.dao.impl.ErrorLogDaoImpl;
 import org.folio.rest.jaxrs.model.AffectedRecord;
@@ -32,38 +34,46 @@ import java.util.UUID;
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class ErrorLogServiceUnitTest {
+class ErrorLogServiceUnitTest {
   private static final String QUERY = "query";
   private static final String TENANT_ID = "diku";
   private static final String JOB_EXECUTION_ID = "jobExecutionId";
   private static final String ERROR_REASON = "Error reason";
-
+  private static final String INSTANCE_TITLE = "The Journal of ecclesiastical history";
+  private static final String INSTANCE_HR_ID = "1";
+  private static final String HOLDINGS_HR_ID = "2";
+  private static final String ITEM_HR_ID = "3";
+  private static final String INSTANCE_ID = "c8b50e3f-0446-429c-960e-03774b88223f";
+  private static final String HOLDINGS_ID = "77d8456b-aec2-48ec-8deb-37c0a65983e6";
+  private static final String ITEM_ID = "e2ecf553-3892-4205-aaff-6761a4d6ccfc";
+  private static OkapiConnectionParams okapiConnectionParams;
+  private static ErrorLog errorLog;
+  private static ErrorLogCollection errorLogCollection;
+  private static JsonObject instance;
 
   @Spy
   @InjectMocks
   private ErrorLogServiceImpl errorLogService;
   @Mock
   private ErrorLogDaoImpl errorLogDao;
-
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogCaptor;
 
-  private static OkapiConnectionParams okapiConnectionParams;
-  private static ErrorLog errorLog;
-  private static ErrorLogCollection errorLogCollection;
-
   @BeforeAll
   static void beforeEach() {
+    instance = createRecord();
     errorLog = new ErrorLog()
       .withId(UUID.randomUUID().toString())
       .withJobExecutionId(UUID.randomUUID().toString())
@@ -130,22 +140,25 @@ public class ErrorLogServiceUnitTest {
     JsonObject instanceRecord = new JsonObject()
       .put("hrid", "1")
       .put("id", "c8b50e3f-0446-429c-960e-03774b88223f")
-      .put("title", "The Journal of ecclesiastical history");
+      .put("title", INSTANCE_TITLE);
+    JsonObject record = new JsonObject();
+    record.put("instance", instanceRecord);
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceRecord, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
-      Assert.assertEquals(errorLog.getAffectedRecord().getRecordType(), AffectedRecord.RecordType.INSTANCE);
-      Assert.assertEquals(errorLog.getAffectedRecord().getHrid(), "1");
-      Assert.assertEquals(errorLog.getAffectedRecord().getId(), "c8b50e3f-0446-429c-960e-03774b88223f");
-      Assert.assertEquals(errorLog.getAffectedRecord().getTitle(), "The Journal of ecclesiastical history");
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
+      Assert.assertEquals(INSTANCE_HR_ID, errorLog.getAffectedRecord().getHrid());
+      Assert.assertEquals(INSTANCE_ID, errorLog.getAffectedRecord().getId());
+      Assert.assertEquals(INSTANCE_TITLE, errorLog.getAffectedRecord().getTitle());
+      Assert.assertTrue(errorLog.getAffectedRecord().getAffectedRecords().isEmpty());
       context.completeNow();
     }));
   }
@@ -162,10 +175,89 @@ public class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
-      Assert.assertEquals(errorLog.getAffectedRecord().getRecordType(), AffectedRecord.RecordType.INSTANCE);
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void saveWithAffectedRecord_shouldSaveWithHoldingsAndItemsInfo(VertxTestContext context) {
+    // given
+    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instance, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      assertErrorLogWithHoldingsAndItems(errorLog, true);
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void saveWithAffectedRecord_shouldSaveWithHoldingsInfo(VertxTestContext context) {
+    // given
+    JsonObject instanceObject = new JsonObject();
+    instanceObject.put("instance", instance.getJsonObject("instance"));
+    instanceObject.put("holdings", instance.getJsonArray("holdings"));
+    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      assertErrorLogWithHoldingsAndItems(errorLog, false);
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void saveWithAffectedRecord_shouldSaveWithHoldingsInfoWithoutItemIfHoldingIdIsEmpty(VertxTestContext context) {
+    // given
+    JsonObject instanceObject = new JsonObject();
+    instanceObject.put("instance", instance.getJsonObject("instance"));
+    instanceObject.put("holdings", instance.getJsonArray("holdings"));
+    instanceObject.put("items", instance.getJsonArray("items"));
+    JsonArray items = instanceObject.getJsonArray("items");
+    items.getJsonObject(0).put("holdingsRecordId", StringUtils.EMPTY);
+    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      assertErrorLogWithHoldingsAndItems(errorLog, false);
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void saveWithAffectedRecord_shouldSaveWithHoldingsInfoWithoutItemIfHoldingIdIsWrong(VertxTestContext context) {
+    // given
+    JsonObject instanceObject = new JsonObject();
+    instanceObject.put("instance", instance.getJsonObject("instance"));
+    instanceObject.put("holdings", instance.getJsonArray("holdings"));
+    instanceObject.put("items", instance.getJsonArray("items"));
+    JsonArray items = instanceObject.getJsonArray("items");
+    items.getJsonObject(0).put("holdingsRecordId", UUID.randomUUID().toString());
+    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      assertErrorLogWithHoldingsAndItems(errorLog, false);
       context.completeNow();
     }));
   }
@@ -181,9 +273,9 @@ public class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
     }));
   }
@@ -214,6 +306,52 @@ public class ErrorLogServiceUnitTest {
       verify(errorLogDao).update(eq(errorLog), eq(TENANT_ID));
       context.completeNow();
     }));
+  }
+
+  private void assertErrorLogWithHoldingsAndItems(ErrorLog errorLog, boolean isItemPresent) {
+    Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+    Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+    Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+    AffectedRecord instanceAffectedRecord = errorLog.getAffectedRecord();
+    Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, instanceAffectedRecord.getRecordType());
+    Assert.assertEquals(INSTANCE_HR_ID, instanceAffectedRecord.getHrid());
+    Assert.assertEquals(INSTANCE_ID, instanceAffectedRecord.getId());
+    Assert.assertEquals(INSTANCE_TITLE, instanceAffectedRecord.getTitle());
+    AffectedRecord holdingAffectedRecord = errorLog.getAffectedRecord().getAffectedRecords().get(0);
+    Assert.assertEquals(HOLDINGS_HR_ID, holdingAffectedRecord.getHrid());
+    Assert.assertEquals(HOLDINGS_ID, holdingAffectedRecord.getId());
+    Assert.assertEquals(HOLDINGS, holdingAffectedRecord.getRecordType());
+    if (isItemPresent) {
+      AffectedRecord itemAffectedRecord = holdingAffectedRecord.getAffectedRecords().get(0);
+      Assert.assertEquals(ITEM_HR_ID, itemAffectedRecord.getHrid());
+      Assert.assertEquals(ITEM_ID, itemAffectedRecord.getId());
+      Assert.assertEquals(ITEM, itemAffectedRecord.getRecordType());
+    } else {
+      Assert.assertTrue(holdingAffectedRecord.getAffectedRecords().isEmpty());
+    }
+  }
+
+  private static JsonObject createRecord() {
+    instance = new JsonObject();
+    JsonObject instanceRecord = new JsonObject()
+      .put("hrid", INSTANCE_HR_ID)
+      .put("id", INSTANCE_ID)
+      .put("title", INSTANCE_TITLE);
+    JsonObject holdingRecord = new JsonObject()
+      .put("hrid", HOLDINGS_HR_ID)
+      .put("id", HOLDINGS_ID)
+      .put("instanceId", INSTANCE_ID);
+    JsonObject itemRecord = new JsonObject()
+      .put("hrid", ITEM_HR_ID)
+      .put("id", ITEM_ID)
+      .put("holdingsRecordId", HOLDINGS_ID);
+    JsonArray holdings = new JsonArray().add(holdingRecord);
+    JsonArray items = new JsonArray().add(itemRecord);
+    instance.put("instance", instanceRecord);
+    instance.put("holdings", holdings);
+    instance.put("items", items);
+
+    return instance;
   }
 
 }

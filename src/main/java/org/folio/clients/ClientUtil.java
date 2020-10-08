@@ -1,5 +1,6 @@
 package org.folio.clients;
 
+import static java.lang.String.format;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
@@ -11,7 +12,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
@@ -33,30 +33,30 @@ public final class ClientUtil {
   private ClientUtil() {
   }
 
-  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
+  public static JsonObject getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     URI uri = prepareFullUriWithQuery(ids, params, endpoint, queryPattern);
     httpGet.setURI(uri);
     LOGGER.info("Calling GET By IDs {}", uri);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
-      return Optional.ofNullable(getResponseEntity(response));
-    } catch (IOException e) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      return Optional.empty();
+      return getResponseEntity(response);
+    } catch (IOException exception) {
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
+      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
     }
   }
 
-  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) {
+  public static JsonObject getRequest(OkapiConnectionParams params, String endpoint) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(endpoint));
     LOGGER.info("Calling GET {}", endpoint);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
-      return Optional.ofNullable(getResponseEntity(response));
-    } catch (IOException e) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      return Optional.empty();
+      return getResponseEntity(response);
+    } catch (IOException exception) {
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
+      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
     }
   }
 
@@ -69,16 +69,16 @@ public final class ClientUtil {
 
   @NotNull
   private static URI prepareFullUriWithQuery(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
-    String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
+    String query = ids.stream().map(s -> format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
-      String uri = String.format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
+      String uri = format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
     }
   }
 
-  public static JsonObject getResponseEntity(CloseableHttpResponse response) {
+  public static JsonObject getResponseEntity(CloseableHttpResponse response) throws IOException {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
       try {
@@ -87,10 +87,10 @@ public final class ClientUtil {
         LOGGER.error("Exception while building response entity", e);
       }
     }
-    return null;
+    throw new IOException("Get invalid response with status: " + response.getStatusLine().getStatusCode());
   }
 
   static String buildQueryEndpoint(String endpoint, Object... params) {
-    return String.format(endpoint, params);
+    return format(endpoint, params);
   }
 }

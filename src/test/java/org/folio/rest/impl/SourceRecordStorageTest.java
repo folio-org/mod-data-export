@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
@@ -35,7 +36,7 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
     List<String> uuids = Arrays.asList("ae573875-fbc8-40e7-bda7-0ac283354226", "5fc04e92-70dd-46b8-97ea-194015762a60");
     // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByInstanceIds(uuids, okapiConnectionParams);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByInstanceIds(uuids, UUID.randomUUID().toString(), okapiConnectionParams);
     // then
     Assert.assertTrue(srsResponse.isPresent());
     Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
