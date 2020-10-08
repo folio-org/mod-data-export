@@ -181,7 +181,7 @@ public class InventoryClient {
     try {
       return getRequest(params, endpoint);
     } catch (HttpClientException exception) {
-      errorLogService.saveGeneralError("Error while getting holdings by instance ids " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralError(String.format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -192,7 +192,7 @@ public class InventoryClient {
           QUERY_PATTERN_ITEM);
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralError("Error while getting items by holding ids: " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralError("Error while getting items by holding ids, message: " + exception.getMessage(), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

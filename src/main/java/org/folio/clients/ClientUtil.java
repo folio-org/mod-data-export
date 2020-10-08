@@ -44,7 +44,7 @@ public final class ClientUtil {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException exception) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
-      throw new HttpClientException(format("Exception while calling %s", httpGet.getURI()));
+      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
     }
   }
 
@@ -55,9 +55,9 @@ public final class ClientUtil {
     LOGGER.info("Calling GET {}", endpoint);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
-    } catch (IOException e) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      throw new HttpClientException(format("Exception while calling %s", httpGet.getURI()));
+    } catch (IOException exception) {
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
+      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
     }
   }
 

@@ -28,8 +28,8 @@ public class UsersClient {
     String endpoint = ClientUtil.buildQueryEndpoint(resourcesPathWithId(USERS), params.getOkapiUrl(), userId);
     try {
       return ClientUtil.getRequest(params, endpoint);
-    } catch (HttpClientException e) {
-      errorLogService.saveGeneralError("Error while getting user with id = " + userId, jobExecutionId, params.getTenantId());
+    } catch (HttpClientException exception) {
+      errorLogService.saveGeneralError(String.format("Error while getting user with id = %s, message: %s", userId, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

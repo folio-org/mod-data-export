@@ -95,7 +95,7 @@ public class ExportManagerImpl implements ExportManager {
      * fly
      */
     if (isTransformationEmpty(mappingProfile)) {
-      srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, params);
+      srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
       List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
@@ -135,10 +135,10 @@ public class ExportManagerImpl implements ExportManager {
    * @param params      okapi connection parameters
    * @return @see SrsLoadResult
    */
-  private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, OkapiConnectionParams params) {
+  private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId, OkapiConnectionParams params) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, params);
+      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, jobExecutionId, params);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
       srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
     });

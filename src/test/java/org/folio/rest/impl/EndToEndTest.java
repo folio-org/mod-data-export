@@ -250,7 +250,7 @@ class EndToEndTest extends RestVerticleTestBase {
 
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
-    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
+    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
   }
 
   private ArgumentCaptor<FileDefinition> givenCaptureFileExportDefinition() {
@@ -262,7 +262,7 @@ class EndToEndTest extends RestVerticleTestBase {
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
     String json = FileUtils.readFileToString(TestUtil.getFileFromResources(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
-    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
+    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
   }
 
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFile(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {

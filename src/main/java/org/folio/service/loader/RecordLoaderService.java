@@ -15,10 +15,11 @@ public interface RecordLoaderService {
    * Retrieves SRS records using blocking http client
    *
    * @param instanceIds           inventory instances identifiers
+   * @param jobExecutionId        job execution id
    * @param okapiConnectionParams okapi headers and connection parameters
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, OkapiConnectionParams okapiConnectionParams);
+  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, String jobExecutionId, OkapiConnectionParams okapiConnectionParams);
 
   /**
    * Retrieves Inventory instances using blocking http client
