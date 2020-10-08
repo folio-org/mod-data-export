@@ -1,5 +1,6 @@
 package org.folio.clients;
 
+import static java.lang.String.format;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
@@ -33,7 +34,7 @@ public final class ClientUtil {
   private ClientUtil() {
   }
 
-  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
+  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws ClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     URI uri = prepareFullUriWithQuery(ids, params, endpoint, queryPattern);
@@ -41,13 +42,13 @@ public final class ClientUtil {
     LOGGER.info("Calling GET By IDs {}", uri);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return Optional.ofNullable(getResponseEntity(response));
-    } catch (IOException e) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      return Optional.empty();
+    } catch (IOException exception) {
+      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
+      throw new ClientException(format("Exception while calling %s", httpGet.getURI()));
     }
   }
 
-  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) {
+  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) throws ClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(endpoint));
@@ -56,7 +57,7 @@ public final class ClientUtil {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      return Optional.empty();
+      throw new ClientException(format("Exception while calling %s", httpGet.getURI()));
     }
   }
 
@@ -69,9 +70,9 @@ public final class ClientUtil {
 
   @NotNull
   private static URI prepareFullUriWithQuery(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) {
-    String query = ids.stream().map(s -> String.format(queryPattern, s)).collect(Collectors.joining(" or "));
+    String query = ids.stream().map(s -> format(queryPattern, s)).collect(Collectors.joining(" or "));
     try {
-      String uri = String.format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
+      String uri = format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8.name()));
       return URI.create(uri);
     } catch (UnsupportedEncodingException e) {
       throw new IllegalArgumentException("Exception while building a query from list of ids", e);
@@ -91,6 +92,6 @@ public final class ClientUtil {
   }
 
   static String buildQueryEndpoint(String endpoint, Object... params) {
-    return String.format(endpoint, params);
+    return format(endpoint, params);
   }
 }

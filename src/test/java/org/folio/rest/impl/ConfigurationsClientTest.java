@@ -4,7 +4,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.rule.Rule;
-import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,6 +12,7 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
@@ -24,6 +24,7 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
   private static final String DEFAULT_LEADER_TRANSLATION_PARAMETERS_POS17 = "3";
   private static final String DEFAULT_LEADER_TRANSLATION_PARAMETERS_POS18 = "c";
   private static final String DEFAULT_LEADER_TRANSLATION_PARAMETERS_POS19 = " ";
+  private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
@@ -39,7 +40,7 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
     ConfigurationsClient configurationsClient = new ConfigurationsClient();
 
     //when
-    List<Rule> ruleList = configurationsClient.getRulesFromConfiguration(okapiConnectionParams);
+    List<Rule> ruleList = configurationsClient.getRulesFromConfiguration(JOB_EXECUTION_ID, okapiConnectionParams);
 
     Assert.assertFalse(ruleList.isEmpty());
   }
@@ -49,7 +50,7 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
     ConfigurationsClient configurationsClient = new ConfigurationsClient();
 
     //when
-    List<Rule> ruleList = configurationsClient.getRulesFromConfiguration(okapiConnectionParams);
+    List<Rule> ruleList = configurationsClient.getRulesFromConfiguration(JOB_EXECUTION_ID, okapiConnectionParams);
 
     Assert.assertEquals(DEFAULT_LEADER_FIELD_NAME, ruleList.get(0).getField());
     Assert.assertEquals(DEFAULT_LEADER_FIELD_DESCRIPTION, ruleList.get(0).getDescription());

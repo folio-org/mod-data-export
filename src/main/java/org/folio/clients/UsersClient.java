@@ -4,7 +4,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.UserInfo;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.util.OkapiConnectionParams;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -19,10 +21,17 @@ public class UsersClient {
   private static final String FIRST_NAME = "firstName";
   private static final String LAST_NAME = "lastName";
   private static final String USER_NAME = "username";
+  @Autowired
+  private ErrorLogService errorLogService;
 
-  public Optional<JsonObject> getById(String userId, OkapiConnectionParams params) {
+  public Optional<JsonObject> getById(String userId, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = ClientUtil.buildQueryEndpoint(resourcesPathWithId(USERS), params.getOkapiUrl(), userId);
-    return ClientUtil.getRequest(params, endpoint);
+    try {
+      return ClientUtil.getRequest(params, endpoint);
+    } catch (ClientException e) {
+      errorLogService.saveGeneralError("Error while getting user with id = " + userId, jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
   }
 
   public Future<UserInfo> getUserInfoAsync(String userId, OkapiConnectionParams params) {

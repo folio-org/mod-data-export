@@ -44,8 +44,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, OkapiConnectionParams params, int partitionSize) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesByIds(new ArrayList<>(instanceIds), params, partitionSize);
+  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
+    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
     return optionalRecords.map(instances -> populateLoadResultFromResponse("instances", instances)).orElseGet(ArrayList::new);
   }
 
@@ -83,14 +83,14 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> getHoldingsForInstance(String instanceId, OkapiConnectionParams params) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getHoldingsByInstanceId(instanceId, params);
+  public List<JsonObject> getHoldingsForInstance(String instanceId, String jobExecutionId, OkapiConnectionParams params) {
+    Optional<JsonObject> optionalRecords = inventoryClient.getHoldingsByInstanceId(instanceId, jobExecutionId, params);
     return optionalRecords.map(holdings -> populateLoadResultFromResponse("holdingsRecords", holdings)).orElseGet(ArrayList::new);
   }
 
   @Override
-  public List<JsonObject> getAllItemsForHolding(List<String> holdingIds, OkapiConnectionParams params) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getItemsByHoldingIds(holdingIds, params);
+  public List<JsonObject> getAllItemsForHolding(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params) {
+    Optional<JsonObject> optionalRecords = inventoryClient.getItemsByHoldingIds(holdingIds, jobExecutionId, params);
     return optionalRecords.map(items -> populateLoadResultFromResponse("items", items)).orElseGet(ArrayList::new);
   }
 }

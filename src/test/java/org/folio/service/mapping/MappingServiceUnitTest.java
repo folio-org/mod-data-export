@@ -96,7 +96,6 @@ import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
@@ -156,7 +155,7 @@ class MappingServiceUnitTest {
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
@@ -177,13 +176,13 @@ class MappingServiceUnitTest {
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyList());
     // when
     mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(instance.getJsonObject("instance"), "Error during mapping", jobExecutionId, params.getTenantId());
+    verify(errorLogService).saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, params.getTenantId());
   }
 
   @Test
@@ -196,7 +195,7 @@ class MappingServiceUnitTest {
     mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
@@ -220,7 +219,7 @@ class MappingServiceUnitTest {
     mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
@@ -258,7 +257,7 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(getDefaultRules());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
@@ -284,7 +283,7 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createInstanceTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
@@ -311,7 +310,7 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
 
     // when
@@ -339,7 +338,7 @@ class MappingServiceUnitTest {
     mappingProfile.setTransformations(createItemTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
-    Mockito.when(configurationsClient.getRulesFromConfiguration(any(OkapiConnectionParams.class)))
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);

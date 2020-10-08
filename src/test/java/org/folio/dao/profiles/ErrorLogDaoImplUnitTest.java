@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
-public class ErrorLogDaoImplUnitTest {
+class ErrorLogDaoImplUnitTest {
 
   private static final String TABLE = "error_logs";
   private static final String TENANT_ID = "diku";

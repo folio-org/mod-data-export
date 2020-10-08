@@ -41,6 +41,7 @@ class RecordLoaderServiceUnitTest{
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
   protected static final String HOLDINGS_RESPONSE_JSON = "mockData/inventory/holdings_in000005.json";
+  private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
 
   @Mock
   SourceRecordStorageClient srsClient;
@@ -93,7 +94,7 @@ class RecordLoaderServiceUnitTest{
     // given
     List<String> uuids = new ArrayList<>();
     // when call loadInventoryInstances method, then assert no exception thrown
-    assertThatCode(() -> recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams, LIMIT))
+    assertThatCode(() -> recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT))
       .doesNotThrowAnyException();
   }
 
@@ -101,9 +102,9 @@ class RecordLoaderServiceUnitTest{
   void loadInstanceRecords_shouldReturnTwoRecordsByIds() {
     // given
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
-    when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
+    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams, LIMIT);
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
     assertThat(inventoryResponse, hasSize(2));
   }
@@ -112,10 +113,10 @@ class RecordLoaderServiceUnitTest{
   void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
     JsonObject data = buildEmptyResponse("instances");
-    when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
+    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams, LIMIT);
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
     assertThat(inventoryResponse, empty());
   }
@@ -123,10 +124,10 @@ class RecordLoaderServiceUnitTest{
   @Test
   void loadInstanceRecords_shouldReturnEmptyList_whenOptionalResponseIsNotPresent() {
     // given
-    when(inventoryClient.getInstancesByIds(anyList(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
+    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, okapiConnectionParams, LIMIT);
+    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
     assertThat(inventoryResponse, empty());
   }
@@ -135,9 +136,9 @@ class RecordLoaderServiceUnitTest{
   void getHoldingsRecords_shouldReturnTwoRecordsByIds() {
     // given
     String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
-    when(inventoryClient.getHoldingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromInventoryHoldings));
+    when(inventoryClient.getHoldingsByInstanceId(anyString(), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromInventoryHoldings));
     // when
-    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
+    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, JOB_EXECUTION_ID, okapiConnectionParams);
     //then
     assertThat(holdingsResponse, hasSize(2));
   }
@@ -147,9 +148,9 @@ class RecordLoaderServiceUnitTest{
     // given
     JsonObject data = buildEmptyResponse("holdingsRecords");
     String instanceUUID = "f31a36de-fcf8-44f9-87ef-a55d06ad21ae";
-    when(inventoryClient.getHoldingsByInstanceId(anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    when(inventoryClient.getHoldingsByInstanceId(anyString(), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
     // when
-    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, okapiConnectionParams);
+    List<JsonObject> holdingsResponse = recordLoaderService.getHoldingsForInstance(instanceUUID, JOB_EXECUTION_ID, okapiConnectionParams);
     //then
     assertThat(holdingsResponse, empty());
   }
@@ -159,9 +160,9 @@ class RecordLoaderServiceUnitTest{
     // given
     JsonObject data = buildEmptyResponse("items");
     List<String> holdingIDs = Collections.singletonList(UUID.randomUUID().toString());
-    when(inventoryClient.getItemsByHoldingIds(anyList(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
+    when(inventoryClient.getItemsByHoldingIds(anyList(), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(data));
     // when
-    List<JsonObject> itemsResponse = recordLoaderService.getAllItemsForHolding(holdingIDs, okapiConnectionParams);
+    List<JsonObject> itemsResponse = recordLoaderService.getAllItemsForHolding(holdingIDs, JOB_EXECUTION_ID, okapiConnectionParams);
     //then
     assertThat(itemsResponse, empty());
   }

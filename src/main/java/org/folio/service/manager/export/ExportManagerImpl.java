@@ -18,6 +18,7 @@ import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.convertor.InventoryRecordConvertorService;
 import org.folio.service.mapping.convertor.SrsRecordConvertorService;
@@ -57,6 +58,8 @@ public class ExportManagerImpl implements ExportManager {
   private InventoryRecordConvertorService inventoryRecordService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  ErrorLogService errorLogService;
 
   public ExportManagerImpl() {
   }
@@ -104,10 +107,13 @@ public class ExportManagerImpl implements ExportManager {
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
     }
 
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), params);
+    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    LOGGER.info("Number of instances not found in Inventory Storage: {}", instances.size());
-
+    int numberOfNotFoundRecords = srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size();
+    LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
+    if (numberOfNotFoundRecords > 0) {
+      errorLogService.saveGeneralError("Some records are not found in srs and inventory, number of not found records: " +  numberOfNotFoundRecords, exportPayload.getJobExecutionId(), params.getTenantId());
+    }
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
@@ -146,10 +152,10 @@ public class ExportManagerImpl implements ExportManager {
    * @param params                    okapi connection parameters
    * @return list of instances
    */
-  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, OkapiConnectionParams params) {
+  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
     List<JsonObject> instances = new ArrayList<>();
     Lists.partition(singleInstanceIdentifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, params, INVENTORY_LOAD_PARTITION_SIZE);
+        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, jobExecutionId, params, INVENTORY_LOAD_PARTITION_SIZE);
         instances.addAll(partitionLoadResult);
       }
     );
@@ -185,8 +191,10 @@ public class ExportManagerImpl implements ExportManager {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
+        errorLogService.saveGeneralError(serviceException.getMessage(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
         return ExportResult.failed(serviceException.getErrorCode());
       }
+      errorLogService.saveGeneralError(ErrorCode.GENERIC_ERROR_CODE.getDescription(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export has been successfully passed");
@@ -194,6 +202,7 @@ public class ExportManagerImpl implements ExportManager {
         if (exportPayload.getExportedRecordsNumber() == 0) {
           return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
         } else if (exportPayload.getFailedRecordsNumber() > 0) {
+          errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
           return ExportResult.completedWithErrors();
         } else {
           return ExportResult.completed();

@@ -11,7 +11,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;

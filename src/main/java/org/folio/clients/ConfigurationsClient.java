@@ -6,10 +6,12 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.processor.rule.Rule;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
@@ -28,6 +30,8 @@ public class ConfigurationsClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String QUERY = "?query=";
   private static final String QUERY_VALUE = "code=\"RULES_OVERRIDE\" AND enabled==true";
+  @Autowired
+  private ErrorLogService errorLogService;
 
   /**
    * Fetch rules for the mapping process from mod-configuration. If there are no rules provided in mod-configuration
@@ -36,9 +40,15 @@ public class ConfigurationsClient {
    * @param params okapi headers and connection parameters
    * @return list of {@link Rule}
    */
-  public List<Rule> getRulesFromConfiguration(OkapiConnectionParams params) {
+  public List<Rule> getRulesFromConfiguration(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(QUERY_VALUE);
-    Optional<JsonObject> rulesFromConfig = ClientUtil.getRequest(params, endpoint);
+    Optional<JsonObject> rulesFromConfig ;
+    try {
+      rulesFromConfig = ClientUtil.getRequest(params, endpoint);
+    } catch (ClientException e) {
+      errorLogService.saveGeneralError("Error while query the rules from mod configuration: " + e.getMessage(), jobExecutionId, params.getTenantId());
+      rulesFromConfig = Optional.empty();
+    }
     return rulesFromConfig.map(entries -> constructRulesFromJson(entries, params.getTenantId())).orElse(emptyList());
   }
 

@@ -42,7 +42,7 @@ class UsersClientTest extends RestVerticleTestBase {
     // given
     UsersClient usersClient = new UsersClient();
     // when
-    Optional<JsonObject> optionalUser = usersClient.getById(UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> optionalUser = usersClient.getById(UUID.randomUUID().toString(), UUID.randomUUID().toString(), okapiConnectionParams);
     // then
     Assert.assertTrue(optionalUser.isPresent());
   }

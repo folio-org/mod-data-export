@@ -32,35 +32,31 @@ import java.util.UUID;
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class ErrorLogServiceUnitTest {
+class ErrorLogServiceUnitTest {
   private static final String QUERY = "query";
   private static final String TENANT_ID = "diku";
   private static final String JOB_EXECUTION_ID = "jobExecutionId";
   private static final String ERROR_REASON = "Error reason";
-
-
+  private static OkapiConnectionParams okapiConnectionParams;
+  private static ErrorLog errorLog;
+  private static ErrorLogCollection errorLogCollection;
   @Spy
   @InjectMocks
   private ErrorLogServiceImpl errorLogService;
   @Mock
   private ErrorLogDaoImpl errorLogDao;
-
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogCaptor;
-
-  private static OkapiConnectionParams okapiConnectionParams;
-  private static ErrorLog errorLog;
-  private static ErrorLogCollection errorLogCollection;
 
   @BeforeAll
   static void beforeEach() {
@@ -131,21 +127,23 @@ public class ErrorLogServiceUnitTest {
       .put("hrid", "1")
       .put("id", "c8b50e3f-0446-429c-960e-03774b88223f")
       .put("title", "The Journal of ecclesiastical history");
+    JsonObject record = new JsonObject();
+    record.put("instance", instanceRecord);
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceRecord, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
-      Assert.assertEquals(errorLog.getAffectedRecord().getRecordType(), AffectedRecord.RecordType.INSTANCE);
-      Assert.assertEquals(errorLog.getAffectedRecord().getHrid(), "1");
-      Assert.assertEquals(errorLog.getAffectedRecord().getId(), "c8b50e3f-0446-429c-960e-03774b88223f");
-      Assert.assertEquals(errorLog.getAffectedRecord().getTitle(), "The Journal of ecclesiastical history");
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
+      Assert.assertEquals("1", errorLog.getAffectedRecord().getHrid());
+      Assert.assertEquals("c8b50e3f-0446-429c-960e-03774b88223f", errorLog.getAffectedRecord().getId());
+      Assert.assertEquals("The Journal of ecclesiastical history", errorLog.getAffectedRecord().getTitle());
       context.completeNow();
     }));
   }
@@ -162,10 +160,10 @@ public class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
-      Assert.assertEquals(errorLog.getAffectedRecord().getRecordType(), AffectedRecord.RecordType.INSTANCE);
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
       context.completeNow();
     }));
   }
@@ -181,9 +179,9 @@ public class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(errorLog.getLogLevel(), ErrorLog.LogLevel.ERROR);
-      Assert.assertEquals(errorLog.getReason(), ERROR_REASON);
-      Assert.assertEquals(errorLog.getJobExecutionId(), JOB_EXECUTION_ID);
+      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
     }));
   }

@@ -17,11 +17,9 @@ import java.util.UUID;
 
 import org.assertj.core.util.Maps;
 import org.folio.clients.UsersClient;
-import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.file.definition.FileDefinitionService;
@@ -158,7 +156,7 @@ class InputDataManagerUnitTest {
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
-    when(usersClient.getById(anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
+    when(usersClient.getById(anyString(), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
     doReturn(sourceReader).when(inputDataManager).initSourceReader(any(FileDefinition.class), anyInt());

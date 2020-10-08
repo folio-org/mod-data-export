@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 @ExtendWith(MockitoExtension.class)
-public class ErrorLogsTest extends RestVerticleTestBase {
+class ErrorLogsTest extends RestVerticleTestBase {
 
   @Autowired
   private ErrorLogDao errorLogDao;
@@ -38,7 +38,7 @@ public class ErrorLogsTest extends RestVerticleTestBase {
   }
 
   @Test
-  public void shouldReturnErrorLogsCollectionWithTwoRecords(VertxTestContext context) {
+  void shouldReturnErrorLogsCollectionWithTwoRecords(VertxTestContext context) {
     // given
     AffectedRecord instanceRecord = new AffectedRecord()
       .withRecordType(AffectedRecord.RecordType.INSTANCE)

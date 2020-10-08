@@ -13,6 +13,7 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.convertor.InventoryRecordConvertorService;
 import org.folio.service.mapping.convertor.SrsRecordConvertorService;
 import org.folio.util.OkapiConnectionParams;
@@ -37,6 +38,8 @@ class ExportManagerUnitTest {
   private SrsRecordConvertorService srsRecordService;
   @Mock
   private InventoryRecordConvertorService inventoryRecordService;
+  @Mock
+  private ErrorLogService errorLogService;
   @InjectMocks
   private ExportManagerImpl exportManager = Mockito.spy(new ExportManagerImpl());
 
@@ -57,10 +60,11 @@ class ExportManagerUnitTest {
     exportManager.exportBlocking(exportPayload);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), any(OkapiConnectionParams.class));
-    Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
+    Mockito.verify(errorLogService).saveGeneralError(anyString(), anyString(), anyString());
   }
 
 }
