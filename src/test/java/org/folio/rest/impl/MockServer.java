@@ -14,6 +14,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -208,6 +209,10 @@ public class MockServer {
     try {
       instance = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_RECORDS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, INSTANCE, instance);
+      String query = ctx.request().getParam("query");
+      if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+        serverResponse(ctx, 500, APPLICATION_JSON, null);
+      }
       serverResponse(ctx, 200, APPLICATION_JSON, instance.encodePrettily());
     } catch (IOException e) {
       ctx.response()

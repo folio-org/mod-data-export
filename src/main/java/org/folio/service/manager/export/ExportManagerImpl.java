@@ -101,8 +101,7 @@ public class ExportManagerImpl implements ExportManager {
       List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
           exportPayload.getJobExecutionId(), params);
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
-      LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs()
-        .size());
+      LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
     } else {
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
     }

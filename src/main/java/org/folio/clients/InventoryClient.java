@@ -56,8 +56,8 @@ public class InventoryClient {
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
-      return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
-          QUERY_PATTERN_INVENTORY);
+      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+          QUERY_PATTERN_INVENTORY));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralError("Error while getting instances by ids. " + exception.getMessage(), jobExecutionId, params.getTenantId());
@@ -155,7 +155,7 @@ public class InventoryClient {
     Optional<JsonObject> responseBody;
     Map<String, JsonObject> map = new HashMap<>();
     try {
-      responseBody = ClientUtil.getRequest(params, queryEndpoint);
+      responseBody = Optional.of(ClientUtil.getRequest(params, queryEndpoint));
     } catch (HttpClientException e) {
       if (StringUtils.isNotEmpty(jobExecutionId)) {
         errorLogService.saveGeneralError("Error while getting reference data from inventory during the export process by calling  " + url, jobExecutionId, params.getTenantId());
@@ -179,7 +179,7 @@ public class InventoryClient {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
         params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
     try {
-      return getRequest(params, endpoint);
+      return Optional.of(getRequest(params, endpoint));
     } catch (HttpClientException exception) {
       errorLogService.saveGeneralError(String.format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
@@ -188,11 +188,11 @@ public class InventoryClient {
 
   public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params) {
     try {
-      return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-          QUERY_PATTERN_ITEM);
+      return Optional.of(ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+          QUERY_PATTERN_ITEM));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralError("Error while getting items by holding ids, message: " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralError("Error while getting items by holding ids " + exception.getMessage(), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

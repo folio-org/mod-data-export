@@ -44,7 +44,7 @@ public class ConfigurationsClient {
     String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(QUERY_VALUE);
     Optional<JsonObject> rulesFromConfig ;
     try {
-      rulesFromConfig = ClientUtil.getRequest(params, endpoint);
+      rulesFromConfig = Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
       errorLogService.saveGeneralError("Error while query the rules from mod configuration: " + e.getMessage(), jobExecutionId, params.getTenantId());
       rulesFromConfig = Optional.empty();

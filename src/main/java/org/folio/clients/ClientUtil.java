@@ -12,7 +12,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.MediaType;
@@ -34,27 +33,27 @@ public final class ClientUtil {
   private ClientUtil() {
   }
 
-  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws HttpClientException {
+  public static JsonObject getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     URI uri = prepareFullUriWithQuery(ids, params, endpoint, queryPattern);
     httpGet.setURI(uri);
     LOGGER.info("Calling GET By IDs {}", uri);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
-      return Optional.ofNullable(getResponseEntity(response));
+      return getResponseEntity(response);
     } catch (IOException exception) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
       throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
     }
   }
 
-  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) throws HttpClientException {
+  public static JsonObject getRequest(OkapiConnectionParams params, String endpoint) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(endpoint));
     LOGGER.info("Calling GET {}", endpoint);
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
-      return Optional.ofNullable(getResponseEntity(response));
+      return getResponseEntity(response);
     } catch (IOException exception) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
       throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
@@ -79,7 +78,7 @@ public final class ClientUtil {
     }
   }
 
-  public static JsonObject getResponseEntity(CloseableHttpResponse response) {
+  public static JsonObject getResponseEntity(CloseableHttpResponse response) throws IOException {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
       try {
@@ -88,7 +87,7 @@ public final class ClientUtil {
         LOGGER.error("Exception while building response entity", e);
       }
     }
-    return null;
+    throw new IOException("Get invalid response with status: " + response.getStatusLine().getStatusCode());
   }
 
   static String buildQueryEndpoint(String endpoint, Object... params) {

@@ -27,7 +27,7 @@ public class UsersClient {
   public Optional<JsonObject> getById(String userId, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = ClientUtil.buildQueryEndpoint(resourcesPathWithId(USERS), params.getOkapiUrl(), userId);
     try {
-      return ClientUtil.getRequest(params, endpoint);
+      return Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException exception) {
       errorLogService.saveGeneralError(String.format("Error while getting user with id = %s, message: %s", userId, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();

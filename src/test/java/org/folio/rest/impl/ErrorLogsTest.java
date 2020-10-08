@@ -62,7 +62,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
     errorLogDao.save(errorLog, okapiConnectionParams.getTenantId());
 
     // when
-    vertx.setTimer(2000, handler -> {
+    vertx.setTimer(3000, handler -> {
       Response response = RestAssured.given()
         .spec(jsonRequestSpecification)
         .get(ERROR_LOGS_SERVICE_URL + "?query=jobExecutionId=" + jobExecutionId);
