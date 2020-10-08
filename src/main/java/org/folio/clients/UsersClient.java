@@ -28,7 +28,7 @@ public class UsersClient {
     String endpoint = ClientUtil.buildQueryEndpoint(resourcesPathWithId(USERS), params.getOkapiUrl(), userId);
     try {
       return ClientUtil.getRequest(params, endpoint);
-    } catch (ClientException e) {
+    } catch (HttpClientException e) {
       errorLogService.saveGeneralError("Error while getting user with id = " + userId, jobExecutionId, params.getTenantId());
       return Optional.empty();
     }

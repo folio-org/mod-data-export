@@ -45,7 +45,7 @@ public class ConfigurationsClient {
     Optional<JsonObject> rulesFromConfig ;
     try {
       rulesFromConfig = ClientUtil.getRequest(params, endpoint);
-    } catch (ClientException e) {
+    } catch (HttpClientException e) {
       errorLogService.saveGeneralError("Error while query the rules from mod configuration: " + e.getMessage(), jobExecutionId, params.getTenantId());
       rulesFromConfig = Optional.empty();
     }

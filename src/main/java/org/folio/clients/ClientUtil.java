@@ -34,7 +34,7 @@ public final class ClientUtil {
   private ClientUtil() {
   }
 
-  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws ClientException {
+  public static Optional<JsonObject> getByIds(List<String> ids, OkapiConnectionParams params, String endpoint, String queryPattern) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     URI uri = prepareFullUriWithQuery(ids, params, endpoint, queryPattern);
@@ -44,11 +44,11 @@ public final class ClientUtil {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException exception) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
-      throw new ClientException(format("Exception while calling %s", httpGet.getURI()));
+      throw new HttpClientException(format("Exception while calling %s", httpGet.getURI()));
     }
   }
 
-  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) throws ClientException {
+  public static Optional<JsonObject> getRequest(OkapiConnectionParams params, String endpoint) throws HttpClientException {
     HttpGet httpGet = new HttpGet();
     setCommonHeaders(httpGet, params);
     httpGet.setURI(URI.create(endpoint));
@@ -57,7 +57,7 @@ public final class ClientUtil {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpGet.getURI(), e);
-      throw new ClientException(format("Exception while calling %s", httpGet.getURI()));
+      throw new HttpClientException(format("Exception while calling %s", httpGet.getURI()));
     }
   }
 

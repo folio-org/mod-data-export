@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import com.google.common.collect.Lists;
+import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.vertx.core.Context;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -12,6 +13,8 @@ import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.spring.SpringContextUtil;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -22,6 +25,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -35,6 +39,54 @@ class ErrorLogsTest extends RestVerticleTestBase {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  @Test
+  void shouldReturnLogsById(VertxTestContext context) {
+    // given
+    String jobExecutionId = UUID.randomUUID().toString();
+    Date date = new Date();
+    String logId = UUID.randomUUID().toString();
+    String recordId = UUID.randomUUID().toString();
+    AffectedRecord instanceRecord = new AffectedRecord()
+      .withRecordType(AffectedRecord.RecordType.INSTANCE)
+      .withId(recordId)
+      .withHrid("instance hrid")
+      .withTitle("instance title");
+    ErrorLog errorLog = new ErrorLog()
+      .withCreatedData(date)
+      .withJobExecutionId(jobExecutionId)
+      .withLogLevel(ErrorLog.LogLevel.ERROR)
+      .withId(logId)
+      .withReason("Error reason");
+    errorLogDao.save(errorLog, okapiConnectionParams.getTenantId());
+
+    // when
+    vertx.setTimer(2000, handler -> {
+      Response response = RestAssured.given()
+        .spec(jsonRequestSpecification)
+        .get(ERROR_LOGS_SERVICE_URL + "?query=jobExecutionId=" + jobExecutionId);
+
+      // then
+      context.verify(() -> {
+        ErrorLogCollection errorLogCollection = response.as(ErrorLogCollection.class);
+        Assertions.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
+        assertFalse(errorLogCollection.getErrorLogs().isEmpty());
+        ErrorLog errorLog1 = errorLogCollection.getErrorLogs().get(0);
+        Assert.assertEquals(date, errorLog1.getCreatedData());
+        Assert.assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
+        Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
+        Assert.assertEquals(logId, errorLog1.getId());
+        Assert.assertEquals("Error reason", errorLog1.getReason());
+        AffectedRecord affectedRecord = errorLog1.getAffectedRecord();
+        Assert.assertEquals(recordId, affectedRecord.getId());
+        Assert.assertEquals("instance hrid", affectedRecord.getHrid());
+        Assert.assertEquals("instance title", affectedRecord.getTitle());
+        Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, affectedRecord.getRecordType());
+        Assert.assertTrue(affectedRecord.getAffectedRecords().isEmpty());
+        context.completeNow();
+      });
+    });
   }
 
   @Test

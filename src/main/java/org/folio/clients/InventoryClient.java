@@ -58,7 +58,7 @@ public class InventoryClient {
     try {
       return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
           QUERY_PATTERN_INVENTORY);
-    } catch (ClientException exception) {
+    } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralError("Error while getting instances by ids. " + exception.getMessage(), jobExecutionId, params.getTenantId());
       return Optional.empty();
@@ -156,7 +156,7 @@ public class InventoryClient {
     Map<String, JsonObject> map = new HashMap<>();
     try {
       responseBody = ClientUtil.getRequest(params, queryEndpoint);
-    } catch (ClientException e) {
+    } catch (HttpClientException e) {
       if (StringUtils.isNotEmpty(jobExecutionId)) {
         errorLogService.saveGeneralError("Error while getting reference data from inventory during the export process by calling  " + url, jobExecutionId, params.getTenantId());
       }
@@ -180,7 +180,7 @@ public class InventoryClient {
         params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
     try {
       return getRequest(params, endpoint);
-    } catch (ClientException exception) {
+    } catch (HttpClientException exception) {
       errorLogService.saveGeneralError("Error while getting holdings by instance ids " + exception.getMessage(), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
@@ -190,7 +190,7 @@ public class InventoryClient {
     try {
       return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
           QUERY_PATTERN_ITEM);
-    } catch (ClientException exception) {
+    } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralError("Error while getting items by holding ids: " + exception.getMessage(), jobExecutionId, params.getTenantId());
       return Optional.empty();
