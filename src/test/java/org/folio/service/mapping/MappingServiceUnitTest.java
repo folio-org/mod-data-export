@@ -192,9 +192,6 @@ class MappingServiceUnitTest {
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items_and_instances.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
-    String actualJson = TestUtil.getJsonFromMarc(actualMarcRecord);
-    String expectedJson = TestUtil.getJsonFromMarc(expectedMarcRecord);
-
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
