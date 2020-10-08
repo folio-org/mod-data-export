@@ -46,7 +46,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
   public List<String> readNext() {
     return iterator.next()
       .stream()
-      .map(s -> s.replace("\"", "").trim())
+      .map(s -> s.replaceAll("\"", "").trim())
       .collect(Collectors.toList());
   }
 

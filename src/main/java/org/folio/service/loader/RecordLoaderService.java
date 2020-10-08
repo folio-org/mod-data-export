@@ -35,6 +35,7 @@ public interface RecordLoaderService {
    * @param instanceId     instance id
    * @param jobExecutionId job execution id
    * @param params         okapi headers and connection parameters
+   * @param params         okapi headers and connection parameters
    */
   List<JsonObject>  getHoldingsForInstance(String instanceId, String jobExecutionId, OkapiConnectionParams params);
 
@@ -42,7 +43,6 @@ public interface RecordLoaderService {
    * Retrieve all Items for the list of holding UUIDs
    *
    * @param holdingIds     holding id`s
-   * @param jobExecutionId
    * @param jobExecutionId job execution id
    * @param params         okapi headers and connection parameters
    * @return collection of json objects
