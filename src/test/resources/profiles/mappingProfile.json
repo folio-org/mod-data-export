@@ -9,7 +9,7 @@
   "transformations": [
     {
       "fieldId": "electronicAccess.linkText",
-      "path": "items[*].electronicAccess[*].linkText",
+      "path": "$.holdings[*].items[*].electronicAccess[*].linkText",
       "transformation": "001",
       "enabled": true,
       "recordType": "ITEM"

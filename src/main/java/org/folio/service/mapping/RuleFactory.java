@@ -72,6 +72,7 @@ public class RuleFactory {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
+    markItemTransformationsWithSameFieldInHoldings(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
@@ -86,6 +87,18 @@ public class RuleFactory {
       }
     }
     return rules;
+  }
+
+  private void markItemTransformationsWithSameFieldInHoldings(List<Transformations> mappingTransformations) {
+    for (Transformations holdingsTransformation: mappingTransformations) {
+      for (Transformations itemTransformation: mappingTransformations) {
+        if (holdingsTransformation.getRecordType().equals(HOLDINGS) && itemTransformation.getRecordType().equals(ITEM)) {
+          if (holdingsTransformation.getFieldId().equals(itemTransformation.getFieldId())) {
+            itemTransformation.setHasSameFieldInHoldings(true);
+          }
+        }
+      }
+    }
   }
 
   public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {

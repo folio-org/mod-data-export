@@ -143,7 +143,7 @@ class MappingServiceUnitTest {
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
 
   }
@@ -167,7 +167,7 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -191,7 +191,10 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items_and_instances.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
+    String actualJson = TestUtil.getJsonFromMarc(actualMarcRecord);
+    String expectedJson = TestUtil.getJsonFromMarc(expectedMarcRecord);
+
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -229,7 +232,7 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -256,7 +259,7 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_instance_transformationFields.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -284,7 +287,7 @@ class MappingServiceUnitTest {
     String actualMarcRecord = actualMarcRecords.get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_holdings_transformationFields.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -305,13 +308,11 @@ class MappingServiceUnitTest {
       .thenReturn(Collections.emptyList());
     // when
     List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
-
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
-
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_item_transformationFields.json");
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
@@ -342,22 +343,22 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("holdings.temporarylocation.campus.code", "$.holdings[*].temporaryLocationId", "921  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.institution.name", "$.holdings[*].temporaryLocationId", "922  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.institution.code", "$.holdings[*].temporaryLocationId", "923  $a", HOLDINGS));
-    transformations.add(createTransformations("item.permanentlocation.name", "$.items[*].permanentLocationId", "924  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.code", "$.items[*].permanentLocationId", "925  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.library.name", "$.items[*].permanentLocationId", "926  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.library.code", "$.items[*].permanentLocationId", "927  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.campus.name", "$.items[*].permanentLocationId", "928  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.campus.code", "$.items[*].permanentLocationId", "929  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.institution.name", "$.items[*].permanentLocationId", "930  $a", ITEM));
-    transformations.add(createTransformations("item.permanentlocation.institution.code", "$.items[*].permanentLocationId", "931  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.name", "$.items[*].effectiveLocationId", "932  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.code", "$.items[*].effectiveLocationId", "933  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.library.name", "$.items[*].effectiveLocationId", "934  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.library.code", "$.items[*].effectiveLocationId", "935  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.campus.name", "$.items[*].effectiveLocationId", "936  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.campus.code", "$.items[*].effectiveLocationId", "937  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.institution.name", "$.items[*].effectiveLocationId", "938  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.institution.code", "$.items[*].effectiveLocationId", "939  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.name", "$.holdings[*].items[*].permanentLocationId", "924  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.code", "$.holdings[*].items[*].permanentLocationId", "925  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.library.name", "$.holdings[*].items[*].permanentLocationId", "926  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.library.code", "$.holdings[*].items[*].permanentLocationId", "927  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.campus.name", "$.holdings[*].items[*].permanentLocationId", "928  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.campus.code", "$.holdings[*].items[*].permanentLocationId", "929  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.institution.name", "$.holdings[*].items[*].permanentLocationId", "930  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.institution.code", "$.holdings[*].items[*].permanentLocationId", "931  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.name", "$.holdings[*].items[*].effectiveLocationId", "932  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.code", "$.holdings[*].items[*].effectiveLocationId", "933  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.library.name", "$.holdings[*].items[*].effectiveLocationId", "934  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.library.code", "$.holdings[*].items[*].effectiveLocationId", "935  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.campus.name", "$.holdings[*].items[*].effectiveLocationId", "936  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.campus.code", "$.holdings[*].items[*].effectiveLocationId", "937  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.institution.name", "$.holdings[*].items[*].effectiveLocationId", "938  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.institution.code", "$.holdings[*].items[*].effectiveLocationId", "939  $a", ITEM));
     return transformations;
   }
 

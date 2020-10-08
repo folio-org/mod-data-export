@@ -1,587 +1,884 @@
 {
-  "leader":"01759nam a2200661 a 4500",
-  "fields":[
+  "leader": "00000nam a2200000 a 4500",
+  "fields": [
     {
-      "925":{
-        "subfields":[
+      "925": {
+        "subfields": [
           {
-            "a":"10101"
+            "a": "10101"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "926":{
-        "subfields":[
+      "925": {
+        "subfields": [
           {
-            "a":"6066.I4588 B749 "
+            "a": "10291"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "926":{
-        "subfields":[
+      "926": {
+        "subfields": [
           {
-            "a":"6076.I4588 B749 "
+            "a": "6066.I0119 C760 "
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "927":{
-        "subfields":[
+      "926": {
+        "subfields": [
           {
-            "a":"prefix"
+            "a": "6076.I4588 B749 "
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "928":{
-        "subfields":[
+      "926": {
+        "subfields": [
           {
-            "a":"suffix"
+            "a": "9901.I4981"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "929":{
-        "subfields":[
+      "927": {
+        "subfields": [
           {
-            "a":"MOYS"
+            "a": "testPrefix1"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "930":{
-        "subfields":[
+      "927": {
+        "subfields": [
           {
-            "a":"1987:Jan.-June"
+            "a": "testPrefix2"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "931":{
-        "subfields":[
+      "928": {
+        "subfields": [
           {
-            "a":"Copy 2"
+            "a": "testSuffix1"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "932":{
-        "subfields":[
+      "928": {
+        "subfields": [
           {
-            "a":"descriptionOfPieces"
+            "a": "testSuffix2"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "933":{
-        "subfields":[
+      "929": {
+        "subfields": [
           {
-            "a":"OSC"
+            "a": "MOYS"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "934":{
-        "subfields":[
+      "930": {
+        "subfields": [
           {
-            "a":"Other Side Campus"
+            "a": "1979:Jan.-June"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "935":{
-        "subfields":[
+      "930": {
+        "subfields": [
           {
-            "a":"Special Reading Room Code"
+            "a": "1987:Jan.-June"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "936":{
-        "subfields":[
+      "931": {
+        "subfields": [
           {
-            "a":"ALR"
+            "a": "Copy 1"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "937":{
-        "subfields":[
+      "931": {
+        "subfields": [
           {
-            "a":"Agriculture Library Reserve"
+            "a": "Copy 2"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "938":{
-        "subfields":[
+      "932": {
+        "subfields": [
           {
-            "a":"ALR"
+            "a": "test description of pieces 1"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "939":{
-        "subfields":[
+      "932": {
+        "subfields": [
           {
-            "a":"Agriculture Library Reserve"
+            "a": "test description of pieces 2"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "940":{
-        "subfields":[
+      "933": {
+        "subfields": [
           {
-            "a":"Special Reading Room"
+            "a": "OSC"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "941":{
-        "subfields":[
+      "934": {
+        "subfields": [
           {
-            "a":"itemLinkText2"
+            "a": "Other Side Campus"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "941":{
-        "subfields":[
+      "935": {
+        "subfields": [
           {
-            "a":"itemLinkText3"
+            "a": "Special Reading Room Code"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "941":{
-        "subfields":[
+      "936": {
+        "subfields": [
           {
-            "a":"itemLinkText4"
+            "a": "ALR"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "943":{
-        "subfields":[
+      "937": {
+        "subfields": [
           {
-            "a":"itemLinkText1"
+            "a": "Agriculture Library Reserve"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "949":{
-        "subfields":[
+      "938": {
+        "subfields": [
           {
-            "a":"Table of contents"
+            "a": "ALR"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "955":{
-        "subfields":[
+      "939": {
+        "subfields": [
           {
-            "a":"Table of contents only"
+            "a": "Agriculture Library Reserve"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "959":{
-        "subfields":[
+      "940": {
+        "subfields": [
           {
-            "a":"itemUri2"
+            "a": "Special Reading Room"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "959":{
-        "subfields":[
+      "941": {
+        "subfields": [
           {
-            "a":"itemUri3"
+            "a": "Electronic resource (PDF)"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "959":{
-        "subfields":[
+      "941": {
+        "subfields": [
           {
-            "a":"itemUri4"
+            "a": "Electronic resource (PDF)"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "961":{
-        "subfields":[
+      "941": {
+        "subfields": [
           {
-            "a":"itemUri1"
+            "a": "Electronic resource (XML)"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "965":{
-        "subfields":[
+      "941": {
+        "subfields": [
           {
-            "a":"v.73:no.1-6"
+            "a": "Electronic resource (audio streaming)"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "966":{
-        "subfields":[
+      "943": {
+        "subfields": [
           {
-            "a":"65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+            "a": "Electronic resource (RTF)"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "966":{
-        "subfields":[
+      "947": {
+        "subfields": [
           {
-            "a":"65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+            "a": "Novel"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "967":{
-        "subfields":[
+      "949": {
+        "subfields": [
           {
-            "a":"item000000000004"
+            "a": "Table of contents"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "968":{
-        "subfields":[
+      "953": {
+        "subfields": [
           {
-            "a":"0b96a642-5e7f-452d-9cae-9cee66c9a892"
+            "a": "Access to audio file"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "968":{
-        "subfields":[
+      "953": {
+        "subfields": [
           {
-            "a":"5b31ec8c-95a7-4b91-95cc-b551a74b91ca"
+            "a": "Table of contents only"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "970":{
-        "subfields":[
+      "953": {
+        "subfields": [
           {
-            "a":"Signed by the author"
+            "a": "test public note 3"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "973":{
-        "subfields":[
+      "953": {
+        "subfields": [
           {
-            "a":"book"
+            "a": "test public note 4"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "973":{
-        "subfields":[
+      "955": {
+        "subfields": [
           {
-            "a":"dvd"
+            "a": "Table of contents only"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "974":{
-        "subfields":[
+      "959": {
+        "subfields": [
           {
-            "a":"e85d73af-ea83-5cc6-946a-4d14a790f087"
+            "a": "http://d-nb.info/1150175923/01"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "975":{
-        "subfields":[
+      "959": {
+        "subfields": [
           {
-            "a":"2020-09-03:10-53-54"
+            "a": "http://d-nb.info/1150175923/04"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "976":{
-        "subfields":[
+      "959": {
+        "subfields": [
           {
-            "a":"e85d73af-ea83-5cc6-946a-4d14a790f087"
+            "a": "http://www.folio.org/"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "977":{
-        "subfields":[
+      "959": {
+        "subfields": [
           {
-            "a":"2020-09-03:12-43-25"
+            "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "978":{
-        "subfields":[
+      "961": {
+        "subfields": [
           {
-            "a":"2"
+            "a": "http://d-nb.info/1150176652/04"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "979":{
-        "subfields":[
+      "965": {
+        "subfields": [
           {
-            "a":"Reading room"
+            "a": "v.73:no.1-6"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "980":{
-        "subfields":[
+      "965": {
+        "subfields": [
           {
-            "a":"RS"
+            "a": "v.81:no.1-6"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "981":{
-        "subfields":[
+      "966": {
+        "subfields": [
           {
-            "a":"Riverside Campus"
+            "a": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "982":{
-        "subfields":[
+      "966": {
+        "subfields": [
           {
-            "a":"Miller Code"
+            "a": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "983":{
-        "subfields":[
+      "966": {
+        "subfields": [
           {
-            "a":"ML"
+            "a": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "984":{
-        "subfields":[
+      "967": {
+        "subfields": [
           {
-            "a":"Main Library"
+            "a": "item000000000004"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "985":{
-        "subfields":[
+      "967": {
+        "subfields": [
           {
-            "a":"ML"
+            "a": "item000000000090"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "986":{
-        "subfields":[
+      "968": {
+        "subfields": [
           {
-            "a":"Main Library"
+            "a": "0b96a642-5e7f-452d-9cae-9cee66c9a892"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "987":{
-        "subfields":[
+      "968": {
+        "subfields": [
           {
-            "a":"Miller General Stacks"
+            "a": "0b96a642-5e7f-452d-9cae-9cee66c9a892"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "988":{
-        "subfields":[
+      "968": {
+        "subfields": [
           {
-            "a":"Available"
+            "a": "5b31ec8c-95a7-4b91-95cc-b551a74b91ca"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "989":{
-        "subfields":[
+      "970": {
+        "subfields": [
           {
-            "a":"volume"
+            "a": "Signed by the author"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
       }
     },
     {
-      "990":{
-        "subfields":[
+      "973": {
+        "subfields": [
           {
-            "a":"1944"
+            "a": "book"
           }
         ],
-        "ind1":"f",
-        "ind2":"f"
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "973": {
+        "subfields": [
+          {
+            "a": "dvd"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "974": {
+        "subfields": [
+          {
+            "a": "e85d73af-ea83-5cc6-946a-4d14a790f087"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "974": {
+        "subfields": [
+          {
+            "a": "f72758e1-659c-4c31-94d0-5c700e53cf4c"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "975": {
+        "subfields": [
+          {
+            "a": "2020-08-02:11-03-04"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "975": {
+        "subfields": [
+          {
+            "a": "2020-09-03:10-53-54"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "976": {
+        "subfields": [
+          {
+            "a": "e85d73af-ea83-5cc6-946a-4d14a790f087"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "976": {
+        "subfields": [
+          {
+            "a": "f72758e1-659c-4c31-94d0-5c700e53cf4c"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "977": {
+        "subfields": [
+          {
+            "a": "2019-08-04:01-03-15"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "977": {
+        "subfields": [
+          {
+            "a": "2020-09-03:12-43-25"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "978": {
+        "subfields": [
+          {
+            "a": "1"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "978": {
+        "subfields": [
+          {
+            "a": "2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "979": {
+        "subfields": [
+          {
+            "a": "Reading room"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "979": {
+        "subfields": [
+          {
+            "a": "Reading room"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "980": {
+        "subfields": [
+          {
+            "a": "RS"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "981": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "982": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "983": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "984": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "985": {
+        "subfields": [
+          {
+            "a": "ML"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "986": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "987": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "988": {
+        "subfields": [
+          {
+            "a": "Available"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "988": {
+        "subfields": [
+          {
+            "a": "Available"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "989": {
+        "subfields": [
+          {
+            "a": "test volume 1"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "989": {
+        "subfields": [
+          {
+            "a": "test volume 2"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "990": {
+        "subfields": [
+          {
+            "a": "1940"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "990": {
+        "subfields": [
+          {
+            "a": "1944"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
       }
     }
   ]

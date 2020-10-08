@@ -23,6 +23,7 @@ import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.service.mapping.handler.RuleHandler;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.writer.RecordWriter;
@@ -60,11 +61,10 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules) {
-    List<Rule> synchronizedRules = Collections.synchronizedList(rules);
     List<String> records = null;
     try {
       records = mappingThreadPool.submit(() -> instances.parallelStream()
-        .map(instance -> mapInstance(instance, referenceData, synchronizedRules))
+        .map(instance -> mapInstance(instance, referenceData, rules))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList()))
@@ -78,11 +78,12 @@ public class MappingServiceImpl implements MappingService {
     return records;
   }
 
-  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules) {
     try {
+      List<Rule> finalRules = RuleHandler.preHandle(instance, originalRules);
       EntityReader entityReader = new JPathSyntaxEntityReader(instance);
       RecordWriter recordWriter = new MarcRecordWriter();
-      String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+      String record = ruleProcessor.process(entityReader, recordWriter, referenceData, finalRules);
       return Optional.of(record);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);

@@ -166,13 +166,13 @@ class SrsRecordConvertorServiceUnitTest {
     transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
-    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9071 $a", ITEM));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.holdings[*].items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].items[*].electronicAccess[*].linkText", "906  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].items[*].electronicAccess[*].uri", "9071 $a", ITEM));
     transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.name", "$.holdings[*].temporaryLocationId", "909  $a", HOLDINGS));
-    transformations.add(createTransformations("item.permanentlocation.name", "$.items[*].permanentLocationId", "910  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.name", "$.items[*].effectiveLocationId", "911  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.name", "$.holdings[*].items[*].permanentLocationId", "910  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.name", "$.holdings[*].items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 

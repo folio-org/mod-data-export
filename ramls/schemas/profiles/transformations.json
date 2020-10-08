@@ -27,6 +27,11 @@
       "type": "string",
       "$ref": "recordTypes.json"
     },
+    "hasSameFieldInHoldings": {
+      "description": "The sign that means the current transformation is for boh item and holding",
+      "type": "boolean",
+      "default": false
+    },
     "metadataParameters": {
       "description": "Additional parameters used for mapping",
       "type": "object",
