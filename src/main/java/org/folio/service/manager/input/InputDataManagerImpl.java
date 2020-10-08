@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
+import static org.folio.rest.jaxrs.model.FileDefinition.Format.CQL;
 import static org.folio.rest.jaxrs.model.FileDefinition.Format.CSV;
 import static org.folio.rest.jaxrs.model.FileDefinition.Format.MRC;
 
@@ -109,7 +110,7 @@ class InputDataManagerImpl implements InputDataManager {
         Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
-          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isCSV(requestFileDefinition), tenantId);
+          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId);
           exportNextChunk(exportPayload, sourceReader);
         } else {
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
@@ -250,8 +251,8 @@ class InputDataManagerImpl implements InputDataManager {
     }
   }
 
-  private boolean isCSV(FileDefinition requestFileDefinition) {
-    return CSV.equals(requestFileDefinition.getFormat());
+  private boolean isNotCQL(FileDefinition requestFileDefinition) {
+    return !CQL.equals(requestFileDefinition.getFormat());
   }
 
   private InputDataContext getInputDataContext(String jobExecutionId) {

@@ -44,7 +44,7 @@
         "cql",
         "mrc"
       ],
-      "default": "csv"
+      "default": "mrc"
     },
     "metadata": {
       "description": "Meta information ",
