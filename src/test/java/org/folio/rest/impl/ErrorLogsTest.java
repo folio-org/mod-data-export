@@ -42,7 +42,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldReturnLogsById(VertxTestContext context) {
+  void shouldReturnLogsByJobExecutionId(VertxTestContext context) {
     // given
     String jobExecutionId = UUID.randomUUID().toString();
     Date date = new Date();
