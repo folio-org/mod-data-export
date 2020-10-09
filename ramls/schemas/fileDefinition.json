@@ -37,7 +37,7 @@
       "type": "integer"
     },
     "uploadFormat": {
-      "description": "Format of exported file",
+      "description": "Format of upload file",
       "type": "string",
       "enum": [
         "csv",
