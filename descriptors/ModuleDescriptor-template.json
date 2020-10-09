@@ -117,8 +117,7 @@
             "configuration.entries.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
-            "inventory-storage.call-number-types.collection.get",
-            "inventory-storage.instance-bulk.ids.get"
+            "inventory-storage.call-number-types.collection.get"
           ]
         },
         {
@@ -152,6 +151,7 @@
             "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
+            "inventory-storage.instance-bulk.ids.get"
           ]
         },
         {
