@@ -29,6 +29,7 @@ import java.util.Map;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.util.ExceptionToResponseMapper.map;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
@@ -110,7 +111,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   }
 
   private Future<FileDefinition> saveFileDependsOnFileExtension(FileDefinition fileDefinition, byte[] data, OkapiConnectionParams params) {
-    return FileDefinition.Format.CQL.equals(fileDefinition.getFormat())
+    return CQL.equals(fileDefinition.getUploadFormat())
       ? fileUploadService.saveUUIDsByCQL(fileDefinition, new String(data), params)
       : fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
   }

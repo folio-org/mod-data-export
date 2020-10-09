@@ -36,9 +36,7 @@ import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CSV;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.MRC;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -203,7 +201,6 @@ class InputDataManagerImpl implements InputDataManager {
       .withFileName(fileNameWithoutExtension + DELIMITER + jobExecution.getHrId() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
-      .withFormat(MRC)
       .withMetadata(exportRequest.getMetadata());
   }
 
@@ -252,7 +249,7 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   private boolean isNotCQL(FileDefinition requestFileDefinition) {
-    return !CQL.equals(requestFileDefinition.getFormat());
+    return !CQL.equals(requestFileDefinition.getUploadFormat());
   }
 
   private InputDataContext getInputDataContext(String jobExecutionId) {

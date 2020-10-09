@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 
 @SuppressWarnings({"java:S2095"})
 public class LocalStorageCsvSourceReader implements SourceReader {
@@ -59,7 +60,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public long totalCount() {
-    if(nonNull(fileDefinition)) {
+    if(nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
         return fileLines.count();
       } catch (IOException e) {

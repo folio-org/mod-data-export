@@ -36,15 +36,14 @@
       "description": "Size of the file in Kbyte",
       "type": "integer"
     },
-    "format": {
+    "uploadFormat": {
       "description": "Format of exported file",
       "type": "string",
       "enum": [
         "csv",
-        "cql",
-        "mrc"
+        "cql"
       ],
-      "default": "mrc"
+      "default": "csv"
     },
     "metadata": {
       "description": "Meta information ",

@@ -2,8 +2,8 @@ package org.folio.rest.impl;
 
 import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CSV;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
@@ -36,7 +36,7 @@ import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.FileDefinition.Format;
+import org.folio.rest.jaxrs.model.FileDefinition.UploadFormat;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
@@ -311,14 +311,14 @@ class DataExportTest extends RestVerticleTestBase {
     return fileExportDefinitionCaptor;
   }
 
-  private FileDefinition uploadFile(String fileName, Format format, String tenantId) throws IOException {
+  private FileDefinition uploadFile(String fileName, UploadFormat format, String tenantId) throws IOException {
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
     RequestSpecification binaryRequestSpecification = buildRequestSpecification(tenantId);
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName(fileName)
-      .withFormat(format);
+      .withUploadFormat(format);
 
     postRequest(JsonObject.mapFrom(givenFileDefinition), FILE_DEFINITION_SERVICE_URL, tenantId);
 
@@ -331,7 +331,7 @@ class DataExportTest extends RestVerticleTestBase {
       .extract().body().as(FileDefinition.class);
   }
 
-  private FileDefinition uploadFile(String fileName, Format format) throws IOException {
+  private FileDefinition uploadFile(String fileName, UploadFormat format) throws IOException {
     return uploadFile(fileName, format, okapiConnectionParams.getTenantId());
   }
 

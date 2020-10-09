@@ -3,7 +3,7 @@
    "fileName":"marc.csv",
    "status":"COMPLETED",
    "size" : 200,
-   "format": "csv",
+   "uploadFormat": "csv",
    "metadata": 
     {
      "createdDate": "2019-07-22T11:22:07Z",

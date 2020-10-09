@@ -27,8 +27,8 @@ import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.Format.CSV;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
@@ -46,7 +46,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName("InventoryUUIDs.csv")
-      .withFormat(CSV);
+      .withUploadFormat(CSV);
     // when created a new entity
     RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -76,7 +76,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName("InventoryUUIDs.txt")
-      .withFormat(CSV);
+      .withUploadFormat(CSV);
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -139,7 +139,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName("InventoryUUIDs.csv")
-      .withFormat(CSV);
+      .withUploadFormat(CSV);
     // when created a new file definition
     RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -197,7 +197,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
       .withFileName("InventoryUUIDs.csv")
-      .withFormat(CQL);
+      .withUploadFormat(CQL);
     // when created a new file definition
     RestAssured.given()
       .spec(jsonRequestSpecification)

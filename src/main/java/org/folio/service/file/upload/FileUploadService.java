@@ -40,6 +40,8 @@ public interface FileUploadService {
    * Saves given file data to the {@link FileStorage}
    *
    * @param fileDefinition {@link FileDefinition}
+   * @param query request query to retrieve uuids
+   * @param params okapi connection param {@link OkapiConnectionParams}
    * @return {@link FileDefinition}
    */
   Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params);

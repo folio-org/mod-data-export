@@ -58,7 +58,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
     if (data.length > 0) {
       return fileStorage.saveFileDataAsync(data, fileDefinition)
-        .compose(ar -> updateFileDefinitionWithJobExeution(new JobExecution(), fileDefinition, tenantId));
+        .compose(ar -> updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId));
     }
     return Future.succeededFuture(fileDefinition);
   }
@@ -79,7 +79,7 @@ public class FileUploadServiceImpl implements FileUploadService {
           ids.add((String) id);
         }
         return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-          .compose(ar -> updateFileDefinitionWithJobExeution(getJobExecutionWithProgress(jsonIds.size()),
+          .compose(ar -> updateFileDefinitionWithJobExecution(getJobExecutionWithProgress(jsonIds.size()),
             fileDefinition, params.getTenantId()));
       }
     }
@@ -93,7 +93,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
 
-  private Future<FileDefinition> updateFileDefinitionWithJobExeution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
+  private Future<FileDefinition> updateFileDefinitionWithJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
     return jobExecutionService.save(jobExecution, tenantId)
       .compose(savedJob -> fileDefinitionService.update(fileDefinition.withJobExecutionId(savedJob.getId()), tenantId));
   }

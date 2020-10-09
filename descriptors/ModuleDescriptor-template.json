@@ -77,6 +77,10 @@
     {
       "id": "call-number-types",
       "version": "1.0"
+    },
+    {
+      "id": "instance-bulk",
+      "version": "0.1"
     }
   ],
   "provides": [
@@ -113,7 +117,8 @@
             "configuration.entries.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
-            "inventory-storage.call-number-types.collection.get"
+            "inventory-storage.call-number-types.collection.get",
+            "inventory-storage.instance-bulk.ids.get"
           ]
         },
         {
