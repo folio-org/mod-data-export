@@ -498,16 +498,13 @@ public class MockServer {
   }
 
   private void handleGetInstanceBulkIds(RoutingContext ctx) {
-    logger.info("Handle get instance bulk ids: " + ctx.request()
-      .path());
+    logger.info("Handle get instance bulk ids: " + ctx.request().path());
     try {
       JsonObject bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
       addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
       serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      ctx.response().setStatusCode(500).end();
     }
   }
 
