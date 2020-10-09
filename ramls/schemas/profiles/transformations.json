@@ -28,7 +28,7 @@
       "$ref": "recordTypes.json"
     },
     "hasSameFieldInHoldings": {
-      "description": "The sign that means the current transformation is for boh item and holding",
+      "description": "The sign that means the current transformation intended for both item and holding",
       "type": "boolean",
       "default": false
     },
