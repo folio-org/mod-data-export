@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.OkapiConnectionParams;
+import org.folio.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
@@ -40,6 +42,8 @@ import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
+
+import javax.swing.text.html.Option;
 
 @Component
 public class InventoryClient {
@@ -72,10 +76,16 @@ public class InventoryClient {
       return Optional.empty();
     }
     String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query) + ")";
-    return ClientUtil.getRequest(params, endpoint);
+    try {
+      return Optional.of(ClientUtil.getRequest(params, endpoint));
+    } catch (HttpClientException e) {
+      LOGGER.error(e.getMessage(), e.getCause());
+      errorLogService.saveGeneralError("Error while getting instances by ids. " + e.getMessage(), StringUtils.EMPTY, params.getTenantId());
+      return Optional.empty();
+    }
   }
 
-  public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getNatureOfContentTerms(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
     return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTENT_TERMS);
   }
@@ -187,11 +197,11 @@ public class InventoryClient {
 
   public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-      params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
+      params.getOkapiUrl(), format(QUERY_PATTERN_HOLDING, instanceID));
     try {
       return Optional.of(getRequest(params, endpoint));
     } catch (HttpClientException exception) {
-      errorLogService.saveGeneralError(String.format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralError(format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

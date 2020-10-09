@@ -3,6 +3,7 @@ package org.folio.service.file.upload;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.InventoryClient;
 import org.folio.rest.exceptions.ServiceException;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;

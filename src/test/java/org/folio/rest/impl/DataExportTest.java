@@ -10,6 +10,8 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
@@ -19,12 +21,14 @@ import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
+import org.folio.clients.InventoryClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
@@ -38,6 +42,8 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.folio.util.OkapiConnectionParams;
+import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -55,9 +61,8 @@ import org.springframework.context.annotation.Primary;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
-
-import org.junit.Assert;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -72,13 +77,15 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
-  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
-  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
-  public static final int EXPORTED_RECORDS_NUMBER_3 = 3;
+  private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  private static final int EXPORTED_RECORDS_NUMBER_3 = 3;
   private static final String CUSTOM_TEST_TENANT = "custom_test_tenant";
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
+  private static InventoryClient mockInventoryClient = Mockito.spy(InventoryClient.class);
+
   @Autowired
   private JobExecutionDao jobExecutionDao;
   @Autowired
@@ -172,6 +179,11 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
+    JsonObject bulkUUIDs = new JsonObject().put("ids", new JsonArray()
+      .add("7fbd5d84-62d1-44c6-9c45-6cb173998bbd")
+      .add("5fc04e92-70dd-46b8-97ea-194015762a60"));
+    Mockito.doReturn(Optional.of(bulkUUIDs)).when(mockInventoryClient).getInstancesBulkUUIDs(anyString(), any(OkapiConnectionParams.class));
+    Mockito.doReturn(Optional.empty()).when(mockInventoryClient).getInstancesBulkUUIDs(eq(""), any(OkapiConnectionParams.class));
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_CQL, CQL);
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
@@ -257,7 +269,7 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = CUSTOM_TEST_TENANT;
     //given
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
-    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CUSTOM_TEST_TENANT);
+    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CSV, CUSTOM_TEST_TENANT);
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a");
 
     //when
@@ -422,6 +434,12 @@ class DataExportTest extends RestVerticleTestBase {
     @Primary
     public ExportStorageService getMockExportStorageService() {
       return mockExportStorageService;
+    }
+
+    @Bean
+    @Primary
+    public InventoryClient getMockInventoryClient() {
+      return mockInventoryClient;
     }
   }
 }
