@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
@@ -39,10 +39,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class SrsRecordConvertorServiceUnitTest {
+class SrsRecordConverterServiceUnitTest {
 
   @InjectMocks
-  SrsRecordConvertorService srsRecordConvertorService;
+  SrsRecordConverterService srsRecordConverterService;
   @InjectMocks
   private MappingService mappingService = Mockito.spy(new MappingServiceImpl());
 
@@ -56,7 +56,7 @@ class SrsRecordConvertorServiceUnitTest {
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceDataImpl();
 
-  SrsRecordConvertorServiceUnitTest() {
+  SrsRecordConverterServiceUnitTest() {
     referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
@@ -84,7 +84,7 @@ class SrsRecordConvertorServiceUnitTest {
     }
 
     //when
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
 
     //Then
@@ -116,7 +116,7 @@ class SrsRecordConvertorServiceUnitTest {
     //when
     Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", params))
     .thenReturn(result);
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
 
     //then
@@ -151,7 +151,7 @@ class SrsRecordConvertorServiceUnitTest {
     }
     Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", params))
     .thenReturn(result);
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
     assertNotEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
     Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), any(OkapiConnectionParams.class));

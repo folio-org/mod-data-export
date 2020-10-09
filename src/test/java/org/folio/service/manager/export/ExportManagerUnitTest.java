@@ -13,8 +13,8 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
-import org.folio.service.mapping.convertor.InventoryRecordConvertorService;
-import org.folio.service.mapping.convertor.SrsRecordConvertorService;
+import org.folio.service.mapping.converter.InventoryRecordConverterService;
+import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +34,9 @@ class ExportManagerUnitTest {
   @Mock
   private ExportService exportService;
   @Mock
-  private SrsRecordConvertorService srsRecordService;
+  private SrsRecordConverterService srsRecordService;
   @Mock
-  private InventoryRecordConvertorService inventoryRecordService;
+  private InventoryRecordConverterService inventoryRecordService;
   @InjectMocks
   private ExportManagerImpl exportManager = Mockito.spy(new ExportManagerImpl());
 

@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InventoryRecordConvertorService extends RecordConvertor {
+public class InventoryRecordConverterService extends RecordConverter {
   @Autowired
   private MappingService mappingService;
 

@@ -19,8 +19,8 @@ import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.input.InputDataManager;
-import org.folio.service.mapping.convertor.InventoryRecordConvertorService;
-import org.folio.service.mapping.convertor.SrsRecordConvertorService;
+import org.folio.service.mapping.converter.InventoryRecordConverterService;
+import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -52,9 +52,9 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private JobExecutionService jobExecutionService;
   @Autowired
-  private SrsRecordConvertorService srsRecordService;
+  private SrsRecordConverterService srsRecordService;
   @Autowired
-  private InventoryRecordConvertorService inventoryRecordService;
+  private InventoryRecordConverterService inventoryRecordService;
   @Autowired
   private Vertx vertx;
 
