@@ -17,6 +17,7 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.Assert;
@@ -122,7 +123,7 @@ class MappingServiceUnitTest {
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
     referenceData.put(CALL_NUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
-    referenceData.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
+    referenceData.put(ExternalPathResolver.MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
     referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
     referenceData.put(INSTANCE_FORMATS, ReferenceDataResponseUtil.getInstanceFormats());

@@ -1,5 +1,5 @@
 {
-  "leader": "00000nam a2200000 a 4500",
+  "leader": "02789nam a2200985 a 4500",
   "fields": [
     {
       "925": {
@@ -269,7 +269,7 @@
       "941": {
         "subfields": [
           {
-            "a": "Electronic resource (PDF)"
+            "a": "Electronic resource (FCF)"
           }
         ],
         "ind1": "f",
@@ -280,7 +280,7 @@
       "941": {
         "subfields": [
           {
-            "a": "Electronic resource (PDF)"
+            "a": "Electronic resource (OTT)"
           }
         ],
         "ind1": "f",

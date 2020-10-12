@@ -2,19 +2,10 @@ package org.folio;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.marc4j.MarcJsonReader;
-import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamWriter;
-import org.marc4j.MarcWriter;
+import org.marc4j.*;
 import org.marc4j.marc.Record;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -103,6 +94,20 @@ public final class TestUtil {
     MarcReader marcReader = new MarcJsonReader(inputStream);
     OutputStream outputStream = new ByteArrayOutputStream();
     MarcWriter writer = new MarcStreamWriter(outputStream);
+    while (marcReader.hasNext()) {
+      Record record = marcReader.next();
+      writer.write(record);
+    }
+
+    writer.close();
+    return outputStream.toString();
+  }
+
+  public static String getJsonFromMarc(String marcRecord) throws FileNotFoundException {
+    InputStream inputStream = new ByteArrayInputStream(marcRecord.getBytes(StandardCharsets.UTF_8));
+    MarcReader marcReader = new MarcStreamReader(inputStream);
+    OutputStream outputStream = new ByteArrayOutputStream();
+    MarcWriter writer = new MarcJsonWriter(outputStream);
     while (marcReader.hasNext()) {
       Record record = marcReader.next();
       writer.write(record);

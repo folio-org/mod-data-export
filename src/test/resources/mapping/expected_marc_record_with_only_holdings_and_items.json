@@ -1,5 +1,5 @@
 {
-  "leader": "02176nam a2200709 a 4500",
+  "leader": "02747nam a2200901 a 4500",
   "fields": [
     {
       "900": {
@@ -55,7 +55,7 @@
       "902": {
         "subfields": [
           {
-            "a": "Electronic resource (PDF)"
+            "a": "Electronic resource (DOCX)"
           }
         ],
         "ind1": " ",
@@ -77,7 +77,7 @@
       "902": {
         "subfields": [
           {
-            "a": "Electronic resource (txt)"
+            "a": "Electronic resource (XSLT)"
           }
         ],
         "ind1": " ",
@@ -154,7 +154,7 @@
       "905": {
         "subfields": [
           {
-            "a": "Electronic resource (PDF)"
+            "a": "Electronic resource (FCF)"
           },
           {
             "3": "holding00001"
@@ -168,7 +168,7 @@
       "905": {
         "subfields": [
           {
-            "a": "Electronic resource (PDF)"
+            "a": "Electronic resource (OTT)"
           },
           {
             "3": "holding00001"
@@ -492,7 +492,54 @@
       "924": {
         "subfields": [
           {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "924": {
+        "subfields": [
+          {
+            "3": "holding00002"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "924": {
+        "subfields": [
+          {
             "a": "Miller General Stacks"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "925": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "925": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -504,6 +551,31 @@
         "subfields": [
           {
             "a": "Miller Code"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "926": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "926": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -515,6 +587,31 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "927": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "927": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -526,6 +623,31 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "928": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "928": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -537,6 +659,31 @@
         "subfields": [
           {
             "a": "Riverside Campus"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "929": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "929": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -548,6 +695,31 @@
         "subfields": [
           {
             "a": "RS"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "930": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "930": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -559,6 +731,31 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "931": {
+        "subfields": [
+          {
+            "3": "holding00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "931": {
+        "subfields": [
+          {
+            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -570,6 +767,9 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holding00001"
           }
         ],
         "ind1": " ",
