@@ -10,25 +10,23 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
-import org.folio.clients.InventoryClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
@@ -42,8 +40,6 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
-import org.folio.util.OkapiConnectionParams;
-import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -61,8 +57,9 @@ import org.springframework.context.annotation.Primary;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
+
+import org.junit.Assert;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -84,7 +81,6 @@ class DataExportTest extends RestVerticleTestBase {
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
-  private static InventoryClient mockInventoryClient = Mockito.spy(InventoryClient.class);
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
@@ -103,7 +99,7 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB, CSV);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -129,7 +125,7 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB, CSV);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -153,7 +149,7 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCSV_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY, CSV);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -179,12 +175,13 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    JsonObject bulkUUIDs = new JsonObject().put("ids", new JsonArray()
-      .add("7fbd5d84-62d1-44c6-9c45-6cb173998bbd")
-      .add("5fc04e92-70dd-46b8-97ea-194015762a60"));
-    Mockito.doReturn(Optional.of(bulkUUIDs)).when(mockInventoryClient).getInstancesBulkUUIDs(anyString(), any(OkapiConnectionParams.class));
-    Mockito.doReturn(Optional.empty()).when(mockInventoryClient).getInstancesBulkUUIDs(eq(""), any(OkapiConnectionParams.class));
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_CQL, CQL);
+    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TENANT, tenantId)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .build();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_CQL, CQL, requestSpecificationForMockServer);
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -212,7 +209,7 @@ class DataExportTest extends RestVerticleTestBase {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
-    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId);
+    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
@@ -240,7 +237,7 @@ class DataExportTest extends RestVerticleTestBase {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
-    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId);
+    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
@@ -269,7 +266,7 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = CUSTOM_TEST_TENANT;
     //given
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
-    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CSV, CUSTOM_TEST_TENANT);
+    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CSV, CUSTOM_TEST_TENANT, buildRequestSpecification(tenantId));
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a");
 
     //when
@@ -291,7 +288,6 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
 
-
   private String buildCustomJobProfile(String tenantID) {
     String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
     JsonObject mappingProfilejs = new JsonObject(mappingProfile);
@@ -311,9 +307,8 @@ class DataExportTest extends RestVerticleTestBase {
     return fileExportDefinitionCaptor;
   }
 
-  private FileDefinition uploadFile(String fileName, UploadFormat format, String tenantId) throws IOException {
+  private FileDefinition uploadFile(String fileName, UploadFormat format, String tenantId, RequestSpecification binaryRequestSpecification) throws IOException {
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification(tenantId);
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
@@ -331,8 +326,8 @@ class DataExportTest extends RestVerticleTestBase {
       .extract().body().as(FileDefinition.class);
   }
 
-  private FileDefinition uploadFile(String fileName, UploadFormat format) throws IOException {
-    return uploadFile(fileName, format, okapiConnectionParams.getTenantId());
+  private FileDefinition uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification) throws IOException {
+    return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification);
   }
 
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition) {
@@ -382,8 +377,8 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog2.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
-    for (ErrorLog errorLog: errorLogCollection.getErrorLogs()) {
-        Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
+    for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
+      Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
         || errorLog.getReason().contains("Nothing to export: no binary file generated")
         || errorLog.getReason().contains("Some records are not found in srs and inventory, number of not found records: 1")
         || errorLog.getReason().contains("Export file definition is not valid with id:"));
@@ -436,10 +431,5 @@ class DataExportTest extends RestVerticleTestBase {
       return mockExportStorageService;
     }
 
-    @Bean
-    @Primary
-    public InventoryClient getMockInventoryClient() {
-      return mockInventoryClient;
-    }
   }
 }

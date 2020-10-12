@@ -1,5 +1,10 @@
 package org.folio.service.file.upload;
 
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
+
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,12 +26,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -70,19 +69,21 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
-    Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
-    List<String> ids = new ArrayList<>();
-    if (instancesUUIDs.isPresent()) {
-      JsonArray jsonIds = instancesUUIDs.get().getJsonArray("ids");
-      if (jsonIds.size() > 0) {
-        for (Object id : jsonIds) {
-          ids.add((String) id);
+    if (StringUtils.isNotBlank(query)) {
+      Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
+      List<String> ids = new ArrayList<>();
+      if (instancesUUIDs.isPresent()) {
+        JsonArray jsonIds = instancesUUIDs.get().getJsonArray("ids");
+        if (jsonIds.size() > 0) {
+          for (Object id : jsonIds) {
+            ids.add(((JsonObject) id).getString("id"));
+          }
+          JobExecution jobExecution = new JobExecution().
+            withProgress(new Progress()
+              .withTotal(String.valueOf(jsonIds.size())));
+          return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+            .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
         }
-        JobExecution jobExecution = new JobExecution().
-          withProgress(new Progress()
-            .withTotal(String.valueOf(jsonIds.size())));
-        return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-          .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
       }
     }
     return Future.succeededFuture(fileDefinition);

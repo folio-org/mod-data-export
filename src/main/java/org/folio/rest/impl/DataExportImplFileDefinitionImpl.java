@@ -1,5 +1,11 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.RestVerticle.STREAM_ABORT;
+import static org.folio.rest.jaxrs.model.FileDefinition.Status;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.util.ExceptionToResponseMapper.map;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -25,12 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.Map;
-
-import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.RestVerticle.STREAM_ABORT;
-import static org.folio.rest.jaxrs.model.FileDefinition.Status;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-import static org.folio.util.ExceptionToResponseMapper.map;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
@@ -61,6 +61,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+      .compose(ar -> replaceCQLExtensionToCSV(entity))
       .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
       .map(Response.class::cast)
@@ -119,6 +120,14 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   private Future<Void> validateFileNameExtension(String fileName) {
     if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION) && !FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION)) {
       throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION);
+    }
+    return succeededFuture();
+  }
+
+  private Future<Void> replaceCQLExtensionToCSV(FileDefinition fileDefinition) {
+    String fileName = fileDefinition.getFileName();
+    if (CQL.equals(fileDefinition.getUploadFormat()) && FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION)) {
+      fileDefinition.setFileName(FilenameUtils.getBaseName(fileName) + "." + CSV_FORMAT_EXTENSION);
     }
     return succeededFuture();
   }
