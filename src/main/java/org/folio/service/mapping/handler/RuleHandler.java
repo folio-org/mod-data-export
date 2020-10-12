@@ -15,7 +15,11 @@ import java.util.List;
  * @see MappingService
  */
 public class RuleHandler {
-  private final static String HOLDINGS_KEY = "holdings";
+  private static final String HOLDINGS_KEY = "holdings";
+
+  /* Private constructor to hide the implicit public one */
+  private RuleHandler() {
+  }
 
   /**
    * The method adds new rules to the incoming original rules.
@@ -28,40 +32,45 @@ public class RuleHandler {
    * @return final rules
    */
   public static List<Rule> preHandle(JsonObject instance, List<Rule> originalRules) {
-    if (instance.containsKey(HOLDINGS_KEY)) {
-      List<Rule> starredRules = new ArrayList<>();
-      List<Rule> indexedRules = new ArrayList<>();
-      int numberOfHoldings = instance.getJsonArray(HOLDINGS_KEY).size();
-      for (Rule originRule : originalRules) {
-        boolean hasRuleSameFieldInHoldings = false;
-        for (DataSource targetDataSource : originRule.getDataSources()) {
-          if (targetDataSource.isHasSameFieldInHoldings()) {
-            hasRuleSameFieldInHoldings = true;
-            for (int holdingIndex = 0; holdingIndex < numberOfHoldings; holdingIndex++) {
-              /* Creating new rule with indexed path */
-              Rule indexedRule = originRule.copy();
-              for (DataSource dataSource : indexedRule.getDataSources()) {
-                if (dataSource.getFrom() != null && dataSource.getFrom().equals(targetDataSource.getFrom())) {
-                  dataSource.setFrom(targetDataSource.getFrom().replace("$.holdings[*]", "$.holdings[" + holdingIndex + "]"));
-                }
-              }
-              /* Adding sub-field '3' with related holding hrid */
-              DataSource holdingHridDataSource = new DataSource();
-              holdingHridDataSource.setFrom("$.holdings[" + holdingIndex + "].hrid");
-              holdingHridDataSource.setSubfield("3");
-              indexedRule.getDataSources().add(holdingHridDataSource);
-              indexedRules.add(indexedRule);
-            }
-          }
-        }
-        if (!hasRuleSameFieldInHoldings) {
-          starredRules.add(originRule);
-        }
-      }
-      starredRules.addAll(indexedRules);
-      return Collections.synchronizedList(starredRules);
-    } else {
+    if (!instance.containsKey(HOLDINGS_KEY)) {
       return Collections.synchronizedList(originalRules);
     }
+    int numberOfHoldings = instance.getJsonArray(HOLDINGS_KEY).size();
+    List<Rule> starredRules = new ArrayList<>();
+    List<Rule> indexedRules = new ArrayList<>();
+    for (Rule originRule : originalRules) {
+      boolean hasRuleSameFieldInHoldings = false;
+      for (DataSource targetDataSource : originRule.getDataSources()) {
+        if (targetDataSource.isHasSameFieldInHoldings()) {
+          hasRuleSameFieldInHoldings = true;
+          for (int holdingIndex = 0; holdingIndex < numberOfHoldings; holdingIndex++) {
+            Rule indexedRule = originRule.copy();
+            indexRule(targetDataSource, holdingIndex, indexedRule);
+            addHridDataSource(indexedRules, holdingIndex, indexedRule);
+          }
+        }
+      }
+      if (!hasRuleSameFieldInHoldings) {
+        starredRules.add(originRule);
+      }
+    }
+    starredRules.addAll(indexedRules);
+    return Collections.synchronizedList(starredRules);
+  }
+
+  private static void indexRule(DataSource targetDataSource, int holdingIndex, Rule indexedRule) {
+    for (DataSource dataSource : indexedRule.getDataSources()) {
+      if (dataSource.getFrom() != null && dataSource.getFrom().equals(targetDataSource.getFrom())) {
+        dataSource.setFrom(targetDataSource.getFrom().replace("$.holdings[*]", "$.holdings[" + holdingIndex + "]"));
+      }
+    }
+  }
+
+  private static void addHridDataSource(List<Rule> indexedRules, int holdingIndex, Rule indexedRule) {
+    DataSource holdingHridDataSource = new DataSource();
+    holdingHridDataSource.setFrom("$.holdings[" + holdingIndex + "].hrid");
+    holdingHridDataSource.setSubfield("3");
+    indexedRule.getDataSources().add(holdingHridDataSource);
+    indexedRules.add(indexedRule);
   }
 }
