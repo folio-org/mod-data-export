@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -13,7 +13,7 @@ import java.util.List;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
 
 @Service
-public class InventoryRecordConvertorService extends RecordConvertor {
+public class InventoryRecordConverterService extends RecordConverter {
   @Autowired
   private MappingService mappingService;
   private static final String ID_FIELD = "id";

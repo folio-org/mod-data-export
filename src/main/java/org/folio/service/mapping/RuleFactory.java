@@ -31,8 +31,7 @@ import java.util.Set;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -72,6 +71,7 @@ public class RuleFactory {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
+    markItemTransformationsWithSameFieldInHoldings(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
@@ -86,6 +86,20 @@ public class RuleFactory {
       }
     }
     return rules;
+  }
+
+  private void markItemTransformationsWithSameFieldInHoldings(List<Transformations> mappingTransformations) {
+    for (Transformations holdingsTransformation: mappingTransformations) {
+      for (Transformations itemTransformation: mappingTransformations) {
+        if (holdingsTransformation.getRecordType().equals(HOLDINGS) && itemTransformation.getRecordType().equals(ITEM)) {
+          String holdingFieldId = holdingsTransformation.getFieldId().replace("holdings", EMPTY);
+          String itemFieldId = itemTransformation.getFieldId().replace("item", EMPTY);
+          if (holdingFieldId.equals(itemFieldId)) {
+            itemTransformation.setHasSameFieldInHoldings(true);
+          }
+        }
+      }
+    }
   }
 
   public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
@@ -122,7 +136,7 @@ public class RuleFactory {
     if (temporaryLocationTransformation.isPresent()) {
       return temporaryLocationTransformation.get().getTransformation();
     }
-    return StringUtils.EMPTY;
+    return EMPTY;
   }
 
   private boolean isHoldingsPermanentLocation(Transformations mappingTransformation) {

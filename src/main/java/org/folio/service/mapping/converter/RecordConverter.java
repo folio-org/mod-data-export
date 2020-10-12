@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
@@ -18,7 +18,7 @@ import org.folio.service.loader.RecordLoaderService;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RecordConvertor {
+public class RecordConverter {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup()
       .lookupClass());
 

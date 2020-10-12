@@ -25,7 +25,7 @@ public class JsonPathBuilder implements PathBuilder {
       return "instance";
     if (RecordType.HOLDINGS.equals(recordType))
       return "holdings[*]";
-    return "items[*]";
+    return "holdings[*].items[*]";
   }
 
 }

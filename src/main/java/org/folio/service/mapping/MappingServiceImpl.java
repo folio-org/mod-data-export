@@ -13,6 +13,7 @@ import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.mapping.handler.RuleHandler;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.writer.RecordWriter;
@@ -81,9 +82,10 @@ public class MappingServiceImpl implements MappingService {
     return records;
   }
 
-  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules, String jobExecutionId, OkapiConnectionParams connectionParams) {
+  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     try {
-      return mapInstance(instance, referenceData, rules);
+      List<Rule> finalRules = RuleHandler.preHandle(instance, originalRules);
+      return mapInstance(instance, referenceData, finalRules);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
       errorLogService.saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, connectionParams.getTenantId());

@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SrsRecordConvertorService extends RecordConvertor {
+public class SrsRecordConverterService extends RecordConverter {
   @Autowired
   private MappingService mappingService;
 
