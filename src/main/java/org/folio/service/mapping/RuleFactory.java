@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -91,7 +92,9 @@ public class RuleFactory {
     for (Transformations holdingsTransformation: mappingTransformations) {
       for (Transformations itemTransformation: mappingTransformations) {
         if (holdingsTransformation.getRecordType().equals(HOLDINGS) && itemTransformation.getRecordType().equals(ITEM)) {
-          if (holdingsTransformation.getFieldId().equals(itemTransformation.getFieldId())) {
+          String holdingFieldId = holdingsTransformation.getFieldId().replace("holdings", EMPTY);
+          String itemFieldId = itemTransformation.getFieldId().replace("item", EMPTY);
+          if (holdingFieldId.equals(itemFieldId)) {
             itemTransformation.setHasSameFieldInHoldings(true);
           }
         }

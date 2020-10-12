@@ -85,15 +85,19 @@ public class MappingServiceImpl implements MappingService {
   private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     try {
       List<Rule> finalRules = RuleHandler.preHandle(instance, originalRules);
-      EntityReader entityReader = new JPathSyntaxEntityReader(instance);
-      RecordWriter recordWriter = new MarcRecordWriter();
-      String record = ruleProcessor.process(entityReader, recordWriter, referenceData, finalRules);
-      return Optional.of(record);
+      return mapInstance(instance, referenceData, finalRules);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
       errorLogService.saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, connectionParams.getTenantId());
       return Optional.empty();
     }
+  }
+
+  protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+    EntityReader entityReader = new JPathSyntaxEntityReader(instance);
+    RecordWriter recordWriter = new MarcRecordWriter();
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+    return Optional.of(record);
   }
 
   /**
