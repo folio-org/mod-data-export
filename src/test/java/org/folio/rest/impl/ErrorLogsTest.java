@@ -54,7 +54,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
       .withHrid("instance hrid")
       .withTitle("instance title");
     ErrorLog errorLog = new ErrorLog()
-      .withCreatedData(date)
+      .withCreatedDate(date)
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(logId)
@@ -73,7 +73,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
         Assertions.assertEquals(HttpStatus.SC_OK, response.getStatusCode());
         assertFalse(errorLogCollection.getErrorLogs().isEmpty());
         ErrorLog errorLog1 = errorLogCollection.getErrorLogs().get(0);
-        Assert.assertEquals(date, errorLog1.getCreatedData());
+        Assert.assertEquals(date, errorLog1.getCreatedDate());
         Assert.assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
         Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
         Assert.assertEquals(logId, errorLog1.getId());
@@ -105,14 +105,14 @@ class ErrorLogsTest extends RestVerticleTestBase {
       .withTitle("holdings title");
     String jobExecutionId = UUID.randomUUID().toString();
     ErrorLog errorLog1 = new ErrorLog()
-      .withCreatedData(new Date())
+      .withCreatedDate(new Date())
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())
       .withReason("Error reason")
       .withAffectedRecord(holdingRecord);
     ErrorLog errorLog2 = new ErrorLog()
-      .withCreatedData(new Date())
+      .withCreatedDate(new Date())
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())

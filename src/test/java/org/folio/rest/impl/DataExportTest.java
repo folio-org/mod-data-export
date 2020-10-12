@@ -2,6 +2,8 @@ package org.folio.rest.impl;
 
 import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
@@ -12,6 +14,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -21,10 +25,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
@@ -34,12 +34,12 @@ import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.FileDefinition.UploadFormat;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
-import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -54,6 +54,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.UUID;
+
+import org.junit.Assert;
+
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -66,13 +73,15 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
-  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
-  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
-  public static final int EXPORTED_RECORDS_NUMBER_3 = 3;
+  private static final String UUIDS_CQL = "InventoryUUIDs.cql";
+  private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  private static final int EXPORTED_RECORDS_NUMBER_3 = 3;
   private static final String CUSTOM_TEST_TENANT = "custom_test_tenant";
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
+
   @Autowired
   private JobExecutionDao jobExecutionDao;
   @Autowired
@@ -87,10 +96,10 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  void testExport_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -99,24 +108,24 @@ class DataExportTest extends RestVerticleTestBase {
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-      JobExecution jobExecution = optionalJobExecution.get();
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-        context.verify(() -> {
-          FileDefinition fileExportDefinition = optionalFileDefinition.get();
-          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-          assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-          validateExternalCalls();
-          context.completeNow();
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(() -> {
+            FileDefinition fileExportDefinition = optionalFileDefinition.get();
+            assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
+            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
+            validateExternalCalls();
+            context.completeNow();
+          });
         });
-      });
-    }));
+      }));
   }
 
   @Test
-  void testExport_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -137,10 +146,10 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  void testExport_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
+  void testExportByCSV_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY);
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
@@ -152,23 +161,55 @@ class DataExportTest extends RestVerticleTestBase {
         .onSuccess(optionalJobExecution -> {
           JobExecution jobExecution = optionalJobExecution.get();
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-              context.verify(() -> {
-                assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-                validateExternalCallsForInventory();
-                context.completeNow();
-              });
+            context.verify(() -> {
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+              validateExternalCallsForInventory();
+              context.completeNow();
             });
+          });
+        });
+    });
+  }
+
+  @Test
+  void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TENANT, tenantId)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .build();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_CQL, CQL, requestSpecificationForMockServer);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+            context.verify(() -> {
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
+              validateExternalCallsForInventory();
+              context.completeNow();
+            });
+          });
         });
     });
   }
 
   @Disabled("Disabled for Q3-2020(and until futher decision is made) as we are going to generate marc on the fly for custom profiles")
   @Test
-  void testExport_UnderlyingSrsWithProfileTransformations(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsWithProfileTransformations(VertxTestContext context) throws IOException {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
-    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", tenantId);
+    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
@@ -178,25 +219,25 @@ class DataExportTest extends RestVerticleTestBase {
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-      JobExecution jobExecution = optionalJobExecution.get();
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-        context.verify(() -> {
-          FileDefinition fileExportDefinition = optionalFileDefinition.get();
-          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-          assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "expected_marc_MappingTransformations.json");
-          validateExternalCallsForMappingProfileTransformations();
-          context.completeNow();
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(() -> {
+            FileDefinition fileExportDefinition = optionalFileDefinition.get();
+            assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "expected_marc_MappingTransformations.json");
+            validateExternalCallsForMappingProfileTransformations();
+            context.completeNow();
+          });
         });
-      });
-    }));
+      }));
   }
 
   @Test
-  void testExport_UnderlyingSrsWithProfileTransformationsNoCallToSRS(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsWithProfileTransformationsNoCallToSRS(VertxTestContext context) throws IOException {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
-    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", tenantId);
+    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
@@ -206,15 +247,15 @@ class DataExportTest extends RestVerticleTestBase {
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-      JobExecution jobExecution = optionalJobExecution.get();
-      fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-        context.verify(() -> {
-          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-          validateExternalCallsForMappingProfileTransformations();
-          context.completeNow();
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(() -> {
+            assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+            validateExternalCallsForMappingProfileTransformations();
+            context.completeNow();
+          });
         });
-      });
-    }));
+      }));
   }
 
 
@@ -225,7 +266,7 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = CUSTOM_TEST_TENANT;
     //given
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
-    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CUSTOM_TEST_TENANT);
+    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CSV, CUSTOM_TEST_TENANT, buildRequestSpecification(tenantId));
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a");
 
     //when
@@ -247,7 +288,6 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
 
-
   private String buildCustomJobProfile(String tenantID) {
     String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
     JsonObject mappingProfilejs = new JsonObject(mappingProfile);
@@ -257,8 +297,8 @@ class DataExportTest extends RestVerticleTestBase {
     JsonObject jobProfilejs = new JsonObject(jobProfile);
     Response response = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID);
     return response.then()
-        .extract()
-        .path("id");
+      .extract()
+      .path("id");
   }
 
   private ArgumentCaptor<FileDefinition> captureFileExportDefinition(String tenantId) {
@@ -267,13 +307,13 @@ class DataExportTest extends RestVerticleTestBase {
     return fileExportDefinitionCaptor;
   }
 
-  private FileDefinition uploadFile(String fileName, String tenantId) throws IOException {
+  private FileDefinition uploadFile(String fileName, UploadFormat format, String tenantId, RequestSpecification binaryRequestSpecification) throws IOException {
     File fileToUpload = TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    RequestSpecification binaryRequestSpecification = buildRequestSpecification(tenantId);
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName(fileName);
+      .withFileName(fileName)
+      .withUploadFormat(format);
 
     postRequest(JsonObject.mapFrom(givenFileDefinition), FILE_DEFINITION_SERVICE_URL, tenantId);
 
@@ -286,8 +326,8 @@ class DataExportTest extends RestVerticleTestBase {
       .extract().body().as(FileDefinition.class);
   }
 
-  private FileDefinition uploadFile(String fileName) throws IOException {
-    return uploadFile(fileName, okapiConnectionParams.getTenantId());
+  private FileDefinition uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification) throws IOException {
+    return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification);
   }
 
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition) {
@@ -337,8 +377,8 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog2.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
-    for (ErrorLog errorLog: errorLogCollection.getErrorLogs()) {
-        Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
+    for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
+      Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
         || errorLog.getReason().contains("Nothing to export: no binary file generated")
         || errorLog.getReason().contains("Some records are not found in srs and inventory, number of not found records: 1")
         || errorLog.getReason().contains("Export file definition is not valid with id:"));
@@ -367,7 +407,7 @@ class DataExportTest extends RestVerticleTestBase {
     validateExternalCallsForReferenceData();
   }
 
-  private void validateExternalCallsForReferenceData(){
+  private void validateExternalCallsForReferenceData() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES).size());
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTRIBUTOR_NAME_TYPES).size());
@@ -390,5 +430,6 @@ class DataExportTest extends RestVerticleTestBase {
     public ExportStorageService getMockExportStorageService() {
       return mockExportStorageService;
     }
+
   }
 }

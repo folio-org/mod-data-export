@@ -36,6 +36,15 @@
       "description": "Size of the file in Kbyte",
       "type": "integer"
     },
+    "uploadFormat": {
+      "description": "Format of upload file",
+      "type": "string",
+      "enum": [
+        "csv",
+        "cql"
+      ],
+      "default": "csv"
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",

@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.file.FileSystem;
+import org.folio.clients.InventoryClient;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +14,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -29,6 +33,8 @@ public class LocalFileSystemStorage implements FileStorage {
 
   private WorkerExecutor workerExecutor;
   private FileSystem fileSystem;
+  @Autowired
+  private InventoryClient inventoryClient;
 
 
   public LocalFileSystemStorage(@Autowired Vertx vertx) {
@@ -42,6 +48,22 @@ public class LocalFileSystemStorage implements FileStorage {
     workerExecutor.<Void>executeBlocking(blockingFuture -> {
       try {
         saveFileData(data, fileDefinition);
+      } catch (Exception e) {
+        LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
+        promise.fail(e);
+      }
+      promise.complete(fileDefinition);
+    }, null);
+    return promise.future();
+  }
+
+  @Override
+  public Future<FileDefinition> saveFileDataAsyncCQL(List<String> uuids, FileDefinition fileDefinition) {
+    Promise<FileDefinition> promise = Promise.promise();
+    workerExecutor.<Void>executeBlocking(blockingFuture -> {
+      try {
+        String collect = uuids.stream().collect(Collectors.joining(System.lineSeparator()));
+        saveFileData(collect.getBytes(StandardCharsets.UTF_8.name()), fileDefinition);
       } catch (Exception e) {
         LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
         promise.fail(e);

@@ -1,21 +1,6 @@
 package org.folio.clients;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.StringUtils;
-import org.folio.service.logs.ErrorLogService;
-import org.folio.util.OkapiConnectionParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
@@ -28,6 +13,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
@@ -40,6 +26,23 @@ import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.service.logs.ErrorLogService;
+import org.folio.util.OkapiConnectionParams;
+import org.folio.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Component
 public class InventoryClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -48,6 +51,7 @@ public class InventoryClient {
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
+  private static final String QUERY = "?(query=";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
@@ -61,6 +65,20 @@ public class InventoryClient {
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralError("Error while getting instances by ids. " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<JsonObject> getInstancesBulkUUIDs(String query, OkapiConnectionParams params) {
+    if (StringUtils.isEmpty(query)) {
+      return Optional.empty();
+    }
+    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query) + ")";
+    try {
+      return Optional.of(ClientUtil.getRequest(params, endpoint));
+    } catch (HttpClientException e) {
+      LOGGER.error(e.getMessage(), e.getCause());
+      errorLogService.saveGeneralError("Error while getting instances by ids. " + e.getMessage(), StringUtils.EMPTY, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -177,11 +195,11 @@ public class InventoryClient {
 
   public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-        params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
+      params.getOkapiUrl(), format(QUERY_PATTERN_HOLDING, instanceID));
     try {
       return Optional.of(getRequest(params, endpoint));
     } catch (HttpClientException exception) {
-      errorLogService.saveGeneralError(String.format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralError(format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

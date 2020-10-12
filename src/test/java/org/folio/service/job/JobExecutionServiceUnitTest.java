@@ -35,15 +35,15 @@ import static java.util.Collections.singletonList;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -347,7 +347,7 @@ class JobExecutionServiceUnitTest {
     when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
 
     //when
-    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, true, TENANT_ID);
 
     //then
     future.onComplete(ar -> {

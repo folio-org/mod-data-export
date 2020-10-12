@@ -115,7 +115,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId) {
+  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
       ExportedFile exportedFile = new ExportedFile()
         .withFileId(UUID.randomUUID().toString())
@@ -132,7 +132,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       jobExecution.setRunBy(new RunBy()
         .withFirstName(personal.getString("firstName"))
         .withLastName(personal.getString("lastName")));
-      jobExecution.setProgress(new Progress().withTotal(String.valueOf(totalCount)));
+      if (withProgress) {
+        jobExecution.setProgress(new Progress().withTotal(String.valueOf(totalCount)));
+      }
       return update(jobExecution, tenantId);
     });
   }

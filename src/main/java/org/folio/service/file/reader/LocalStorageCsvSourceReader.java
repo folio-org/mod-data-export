@@ -1,5 +1,8 @@
 package org.folio.service.file.reader;
 
+import static java.util.Objects.nonNull;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+
 import com.google.common.collect.Iterables;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.slf4j.Logger;
@@ -14,8 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Objects.nonNull;
 
 @SuppressWarnings({"java:S2095"})
 public class LocalStorageCsvSourceReader implements SourceReader {
@@ -59,7 +60,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public long totalCount() {
-    if(nonNull(fileDefinition)) {
+    if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
         return fileLines.count();
       } catch (IOException e) {

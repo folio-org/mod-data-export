@@ -1,3 +1,4 @@
+
 package org.folio.service.logs;
 
 import io.vertx.core.Future;
@@ -79,7 +80,7 @@ class ErrorLogServiceUnitTest {
       .withJobExecutionId(UUID.randomUUID().toString())
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withReason("Error reason")
-      .withCreatedData(new Date())
+      .withCreatedDate(new Date())
       .withMetadata(new Metadata()
         .withCreatedByUserId(UUID.randomUUID().toString())
         .withUpdatedByUserId(UUID.randomUUID().toString()));
