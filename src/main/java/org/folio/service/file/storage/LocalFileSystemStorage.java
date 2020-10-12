@@ -57,6 +57,7 @@ public class LocalFileSystemStorage implements FileStorage {
       saveFileData(data, fileDefinition);
     } catch (IOException e) {
       LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
+      throw new RuntimeException(e);
     }
     return fileDefinition;
   }

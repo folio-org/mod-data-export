@@ -162,6 +162,17 @@
         },
         {
           "methods": [
+            "DELETE"
+          ],
+          "pathPattern": "/data-export/job-executions/{id}",
+          "permissionsRequired": [
+            "data-export.job-executions.item.delete"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export/job-executions/{jobId}/download/{fileId}",
@@ -380,6 +391,11 @@
       "description": "Entry point to get Job Executions by query"
     },
     {
+      "permissionName": "data-export.job-executions.item.delete",
+      "displayName": "Data Export - delete job execution by Id",
+      "description": "Permission to delete Job Executions by Id"
+    },
+    {
       "permissionName": "data-export.file-definitions.upload.post",
       "displayName": "Data Export - upload file",
       "description": "Entry point to upload file"
@@ -469,6 +485,7 @@
         "data-export.file-definitions.item.post",
         "data-export.file-definitions.upload.post",
         "data-export.job-executions.items.get",
+        "data-export.job-executions.item.delete",
         "data-export.job-executions.items.download.get",
         "data-export.job-profiles.item.post",
         "data-export.job-profiles.collection.get",

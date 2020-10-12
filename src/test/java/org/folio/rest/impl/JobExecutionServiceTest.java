@@ -92,4 +92,38 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
     });
   }
 
+  @Test
+  void deleteJobExecutions_return404_IfNoJobExecutionsWithGivenId() {
+    RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .when()
+      .delete(JOB_EXECUTIONS_URL + "/" + UUID.randomUUID().toString())
+      .then()
+      .statusCode(HttpStatus.SC_NOT_FOUND);
+  }
+
+  @Test
+  void deleteJobExecutions_return200_IfJobExecutionWithGivenIdPresent(VertxTestContext context) {
+    //create a Job Execution
+    JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString()).withStatus(Status.IN_PROGRESS);
+
+    jobExecutionService.save(jobExecution, TENANT_ID);
+
+    vertx.setTimer(3000L, handler -> {
+
+      //delete of the above job execution is a success
+      RestAssured.given().spec(jsonRequestSpecification).when()
+          .delete(JOB_EXECUTIONS_URL + "/" + jobExecution.getId()).then()
+          .statusCode(HttpStatus.SC_NO_CONTENT);
+
+      //verify the jobexecution is not present
+      jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
+          .onComplete(jobExec -> context.verify(() -> {
+            Assertions.assertEquals(true, jobExec.failed());
+            context.completeNow();
+          }));
+    });
+
+  }
+
 }

@@ -4,6 +4,7 @@ import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,12 +30,16 @@ import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
+import org.folio.rest.jaxrs.model.ErrorLog;
+import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -60,6 +65,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
   public static final int EXPORTED_RECORDS_NUMBER_3 = 3;
@@ -71,6 +77,8 @@ class DataExportTest extends RestVerticleTestBase {
   private JobExecutionDao jobExecutionDao;
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   public DataExportTest() {
     Context vertxContext = vertx.getOrCreateContext();
@@ -210,6 +218,34 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
 
+  @Test
+  void shouldNotExportFile_whenInventoryReturnServerError(VertxTestContext context) throws IOException, InterruptedException {
+    postToTenant(CUSTOM_TENANT_HEADER);
+    // given
+    String tenantId = CUSTOM_TEST_TENANT;
+    //given
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CUSTOM_TEST_TENANT);
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a");
+
+    //when
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        errorLogService.getByJobExecutionId("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogCollection -> {
+          context.verify(() -> {
+            assertJobExecution(jobExecution, FAIL, 0);
+            assertErrorLogs(errorLogCollection, jobExecutionId);
+            context.completeNow();
+          });
+        });
+      }));
+  }
+
 
 
   private String buildCustomJobProfile(String tenantID) {
@@ -285,6 +321,28 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(status, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
+  }
+
+  private void assertErrorLogs(ErrorLogCollection errorLogCollection, String jobExecutionId) {
+    Assert.assertEquals(4, errorLogCollection.getErrorLogs().size());
+    ErrorLog errorLog1 = errorLogCollection.getErrorLogs().get(0);
+    ErrorLog errorLog2 = errorLogCollection.getErrorLogs().get(1);
+    ErrorLog errorLog3 = errorLogCollection.getErrorLogs().get(2);
+    ErrorLog errorLog4 = errorLogCollection.getErrorLogs().get(3);
+    assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog2.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog3.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog4.getJobExecutionId());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog2.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
+    for (ErrorLog errorLog: errorLogCollection.getErrorLogs()) {
+        Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
+        || errorLog.getReason().contains("Nothing to export: no binary file generated")
+        || errorLog.getReason().contains("Some records are not found in srs and inventory, number of not found records: 1")
+        || errorLog.getReason().contains("Export file definition is not valid with id:"));
+    }
   }
 
   private void validateExternalCalls() {

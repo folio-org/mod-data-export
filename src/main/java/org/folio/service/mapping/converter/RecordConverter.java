@@ -42,16 +42,16 @@ public class RecordConverter {
    * @param appendHoldingsItems
    */
    protected void fetchHoldingsAndItems(MappingProfile mappingProfile, OkapiConnectionParams params, String instanceUUID,
-       JsonObject appendHoldingsItems) {
+       JsonObject appendHoldingsItems, String jobExecutionId) {
      if (isTransformationRequired(mappingProfile)) {
        LOGGER.debug("Fetching holdings/items for instance");
-       List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, params);
+       List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, jobExecutionId, params);
        appendHoldingsItems.put("holdings", new JsonArray(holdings));
        if (mappingProfile.getRecordTypes().contains(RecordType.ITEM) && CollectionUtils.isNotEmpty(holdings)) {
          List<String> holdingIds = holdings.stream()
            .map(record -> record.getString("id"))
            .collect(Collectors.toList());
-         List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, params);
+         List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, jobExecutionId, params);
          appendHoldingsItems.put("items", new JsonArray(items));
        }
      }

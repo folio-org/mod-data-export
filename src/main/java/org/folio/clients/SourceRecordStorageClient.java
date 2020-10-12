@@ -7,10 +7,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -26,8 +28,10 @@ import static org.folio.util.ExternalPathResolver.SRS;
 public class SourceRecordStorageClient {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String GET_RECORDS_QUERY = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=INSTANCE";
+  @Autowired
+  private ErrorLogService errorLogService;
 
-  public Optional<JsonObject> getRecordsByInstanceIds(List<String> ids, OkapiConnectionParams params) {
+  public Optional<JsonObject> getRecordsByInstanceIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
     HttpPost httpPost = new HttpPost(format(GET_RECORDS_QUERY, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -37,6 +41,7 @@ public class SourceRecordStorageClient {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpPost.getURI(), e);
+      errorLogService.saveGeneralError(String.format("Exception while calling %s, message: %s", httpPost.getURI(), e.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

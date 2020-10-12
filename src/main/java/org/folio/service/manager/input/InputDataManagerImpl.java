@@ -19,6 +19,7 @@ import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
 import org.folio.service.job.JobExecutionService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
@@ -57,6 +58,8 @@ class InputDataManagerImpl implements InputDataManager {
   private Vertx vertx;
   @Autowired
   private UsersClient usersClient;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   private WorkerExecutor executor;
   private LocalMap<String, InputDataContext> inputDataLocalMap;
@@ -101,7 +104,7 @@ class InputDataManagerImpl implements InputDataManager {
         initInputDataContext(sourceReader, jobExecutionId);
         ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
-        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), okapiConnectionParams);
+        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
           jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), tenantId);
@@ -111,6 +114,7 @@ class InputDataManagerImpl implements InputDataManager {
         }
       });
     } else {
+      errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
       jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
       sourceReader.close();

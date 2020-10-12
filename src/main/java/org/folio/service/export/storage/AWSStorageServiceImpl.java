@@ -12,6 +12,7 @@ import io.vertx.core.Vertx;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
   private AmazonFactory amazonFactory;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   /**
    * Fetch the link to download a file for a given job by fileName
@@ -54,22 +57,27 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
+      errorLogService.saveGeneralError("S3 bucket is not provided", jobExecutionId, tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     }
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
       .withExpiration(getExpiration());
-    vertx.executeBlocking(blockingFuture -> {
-      URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
-      blockingFuture.complete(url.toString());
-    }, asyncResult -> {
-      if (asyncResult.failed()) {
-        promise.fail(asyncResult.cause());
-      } else {
-        String url = (String)asyncResult.result();
-        promise.complete(url);
-      }
-    });
+    try {
+      vertx.executeBlocking(blockingFuture -> {
+        URL url = s3Client.generatePresignedUrl(generatePresignedUrlRequest);
+        blockingFuture.complete(url.toString());
+      }, asyncResult -> {
+        if (asyncResult.failed()) {
+          promise.fail(asyncResult.cause());
+        } else {
+          String url = (String) asyncResult.result();
+          promise.complete(url);
+        }
+      });
+    } finally {
+      s3Client.shutdown();
+    }
     return promise.future();
   }
 
@@ -93,6 +101,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
+      errorLogService.saveGeneralError("S3 bucket is not provided", fileDefinition.getJobExecutionId(), tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
@@ -112,4 +121,5 @@ public class AWSStorageServiceImpl implements ExportStorageService {
       }
     }
   }
+
 }

@@ -4,6 +4,7 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -88,8 +89,8 @@ class EndToEndTest extends RestVerticleTestBase {
 
   @Disabled("This test class will be removed in the future")
   public void before() {
-    when(mockUsersClient.getById(ArgumentMatchers.anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
-    when(mockInventoryClient.getNatureOfContentTerms(ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());
+    when(mockUsersClient.getById(anyString(), anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
+    when(mockInventoryClient.getNatureOfContentTerms(anyString(), ArgumentMatchers.any(OkapiConnectionParams.class))).thenReturn(Collections.emptyMap());
   }
 
 
@@ -249,7 +250,7 @@ class EndToEndTest extends RestVerticleTestBase {
 
 
   private void givenSetUpSoureRecordMockToReturnEmptyRecords() {
-    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
+    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.empty());
   }
 
   private ArgumentCaptor<FileDefinition> givenCaptureFileExportDefinition() {
@@ -261,7 +262,7 @@ class EndToEndTest extends RestVerticleTestBase {
   private void givenSetSourceStorageMockToReturnRecords() throws IOException {
     String json = FileUtils.readFileToString(TestUtil.getFileFromResources(SRS_RESPONSE_FILE_NAME), Charsets.UTF_8);
     JsonObject data = new JsonObject(json);
-    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
+    when(mockSrsClient.getRecordsByInstanceIds(any(List.class), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(data));
   }
 
   private Future<FileDefinition> assertCompletedFileDefinitionAndExportedFile(TestContext context, Optional<FileDefinition> fileExportDefinitionOptional) {

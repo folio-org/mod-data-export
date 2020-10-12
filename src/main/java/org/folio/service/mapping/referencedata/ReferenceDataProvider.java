@@ -6,6 +6,7 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
@@ -43,7 +44,7 @@ public class ReferenceDataProvider {
   public ReferenceData get(String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
     ReferenceData cached = this.cache.get(jobExecutionId);
     if (cached == null) {
-      ReferenceData loaded = load(okapiConnectionParams);
+      ReferenceData loaded = load(jobExecutionId, okapiConnectionParams);
       this.cache.put(jobExecutionId, loaded);
       return loaded;
     } else {
@@ -59,14 +60,14 @@ public class ReferenceDataProvider {
    */
   public ReferenceData getReferenceDataForTransformationFields(OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
-    referenceData.put(ALTERNATIVE_TITLE_TYPES, inventoryClient.getAlternativeTitleTypes(okapiConnectionParams));
-    referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(okapiConnectionParams));
-    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
-    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
-    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
-    referenceData.put(ISSUANCE_MODES, inventoryClient.getModesOfIssuance(okapiConnectionParams));
-    referenceData.put(HOLDING_NOTE_TYPES, inventoryClient.getHoldingsNoteTypes(okapiConnectionParams));
-    referenceData.put(ITEM_NOTE_TYPES, inventoryClient.getItemNoteTypes(okapiConnectionParams));
+    referenceData.put(ALTERNATIVE_TITLE_TYPES, inventoryClient.getAlternativeTitleTypes(EMPTY, okapiConnectionParams));
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(EMPTY, okapiConnectionParams));
+    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(EMPTY, okapiConnectionParams));
+    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(EMPTY, okapiConnectionParams));
+    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(EMPTY, okapiConnectionParams));
+    referenceData.put(ISSUANCE_MODES, inventoryClient.getModesOfIssuance(EMPTY, okapiConnectionParams));
+    referenceData.put(HOLDING_NOTE_TYPES, inventoryClient.getHoldingsNoteTypes(EMPTY, okapiConnectionParams));
+    referenceData.put(ITEM_NOTE_TYPES, inventoryClient.getItemNoteTypes(EMPTY, okapiConnectionParams));
     return referenceData;
   }
 
@@ -75,22 +76,22 @@ public class ReferenceDataProvider {
    *
    * @param okapiConnectionParams
    */
-  private ReferenceDataImpl load(OkapiConnectionParams okapiConnectionParams) {
+  private ReferenceDataImpl load(String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
-    referenceData.put(CONTENT_TERMS, inventoryClient.getNatureOfContentTerms(okapiConnectionParams));
-    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(okapiConnectionParams));
-    referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(okapiConnectionParams));
-    referenceData.put(LOCATIONS, inventoryClient.getLocations(okapiConnectionParams));
-    referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(okapiConnectionParams));
-    referenceData.put(LIBRARIES, inventoryClient.getLibraries(okapiConnectionParams));
-    referenceData.put(CAMPUSES, inventoryClient.getCampuses(okapiConnectionParams));
-    referenceData.put(INSTITUTIONS, inventoryClient.getInstitutions(okapiConnectionParams));
-    referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(okapiConnectionParams));
-    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(okapiConnectionParams));
-    referenceData.put(INSTANCE_FORMATS, inventoryClient.getInstanceFormats(okapiConnectionParams));
-    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(okapiConnectionParams));
-    referenceData.put(ISSUANCE_MODES, inventoryClient.getModesOfIssuance(okapiConnectionParams));
-    referenceData.put(CALL_NUMBER_TYPES, inventoryClient.getCallNumberTypes(okapiConnectionParams));
+    referenceData.put(CONTENT_TERMS, inventoryClient.getNatureOfContentTerms(jobExecutionId, okapiConnectionParams));
+    referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(jobExecutionId, okapiConnectionParams));
+    referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(jobExecutionId, okapiConnectionParams));
+    referenceData.put(LOCATIONS, inventoryClient.getLocations(jobExecutionId, okapiConnectionParams));
+    referenceData.put(LOAN_TYPES, inventoryClient.getLoanTypes(jobExecutionId, okapiConnectionParams));
+    referenceData.put(LIBRARIES, inventoryClient.getLibraries(jobExecutionId, okapiConnectionParams));
+    referenceData.put(CAMPUSES, inventoryClient.getCampuses(jobExecutionId, okapiConnectionParams));
+    referenceData.put(INSTITUTIONS, inventoryClient.getInstitutions(jobExecutionId, okapiConnectionParams));
+    referenceData.put(MATERIAL_TYPES, inventoryClient.getMaterialTypes(jobExecutionId, okapiConnectionParams));
+    referenceData.put(INSTANCE_TYPES, inventoryClient.getInstanceTypes(jobExecutionId, okapiConnectionParams));
+    referenceData.put(INSTANCE_FORMATS, inventoryClient.getInstanceFormats(jobExecutionId, okapiConnectionParams));
+    referenceData.put(ELECTRONIC_ACCESS_RELATIONSHIPS, inventoryClient.getElectronicAccessRelationships(jobExecutionId, okapiConnectionParams));
+    referenceData.put(ISSUANCE_MODES, inventoryClient.getModesOfIssuance(jobExecutionId, okapiConnectionParams));
+    referenceData.put(CALL_NUMBER_TYPES, inventoryClient.getCallNumberTypes(jobExecutionId, okapiConnectionParams));
     return referenceData;
   }
 }

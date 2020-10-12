@@ -88,4 +88,13 @@ public interface JobExecutionService {
    */
   Future<Void> expireJobExecutions(String tenantId);
 
+  /**
+   * Deletes a {@link JobExecution} by id
+   *
+   * @param id JobExecution id
+   * @param tenantId tenant id
+   * @return future with Boolean
+   */
+  Future<Boolean> deleteById(String id, String tenantId);
+
 }

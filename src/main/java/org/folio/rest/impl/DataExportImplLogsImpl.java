@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import org.folio.rest.jaxrs.resource.DataExportLogs;
+import org.folio.rest.jaxrs.resource.DataExportLogs.GetDataExportLogsResponse;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
@@ -34,7 +35,7 @@ public class DataExportImplLogsImpl implements DataExportLogs {
   public void getDataExportLogs(@Min(0) @Max(2147483647) int offset, @Min(0) @Max(2147483647) int limit, String query, @Pattern(regexp = "[a-zA-Z]{2}") String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     Future.succeededFuture()
       .compose(ar -> errorLogService.getByJobExecutionId(query, offset, limit, tenantId))
-      .map(DataExportImplLogsImpl.GetDataExportLogsResponse::respond200WithApplicationJson)
+      .map(GetDataExportLogsResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler);

@@ -1,10 +1,26 @@
 package org.folio.clients;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.service.logs.ErrorLogService;
+import org.folio.util.OkapiConnectionParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
+import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
@@ -24,17 +40,9 @@ import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import org.folio.util.OkapiConnectionParams;
-import org.springframework.stereotype.Component;
-
 @Component
 public class InventoryClient {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
@@ -43,95 +51,117 @@ public class InventoryClient {
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
-  public Optional<JsonObject> getInstancesByIds(List<String> ids, OkapiConnectionParams params, int partitionSize) {
-    return ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
-        QUERY_PATTERN_INVENTORY);
+  @Autowired
+  private ErrorLogService errorLogService;
+
+  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
+    try {
+      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+          QUERY_PATTERN_INVENTORY));
+    } catch (HttpClientException exception) {
+      LOGGER.error(exception.getMessage(), exception.getCause());
+      errorLogService.saveGeneralError("Error while getting instances by ids. " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
   }
 
-  public Map<String, JsonObject> getNatureOfContentTerms(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getNatureOfContentTerms(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(CONTENT_TERMS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, CONTENT_TERMS);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTENT_TERMS);
   }
 
-  public Map<String, JsonObject> getIdentifierTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getIdentifierTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(IDENTIFIER_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, IDENTIFIER_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, IDENTIFIER_TYPES);
   }
 
-  public Map<String, JsonObject> getLocations(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getLocations(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(LOCATIONS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, LOCATIONS);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, LOCATIONS);
   }
 
-  public Map<String, JsonObject> getLibraries(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getLibraries(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(LIBRARIES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, LIBRARIES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, LIBRARIES);
   }
 
-  public Map<String, JsonObject> getCampuses(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getCampuses(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(CAMPUSES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, CAMPUSES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, CAMPUSES);
   }
 
-  public Map<String, JsonObject> getInstitutions(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getInstitutions(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(INSTITUTIONS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, INSTITUTIONS);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, INSTITUTIONS);
   }
 
-  public Map<String, JsonObject> getMaterialTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getMaterialTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(MATERIAL_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, MATERIAL_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, MATERIAL_TYPES);
   }
 
-  public Map<String, JsonObject> getModesOfIssuance(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getModesOfIssuance(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(ISSUANCE_MODES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, ISSUANCE_MODES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, ISSUANCE_MODES);
   }
 
-  public Map<String, JsonObject> getInstanceTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getInstanceTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(INSTANCE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, INSTANCE_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, INSTANCE_TYPES);
   }
 
-  public Map<String, JsonObject> getInstanceFormats(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getInstanceFormats(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(INSTANCE_FORMATS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, INSTANCE_FORMATS);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, INSTANCE_FORMATS);
   }
 
-  public Map<String, JsonObject> getElectronicAccessRelationships(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getElectronicAccessRelationships(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(ELECTRONIC_ACCESS_RELATIONSHIPS) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, ELECTRONIC_ACCESS_RELATIONSHIPS);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, ELECTRONIC_ACCESS_RELATIONSHIPS);
   }
 
-  public Map<String, JsonObject> getAlternativeTitleTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getAlternativeTitleTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(ALTERNATIVE_TITLE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, ALTERNATIVE_TITLE_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, ALTERNATIVE_TITLE_TYPES);
   }
 
-  public Map<String, JsonObject> getLoanTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getLoanTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(LOAN_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, LOAN_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, LOAN_TYPES);
   }
 
-  public Map<String, JsonObject> getHoldingsNoteTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getHoldingsNoteTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(HOLDING_NOTE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, HOLDING_NOTE_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, HOLDING_NOTE_TYPES);
   }
 
-  public Map<String, JsonObject> getItemNoteTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getItemNoteTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(ITEM_NOTE_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, ITEM_NOTE_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, ITEM_NOTE_TYPES);
   }
 
-  public Map<String, JsonObject> getCallNumberTypes(OkapiConnectionParams params) {
+  public Map<String, JsonObject> getCallNumberTypes(String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = resourcesPathWithPrefix(CALL_NUMBER_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, CALL_NUMBER_TYPES);
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, CALL_NUMBER_TYPES);
   }
 
-  private Map<String, JsonObject> getReferenceDataByUrl(String url, OkapiConnectionParams params, String field) {
+  public Map<String, JsonObject> getContributorNameTypes(String jobExecutionId, OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
+    return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTRIBUTOR_NAME_TYPES);
+  }
+
+  private Map<String, JsonObject> getReferenceDataByUrl(String url, String jobExecutionId, OkapiConnectionParams params, String field) {
     String queryEndpoint = ClientUtil.buildQueryEndpoint(url, params.getOkapiUrl());
-    Optional<JsonObject> responseBody = ClientUtil.getRequest(params, queryEndpoint);
+    Optional<JsonObject> responseBody;
     Map<String, JsonObject> map = new HashMap<>();
+    try {
+      responseBody = Optional.of(ClientUtil.getRequest(params, queryEndpoint));
+    } catch (HttpClientException e) {
+      if (StringUtils.isNotEmpty(jobExecutionId)) {
+        errorLogService.saveGeneralError("Error while getting reference data from inventory during the export process by calling  " + url, jobExecutionId, params.getTenantId());
+      }
+      return map;
+    }
     responseBody.ifPresent(rb -> {
       if (rb.containsKey(field)) {
         JsonArray array = rb.getJsonArray(field);
@@ -145,20 +175,26 @@ public class InventoryClient {
     return map;
   }
 
-  public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, OkapiConnectionParams params) {
+  public Optional<JsonObject> getHoldingsByInstanceId(String instanceID, String jobExecutionId, OkapiConnectionParams params) {
     String endpoint = buildQueryEndpoint(resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
         params.getOkapiUrl(), String.format(QUERY_PATTERN_HOLDING, instanceID));
-    return getRequest(params, endpoint);
+    try {
+      return Optional.of(getRequest(params, endpoint));
+    } catch (HttpClientException exception) {
+      errorLogService.saveGeneralError(String.format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
   }
 
-  public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, OkapiConnectionParams params) {
-    return ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-        QUERY_PATTERN_ITEM);
-  }
-
-  public Map<String, JsonObject> getContributorNameTypes(OkapiConnectionParams params) {
-    String endpoint = resourcesPathWithPrefix(CONTRIBUTOR_NAME_TYPES) + LIMIT_PARAMETER + REFERENCE_DATA_LIMIT;
-    return getReferenceDataByUrl(endpoint, params, CONTRIBUTOR_NAME_TYPES);
+  public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params) {
+    try {
+      return Optional.of(ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
+          QUERY_PATTERN_ITEM));
+    } catch (HttpClientException exception) {
+      LOGGER.error(exception.getMessage(), exception.getCause());
+      errorLogService.saveGeneralError("Error while getting items by holding ids " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
   }
 
 }

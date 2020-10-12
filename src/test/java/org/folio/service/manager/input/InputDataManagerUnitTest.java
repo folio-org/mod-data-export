@@ -20,12 +20,12 @@ import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.job.JobExecutionServiceImpl;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
@@ -117,6 +117,8 @@ class InputDataManagerUnitTest {
   private InputDataContext inputDataContext;
   @Mock
   private UsersClient usersClient;
+  @Mock
+  private ErrorLogService errorLogService;
 
   private Context context;
   private AbstractApplicationContext springContext;
@@ -154,7 +156,7 @@ class InputDataManagerUnitTest {
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
     when(jobExecutionService.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
-    when(usersClient.getById(anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
+    when(usersClient.getById(anyString(), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
     doReturn(sourceReader).when(inputDataManager).initSourceReader(any(FileDefinition.class), anyInt());
@@ -177,6 +179,7 @@ class InputDataManagerUnitTest {
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
     assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + jobExecution.getHrId() + ".mrc"));
+    verify(errorLogService).saveGeneralError("Error while reading from input file with uuids or file is empty", JOB_EXECUTION_ID, TENANT_ID);
   }
 
   @Test
