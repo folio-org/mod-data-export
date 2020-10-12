@@ -250,12 +250,14 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
       .withFieldId(FIELD_ID_1)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.ITEM);
     Transformations transformations2 = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_2)
       .withFieldId(FIELD_ID_2)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_2);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_2)
+      .withRecordType(RecordType.ITEM);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(transformations1, transformations2));
@@ -278,7 +280,8 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
       .withFieldId(FIELD_ID_1)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD)
+      .withRecordType(RecordType.ITEM);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(transformations));
@@ -458,7 +461,8 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withFieldId(EFFECTIVE_LOCATION_FIELD_ID)
       .withPath(EFFECTIVE_LOCATION_PATH)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.ITEM);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
@@ -608,7 +612,8 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withFieldId(MATERIAL_TYPE_FIELD_ID)
       .withPath(MATERIAL_TYPE_PATH)
-      .withTransformation(TRANSFORMATION_FIELD_VALUE_1);
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(RecordType.ITEM);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(Lists.newArrayList(temporaryLocationTransformations));
@@ -630,17 +635,20 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withFieldId(CALLNUMBER_FIELD_ID)
       .withPath(CALLNUMBER_FIELD_PATH)
-      .withTransformation("900ff$a");
+      .withTransformation("900ff$a")
+      .withRecordType(RecordType.ITEM);
     Transformations transformation2 = new Transformations()
       .withEnabled(true)
       .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
       .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
-      .withTransformation("900ff$b");
+      .withTransformation("900ff$b")
+      .withRecordType(RecordType.ITEM);
     Transformations transformation3 = new Transformations()
       .withEnabled(true)
       .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
       .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
-      .withTransformation("900ff$c");
+      .withTransformation("900ff$c")
+      .withRecordType(RecordType.ITEM);
     List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
@@ -662,17 +670,20 @@ class RuleFactoryUnitTest {
       .withEnabled(true)
       .withFieldId(CALLNUMBER_FIELD_ID)
       .withPath(CALLNUMBER_FIELD_PATH)
-      .withTransformation("900ff$a");
+      .withTransformation("900ff$a")
+      .withRecordType(RecordType.ITEM);
     Transformations transformation2 = new Transformations()
       .withEnabled(true)
       .withFieldId(CALLNUMBER_PREFIX_FIELD_ID)
       .withPath(CALLNUMBER_PREFIX_FIELD_PATH)
-      .withTransformation("900  $b");
+      .withTransformation("900  $b")
+      .withRecordType(RecordType.ITEM);
     Transformations transformation3 = new Transformations()
       .withEnabled(true)
       .withFieldId(CALLNUMBER_SUFFIX_FIELD_ID)
       .withPath(CALLNUMBER_SUFFIX_FIELD_PATH)
-      .withTransformation("90011$c");
+      .withTransformation("90011$c")
+      .withRecordType(RecordType.ITEM);
     List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
