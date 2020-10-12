@@ -1,10 +1,14 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
-import io.vertx.core.Context;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
+
 import org.apache.http.HttpStatus;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecution.Status;
@@ -17,14 +21,11 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
-
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import io.restassured.RestAssured;
+import io.vertx.core.Context;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -83,12 +84,12 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
         .then()
         .statusCode(HttpStatus.SC_NO_CONTENT);
 
-      vertx.setTimer(3000L, ar ->
-        jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
-          .onSuccess(jobExec -> context.verify(() -> {
-            Assertions.assertEquals(Status.FAIL, jobExec.getStatus());
-            context.completeNow();
-          })));
+      jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
+        .onComplete(asyncResult -> context.verify(() -> {
+          Assertions.assertTrue(asyncResult.succeeded());
+          Assertions.assertEquals(Status.FAIL, asyncResult.result().getStatus());
+          context.completeNow();
+        }));
     });
   }
 
@@ -113,15 +114,15 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
 
       //delete of the above job execution is a success
       RestAssured.given().spec(jsonRequestSpecification).when()
-          .delete(JOB_EXECUTIONS_URL + "/" + jobExecution.getId()).then()
-          .statusCode(HttpStatus.SC_NO_CONTENT);
+        .delete(JOB_EXECUTIONS_URL + "/" + jobExecution.getId()).then()
+        .statusCode(HttpStatus.SC_NO_CONTENT);
 
       //verify the jobexecution is not present
       jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
-          .onComplete(jobExec -> context.verify(() -> {
-            Assertions.assertEquals(true, jobExec.failed());
-            context.completeNow();
-          }));
+        .onComplete(jobExec -> context.verify(() -> {
+          Assertions.assertEquals(true, jobExec.failed());
+          context.completeNow();
+        }));
     });
 
   }

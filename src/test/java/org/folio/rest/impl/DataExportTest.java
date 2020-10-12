@@ -13,18 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.vertx.core.Context;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.UUID;
+
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
@@ -40,11 +33,14 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -54,12 +50,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.UUID;
-
-import org.junit.Assert;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.vertx.core.Context;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -72,11 +74,13 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
-  private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
-  private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
-  private static final int EXPORTED_RECORDS_NUMBER_3 = 3;
+  public static final int EXPORTED_RECORDS_EMPTY = 0;
+  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  public static final int EXPORTED_RECORDS_NUMBER_3 = 3;
   private static final String CUSTOM_TEST_TENANT = "custom_test_tenant";
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
@@ -94,6 +98,48 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
+
+
+  @Test
+  void testExport_uploadingEmptyCqlFile_FAILED_job(VertxTestContext context) throws IOException {
+    //given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+          context.completeNow();
+        });
+      }));
+  }
+
+  @Test
+  void testExport_uploadingEmptyCsvFile_FAILED_job(VertxTestContext context) throws IOException {
+    //given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CSV, buildRequestSpecification(tenantId));
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+          context.completeNow();
+        });
+      }));
+  }
+
 
   @Test
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
