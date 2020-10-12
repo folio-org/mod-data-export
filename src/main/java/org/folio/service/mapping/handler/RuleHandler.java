@@ -39,7 +39,7 @@ public class RuleHandler {
             hasRuleSameFieldInHoldings = true;
             for (int holdingIndex = 0; holdingIndex < numberOfHoldings; holdingIndex++) {
               /* Creating new rule with indexed path */
-              Rule indexedRule = originRule.clone();
+              Rule indexedRule = originRule.copy();
               for (DataSource dataSource : indexedRule.getDataSources()) {
                 if (dataSource.getFrom() != null && dataSource.getFrom().equals(targetDataSource.getFrom())) {
                   dataSource.setFrom(targetDataSource.getFrom().replace("$.holdings[*]", "$.holdings[" + holdingIndex + "]"));
