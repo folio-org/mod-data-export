@@ -5,7 +5,6 @@ import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -31,8 +30,7 @@ import java.util.Set;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -135,7 +133,7 @@ public class RuleFactory {
     if (temporaryLocationTransformation.isPresent()) {
       return temporaryLocationTransformation.get().getTransformation();
     }
-    return StringUtils.EMPTY;
+    return EMPTY;
   }
 
   private boolean isHoldingsPermanentLocation(Transformations mappingTransformation) {
