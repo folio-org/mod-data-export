@@ -767,421 +767,421 @@
       {
          "fieldId":"item.barcode",
          "displayNameKey":"item.barcode",
-         "path":"$.items[*].barcode",
+         "path":"$.holdings[*].items[*].barcode",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.callnumber",
          "displayNameKey":"item.callNumber",
-         "path":"$.items[*].effectiveCallNumberComponents.callNumber",
+         "path":"$.holdings[*].items[*].effectiveCallNumberComponents.callNumber",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.callnumberprefix",
          "displayNameKey":"item.callNumberPrefix",
-         "path":"$.items[*].effectiveCallNumberComponents.prefix",
+         "path":"$.holdings[*].items[*].effectiveCallNumberComponents.prefix",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.callnumbersuffix",
          "displayNameKey":"item.callNumberSuffix",
-         "path":"$.items[*].effectiveCallNumberComponents.suffix",
+         "path":"$.holdings[*].items[*].effectiveCallNumberComponents.suffix",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.callnumbertype",
          "displayNameKey":"item.callNumberType",
-         "path":"$.items[*].effectiveCallNumberComponents.typeId",
+         "path":"$.holdings[*].items[*].effectiveCallNumberComponents.typeId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.chronology",
          "displayNameKey":"item.chronology",
-         "path":"$.items[*].chronology",
+         "path":"$.holdings[*].items[*].chronology",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.copynumber",
          "displayNameKey":"item.copyNumber",
-         "path":"$.items[*].copyNumber",
+         "path":"$.holdings[*].items[*].copyNumber",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.descriptionofpieces",
          "displayNameKey":"item.descriptionOfPieces",
-         "path":"$.items[*].descriptionOfPieces",
+         "path":"$.holdings[*].items[*].descriptionOfPieces",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.campus.code",
          "displayNameKey":"item.effectiveLocation.campus.code",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.campus.name",
          "displayNameKey":"item.effectiveLocation.campus.name",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.code",
          "displayNameKey":"item.effectiveLocation.code",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.institution.code",
          "displayNameKey":"item.effectiveLocation.institution.code",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.institution.name",
          "displayNameKey":"item.effectiveLocation.institution.name",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.library.code",
          "displayNameKey":"item.effectiveLocation.library.code",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.library.name",
          "displayNameKey":"item.effectiveLocation.library.name",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.effectivelocation.name",
          "displayNameKey":"item.effectiveLocation.name",
-         "path":"$.items[*].effectiveLocationId",
+         "path":"$.holdings[*].items[*].effectiveLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.default",
          "displayNameKey":"item.electronic.access.linkText.default",
-         "path":"$.items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.no.display.constant.generated",
          "displayNameKey":"item.electronic.access.linkText",
          "referenceDataValue":"No display constant generated",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.no.information.provided",
          "displayNameKey":"item.electronic.access.linkText",
          "referenceDataValue":"No information provided",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.related.resource",
          "displayNameKey":"item.electronic.access.linkText",
          "referenceDataValue":"Related resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.resource",
          "displayNameKey":"item.electronic.access.linkText",
          "referenceDataValue":"Resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.linktext.version.of.resource",
          "displayNameKey":"item.electronic.access.linkText",
          "referenceDataValue":"Version of resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].linkText",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].linkText",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.default",
          "displayNameKey":"item.electronic.access.materialsSpecification.default",
-         "path":"$.items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.no.display.constant.generated",
          "displayNameKey":"item.electronic.access.materialsSpecification",
          "referenceDataValue":"No display constant generated",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.no.information.provided",
          "displayNameKey":"item.electronic.access.materialsSpecification",
          "referenceDataValue":"No information provided",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.related.resource",
          "displayNameKey":"item.electronic.access.materialsSpecification",
          "referenceDataValue":"Related resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.resource",
          "displayNameKey":"item.electronic.access.materialsSpecification",
          "referenceDataValue":"Resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.materialsspecification.version.of.resource",
          "displayNameKey":"item.electronic.access.materialsSpecification",
          "referenceDataValue":"Version of resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].materialsSpecification",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].materialsSpecification",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.default",
          "displayNameKey":"item.electronic.access.publicNote.default",
-         "path":"$.items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.no.display.constant.generated",
          "displayNameKey":"item.electronic.access.publicNote",
          "referenceDataValue":"No display constant generated",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.no.information.provided",
          "displayNameKey":"item.electronic.access.publicNote",
          "referenceDataValue":"No information provided",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.related.resource",
          "displayNameKey":"item.electronic.access.publicNote",
          "referenceDataValue":"Related resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.resource",
          "displayNameKey":"item.electronic.access.publicNote",
          "referenceDataValue":"Resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.publicnote.version.of.resource",
          "displayNameKey":"item.electronic.access.publicNote",
          "referenceDataValue":"Version of resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].publicNote",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].publicNote",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.default",
          "displayNameKey":"item.electronic.access.uri.default",
-         "path":"$.items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(!(@.relationshipId) || @.relationshipId == null)].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.no.display.constant.generated",
          "displayNameKey":"item.electronic.access.uri",
          "referenceDataValue":"No display constant generated",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='ef03d582-219c-4221-8635-bc92f1107021')].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.no.information.provided",
          "displayNameKey":"item.electronic.access.uri",
          "referenceDataValue":"No information provided",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f50c90c9-bae0-4add-9cd0-db9092dbc9dd')].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.related.resource",
          "displayNameKey":"item.electronic.access.uri",
          "referenceDataValue":"Related resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.resource",
          "displayNameKey":"item.electronic.access.uri",
          "referenceDataValue":"Resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='f5d0068e-6272-458e-8a81-b85e7b9a14aa')].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.electronic.access.uri.version.of.resource",
          "displayNameKey":"item.electronic.access.uri",
          "referenceDataValue":"Version of resource",
-         "path":"$.items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].uri",
+         "path":"$.holdings[*].items[*].electronicAccess[?(@.relationshipId=='3b430592-2e09-4b48-9a0c-0636d66b9fb3')].uri",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.enumeration",
          "displayNameKey":"item.enumeration",
-         "path":"$.items[*].enumeration",
+         "path":"$.holdings[*].items[*].enumeration",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.holdingsrecordid",
          "displayNameKey":"item.holdingsRecordId",
-         "path":"$.items[*].holdingsRecordId",
+         "path":"$.holdings[*].items[*].holdingsRecordId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.hrid",
          "displayNameKey":"item.hrid",
-         "path":"$.items[*].hrid",
+         "path":"$.holdings[*].items[*].hrid",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.id",
          "displayNameKey":"item.id",
-         "path":"$.items[*].id",
+         "path":"$.holdings[*].items[*].id",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.itemnotetypeid.action.note",
          "displayNameKey":"item.itemNoteTypeId",
          "referenceDataValue":"Action note",
-         "path":"$.items[*].notes[?(@.itemNoteTypeId=='0e40884c-3523-4c6d-8187-d578e3d2794e' && (!(@.staffOnly) || @.staffOnly == false))].note",
+         "path":"$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='0e40884c-3523-4c6d-8187-d578e3d2794e' && (!(@.staffOnly) || @.staffOnly == false))].note",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.itemnotetypeid.binding",
          "displayNameKey":"item.itemNoteTypeId",
          "referenceDataValue":"Binding",
-         "path":"$.items[*].notes[?(@.itemNoteTypeId=='87c450be-2033-41fb-80ba-dd2409883681' && (!(@.staffOnly) || @.staffOnly == false))].note",
+         "path":"$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='87c450be-2033-41fb-80ba-dd2409883681' && (!(@.staffOnly) || @.staffOnly == false))].note",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.itemnotetypeid.staffonly.action.note",
          "displayNameKey":"item.itemNoteTypeId.staffOnly",
          "referenceDataValue":"Action note",
-         "path":"$.items[*].notes[?(@.itemNoteTypeId=='0e40884c-3523-4c6d-8187-d578e3d2794e' && ((@.staffOnly) && @.staffOnly == true))].note",
+         "path":"$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='0e40884c-3523-4c6d-8187-d578e3d2794e' && ((@.staffOnly) && @.staffOnly == true))].note",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.itemnotetypeid.staffonly.binding",
          "displayNameKey":"item.itemNoteTypeId.staffOnly",
          "referenceDataValue":"Binding",
-         "path":"$.items[*].notes[?(@.itemNoteTypeId=='87c450be-2033-41fb-80ba-dd2409883681' && ((@.staffOnly) && @.staffOnly == true))].note",
+         "path":"$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='87c450be-2033-41fb-80ba-dd2409883681' && ((@.staffOnly) && @.staffOnly == true))].note",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.materialtypeid",
          "displayNameKey":"item.materialTypeId",
-         "path":"$.items[*].materialTypeId",
+         "path":"$.holdings[*].items[*].materialTypeId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.metadata.createdbyuserid",
          "displayNameKey":"item.metadata.createdByUserId",
-         "path":"$.items[*].metadata.createdByUserId",
+         "path":"$.holdings[*].items[*].metadata.createdByUserId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.metadata.createddate",
          "displayNameKey":"item.metadata.createdDate",
-         "path":"$.items[*].metadata.createdDate",
+         "path":"$.holdings[*].items[*].metadata.createdDate",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.metadata.updatedbyuserid",
          "displayNameKey":"item.metadata.updatedByUserId",
-         "path":"$.items[*].metadata.updatedByUserId",
+         "path":"$.holdings[*].items[*].metadata.updatedByUserId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.metadata.updateddate",
          "displayNameKey":"item.metadata.updatedDate",
-         "path":"$.items[*].metadata.updatedDate",
+         "path":"$.holdings[*].items[*].metadata.updatedDate",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.numberofpieces",
          "displayNameKey":"item.numberOfPieces",
-         "path":"$.items[*].numberOfPieces",
+         "path":"$.holdings[*].items[*].numberOfPieces",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentloantypeid",
          "displayNameKey":"item.permanentLoanTypeId",
-         "path":"$.items[*].permanentLoanTypeId",
+         "path":"$.holdings[*].items[*].permanentLoanTypeId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.campus.code",
          "displayNameKey":"item.permanentLocation.campus.code",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.campus.name",
          "displayNameKey":"item.permanentLocation.campus.name",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.code",
          "displayNameKey":"item.permanentLocation.code",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.institution.code",
          "displayNameKey":"item.permanentLocation.institution.code",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.institution.name",
          "displayNameKey":"item.permanentLocation.institution.name",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.library.code",
          "displayNameKey":"item.permanentLocation.library.code",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.library.name",
          "displayNameKey":"item.permanentLocation.library.name",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.permanentlocation.name",
          "displayNameKey":"item.permanentLocation.name",
-         "path":"$.items[*].permanentLocationId",
+         "path":"$.holdings[*].items[*].permanentLocationId",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.status",
          "displayNameKey":"item.status",
-         "path":"$.items[*].status.name",
+         "path":"$.holdings[*].items[*].status.name",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.volume",
          "displayNameKey":"item.volume",
-         "path":"$.items[*].volume",
+         "path":"$.holdings[*].items[*].volume",
          "recordType":"ITEM"
       },
       {
          "fieldId":"item.yearcaption",
          "displayNameKey":"item.yearCaption",
-         "path":"$.items[*].yearCaption[*]",
+         "path":"$.holdings[*].items[*].yearCaption[*]",
          "recordType":"ITEM"
       }
    ],

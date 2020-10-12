@@ -312,7 +312,7 @@ class DataExportTest extends RestVerticleTestBase {
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition, String fileName) throws FileNotFoundException {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
     File expectedJsonRecords = getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    String expectedMarcRecord = TestUtil.getExpectedMarcFromJson(expectedJsonRecords);
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     assertEquals(expectedMarcRecord, actualGeneratedFileContent);
     assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }

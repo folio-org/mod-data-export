@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import static org.folio.TestUtil.readFileContentFromResources;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.util.*;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.ReferenceData;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -37,12 +36,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class SrsRecordConvertorServiceUnitTest {
+class SrsRecordConverterServiceUnitTest {
 
   @InjectMocks
-  SrsRecordConvertorService srsRecordConvertorService;
+  SrsRecordConverterService srsRecordConverterService;
   @InjectMocks
   private MappingService mappingService = Mockito.spy(new MappingServiceImpl());
 
@@ -56,7 +60,7 @@ class SrsRecordConvertorServiceUnitTest {
   private OkapiConnectionParams params = new OkapiConnectionParams();
   private ReferenceData referenceData = new ReferenceDataImpl();
 
-  SrsRecordConvertorServiceUnitTest() {
+  SrsRecordConverterServiceUnitTest() {
     referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
@@ -84,7 +88,7 @@ class SrsRecordConvertorServiceUnitTest {
     }
 
     //when
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Collections.singletonList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Collections.singletonList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
 
     //Then
@@ -116,7 +120,7 @@ class SrsRecordConvertorServiceUnitTest {
     //when
     Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", jobExecutionId, params))
     .thenReturn(result);
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Collections.singletonList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
 
     //then
@@ -151,7 +155,7 @@ class SrsRecordConvertorServiceUnitTest {
     }
     Mockito.when(recordLoaderService.getHoldingsForInstance("ae573875-fbc8-40e7-bda7-0ac283354226", jobExecutionId, params))
     .thenReturn(result);
-    List<String> afterConversion = srsRecordConvertorService.transformSrsRecord(mappingProfile, Collections.singletonList(srsRecord), jobExecutionId, params);
+    List<String> afterConversion = srsRecordConverterService.transformSrsRecord(mappingProfile, Arrays.asList(srsRecord), jobExecutionId, params);
     JsonObject afterJson = new JsonObject(afterConversion.get(0));
     assertNotEquals(srsRecord.getJsonObject("parsedRecord").getJsonObject("content"), afterJson);
     Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), anyString(), any(OkapiConnectionParams.class));
@@ -166,13 +170,13 @@ class SrsRecordConvertorServiceUnitTest {
     transformations.add(createTransformations("callNumberSuffix", "$.holdings[*].callNumberSuffix", "902  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].electronicAccess[*].linkText", "903  $a", HOLDINGS));
     transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].electronicAccess[*].uri", "90412$a", HOLDINGS));
-    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.linkText", "$.items[*].electronicAccess[*].linkText", "906  $a", ITEM));
-    transformations.add(createTransformations("electronicAccess.uri", "$.items[*].electronicAccess[*].uri", "9071 $a", ITEM));
+    transformations.add(createTransformations("effectiveCallNumberComponents.callNumber", "$.holdings[*].items[*].effectiveCallNumberComponents.callNumber", "905  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.linkText", "$.holdings[*].items[*].electronicAccess[*].linkText", "906  $a", ITEM));
+    transformations.add(createTransformations("electronicAccess.uri", "$.holdings[*].items[*].electronicAccess[*].uri", "9071 $a", ITEM));
     transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.name", "$.holdings[*].temporaryLocationId", "909  $a", HOLDINGS));
-    transformations.add(createTransformations("item.permanentlocation.name", "$.items[*].permanentLocationId", "910  $a", ITEM));
-    transformations.add(createTransformations("item.effectivelocation.name", "$.items[*].effectiveLocationId", "911  $a", ITEM));
+    transformations.add(createTransformations("item.permanentlocation.name", "$.holdings[*].items[*].permanentLocationId", "910  $a", ITEM));
+    transformations.add(createTransformations("item.effectivelocation.name", "$.holdings[*].items[*].effectiveLocationId", "911  $a", ITEM));
     return transformations;
   }
 

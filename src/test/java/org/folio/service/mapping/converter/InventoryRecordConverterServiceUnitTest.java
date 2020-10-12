@@ -1,4 +1,4 @@
-package org.folio.service.mapping.convertor;
+package org.folio.service.mapping.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,10 +28,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-class InventoryRecordConvertorServiceUnitTest {
+class InventoryRecordConverterServiceUnitTest {
 
   @InjectMocks
-  InventoryRecordConvertorService inventoryRecordConvertorService;
+  InventoryRecordConverterService inventoryRecordConverterService;
   @InjectMocks
   private MappingService mappingService = Mockito.spy(new MappingServiceImpl());
 
@@ -44,7 +44,7 @@ class InventoryRecordConvertorServiceUnitTest {
   private static final String ITEM_ID_2 = "5b31ec8c-95a7-4b91-95cc-b551a74b91ca";
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
 
-  InventoryRecordConvertorServiceUnitTest() {}
+  InventoryRecordConverterServiceUnitTest() {}
 
   @Test
   void appendHoldingsAndItems() {
@@ -57,7 +57,7 @@ class InventoryRecordConvertorServiceUnitTest {
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     MappingProfile mappingProfile = new MappingProfile();
     // when
-    List<JsonObject> instancesHoldItem = inventoryRecordConvertorService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
+    List<JsonObject> instancesHoldItem = inventoryRecordConverterService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(0)).getHoldingsForInstance(anyString(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(0)).getAllItemsForHolding(anyList(), anyString(), any(OkapiConnectionParams.class));
@@ -79,7 +79,7 @@ class InventoryRecordConvertorServiceUnitTest {
     MappingProfile mappingProfile = new MappingProfile()
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE));
     // when
-    List<JsonObject> instancesHoldItem = inventoryRecordConvertorService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
+    List<JsonObject> instancesHoldItem = inventoryRecordConverterService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(0)).getHoldingsForInstance(anyString(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(0)).getAllItemsForHolding(anyList(), anyString(), any(OkapiConnectionParams.class));
@@ -104,7 +104,7 @@ class InventoryRecordConvertorServiceUnitTest {
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE, RecordType.HOLDINGS))
       .withTransformations(Arrays.asList(new Transformations()));
     // when
-    List<JsonObject> instancesHoldItem = inventoryRecordConvertorService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
+    List<JsonObject> instancesHoldItem = inventoryRecordConverterService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(0)).getAllItemsForHolding(anyList(), anyString(), any(OkapiConnectionParams.class));
@@ -133,7 +133,7 @@ class InventoryRecordConvertorServiceUnitTest {
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE, RecordType.HOLDINGS, RecordType.ITEM))
       .withTransformations(Arrays.asList(new Transformations()));
     // when
-    List<JsonObject> instancesHoldItem = inventoryRecordConvertorService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID,okapiConnectionParams);
+    List<JsonObject> instancesHoldItem = inventoryRecordConverterService.appendHoldingsAndItems(identifiers, mappingProfile, JOB_EXECUTION_ID,okapiConnectionParams);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsForInstance(anyString(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(1)).getAllItemsForHolding(anyList(), anyString(), any(OkapiConnectionParams.class));
