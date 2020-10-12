@@ -8,8 +8,6 @@ import java.util.Map;
 
 public class ReferenceDataImpl implements ReferenceData {
 
-  public static final String MATERIAL_TYPES = "materialTypes";
-
   private final Map<String, Map<String, JsonObject>> referenceDataMap = new HashMap<>();
 
   @Override
