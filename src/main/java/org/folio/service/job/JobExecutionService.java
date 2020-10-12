@@ -65,9 +65,10 @@ public interface JobExecutionService {
    * @param id                   job execution id
    * @param fileExportDefinition definition of the file to export
    * @param user                 user represented in json object
+   * @param withProgress         condition to add progress
    * @param tenantId             tenant id
    */
-  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, String tenantId);
+  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}
@@ -91,7 +92,7 @@ public interface JobExecutionService {
   /**
    * Deletes a {@link JobExecution} by id
    *
-   * @param id JobExecution id
+   * @param id       JobExecution id
    * @param tenantId tenant id
    * @return future with Boolean
    */

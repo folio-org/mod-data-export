@@ -29,8 +29,8 @@ import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
+import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
 import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -39,6 +39,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
+import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
@@ -84,6 +85,7 @@ public class MockServer {
   private static final String CALL_NUMBER_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_call_number_types_response.json";
   private static final String HOLDING_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_holding_note_types_response.json";
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
+  private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -97,7 +99,7 @@ public class MockServer {
 
   public void start() throws InterruptedException, ExecutionException, TimeoutException {
     // Setup Mock Server...
-    logger.info("Starting mock server on port: "+port);
+    logger.info("Starting mock server on port: " + port);
     HttpServer server = vertx.createHttpServer();
     CompletableFuture<HttpServer> deploymentComplete = new CompletableFuture<>();
     server.requestHandler(defineRoutes())
@@ -157,6 +159,7 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
+    router.get(resourcesPath(INSTANCE_BULK_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
     return router;
   }
 
@@ -491,6 +494,17 @@ public class MockServer {
       ctx.response()
         .setStatusCode(500)
         .end();
+    }
+  }
+
+  private void handleGetInstanceBulkIds(RoutingContext ctx) {
+    logger.info("Handle get instance bulk ids: " + ctx.request().path());
+    try {
+      JsonObject bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
+      addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
+      serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+    } catch (IOException e) {
+      ctx.response().setStatusCode(500).end();
     }
   }
 

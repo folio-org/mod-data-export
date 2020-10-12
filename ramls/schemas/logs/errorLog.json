@@ -11,7 +11,7 @@
       "description": "UUID of the related job execution",
       "$ref": "../../raml-util/schemas/uuid.schema"
     },
-    "createdData": {
+    "createdDate": {
       "description": "Creation datetime",
       "type": "string",
       "format": "date-time"
@@ -44,7 +44,7 @@
     }
   },
   "required": [
-    "createdData",
+    "createdDate",
     "logLevel",
     "affectedRecord"
   ]

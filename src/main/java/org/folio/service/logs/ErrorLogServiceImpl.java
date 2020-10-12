@@ -42,7 +42,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     if (errorLog.getId() == null) {
       errorLog.setId(UUID.randomUUID().toString());
     }
-    errorLog.setCreatedData(new Date());
+    errorLog.setCreatedDate(new Date());
     return errorLogDao.save(errorLog, tenantId);
   }
 

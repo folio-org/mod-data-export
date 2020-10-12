@@ -1,5 +1,6 @@
 package org.folio.service.manager.input;
 
+import com.google.common.collect.Lists;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -8,13 +9,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import org.assertj.core.util.Maps;
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
@@ -22,14 +16,14 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Metadata;
-import org.folio.service.file.definition.FileDefinitionService;
-import org.folio.service.job.JobExecutionServiceImpl;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.reader.SourceReader;
+import org.folio.service.job.JobExecutionServiceImpl;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
-import org.folio.service.file.reader.SourceReader;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,23 +40,28 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(MockitoJUnitRunner.class)
 class InputDataManagerUnitTest {
@@ -187,7 +186,7 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(true), eq(TENANT_ID));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     //when
     inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
@@ -205,7 +204,7 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(true), eq(TENANT_ID));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
 
     //when
@@ -224,7 +223,7 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_2), eq(true), eq(TENANT_ID));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
@@ -249,13 +248,13 @@ class InputDataManagerUnitTest {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
     when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_4);
-    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_4), eq(TENANT_ID));
+    doCallRealMethod().when(jobExecutionService).prepareJobForExport(eq(JOB_EXECUTION_ID), any(FileDefinition.class), eq(USER), eq(TOTAL_COUNT_4), eq(true), eq(TENANT_ID));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
     when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
 
     //when
-    inputDataManager.initBlocking(exportRequestJson,  JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(exportManager).exportData(exportPayloadJsonCaptor.capture());
