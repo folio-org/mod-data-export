@@ -51,7 +51,7 @@ public class InventoryClient {
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
-  private static final String QUERY = "?(query=";
+  private static final String QUERY = "?query=";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
@@ -73,7 +73,7 @@ public class InventoryClient {
     if (StringUtils.isEmpty(query)) {
       return Optional.empty();
     }
-    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query) + ")";
+    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
     try {
       return Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
