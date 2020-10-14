@@ -29,7 +29,6 @@ public class RecordConverter {
      List<Transformations> transformations = mappingProfile.getTransformations();
      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
      return isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM));
-
    }
 
   /**
@@ -46,14 +45,18 @@ public class RecordConverter {
      if (isTransformationRequired(mappingProfile)) {
        LOGGER.debug("Fetching holdings/items for instance");
        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, jobExecutionId, params);
-       appendHoldingsItems.put("holdings", new JsonArray(holdings));
        if (mappingProfile.getRecordTypes().contains(RecordType.ITEM) && CollectionUtils.isNotEmpty(holdings)) {
-         List<String> holdingIds = holdings.stream()
-           .map(record -> record.getString("id"))
-           .collect(Collectors.toList());
+         List<String> holdingIds = holdings.stream().map(holding -> holding.getString("id")).collect(Collectors.toList());
          List<JsonObject> items = recordLoaderService.getAllItemsForHolding(holdingIds, jobExecutionId, params);
-         appendHoldingsItems.put("items", new JsonArray(items));
+         for (JsonObject holding : holdings) {
+           String holdingId = holding.getString("id");
+           List<JsonObject> currentItems = items.stream()
+             .filter(item -> holdingId.equals(item.getString("holdingsRecordId")))
+             .collect(Collectors.toList());
+           holding.put("items", currentItems);
+         }
        }
+       appendHoldingsItems.put("holdings", new JsonArray(holdings));
      }
    }
 }

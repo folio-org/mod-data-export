@@ -1,5 +1,5 @@
 {
-  "leader": "02747nam a2200901 a 4500",
+  "leader": "02247nam a2200757 a 4500",
   "fields": [
     {
       "900": {
@@ -155,9 +155,6 @@
         "subfields": [
           {
             "a": "Electronic resource (FCF)"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": " ",
@@ -169,9 +166,6 @@
         "subfields": [
           {
             "a": "Electronic resource (OTT)"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": " ",
@@ -183,9 +177,6 @@
         "subfields": [
           {
             "a": "Electronic resource (RTF)"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": " ",
@@ -197,9 +188,6 @@
         "subfields": [
           {
             "a": "Electronic resource (XML)"
-          },
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -211,9 +199,6 @@
         "subfields": [
           {
             "a": "Electronic resource (audio streaming)"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": " ",
@@ -225,9 +210,6 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/01"
-          },
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": "1",
@@ -239,9 +221,6 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/04"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": "1",
@@ -253,9 +232,6 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150176652/04"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": "1",
@@ -267,9 +243,6 @@
         "subfields": [
           {
             "a": "http://www.folio.org/"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": "1",
@@ -281,9 +254,6 @@
         "subfields": [
           {
             "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": "1",
@@ -492,54 +462,7 @@
       "924": {
         "subfields": [
           {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "924": {
-        "subfields": [
-          {
-            "3": "holding00002"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "924": {
-        "subfields": [
-          {
             "a": "Miller General Stacks"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "925": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "925": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -551,31 +474,6 @@
         "subfields": [
           {
             "a": "Miller Code"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "926": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "926": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -587,31 +485,6 @@
         "subfields": [
           {
             "a": "Main Library"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "927": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "927": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -623,31 +496,6 @@
         "subfields": [
           {
             "a": "ML"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "928": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "928": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -659,31 +507,6 @@
         "subfields": [
           {
             "a": "Riverside Campus"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "929": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "929": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -695,31 +518,6 @@
         "subfields": [
           {
             "a": "RS"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "930": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "930": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -731,31 +529,6 @@
         "subfields": [
           {
             "a": "Main Library"
-          },
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "931": {
-        "subfields": [
-          {
-            "3": "holding00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "931": {
-        "subfields": [
-          {
-            "3": "holding00002"
           }
         ],
         "ind1": " ",
@@ -767,9 +540,6 @@
         "subfields": [
           {
             "a": "ML"
-          },
-          {
-            "3": "holding00001"
           }
         ],
         "ind1": " ",
@@ -858,6 +628,56 @@
         "subfields": [
           {
             "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "itemHrid000000000001"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "itemHrid000000000003"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",

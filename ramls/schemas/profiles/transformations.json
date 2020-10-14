@@ -27,7 +27,7 @@
       "type": "string",
       "$ref": "recordTypes.json"
     },
-    "hasSameFieldInHoldings": {
+    "hasSameTagInHoldings": {
       "description": "The sign that means the current transformation intended for both item and holding",
       "type": "boolean",
       "default": false

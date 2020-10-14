@@ -70,6 +70,7 @@ public class RuleHandler {
     DataSource holdingHridDataSource = new DataSource();
     holdingHridDataSource.setFrom("$.holdings[" + holdingIndex + "].hrid");
     holdingHridDataSource.setSubfield("3");
+    holdingHridDataSource.setReadDependingOnDataSource(0);
     indexedRule.getDataSources().add(holdingHridDataSource);
     indexedRules.add(indexedRule);
   }

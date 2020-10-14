@@ -121,8 +121,8 @@ class InventoryRecordConverterServiceUnitTest {
     Mockito.when(recordLoaderService.getHoldingsForInstance(eq(INSTANCE_ID), anyString(), any(OkapiConnectionParams.class)))
     .thenReturn(Arrays.asList(new JsonObject().put("id", HOLDINGS_ID)));
     Mockito.when(recordLoaderService.getAllItemsForHolding(eq(Arrays.asList(HOLDINGS_ID)), anyString(), any(OkapiConnectionParams.class)))
-    .thenReturn(Arrays.asList(new JsonObject().put("id", ITEM_ID_1),
-                              new JsonObject().put("id", ITEM_ID_2)));
+    .thenReturn(Arrays.asList(new JsonObject().put("id", ITEM_ID_1).put("holdingsRecordId", HOLDINGS_ID),
+                              new JsonObject().put("id", ITEM_ID_2).put("holdingsRecordId", HOLDINGS_ID)));
     List<JsonObject> identifiers = new ArrayList<>();
     JsonObject instance = new JsonObject();
     instance.put("id", INSTANCE_ID);
@@ -139,11 +139,10 @@ class InventoryRecordConverterServiceUnitTest {
     Mockito.verify(recordLoaderService, Mockito.times(1)).getAllItemsForHolding(anyList(), anyString(), any(OkapiConnectionParams.class));
     assertEquals(INSTANCE_ID, instancesHoldItem.get(0).getJsonObject("instance").getString("id"));
     assertNotNull(instancesHoldItem.get(0).getJsonArray("holdings"));
-    assertNotNull( instancesHoldItem.get(0).getJsonArray("items"));
     assertEquals(INSTANCE_ID, instancesHoldItem.get(0).getJsonObject("instance").getString("id"));
     assertEquals(HOLDINGS_ID, instancesHoldItem.get(0).getJsonArray("holdings").getJsonObject(0).getString("id"));
-    assertEquals(ITEM_ID_1, instancesHoldItem.get(0).getJsonArray("items").getJsonObject(0).getString("id"));
-    assertEquals(ITEM_ID_2, instancesHoldItem.get(0).getJsonArray("items").getJsonObject(1).getString("id"));
+    assertEquals(ITEM_ID_1, instancesHoldItem.get(0).getJsonArray("holdings").getJsonObject(0).getJsonArray("items").getJsonObject(0).getString("id"));
+    assertEquals(ITEM_ID_2, instancesHoldItem.get(0).getJsonArray("holdings").getJsonObject(0).getJsonArray("items").getJsonObject(1).getString("id"));
 
   }
 
