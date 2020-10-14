@@ -1,19 +1,22 @@
-## 07/29/2020 v3.0.0 Released
+## 10/14/2020 v3.0.0 Released
  Major version release which includes below features :
  * specify profile transformations for multiple fields from instance,holdings,items
  * expire long running/stuck jobs
  * ability to look at logs for each job-execution, and delete jobs
+ * exporting MARC records using a CQL query
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.4...v3.0.0)
 
 ### Stories
 * [MDEXP-300](https://issues.folio.org/browse/MDEXP-300) - Close ASW client after getting download link
+* [MDEXP-294](https://issues.folio.org/browse/MDEXP-294) - Export records using CQL
 * [MDEXP-288](https://issues.folio.org/browse/MDEXP-288) - Final verification migration scripts before release- Q32020
 * [MDEXP-282](https://issues.folio.org/browse/MDEXP-282) - Observations on testing data-export with profile
 * [MDEXP-281](https://issues.folio.org/browse/MDEXP-281) - POC: Export records using CQL
 * [MDEXP-277](https://issues.folio.org/browse/MDEXP-277) - POC: Investigate making fewer calls to Inventory modules
 * [MDEXP-271](https://issues.folio.org/browse/MDEXP-271) - Differentiate "displayNameKey" for entities without "referenceDataValue"
 * [MDEXP-270](https://issues.folio.org/browse/MDEXP-270) - Review state control of module
+* [MDEXP-266](https://issues.folio.org/browse/MDEXP-266) - Generate MARC record- Holdings and items in same field
 * [MDEXP-264](https://issues.folio.org/browse/MDEXP-264) - API endpoints to follow naming conventions
 * [MDEXP-263](https://issues.folio.org/browse/MDEXP-263) - API for DELETE /job-executions/{jobExecutionId}
 * [MDEXP-261](https://issues.folio.org/browse/MDEXP-261) - Create API GET/data-export/logs for error log handling
