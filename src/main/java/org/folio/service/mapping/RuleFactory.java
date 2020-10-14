@@ -92,10 +92,10 @@ public class RuleFactory {
     for (Transformations holdingsTransformation: mappingTransformations) {
       for (Transformations itemTransformation: mappingTransformations) {
         if (holdingsTransformation.getRecordType().equals(HOLDINGS) && itemTransformation.getRecordType().equals(ITEM)) {
-          String holdingFieldId = holdingsTransformation.getFieldId().replace("holdings", EMPTY);
-          String itemFieldId = itemTransformation.getFieldId().replace("item", EMPTY);
-          if (holdingFieldId.equals(itemFieldId)) {
-            itemTransformation.setHasSameFieldInHoldings(true);
+          String holdingTag = holdingsTransformation.getTransformation().substring(0, 3);
+          String itemTag = itemTransformation.getTransformation().substring(0, 3);
+          if (holdingTag.equals(itemTag)) {
+            itemTransformation.setHasSameTagInHoldings(true);
           }
         }
       }

@@ -286,8 +286,8 @@ class MappingServiceUnitTest {
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(40, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(49, appendedMarcRecords.size());
+    Assert.assertEquals(42, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(51, appendedMarcRecords.size());
   }
 
   @Test
@@ -403,6 +403,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "905  $a", ITEM));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9061 $a", ITEM));
     transformations.add(createTransformations(MATERIALTYPE_FIELD_ID, MATERIAL_TYPE_ID_PATH, "907  $a", ITEM));
+    transformations.add(createTransformations("holdings.instanceid", "$.holdings[*].instanceId", "991  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.code", "$.holdings[*].permanentLocationId", "909  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.library.name", "$.holdings[*].permanentLocationId", "910  $a", HOLDINGS));
@@ -419,6 +420,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("holdings.temporarylocation.campus.code", "$.holdings[*].temporaryLocationId", "921  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.institution.name", "$.holdings[*].temporaryLocationId", "922  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.temporarylocation.institution.code", "$.holdings[*].temporaryLocationId", "923  $a", HOLDINGS));
+    transformations.add(createTransformations("holdings.callnumber", "$.holdings[*].callNumber", "990  $a", HOLDINGS));
     transformations.add(createTransformations("item.permanentlocation.name", "$.holdings[*].items[*].permanentLocationId", "924  $a", ITEM));
     transformations.add(createTransformations("item.permanentlocation.code", "$.holdings[*].items[*].permanentLocationId", "925  $a", ITEM));
     transformations.add(createTransformations("item.permanentlocation.library.name", "$.holdings[*].items[*].permanentLocationId", "926  $a", ITEM));
@@ -435,6 +437,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("item.effectivelocation.campus.code", "$.holdings[*].items[*].effectiveLocationId", "937  $a", ITEM));
     transformations.add(createTransformations("item.effectivelocation.institution.name", "$.holdings[*].items[*].effectiveLocationId", "938  $a", ITEM));
     transformations.add(createTransformations("item.effectivelocation.institution.code", "$.holdings[*].items[*].effectiveLocationId", "939  $a", ITEM));
+    transformations.add(createTransformations("item.hrid", "$.holdings[*].items[*].hrid", "991  $a", ITEM));
     return transformations;
   }
 
