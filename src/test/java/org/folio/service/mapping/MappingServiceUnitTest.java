@@ -122,7 +122,7 @@ class MappingServiceUnitTest {
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
     referenceData.put(CALL_NUMBER_TYPES, ReferenceDataResponseUtil.getCallNumberTypes());
     referenceData.put(LOCATIONS, ReferenceDataResponseUtil.getLocations());
-    referenceData.put("materialTypes", ReferenceDataResponseUtil.getMaterialTypes());
+    referenceData.put(ExternalPathResolver.MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     referenceData.put(INSTANCE_TYPES, ReferenceDataResponseUtil.getInstanceTypes());
     referenceData.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
     referenceData.put(INSTANCE_FORMATS, ReferenceDataResponseUtil.getInstanceFormats());

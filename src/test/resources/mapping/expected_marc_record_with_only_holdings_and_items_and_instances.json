@@ -1,5 +1,5 @@
 {
-  "leader": "02349nam a2200817 a 4500",
+  "leader": "02385nam a2200817 a 4500",
   "fields": [
     {
       "001": "instance00001"
@@ -692,6 +692,9 @@
         "subfields": [
           {
             "a": "itemHrid000000000001"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -703,6 +706,9 @@
         "subfields": [
           {
             "a": "itemHrid000000000003"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
