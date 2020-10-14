@@ -84,12 +84,13 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
         .then()
         .statusCode(HttpStatus.SC_NO_CONTENT);
 
+      vertx.setTimer(3000L, ar ->
       jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
         .onComplete(asyncResult -> context.verify(() -> {
           Assertions.assertTrue(asyncResult.succeeded());
           Assertions.assertEquals(Status.FAIL, asyncResult.result().getStatus());
           context.completeNow();
-        }));
+        })));
     });
   }
 
