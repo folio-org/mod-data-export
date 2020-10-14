@@ -117,26 +117,6 @@ class DataExportTest extends RestVerticleTestBase {
         });
       }));
   }
-//
-//  @Test
-//  void testExport_uploadingEmptyCsvFile_FAILED_job(VertxTestContext context) throws IOException {
-//    //given
-//    String tenantId = okapiConnectionParams.getTenantId();
-//    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CSV, buildRequestSpecification(tenantId));
-//    // when
-//    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
-//    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
-//    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-//    // then
-//    vertx.setTimer(TIMER_DELAY, handler ->
-//      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-//        JobExecution jobExecution = optionalJobExecution.get();
-//        context.verify(() -> {
-//          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
-//          context.completeNow();
-//        });
-//      }));
-//  }
 
   @Test
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
