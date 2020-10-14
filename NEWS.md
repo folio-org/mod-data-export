@@ -1,3 +1,64 @@
+## 10/14/2020 v3.0.0 Released
+ Major version release which includes below features :
+ * specify profile transformations for multiple fields from instance,holdings,items
+ * expire long running/stuck jobs
+ * ability to look at logs for each job-execution, and delete jobs
+ * exporting MARC records using a CQL query
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.4...v3.0.0)
+
+### Stories
+* [MDEXP-300](https://issues.folio.org/browse/MDEXP-300) - Close ASW client after getting download link
+* [MDEXP-294](https://issues.folio.org/browse/MDEXP-294) - Export records using CQL
+* [MDEXP-288](https://issues.folio.org/browse/MDEXP-288) - Final verification migration scripts before release- Q32020
+* [MDEXP-282](https://issues.folio.org/browse/MDEXP-282) - Observations on testing data-export with profile
+* [MDEXP-281](https://issues.folio.org/browse/MDEXP-281) - POC: Export records using CQL
+* [MDEXP-277](https://issues.folio.org/browse/MDEXP-277) - POC: Investigate making fewer calls to Inventory modules
+* [MDEXP-271](https://issues.folio.org/browse/MDEXP-271) - Differentiate "displayNameKey" for entities without "referenceDataValue"
+* [MDEXP-270](https://issues.folio.org/browse/MDEXP-270) - Review state control of module
+* [MDEXP-266](https://issues.folio.org/browse/MDEXP-266) - Generate MARC record- Holdings and items in same field
+* [MDEXP-264](https://issues.folio.org/browse/MDEXP-264) - API endpoints to follow naming conventions
+* [MDEXP-263](https://issues.folio.org/browse/MDEXP-263) - API for DELETE /job-executions/{jobExecutionId}
+* [MDEXP-261](https://issues.folio.org/browse/MDEXP-261) - Create API GET/data-export/logs for error log handling
+* [MDEXP-259](https://issues.folio.org/browse/MDEXP-259) - Log errors for Holdings records export
+* [MDEXP-257](https://issues.folio.org/browse/MDEXP-257) - Log errors for inventory Instance record exports
+* [MDEXP-256](https://issues.folio.org/browse/MDEXP-256) - Modify status of the completed export job
+* [MDEXP-255](https://issues.folio.org/browse/MDEXP-255) - Generate-marc-utils: add default support for translations
+* [MDEXP-252](https://issues.folio.org/browse/MDEXP-252) - Applying mapping profile - location fields - holdings and item
+* [MDEXP-251](https://issues.folio.org/browse/MDEXP-251) - Mapping profile - provide field name - locations - holdings and items
+* [MDEXP-249](https://issues.folio.org/browse/MDEXP-249) - Applying mapping profile - Item - effective call number
+* [MDEXP-248](https://issues.folio.org/browse/MDEXP-248) - Mapping profile - provide field name - item - effective call number
+* [MDEXP-246](https://issues.folio.org/browse/MDEXP-246) - Implement Expire stuck jobs
+* [MDEXP-243](https://issues.folio.org/browse/MDEXP-243) - Applying mapping profile - Combination of record types - selected fields - missing transformation
+* [MDEXP-238](https://issues.folio.org/browse/MDEXP-238) - Applying mapping profile - Item - selected fields with transformation provided
+* [MDEXP-237](https://issues.folio.org/browse/MDEXP-237) - Applying mapping profile - Holdings - selected fields with transformation provided
+* [MDEXP-236](https://issues.folio.org/browse/MDEXP-236) - Check how much memory the module needs to get generated 1 file
+* [MDEXP-233](https://issues.folio.org/browse/MDEXP-233) - Apply sorting for mapping transformations subfields in alphabetical order
+* [MDEXP-231](https://issues.folio.org/browse/MDEXP-231) - Mapping profile - provide field name - holdings statement
+* [MDEXP-230](https://issues.folio.org/browse/MDEXP-230) - Mapping profile - provide field name - notes (holdings and items)
+* [MDEXP-229](https://issues.folio.org/browse/MDEXP-229) - Mapping profile - provide field name - electronic access
+* [MDEXP-227](https://issues.folio.org/browse/MDEXP-227) - Mapping profile - provide field name - contributors
+* [MDEXP-225](https://issues.folio.org/browse/MDEXP-225) - Restrict deletion of default mapping profile and job profile
+* [MDEXP-218](https://issues.folio.org/browse/MDEXP-218) - Mapping profile - provide items field names - field value
+* [MDEXP-217](https://issues.folio.org/browse/MDEXP-217) - Mapping profile - provide field name - value for key - with reference data
+* [MDEXP-216](https://issues.folio.org/browse/MDEXP-216) - Mapping profile - provide holdings field names - field value
+* [MDEXP-211](https://issues.folio.org/browse/MDEXP-211) - Mod-data-export migrate to Java 11
+* [MDEXP-210](https://issues.folio.org/browse/MDEXP-210) - Mapping profile - provide instance field names - field value
+* [MDEXP-207](https://issues.folio.org/browse/MDEXP-207) - Performance improvements
+* [MDEXP-174](https://issues.folio.org/browse/MDEXP-174) - Use the created shared library
+* [MDEXP-150](https://issues.folio.org/browse/MDEXP-150) - Mapping profile - transformations - retrieve field names
+* [MDEXP-141](https://issues.folio.org/browse/MDEXP-141) - Applying mapping profile - Instance - selected fields with transformation provided
+* [MDEXP-90](https://issues.folio.org/browse/MDEXP-90) - POC: Make data-export horizontally scalable
+* [MDEXP-75](https://issues.folio.org/browse/MDEXP-75) - Create a Test suite
+
+### Bug Fixes
+* [MDEXP-306](https://issues.folio.org/browse/MDEXP-306) - Fix migration script for handling statuses
+* [MDEXP-304](https://issues.folio.org/browse/MDEXP-304) - Fix module logging after upgrade to java 11
+* [MDEXP-301](https://issues.folio.org/browse/MDEXP-301) - Fix NPE while export with material type field for custom mapping profile
+* [MDEXP-279](https://issues.folio.org/browse/MDEXP-279) - Mapping materialTypeId and permanentLoanTypeId to proper fields
+* [MDEXP-244](https://issues.folio.org/browse/MDEXP-244) - Not all items displayed if mapped to the MARC subfield
+
+
 ## 07/29/2020 v2.1.4 Released
 This is a bugfix release to address changes missing metadata for default job profiles and mapping profiles
 
