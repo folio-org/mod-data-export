@@ -102,18 +102,4 @@ public final class TestUtil {
     writer.close();
     return outputStream.toString();
   }
-
-  public static String getJsonFromMarc(String marcRecord) throws FileNotFoundException {
-    InputStream inputStream = new ByteArrayInputStream(marcRecord.getBytes(StandardCharsets.UTF_8));
-    MarcReader marcReader = new MarcStreamReader(inputStream);
-    OutputStream outputStream = new ByteArrayOutputStream();
-    MarcWriter writer = new MarcJsonWriter(outputStream);
-    while (marcReader.hasNext()) {
-      Record record = marcReader.next();
-      writer.write(record);
-    }
-
-    writer.close();
-    return outputStream.toString();
-  }
 }
