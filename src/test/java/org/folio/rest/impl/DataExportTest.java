@@ -102,39 +102,7 @@ class DataExportTest extends RestVerticleTestBase {
   void testExport_uploadingEmptyCqlFile_FAILED_job(VertxTestContext context) throws IOException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
-    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
-      .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, tenantId)
-      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
-      .setBaseUri(BASE_OKAPI_URL)
-      .build();
-    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, requestSpecificationForMockServer);
-    // when
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
-    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
-    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    // then
-    vertx.setTimer(TIMER_DELAY, handler ->
-      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        context.verify(() -> {
-          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
-          context.completeNow();
-        });
-      }));
-  }
-
-  @Test
-  void testExport_uploadingEmptyCsvFile_FAILED_job(VertxTestContext context) throws IOException {
-    //given
-    String tenantId = okapiConnectionParams.getTenantId();
-    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
-      .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, tenantId)
-      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
-      .setBaseUri(BASE_OKAPI_URL)
-      .build();
-    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CSV, requestSpecificationForMockServer);
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
