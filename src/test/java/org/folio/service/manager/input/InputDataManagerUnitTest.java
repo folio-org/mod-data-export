@@ -158,7 +158,7 @@ class InputDataManagerUnitTest {
     when(usersClient.getById(anyString(), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(USER));
     doReturn(exportManager).when(inputDataManager).getExportManager();
     doReturn(2).when(inputDataManager).getBatchSize();
-    doReturn(sourceReader).when(inputDataManager).initSourceReader(any(FileDefinition.class), anyInt());
+    doReturn(sourceReader).when(inputDataManager).initSourceReader(any(FileDefinition.class), anyString(), anyString(), anyInt());
 
   }
 

@@ -99,7 +99,7 @@ class InputDataManagerImpl implements InputDataManager {
     String tenantId = okapiConnectionParams.getTenantId();
     String jobExecutionId = jobExecution.getId();
     FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
-    SourceReader sourceReader = initSourceReader(requestFileDefinition, getBatchSize());
+    SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
@@ -141,9 +141,9 @@ class InputDataManagerImpl implements InputDataManager {
     }
   }
 
-  protected SourceReader initSourceReader(FileDefinition requestFileDefinition, int batchSize) {
+  protected SourceReader initSourceReader(FileDefinition requestFileDefinition, String jobExecutionId, String tenantId, int batchSize) {
     SourceReader sourceReader = new LocalStorageCsvSourceReader();
-    sourceReader.init(requestFileDefinition, batchSize);
+    sourceReader.init(requestFileDefinition, errorLogService, jobExecutionId, tenantId, batchSize);
     return sourceReader;
   }
 
