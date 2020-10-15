@@ -72,7 +72,7 @@ class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  void shouldReturnTotalCountFive_whenReaderInitialized_AndSkipInvalidFields() {
+  void shouldReturnTotalCountThree_whenReaderInitialized_AndSkipInvalidFields() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_WITH_WRONG_FORMATS);
