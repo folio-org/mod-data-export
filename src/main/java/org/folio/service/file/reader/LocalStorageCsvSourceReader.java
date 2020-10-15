@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 
 import com.google.common.collect.Iterables;
+
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,6 +30,11 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public void init(FileDefinition fileDefinition, int batchSize) {
+    if (Objects.isNull(fileDefinition.getSourcePath())) {
+      this.iterator = Collections.emptyIterator();
+      return;
+    }
+
     try {
       this.fileDefinition = fileDefinition;
       this.fileStream = Files.lines(Paths.get(fileDefinition.getSourcePath()));
