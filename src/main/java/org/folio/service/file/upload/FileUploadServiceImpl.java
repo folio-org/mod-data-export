@@ -5,9 +5,11 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.InventoryClient;
@@ -23,9 +25,9 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
@@ -55,11 +57,13 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
-    if (data.length > 0) {
-      return fileStorage.saveFileDataAsync(data, fileDefinition)
-        .compose(ar -> updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId));
-    }
-    return Future.succeededFuture(fileDefinition);
+    return fileStorage.saveFileDataAsync(data, fileDefinition)
+      .compose(ar -> {
+        if (Objects.isNull(fileDefinition.getJobExecutionId())) {
+          return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
+        }
+        return Future.succeededFuture(fileDefinition);
+      });
   }
 
   @Override
@@ -85,6 +89,9 @@ public class FileUploadServiceImpl implements FileUploadService {
             .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
         }
       }
+    }
+    if (Objects.isNull(fileDefinition.getJobExecutionId())) {
+      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
     }
     return Future.succeededFuture(fileDefinition);
   }
