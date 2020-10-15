@@ -9,12 +9,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.shareddata.LocalMap;
+
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
@@ -30,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -117,7 +120,7 @@ class InputDataManagerImpl implements InputDataManager {
     } else {
       errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.FAIL, tenantId);
+      jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL).withProgress(new Progress()).withCompletedDate(new Date()), tenantId);
       sourceReader.close();
     }
   }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,6 +38,10 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public void init(FileDefinition fileDefinition, ErrorLogService errorLogService, String jobExecutionId, String tenantId, int batchSize) {
+    if (Objects.isNull(fileDefinition.getSourcePath())) {
+      this.iterator = Collections.emptyIterator();
+      return;
+    }
     try {
       this.fileDefinition = fileDefinition;
       this.errorLogService = errorLogService;
@@ -76,7 +81,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
   public long totalCount() {
     if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
-        return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines);
+        return fileLines.count();
       } catch (IOException e) {
         LOGGER.error(e.getMessage(), e);
       }

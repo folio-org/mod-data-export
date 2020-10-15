@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -163,13 +164,20 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     Promise<Void> jobExecutionPromise = Promise.promise();
     //expire entries that have last updated date greater then 1 hr
     jobExecutionDao.getExpiredEntries(new Date(new Date().getTime() - 3600_000), tenantId)
-      .onSuccess(jobExes -> {
-        jobExes.forEach(jobExe -> {
-          jobExe.setStatus(JobExecution.Status.FAIL);
-          jobExecutionDao.update(jobExe, tenantId);
-        });
+      .onComplete(asyncResult -> {
+        if (asyncResult.succeeded()) {
+          List<JobExecution> jobExecutionList = asyncResult.result();
+          jobExecutionList.forEach(jobExe -> {
+            jobExe.setStatus(JobExecution.Status.FAIL);
+            jobExecutionDao.update(jobExe, tenantId);
+          });
+          jobExecutionPromise.complete();
+        } else {
+          String errorMessage = String.format("Fail to fetch expired job executions, cause %s", asyncResult.cause());
+          LOGGER.error(errorMessage);
+          jobExecutionPromise.fail(errorMessage);
+        }
 
-        jobExecutionPromise.complete();
       });
     return jobExecutionPromise.future();
   }
