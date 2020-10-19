@@ -99,12 +99,11 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @ParameterizedTest
-  @EnumSource(value = UploadFormat.class, names = {"CSV","CQL"})
-  void testExport_uploadingEmptyFile_FAILED_job(UploadFormat uploadFormat, VertxTestContext context) throws IOException {
+  @Test
+  void testExport_uploadingCsvEmptyFile_FAILED_job(VertxTestContext context) throws IOException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, uploadFormat, buildRequestSpecification(tenantId));
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CSV, buildRequestSpecification(tenantId));
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
