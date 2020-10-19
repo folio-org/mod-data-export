@@ -39,6 +39,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -97,12 +99,12 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-
-  @Test
-  void testExport_uploadingEmptyCqlFile_FAILED_job(VertxTestContext context) throws IOException {
+  @ParameterizedTest
+  @EnumSource(value = UploadFormat.class, names = {"CSV","CQL"})
+  void testExport_uploadingEmptyFile_FAILED_job(UploadFormat uploadFormat, VertxTestContext context) throws IOException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, uploadFormat, buildRequestSpecification(tenantId));
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
@@ -384,6 +386,8 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(status, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
+    assertNotNull(jobExecution.getExportedFiles().iterator().next().getFileName());
+    assertNotNull(jobExecution.getRunBy());
   }
 
   private void assertErrorLogs(ErrorLogCollection errorLogCollection, String jobExecutionId) {

@@ -13,10 +13,12 @@ import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
+import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
@@ -36,6 +38,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
@@ -103,12 +107,12 @@ class InputDataManagerImpl implements InputDataManager {
     String jobExecutionId = jobExecution.getId();
     FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
     SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
+    Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
         ExportPayload exportPayload = createExportPayload(savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
-        Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
           jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId);
@@ -120,7 +124,8 @@ class InputDataManagerImpl implements InputDataManager {
     } else {
       errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL).withProgress(new Progress()).withCompletedDate(new Date()), tenantId);
+      populateJobExecutionForEmptyFileUploaded(jobExecution, fileExportDefinition, optionalUser.orElse(new JsonObject()));
+      jobExecutionService.update(jobExecution, tenantId);
       sourceReader.close();
     }
   }
@@ -253,6 +258,24 @@ class InputDataManagerImpl implements InputDataManager {
 
   private boolean isNotCQL(FileDefinition requestFileDefinition) {
     return !CQL.equals(requestFileDefinition.getUploadFormat());
+  }
+
+  private void populateJobExecutionForEmptyFileUploaded(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user) {
+    Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+    ExportedFile exportedFile = new ExportedFile()
+      .withFileId(UUID.randomUUID().toString())
+      .withFileName(fileExportDefinition.getFileName());
+    exportedFiles.add(exportedFile);
+    jobExecution.setExportedFiles(exportedFiles);
+    jobExecution.setStatus(JobExecution.Status.FAIL);
+    jobExecution.setProgress(new Progress());
+    jobExecution.setCompletedDate(new Date());
+    if (user.containsKey("personal")) {
+      JsonObject personal = user.getJsonObject("personal");
+      jobExecution.setRunBy(new RunBy()
+        .withFirstName(personal.getString("firstName"))
+        .withLastName(personal.getString("lastName")));
+    }
   }
 
   private InputDataContext getInputDataContext(String jobExecutionId) {
