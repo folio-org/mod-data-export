@@ -7,6 +7,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.Int;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -81,7 +82,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
   }
 
   @Override
-  public long totalCount() {
+  public int totalCount() {
     if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
         return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines);
@@ -89,10 +90,10 @@ public class LocalStorageCsvSourceReader implements SourceReader {
         LOGGER.error(e.getMessage(), e);
       }
     }
-    return 0L;
+    return 0;
   }
 
-  private long getValidUUIDsCountAndSaveErrorIfInvalidFound(Stream<String> fileLines) {
+  private int getValidUUIDsCountAndSaveErrorIfInvalidFound(Stream<String> fileLines) {
     List<String> invalidUUIDs = new ArrayList<>();
     long count = fileLines
       .filter(s -> {
@@ -106,7 +107,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
     if (CollectionUtils.isNotEmpty(invalidUUIDs)) {
       errorLogService.saveGeneralError(format("Current UUIDs is in wrong format: %s", String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
     }
-    return count;
+    return (int) count;
   }
 
 

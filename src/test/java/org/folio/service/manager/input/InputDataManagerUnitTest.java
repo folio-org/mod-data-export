@@ -95,8 +95,8 @@ class InputDataManagerUnitTest {
       .put("firstname", "John")
       .put("lastname", "Doe")
     );
-  private static final long TOTAL_COUNT_2 = 2L;
-  private static final long TOTAL_COUNT_4 = 4L;
+  private static final int TOTAL_COUNT_2 = 2;
+  private static final int TOTAL_COUNT_4 = 4;
 
   @InjectMocks
   @Spy
