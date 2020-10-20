@@ -52,21 +52,4 @@ public class MappingProfileServiceTest extends RestVerticleTestBase {
       .then()
       .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
   }
-
-  @Test
-  void postMappingProfile_return201Status() {
-    MappingProfile mappingProfile = new MappingProfile()
-      .withName("mappingProfileName")
-      .withRecordTypes(Lists.newArrayList(RecordType.INSTANCE))
-      .withTransformations(Lists.newArrayList(new Transformations()
-        .withFieldId("instance.id")
-        .withRecordType(RecordType.INSTANCE)));
-    RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .body(JsonObject.mapFrom(mappingProfile).encode())
-      .when()
-      .post(MAPPING_PROFILE_URL)
-      .then()
-      .statusCode(HttpStatus.SC_CREATED);
-  }
 }
