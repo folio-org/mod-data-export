@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
@@ -39,8 +40,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -100,16 +99,17 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException {
+  void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    context.awaitCompletion(5, TimeUnit.SECONDS);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler ->
+    vertx.setTimer(7000L, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
@@ -379,6 +379,11 @@ class DataExportTest extends RestVerticleTestBase {
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     assertEquals(expectedMarcRecord, actualGeneratedFileContent);
     assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
+  }
+
+  private void assertFailedFileDefinition(FileDefinition fileExportDefinition) {
+    assertNull(fileExportDefinition.getSourcePath());
+    assertEquals(FileDefinition.Status.ERROR, fileExportDefinition.getStatus());
   }
 
   private void assertJobExecution(JobExecution jobExecution, JobExecution.Status status, Integer numberOfExportedRecords) {

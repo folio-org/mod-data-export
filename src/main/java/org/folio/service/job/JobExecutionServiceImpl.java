@@ -118,26 +118,37 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   @Override
   public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
-      ExportedFile exportedFile = new ExportedFile()
-        .withFileId(UUID.randomUUID().toString())
-        .withFileName(fileExportDefinition.getFileName());
-      Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
-      exportedFiles.add(exportedFile);
-      jobExecution.setExportedFiles(exportedFiles);
-      jobExecution.setStatus(JobExecution.Status.IN_PROGRESS);
-      if (Objects.isNull(jobExecution.getStartedDate())) {
-        jobExecution.setStartedDate(new Date());
-        jobExecution.setLastUpdatedDate(new Date());
-      }
-      JsonObject personal = user.getJsonObject("personal");
-      jobExecution.setRunBy(new RunBy()
-        .withFirstName(personal.getString("firstName"))
-        .withLastName(personal.getString("lastName")));
-      if (withProgress) {
-        jobExecution.setProgress(new Progress().withTotal(totalCount));
-      }
+      prepareJobExecution(jobExecution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress, tenantId);
       return update(jobExecution, tenantId);
     });
+  }
+
+  @Override
+  public Future<JobExecution> prepareJobForFailedExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
+    prepareJobExecution(jobExecution, fileExportDefinition, FAIL, user, totalCount, withProgress, tenantId);
+    jobExecution.setCompletedDate(new Date());
+    return update(jobExecution, tenantId);
+  }
+
+  private void prepareJobExecution(JobExecution jobExecution, FileDefinition fileExportDefinition, JobExecution.Status status, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
+    ExportedFile exportedFile = new ExportedFile()
+      .withFileId(UUID.randomUUID().toString())
+      .withFileName(fileExportDefinition.getFileName());
+    Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
+    exportedFiles.add(exportedFile);
+    jobExecution.setExportedFiles(exportedFiles);
+    jobExecution.setStatus(status);
+    if (Objects.isNull(jobExecution.getStartedDate())) {
+      jobExecution.setStartedDate(new Date());
+      jobExecution.setLastUpdatedDate(new Date());
+    }
+    JsonObject personal = user.getJsonObject("personal");
+    jobExecution.setRunBy(new RunBy()
+      .withFirstName(personal.getString("firstName"))
+      .withLastName(personal.getString("lastName")));
+    if (withProgress) {
+        jobExecution.setProgress(new Progress().withTotal(totalCount));
+    }
   }
 
   @Override

@@ -1,14 +1,16 @@
 package org.folio.service.manager.input;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.WorkerExecutor;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.shareddata.LocalMap;
+import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.nonNull;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
@@ -33,17 +35,15 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import static io.vertx.core.Future.succeededFuture;
-import static java.util.Objects.nonNull;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.shareddata.LocalMap;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -97,8 +97,8 @@ class InputDataManagerImpl implements InputDataManager {
     }, this::handleExportResult);
   }
 
-  protected void initBlocking(JsonObject request, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, JsonObject jobExecutionJson, Map<String, String> params) {
-    ExportRequest exportRequest = request.mapTo(ExportRequest.class);
+  protected void initBlocking(JsonObject exportRequestJson, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, JsonObject jobExecutionJson, Map<String, String> params) {
+    ExportRequest exportRequest = exportRequestJson.mapTo(ExportRequest.class);
     MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
     FileDefinition requestFileDefinition = requestFileDefinitionJson.mapTo(FileDefinition.class);
     JobExecution jobExecution = jobExecutionJson.mapTo(JobExecution.class);
@@ -123,9 +123,14 @@ class InputDataManagerImpl implements InputDataManager {
       });
     } else {
       errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
-      fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId);
-      populateJobExecutionForEmptyFileUploaded(jobExecution, fileExportDefinition, optionalUser.orElse(new JsonObject()));
-      jobExecutionService.update(jobExecution, tenantId);
+      fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
+        if (optionalUser.isPresent()) {
+          jobExecutionService.prepareJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
+        } else {
+          ExportPayload exportPayload = createExportPayload(fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+        }
+      });
       sourceReader.close();
     }
   }
