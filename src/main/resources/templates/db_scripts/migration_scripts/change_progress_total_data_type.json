@@ -1,0 +1,2 @@
+UPDATE ${myuniversity}_${mymodule}.job_executions
+SET jsonb = jsonb_set(jsonb #- '{progress, total}', '{progress, total}', to_json((jsonb -> 'progress' ->> 'total')::int)::jsonb);
