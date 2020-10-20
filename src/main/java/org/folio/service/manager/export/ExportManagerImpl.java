@@ -114,7 +114,7 @@ public class ExportManagerImpl implements ExportManager {
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory, The UUIDS are: %s",
+      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory. The UUIDS of not found records: %s",
         StringUtils.joinWith(", ", instances.getNotFoundInstancesUUIDs())), exportPayload.getJobExecutionId(), params.getTenantId());
     }
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
