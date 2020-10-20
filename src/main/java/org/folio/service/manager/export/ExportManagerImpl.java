@@ -102,7 +102,7 @@ public class ExportManagerImpl implements ExportManager {
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
       List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
-          exportPayload.getJobExecutionId(), params);
+        exportPayload.getJobExecutionId(), params);
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
     } else {
@@ -114,7 +114,8 @@ public class ExportManagerImpl implements ExportManager {
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory, number of not found records: %s %n The UUIDS: %s",  numberOfNotFoundRecords, StringUtils.joinWith(", ", instances.getNotFoundInstancesUUIDs())), exportPayload.getJobExecutionId(), params.getTenantId());
+      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory, The UUIDS are: %s",
+        StringUtils.joinWith(", ", instances.getNotFoundInstancesUUIDs())), exportPayload.getJobExecutionId(), params.getTenantId());
     }
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
