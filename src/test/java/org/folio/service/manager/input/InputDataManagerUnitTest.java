@@ -40,6 +40,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -166,14 +167,15 @@ class InputDataManagerUnitTest {
   void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(false);
-    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.FAIL), eq(TENANT_ID));
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+    doCallRealMethod().when(jobExecutionService).prepareJobForFailedExport(any(), any(FileDefinition.class), eq(USER), eq(Long.valueOf(0)), eq(true),  eq(TENANT_ID));
     //when
     inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(sourceReader).close();
     verify(fileDefinitionService).save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID));
-    verify(jobExecutionService).update(jobExecutionCaptor.capture(), eq(TENANT_ID));
+    verify(jobExecutionService).prepareJobForFailedExport(jobExecutionCaptor.capture(), any(FileDefinition.class), eq(USER), eq(Long.valueOf(0)), eq(true),  eq(TENANT_ID));
     assertNotNull(jobExecutionCaptor.getValue().getCompletedDate());
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
