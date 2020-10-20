@@ -24,11 +24,13 @@ public interface RecordLoaderService {
   /**
    * Retrieves Inventory instances using blocking http client
    *
-   * @param instanceIds    inventory instances identifiers
-   * @param jobExecutionId job execution id
-   * @return collection of json objects
+   * @param instanceIds           inventory instances identifiers
+   * @param jobExecutionId        job execution id
+   * @param okapiConnectionParams okapi headers and connection parameters
+   * @param partitionSize         inventory query limit
+   * @return {@link InventoryLoadResult}
    */
-  List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, int partitionSize);
+  InventoryLoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, int partitionSize);
 
   /**
    * Retrieve all the holdings for a given instance UUID
