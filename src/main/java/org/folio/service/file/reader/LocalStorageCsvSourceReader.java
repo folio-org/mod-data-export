@@ -7,7 +7,6 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.Int;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
