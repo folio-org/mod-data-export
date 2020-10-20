@@ -265,24 +265,6 @@ class InputDataManagerImpl implements InputDataManager {
     return !CQL.equals(requestFileDefinition.getUploadFormat());
   }
 
-  private void populateJobExecutionForEmptyFileUploaded(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user) {
-    Set<ExportedFile> exportedFiles = jobExecution.getExportedFiles();
-    ExportedFile exportedFile = new ExportedFile()
-      .withFileId(UUID.randomUUID().toString())
-      .withFileName(fileExportDefinition.getFileName());
-    exportedFiles.add(exportedFile);
-    jobExecution.setExportedFiles(exportedFiles);
-    jobExecution.setStatus(JobExecution.Status.FAIL);
-    jobExecution.setProgress(new Progress());
-    jobExecution.setCompletedDate(new Date());
-    if (user.containsKey("personal")) {
-      JsonObject personal = user.getJsonObject("personal");
-      jobExecution.setRunBy(new RunBy()
-        .withFirstName(personal.getString("firstName"))
-        .withLastName(personal.getString("lastName")));
-    }
-  }
-
   private InputDataContext getInputDataContext(String jobExecutionId) {
     return inputDataLocalMap.get(jobExecutionId);
   }
