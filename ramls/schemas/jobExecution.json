@@ -9,7 +9,7 @@
     },
     "hrId": {
       "description": "Human readable id",
-      "type": "string"
+      "type": "integer"
     },
     "exportedFiles": {
       "description": "List of exported files",

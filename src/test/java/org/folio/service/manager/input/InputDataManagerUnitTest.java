@@ -150,7 +150,7 @@ class InputDataManagerUnitTest {
     fileExportDefinition = createFileExportDefinition();
     exportRequest = createExportRequest();
     requestParams = Maps.<String, String>newHashMap(OKAPI_HEADER_TENANT, TENANT_ID);
-    jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW).withHrId("1");
+    jobExecution = new JobExecution().withId(JOB_EXECUTION_ID).withStatus(JobExecution.Status.NEW).withHrId(1);
     mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(jobExecutionService.getById(eq(JOB_EXECUTION_ID), eq(TENANT_ID))).thenReturn(Future.succeededFuture(jobExecution));
