@@ -1,28 +1,42 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.HttpStatus;
+import org.folio.processor.translations.Translation;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.TransformationField;
+import org.folio.rest.jaxrs.model.TransformationFieldCollection;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.resource.DataExportMappingProfiles;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
+import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.swing.text.html.Option;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Map;
-
-import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
+import java.util.Optional;
 
 public class DataExportImplMappingProfilesImpl implements DataExportMappingProfiles {
   private final String tenantId;
   @Autowired
   private MappingProfileService mappingProfileService;
+  @Autowired
+  private TransformationFieldsService transformationFieldsService;
 
   public DataExportImplMappingProfilesImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -31,8 +45,10 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
 
   @Override
   public void postDataExportMappingProfiles(String lang, MappingProfile entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     succeededFuture()
-      .compose(ar -> mappingProfileService.save(entity, new OkapiConnectionParams(okapiHeaders)))
+      .compose(ar -> mappingProfileService.validate(entity, params))
+      .compose(ar -> mappingProfileService.save(entity, params))
       .map(mappingProfile -> (Response) PostDataExportMappingProfilesResponse.respond201WithApplicationJson(mappingProfile, PostDataExportMappingProfilesResponse.headersFor201()))
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler);
@@ -72,8 +88,10 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
 
   @Override
   public void putDataExportMappingProfilesById(String id, String lang, MappingProfile entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     succeededFuture()
-      .compose(ar -> mappingProfileService.update(entity, new OkapiConnectionParams(okapiHeaders)))
+      .compose(ar -> mappingProfileService.validate(entity, params))
+      .compose(ar -> mappingProfileService.update(entity, params))
       .map(PutDataExportMappingProfilesByIdResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
