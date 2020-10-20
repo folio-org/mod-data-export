@@ -10,12 +10,14 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
 import org.folio.service.job.JobExecutionService;
+import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.logs.ErrorLogService;
@@ -29,9 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -106,14 +109,14 @@ public class ExportManagerImpl implements ExportManager {
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
     }
 
-    List<JsonObject> instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
-    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.size());
-    int numberOfNotFoundRecords = srsLoadResult.getInstanceIdsWithoutSrs().size() - instances.size();
+    InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
+    int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.saveGeneralError("Some records are not found in srs and inventory, number of not found records: " +  numberOfNotFoundRecords, exportPayload.getJobExecutionId(), params.getTenantId());
+      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory, number of not found records: %s %n The UUIDS: %s",  numberOfNotFoundRecords, StringUtils.joinWith(", ", instances.getNotFoundInstancesUUIDs())), exportPayload.getJobExecutionId(), params.getTenantId());
     }
-    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances, exportPayload.getJobExecutionId(), mappingProfile, params);
+    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
@@ -151,14 +154,15 @@ public class ExportManagerImpl implements ExportManager {
    * @param params                    okapi connection parameters
    * @return list of instances
    */
-  private List<JsonObject> loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
-    List<JsonObject> instances = new ArrayList<>();
+  private InventoryLoadResult loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
+    InventoryLoadResult inventoryLoadResult = new InventoryLoadResult();
     Lists.partition(singleInstanceIdentifiers, INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        List<JsonObject> partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, jobExecutionId, params, INVENTORY_LOAD_PARTITION_SIZE);
-        instances.addAll(partitionLoadResult);
+        InventoryLoadResult partitionLoadResult = recordLoaderService.loadInventoryInstancesBlocking(partition, jobExecutionId, params, INVENTORY_LOAD_PARTITION_SIZE);
+        inventoryLoadResult.getInstances().addAll(partitionLoadResult.getInstances());
+        inventoryLoadResult.getNotFoundInstancesUUIDs().addAll(partitionLoadResult.getNotFoundInstancesUUIDs());
       }
     );
-    return instances;
+    return inventoryLoadResult;
   }
 
   /**
