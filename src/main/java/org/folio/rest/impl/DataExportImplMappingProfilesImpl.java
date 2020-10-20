@@ -5,17 +5,9 @@ import static java.lang.String.format;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import org.apache.commons.lang3.StringUtils;
-import org.folio.HttpStatus;
-import org.folio.processor.translations.Translation;
-import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.jaxrs.model.TransformationField;
-import org.folio.rest.jaxrs.model.TransformationFieldCollection;
-import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.resource.DataExportMappingProfiles;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
@@ -25,11 +17,8 @@ import org.folio.util.ExceptionToResponseMapper;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.swing.text.html.Option;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class DataExportImplMappingProfilesImpl implements DataExportMappingProfiles {
   private final String tenantId;

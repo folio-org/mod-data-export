@@ -119,29 +119,28 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   @Override
   public Future<Void> validate(MappingProfile mappingProfile, OkapiConnectionParams params) {
     if (CollectionUtils.isNotEmpty(mappingProfile.getTransformations())) {
-       return transformationFieldsService.getTransformationFields(params)
-        .compose(transformationFieldCollection -> {
-          List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
-          for (Transformations transformation : mappingProfile.getTransformations()) {
-            String fieldId = transformation.getFieldId();
-            if (StringUtils.isBlank(fieldId)) {
-              throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
-            }
-            Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
-              .filter(transformationField -> fieldId.equals(transformationField.getFieldId()))
-              .findFirst();
-            if (transformationFieldOptional.isEmpty()) {
-              throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", fieldId));
-            }
-            TransformationField transformationField = transformationFieldOptional.get();
-            TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
-            if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
-              throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
-                "expected record type: %s", fieldId, expectedRecordType));
-            }
+      return transformationFieldsService.getTransformationFields(params).compose(transformationFieldCollection -> {
+        List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
+        for (Transformations transformation : mappingProfile.getTransformations()) {
+          String fieldId = transformation.getFieldId();
+          if (StringUtils.isBlank(fieldId)) {
+            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
           }
-          return Future.succeededFuture();
-        });
+          Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
+            .filter(transformationField -> fieldId.equals(transformationField.getFieldId()))
+            .findFirst();
+          if (transformationFieldOptional.isEmpty()) {
+            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", fieldId));
+          }
+          TransformationField transformationField = transformationFieldOptional.get();
+          TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
+          if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
+            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
+              "expected record type: %s", fieldId, expectedRecordType));
+          }
+        }
+        return Future.succeededFuture();
+      });
     }
     return Future.succeededFuture();
   }
