@@ -403,7 +403,7 @@ class DataExportTest extends RestVerticleTestBase {
     for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
       Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
         || errorLog.getReason().contains("Nothing to export: no binary file generated")
-        || errorLog.getReason().contains("Some records are not found in srs and inventory, The UUIDS are:")
+        || errorLog.getReason().contains("Some records are not found in srs and inventory. The UUIDS of not found records:")
         || errorLog.getReason().contains("Export file definition is not valid with id:"));
     }
   }
