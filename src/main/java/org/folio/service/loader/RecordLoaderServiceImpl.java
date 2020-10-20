@@ -68,8 +68,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
         }
       }
     }
-    inventoryLoadResult.getInstances().addAll(inventoryRecords);
-    inventoryLoadResult.getNotFoundInstancesUUIDs().addAll(singleInstanceIdentifiersSet);
+    inventoryLoadResult.setInstances(inventoryRecords);
+    inventoryLoadResult.setNotFoundInstancesUUIDs(singleInstanceIdentifiersSet);
   }
 
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {
