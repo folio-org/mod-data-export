@@ -115,28 +115,21 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
 
     // when
-    fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveFileDefinition1Ar -> {
-      return fileDefinitionDao.save(fileDefinition2, TENANT_ID).compose(saveFileDefinition2Ar -> {
-        Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-        // then
-        future.onComplete(ar -> {
-          context.verify(() -> {
-            assertTrue(ar.succeeded());
-            assertTrue(ar.result());
-            assertFalse(testFile1.exists());
-            assertFalse(testFile2.exists());
-            assertFalse(Files.exists(Paths.get(testFile1.getParent())));
-            assertFalse(Files.exists(Paths.get(testFile2.getParent())));
-            assertFileDefinitionIsRemoved();
-            context.completeNow();
-          });
-
-        });
-        return Promise.promise().future();
-      });
-    });
+    fileDefinitionDao.save(fileDefinition1, TENANT_ID);
+    fileDefinitionDao.save(fileDefinition2, TENANT_ID);
+    vertx.setTimer(3000L, handler -> storageCleanupService.cleanStorage(okapiConnectionParams)
+     .onComplete(ar -> context.verify(() -> {
+       assertTrue(ar.succeeded());
+       assertTrue(ar.result());
+       assertFalse(testFile1.exists());
+       assertFalse(testFile2.exists());
+       assertFalse(Files.exists(Paths.get(testFile1.getParent())));
+       assertFalse(Files.exists(Paths.get(testFile2.getParent())));
+       assertFileDefinitionIsRemoved();
+       context.completeNow();
+     })));
   }
+
 
   @Test
   void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(VertxTestContext context) throws IOException {
