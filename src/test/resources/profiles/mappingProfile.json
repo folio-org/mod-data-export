@@ -8,8 +8,8 @@
   "outputFormat": "MARC",
   "transformations": [
     {
-      "fieldId": "electronicAccess.linkText",
-      "path": "$.holdings[*].items[*].electronicAccess[*].linkText",
+      "fieldId": "item.callnumber",
+      "path": "$.holdings[*].items[*].effectiveCallNumberComponents.callNumber",
       "transformation": "001",
       "enabled": true,
       "recordType": "ITEM"
