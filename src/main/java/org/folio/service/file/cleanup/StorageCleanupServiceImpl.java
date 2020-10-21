@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class StorageCleanupServiceImpl implements StorageCleanupService {
 
-  private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 3600_000;
+  private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 80000;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StorageCleanupServiceImpl.class);
 

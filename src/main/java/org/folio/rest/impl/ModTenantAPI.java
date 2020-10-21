@@ -21,7 +21,7 @@ import static io.vertx.core.Future.succeededFuture;
 public class ModTenantAPI extends TenantAPI {
   private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantAPI.class);
 
-  private static final long DELAY_TIME_BETWEEN_CLEANUP_VALUE_MILLIS = 3600_000;
+  private static final long DELAY_TIME_BETWEEN_CLEANUP_VALUE_MILLIS = 80000;
 
   @Autowired
   private StorageCleanupService storageCleanupService;
