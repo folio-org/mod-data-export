@@ -50,12 +50,13 @@ public class ModTenantAPI extends TenantAPI {
   }
 
   private void executeStorageCleanUpJob(Vertx vertx, OkapiConnectionParams params) {
+    LOGGER.error(" Called executeStorageCleanUpJob() Mod tenant api");
     vertx.<Void>executeBlocking(blockingCodeHandler -> storageCleanupService.cleanStorage(params),
       cleanupAsyncResult -> {
         if (cleanupAsyncResult.failed()) {
           LOGGER.error("Error during cleaning file storage.", cleanupAsyncResult.cause().getMessage());
         } else {
-          LOGGER.info("File storage was successfully cleaned of unused files");
+          LOGGER.error("File storage was successfully cleaned of unused files");
         }
       });
   }
