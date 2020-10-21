@@ -45,7 +45,7 @@ public interface SourceReader {
    *
    * @return the total count of all elements in source
    */
-  long totalCount();
+  int totalCount();
 
 
 }

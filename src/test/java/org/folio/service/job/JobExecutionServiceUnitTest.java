@@ -61,8 +61,7 @@ class JobExecutionServiceUnitTest {
   private static final String FIRST_NAME_VALUE = "firstName";
   private static final String LAST_NAME_KEY = "lastName";
   private static final String LAST_NAME_VALUE = "lastName";
-  private static final long TOTAL_COUNT_LONG = 2L;
-  private static final String TOTAL_COUNT_STRING = "2";
+  private static final int TOTAL_COUNT = 2;
 
   @Spy
   @InjectMocks
@@ -347,7 +346,7 @@ class JobExecutionServiceUnitTest {
     when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
 
     //when
-    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT_LONG, true, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT, true, TENANT_ID);
 
     //then
     future.onComplete(ar -> {
@@ -361,8 +360,8 @@ class JobExecutionServiceUnitTest {
           .getFirstName());
         assertEquals(LAST_NAME_VALUE, updatedJobExecution.getRunBy()
           .getLastName());
-        assertEquals(TOTAL_COUNT_STRING, updatedJobExecution.getProgress()
-          .getTotal());
+        assertEquals(TOTAL_COUNT, updatedJobExecution.getProgress()
+          .getTotal().intValue());
         assertEquals(JOB_PROFILE_NAME, jobExecution.getJobProfileName());
         context.completeNow();
       });

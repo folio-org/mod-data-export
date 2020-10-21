@@ -82,9 +82,7 @@ public class FileUploadServiceImpl implements FileUploadService {
           for (Object id : jsonIds) {
             ids.add(((JsonObject) id).getString("id"));
           }
-          JobExecution jobExecution = new JobExecution().
-            withProgress(new Progress()
-              .withTotal(String.valueOf(jsonIds.size())));
+          JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
           return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
             .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
         }

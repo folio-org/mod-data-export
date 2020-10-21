@@ -9,7 +9,7 @@
     },
     "hrId": {
       "description": "Human readable id",
-      "type": "string"
+      "type": "integer"
     },
     "exportedFiles": {
       "description": "List of exported files",
@@ -55,8 +55,8 @@
         },
         "total": {
           "description": "Total number of records",
-          "type": "string",
-          "default": "0"
+          "type": "integer",
+          "default": 0
         }
       }
     },
