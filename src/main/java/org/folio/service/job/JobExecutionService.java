@@ -68,7 +68,7 @@ public interface JobExecutionService {
    * @param withProgress         condition to add progress
    * @param tenantId             tenant id
    */
-  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId);
+  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}
