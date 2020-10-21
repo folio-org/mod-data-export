@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
@@ -97,18 +98,18 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-
   @Test
-  void testExport_uploadingEmptyCqlFile_FAILED_job(VertxTestContext context) throws IOException {
+  void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    context.awaitCompletion(5, TimeUnit.SECONDS);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler ->
+    vertx.setTimer(7000L, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
@@ -380,10 +381,17 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
+  private void assertFailedFileDefinition(FileDefinition fileExportDefinition) {
+    assertNull(fileExportDefinition.getSourcePath());
+    assertEquals(FileDefinition.Status.ERROR, fileExportDefinition.getStatus());
+  }
+
   private void assertJobExecution(JobExecution jobExecution, JobExecution.Status status, Integer numberOfExportedRecords) {
     assertEquals(status, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
+    assertNotNull(jobExecution.getExportedFiles().iterator().next().getFileName());
+    assertNotNull(jobExecution.getRunBy());
   }
 
   private void assertErrorLogs(ErrorLogCollection errorLogCollection, String jobExecutionId) {
