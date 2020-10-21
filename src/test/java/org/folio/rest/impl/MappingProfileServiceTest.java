@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-public class MappingProfileServiceTest extends RestVerticleTestBase {
+class MappingProfileServiceTest extends RestVerticleTestBase {
 
   @Test
   void postMappingProfile_return422Status_whenTransformationFieldIdDoesntExist() {
