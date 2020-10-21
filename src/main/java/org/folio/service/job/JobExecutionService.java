@@ -1,12 +1,13 @@
 package org.folio.service.job;
 
 
-import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.Progress;
+
+import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 
 /**
  * JobExecution Service interface, contains logic for accessing jobs.
@@ -69,6 +70,17 @@ public interface JobExecutionService {
    * @param tenantId             tenant id
    */
   Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId);
+
+  /**
+   * Updates {@link JobExecution} status with specified status && updates exported files && updates started and completed dates
+   *
+   * @param jobExecution         job execution
+   * @param fileExportDefinition definition of the file to export
+   * @param user                 user represented in json object
+   * @param withProgress         condition to add progress
+   * @param tenantId             tenant id
+   */
+  void prepareAndSaveJobForFailedExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId);
 
   /**
    * Increment current value in {@link Progress} of {@link JobExecution}
