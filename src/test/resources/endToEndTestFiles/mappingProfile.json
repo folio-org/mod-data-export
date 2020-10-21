@@ -3,13 +3,12 @@
   "name": "IT Mapping profile",
   "description": "Mapping profile for Testing Int Tests",
   "recordTypes": [
-    "HOLDINGS",
-    "ITEM"
+    "HOLDINGS"
   ],
   "outputFormat": "MARC",
   "transformations": [
     {
-      "fieldId": "callNumber",
+      "fieldId": "holdings.callnumber",
       "path": "$.holdings[*].callNumber",
       "transformation": "900ff$a",
       "enabled": true,
