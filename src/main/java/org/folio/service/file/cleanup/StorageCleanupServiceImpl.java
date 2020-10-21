@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.file.storage.FileStorage;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class StorageCleanupServiceImpl implements StorageCleanupService {
 
-  private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 3600_000;
+  private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 80000;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(StorageCleanupServiceImpl.class);
 
@@ -32,7 +33,10 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
   public Future<Boolean> cleanStorage(OkapiConnectionParams params) {
     Promise<Boolean> promise = Promise.promise();
     return fileDefinitionDao.getExpiredEntries(getFileDefinitionExpirationDate(), params.getTenantId())
-      .compose(fileDefinitions -> deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId()))
+      .compose(fileDefinitions -> {
+        LOGGER.error("cleanStorage() method called to clean this file definitions:" + StringUtils.joinWith(", ", fileDefinitions));
+        return deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId());
+      })
       .compose(compositeFuture -> {
         promise.complete(isFilesDeleted(compositeFuture));
         return promise.future();
@@ -55,6 +59,7 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
     return fileStorage.deleteFileAndParentDirectory(fileDefinition)
       .compose(isFileDeleted -> {
         if (Boolean.TRUE.equals(isFileDeleted)) {
+          LOGGER.error("Try to delete filedefinition with id", fileDefinition.getId());
           return fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId);
         }
         return Future.succeededFuture(false);
