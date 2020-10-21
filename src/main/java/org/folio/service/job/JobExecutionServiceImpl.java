@@ -1,11 +1,24 @@
 package org.folio.service.job;
 
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.JobExecutionDao;
@@ -19,20 +32,11 @@ import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.NotFoundException;
-import java.lang.invoke.MethodHandles;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
-import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Implementation of the JobExecutionService, calls JobExecutionDao to access JobExecution metadata.
@@ -118,19 +122,19 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   @Override
   public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
-      prepareJobExecution(jobExecution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress, tenantId);
+      prepareJobExecution(jobExecution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress);
       return update(jobExecution, tenantId);
     });
   }
 
   @Override
-  public Future<JobExecution> prepareJobForFailedExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
-    prepareJobExecution(jobExecution, fileExportDefinition, FAIL, user, totalCount, withProgress, tenantId);
+  public void prepareAndSaveJobForFailedExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
+    prepareJobExecution(jobExecution, fileExportDefinition, FAIL, user, totalCount, withProgress);
     jobExecution.setCompletedDate(new Date());
-    return update(jobExecution, tenantId);
+    update(jobExecution, tenantId);
   }
 
-  private void prepareJobExecution(JobExecution jobExecution, FileDefinition fileExportDefinition, JobExecution.Status status, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
+  private void prepareJobExecution(JobExecution jobExecution, FileDefinition fileExportDefinition, JobExecution.Status status, JsonObject user, int totalCount, boolean withProgress) {
     ExportedFile exportedFile = new ExportedFile()
       .withFileId(UUID.randomUUID().toString())
       .withFileName(fileExportDefinition.getFileName());
@@ -147,7 +151,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .withFirstName(personal.getString("firstName"))
       .withLastName(personal.getString("lastName")));
     if (withProgress) {
-        jobExecution.setProgress(new Progress().withTotal(totalCount));
+      jobExecution.setProgress(new Progress().withTotal(totalCount));
     }
   }
 
@@ -179,7 +183,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
         if (asyncResult.succeeded()) {
           List<JobExecution> jobExecutionList = asyncResult.result();
           jobExecutionList.forEach(jobExe -> {
-            jobExe.setStatus(JobExecution.Status.FAIL);
+            jobExe.setStatus(FAIL);
             jobExecutionDao.update(jobExe, tenantId);
           });
           jobExecutionPromise.complete();

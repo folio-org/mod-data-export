@@ -5,22 +5,16 @@ import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
-import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.jaxrs.model.Progress;
-import org.folio.rest.jaxrs.model.RunBy;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.reader.LocalStorageCsvSourceReader;
 import org.folio.service.file.reader.SourceReader;
@@ -125,7 +119,7 @@ class InputDataManagerImpl implements InputDataManager {
       errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
-          jobExecutionService.prepareJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
+          jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
           ExportPayload exportPayload = createExportPayload(fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
