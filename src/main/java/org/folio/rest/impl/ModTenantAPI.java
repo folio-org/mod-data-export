@@ -35,8 +35,10 @@ public class ModTenantAPI extends TenantAPI {
   public void postTenant(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
     super.postTenant(entity, headers, asyncResult -> {
       if (asyncResult.failed()) {
+        LOGGER.error("Post tenant failed");
         handlers.handle(asyncResult);
       } else {
+        LOGGER.error("Post tenant success");
         initStorageCleanupService(headers, context);
         handlers.handle(succeededFuture(PostTenantResponse.respond201WithApplicationJson("Post tenant is complete")));
       }
