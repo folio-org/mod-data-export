@@ -104,9 +104,9 @@ class RecordLoaderServiceUnitTest{
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse, hasSize(2));
+    assertThat(inventoryResponse.getInstances(), hasSize(2));
   }
 
   @Test
@@ -116,9 +116,9 @@ class RecordLoaderServiceUnitTest{
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse, empty());
+    assertThat(inventoryResponse.getInstances(), empty());
   }
 
   @Test
@@ -127,9 +127,9 @@ class RecordLoaderServiceUnitTest{
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    List<JsonObject> inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse, empty());
+    assertThat(inventoryResponse.getInstances(), empty());
   }
 
   @Test

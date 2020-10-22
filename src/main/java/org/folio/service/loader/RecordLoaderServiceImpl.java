@@ -9,6 +9,7 @@ import org.folio.clients.SourceRecordStorageClient;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,9 +45,31 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public List<JsonObject> loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
+  public InventoryLoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     Optional<JsonObject> optionalRecords = inventoryClient.getInstancesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
-    return optionalRecords.map(instances -> populateLoadResultFromResponse("instances", instances)).orElseGet(ArrayList::new);
+    InventoryLoadResult inventoryLoadResult = new InventoryLoadResult();
+    if (optionalRecords.isPresent()) {
+      populateLoadResultFromInventory(instanceIds, optionalRecords.get(), inventoryLoadResult);
+    } else {
+      inventoryLoadResult.setNotFoundInstancesUUIDs(instanceIds);
+    }
+    return inventoryLoadResult;
+  }
+
+  private void populateLoadResultFromInventory(Collection<String> instanceIds, JsonObject instanceRecord, InventoryLoadResult inventoryLoadResult) {
+    List<JsonObject> inventoryRecords = new ArrayList<>();
+    Set<String> singleInstanceIdentifiersSet = new HashSet<>(instanceIds);
+    for (String instanceId : instanceIds) {
+      for (Object instance : instanceRecord.getJsonArray("instances")) {
+        JsonObject record = (JsonObject) instance;
+        if (record.getValue("id").equals(instanceId)) {
+          singleInstanceIdentifiersSet.remove(instanceId);
+          inventoryRecords.add(record);
+        }
+      }
+    }
+    inventoryLoadResult.setInstances(inventoryRecords);
+    inventoryLoadResult.setNotFoundInstancesUUIDs(singleInstanceIdentifiersSet);
   }
 
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult) {

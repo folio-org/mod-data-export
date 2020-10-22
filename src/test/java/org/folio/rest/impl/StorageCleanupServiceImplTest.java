@@ -138,6 +138,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     });
   }
 
+
   @Test
   void shouldRemoveFileWithoutParentDirectory_whenParentDirectoryIsNull(VertxTestContext context) throws IOException {
     // given

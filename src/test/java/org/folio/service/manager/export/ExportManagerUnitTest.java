@@ -1,6 +1,7 @@
 package org.folio.service.manager.export;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
+import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.logs.ErrorLogService;
@@ -48,8 +50,11 @@ class ExportManagerUnitTest {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
+    InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
     Mockito.when(marcLoadResult.getInstanceIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
+    Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
