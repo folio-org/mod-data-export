@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.vertx.core.Context;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
@@ -22,12 +23,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
-@ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
+@ExtendWith(MockitoExtension.class)
 class DataExportCleanUpFilesTest extends RestVerticleTestBase {
 
   @Autowired
@@ -65,22 +67,21 @@ class DataExportCleanUpFilesTest extends RestVerticleTestBase {
       .withSourcePath("Path");
     fileDefinitionService.save(fileDefinition, TENANT_ID);
 
-    vertx.setTimer(3000L, ar -> {
-      // when
-      RestAssured.given()
+    vertx.setTimer(3000L, handler -> {
+
+      Response response = RestAssured.given()
         .spec(jsonRequestSpecification)
         .when()
-        .post(CLEAN_UP_FILES_URL)
-        .then()
-        .statusCode(HttpStatus.SC_NO_CONTENT);
+        .post(CLEAN_UP_FILES_URL);
+      assertEquals(204, response.getStatusCode());
 
-      // then
-      fileDefinitionService.getById(fileDefinitionId, TENANT_ID)
-        .onComplete(asyncResult -> {
-          assertTrue(asyncResult.succeeded());
-          assertNull(asyncResult.result());
-          context.completeNow();
-        });
+      vertx.setTimer(3000L, ar ->
+        fileDefinitionService.getById(fileDefinitionId, TENANT_ID)
+          .onComplete(asyncResult -> {
+            assertTrue(asyncResult.failed());
+            assertNull(asyncResult.result());
+            context.completeNow();
+          }));
     });
   }
 
