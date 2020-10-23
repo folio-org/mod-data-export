@@ -119,7 +119,6 @@ public class DataExportImpl implements DataExport {
 
   @Override
   public void postDataExportCleanUpFiles(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    LOGGER.info("Requested call to clean up file definitions and related files");
     vertxContext.runOnContext(v -> storageCleanupService.cleanStorage(new OkapiConnectionParams(okapiHeaders))
       .map(PostDataExportCleanUpFilesResponse.respond204())
       .map(Response.class::cast)

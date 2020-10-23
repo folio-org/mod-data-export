@@ -164,6 +164,10 @@ public class StorageTestSuite {
   }
 
   @Nested
+  class ErrorLogsTestNested extends ErrorLogsTest {
+  }
+
+  @Nested
   class DataExportCleanUpFilesTestNested extends DataExportCleanUpFilesTest {
   }
 
