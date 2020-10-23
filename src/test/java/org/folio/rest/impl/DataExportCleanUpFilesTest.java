@@ -67,11 +67,13 @@ class DataExportCleanUpFilesTest extends RestVerticleTestBase {
     fileDefinitionService.save(fileDefinition, TENANT_ID);
 
     vertx.setTimer(3000L, handler -> {
-
+      //when
       Response response = RestAssured.given()
         .spec(jsonRequestSpecification)
         .when()
         .post(CLEAN_UP_FILES_URL);
+
+      //then
       assertEquals(204, response.getStatusCode());
 
       vertx.setTimer(3000L, ar ->
