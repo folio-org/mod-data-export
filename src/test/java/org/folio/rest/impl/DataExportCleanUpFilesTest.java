@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
-@ExtendWith(MockitoExtension.class)
 class DataExportCleanUpFilesTest extends RestVerticleTestBase {
 
   @Autowired
