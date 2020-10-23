@@ -1,5 +1,5 @@
 {
-  "leader": "02385nam a2200817 a 4500",
+  "leader": "02726nam a2200829 a 4500",
   "fields": [
     {
       "001": "instance00001"
@@ -153,6 +153,9 @@
         "subfields": [
           {
             "a": "6066.I0119 C760 "
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -164,6 +167,9 @@
         "subfields": [
           {
             "a": "6076.I4588 B749 "
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -175,6 +181,9 @@
         "subfields": [
           {
             "a": "9901.I4981"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -182,10 +191,13 @@
       }
     },
     {
-      "905": {
+      "904": {
         "subfields": [
           {
             "a": "Electronic resource (FCF)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -193,10 +205,13 @@
       }
     },
     {
-      "905": {
+      "904": {
         "subfields": [
           {
             "a": "Electronic resource (OTT)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -204,10 +219,13 @@
       }
     },
     {
-      "905": {
+      "904": {
         "subfields": [
           {
             "a": "Electronic resource (RTF)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -215,10 +233,13 @@
       }
     },
     {
-      "905": {
+      "904": {
         "subfields": [
           {
             "a": "Electronic resource (XML)"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -226,10 +247,13 @@
       }
     },
     {
-      "905": {
+      "904": {
         "subfields": [
           {
             "a": "Electronic resource (audio streaming)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -237,10 +261,13 @@
       }
     },
     {
-      "906": {
+      "904": {
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/01"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "1",
@@ -248,10 +275,13 @@
       }
     },
     {
-      "906": {
+      "904": {
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/04"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "1",
@@ -259,10 +289,13 @@
       }
     },
     {
-      "906": {
+      "904": {
         "subfields": [
           {
             "a": "http://d-nb.info/1150176652/04"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "1",
@@ -270,10 +303,13 @@
       }
     },
     {
-      "906": {
+      "904": {
         "subfields": [
           {
             "a": "http://www.folio.org/"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "1",
@@ -281,10 +317,13 @@
       }
     },
     {
-      "906": {
+      "904": {
         "subfields": [
           {
             "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "1",
@@ -669,28 +708,6 @@
       "991": {
         "subfields": [
           {
-            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
-          {
-            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
-          {
             "a": "itemHrid000000000001"
           },
           {
@@ -709,6 +726,48 @@
           },
           {
             "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "b": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "b": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "b": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",

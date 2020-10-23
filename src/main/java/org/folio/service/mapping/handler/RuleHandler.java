@@ -41,7 +41,7 @@ public class RuleHandler {
     for (Rule originRule : originalRules) {
       boolean hasRuleSameFieldInHoldings = false;
       for (DataSource targetDataSource : originRule.getDataSources()) {
-        if (targetDataSource.isHasSameFieldInHoldings()) {
+        if (targetDataSource.isHasSameTagInItems()) {
           hasRuleSameFieldInHoldings = true;
           for (int holdingIndex = 0; holdingIndex < numberOfHoldings; holdingIndex++) {
             Rule indexedRule = originRule.copy();

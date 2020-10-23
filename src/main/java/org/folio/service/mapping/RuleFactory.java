@@ -16,17 +16,13 @@ import org.folio.service.mapping.rulebuilder.RuleBuilder;
 import org.folio.service.mapping.rulebuilder.TransformationRuleBuilder;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
@@ -71,7 +67,7 @@ public class RuleFactory {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
-    markItemTransformationsWithSameFieldInHoldings(mappingTransformations);
+    markItemTransformationsWithSameTag(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
@@ -88,16 +84,18 @@ public class RuleFactory {
     return rules;
   }
 
-  private void markItemTransformationsWithSameFieldInHoldings(List<Transformations> mappingTransformations) {
-    for (Transformations holdingsTransformation: mappingTransformations) {
-      for (Transformations itemTransformation: mappingTransformations) {
-        if (holdingsTransformation.getRecordType().equals(HOLDINGS) && itemTransformation.getRecordType().equals(ITEM)) {
-          String holdingTag = holdingsTransformation.getTransformation().substring(0, 3);
-          String itemTag = itemTransformation.getTransformation().substring(0, 3);
-          if (holdingTag.equals(itemTag)) {
-            itemTransformation.setHasSameTagInHoldings(true);
-          }
-        }
+  private void markItemTransformationsWithSameTag(List<Transformations> mappingTransformations) {
+    MultivaluedMap<String, Transformations> tagToTransformationMap = new MultivaluedHashMap<>();
+    for (Transformations transformation : mappingTransformations) {
+      if (transformation.getRecordType().equals(ITEM)) {
+        String itemTag = transformation.getTransformation().substring(0, 3);
+        tagToTransformationMap.add(itemTag, transformation);
+      }
+    }
+    for (Map.Entry<String, List<Transformations>> entry : tagToTransformationMap.entrySet()) {
+      List<Transformations> transformations = entry.getValue();
+      if (transformations.size() > 1) {
+        transformations.forEach(transformation -> transformation.setHasSameTagInItems(true));
       }
     }
   }

@@ -240,8 +240,8 @@ class MappingServiceUnitTest {
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(41, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(50, appendedMarcRecords.size());
+    Assert.assertEquals(39, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(51, appendedMarcRecords.size());
   }
 
   @Test
@@ -354,10 +354,9 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "902  $a", HOLDINGS));
     transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, HOLDINGS_ELECTRONIC_ACCESS_URI_PATH, "90312$a", HOLDINGS));
     transformations.add(createTransformations(EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID, ITEMS_EFFECTIVE_CALL_NUMBER_PATH, "904  $a", ITEM));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "905  $a", ITEM));
-    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9061 $a", ITEM));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH, "904  $a", ITEM));
+    transformations.add(createTransformations(ELECTRONIC_ACCESS_URI_FIELD_ID, ITEMS_ELECTRONIC_ACCESS_URI_PATH, "9041 $a", ITEM));
     transformations.add(createTransformations(MATERIALTYPE_FIELD_ID, MATERIAL_TYPE_ID_PATH, "907  $a", ITEM));
-    transformations.add(createTransformations("holdings.instanceid", "$.holdings[*].instanceId", "991  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.name", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.code", "$.holdings[*].permanentLocationId", "909  $a", HOLDINGS));
     transformations.add(createTransformations("holdings.permanentlocation.library.name", "$.holdings[*].permanentLocationId", "910  $a", HOLDINGS));
@@ -391,6 +390,7 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("item.effectivelocation.institution.name", "$.holdings[*].items[*].effectiveLocationId", "938  $a", ITEM));
     transformations.add(createTransformations("item.effectivelocation.institution.code", "$.holdings[*].items[*].effectiveLocationId", "939  $a", ITEM));
     transformations.add(createTransformations("item.hrid", "$.holdings[*].items[*].hrid", "991  $a", ITEM));
+    transformations.add(createTransformations("item.holdingsRecordId", "$.holdings[*].items[*].holdingsRecordId", "991  $b", ITEM));
     return transformations;
   }
 
