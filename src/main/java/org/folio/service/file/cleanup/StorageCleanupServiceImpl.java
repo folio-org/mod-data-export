@@ -46,7 +46,7 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
   }
 
   private Future<CompositeFuture> deleteExpiredFilesAndRelatedFileDefinitions(List<FileDefinition> fileDefinitions, String tenantId) {
-    LOGGER.info(format("Start process of removing files and file definitions, number of file definitions to clean up: %s", fileDefinitions.size()));
+    LOGGER.info("Start process of removing files and file definitions, number of file definitions to clean up: {}", fileDefinitions.size());
     List<Future> deleteFilesFutures = fileDefinitions.stream()
       .map(fileDefinition -> deleteExpiredFileAndRelatedFileDefinition(fileDefinition, tenantId))
       .collect(Collectors.toList());

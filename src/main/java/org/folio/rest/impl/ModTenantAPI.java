@@ -12,7 +12,6 @@ import org.folio.spring.SpringContextUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
-import java.util.Objects;
 
 import static io.vertx.core.Future.succeededFuture;
 
@@ -29,10 +28,10 @@ public class ModTenantAPI extends TenantAPI {
   public void postTenant(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
     super.postTenant(entity, headers, asyncResult -> {
       if (asyncResult.failed()) {
-        LOGGER.error("Post tenant is failed, cause: " + asyncResult.cause().getMessage());
+        LOGGER.error("Post tenant failed, cause: " + asyncResult.cause().getMessage());
         handlers.handle(asyncResult);
       } else {
-        LOGGER.info("Post tenant is complete successfully");
+        LOGGER.info("Post tenant is completed successfully");
         handlers.handle(succeededFuture(PostTenantResponse.respond201WithApplicationJson("Post tenant is complete")));
       }
     }, context);
