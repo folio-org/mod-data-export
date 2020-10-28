@@ -58,6 +58,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(logId)
+      .withAffectedRecord(instanceRecord)
       .withReason("Error reason");
     errorLogDao.save(errorLog, okapiConnectionParams.getTenantId());
 
