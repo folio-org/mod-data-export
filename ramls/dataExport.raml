@@ -144,3 +144,25 @@ resourceTypes:
             body:
               text/plain:
                 example: "Internal server error"
+  /clean-up-files:
+      displayName: Clean up FileDefinitions
+      description: API to start clean up mechanism of file definitions and related generated files
+      post:
+        is: [validate]
+        responses:
+          204:
+          400:
+            description: "Bad request"
+            body:
+              text/plain:
+                example: "Bad request"
+          422:
+            description: "Unprocessable Entity"
+            body:
+              application/json:
+                type: errors
+          500:
+            description: "Internal server error"
+            body:
+              text/plain:
+                example: "Internal server error"
