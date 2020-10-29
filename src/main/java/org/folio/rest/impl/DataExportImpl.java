@@ -9,6 +9,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.input.InputDataManager;
@@ -16,9 +17,11 @@ import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
+import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -44,6 +47,9 @@ public class DataExportImpl implements DataExport {
 
   @Autowired
   private DataExportHelper dataExportHelper;
+
+  @Autowired
+  private StorageCleanupService storageCleanupService;
 
   private InputDataManager inputDataManager;
 
@@ -106,6 +112,15 @@ public class DataExportImpl implements DataExport {
   public void postDataExportExpireJobs(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> jobExecutionService.expireJobExecutions(tenantId)
       .map(PostDataExportExpireJobsResponse.respond204())
+      .map(Response.class::cast)
+      .otherwise(ExceptionToResponseMapper::map)
+      .onComplete(asyncResultHandler));
+  }
+
+  @Override
+  public void postDataExportCleanUpFiles(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> storageCleanupService.cleanStorage(new OkapiConnectionParams(okapiHeaders))
+      .map(PostDataExportCleanUpFilesResponse.respond204())
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler));

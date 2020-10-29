@@ -163,7 +163,12 @@ public class StorageTestSuite {
   class TransformationFieldsServiceTestNested extends TransformationFieldsServiceTest {
   }
 
+  @Nested
+  class ErrorLogsTestNested extends ErrorLogsTest {
+  }
 
-
+  @Nested
+  class DataExportCleanUpFilesTestNested extends DataExportCleanUpFilesTest {
+  }
 
 }

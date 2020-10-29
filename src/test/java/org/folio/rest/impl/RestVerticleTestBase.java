@@ -60,6 +60,7 @@ public abstract class RestVerticleTestBase {
   protected static final String ERROR_LOGS_SERVICE_URL = "/data-export/logs";
   protected static final String JOB_EXECUTIONS_URL = "/data-export/job-executions";
   protected static final String EXPIRE_JOBS_URL = "/data-export/expire-jobs";
+  protected static final String CLEAN_UP_FILES_URL = "/data-export/clean-up-files";
   protected static final String FIELD_NAMES_URL = "/data-export/transformation-fields";
   protected static final String MAPPING_PROFILE_URL = "/data-export/mapping-profiles";
   protected static final String UPLOAD_URL = "/upload";
