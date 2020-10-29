@@ -52,6 +52,8 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
       .withTotalRecords(results.getResultInfo().getTotalRecords()));
   }
 
+  // This method should be changed in scope of MDEXP-318, after adding error code to the error log. we will get error
+  // log here by jobExecutionId and errorCode fields
   @Override
   public Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId) {
     Promise<Results<ErrorLog>> promise = Promise.promise();
