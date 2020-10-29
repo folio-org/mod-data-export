@@ -10,6 +10,8 @@ import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
+import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,8 +50,8 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId) {
-    return errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, reason, tenantId);
+  public Future<List<ErrorLog>> getByQuery(Criterion criterion, String tenantId) {
+    return errorLogDao.getByQuery(criterion, tenantId);
   }
 
   @Override
@@ -101,7 +103,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public void populateNotFoundUUIDsErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId) {
-    errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription(), tenantId)
+    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           List<ErrorLog> errorLogs = ar.result();
@@ -122,7 +124,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public void populateNotFoundUUIDsNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId) {
-    errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, SOME_RECORDS_FAILED.getDescription(), tenantId)
+    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId,SOME_RECORDS_FAILED.getDescription()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           List<ErrorLog> errorLogs = ar.result();
@@ -136,7 +138,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
             update(errorLog, tenantId);
           }
         } else {
-          LOGGER.error("Fail to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs);
+          LOGGER.error("Failed to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs);
         }
       });
   }

@@ -3,6 +3,7 @@ package org.folio.dao;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
+import org.folio.rest.persist.Criteria.Criterion;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,12 +22,11 @@ public interface ErrorLogDao {
   /**
    * Gets {@link ErrorLog}
    *
-   * @param jobExecutionId id of job execution
-   * @param reason         substring of reason in error log
-   * @param tenantId       tenant id
+   * @param criterion {@link Criterion}
+   * @param tenantId  tenant id
    * @return future with list of {@link ErrorLog}
    */
-  Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId);
+  Future<List<ErrorLog>> getByQuery(Criterion criterion, String tenantId);
 
   /**
    * Saves {@link ErrorLog}

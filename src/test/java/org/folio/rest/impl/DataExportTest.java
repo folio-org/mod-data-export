@@ -26,8 +26,8 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
+import org.folio.util.HelperUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -47,6 +47,7 @@ import org.springframework.context.annotation.Primary;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -163,14 +164,15 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          errorLogService.getByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription(), tenantId)
+          errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
             .onComplete(ar -> {
               context.verify(() -> {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
                 validateExternalCallsForInventory();
                 assertTrue(ar.succeeded());
-                assertEquals(1, ar.result().size());
-                assertNotFoundUUIDsErrorLog(ar.result().get(0), jobExecutionId);
+                List<ErrorLog> errorLogList = ar.result();
+                assertEquals(1, errorLogList.size());
+                assertNotFoundUUIDsErrorLog(errorLogList.get(0), jobExecutionId);
               });
               context.completeNow();
             });

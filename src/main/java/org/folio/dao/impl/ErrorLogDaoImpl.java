@@ -30,8 +30,6 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
 
   private static final String TABLE = "error_logs";
   private static final String ID_FIELD = "'id'";
-  private static final String JOB_EXECUTION_ID_FIELD = "'jobExecutionId'";
-  private static final String REASON_FIELD = "'reason'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -52,14 +50,10 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
       .withTotalRecords(results.getResultInfo().getTotalRecords()));
   }
 
-  // This method should be changed in scope of MDEXP-318, after adding error code to the error log. we will get error
-  // log here by jobExecutionId and errorCode fields
-  @Override
-  public Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId) {
+  public Future<List<ErrorLog>> getByQuery(Criterion criterion, String tenantId) {
     Promise<Results<ErrorLog>> promise = Promise.promise();
     try {
-      Criterion expiredEntriesCriterion = constructCriterionByJobExecutionIdAndReason(jobExecutionId, reason);
-      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, expiredEntriesCriterion, false, promise);
+      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, criterion, false, promise);
     } catch (Exception e) {
       LOGGER.error("Error during getting errorLog entries by jobExecutionId and reason", e);
       promise.fail(e);
@@ -124,21 +118,6 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
     return promise.future()
       .map(Results::getResults)
       .map(mappingProfiles -> mappingProfiles.isEmpty() ? Optional.empty() : Optional.of(mappingProfiles.get(0)));
-  }
-
-  private Criterion constructCriterionByJobExecutionIdAndReason(String jobExecutionId, String reason) {
-    Criterion criterion = new Criterion();
-    Criteria jobExecutionIdCriteria = new Criteria();
-    jobExecutionIdCriteria.addField(JOB_EXECUTION_ID_FIELD)
-      .setOperation("=")
-      .setVal(jobExecutionId);
-    Criteria reasonCriteria = new Criteria();
-    reasonCriteria.addField(REASON_FIELD)
-      .setOperation("LIKE")
-      .setVal("%" + reason + "%");
-    criterion.addCriterion(jobExecutionIdCriteria);
-    criterion.addCriterion(reasonCriteria);
-    return criterion;
   }
 
 }

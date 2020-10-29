@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
+import org.folio.rest.persist.Criteria.Criterion;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,14 +20,13 @@ public interface ErrorLogService {
   Future<ErrorLogCollection> get(String jobExecutionId, int offset, int limit, String tenantId);
 
   /**
-   * Gets {@link ErrorLog}
+   * Gets list of {@link ErrorLog}
    *
-   * @param jobExecutionId id of job execution
-   * @param reason         substring of reason in error log
-   * @param tenantId       tenant id
+   * @param criterion {@link Criterion}
+   * @param tenantId  tenant id
    * @return future with list of {@link ErrorLog}
    */
-  Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId);
+  Future<List<ErrorLog>> getByQuery(Criterion criterion, String tenantId);
 
   /**
    * Saves {@link ErrorLog} to database
