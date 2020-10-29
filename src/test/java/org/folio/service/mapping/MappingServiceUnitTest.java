@@ -240,8 +240,8 @@ class MappingServiceUnitTest {
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(39, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(51, appendedMarcRecords.size());
+    Assert.assertEquals(38, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(41, appendedMarcRecords.size());
   }
 
   @Test
@@ -389,8 +389,9 @@ class MappingServiceUnitTest {
     transformations.add(createTransformations("item.effectivelocation.campus.code", "$.holdings[*].items[*].effectiveLocationId", "937  $a", ITEM));
     transformations.add(createTransformations("item.effectivelocation.institution.name", "$.holdings[*].items[*].effectiveLocationId", "938  $a", ITEM));
     transformations.add(createTransformations("item.effectivelocation.institution.code", "$.holdings[*].items[*].effectiveLocationId", "939  $a", ITEM));
-    transformations.add(createTransformations("item.hrid", "$.holdings[*].items[*].hrid", "991  $a", ITEM));
-    transformations.add(createTransformations("item.holdingsRecordId", "$.holdings[*].items[*].holdingsRecordId", "991  $b", ITEM));
+    transformations.add(createTransformations("item.barcode", "$.holdings[*].items[*].barcode", "991  $a", ITEM));
+    transformations.add(createTransformations("item.volume", "$.holdings[*].items[*].volume", "991  $b", ITEM));
+    transformations.add(createTransformations("item.yearCaption", "$.holdings[*].items[*].yearCaption", "991  $c", ITEM));
     return transformations;
   }
 

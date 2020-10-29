@@ -91,8 +91,9 @@ public class TransformationRuleBuilder implements RuleBuilder {
         .equals(field))
       .findFirst();
     //If there is already an existing rule, then just append the subfield, without indicators
-    if (existingRule.isPresent() && !mappingTransformation.getHasSameTagInItems()) {
+    if (existingRule.isPresent()) {
       rule = existingRule.get();
+      rule.setHasSameTagInItems(mappingTransformation.getHasSameTagInItems());
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
     } else {
       rule = new Rule();
@@ -114,7 +115,6 @@ public class TransformationRuleBuilder implements RuleBuilder {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
-    fromDataSource.setHasSameFieldInHoldings(mappingTransformation.getHasSameTagInItems());
     buildTranslation(mappingTransformation, fromDataSource);
     dataSources.add(fromDataSource);
     String transformation = mappingTransformation.getTransformation();

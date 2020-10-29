@@ -1,5 +1,5 @@
 {
-  "leader": "02726nam a2200829 a 4500",
+  "leader": "02126nam a2200685 a 4500",
   "fields": [
     {
       "001": "instance00001"
@@ -155,6 +155,12 @@
             "a": "6066.I0119 C760 "
           },
           {
+            "a": "Electronic resource (RTF)"
+          },
+          {
+            "a": "http://d-nb.info/1150176652/04"
+          },
+          {
             "3": "holdingHrid00001"
           }
         ],
@@ -167,6 +173,12 @@
         "subfields": [
           {
             "a": "6076.I4588 B749 "
+          },
+          {
+            "a": "Electronic resource (audio streaming)"
+          },
+          {
+            "a": "http://www.folio.org/"
           },
           {
             "3": "holdingHrid00001"
@@ -183,86 +195,8 @@
             "a": "9901.I4981"
           },
           {
-            "3": "holdingHrid00002"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "Electronic resource (FCF)"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "Electronic resource (OTT)"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "Electronic resource (RTF)"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
             "a": "Electronic resource (XML)"
           },
-          {
-            "3": "holdingHrid00002"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "Electronic resource (audio streaming)"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
           {
             "a": "http://d-nb.info/1150175923/01"
           },
@@ -270,63 +204,7 @@
             "3": "holdingHrid00002"
           }
         ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "http://d-nb.info/1150175923/04"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "http://d-nb.info/1150176652/04"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "http://www.folio.org/"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "904": {
-        "subfields": [
-          {
-            "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": "1",
+        "ind1": " ",
         "ind2": " "
       }
     },
@@ -708,7 +586,13 @@
       "991": {
         "subfields": [
           {
-            "a": "itemHrid000000000001"
+            "a": "101010"
+          },
+          {
+            "b": "test volume 1"
+          },
+          {
+            "c": "1944"
           },
           {
             "3": "holdingHrid00001"
@@ -722,52 +606,33 @@
       "991": {
         "subfields": [
           {
-            "a": "itemHrid000000000003"
+            "a": "202020"
+          },
+          {
+            "b": "test volume 2"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "303030"
+          },
+          {
+            "b": "test volume 3"
+          },
+          {
+            "c": "1940"
           },
           {
             "3": "holdingHrid00002"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
-          {
-            "b": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
-          },
-          {
-            "3": "holdingHrid00002"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
-          {
-            "b": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
-          },
-          {
-            "3": "holdingHrid00001"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
-          {
-            "b": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
-          },
-          {
-            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
