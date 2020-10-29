@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
@@ -69,7 +70,7 @@ class ExportManagerUnitTest {
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
-    Mockito.verify(errorLogService).saveGeneralError(anyString(), anyString(), anyString());
+    Mockito.verify(errorLogService).populateNotFoundUUIDsErrorLog(anyString(), anyList(), anyString());
   }
 
 }

@@ -10,7 +10,6 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -33,8 +32,6 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
-
-import static java.lang.String.format;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -114,8 +111,7 @@ public class ExportManagerImpl implements ExportManager {
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.saveGeneralError(format("Some records are not found in srs and inventory. The UUIDS of not found records: %s",
-        StringUtils.joinWith(", ", instances.getNotFoundInstancesUUIDs())), exportPayload.getJobExecutionId(), params.getTenantId());
+      errorLogService.populateNotFoundUUIDsErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
     }
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
@@ -125,7 +121,6 @@ public class ExportManagerImpl implements ExportManager {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
   }
-
 
   private boolean isTransformationEmpty(MappingProfile mappingProfile) {
     return mappingProfile.getTransformations().isEmpty();
@@ -206,14 +201,21 @@ public class ExportManagerImpl implements ExportManager {
         if (exportPayload.getExportedRecordsNumber() == 0) {
           return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
         } else if (exportPayload.getFailedRecordsNumber() > 0) {
-          errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+          errorLogService.populateNotFoundUUIDsNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
           return ExportResult.completedWithErrors();
         } else {
           return ExportResult.completed();
         }
       }
-      return ExportResult.inProgress();
+      return getInProgressResultDependOnNumberOfNotFoundRecords(exportPayload);
     }
+  }
+
+  private ExportResult getInProgressResultDependOnNumberOfNotFoundRecords(ExportPayload exportPayload) {
+    if (exportPayload.getFailedRecordsNumber() > 0) {
+      errorLogService.populateNotFoundUUIDsNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
+    }
+    return ExportResult.inProgress();
   }
 
   private Future<JobExecution> incrementCurrentProgress(ExportPayload exportPayload) {

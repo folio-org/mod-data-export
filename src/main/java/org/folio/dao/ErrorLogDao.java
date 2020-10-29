@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ErrorLogDao {
@@ -12,16 +13,26 @@ public interface ErrorLogDao {
    * Gets {@link ErrorLog}
    *
    * @param jobExecutionId id of job execution
-   * @param tenantId         tenant id
+   * @param tenantId       tenant id
    * @return future with {@link ErrorLogCollection}
    */
-  Future<ErrorLogCollection> getByJobExecutionId(String jobExecutionId, int offset, int limit, String tenantId);
+  Future<ErrorLogCollection> get(String jobExecutionId, int offset, int limit, String tenantId);
+
+  /**
+   * Gets {@link ErrorLog}
+   *
+   * @param jobExecutionId id of job execution
+   * @param reason         substring of reason in error log
+   * @param tenantId       tenant id
+   * @return future with list of {@link ErrorLog}
+   */
+  Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId);
 
   /**
    * Saves {@link ErrorLog}
    *
    * @param errorLog errorLog to save
-   * @param tenantId     tenant id
+   * @param tenantId tenant id
    * @return future with id of saved {@link ErrorLog}
    */
   Future<ErrorLog> save(ErrorLog errorLog, String tenantId);
@@ -30,7 +41,7 @@ public interface ErrorLogDao {
    * Updates {@link ErrorLog}
    *
    * @param errorLog job to update
-   * @param tenantId     tenant id
+   * @param tenantId tenant id
    * @return future
    */
   Future<ErrorLog> update(ErrorLog errorLog, String tenantId);

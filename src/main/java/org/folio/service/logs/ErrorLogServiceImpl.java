@@ -3,6 +3,8 @@ package org.folio.service.logs;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.AffectedRecord;
@@ -11,30 +13,43 @@ import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
+import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
+import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String HRID_KEY = "hrid";
   private static final String ID_KEY = "id";
   private static final String TITLE_KEY = "title";
   private static final String ITEMS = "items";
   private static final String HOLDINGS_RECORD_ID = "holdingsRecordId";
+  private static final String COMMA_SEPARATOR = ", ";
 
   @Autowired
   private ErrorLogDao errorLogDao;
 
   @Override
-  public Future<ErrorLogCollection> getByJobExecutionId(String query, int offset, int limit, String tenantId) {
-    return errorLogDao.getByJobExecutionId(query, offset, limit, tenantId);
+  public Future<ErrorLogCollection> get(String jobExecutionId, int offset, int limit, String tenantId) {
+    return errorLogDao.get(jobExecutionId, offset, limit, tenantId);
+  }
+
+  @Override
+  public Future<List<ErrorLog>> getByJobExecutionIdAndReason(String jobExecutionId, String reason, String tenantId) {
+    return errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, reason, tenantId);
   }
 
   @Override
@@ -82,6 +97,48 @@ public class ErrorLogServiceImpl implements ErrorLogService {
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId);
     return save(errorLog, tenantId);
+  }
+
+  @Override
+  public void populateNotFoundUUIDsErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId) {
+    errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription(), tenantId)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          List<ErrorLog> errorLogs = ar.result();
+          if (errorLogs.isEmpty()) {
+            saveGeneralError(SOME_UUIDS_NOT_FOUND.getDescription() +
+              StringUtils.joinWith(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY), jobExecutionId, tenantId);
+          } else {
+            ErrorLog errorLog = errorLogs.get(0);
+            String reason = errorLog.getReason();
+            errorLog.setReason(reason + COMMA_SEPARATOR + StringUtils.joinWith(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY));
+            update(errorLog, tenantId);
+          }
+        } else {
+          LOGGER.error("Fail to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription());
+        }
+      });
+  }
+
+  @Override
+  public void populateNotFoundUUIDsNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId) {
+    errorLogDao.getByJobExecutionIdAndReason(jobExecutionId, SOME_RECORDS_FAILED.getDescription(), tenantId)
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          List<ErrorLog> errorLogs = ar.result();
+          if (errorLogs.isEmpty()) {
+            saveGeneralError(SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs, jobExecutionId, tenantId);
+          } else {
+            ErrorLog errorLog = errorLogs.get(0);
+            String reason = errorLog.getReason();
+            int updatedNumberOfNotFoundUUIDs = Integer.parseInt(reason.replaceAll("\\D+", "")) + numberOfNotFoundUUIDs;
+            errorLog.setReason(reason.replaceAll("\\d", EMPTY).trim() + SPACE + updatedNumberOfNotFoundUUIDs);
+            update(errorLog, tenantId);
+          }
+        } else {
+          LOGGER.error("Fail to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs);
+        }
+      });
   }
 
   private List<AffectedRecord> getRecordsForHoldingAndAssociatedItems(JsonObject record) {

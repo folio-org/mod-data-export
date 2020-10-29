@@ -90,7 +90,7 @@ public class LocalFileSystemExportService implements ExportService {
   public void postExport(FileDefinition fileDefinition, String tenantId) {
     if (!isValidFileDefinition(fileDefinition)) {
       if (fileDefinition != null && fileDefinition.getJobExecutionId() != null) {
-        errorLogService.saveGeneralError("Export file definition is not valid with id: " + fileDefinition.getId(), fileDefinition.getJobExecutionId(), tenantId);
+        errorLogService.saveGeneralError("Invalid export file definition id: " + fileDefinition.getId(), fileDefinition.getJobExecutionId(), tenantId);
       } else {
         errorLogService.saveGeneralError("Export file definition is not valid", EMPTY, tenantId);
       }

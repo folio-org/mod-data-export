@@ -29,6 +29,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -41,6 +42,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,9 +97,9 @@ class ErrorLogServiceUnitTest {
   @Test
   void getByJobExecutionId_shouldReturnFailedFuture_whenErrorLogDoesNotExist(VertxTestContext context) {
     // given
-    when(errorLogDao.getByJobExecutionId(QUERY, 0, 0, TENANT_ID)).thenReturn(failedFuture("Error"));
+    when(errorLogDao.get(QUERY, 0, 0, TENANT_ID)).thenReturn(failedFuture("Error"));
     // when
-    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(QUERY, 0, 0, TENANT_ID);
+    Future<ErrorLogCollection> future = errorLogService.get(QUERY, 0, 0, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.failed());
@@ -108,9 +110,9 @@ class ErrorLogServiceUnitTest {
   @Test
   void getByJobExecutionId_shouldCallDaoGet(VertxTestContext context) {
     // given
-    when(errorLogDao.getByJobExecutionId(QUERY, 5, 10, TENANT_ID)).thenReturn(succeededFuture(errorLogCollection));
+    when(errorLogDao.get(QUERY, 5, 10, TENANT_ID)).thenReturn(succeededFuture(errorLogCollection));
     // when
-    Future<ErrorLogCollection> future = errorLogService.getByJobExecutionId(QUERY, 5, 10, TENANT_ID);
+    Future<ErrorLogCollection> future = errorLogService.get(QUERY, 5, 10, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
