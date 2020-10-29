@@ -1,10 +1,13 @@
 package org.folio.service.mapping;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -15,14 +18,13 @@ import org.folio.service.mapping.rulebuilder.RuleBuilder;
 import org.folio.service.mapping.rulebuilder.TransformationRuleBuilder;
 
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,6 @@ import java.util.Set;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -47,8 +48,7 @@ public class RuleFactory {
   private static final String TRANSFORMATION_BUILDER_KEY = "transformation.builder";
   private static final String INSTANCE_ELECTRONIC_ACCESS_ID = "instance.electronic.access";
 
-  private static final Map<String, RuleBuilder> ruleBuilders = ImmutableMap
-    .<String, RuleBuilder>builder()
+  private static final Map<String, RuleBuilder> ruleBuilders = ImmutableMap.<String, RuleBuilder>builder()
     .put(INSTANCE_ELECTRONIC_ACCESS_ID, new CombinedRuleBuilder(3, INSTANCE_ELECTRONIC_ACCESS_ID))
     .put(TRANSFORMATION_BUILDER_KEY, new TransformationRuleBuilder())
     .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
@@ -90,15 +90,16 @@ public class RuleFactory {
   }
 
   private void markItemTransformationsWithSameTag(List<Transformations> mappingTransformations) {
-    MultivaluedMap<String, Transformations> tagToTransformationMap = new MultivaluedHashMap<>();
+    Multimap<String, Transformations> tagToTransformationMap = ArrayListMultimap.create();
     for (Transformations transformation : mappingTransformations) {
       if (transformation.getRecordType().equals(ITEM)) {
         String itemTag = transformation.getTransformation().substring(0, 3);
-        tagToTransformationMap.add(itemTag, transformation);
+        tagToTransformationMap.put(itemTag, transformation);
       }
     }
-    for (Map.Entry<String, List<Transformations>> entry : tagToTransformationMap.entrySet()) {
-      List<Transformations> transformations = entry.getValue();
+
+    for (String tag: tagToTransformationMap.keySet()) {
+      Collection<Transformations> transformations = tagToTransformationMap.get(tag);
       if (transformations.size() > 1) {
         transformations.forEach(transformation -> transformation.setHasSameTagInItems(true));
       }
@@ -107,7 +108,7 @@ public class RuleFactory {
 
   public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
     RecordType recordType = mappingTransformation.getRecordType();
-    if (TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getFieldId())
+    if (TRUE.equals(mappingTransformation.getEnabled()) && StringUtils.isNotBlank(mappingTransformation.getFieldId())
       && RecordType.INSTANCE.equals(recordType)) {
       for (Map.Entry<String, RuleBuilder> ruleBuilderEntry : ruleBuilders.entrySet()) {
         if (mappingTransformation.getFieldId().contains(ruleBuilderEntry.getKey())) {
@@ -120,7 +121,7 @@ public class RuleFactory {
   }
 
   private boolean isTransformationValidAndNotBlank(Transformations mappingTransformation) {
-    return isTransformationValid(mappingTransformation) && isNotBlank(mappingTransformation.getTransformation());
+    return isTransformationValid(mappingTransformation) && StringUtils.isNotBlank(mappingTransformation.getTransformation());
   }
 
   private boolean isPermanentLocationNotEqualsTemporaryLocation(String temporaryLocationTransformation, Transformations mappingTransformation) {
@@ -128,7 +129,7 @@ public class RuleFactory {
   }
 
   private boolean isInstanceTransformationValidAndBlank(Transformations mappingTransformation) {
-    return isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && isBlank(mappingTransformation.getTransformation());
+    return isTransformationValid(mappingTransformation) && INSTANCE.equals(mappingTransformation.getRecordType()) && StringUtils.isBlank(mappingTransformation.getTransformation());
   }
 
   private String getTemporaryLocationTransformation(List<Transformations> mappingTransformations) {
@@ -139,7 +140,7 @@ public class RuleFactory {
     if (temporaryLocationTransformation.isPresent()) {
       return temporaryLocationTransformation.get().getTransformation();
     }
-    return EMPTY;
+    return StringUtils.EMPTY;
   }
 
   private boolean isHoldingsPermanentLocation(Transformations mappingTransformation) {
@@ -147,7 +148,7 @@ public class RuleFactory {
   }
 
   private boolean isTransformationValid(Transformations mappingTransformation) {
-    return TRUE.equals(mappingTransformation.getEnabled()) && isNotBlank(mappingTransformation.getPath());
+    return TRUE.equals(mappingTransformation.getEnabled()) && StringUtils.isNotBlank(mappingTransformation.getPath());
   }
 
   protected List<Rule> getDefaultRulesFromFile() {
