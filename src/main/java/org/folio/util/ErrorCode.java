@@ -13,7 +13,9 @@ public enum ErrorCode {
   FILE_ALREADY_UPLOADED("fileAlreadyUploaded","File already uploaded for this FileDefinition"),
   NOTHING_TO_EXPORT("nothingToExport", "No exported records, nothing to export"),
   SOME_RECORDS_FAILED("someRecordsFailed", "Export is finished with errors, some records are failed to export, number of failed records: "),
-  SOME_UUIDS_NOT_FOUND("someUUIDsNotFound", "UUIDs not found in SRS or inventory: ");
+  SOME_UUIDS_NOT_FOUND("someUUIDsNotFound", "UUIDs not found in SRS or inventory: "),
+  INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: ");
+
 
   private final String code;
   private final String description;

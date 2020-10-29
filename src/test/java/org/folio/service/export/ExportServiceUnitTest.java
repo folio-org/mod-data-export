@@ -133,7 +133,7 @@ class ExportServiceUnitTest {
       exportService.postExport(fileDefinition, TENANT);
     });
 
-    verify(errorLogService).saveGeneralError("Export file definition is not valid", "", TENANT);
+    verify(errorLogService).saveGeneralError("Invalid export file definition id: ", "", TENANT);
   }
 
   @Test

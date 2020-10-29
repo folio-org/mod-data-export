@@ -115,7 +115,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
             update(errorLog, tenantId);
           }
         } else {
-          LOGGER.error("Fail to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription());
+          LOGGER.error("Failed to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription());
         }
       });
   }
