@@ -88,7 +88,7 @@ public class MappingServiceImpl implements MappingService {
       return mapInstance(instance, referenceData, finalRules);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
-      errorLogService.saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, connectionParams.getTenantId());
+      errorLogService.saveWithAffectedRecord(instance, "An error occurred during fields mapping", jobExecutionId, connectionParams.getTenantId());
       return Optional.empty();
     }
   }

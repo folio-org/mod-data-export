@@ -104,7 +104,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
         }
       }).count();
     if (CollectionUtils.isNotEmpty(invalidUUIDs)) {
-      errorLogService.saveGeneralError(format("Current UUIDs is in wrong format: %s", String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
+      errorLogService.saveGeneralError(format("Invalid UUID format: %s", String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
     }
     return count;
   }

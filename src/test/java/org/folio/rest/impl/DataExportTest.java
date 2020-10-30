@@ -1,24 +1,17 @@
 package org.folio.rest.impl;
 
-import static org.folio.TestUtil.getFileFromResources;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.vertx.core.Context;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
@@ -34,7 +27,9 @@ import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExternalPathResolver;
+import org.folio.util.HelperUtils;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -49,18 +44,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.vertx.core.Context;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import static org.folio.TestUtil.getFileFromResources;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -161,17 +165,24 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          context.verify(() -> {
-            assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-            validateExternalCallsForInventory(1);
-            context.completeNow();
-          });
+          errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
+            .onComplete(ar -> {
+              context.verify(() -> {
+                assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
+                validateExternalCallsForInventory(1);
+                assertTrue(ar.succeeded());
+                List<ErrorLog> errorLogList = ar.result();
+                assertEquals(1, errorLogList.size());
+                assertNotFoundUUIDsErrorLog(errorLogList.get(0), jobExecutionId);
+              });
+              context.completeNow();
+            });
         });
       }));
   }
 
   @Test
-  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job2(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY_TWO_BATCHES, CSV, buildRequestSpecification(tenantId));
@@ -325,7 +336,7 @@ class DataExportTest extends RestVerticleTestBase {
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
-        errorLogService.getByJobExecutionId("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogCollection -> {
+        errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogCollection -> {
           context.verify(() -> {
             assertJobExecution(jobExecution, FAIL, 0);
             assertErrorLogs(errorLogCollection, jobExecutionId);
@@ -435,9 +446,15 @@ class DataExportTest extends RestVerticleTestBase {
     for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
       Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
         || errorLog.getReason().contains("Nothing to export: no binary file generated")
-        || errorLog.getReason().contains("Some records are not found in srs and inventory. The UUIDS of not found records:")
-        || errorLog.getReason().contains("Export file definition is not valid with id:"));
+        || errorLog.getReason().contains(SOME_UUIDS_NOT_FOUND.getDescription())
+        || errorLog.getReason().contains("Invalid export file definition id:"));
     }
+  }
+
+  private void assertNotFoundUUIDsErrorLog(ErrorLog errorLog, String jobExecutionId) {
+    Assertions.assertEquals(jobExecutionId, errorLog.getJobExecutionId());
+    Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+    Assertions.assertTrue(errorLog.getReason().contains(SOME_UUIDS_NOT_FOUND.getDescription()));
   }
 
   private void validateExternalCalls() {

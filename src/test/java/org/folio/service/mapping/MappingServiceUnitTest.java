@@ -178,7 +178,7 @@ class MappingServiceUnitTest {
     // when
     mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(instance, "Error during mapping", jobExecutionId, params.getTenantId());
+    verify(errorLogService).saveWithAffectedRecord(instance, "An error occurred during fields mapping", jobExecutionId, params.getTenantId());
   }
 
   @Test
