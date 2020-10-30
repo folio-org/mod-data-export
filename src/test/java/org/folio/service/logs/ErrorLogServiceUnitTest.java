@@ -15,7 +15,7 @@ import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.Metadata;
-import org.folio.util.OkapiConnectionParams;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,20 +29,23 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
+import static org.folio.rest.jaxrs.model.ErrorLog.LogLevel.ERROR;
+import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,7 +64,6 @@ class ErrorLogServiceUnitTest {
   private static final String INSTANCE_ID = "c8b50e3f-0446-429c-960e-03774b88223f";
   private static final String HOLDINGS_ID = "77d8456b-aec2-48ec-8deb-37c0a65983e6";
   private static final String ITEM_ID = "e2ecf553-3892-4205-aaff-6761a4d6ccfc";
-  private static OkapiConnectionParams okapiConnectionParams;
   private static ErrorLog errorLog;
   private static ErrorLogCollection errorLogCollection;
   private static JsonObject instance;
@@ -80,7 +82,7 @@ class ErrorLogServiceUnitTest {
     errorLog = new ErrorLog()
       .withId(UUID.randomUUID().toString())
       .withJobExecutionId(UUID.randomUUID().toString())
-      .withLogLevel(ErrorLog.LogLevel.ERROR)
+      .withLogLevel(ERROR)
       .withReason("Error reason")
       .withCreatedDate(new Date())
       .withMetadata(new Metadata()
@@ -91,7 +93,6 @@ class ErrorLogServiceUnitTest {
       .withTotalRecords(1);
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
-    okapiConnectionParams = new OkapiConnectionParams(headers);
   }
 
   @Test
@@ -154,7 +155,7 @@ class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_REASON, errorLog.getReason());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
@@ -178,7 +179,7 @@ class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_REASON, errorLog.getReason());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
@@ -276,7 +277,7 @@ class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_REASON, errorLog.getReason());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
@@ -311,8 +312,38 @@ class ErrorLogServiceUnitTest {
     }));
   }
 
+  @Test
+  void populateNotFoundUUIDsNumberErrorLog_shouldCallDaoSave_ifResponseIsEmptyList(VertxTestContext context) {
+    // given
+    int number = 1;
+    when(errorLogDao.getByQuery(any(Criterion.class), anyString())).thenReturn(succeededFuture(emptyList()));
+    // when
+    errorLogService.populateNotFoundUUIDsNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
+    // then
+    verify(errorLogDao).save(any(ErrorLog.class), eq(TENANT_ID));
+
+    context.completeNow();
+  }
+
+  @Test
+  void populateNotFoundUUIDsNumberErrorLog_shouldCallDaoUpdate_ifResponseIsWithLog(VertxTestContext context) {
+    // given
+    ErrorLog errorLog = new ErrorLog()
+      .withLogLevel(ERROR)
+      .withJobExecutionId(JOB_EXECUTION_ID)
+      .withReason(SOME_RECORDS_FAILED.getDescription() + 1);
+    int number = 1;
+    when(errorLogDao.getByQuery(any(Criterion.class), anyString())).thenReturn(succeededFuture(singletonList(errorLog)));
+    // when
+    errorLogService.populateNotFoundUUIDsNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
+    // then
+    verify(errorLogDao).update(errorLog, TENANT_ID);
+
+    context.completeNow();
+  }
+
   private void assertErrorLogWithHoldingsAndItems(ErrorLog errorLog, boolean isItemPresent) {
-    Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
+    Assert.assertEquals(ERROR, errorLog.getLogLevel());
     Assert.assertEquals(ERROR_REASON, errorLog.getReason());
     Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
     AffectedRecord instanceAffectedRecord = errorLog.getAffectedRecord();
