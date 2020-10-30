@@ -203,16 +203,23 @@ public class ExportManagerImpl implements ExportManager {
     } else {
       LOGGER.info("Export has been successfully passed");
       if (exportPayload.isLast()) {
-        if (exportPayload.getExportedRecordsNumber() == 0) {
-          return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
-        } else if (exportPayload.getFailedRecordsNumber() > 0) {
-          errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
-          return ExportResult.completedWithErrors();
-        } else {
-          return ExportResult.completed();
-        }
+        return getProperExportResultIfBatchIsLast(exportPayload);
       }
       return ExportResult.inProgress();
+    }
+  }
+
+  private ExportResult getProperExportResultIfBatchIsLast(ExportPayload exportPayload) {
+    if (exportPayload.getExportedRecordsNumber() == 0) {
+      if (vertx.fileSystem().existsBlocking(exportPayload.getFileExportDefinition().getSourcePath())) {
+        return ExportResult.completedWithErrors();
+      }
+      return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
+    } else if (exportPayload.getFailedRecordsNumber() > 0) {
+      errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+      return ExportResult.completedWithErrors();
+    } else {
+      return ExportResult.completed();
     }
   }
 
