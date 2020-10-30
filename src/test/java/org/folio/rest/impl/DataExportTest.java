@@ -169,7 +169,7 @@ class DataExportTest extends RestVerticleTestBase {
             .onComplete(ar -> {
               context.verify(() -> {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-                validateExternalCallsForInventory();
+                validateExternalCallsForInventory(1);
                 assertTrue(ar.succeeded());
                 List<ErrorLog> errorLogList = ar.result();
                 assertEquals(1, errorLogList.size());
@@ -177,6 +177,30 @@ class DataExportTest extends RestVerticleTestBase {
               });
               context.completeNow();
             });
+        });
+      }));
+  }
+
+  @Test
+  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY_TWO_BATCHES, CSV, buildRequestSpecification(tenantId));
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(() -> {
+            assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
+            validateExternalCallsForInventory(2);
+            context.completeNow();
+          });
         });
       }));
   }

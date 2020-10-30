@@ -203,7 +203,7 @@ public class ExportManagerImpl implements ExportManager {
       if (exportPayload.isLast()) {
         return getExportResultForLastBatch(exportPayload);
       }
-      return getInProgressResultDependOnNumberOfNotFoundRecords(exportPayload);
+      return getInProgressExportResult(exportPayload);
     }
   }
 
@@ -221,7 +221,7 @@ public class ExportManagerImpl implements ExportManager {
     }
   }
 
-  private ExportResult getInProgressResultDependOnNumberOfNotFoundRecords(ExportPayload exportPayload) {
+  private ExportResult getInProgressExportResult(ExportPayload exportPayload) {
     if (exportPayload.getFailedRecordsNumber() > 0) {
       errorLogService.populateNotFoundUUIDsNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
     }
