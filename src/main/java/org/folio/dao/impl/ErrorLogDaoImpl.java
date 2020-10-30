@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 import java.util.Optional;
 
 import static org.folio.util.HelperUtils.constructCriteria;
@@ -34,7 +35,7 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
   private PostgresClientFactory pgClientFactory;
 
   @Override
-  public Future<ErrorLogCollection> getByJobExecutionId(String query, int offset, int limit, String tenantId) {
+  public Future<ErrorLogCollection> get(String query, int offset, int limit, String tenantId) {
     Promise<Results<ErrorLog>> promise = Promise.promise();
     try {
       String[] fieldList = {"*"};
@@ -47,6 +48,17 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
     return promise.future().map(results -> new ErrorLogCollection()
       .withErrorLogs(results.getResults())
       .withTotalRecords(results.getResultInfo().getTotalRecords()));
+  }
+
+  public Future<List<ErrorLog>> getByQuery(Criterion criterion, String tenantId) {
+    Promise<Results<ErrorLog>> promise = Promise.promise();
+    try {
+      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, criterion, false, promise);
+    } catch (Exception e) {
+      LOGGER.error("Error during getting errorLog entries by jobExecutionId and reason", e);
+      promise.fail(e);
+    }
+    return promise.future().map(Results::getResults);
   }
 
   @Override
