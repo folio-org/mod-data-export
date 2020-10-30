@@ -77,6 +77,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  private static final String UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
@@ -198,7 +199,7 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForInventory();
+              validateExternalCallsForInventory(1);
               context.completeNow();
             });
           });
@@ -230,7 +231,7 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForInventory();
+              validateExternalCallsForInventory(1);
               context.completeNow();
             });
           });
@@ -292,7 +293,6 @@ class DataExportTest extends RestVerticleTestBase {
         });
       }));
   }
-
 
   @Test
   void shouldNotExportFile_whenInventoryReturnServerError(VertxTestContext context) throws IOException, InterruptedException {
@@ -380,25 +380,25 @@ class DataExportTest extends RestVerticleTestBase {
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition) {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
     String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "GeneratedFileForSrsRecordsOnly.mrc");
-    Assertions.assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
-    Assertions.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
+    assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
+    assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition, String fileName) throws FileNotFoundException {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
     File expectedJsonRecords = getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
-    Assertions.assertEquals(expectedMarcRecord, actualGeneratedFileContent);
-    Assertions.assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
+    assertEquals(expectedMarcRecord, actualGeneratedFileContent);
+    assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
   private void assertFailedFileDefinition(FileDefinition fileExportDefinition) {
     assertNull(fileExportDefinition.getSourcePath());
-    Assertions.assertEquals(FileDefinition.Status.ERROR, fileExportDefinition.getStatus());
+    assertEquals(FileDefinition.Status.ERROR, fileExportDefinition.getStatus());
   }
 
   private void assertJobExecution(JobExecution jobExecution, JobExecution.Status status, Integer numberOfExportedRecords) {
-    Assertions.assertEquals(status, jobExecution.getStatus());
+    assertEquals(status, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
     assertNotNull(jobExecution.getExportedFiles().iterator().next().getFileName());
@@ -411,14 +411,14 @@ class DataExportTest extends RestVerticleTestBase {
     ErrorLog errorLog2 = errorLogCollection.getErrorLogs().get(1);
     ErrorLog errorLog3 = errorLogCollection.getErrorLogs().get(2);
     ErrorLog errorLog4 = errorLogCollection.getErrorLogs().get(3);
-    Assertions.assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
-    Assertions.assertEquals(jobExecutionId, errorLog2.getJobExecutionId());
-    Assertions.assertEquals(jobExecutionId, errorLog3.getJobExecutionId());
-    Assertions.assertEquals(jobExecutionId, errorLog4.getJobExecutionId());
-    Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
-    Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog2.getLogLevel());
-    Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
-    Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
+    assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog2.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog3.getJobExecutionId());
+    assertEquals(jobExecutionId, errorLog4.getJobExecutionId());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog2.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
+    assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
     for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
       Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
         || errorLog.getReason().contains("Nothing to export: no binary file generated")
@@ -440,9 +440,9 @@ class DataExportTest extends RestVerticleTestBase {
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES));
   }
 
-  private void validateExternalCallsForInventory() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+  private void validateExternalCallsForInventory(int expectedNumber) {
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
     validateExternalCallsForReferenceData();
   }
 

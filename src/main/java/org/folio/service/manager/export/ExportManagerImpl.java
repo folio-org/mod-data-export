@@ -15,6 +15,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
+import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
@@ -58,6 +59,8 @@ public class ExportManagerImpl implements ExportManager {
   private InventoryRecordConverterService inventoryRecordService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private FileStorage fileStorage;
   @Autowired
   ErrorLogService errorLogService;
 
@@ -198,16 +201,23 @@ public class ExportManagerImpl implements ExportManager {
     } else {
       LOGGER.info("Export has been successfully passed");
       if (exportPayload.isLast()) {
-        if (exportPayload.getExportedRecordsNumber() == 0) {
-          return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
-        } else if (exportPayload.getFailedRecordsNumber() > 0) {
-          errorLogService.populateNotFoundUUIDsNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
-          return ExportResult.completedWithErrors();
-        } else {
-          return ExportResult.completed();
-        }
+        return getExportResultForLastBatch(exportPayload);
       }
       return getInProgressResultDependOnNumberOfNotFoundRecords(exportPayload);
+    }
+  }
+
+  private ExportResult getExportResultForLastBatch(ExportPayload exportPayload) {
+    if (exportPayload.getExportedRecordsNumber() == 0) {
+      if (fileStorage.isFileExist(exportPayload.getFileExportDefinition().getSourcePath())) {
+        return ExportResult.completedWithErrors();
+      }
+      return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
+    } else if (exportPayload.getFailedRecordsNumber() > 0) {
+      errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+      return ExportResult.completedWithErrors();
+    } else {
+      return ExportResult.completed();
     }
   }
 
