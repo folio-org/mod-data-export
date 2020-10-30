@@ -27,8 +27,8 @@
       "type": "string",
       "$ref": "recordTypes.json"
     },
-    "hasSameTagInHoldings": {
-      "description": "The sign that means the current transformation intended for both item and holding",
+    "hasSameTagInItems": {
+      "description": "The sign that means the current transformation has same marc tag in other item transformations",
       "type": "boolean",
       "default": false
     },

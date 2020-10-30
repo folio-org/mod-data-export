@@ -26,7 +26,7 @@
           "id": "0b96a642-5e7f-452d-9cae-9cee66c9a892",
           "hrid": "itemHrid000000000001",
           "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
-          "barcode": "10101",
+          "barcode": "101010",
           "effectiveCallNumberComponents": {
             "callNumber": "6066.I0119 C760 ",
             "prefix": "testPrefix1",
@@ -87,6 +87,7 @@
         {
           "id": "5b31ec8c-95a7-4b91-95cc-b551a74b91ca",
           "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+          "barcode": "202020",
           "effectiveCallNumberComponents": {
             "callNumber": "6076.I4588 B749 "
           },
@@ -102,6 +103,7 @@
               "publicNote": "test public note 4"
             }
           ],
+          "volume": "test volume 2",
           "materialTypeId": "5ee11d91-f7e8-481d-b079-65d708582ccc"
         }
       ]
@@ -124,10 +126,10 @@
       ],
       "items": [
         {
-          "id": "0b96a642-5e7f-452d-9cae-9cee66c9a892",
+          "id": "23992e08-b55a-4ed8-a570-0172c5bcdd76",
           "holdingsRecordId": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
           "hrid": "itemHrid000000000003",
-          "barcode": "10291",
+          "barcode": "303030",
           "effectiveCallNumberComponents": {
             "callNumber": "9901.I4981",
             "prefix": "testPrefix2",
@@ -141,7 +143,7 @@
               "publicNote": "Table of contents only"
             }
           ],
-          "volume": "test volume 2",
+          "volume": "test volume 3",
           "enumeration": "v.81:no.1-6",
           "chronology": "1979:Jan.-June",
           "yearCaption": [
@@ -158,7 +160,7 @@
           },
           "copyNumber": "Copy 2",
           "numberOfPieces": "2",
-          "source": "test source 2",
+          "source": "test source 3",
           "descriptionOfPieces": "test description of pieces 2",
           "materialTypeId": "2bee2a6c-8a1f-4a06-b565-7f696307f688",
           "permanentLocationId": "1fecb44f-f974-44e0-9f98-05400cd3fcb4",

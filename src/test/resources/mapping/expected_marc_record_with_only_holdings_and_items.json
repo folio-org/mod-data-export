@@ -1,5 +1,5 @@
 {
-  "leader": "02247nam a2200757 a 4500",
+  "leader": "01988nam a2200625 a 4500",
   "fields": [
     {
       "900": {
@@ -122,6 +122,15 @@
         "subfields": [
           {
             "a": "6066.I0119 C760 "
+          },
+          {
+            "a": "Electronic resource (RTF)"
+          },
+          {
+            "a": "http://d-nb.info/1150176652/04"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -133,6 +142,15 @@
         "subfields": [
           {
             "a": "6076.I4588 B749 "
+          },
+          {
+            "a": "Electronic resource (audio streaming)"
+          },
+          {
+            "a": "http://www.folio.org/"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -144,119 +162,18 @@
         "subfields": [
           {
             "a": "9901.I4981"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "905": {
-        "subfields": [
-          {
-            "a": "Electronic resource (FCF)"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "905": {
-        "subfields": [
-          {
-            "a": "Electronic resource (OTT)"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "905": {
-        "subfields": [
-          {
-            "a": "Electronic resource (RTF)"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "905": {
-        "subfields": [
+          },
           {
             "a": "Electronic resource (XML)"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "905": {
-        "subfields": [
-          {
-            "a": "Electronic resource (audio streaming)"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
+          },
           {
             "a": "http://d-nb.info/1150175923/01"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
+          },
           {
-            "a": "http://d-nb.info/1150175923/04"
+            "3": "holdingHrid00002"
           }
         ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
-          {
-            "a": "http://d-nb.info/1150176652/04"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
-          {
-            "a": "http://www.folio.org/"
-          }
-        ],
-        "ind1": "1",
-        "ind2": " "
-      }
-    },
-    {
-      "906": {
-        "subfields": [
-          {
-            "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
-          }
-        ],
-        "ind1": "1",
+        "ind1": " ",
         "ind2": " "
       }
     },
@@ -638,29 +555,13 @@
       "991": {
         "subfields": [
           {
-            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
+            "a": "101010"
+          },
           {
-            "a": "c8b50e3f-0446-429c-960e-03774b88223f"
-          }
-        ],
-        "ind1": " ",
-        "ind2": " "
-      }
-    },
-    {
-      "991": {
-        "subfields": [
+            "b": "test volume 1"
+          },
           {
-            "a": "itemHrid000000000001"
+            "c": "1944"
           },
           {
             "3": "holdingHrid00001"
@@ -674,7 +575,30 @@
       "991": {
         "subfields": [
           {
-            "a": "itemHrid000000000003"
+            "a": "202020"
+          },
+          {
+            "b": "test volume 2"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "991": {
+        "subfields": [
+          {
+            "a": "303030"
+          },
+          {
+            "b": "test volume 3"
+          },
+          {
+            "c": "1940"
           },
           {
             "3": "holdingHrid00002"
