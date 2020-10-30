@@ -122,6 +122,11 @@ public class LocalFileSystemStorage implements FileStorage {
     return promise.future();
   }
 
+  @Override
+  public boolean isFileExist(String path) {
+    return fileSystem.existsBlocking(path);
+  }
+
   private void deleteParentDirectory(Path filePath) throws IOException {
     Path parentFileDefinitionDirectory = filePath.getParent();
     if (Objects.nonNull(parentFileDefinitionDirectory) && isDirectoryEmpty(parentFileDefinitionDirectory)) {
