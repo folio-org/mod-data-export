@@ -70,7 +70,7 @@ class ExportManagerUnitTest {
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(FileDefinition.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
-    Mockito.verify(errorLogService).populateNotFoundUUIDsErrorLog(anyString(), anyList(), anyString());
+    Mockito.verify(errorLogService).populateUUIDsNotFoundErrorLog(anyString(), anyList(), anyString());
   }
 
 }

@@ -114,7 +114,7 @@ public class ExportManagerImpl implements ExportManager {
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.populateNotFoundUUIDsErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
+      errorLogService.populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
     }
     List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
@@ -223,7 +223,7 @@ public class ExportManagerImpl implements ExportManager {
 
   private ExportResult getInProgressExportResult(ExportPayload exportPayload) {
     if (exportPayload.getFailedRecordsNumber() > 0) {
-      errorLogService.populateNotFoundUUIDsNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
+      errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
     }
     return ExportResult.inProgress();
   }

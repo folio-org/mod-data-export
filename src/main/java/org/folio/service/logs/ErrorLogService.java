@@ -83,7 +83,7 @@ public interface ErrorLogService {
    * @param notFoundUUIDs  collection with UUIDs that not found
    * @param tenantId       tenant id
    */
-  void  populateNotFoundUUIDsErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId);
+  void populateUUIDsNotFoundErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId);
 
   /**
    * Gets {@link ErrorLog}
@@ -92,6 +92,6 @@ public interface ErrorLogService {
    * @param numberOfNotFoundUUIDs number of not found UUIDs
    * @param tenantId              tenant id
    */
-  void  populateNotFoundUUIDsNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId);
+  void populateUUIDsNotFoundNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId);
 
 }

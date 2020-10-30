@@ -318,7 +318,7 @@ class ErrorLogServiceUnitTest {
     int number = 1;
     when(errorLogDao.getByQuery(any(Criterion.class), anyString())).thenReturn(succeededFuture(emptyList()));
     // when
-    errorLogService.populateNotFoundUUIDsNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
+    errorLogService.populateUUIDsNotFoundNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
     // then
     verify(errorLogDao).save(any(ErrorLog.class), eq(TENANT_ID));
 
@@ -335,7 +335,7 @@ class ErrorLogServiceUnitTest {
     int number = 1;
     when(errorLogDao.getByQuery(any(Criterion.class), anyString())).thenReturn(succeededFuture(singletonList(errorLog)));
     // when
-    errorLogService.populateNotFoundUUIDsNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
+    errorLogService.populateUUIDsNotFoundNumberErrorLog(JOB_EXECUTION_ID, number, TENANT_ID);
     // then
     verify(errorLogDao).update(errorLog, TENANT_ID);
 

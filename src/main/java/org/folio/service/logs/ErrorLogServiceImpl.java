@@ -102,7 +102,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public void populateNotFoundUUIDsErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId) {
+  public void populateUUIDsNotFoundErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId) {
     errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
@@ -123,7 +123,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public void populateNotFoundUUIDsNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId) {
+  public void populateUUIDsNotFoundNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId) {
     errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId,SOME_RECORDS_FAILED.getDescription()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
