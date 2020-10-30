@@ -73,6 +73,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
+  private static final String UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
@@ -162,7 +163,31 @@ class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-            validateExternalCallsForInventory();
+            validateExternalCallsForInventory(1);
+            context.completeNow();
+          });
+        });
+      }));
+  }
+
+  @Test
+  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job2(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY_TWO_BATCHES, CSV, buildRequestSpecification(tenantId));
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+          context.verify(() -> {
+            assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
+            validateExternalCallsForInventory(2);
             context.completeNow();
           });
         });
@@ -187,7 +212,7 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForInventory();
+              validateExternalCallsForInventory(1);
               context.completeNow();
             });
           });
@@ -219,7 +244,7 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForInventory();
+              validateExternalCallsForInventory(1);
               context.completeNow();
             });
           });
@@ -281,7 +306,6 @@ class DataExportTest extends RestVerticleTestBase {
         });
       }));
   }
-
 
   @Test
   void shouldNotExportFile_whenInventoryReturnServerError(VertxTestContext context) throws IOException, InterruptedException {
@@ -423,9 +447,9 @@ class DataExportTest extends RestVerticleTestBase {
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES));
   }
 
-  private void validateExternalCallsForInventory() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+  private void validateExternalCallsForInventory(int expectedNumber) {
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
     validateExternalCallsForReferenceData();
   }
 
