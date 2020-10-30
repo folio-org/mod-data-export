@@ -133,7 +133,7 @@ class ExportServiceUnitTest {
       exportService.postExport(fileDefinition, TENANT);
     });
 
-    verify(errorLogService).saveGeneralError("Export file definition is not valid", "", TENANT);
+    verify(errorLogService).saveGeneralError("Invalid export file definition id: ", "", TENANT);
   }
 
   @Test
@@ -148,6 +148,6 @@ class ExportServiceUnitTest {
       exportService.postExport(fileDefinition, TENANT);
     });
     // then
-    verify(errorLogService).saveGeneralError("Export file definition is not valid with id: " + FILE_DEFINITION_ID, JOB_EXECUTION_ID, TENANT);
+    verify(errorLogService).saveGeneralError("Invalid export file definition id: " + FILE_DEFINITION_ID, JOB_EXECUTION_ID, TENANT);
   }
 }

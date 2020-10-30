@@ -9,11 +9,9 @@ import org.folio.dao.impl.ErrorLogDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +58,7 @@ class ErrorLogDaoImplUnitTest {
       .when(postgresClient).get(eq(TABLE), eq(ErrorLog.class), any(String[].class), any(CQLWrapper.class), any(Boolean.class), any(Boolean.class), any(Handler.class));
 
     // when
-    Future<ErrorLogCollection> future = errorLogDao.getByJobExecutionId("jobExecutionid", 0, 0, TENANT_ID);
+    Future<ErrorLogCollection> future = errorLogDao.get("jobExecutionid", 0, 0, TENANT_ID);
 
     // then
     future.onComplete(ar -> {
