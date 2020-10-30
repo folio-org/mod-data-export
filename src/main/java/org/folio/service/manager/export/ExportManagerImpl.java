@@ -16,6 +16,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.export.ExportService;
+import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
@@ -61,6 +62,8 @@ public class ExportManagerImpl implements ExportManager {
   private InventoryRecordConverterService inventoryRecordService;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private FileStorage fileStorage;
   @Autowired
   ErrorLogService errorLogService;
 
@@ -203,15 +206,15 @@ public class ExportManagerImpl implements ExportManager {
     } else {
       LOGGER.info("Export has been successfully passed");
       if (exportPayload.isLast()) {
-        return getProperExportResultIfBatchIsLast(exportPayload);
+        return getExportResultForLastBatch(exportPayload);
       }
       return ExportResult.inProgress();
     }
   }
 
-  private ExportResult getProperExportResultIfBatchIsLast(ExportPayload exportPayload) {
+  private ExportResult getExportResultForLastBatch(ExportPayload exportPayload) {
     if (exportPayload.getExportedRecordsNumber() == 0) {
-      if (vertx.fileSystem().existsBlocking(exportPayload.getFileExportDefinition().getSourcePath())) {
+      if (fileStorage.isFileExist(exportPayload.getFileExportDefinition().getSourcePath())) {
         return ExportResult.completedWithErrors();
       }
       return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);

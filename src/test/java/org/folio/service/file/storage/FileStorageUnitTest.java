@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -44,8 +45,10 @@ class FileStorageUnitTest {
     File savedFile = new File(savedFileDefinition.getSourcePath());
     String savedFileContent = new String(Files.readAllBytes(savedFile.toPath()));
     assertEquals(fileContent, savedFileContent);
+    assertTrue(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));
+    assertFalse(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
   }
 
   @Test
@@ -67,8 +70,10 @@ class FileStorageUnitTest {
           File savedFile = new File(savedFileDefinition.getSourcePath());
           String savedFileContent = new String(Files.readAllBytes(savedFile.toPath()));
           assertEquals("uuid", savedFileContent);
+          assertTrue(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
           // clean up storage
           FileUtils.deleteDirectory(new File("./storage"));
+          assertFalse(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
           testContext.completeNow();
         } catch (IOException e) {
           testContext.failNow(e);
@@ -99,6 +104,7 @@ class FileStorageUnitTest {
           assertEquals(fileContent, savedFileContent);
           // clean up storage
           FileUtils.deleteDirectory(new File("./storage"));
+          assertFalse(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
           testContext.completeNow();
         } catch (IOException e) {
           testContext.failNow(e);

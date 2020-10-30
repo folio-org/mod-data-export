@@ -29,4 +29,10 @@ public interface FileStorage {
    * Deletes File and related parent directory from the storage and returns true if succeeded
    */
   Future<Boolean> deleteFileAndParentDirectory(FileDefinition fileDefinition);
+
+  /**
+   * Returned true if file exists with provided path, otherwise returns false
+   */
+  boolean isFileExist(String path);
+
 }
