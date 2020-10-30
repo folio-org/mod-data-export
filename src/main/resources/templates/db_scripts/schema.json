@@ -109,6 +109,11 @@
       "run": "after",
       "snippetPath": "migration_scripts/change_progress_total_data_type.sql",
       "fromModuleVersion": "mod-data-export-3.1.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/remove_hasSameTagInHoldings.sql",
+      "fromModuleVersion": "mod-data-export-3.1.0"
     }
   ]
 }
