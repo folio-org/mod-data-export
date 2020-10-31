@@ -210,11 +210,12 @@ public class ExportManagerImpl implements ExportManager {
   private ExportResult getExportResultForLastBatch(ExportPayload exportPayload) {
     if (exportPayload.getExportedRecordsNumber() == 0) {
       if (fileStorage.isFileExist(exportPayload.getFileExportDefinition().getSourcePath())) {
+        errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
         return ExportResult.completedWithErrors();
       }
       return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
     } else if (exportPayload.getFailedRecordsNumber() > 0) {
-      errorLogService.saveGeneralError("Export is finished with errors, some records are failed to export, number of failed records: " + exportPayload.getFailedRecordsNumber(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+      errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.completedWithErrors();
     } else {
       return ExportResult.completed();
