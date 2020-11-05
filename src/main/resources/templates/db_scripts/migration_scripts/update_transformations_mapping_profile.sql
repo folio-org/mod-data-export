@@ -71,13 +71,7 @@ SET jsonb = jsonb_set(jsonb, '{transformations}', (
        THEN regexp_replace(transformations.value ->> 'fieldId', 'uri', 'uri.default')
 	  	 WHEN transformations.value ->> 'fieldId' LIKE '%materialsspecification'
        THEN regexp_replace(transformations.value ->> 'fieldId', 'materialsspecification', 'materialsspecification.default')
-	  	 WHEN transformations.value ->> 'fieldId' LIKE '%materialsspecification'
-       THEN regexp_replace(transformations.value ->> 'fieldId', 'materialsspecification', 'materialsspecification.default')
-	  	 WHEN transformations.value ->> 'fieldId' LIKE '%materialsspecification'
-       THEN regexp_replace(transformations.value ->> 'fieldId', 'materialsspecification', 'materialsspecification.default')
 	   	 WHEN transformations.value ->> 'fieldId' LIKE '%publicnote'
-       THEN regexp_replace(transformations.value ->> 'fieldId', 'publicnote', 'publicnote.default')
-	 	   WHEN transformations.value ->> 'fieldId' LIKE '%publicnote'
        THEN regexp_replace(transformations.value ->> 'fieldId', 'publicnote', 'publicnote.default')
        ELSE transformations.value ->> 'fieldId'
     END
