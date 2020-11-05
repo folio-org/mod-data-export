@@ -150,21 +150,18 @@ public class ErrorLogServiceImpl implements ErrorLogService {
       for (Object holding : holdings) {
         JsonObject holdingJson = JsonObject.mapFrom(holding);
         AffectedRecord holdingRecord = getAffectedRecordFromJson(holdingJson, AffectedRecord.RecordType.HOLDINGS);
-        holdingRecord.setAffectedRecords(getAssociatedItemRecords(record.getJsonArray(ITEMS), holdingJson.getString(ID_KEY)));
+        holdingRecord.setAffectedRecords(getAssociatedItemRecords(holdingJson.getJsonArray(ITEMS)));
         holdingsAndAssociatedItems.add(holdingRecord);
       }
     }
     return holdingsAndAssociatedItems;
   }
 
-  private List<AffectedRecord> getAssociatedItemRecords(JsonArray items, String holdingId) {
+  private List<AffectedRecord> getAssociatedItemRecords(JsonArray items) {
     List<AffectedRecord> associatedItemRecords = new ArrayList<>();
     if (Objects.nonNull(items)) {
       for (Object item : items) {
-        JsonObject itemJson = JsonObject.mapFrom(item);
-        if (StringUtils.isNotEmpty(holdingId) && holdingId.equals(itemJson.getString(HOLDINGS_RECORD_ID))) {
-          associatedItemRecords.add(getAffectedRecordFromJson(itemJson, ITEM));
-        }
+        associatedItemRecords.add(getAffectedRecordFromJson(JsonObject.mapFrom(item), ITEM));
       }
     }
     return associatedItemRecords;
