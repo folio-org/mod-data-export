@@ -5,4 +5,4 @@ SET jsonb = jsonb_set(jsonb, '{transformations}', (
 	    WHERE ${myuniversity}_${mymodule}.mapping_profiles.id = profiles.id
       GROUP BY jsonb
     ))
-WHERE profiles.jsonb ->> 'transformations' IS NOT null;
+WHERE profiles.jsonb ->> 'transformations' IS NOT null AND jsonb_array_length(profiles.jsonb -> 'transformations') > 0;
