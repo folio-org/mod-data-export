@@ -1,3 +1,23 @@
+## 11/07/2020 v3.0.1 Released
+This hotfix release includes fixes to handle csv file with different symbols, handle empty csv file correctly,
+displaying UUIDs of records from inventory or SRS that were not found in error logs,fixed missing $ 3 subfield in MARC
+file and duplication of multiple error log entries. Also, this release includes migration script for 
+mapping profiles.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.0...v3.0.1)
+
+### Bug Fixes
+* [MDEXP-176](https://issues.folio.org/browse/MDEXP-176) - Handle csv files with other characters
+* [MDEXP-267](https://issues.folio.org/browse/MDEXP-267) - After uploading of empty file the progress field is not provided
+* [MDEXP-305](https://issues.folio.org/browse/MDEXP-305) - Investigate if generated mrc files and directories are not being deleted
+* [MDEXP-307](https://issues.folio.org/browse/MDEXP-307) - Fix security dependency issue
+* [MDEXP-308](https://issues.folio.org/browse/MDEXP-308) - Subfield $3 is missing for the MARC tags with item data
+* [MDEXP-309](https://issues.folio.org/browse/MDEXP-309) - When UUID is not found the error log doesn't list it
+* [MDEXP-313](https://issues.folio.org/browse/MDEXP-313) - Failed job associated with generated mrc file and contains multiple entries in the error log
+* [MDEXP-314](https://issues.folio.org/browse/MDEXP-314) - Mapping profile migrate fieldIds
+* [MDEXP-316](https://issues.folio.org/browse/MDEXP-316) - Error logs does not contains items records if mapping process is failed
+
+
 ## 10/14/2020 v3.0.0 Released
  Major version release which includes below features :
  * specify profile transformations for multiple fields from instance,holdings,items
