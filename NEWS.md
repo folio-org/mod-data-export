@@ -1,4 +1,4 @@
-## 11/09/2020 v2.1.3 Released
+## 11/09/2020 v3.0.2 Released
 This is a bugfix release for correcting SQL statement name in the migration script.
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.1...v3.0.2)
