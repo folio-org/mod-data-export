@@ -113,12 +113,12 @@
     {
       "run": "after",
       "snippetPath": "migration_scripts/remove_hasSameTagInHoldings.sql",
-      "fromModuleVersion": "mod-data-export-3.0.1"
+      "fromModuleVersion": "mod-data-export-3.0.2"
     },
     {
       "run": "after",
       "snippetPath": "migration_scripts/update_transformations_mapping_profile.sql",
-      "fromModuleVersion": "mod-data-export-3.0.1"
+      "fromModuleVersion": "mod-data-export-3.0.2"
     }
   ]
 }
