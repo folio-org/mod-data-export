@@ -1,3 +1,8 @@
+## 11/09/2020 v2.1.3 Released
+This is a bugfix release for correcting SQL statement name in the migration script.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.1...v3.0.2)
+
 ## 11/07/2020 v3.0.1 Released
 This hotfix release includes fixes to handle csv file with different symbols, handle empty csv file correctly,
 displaying UUIDs of records from inventory or SRS that were not found in error logs,fixed missing $ 3 subfield in MARC
