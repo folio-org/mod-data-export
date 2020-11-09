@@ -320,7 +320,7 @@ class EndToEndTest extends RestVerticleTestBase {
     return generatedExportFileContent;
   }
 
-  private boolean isFileNameContainsJobExecutionHrId(String generatedFileName, String jobExecutionHrId) {
+  private boolean isFileNameContainsJobExecutionHrId(String generatedFileName, int jobExecutionHrId) {
     return FilenameUtils.getBaseName(generatedFileName).split(DASH)[1].equals(jobExecutionHrId);
   }
 

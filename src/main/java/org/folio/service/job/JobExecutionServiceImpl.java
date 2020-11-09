@@ -120,7 +120,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, long totalCount, boolean withProgress, String tenantId) {
+  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
     return getById(id, tenantId).compose(jobExecution -> {
       prepareJobExecution(jobExecution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress);
       return update(jobExecution, tenantId);
@@ -134,7 +134,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     update(jobExecution, tenantId);
   }
 
-  private void prepareJobExecution(JobExecution jobExecution, FileDefinition fileExportDefinition, JobExecution.Status status, JsonObject user, long totalCount, boolean withProgress) {
+  private void prepareJobExecution(JobExecution jobExecution, FileDefinition fileExportDefinition, JobExecution.Status status, JsonObject user, int totalCount, boolean withProgress) {
     ExportedFile exportedFile = new ExportedFile()
       .withFileId(UUID.randomUUID().toString())
       .withFileName(fileExportDefinition.getFileName());
@@ -151,7 +151,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
       .withFirstName(personal.getString("firstName"))
       .withLastName(personal.getString("lastName")));
     if (withProgress) {
-      jobExecution.setProgress(new Progress().withTotal(String.valueOf(totalCount)));
+      jobExecution.setProgress(new Progress().withTotal(totalCount));
     }
   }
 

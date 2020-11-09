@@ -1,5 +1,17 @@
 package org.folio.service.profiles;
 
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import io.vertx.core.Future;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
@@ -12,11 +24,13 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.RecordType;
+import org.folio.rest.jaxrs.model.TransformationField;
+import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
+import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.util.OkapiConnectionParams;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -32,13 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static io.vertx.core.Future.succeededFuture;
-import static java.util.Collections.singletonList;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.Assert;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +54,8 @@ import static org.mockito.Mockito.when;
 class MappingProfileServiceUnitTest {
   private static final String MAPPING_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
+  private static final String FIELD_ID = "fieldId";
+  private static final String MISSING_FIELD_ID = "missingFieldId";
   private static MappingProfile expectedMappingProfile;
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
@@ -55,7 +65,10 @@ class MappingProfileServiceUnitTest {
   @Mock
   private MappingProfileDaoImpl mappingProfileDao;
   @Mock
-  UsersClient usersClient;
+  private UsersClient usersClient;
+  @Mock
+  private TransformationFieldsService transformationFieldsService;
+
   private static OkapiConnectionParams okapiConnectionParams;
 
   @BeforeAll
@@ -173,6 +186,91 @@ class MappingProfileServiceUnitTest {
       verify(mappingProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
       context.completeNow();
     }));
+  }
+
+  @Test
+  void validate_shouldThrowExceptionWhenTransformationFieldIdMissing(VertxTestContext context) {
+    // given
+    Transformations transformations = new Transformations();
+    expectedMappingProfile.setTransformations(singletonList(transformations));
+    TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection()
+      .withTransformationFields(singletonList(new TransformationField()));
+    when(transformationFieldsService.getTransformationFields(okapiConnectionParams)).thenReturn(succeededFuture(transformationFieldCollection));
+    //then
+    Future<Void> future = mappingProfileService.validate(expectedMappingProfile, okapiConnectionParams);
+    //when
+    future.onComplete(ar -> {
+      assertTrue(ar.failed());
+      assertEquals(ServiceException.class, ar.cause().getClass());
+      assertEquals("Field id is missing for mapping profile transformation", ar.cause().getMessage());
+      context.completeNow();
+    });
+  }
+
+  @Test
+  void validate_shouldThrowExceptionWhenTransformationFieldDoesntExistByProvidedFieldId(VertxTestContext context) {
+    // given
+    Transformations transformations = new Transformations()
+      .withFieldId(MISSING_FIELD_ID);
+    expectedMappingProfile.setTransformations(singletonList(transformations));
+    TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection()
+      .withTransformationFields(singletonList(new TransformationField()
+        .withFieldId(FIELD_ID)));
+    when(transformationFieldsService.getTransformationFields(okapiConnectionParams)).thenReturn(succeededFuture(transformationFieldCollection));
+    //then
+    Future<Void> future = mappingProfileService.validate(expectedMappingProfile, okapiConnectionParams);
+    //when
+    future.onComplete(ar -> {
+      assertTrue(ar.failed());
+      assertEquals(ServiceException.class, ar.cause().getClass());
+      assertEquals("Transformation doesn't exist by provided fieldId: " + MISSING_FIELD_ID, ar.cause().getMessage());
+      context.completeNow();
+    });
+  }
+
+  @Test
+  void validate_shouldThrowExceptionWhenTransformationRecordTypeIncorrect(VertxTestContext context) {
+    // given
+    Transformations transformations = new Transformations()
+      .withFieldId(FIELD_ID)
+      .withRecordType(RecordType.HOLDINGS);
+    expectedMappingProfile.setTransformations(singletonList(transformations));
+    TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection()
+      .withTransformationFields(singletonList(new TransformationField()
+        .withFieldId(FIELD_ID)
+        .withRecordType(INSTANCE)));
+    when(transformationFieldsService.getTransformationFields(okapiConnectionParams)).thenReturn(succeededFuture(transformationFieldCollection));
+    //then
+    Future<Void> future = mappingProfileService.validate(expectedMappingProfile, okapiConnectionParams);
+    //when
+    future.onComplete(ar -> {
+      assertTrue(ar.failed());
+      assertEquals(ServiceException.class, ar.cause().getClass());
+      assertEquals(format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
+        "expected record type: %s", FIELD_ID, INSTANCE), ar.cause().getMessage());
+      context.completeNow();
+    });
+  }
+
+  @Test
+  void validate_shouldReturnSucceededFuture(VertxTestContext context) {
+    // given
+    Transformations transformations = new Transformations()
+      .withFieldId(FIELD_ID)
+      .withRecordType(RecordType.INSTANCE);
+    expectedMappingProfile.setTransformations(singletonList(transformations));
+    TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection()
+      .withTransformationFields(singletonList(new TransformationField()
+        .withFieldId(FIELD_ID)
+        .withRecordType(INSTANCE)));
+    when(transformationFieldsService.getTransformationFields(okapiConnectionParams)).thenReturn(succeededFuture(transformationFieldCollection));
+    //then
+    Future<Void> future = mappingProfileService.validate(expectedMappingProfile, okapiConnectionParams);
+    //when
+    future.onComplete(ar -> {
+      assertTrue(ar.succeeded());
+      context.completeNow();
+    });
   }
 
 }
