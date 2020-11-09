@@ -45,7 +45,7 @@ SET jsonb = jsonb_set(jsonb, '{transformations}', (
 WHERE profiles.jsonb ->> 'transformations' IS NOT null AND jsonb_array_length(profiles.jsonb -> 'transformations') > 0;
 
 --a Update path fields in mapping profile transformations for item record type - add holdings[*] at the beginning
-UPDATE diku_mod_data_export.mapping_profiles as profiles
+UPDATE ${myuniversity}_${mymodule}.mapping_profiles as profiles
 SET jsonb = jsonb_set(jsonb, '{transformations}', (
   SELECT jsonb_agg(jsonb_set(transformations.value, '{path}', to_jsonb(
     CASE
