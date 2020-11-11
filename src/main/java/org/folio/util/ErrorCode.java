@@ -2,6 +2,9 @@ package org.folio.util;
 
 import org.folio.rest.jaxrs.model.Error;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum ErrorCode {
 
   GENERIC_ERROR_CODE("genericError", "Generic error"),
@@ -14,8 +17,8 @@ public enum ErrorCode {
   NOTHING_TO_EXPORT("nothingToExport", "No exported records, nothing to export"),
   SOME_RECORDS_FAILED("someRecordsFailed", "Export is completed with errors, some records have failed to export, number of failed records: "),
   SOME_UUIDS_NOT_FOUND("someUUIDsNotFound", "UUIDs not found in SRS or inventory: "),
+  INVALID_UUID_FORMAT("invalidUUIDFormat", "Invalid UUID format: "),
   INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: ");
-
 
   private final String code;
   private final String description;
@@ -40,5 +43,13 @@ public enum ErrorCode {
 
   public Error toError() {
     return new Error().withCode(code).withMessage(description);
+  }
+
+  public static List<ErrorCode> reasonsAccordingToUUIDs() {
+    List<ErrorCode> errorCodesForUUIDs = new ArrayList<>();
+    errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND);
+    errorCodesForUUIDs.add(SOME_RECORDS_FAILED);
+    errorCodesForUUIDs.add(INVALID_UUID_FORMAT);
+    return errorCodesForUUIDs;
   }
 }
