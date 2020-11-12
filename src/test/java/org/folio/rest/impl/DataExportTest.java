@@ -26,12 +26,14 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.HelperUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +61,7 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -104,6 +107,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(1)
   void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
     //given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -125,6 +129,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(2)
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -139,18 +144,22 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          context.verify(() -> {
-            FileDefinition fileExportDefinition = optionalFileDefinition.get();
-            assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-            validateExternalCalls();
-            context.completeNow();
+          errorLogService.isErrorsByReasonPresent(ErrorCode.reasonsAccordingToUUIDs(), jobExecutionId, tenantId).onSuccess(isErrorsPresent -> {
+            context.verify(() -> {
+              FileDefinition fileExportDefinition = optionalFileDefinition.get();
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
+              assertFalse(isErrorsPresent);
+              assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
+              validateExternalCalls();
+              context.completeNow();
+            });
           });
         });
       }));
   }
 
   @Test
+  @Order(3)
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -182,6 +191,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(4)
   void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -206,6 +216,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(5)
   void testExportByCSV_GenerateRecordsOnFly(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -232,6 +243,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(6)
   void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -293,6 +305,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(7)
   void testExportByCSV_UnderlyingSrsWithProfileTransformationsNoCallToSRS(VertxTestContext context) throws IOException {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
@@ -319,6 +332,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(8)
   void shouldNotExportFile_whenInventoryReturnServerError(VertxTestContext context) throws IOException, InterruptedException {
     postToTenant(CUSTOM_TENANT_HEADER);
     // given
