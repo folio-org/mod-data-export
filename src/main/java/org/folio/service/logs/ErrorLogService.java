@@ -5,7 +5,6 @@ import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.util.ErrorCode;
 
 import java.util.Collection;
 import java.util.List;
