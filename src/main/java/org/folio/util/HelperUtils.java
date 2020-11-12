@@ -86,7 +86,7 @@ public class HelperUtils {
         .setOperation("SIMILAR TO")
         .setVal(
             reasons.size() > 1
-                ? "%" + String.join("|", reasons) + "%"
+                ? "%(" + String.join("|", reasons) + ")%"
                 : "%" + reasons.get(0) + "%");
 
     criterion.addCriterion(jobExecutionIdCriteria);
