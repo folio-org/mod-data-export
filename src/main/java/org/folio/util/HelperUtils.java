@@ -84,7 +84,11 @@ public class HelperUtils {
     reasonCriteria
         .addField(REASON_FIELD)
         .setOperation("SIMILAR TO")
-        .setVal("%" + String.join("|", reasons) + "%");
+        .setVal(
+            reasons.size() > 1
+                ? "%" + String.join("|", reasons) + "%"
+                : "%" + reasons.get(0) + "%");
+
     criterion.addCriterion(jobExecutionIdCriteria);
     criterion.addCriterion(reasonCriteria);
     return criterion;
