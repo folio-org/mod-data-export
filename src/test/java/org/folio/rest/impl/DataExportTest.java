@@ -76,7 +76,6 @@ import static org.mockito.Mockito.doNothing;
 @ExtendWith(VertxExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DataExportTest extends RestVerticleTestBase {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/job-profiles";
   private static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mapping-profiles";
   private static final long TIMER_DELAY = 7000L;
@@ -142,7 +141,6 @@ class DataExportTest extends RestVerticleTestBase {
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    LOGGER.error("Started testExportByCSV_UnderlyingSrsOnly_COMPLETED_job with jobExecution id + " + jobExecutionId);
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
@@ -231,7 +229,7 @@ class DataExportTest extends RestVerticleTestBase {
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    LOGGER.error("Started testExportByCSV_GenerateRecordsOnFly with jobExecution id + " + jobExecutionId);
+
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(jobExecutionId, tenantId)
@@ -265,7 +263,8 @@ class DataExportTest extends RestVerticleTestBase {
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    LOGGER.error("Started testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs with jobExecution id + " + jobExecutionId);    // then
+
+    // then
     vertx.setTimer(TIMER_DELAY, handler -> {
       jobExecutionDao.getById(jobExecutionId, tenantId)
         .onSuccess(optionalJobExecution -> {
@@ -323,7 +322,6 @@ class DataExportTest extends RestVerticleTestBase {
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    LOGGER.error("Started testExportByCSV_UnderlyingSrsWithProfileTransformationsNoCallToSRS with jobExecution id + " + jobExecutionId);
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {

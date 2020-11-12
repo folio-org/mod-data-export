@@ -175,7 +175,6 @@ public class ExportManagerImpl implements ExportManager {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload);
-    LOGGER.error("Called handleExportResult with execution id = " + exportPayload.getJobExecutionId() + "status" + exportResult.getStatus());
     clearIdentifiers(exportPayload);
     incrementCurrentProgress(exportPayload)
       .onComplete(handler -> {
@@ -212,14 +211,10 @@ public class ExportManagerImpl implements ExportManager {
     if (exportPayload.getExportedRecordsNumber() == 0) {
       if (fileStorage.isFileExist(exportPayload.getFileExportDefinition().getSourcePath())) {
         errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
-        LOGGER.error("Called getExportResultForLastBatch with execution id file exist= " + exportPayload.getJobExecutionId() + "exported ="
-          + exportPayload.getExportedRecordsNumber() + "failed " + exportPayload.getFailedRecordsNumber());
         return ExportResult.completedWithErrors();
       }
       return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
     } else if (exportPayload.getFailedRecordsNumber() > 0) {
-      LOGGER.error("Called getExportResultForLastBatch with execution id failed records = " + exportPayload.getJobExecutionId()
-        + "exported =" + exportPayload.getExportedRecordsNumber() + "failed " + exportPayload.getFailedRecordsNumber());
       errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.completedWithErrors();
     } else {

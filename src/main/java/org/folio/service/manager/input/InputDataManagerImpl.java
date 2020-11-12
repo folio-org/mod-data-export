@@ -38,7 +38,6 @@ import java.util.Optional;
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
 import static org.folio.util.ErrorCode.reasonsAccordingToUUIDs;
 
 /**
@@ -168,21 +167,21 @@ class InputDataManagerImpl implements InputDataManager {
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     JobExecution.Status status = getJobExecutionStatus(exportResult);
-    LOGGER.error("Called finalize export with job status " + status + "And job execution id = " + jobExecutionId);
     if (status.equals(JobExecution.Status.COMPLETED)) {
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
               isAnyErrorPresent -> {
                 if (isAnyErrorPresent.succeeded()
                     && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
-                  exportResult.setStatus(COMPLETED_WITH_ERRORS);
+                  jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.COMPLETED_WITH_ERRORS, tenantId);
+                  updateFileDefinitionStatus(fileExportDefinition, FileDefinition.Status.ERROR, tenantId);
                 }
                 jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
-                updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+                updateFileDefinitionStatus(fileExportDefinition, FileDefinition.Status.COMPLETED, tenantId);
               });
     } else {
       jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
-      updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+      updateFileDefinitionStatus(fileExportDefinition, getFileDefinitionStatus(exportResult), tenantId);
     }
     closeSourceReader(jobExecutionId);
     removeInputDataContext(jobExecutionId);
@@ -264,8 +263,8 @@ class InputDataManagerImpl implements InputDataManager {
     return FileDefinition.Status.ERROR;
   }
 
-  private void updateFileDefinitionStatusByResult(FileDefinition fileDefinition, ExportResult exportResult, String tenantId) {
-    fileDefinition.withStatus(getFileDefinitionStatus(exportResult));
+  private void updateFileDefinitionStatus(FileDefinition fileDefinition, FileDefinition.Status status, String tenantId) {
+    fileDefinition.withStatus(status);
     fileDefinitionService.update(fileDefinition, tenantId);
   }
 
