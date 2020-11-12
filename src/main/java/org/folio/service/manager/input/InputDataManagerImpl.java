@@ -168,16 +168,17 @@ class InputDataManagerImpl implements InputDataManager {
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     JobExecution.Status status = getJobExecutionStatus(exportResult);
+    ExportResult expResult = new ExportResult(exportResult.toJson());
     if (status.equals(JobExecution.Status.COMPLETED)) {
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
               isAnyErrorPresent -> {
                 if (isAnyErrorPresent.succeeded()
                     && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
-                  exportResult.setStatus(COMPLETED_WITH_ERRORS);
+                  expResult.setStatus(COMPLETED_WITH_ERRORS);
                 }
-                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
-                updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(expResult), tenantId);
+                updateFileDefinitionStatusByResult(fileExportDefinition, expResult, tenantId);
               });
     } else {
       jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
