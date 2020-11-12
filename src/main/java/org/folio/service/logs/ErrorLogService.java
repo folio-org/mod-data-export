@@ -98,10 +98,10 @@ public interface ErrorLogService {
   /**
    * If error log with description from error code is present - then true, otherwise - false
    *
-   * @param errorCode             {@link ErrorCode}
+   * @param reasons               reasons using for querying the logs
    * @param jobExecutionId        id of job execution
    * @param tenantId              tenant id
    */
-  Future<Boolean> isErrorsByReasonPresent(ErrorCode errorCode, String jobExecutionId, String tenantId);
+  Future<Boolean> isErrorsByReasonPresent(List<String> reasons, String jobExecutionId, String tenantId);
 
 }

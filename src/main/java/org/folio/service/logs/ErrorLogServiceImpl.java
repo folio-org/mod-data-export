@@ -13,7 +13,6 @@ import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.util.ErrorCode;
 import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,7 @@ import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason;
+import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndReasons;
 
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
@@ -149,12 +148,9 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public Future<Boolean> isErrorsByReasonPresent(
-      ErrorCode errorCode, String jobExecutionId, String tenantId) {
+      List<String> reasons, String jobExecutionId, String tenantId) {
     Promise<Boolean> promise = Promise.promise();
-    getByQuery(
-            getErrorLogCriterionByJobExecutionIdAndReason(
-                jobExecutionId, errorCode.getDescription()),
-            tenantId)
+    getByQuery(getErrorLogCriterionByJobExecutionIdAndReasons(jobExecutionId, reasons), tenantId)
         .onSuccess(errorLogList -> promise.complete(CollectionUtils.isNotEmpty(errorLogList)))
         .onFailure(ar -> promise.complete(false));
 

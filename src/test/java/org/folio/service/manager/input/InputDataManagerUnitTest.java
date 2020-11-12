@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -313,7 +314,7 @@ class InputDataManagerUnitTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(errorLogService.isErrorsByReasonPresent(any(ErrorCode.class), anyString(), anyString())).thenReturn(Future.succeededFuture(false));
+    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(false));
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
@@ -339,7 +340,7 @@ class InputDataManagerUnitTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(errorLogService.isErrorsByReasonPresent(any(ErrorCode.class), anyString(), anyString())).thenReturn(Future.succeededFuture(true));
+    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(true));
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());

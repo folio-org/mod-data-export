@@ -45,11 +45,11 @@ public enum ErrorCode {
     return new Error().withCode(code).withMessage(description);
   }
 
-  public static List<ErrorCode> reasonsAccordingToUUIDs() {
-    List<ErrorCode> errorCodesForUUIDs = new ArrayList<>();
-    errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND);
-    errorCodesForUUIDs.add(SOME_RECORDS_FAILED);
-    errorCodesForUUIDs.add(INVALID_UUID_FORMAT);
+  public static List<String> reasonsAccordingToUUIDs() {
+    List<String> errorCodesForUUIDs = new ArrayList<>();
+    errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND.getDescription());
+    errorCodesForUUIDs.add(SOME_RECORDS_FAILED.getDescription());
+    errorCodesForUUIDs.add(INVALID_UUID_FORMAT.getDescription());
     return errorCodesForUUIDs;
   }
 }

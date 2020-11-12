@@ -1,7 +1,6 @@
 package org.folio.service.manager.input;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -35,12 +34,12 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
+import static org.folio.util.ErrorCode.reasonsAccordingToUUIDs;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -172,8 +171,8 @@ class InputDataManagerImpl implements InputDataManager {
     if (status.equals(JobExecution.Status.COMPLETED)) {
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
-              isErrorsPresent -> {
-                if (isErrorsPresent.succeeded() && Boolean.TRUE.equals(isErrorsPresent.result())) {
+            isAnyErrorPresent -> {
+                if (isAnyErrorPresent.succeeded() && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
                   exportResult.setStatus(COMPLETED_WITH_ERRORS);
                 }
                 jobExecutionService.updateJobStatusById(
@@ -190,22 +189,9 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Boolean> isErrorsRelatedToUUIDsPresent(String jobExecutionId, String tenantId) {
     Promise<Boolean> promise = Promise.promise();
-    List<Future> errorsList =
-        ErrorCode.reasonsAccordingToUUIDs().stream()
-            .map(
-                errorCode ->
-                    errorLogService.isErrorsByReasonPresent(errorCode, jobExecutionId, tenantId))
-            .collect(Collectors.toList());
-    CompositeFuture.all(errorsList)
-        .onSuccess(
-            compositeFuture -> {
-              boolean isErrorPresent =
-                  compositeFuture.<Boolean>list().stream()
-                      .filter(Boolean.TRUE::equals)
-                      .findFirst()
-                      .orElse(false);
-              promise.complete(isErrorPresent);
-            })
+    errorLogService
+        .isErrorsByReasonPresent(reasonsAccordingToUUIDs(), jobExecutionId, tenantId)
+        .onSuccess(isAnyErrorPresent -> promise.complete(Boolean.TRUE.equals(isAnyErrorPresent)))
         .onFailure(ar -> promise.complete(false));
 
     return promise.future();
