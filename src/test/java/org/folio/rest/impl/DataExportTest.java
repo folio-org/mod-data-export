@@ -78,7 +78,7 @@ import static org.mockito.Mockito.doNothing;
 class DataExportTest extends RestVerticleTestBase {
   private static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/job-profiles";
   private static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mapping-profiles";
-  private static final long TIMER_DELAY = 7000L;
+  private static final long TIMER_DELAY = 5000L;
   private static final String UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String UUIDS_INVENTORY = "uuids_inventory.csv";
