@@ -168,6 +168,7 @@ class InputDataManagerImpl implements InputDataManager {
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     JobExecution.Status status = getJobExecutionStatus(exportResult);
+    LOGGER.error("Called finalize export with job status " + status + "And job execution id = " + jobExecutionId);
     if (status.equals(JobExecution.Status.COMPLETED)) {
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
@@ -191,7 +192,7 @@ class InputDataManagerImpl implements InputDataManager {
     Promise<Boolean> promise = Promise.promise();
     errorLogService
         .isErrorsByReasonPresent(reasonsAccordingToUUIDs(), jobExecutionId, tenantId)
-        .onSuccess(isAnyErrorPresent -> promise.complete(Boolean.TRUE.equals(isAnyErrorPresent)))
+        .onSuccess(promise::complete)
         .onFailure(ar -> promise.complete(false));
 
     return promise.future();

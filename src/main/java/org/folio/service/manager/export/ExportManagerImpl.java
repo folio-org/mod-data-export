@@ -175,6 +175,7 @@ public class ExportManagerImpl implements ExportManager {
     Promise<Void> promise = Promise.promise();
     JsonObject exportPayloadJson = JsonObject.mapFrom(exportPayload);
     ExportResult exportResult = getExportResult(asyncResult, exportPayload);
+    LOGGER.error("Called handleExportResult with execution id = " + exportPayload.getJobExecutionId());
     clearIdentifiers(exportPayload);
     incrementCurrentProgress(exportPayload)
       .onComplete(handler -> {
