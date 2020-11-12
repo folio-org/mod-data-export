@@ -1,3 +1,12 @@
+## 11/12/2020 v3.0.3 Released
+This is a bugfix release for fixing the job execution status when invalid UUIDs are present in the batch
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.2...v3.0.3)
+
+### Bug Fixes
+* [MDEXP-337](https://issues.folio.org/browse/MDEXP-337) - Fix wrong jobExecution status when some UUIDs are invalid or not found in storages not in last batch
+
+
 ## 11/09/2020 v3.0.2 Released
 This is a bugfix release for correcting SQL statement name in the migration script.
 
