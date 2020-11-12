@@ -1,10 +1,12 @@
 package org.folio.service.logs;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.AffectedRecord;
@@ -30,6 +32,7 @@ import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndReasons;
 
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
@@ -141,6 +144,17 @@ public class ErrorLogServiceImpl implements ErrorLogService {
           LOGGER.error("Failed to query error logs by jobExecutionId: {} and reason: {}", jobExecutionId, SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs);
         }
       });
+  }
+
+  @Override
+  public Future<Boolean> isErrorsByReasonPresent(
+      List<String> reasons, String jobExecutionId, String tenantId) {
+    Promise<Boolean> promise = Promise.promise();
+    getByQuery(getErrorLogCriterionByJobExecutionIdAndReasons(jobExecutionId, reasons), tenantId)
+        .onSuccess(errorLogList -> promise.complete(CollectionUtils.isNotEmpty(errorLogList)))
+        .onFailure(ar -> promise.complete(false));
+
+    return promise.future();
   }
 
   private List<AffectedRecord> getRecordsForHoldingAndAssociatedItems(JsonObject record) {

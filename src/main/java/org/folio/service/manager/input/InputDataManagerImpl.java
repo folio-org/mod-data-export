@@ -1,14 +1,15 @@
 package org.folio.service.manager.input;
 
-import static io.vertx.core.Future.succeededFuture;
-import static java.util.Objects.nonNull;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.WorkerExecutor;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
@@ -29,15 +30,16 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.WorkerExecutor;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.shareddata.LocalMap;
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.nonNull;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
+import static org.folio.util.ErrorCode.reasonsAccordingToUUIDs;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -165,10 +167,34 @@ class InputDataManagerImpl implements InputDataManager {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
-    jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
-    updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+    JobExecution.Status status = getJobExecutionStatus(exportResult);
+    if (status.equals(JobExecution.Status.COMPLETED)) {
+      isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
+          .onComplete(
+              isAnyErrorPresent -> {
+                if (isAnyErrorPresent.succeeded()
+                    && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
+                  exportResult.setStatus(COMPLETED_WITH_ERRORS);
+                }
+                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
+                updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+              });
+    } else {
+      jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
+      updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+    }
     closeSourceReader(jobExecutionId);
     removeInputDataContext(jobExecutionId);
+  }
+
+  private Future<Boolean> isErrorsRelatedToUUIDsPresent(String jobExecutionId, String tenantId) {
+    Promise<Boolean> promise = Promise.promise();
+    errorLogService
+        .isErrorsByReasonPresent(reasonsAccordingToUUIDs(), jobExecutionId, tenantId)
+        .onSuccess(isAnyErrorPresent -> promise.complete(Boolean.TRUE.equals(isAnyErrorPresent)))
+        .onFailure(ar -> promise.complete(false));
+
+    return promise.future();
   }
 
   protected ExportManager getExportManager() {

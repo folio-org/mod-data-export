@@ -8,6 +8,8 @@ import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.cql.CQLWrapper;
 
+import java.util.List;
+
 public class HelperUtils {
 
   private static final String JOB_EXECUTION_ID_FIELD = "'jobExecutionId'";
@@ -70,4 +72,25 @@ public class HelperUtils {
     return criterion;
   }
 
+  public static Criterion getErrorLogCriterionByJobExecutionIdAndReasons(
+      String jobExecutionId, List<String> reasons) {
+    Criterion criterion = new Criterion();
+    Criteria jobExecutionIdCriteria = new Criteria();
+    jobExecutionIdCriteria
+        .addField(JOB_EXECUTION_ID_FIELD)
+        .setOperation("=")
+        .setVal(jobExecutionId);
+    Criteria reasonCriteria = new Criteria();
+    reasonCriteria
+        .addField(REASON_FIELD)
+        .setOperation("SIMILAR TO")
+        .setVal(
+            reasons.size() > 1
+                ? "%(" + String.join("|", reasons) + ")%"
+                : "%" + reasons.get(0) + "%");
+
+    criterion.addCriterion(jobExecutionIdCriteria);
+    criterion.addCriterion(reasonCriteria);
+    return criterion;
+  }
 }

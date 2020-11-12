@@ -25,6 +25,7 @@ import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.util.ErrorCode.INVALID_UUID_FORMAT;
 
 @SuppressWarnings({"java:S2095"})
 public class LocalStorageCsvSourceReader implements SourceReader {
@@ -104,7 +105,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
         }
       }).count();
     if (CollectionUtils.isNotEmpty(invalidUUIDs)) {
-      errorLogService.saveGeneralError(format("Invalid UUID format: %s", String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
+      errorLogService.saveGeneralError(INVALID_UUID_FORMAT.getDescription() + String.join(COMMA, invalidUUIDs), jobExecutionId, tenantId);
     }
     return (int) count;
   }

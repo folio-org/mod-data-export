@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.ErrorCode;
 
 import java.util.Collection;
 import java.util.List;
@@ -93,5 +94,14 @@ public interface ErrorLogService {
    * @param tenantId              tenant id
    */
   void populateUUIDsNotFoundNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId);
+
+  /**
+   * If error log with description from error code is present - then true, otherwise - false
+   *
+   * @param reasons               reasons using for querying the logs
+   * @param jobExecutionId        id of job execution
+   * @param tenantId              tenant id
+   */
+  Future<Boolean> isErrorsByReasonPresent(List<String> reasons, String jobExecutionId, String tenantId);
 
 }

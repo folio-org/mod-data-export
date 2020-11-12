@@ -8,6 +8,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -41,8 +42,10 @@ import org.folio.service.manager.export.ExportResult;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -50,7 +53,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
@@ -65,7 +67,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import io.vertx.core.shareddata.SharedData;
 
-@RunWith(MockitoJUnitRunner.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class InputDataManagerUnitTest {
 
   private static final int BATCH_SIZE = 2;
@@ -165,6 +167,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(1)
   void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(false);
@@ -185,6 +188,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(2)
   void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
@@ -203,6 +207,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(3)
   void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
@@ -222,6 +227,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(4)
   void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
@@ -247,6 +253,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(5)
   void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
@@ -272,6 +279,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(6)
   void shouldFinishExportWithErrors_whenProceedWithExportStatusError() {
     //given
     jobExecution.withProgress(new Progress());
@@ -296,6 +304,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(7)
   void shouldFinishExportSuccessfully_whenProceedWithExportStatusCompleted() {
     //given
     jobExecution.withProgress(new Progress());
@@ -305,6 +314,7 @@ class InputDataManagerUnitTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(false));
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
@@ -320,6 +330,34 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(8)
+  void shouldFinishExportWithErrors_whenProceedWithExportStatusCompleted_ButErrorLogsRelatesToTheUUIDsPresent() {
+    //given
+    jobExecution.withProgress(new Progress());
+    ExportPayload exportPayload = createExportPayload();
+    doCallRealMethod().when(jobExecutionService).updateJobStatusById(eq(JOB_EXECUTION_ID), eq(JobExecution.Status.COMPLETED_WITH_ERRORS), eq(TENANT_ID));
+    when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
+    when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
+    when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
+    when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(true));
+
+    //when
+    inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
+
+    //then
+      verify(jobExecutionService).update(jobExecution, TENANT_ID);
+      assertJobStatus(JobExecution.Status.COMPLETED_WITH_ERRORS);
+      assertNotNull(jobExecution.getCompletedDate());
+      FileDefinition.Status actualFileDefinitionStatus = fileExportDefinitionCaptor.getValue().getStatus();
+      assertThat(actualFileDefinitionStatus, equalTo(FileDefinition.Status.ERROR));
+      verify(sourceReader).close();
+      verify(inputDataLocalMap).remove(JOB_EXECUTION_ID);
+
+  }
+
+  @Test
+  @Order(9)
   void shouldFinishExportWithErrors_whenProceedWithExportStatusInProgress_andSourceStreamNull() {
     //given
     jobExecution.withProgress(new Progress());
@@ -343,6 +381,7 @@ class InputDataManagerUnitTest {
   }
 
   @Test
+  @Order(10)
   void shouldExportNextChunk_whenProceedWithExportStatusInProgress_andSourceStreamHasMoreChunksToExport() {
     //given
     ExportPayload exportPayload = createExportPayload();
