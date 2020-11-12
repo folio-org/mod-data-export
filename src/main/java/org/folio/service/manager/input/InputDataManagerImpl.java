@@ -168,16 +168,20 @@ class InputDataManagerImpl implements InputDataManager {
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     JobExecution.Status status = getJobExecutionStatus(exportResult);
+    ExportResult expResult = new ExportResult(exportResult.toJson());
+    //the status obtained here is for the last batch
     if (status.equals(JobExecution.Status.COMPLETED)) {
+      // check if there were any errors in the previous batches , if yes then complete the job with
+      // "Completed with errors" status
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
               isAnyErrorPresent -> {
                 if (isAnyErrorPresent.succeeded()
                     && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
-                  exportResult.setStatus(COMPLETED_WITH_ERRORS);
+                  expResult.setStatus(COMPLETED_WITH_ERRORS);
                 }
-                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
-                updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
+                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(expResult), tenantId);
+                updateFileDefinitionStatusByResult(fileExportDefinition, expResult, tenantId);
               });
     } else {
       jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
@@ -191,7 +195,7 @@ class InputDataManagerImpl implements InputDataManager {
     Promise<Boolean> promise = Promise.promise();
     errorLogService
         .isErrorsByReasonPresent(reasonsAccordingToUUIDs(), jobExecutionId, tenantId)
-        .onSuccess(isAnyErrorPresent -> promise.complete(Boolean.TRUE.equals(isAnyErrorPresent)))
+        .onSuccess(promise::complete)
         .onFailure(ar -> promise.complete(false));
 
     return promise.future();

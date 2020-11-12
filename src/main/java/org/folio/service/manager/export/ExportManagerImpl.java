@@ -199,8 +199,9 @@ public class ExportManagerImpl implements ExportManager {
       errorLogService.saveGeneralError(ErrorCode.GENERIC_ERROR_CODE.getDescription(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
-      LOGGER.info("Export has been successfully passed");
+      LOGGER.info("Export batch has successfully completed");
       if (exportPayload.isLast()) {
+        LOGGER.debug("Processing the last export batch");
         return getExportResultForLastBatch(exportPayload);
       }
       return getInProgressExportResult(exportPayload);
@@ -210,11 +211,13 @@ public class ExportManagerImpl implements ExportManager {
   private ExportResult getExportResultForLastBatch(ExportPayload exportPayload) {
     if (exportPayload.getExportedRecordsNumber() == 0) {
       if (fileStorage.isFileExist(exportPayload.getFileExportDefinition().getSourcePath())) {
+        LOGGER.debug("Errors found in the entire last batch,status completing with errors");
         errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
         return ExportResult.completedWithErrors();
       }
       return ExportResult.failed(ErrorCode.NOTHING_TO_EXPORT);
     } else if (exportPayload.getFailedRecordsNumber() > 0) {
+      LOGGER.debug("Errors found in few records of last batch,status completing with errors");
       errorLogService.populateUUIDsNotFoundNumberErrorLog(exportPayload.getJobExecutionId(), exportPayload.getFailedRecordsNumber(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.completedWithErrors();
     } else {
