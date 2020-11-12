@@ -323,7 +323,11 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private void assertFileDefinitionIsNotRemoved() {
     fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
+      //compare fields and not the POJO, as the object address may be different
       assertEquals(fileDefinitionAr.result().get().getId(), fileDefinition1.getId());
+      assertEquals(fileDefinitionAr.result().get().getFileName(), fileDefinition1.getFileName());
+      assertEquals(fileDefinitionAr.result().get().getStatus(), fileDefinition1.getStatus());
+      assertEquals(fileDefinitionAr.result().get().getSize(), fileDefinition1.getSize());
     });
   }
 
