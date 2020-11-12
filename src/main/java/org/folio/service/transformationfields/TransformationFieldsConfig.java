@@ -20,6 +20,7 @@ import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
  */
 public enum TransformationFieldsConfig {
 
+
   //Common Fields
   ID("id", "$.{recordType}.id"),
   HR_ID("hrid", "$.{recordType}.hrid"),
@@ -57,22 +58,22 @@ public enum TransformationFieldsConfig {
   HOLDINGS_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].callNumberTypeId"),
   HOLDING_NOTE_TYPE("holdingNoteTypeId", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", HOLDING_NOTE_TYPES),
   HOLDING_NOTE_TYPE_STAFF_ONLY("holdingNoteTypeId.staffOnly", "$.holdings[*].notes[?(@.holdingsNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", HOLDING_NOTE_TYPES),
-  HOLDING_PERMANENT_LOCATION_NAME("permanentLocation.name", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_CODE("permanentLocation.code", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", "$.holdings[*].permanentLocationId"),
-  HOLDING_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", "$.holdings[*].permanentLocationId"),
-  HOLDING_TEMPORARY_LOCATION_NAME("temporaryLocation.name", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_CODE("temporaryLocation.code", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_LIBRARY_NAME("temporaryLocation.library.name", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_LIBRARY_CODE("temporaryLocation.library.code", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_CAMPUS_NAME("temporaryLocation.campus.name", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_CAMPUS_CODE("temporaryLocation.campus.code", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_INSTITUTION_NAME("temporaryLocation.institution.name", "$.holdings[*].temporaryLocationId"),
-  HOLDING_TEMPORARY_LOCATION_INSTITUTION_CODE("temporaryLocation.institution.code", "$.holdings[*].temporaryLocationId"),
+  HOLDING_PERMANENT_LOCATION_NAME("permanentLocation.name", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_CODE("permanentLocation.code", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", Constants.PERMANENT_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_NAME("temporaryLocation.name", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_CODE("temporaryLocation.code", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_LIBRARY_NAME("temporaryLocation.library.name", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_LIBRARY_CODE("temporaryLocation.library.code", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_CAMPUS_NAME("temporaryLocation.campus.name", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_CAMPUS_CODE("temporaryLocation.campus.code", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_INSTITUTION_NAME("temporaryLocation.institution.name", Constants.TEMPORARY_LOCATION_ID),
+  HOLDING_TEMPORARY_LOCATION_INSTITUTION_CODE("temporaryLocation.institution.code", Constants.TEMPORARY_LOCATION_ID),
   HOLDINGS_STATEMENT("holdingsStatements.statement", "$.holdings[*].holdingsStatements[*].statement"),
   HOLDINGS_STATEMENT_NOTE("holdingsStatements.note", "$.holdings[*].holdingsStatements[*].note"),
   HOLDINGS_STATEMENT_NOTE_STAFF("holdingsStatements.staffNote", "$.holdings[*].holdingsStatements[*].staffNote"),
@@ -158,5 +159,13 @@ public enum TransformationFieldsConfig {
 
   public Map<String, String> getMetadataParameters() {
     return metadataParameters;
+  }
+
+
+  public class Constants{
+    private Constants() {
+    }
+    static final String TEMPORARY_LOCATION_ID = "$.holdings[*].temporaryLocationId";
+    static final String PERMANENT_LOCATION_ID = "$.holdings[*].permanentLocationId";
   }
 }
