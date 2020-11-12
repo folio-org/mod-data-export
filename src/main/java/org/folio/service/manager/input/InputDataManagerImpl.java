@@ -171,12 +171,12 @@ class InputDataManagerImpl implements InputDataManager {
     if (status.equals(JobExecution.Status.COMPLETED)) {
       isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
           .onComplete(
-            isAnyErrorPresent -> {
-                if (isAnyErrorPresent.succeeded() && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
+              isAnyErrorPresent -> {
+                if (isAnyErrorPresent.succeeded()
+                    && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
                   exportResult.setStatus(COMPLETED_WITH_ERRORS);
                 }
-                jobExecutionService.updateJobStatusById(
-                    jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
+                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
                 updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
               });
     } else {
