@@ -175,9 +175,10 @@ class InputDataManagerImpl implements InputDataManager {
                     && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
                   jobExecutionService.updateJobStatusById(jobExecutionId, JobExecution.Status.COMPLETED_WITH_ERRORS, tenantId);
                   updateFileDefinitionStatus(fileExportDefinition, FileDefinition.Status.ERROR, tenantId);
+                } else {
+                  jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
+                  updateFileDefinitionStatus(fileExportDefinition, getFileDefinitionStatus(exportResult), tenantId);
                 }
-                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(exportResult), tenantId);
-                updateFileDefinitionStatus(fileExportDefinition, FileDefinition.Status.COMPLETED, tenantId);
               });
     } else {
       jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
