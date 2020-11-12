@@ -317,7 +317,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private void assertFileDefinitionIsRemoved() {
     fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
-      assertTrue(fileDefinitionAr.failed());
+      assertTrue(fileDefinitionAr.result().isEmpty());
     });
   }
 
