@@ -1,3 +1,12 @@
+## 11/13/2020 v3.0.4 Released
+This is a bugfix release for fixing the wrong job execution state if upload an empty file, that brokes UI
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.3...v3.0.4)
+
+### Bug Fixes
+* [MDEXP-338](https://issues.folio.org/browse/MDEXP-338) - Fix periodically wrong jobExecution state when uploading an empty file
+
+
 ## 11/12/2020 v3.0.3 Released
 This is a bugfix release for fixing the job execution status when invalid UUIDs are present in the batch
 
