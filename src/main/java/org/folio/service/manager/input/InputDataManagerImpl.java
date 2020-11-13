@@ -111,8 +111,12 @@ class InputDataManagerImpl implements InputDataManager {
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
-          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId);
-          exportNextChunk(exportPayload, sourceReader);
+          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId)
+          .onSuccess(jobExec -> exportNextChunk(exportPayload, sourceReader))
+          .onFailure(ar -> {
+            jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
+            finalizeExport(exportPayload, ExportResult.failed(ErrorCode.FAIL_TO_UPDATE_JOB));
+          });
         } else {
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
