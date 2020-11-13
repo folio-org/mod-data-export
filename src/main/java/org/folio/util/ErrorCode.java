@@ -18,7 +18,8 @@ public enum ErrorCode {
   SOME_RECORDS_FAILED("someRecordsFailed", "Export is completed with errors, some records have failed to export, number of failed records: "),
   SOME_UUIDS_NOT_FOUND("someUUIDsNotFound", "UUIDs not found in SRS or inventory: "),
   INVALID_UUID_FORMAT("invalidUUIDFormat", "Invalid UUID format: "),
-  INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: ");
+  INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: "),
+  FAIL_TO_UPDATE_JOB("failToUpdateJob", "Fail to prepare job execution for export");
 
   private final String code;
   private final String description;

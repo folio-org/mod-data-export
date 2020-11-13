@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,6 +15,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -401,6 +404,27 @@ class InputDataManagerUnitTest {
     assertThat(exportRequest.getString(JOB_EXECUTION_ID_KEY), equalTo(JOB_EXECUTION_ID));
     assertThat(exportRequest.getBoolean(LAST_KEY), equalTo(false));
     assertThat(exportRequest.getJsonArray(IDENTIFIERS_KEY), equalTo(new JsonArray(EXPECTED_IDS)));
+  }
+
+  @Test
+  @Order(10)
+  void shouldFailToExport_whenPrepareJobForExport_Fail() {
+      //given
+    jobExecution.withProgress(new Progress());
+    when(sourceReader.hasNext()).thenReturn(true, true);
+    when(sourceReader.readNext()).thenReturn(EXPECTED_IDS);
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+    when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
+    when(inputDataLocalMap.get(null)).thenReturn(inputDataContext);
+    when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
+    when(jobExecutionService.prepareJobForExport(anyString(), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString())).thenReturn(Future.failedFuture("error"));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+
+    //then
+    verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString());
+    verify(exportManager, never()).exportData(any(JsonObject.class));
   }
 
   private void initializeInputDataManager() {
