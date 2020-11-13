@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -417,7 +418,7 @@ class InputDataManagerUnitTest {
     when(fileDefinitionService.update(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture());
     when(inputDataLocalMap.get(null)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(jobExecutionService.prepareJobForExport(anyString(), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString())).thenReturn(Future.failedFuture("error"));
+    when(jobExecutionService.prepareJobForExport(anyString(), any(FileDefinition.class), any(JsonObject.class), anyLong(), anyBoolean(), anyString())).thenReturn(Future.failedFuture("error"));
 
     //when
     inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
