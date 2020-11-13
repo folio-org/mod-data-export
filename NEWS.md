@@ -1,5 +1,5 @@
 ## 11/13/2020 v3.0.4 Released
-This is a bugfix release for fixing the wrong job execution state if upload an empty file, that brokes UI
+This is a bugfix release for fixing the wrong job execution state if upload an empty file, that breaks UI
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.3...v3.0.4)
 
