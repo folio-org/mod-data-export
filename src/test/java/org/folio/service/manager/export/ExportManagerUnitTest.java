@@ -6,12 +6,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.export.ExportService;
 import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
@@ -19,6 +17,7 @@ import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
 import org.folio.service.mapping.converter.SrsRecordConverterService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,10 +28,20 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class ExportManagerUnitTest {
   private static final int LIMIT = 50;
+  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+
   @Mock
   private RecordLoaderService recordLoaderService;
   @Mock
@@ -43,11 +52,13 @@ class ExportManagerUnitTest {
   private InventoryRecordConverterService inventoryRecordService;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private MappingProfileService mappingProfileService;
   @InjectMocks
   private ExportManagerImpl exportManager = Mockito.spy(new ExportManagerImpl());
 
   @Test
-  void exportBlocking_shouldPassExportFor_1000_Records() {
+  void exportBlocking_shouldPassExportFor_1000_UnderlyingSrsRecords() {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
@@ -56,13 +67,16 @@ class ExportManagerUnitTest {
     Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
+    Mockito.when(mappingProfileService.getById(eq(DEFAULT_MAPPING_PROFILE_ID), anyString())).thenReturn(Future.succeededFuture(new MappingProfile()));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
+    MappingProfile mappingProfile =
+        new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.SRS));
     // when
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", new MappingProfile());
+    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     exportManager.exportBlocking(exportPayload);
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class));
