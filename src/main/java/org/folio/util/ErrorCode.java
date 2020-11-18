@@ -19,7 +19,7 @@ public enum ErrorCode {
   SOME_UUIDS_NOT_FOUND("someUUIDsNotFound", "UUIDs not found in SRS or inventory: "),
   INVALID_UUID_FORMAT("invalidUUIDFormat", "Invalid UUID format: "),
   INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: "),
-  FAIL_TO_UPDATE_JOB("failToUpdateJob", "Fail to prepare job execution for export");
+  FAIL_TO_UPDATE_JOB("failToUpdateJob", "Fail to prepare job execution for export"),
   DEFAULT_MAPPING_PROFILE_NOT_FOUND("defaultMappingProfileNotFound", "Default mapping profile not found");
 
   private final String code;
