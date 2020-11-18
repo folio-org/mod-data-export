@@ -115,12 +115,6 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-//  @BeforeEach
-//  public void setUp() throws IOException {
-//    super.setUp();
-//    buildSrsJobProfile(okapiConnectionParams.getTenantId());
-//  }
-
   @Test
   @Order(1)
   void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
