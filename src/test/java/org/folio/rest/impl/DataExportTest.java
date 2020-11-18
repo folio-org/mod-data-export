@@ -39,6 +39,9 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.FileDefinition.UploadFormat;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
@@ -66,6 +69,7 @@ import org.springframework.context.annotation.Primary;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -95,6 +99,8 @@ class DataExportTest extends RestVerticleTestBase {
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
+  private static String srsJobProfileId;
+  private static String srsMappingProfileId;
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
@@ -103,29 +109,17 @@ class DataExportTest extends RestVerticleTestBase {
   @Autowired
   private ErrorLogService errorLogService;
 
-  private String srsJobProfileId;
-  private String mappingProfileId;
-
   public DataExportTest() {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @BeforeEach
-  public void setUp() throws IOException {
-    super.setUp();
-    srsJobProfileId =
-        buildCustomJobProfile(
-            okapiConnectionParams.getTenantId(), "srsMappingProfile.json", "srsJobProfile.json");
-  }
-
-  @AfterEach
-  public void tearDown() throws Exception {
-    super.tearDown();
-    deleteRequestById(DATA_EXPORT_JOB_PROFILES_ENDPOINT + "/{id}", srsJobProfileId);
-    deleteRequestById(DATA_EXPORT_MAPPING_PROFILES_ENDPOINT + "/{id}", mappingProfileId);
-  }
+//  @BeforeEach
+//  public void setUp() throws IOException {
+//    super.setUp();
+//    buildSrsJobProfile(okapiConnectionParams.getTenantId());
+//  }
 
   @Test
   @Order(1)
@@ -157,6 +151,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -187,6 +182,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -219,6 +215,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY_TWO_BATCHES, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -244,6 +241,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -277,6 +275,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_CQL, CQL, requestSpecificationForMockServer);
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -305,7 +304,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT, "mappingProfile.json", "jobProfile.json");
+    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -334,7 +333,7 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT, "mappingProfile.json", "jobProfile.json");
+    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
@@ -382,20 +381,36 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
 
-  private String buildCustomJobProfile(String tenantID, String mappingProfileFileName, String jobProfileFileName) {
-    String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + mappingProfileFileName);
+  private String buildCustomJobProfile(String tenantID) {
+    String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
     JsonObject mappingProfilejs = new JsonObject(mappingProfile);
-    mappingProfileId = postRequest(mappingProfilejs, DATA_EXPORT_MAPPING_PROFILES_ENDPOINT, tenantID)
-      .then()
-      .extract()
-      .path("id");
+    postRequest(mappingProfilejs, DATA_EXPORT_MAPPING_PROFILES_ENDPOINT, tenantID);
 
-    String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + jobProfileFileName);
+    String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
     JsonObject jobProfilejs = new JsonObject(jobProfile);
     Response response = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID);
     return response.then()
       .extract()
       .path("id");
+  }
+
+  private void buildSrsJobProfile(String tenantID) {
+    if (srsMappingProfileId == null) {
+      String srsMappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "srsMappingProfile.json");
+      JsonObject srsMappingProfileJson = new JsonObject(srsMappingProfile);
+      srsMappingProfileId = postRequest(srsMappingProfileJson, DATA_EXPORT_MAPPING_PROFILES_ENDPOINT, tenantID)
+        .then()
+        .extract()
+        .path("id");
+    }
+    if (srsJobProfileId == null) {
+      String srsJobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "srsJobProfile.json");
+      JsonObject srsJobProfileJson = new JsonObject(srsJobProfile);
+      Response response = postRequest(srsJobProfileJson, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID);
+      srsJobProfileId = response.then()
+        .extract()
+        .path("id");
+    }
   }
 
   private ArgumentCaptor<FileDefinition> captureFileExportDefinition(String tenantId) {

@@ -83,9 +83,8 @@ public class ExportManagerImpl implements ExportManager {
   @Override
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
-    this.executor.executeBlocking(blockingFuture -> {
-      exportBlocking(exportPayload);
-      blockingFuture.complete();
+    this.executor.executeBlocking(blockingPromise -> {
+      exportBlocking(exportPayload, blockingPromise);
     }, ar -> handleExportResult(ar, exportPayload));
   }
 
@@ -94,7 +93,7 @@ public class ExportManagerImpl implements ExportManager {
    *
    * @param exportPayload payload of the export request
    */
-  protected void exportBlocking(ExportPayload exportPayload) {
+  protected void exportBlocking(ExportPayload exportPayload, Promise blockingPromise) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
@@ -112,14 +111,16 @@ public class ExportManagerImpl implements ExportManager {
       mappingProfileService
           .getById(DEFAULT_MAPPING_PROFILE_ID, params.getTenantId())
           .onSuccess(
-              defaultMappingProfile ->
-                  generateRecordsOnTheFly(
-                      exportPayload,
-                      identifiers,
-                      fileExportDefinition,
-                      defaultMappingProfile,
-                      params,
-                      srsLoadResult))
+              defaultMappingProfile -> {
+                generateRecordsOnTheFly(
+                    exportPayload,
+                    identifiers,
+                    fileExportDefinition,
+                    defaultMappingProfile,
+                    params,
+                    srsLoadResult);
+                blockingPromise.complete();
+              })
           .onFailure(
               ar -> {
                 LOGGER.error("Failed to fetch default mapping profile");
@@ -127,12 +128,16 @@ public class ExportManagerImpl implements ExportManager {
                     ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getDescription(),
                     exportPayload.getJobExecutionId(),
                     params.getTenantId());
-                throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
+                throw new ServiceException(
+                    HttpStatus.HTTP_INTERNAL_SERVER_ERROR,
+                    ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
               });
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
-      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
+      generateRecordsOnTheFly(
+          exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
+      blockingPromise.complete();
     }
   }
 
