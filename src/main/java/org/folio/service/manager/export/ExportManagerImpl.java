@@ -10,10 +10,12 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.export.ExportService;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
@@ -24,6 +26,7 @@ import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
 import org.folio.service.mapping.converter.SrsRecordConverterService;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -33,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -62,7 +66,9 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private FileStorage fileStorage;
   @Autowired
-  ErrorLogService errorLogService;
+  private ErrorLogService errorLogService;
+  @Autowired
+  private MappingProfileService mappingProfileService;
 
   public ExportManagerImpl() {
   }
@@ -76,9 +82,8 @@ public class ExportManagerImpl implements ExportManager {
   @Override
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
-    this.executor.executeBlocking(blockingFuture -> {
-      exportBlocking(exportPayload);
-      blockingFuture.complete();
+    this.executor.executeBlocking(blockingPromise -> {
+      exportBlocking(exportPayload, blockingPromise);
     }, ar -> handleExportResult(ar, exportPayload));
   }
 
@@ -87,28 +92,41 @@ public class ExportManagerImpl implements ExportManager {
    *
    * @param exportPayload payload of the export request
    */
-  protected void exportBlocking(ExportPayload exportPayload) {
+  protected void exportBlocking(ExportPayload exportPayload, Promise blockingPromise) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    SrsLoadResult srsLoadResult = new SrsLoadResult();
-    /**
-     * For Q3-2020, if a custom mapping profile is used, never fetch the underlying SRS records, always generate marc records on the
-     * fly
-     */
-    if (isTransformationEmpty(mappingProfile)) {
-      srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
-      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
 
+    if (Objects.nonNull(mappingProfile)
+      && mappingProfile.getRecordTypes().contains(RecordType.SRS)
+      && !mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
+      SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
+      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
       List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params);
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
+      mappingProfileService.getDefault(params.getTenantId())
+        .onSuccess(defaultMappingProfile -> {
+            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
+            blockingPromise.complete();
+          })
+        .onFailure(ar -> {
+            LOGGER.error("Failed to fetch default mapping profile");
+            errorLogService.saveGeneralError(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getDescription(), exportPayload.getJobExecutionId(), params.getTenantId());
+            throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
+          });
     } else {
+      SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
+      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
+      blockingPromise.complete();
     }
+  }
 
+  private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
+                                       MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult) {
     InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
@@ -116,17 +134,14 @@ public class ExportManagerImpl implements ExportManager {
     if (numberOfNotFoundRecords > 0) {
       errorLogService.populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
     }
-    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
+    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(),
+      exportPayload.getJobExecutionId(), mappingProfile, params);
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }
-  }
-
-  private boolean isTransformationEmpty(MappingProfile mappingProfile) {
-    return mappingProfile.getTransformations().isEmpty();
   }
 
   /**

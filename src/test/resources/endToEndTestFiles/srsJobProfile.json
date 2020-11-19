@@ -1,0 +1,7 @@
+{
+  "id": "d446a395-9129-4680-a7d5-3ea9f418537d",
+  "name": "SRS job profile",
+  "destination": "fileSystem",
+  "description": "SRS job profile description",
+  "mappingProfileId": "946f57cf-08ac-451b-9ea9-56165b9353d5"
+}

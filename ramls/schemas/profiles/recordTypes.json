@@ -6,6 +6,7 @@
   "enum": [
     "INSTANCE",
     "HOLDINGS",
-    "ITEM"
+    "ITEM",
+    "SRS"
   ]
 }
