@@ -1,5 +1,12 @@
 package org.folio.service.mapping;
 
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
@@ -30,13 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static java.lang.Boolean.TRUE;
-import static java.util.Objects.nonNull;
-import static org.apache.commons.collections4.CollectionUtils.isEmpty;
-import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
-import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 
 public class RuleFactory {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -80,7 +80,8 @@ public class RuleFactory {
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
       } else if(HOLDINGS.equals(mappingTransformation.getRecordType()) || ITEM.equals(mappingTransformation.getRecordType()) ) {
-        LOGGER.error("Transformation with empty value is not available for record types Holdings and Item");
+        LOGGER.error(String.format("No transformation provided for field name: %s, and with record type: %s",
+          mappingTransformation.getFieldId(), mappingTransformation.getRecordType()));
       }
       if (rule.isPresent()) {
         rules.add(rule.get());
