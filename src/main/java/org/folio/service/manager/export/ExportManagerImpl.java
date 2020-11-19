@@ -48,7 +48,6 @@ public class ExportManagerImpl implements ExportManager {
   private static final int POOL_SIZE = 2;
   private static final int SRS_LOAD_PARTITION_SIZE = 50;
   private static final int INVENTORY_LOAD_PARTITION_SIZE = 50;
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
@@ -100,8 +99,8 @@ public class ExportManagerImpl implements ExportManager {
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
 
     if (Objects.nonNull(mappingProfile)
-        && mappingProfile.getRecordTypes().contains(RecordType.SRS)
-        && !mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
+      && mappingProfile.getRecordTypes().contains(RecordType.SRS)
+      && !mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
       SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
       List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
@@ -109,68 +108,39 @@ public class ExportManagerImpl implements ExportManager {
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
       mappingProfileService
-          .getById(DEFAULT_MAPPING_PROFILE_ID, params.getTenantId())
-          .onSuccess(
-              defaultMappingProfile -> {
-                generateRecordsOnTheFly(
-                    exportPayload,
-                    identifiers,
-                    fileExportDefinition,
-                    defaultMappingProfile,
-                    params,
-                    srsLoadResult);
-                blockingPromise.complete();
-              })
-          .onFailure(
-              ar -> {
-                LOGGER.error("Failed to fetch default mapping profile");
-                errorLogService.saveGeneralError(
-                    ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getDescription(),
-                    exportPayload.getJobExecutionId(),
-                    params.getTenantId());
-                throw new ServiceException(
-                    HttpStatus.HTTP_INTERNAL_SERVER_ERROR,
-                    ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
-              });
+        .getDefault(params.getTenantId())
+        .onSuccess(
+          defaultMappingProfile -> {
+            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
+            blockingPromise.complete();
+          })
+        .onFailure(ar -> {
+            LOGGER.error("Failed to fetch default mapping profile");
+            errorLogService.saveGeneralError(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getDescription(), exportPayload.getJobExecutionId(), params.getTenantId());
+            throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
+          });
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
-      generateRecordsOnTheFly(
-          exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
+      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
       blockingPromise.complete();
     }
   }
 
-  private void generateRecordsOnTheFly(
-      ExportPayload exportPayload,
-      List<String> identifiers,
-      FileDefinition fileExportDefinition,
-      MappingProfile mappingProfile,
-      OkapiConnectionParams params,
-      SrsLoadResult srsLoadResult) {
-    InventoryLoadResult instances =
-        loadInventoryInstancesInPartitions(
-            srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
-    LOGGER.info(
-        "Number of instances, that returned from inventory storage: {}",
-        instances.getInstances().size());
+  private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
+                                       MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult) {
+    InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      errorLogService.populateUUIDsNotFoundErrorLog(
-          exportPayload.getJobExecutionId(),
-          instances.getNotFoundInstancesUUIDs(),
-          params.getTenantId());
+      errorLogService.populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
     }
-    List<String> mappedMarcRecords =
-        inventoryRecordService.transformInventoryRecords(
-            instances.getInstances(), exportPayload.getJobExecutionId(), mappingProfile, params);
-    exportService.exportInventoryRecords(
-        mappedMarcRecords, fileExportDefinition, params.getTenantId());
-    exportPayload.setExportedRecordsNumber(
-        srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
-    exportPayload.setFailedRecordsNumber(
-        identifiers.size() - exportPayload.getExportedRecordsNumber());
+    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(),
+      exportPayload.getJobExecutionId(), mappingProfile, params);
+    exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());
     }

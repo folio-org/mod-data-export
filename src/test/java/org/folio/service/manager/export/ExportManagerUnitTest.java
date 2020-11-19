@@ -36,7 +36,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ServerErrorException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -78,14 +77,13 @@ class ExportManagerUnitTest {
     Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
-    Mockito.when(mappingProfileService.getById(eq(DEFAULT_MAPPING_PROFILE_ID), anyString())).thenReturn(Future.succeededFuture(new MappingProfile()));
+    Mockito.when(mappingProfileService.getDefault(anyString())).thenReturn(Future.succeededFuture(new MappingProfile()));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
     Map<String, String> params = new HashMap<>();
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
-    MappingProfile mappingProfile =
-        new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.SRS));
+    MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.SRS));
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     exportManager.exportBlocking(exportPayload, Promise.promise());
@@ -107,7 +105,7 @@ class ExportManagerUnitTest {
     InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
     Mockito.when(marcLoadResult.getInstanceIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
-    Mockito.when(mappingProfileService.getById(eq(DEFAULT_MAPPING_PROFILE_ID), anyString())).thenReturn(Future.failedFuture(new NotFoundException()));
+    Mockito.when(mappingProfileService.getDefault(anyString())).thenReturn(Future.failedFuture(new NotFoundException()));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
