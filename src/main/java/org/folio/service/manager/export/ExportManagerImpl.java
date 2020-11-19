@@ -107,10 +107,8 @@ public class ExportManagerImpl implements ExportManager {
         exportPayload.getJobExecutionId(), params);
       exportService.exportSrsRecord(marcToExport, fileExportDefinition);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
-      mappingProfileService
-        .getDefault(params.getTenantId())
-        .onSuccess(
-          defaultMappingProfile -> {
+      mappingProfileService.getDefault(params.getTenantId())
+        .onSuccess(defaultMappingProfile -> {
             generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
             blockingPromise.complete();
           })

@@ -80,10 +80,8 @@ public class RuleFactory {
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
       } else if(HOLDINGS.equals(mappingTransformation.getRecordType()) || ITEM.equals(mappingTransformation.getRecordType()) ) {
-        LOGGER.error(
-            String.format(
-                "No transformation provided for field name: %s, and with record type: %s",
-                mappingTransformation.getFieldId(), mappingTransformation.getRecordType()));
+        LOGGER.error(String.format("No transformation provided for field name: %s, and with record type: %s",
+          mappingTransformation.getFieldId(), mappingTransformation.getRecordType()));
       }
       if (rule.isPresent()) {
         rules.add(rule.get());
