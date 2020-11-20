@@ -1,7 +1,7 @@
 package org.folio.service.mapping.referencedata;
 
 import org.folio.clients.InventoryClient;
-import org.folio.processor.ReferenceData;
+import org.folio.processor.referencedata.ReferenceData;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

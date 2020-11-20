@@ -4,7 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.MapUtils;
-import org.folio.processor.ReferenceData;
+import org.folio.processor.referencedata.ReferenceData;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;

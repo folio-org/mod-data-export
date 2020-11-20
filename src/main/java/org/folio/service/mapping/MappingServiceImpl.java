@@ -5,7 +5,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.clients.ConfigurationsClient;
-import org.folio.processor.ReferenceData;
+import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.TranslationsFunctionHolder;
@@ -96,7 +96,9 @@ public class MappingServiceImpl implements MappingService {
   protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules);
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException  -> {
+
+    }));
     return Optional.of(record);
   }
 
@@ -110,7 +112,7 @@ public class MappingServiceImpl implements MappingService {
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules);
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException -> {}));
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {

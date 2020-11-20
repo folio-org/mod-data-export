@@ -6,7 +6,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
-import org.folio.processor.ReferenceData;
+import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.MappingProfile;
