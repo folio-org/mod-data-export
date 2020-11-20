@@ -96,9 +96,7 @@ public class MappingServiceImpl implements MappingService {
   protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException  -> {
-
-    }));
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException  -> {}));
     return Optional.of(record);
   }
 
