@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(VertxExtension.class)
 class MappingProfileServiceTest extends RestVerticleTestBase {
 
+  private static final String INVALID_TRANSFORMATION = "123qq$qweqwe";
+
   @Test
   void postMappingProfile_return422Status_whenTransformationFieldIdDoesntExist() {
     MappingProfile mappingProfile = new MappingProfile()
@@ -44,6 +46,24 @@ class MappingProfileServiceTest extends RestVerticleTestBase {
       .withTransformations(Lists.newArrayList(new Transformations()
         .withFieldId("instance.id")
         .withRecordType(RecordType.HOLDINGS)));
+    RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(mappingProfile).encode())
+      .when()
+      .post(MAPPING_PROFILE_URL)
+      .then()
+      .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+  }
+
+  @Test
+  void postMappingProfile_return422Status_whenTransformationInvalid() {
+    MappingProfile mappingProfile = new MappingProfile()
+      .withName("mappingProfileName")
+      .withRecordTypes(Lists.newArrayList(RecordType.HOLDINGS))
+      .withTransformations(Lists.newArrayList(new Transformations()
+        .withFieldId("instance.id")
+        .withRecordType(RecordType.INSTANCE)
+        .withTransformation(INVALID_TRANSFORMATION)));
     RestAssured.given()
       .spec(jsonRequestSpecification)
       .body(JsonObject.mapFrom(mappingProfile).encode())
