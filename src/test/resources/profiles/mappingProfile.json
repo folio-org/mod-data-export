@@ -10,7 +10,7 @@
     {
       "fieldId": "item.callnumber",
       "path": "$.holdings[*].items[*].effectiveCallNumberComponents.callNumber",
-      "transformation": "001",
+      "transformation": "001  $a",
       "enabled": true,
       "recordType": "ITEM"
     }

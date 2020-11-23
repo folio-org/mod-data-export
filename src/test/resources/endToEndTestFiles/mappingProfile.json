@@ -10,7 +10,7 @@
     {
       "fieldId": "holdings.callnumber",
       "path": "$.holdings[*].callNumber",
-      "transformation": "900ff$a",
+      "transformation": "90011$a",
       "enabled": true,
       "recordType": "HOLDINGS"
     }

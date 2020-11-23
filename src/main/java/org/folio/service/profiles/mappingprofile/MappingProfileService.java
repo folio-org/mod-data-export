@@ -54,6 +54,14 @@ public interface MappingProfileService {
   Future<MappingProfile> getById(String mappingProfileId, String tenantId);
 
   /**
+   * Gets default {@link MappingProfile}
+   *
+   * @param tenantId         tenant id
+   * @return future with default {@link MappingProfile}
+   */
+  Future<MappingProfile> getDefault(String tenantId);
+
+  /**
    * Validates {@link MappingProfile}
    *
    * @param mappingProfile {@link MappingProfile} to validate
