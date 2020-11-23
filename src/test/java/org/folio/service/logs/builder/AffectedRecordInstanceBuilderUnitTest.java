@@ -120,7 +120,7 @@ class AffectedRecordInstanceBuilderUnitTest {
   }
 
   @Test
-  void buildAffectedRecord_shouldBuildRecordWithTypeAndId_whenGivenJsonIsnull() {
+  void buildAffectedRecord_shouldBuildRecordWithTypeAndId_whenGivenJsonIsEmpty() {
 
     // when
     AffectedRecord affectedRecord = affectedRecordBuilder.build(new JsonObject(), "jobId", INSTANCE_ID, false, params);
