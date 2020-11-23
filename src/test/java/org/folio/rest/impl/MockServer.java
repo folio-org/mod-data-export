@@ -75,6 +75,7 @@ public class MockServer {
   private static final String CAMPUSES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_campuses_response.json";
   private static final String INSTITUTIONS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_institutions_response.json";
   private static final String CONFIGURATIONS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "configurations/get_configuration_response.json";
+  private static final String CONFIGURATIONS_MOCK_DATA_PATH_FOR_HOST = BASE_MOCK_DATA_PATH + "configurations/get_host_configuration_response.json";
   private static final String MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_material_types_response.json";
   private static final String INSTANCE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_types_response.json";
   private static final String INSTANCE_FORMATS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_formats_response.json";
@@ -512,16 +513,22 @@ public class MockServer {
     logger.info("handleGetRulesFromModConfigurations got: " + ctx.request()
       .path());
     try {
-      JsonObject rulesFromConfig = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
-      URL url = Resources.getResource("rules/rulesDefault.json");
-      String rules = Resources.toString(url, StandardCharsets.UTF_8);
-      rulesFromConfig.getJsonArray("configs")
-        .stream()
-        .map(object -> (JsonObject) object)
-        .forEach(obj -> obj.put("value", rules));
+      if (ctx.request().getParam("query").contains("FOLIO_HOST")) {
+        JsonObject host = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH_FOR_HOST));
+        addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, host);
+        serverResponse(ctx, 200, APPLICATION_JSON, host.encodePrettily());
+      } else {
+        JsonObject rulesFromConfig = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
+        URL url = Resources.getResource("rules/rulesDefault.json");
+        String rules = Resources.toString(url, StandardCharsets.UTF_8);
+        rulesFromConfig.getJsonArray("configs")
+          .stream()
+          .map(object -> (JsonObject) object)
+          .forEach(obj -> obj.put("value", rules));
 
-      addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, rulesFromConfig);
-      serverResponse(ctx, 200, APPLICATION_JSON, rulesFromConfig.encodePrettily());
+        addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, rulesFromConfig);
+        serverResponse(ctx, 200, APPLICATION_JSON, rulesFromConfig.encodePrettily());
+      }
     } catch (IOException e) {
       ctx.response()
         .setStatusCode(500)

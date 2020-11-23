@@ -60,4 +60,17 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
     Assert.assertEquals(DEFAULT_LEADER_TRANSLATION_PARAMETERS_POS19, ruleList.get(0).getDataSources().get(0).getTranslation().getParameter("position19"));
   }
 
+  @Test
+  void shouldRetrieveRecordLinkFromModConfig() {
+    ConfigurationsClient configurationsClient = new ConfigurationsClient();
+    String id = UUID.randomUUID().toString();
+    String expectedLink = "https://folio-testing.dev.folio.org/inventory/view/" + id;
+
+    //when
+    String recordLink = configurationsClient.getInventoryRecordLink(id, JOB_EXECUTION_ID, okapiConnectionParams);
+
+    Assert.assertEquals(expectedLink, recordLink);
+
+  }
+
 }

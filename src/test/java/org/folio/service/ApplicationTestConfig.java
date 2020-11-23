@@ -21,16 +21,11 @@ import java.util.Map;
   "org.folio.rest.impl"})
 public class ApplicationTestConfig {
 
-  @Autowired
-  AffectedRecordInstanceBuilder affectedRecordInstanceBuilder;
-  @Autowired
-  AffectedRecordHoldingBuilder affectedRecordHoldingBuilder;
-  @Autowired
-  AffectedRecordItemBuilder affectedRecordItemBuilder;
-
   @Bean
   @Qualifier("affectedRecordBuilders")
-  public Map<String, AffectedRecordBuilder> getBuilders() {
+  public Map<String, AffectedRecordBuilder> getBuilders(@Autowired AffectedRecordInstanceBuilder affectedRecordInstanceBuilder,
+                                                        @Autowired AffectedRecordHoldingBuilder affectedRecordHoldingBuilder,
+                                                        @Autowired AffectedRecordItemBuilder affectedRecordItemBuilder) {
     Map<String, AffectedRecordBuilder> builders = new HashMap<>();
     builders.put(AffectedRecordInstanceBuilder.class.getName(), affectedRecordInstanceBuilder);
     builders.put(AffectedRecordHoldingBuilder.class.getName(), affectedRecordHoldingBuilder);

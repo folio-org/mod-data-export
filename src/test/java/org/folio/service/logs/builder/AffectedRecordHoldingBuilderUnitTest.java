@@ -4,6 +4,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.service.ApplicationTestConfig;
@@ -30,6 +31,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.RestVerticleTestBase.TENANT_ID;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -87,6 +89,25 @@ class AffectedRecordHoldingBuilderUnitTest {
     assertEquals(expectedLink, affectedRecord.getInventoryRecordLink());
     assertEquals(1, affectedRecord.getAffectedRecords().size());
     assertTrue(Objects.isNull(affectedRecord.getTitle()));
+    Mockito.verify(configurationsClient, times(1))
+      .getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class));
+  }
+
+  @Test
+  void buildAffectedRecord_shouldReturnRecordWithoutLink_IfClientReturnEmpty() {
+    // given
+    JsonObject record = new JsonObject(readFileContentFromResources("mapping/given_InstanceHoldingsItems.json"));
+    Mockito.when(configurationsClient.getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class)))
+      .thenReturn(StringUtils.EMPTY);
+
+    // when
+    AffectedRecord affectedRecord = affectedRecordBuilder.build(record, "jobId", HOLDING_ID, true, params);
+
+    // then
+    assertEquals(HOLDING_ID, affectedRecord.getId());
+    assertEquals(HOLDING_HR_ID, affectedRecord.getHrid());
+    assertEquals(HOLDINGS, affectedRecord.getRecordType());
+    assertNull(affectedRecord.getInventoryRecordLink());
     Mockito.verify(configurationsClient, times(1))
       .getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class));
   }

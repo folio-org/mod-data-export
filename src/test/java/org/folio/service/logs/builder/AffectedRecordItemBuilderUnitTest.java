@@ -4,6 +4,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.service.ApplicationTestConfig;
@@ -30,6 +31,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.RestVerticleTestBase.TENANT_ID;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -86,6 +88,25 @@ class AffectedRecordItemBuilderUnitTest {
     assertEquals(ITEM, affectedRecord.getRecordType());
     assertEquals("localhost:3000/inventory/view/" + INSTANCE_ID + "/" + HOLDING_ID + "/" + ITEM_ID,
       affectedRecord.getInventoryRecordLink());
+    Mockito.verify(configurationsClient, times(1))
+      .getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class));
+  }
+
+  @Test
+  void buildAffectedRecord_shouldReturnRecordWithoutLink_IfClientReturnEmpty() {
+    // given
+    JsonObject record = new JsonObject(readFileContentFromResources("mapping/given_InstanceHoldingsItems.json"));
+    Mockito.when(configurationsClient.getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class)))
+      .thenReturn(StringUtils.EMPTY);
+
+    // when
+    AffectedRecord affectedRecord = affectedRecordBuilder.build(record, "jobId", ITEM_ID, true, params);
+
+    // then
+    assertEquals(ITEM_ID, affectedRecord.getId());
+    assertEquals(ITEM_HR_ID, affectedRecord.getHrid());
+    assertEquals(ITEM, affectedRecord.getRecordType());
+    assertNull(affectedRecord.getInventoryRecordLink());
     Mockito.verify(configurationsClient, times(1))
       .getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class));
   }

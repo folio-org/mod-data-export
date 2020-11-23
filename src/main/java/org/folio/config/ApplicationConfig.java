@@ -20,16 +20,12 @@ import java.util.Map;
   "org.folio.clients",
   "org.folio.rest.impl"})
 public class ApplicationConfig {
-  @Autowired
-  AffectedRecordInstanceBuilder affectedRecordInstanceBuilder;
-  @Autowired
-  AffectedRecordHoldingBuilder affectedRecordHoldingBuilder;
-  @Autowired
-  AffectedRecordItemBuilder affectedRecordItemBuilder;
 
   @Bean
   @Qualifier("affectedRecordBuilders")
-  public Map<String, AffectedRecordBuilder> getBuilders() {
+  public Map<String, AffectedRecordBuilder> getBuilders(@Autowired AffectedRecordInstanceBuilder affectedRecordInstanceBuilder,
+                                                        @Autowired AffectedRecordHoldingBuilder affectedRecordHoldingBuilder,
+                                                        @Autowired AffectedRecordItemBuilder affectedRecordItemBuilder) {
     return ImmutableMap.<String, AffectedRecordBuilder>builder()
       .put(AffectedRecordInstanceBuilder.class.getName(), affectedRecordInstanceBuilder)
       .put(AffectedRecordHoldingBuilder.class.getName(), affectedRecordHoldingBuilder)

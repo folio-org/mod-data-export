@@ -2,6 +2,7 @@ package org.folio.service.logs.builder;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.service.logs.AffectedRecordInstanceBuilder;
@@ -25,6 +26,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.RestVerticleTestBase.TENANT_ID;
 import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -77,6 +79,27 @@ class AffectedRecordInstanceBuilderUnitTest {
   }
 
   @Test
+  void buildAffectedRecord_shouldReturnRecordWithoutLink_IfClientReturnEmpty() {
+    // given
+    JsonObject record = new JsonObject(readFileContentFromResources("mapping/given_InstanceHoldingsItems.json"));
+    Mockito.when(configurationsClient.getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class)))
+      .thenReturn(StringUtils.EMPTY);
+
+    // when
+    AffectedRecord affectedRecord = affectedRecordBuilder.build(record, "jobId", INSTANCE_ID, true, params);
+
+    // then
+    assertEquals(INSTANCE_TITLE, affectedRecord.getTitle());
+    assertEquals(INSTANCE_ID, affectedRecord.getId());
+    assertEquals(INSTANCE_HR_ID, affectedRecord.getHrid());
+    assertEquals(INSTANCE, affectedRecord.getRecordType());
+    assertNull(affectedRecord.getInventoryRecordLink());
+    assertTrue(affectedRecord.getAffectedRecords().isEmpty());
+    Mockito.verify(configurationsClient, times(1))
+      .getInventoryRecordLink(anyString(), anyString(), any(OkapiConnectionParams.class));
+  }
+
+  @Test
   void buildAffectedRecord_shouldReturnRecordWithoutLink_IfLinkCreationNotRequired() {
     // give
 
@@ -91,6 +114,23 @@ class AffectedRecordInstanceBuilderUnitTest {
     assertEquals(INSTANCE_HR_ID, affectedRecord.getHrid());
     assertEquals(INSTANCE, affectedRecord.getRecordType());
     assertTrue(Objects.isNull(affectedRecord.getInventoryRecordLink()));
+    verify(configurationsClient, never())
+      .getConfigsFromModConfigByQuery(anyString(), anyString(), any(OkapiConnectionParams.class));
+    assertTrue(affectedRecord.getAffectedRecords().isEmpty());
+  }
+
+  @Test
+  void buildAffectedRecord_shouldBuildRecordWithTypeAndId_whenGivenJsonIsnull() {
+
+    // when
+    AffectedRecord affectedRecord = affectedRecordBuilder.build(new JsonObject(), "jobId", INSTANCE_ID, false, params);
+
+    // then
+    assertNull(affectedRecord.getTitle());
+    assertNull(affectedRecord.getHrid());
+    assertEquals(INSTANCE_ID, affectedRecord.getId());
+    assertEquals(INSTANCE, affectedRecord.getRecordType());
+    assertNull(affectedRecord.getInventoryRecordLink());
     verify(configurationsClient, never())
       .getConfigsFromModConfigByQuery(anyString(), anyString(), any(OkapiConnectionParams.class));
     assertTrue(affectedRecord.getAffectedRecords().isEmpty());
