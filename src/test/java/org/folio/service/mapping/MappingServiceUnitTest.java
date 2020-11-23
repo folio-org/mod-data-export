@@ -153,7 +153,7 @@ class MappingServiceUnitTest {
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping: reason - undefined"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
+    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping, reason: undefined, cause: java.lang.NullPointerException"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
   }
 

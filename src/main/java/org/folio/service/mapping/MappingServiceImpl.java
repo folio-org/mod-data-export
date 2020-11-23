@@ -98,7 +98,7 @@ public class MappingServiceImpl implements MappingService {
     RecordWriter recordWriter = new MarcRecordWriter();
     String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
-      String reason = String.format("An error occurred during fields mapping, reason: %s, cause: %s ", translationException.getErrorCode().getDescription(), translationException.getMessage());
+      String reason = String.format("An error occurred during fields mapping, reason: %s, cause: %s", translationException.getErrorCode().getDescription(), translationException.getMessage());
       errorLogService.saveWithAffectedRecord(instance, reason, jobExecutionId, translationException, connectionParams);
     }));
     return Optional.of(record);
