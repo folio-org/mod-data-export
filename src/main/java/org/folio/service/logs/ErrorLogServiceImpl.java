@@ -85,7 +85,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, TranslationException translationException, OkapiConnectionParams params) {
-    AffectedRecord affectedRecord;
+    AffectedRecord affectedRecord = new AffectedRecord();
     RecordInfo recordInfo = translationException.getRecordInfo();
     if (recordInfo.getType().isInstance()) {
       affectedRecord = affectedRecordsBuilders
@@ -95,7 +95,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
       affectedRecord = affectedRecordsBuilders
         .get(AffectedRecordHoldingBuilder.class.getName())
         .build(record, jobExecutionId, recordInfo.getId(), true, params);
-    } else {
+    } else if (recordInfo.getType().isItem()){
       affectedRecord = affectedRecordsBuilders
         .get(AffectedRecordItemBuilder.class.getName())
         .build(record, jobExecutionId, recordInfo.getId(), true, params);

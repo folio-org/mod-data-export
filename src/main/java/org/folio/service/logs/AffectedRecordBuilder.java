@@ -16,7 +16,7 @@ public interface AffectedRecordBuilder {
    *
    * @param record                 record used for mapping process
    * @param jobExecutionId         job execution id
-   * @param recordId               id if the affected record
+   * @param recordId               id of the affected record
    * @param isLinkCreationRequired if true - link to the record will be created, otherwise not
    * @param params                 okapi connection parameters
    * @return {@link AffectedRecord}

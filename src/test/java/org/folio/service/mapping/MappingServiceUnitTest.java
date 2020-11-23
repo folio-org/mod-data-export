@@ -6,6 +6,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.error.TranslationException;
 import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.ErrorLog;
@@ -46,34 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_PATH;
-import static org.folio.TestUtil.EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_URI_FIELD_ID;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_HR_ID_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_HR_ID_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_METADATA_CREATED_DATE_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_METADATA_CREATED_DATE_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_METADATA_UPDATED_DATE_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH;
-import static org.folio.TestUtil.ITEMS_EFFECTIVE_CALL_NUMBER_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.MATERIALTYPE_FIELD_ID;
-import static org.folio.TestUtil.MATERIAL_TYPE_ID_PATH;
-import static org.folio.TestUtil.getFileFromResources;
-import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.TestUtil.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -94,6 +68,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -162,6 +137,22 @@ class MappingServiceUnitTest {
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+
+  }
+
+  @Test
+  void shouldCallSaveAffectedRecord_whenReferenceDataIsNull_asManyTimes_asErrorsOccurs() {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(null);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    // then
+    verify(errorLogService, times(59)).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping: reason - undefined"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
   }
 
