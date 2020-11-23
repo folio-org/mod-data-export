@@ -6,6 +6,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.TranslationException;
 import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
@@ -143,7 +144,7 @@ class MappingServiceUnitTest {
   @Test
   void shouldCallSaveAffectedRecord_whenReferenceDataIsNull_asManyTimes_asErrorsOccurs() {
     // given
-    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(null);
@@ -152,7 +153,7 @@ class MappingServiceUnitTest {
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService, times(59)).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping: reason - undefined"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
+    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping: reason - undefined"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
   }
 

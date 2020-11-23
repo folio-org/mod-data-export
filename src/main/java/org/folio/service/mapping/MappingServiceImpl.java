@@ -98,7 +98,8 @@ public class MappingServiceImpl implements MappingService {
     RecordWriter recordWriter = new MarcRecordWriter();
     String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
-      errorLogService.saveWithAffectedRecord(instance, "An error occurred during fields mapping: reason - " + translationException.getErrorCode().getDescription(), jobExecutionId, translationException, connectionParams);
+      String reason = String.format("An error occurred during fields mapping, reason: %s, cause: %s ", translationException.getErrorCode().getDescription(), translationException.getMessage());
+      errorLogService.saveWithAffectedRecord(instance, reason, jobExecutionId, translationException, connectionParams);
     }));
     return Optional.of(record);
   }
@@ -114,8 +115,10 @@ public class MappingServiceImpl implements MappingService {
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
     return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException ->
-      errorLogService.saveGeneralError("An error occurred during fields mapping for srs record with id: "
-        + translationException.getRecordInfo().getId(), jobExecutionId, connectionParams.getTenantId())));
+      errorLogService.saveGeneralError(String.format("An error occurred during fields mapping for srs record with " +
+          "id: %s, reason: %s, cause: %s ", translationException.getRecordInfo().getId(),
+        translationException.getErrorCode().getDescription(), translationException.getMessage()),
+        jobExecutionId, connectionParams.getTenantId())));
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {
