@@ -91,6 +91,7 @@ import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -166,7 +167,7 @@ class MappingServiceUnitTest {
 
 
   @Test
-  void shouldPopulateErrorLog_whenMappingFailed() throws FileNotFoundException {
+  void shouldPopulateErrorLog_whenMappingFailed() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
@@ -174,11 +175,11 @@ class MappingServiceUnitTest {
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
-    doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyList());
+    doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyString(), anyList(), any(OkapiConnectionParams.class));
     // when
     mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(instance, "An error occurred during fields mapping", jobExecutionId, params.getTenantId());
+    verify(errorLogService).saveGeneralError(eq("An error occurred during fields mapping"), eq(jobExecutionId),  any());
   }
 
   @Test

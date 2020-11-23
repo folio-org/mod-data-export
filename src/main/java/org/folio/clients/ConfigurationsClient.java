@@ -22,16 +22,50 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 @Component
 public class ConfigurationsClient {
+  public static final String QUERY_VALUE_FOR_HOST = "code=\"FOLIO_HOST\"";
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String QUERY = "?query=";
   private static final String QUERY_VALUE = "code=\"RULES_OVERRIDE\" AND enabled==true";
+  private static final String RECORDS_URL_PART = "/inventory/view/";
+
   @Autowired
   private ErrorLogService errorLogService;
+
+  public Optional<JsonObject> getConfigsFromModConfigByQuery(String jobExecutionId, String query, OkapiConnectionParams params ) {
+    String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
+    Optional<JsonObject> response;
+    try {
+      response = Optional.of(ClientUtil.getRequest(params, endpoint));
+    } catch (HttpClientException e) {
+      errorLogService.saveGeneralError("Error while query the configs from mod configuration by query: " + query + SPACE + e.getMessage(), jobExecutionId, params.getTenantId());
+      response = Optional.empty();
+    }
+    return response;
+  }
+
+  public String getInventoryRecordLink(String idsUrlPart, String jobExecutionId, OkapiConnectionParams params) {
+    Optional<JsonObject> jsonObject = getConfigsFromModConfigByQuery(jobExecutionId, ConfigurationsClient.QUERY_VALUE_FOR_HOST, params);
+    String query = RECORDS_URL_PART + idsUrlPart;
+    if (jsonObject.isPresent()) {
+      JsonArray configs = jsonObject.get().getJsonArray("configs");
+      if (configs.size() == 0) {
+        LOGGER.error("No configuration for host in mod config. There will be no link to the failed entry");
+        errorLogService.saveGeneralError("Error while query the configs from mod configuration by query: "
+          + query + SPACE + "No configuration for host in mod config. There will be no link to the failed record", jobExecutionId, params.getTenantId());
+        return EMPTY;
+      }
+      return configs.getJsonObject(0).getString("value") + query;
+    } else {
+      return EMPTY;
+    }
+  }
 
   /**
    * Fetch rules for the mapping process from mod-configuration. If there are no rules provided in mod-configuration

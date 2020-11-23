@@ -39,7 +39,7 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
-import static org.folio.util.ErrorCode.reasonsAccordingToUUIDs;
+import static org.folio.util.ErrorCode.reasonsAccordingToExport;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -177,7 +177,7 @@ class InputDataManagerImpl implements InputDataManager {
     if (status.equals(JobExecution.Status.COMPLETED)) {
       // check if there were any errors in the previous batches , if yes then complete the job with
       // "Completed with errors" status
-      isErrorsRelatedToUUIDsPresent(jobExecutionId, tenantId)
+      isSelectedErrorsPresent(jobExecutionId, tenantId)
           .onComplete(
               isAnyErrorPresent -> {
                 if (isAnyErrorPresent.succeeded()
@@ -195,10 +195,10 @@ class InputDataManagerImpl implements InputDataManager {
     removeInputDataContext(jobExecutionId);
   }
 
-  private Future<Boolean> isErrorsRelatedToUUIDsPresent(String jobExecutionId, String tenantId) {
+  private Future<Boolean> isSelectedErrorsPresent(String jobExecutionId, String tenantId) {
     Promise<Boolean> promise = Promise.promise();
     errorLogService
-        .isErrorsByReasonPresent(reasonsAccordingToUUIDs(), jobExecutionId, tenantId)
+        .isErrorsByReasonPresent(reasonsAccordingToExport(), jobExecutionId, tenantId)
         .onSuccess(promise::complete)
         .onFailure(ar -> promise.complete(false));
 
