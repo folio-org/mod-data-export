@@ -107,17 +107,18 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
     Optional<JsonObject> recordLink = configurationsClient.getConfigsFromModConfigByQuery(JOB_EXECUTION_ID, "FAIL", okapiConnectionParams);
 
     // then
-    context.verify(() -> {
-      Assert.assertTrue(recordLink.isEmpty());
-      Criterion criterion = HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(JOB_EXECUTION_ID, "Error while query the configs from mod configuration by query");
-      errorLogService.getByQuery(criterion, okapiConnectionParams.getTenantId())
-        .onSuccess(errorLogList -> {
-          Assertions.assertNotNull(errorLogList);
-          Assertions.assertFalse(errorLogList.isEmpty());
-          Assertions.assertEquals(JOB_EXECUTION_ID, errorLogList.get(0).getJobExecutionId());
-          context.completeNow();
-        });
-    });
+    vertx.setTimer(2000L, handler ->
+      context.verify(() -> {
+        Assert.assertTrue(recordLink.isEmpty());
+        Criterion criterion = HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(JOB_EXECUTION_ID, "Error while query the configs from mod configuration by query");
+        errorLogService.getByQuery(criterion, okapiConnectionParams.getTenantId())
+          .onSuccess(errorLogList -> {
+            Assertions.assertNotNull(errorLogList);
+            Assertions.assertFalse(errorLogList.isEmpty());
+            Assertions.assertEquals(JOB_EXECUTION_ID, errorLogList.get(0).getJobExecutionId());
+            context.completeNow();
+          });
+      }));
 
   }
 
