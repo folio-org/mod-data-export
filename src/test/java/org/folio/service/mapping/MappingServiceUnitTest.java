@@ -140,7 +140,7 @@ class MappingServiceUnitTest {
   }
 
   @Test
-  void shouldCallSaveAffectedRecord_whenReferenceDataIsNull_asManyTimes_asErrorsOccurs() {
+  void shouldCallSaveAffectedRecord_whenReferenceDataIsNull() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instanceHolding.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
@@ -156,7 +156,7 @@ class MappingServiceUnitTest {
   }
 
   @Test
-  void shouldReturnVariableFieldsForHoldingsAndItem_whenMappingProfileTransformationsAreProvided2() throws FileNotFoundException {
+  void shouldSaveGeneralError_whenReferenceDataIsNull() {
     // given
     JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
     String expectedReason = "An error occurred during fields mapping for srs record with id: 65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61, reason: undefined, cause: java.lang.NullPointerException ";
