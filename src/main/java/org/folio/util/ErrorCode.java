@@ -20,7 +20,9 @@ public enum ErrorCode {
   INVALID_UUID_FORMAT("invalidUUIDFormat", "Invalid UUID format: "),
   INVALID_EXPORT_FILE_DEFINITION_ID("invalidExportFileDefinitionId", "Invalid export file definition id: "),
   FAIL_TO_UPDATE_JOB("failToUpdateJob", "Fail to prepare job execution for export"),
-  DEFAULT_MAPPING_PROFILE_NOT_FOUND("defaultMappingProfileNotFound", "Default mapping profile not found");
+  DEFAULT_MAPPING_PROFILE_NOT_FOUND("defaultMappingProfileNotFound", "Default mapping profile not found"),
+  DATE_PARSE_ERROR_CODE("errorDuringParsingDate", "An error occurs during parsing the date while the mapping process"),
+  UNDEFINED("undefined", "undefined");
 
   private final String code;
   private final String description;
@@ -47,11 +49,13 @@ public enum ErrorCode {
     return new Error().withCode(code).withMessage(description);
   }
 
-  public static List<String> reasonsAccordingToUUIDs() {
+  public static List<String> reasonsAccordingToExport() {
     List<String> errorCodesForUUIDs = new ArrayList<>();
     errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND.getDescription());
     errorCodesForUUIDs.add(SOME_RECORDS_FAILED.getDescription());
     errorCodesForUUIDs.add(INVALID_UUID_FORMAT.getDescription());
+    errorCodesForUUIDs.add(DATE_PARSE_ERROR_CODE.getDescription());
+    errorCodesForUUIDs.add(UNDEFINED.getDescription());
     return errorCodesForUUIDs;
   }
 }

@@ -2,9 +2,11 @@ package org.folio.service.logs;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import org.folio.processor.error.TranslationException;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.OkapiConnectionParams;
 
 import java.util.Collection;
 import java.util.List;
@@ -71,10 +73,10 @@ public interface ErrorLogService {
    * @param record         {@link JsonObject} inventory record that is cause of the error
    * @param reason         the reason of the error
    * @param jobExecutionId id of specific job execution
-   * @param tenantId       id of specific tenant
+   * @param params         okapi connection parameters
    * @return future with saved {@link ErrorLog}
    */
-  Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, String tenantId);
+  Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, TranslationException recordInfo, OkapiConnectionParams params);
 
   /**
    * Gets {@link ErrorLog}

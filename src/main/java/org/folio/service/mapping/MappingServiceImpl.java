@@ -5,8 +5,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.clients.ConfigurationsClient;
-import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.RuleProcessor;
+import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.folio.reader.EntityReader;
@@ -85,18 +85,22 @@ public class MappingServiceImpl implements MappingService {
   private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     try {
       List<Rule> finalRules = RuleHandler.preHandle(instance, originalRules);
-      return mapInstance(instance, referenceData, finalRules);
+      return mapInstance(instance, referenceData, jobExecutionId, finalRules, connectionParams);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
-      errorLogService.saveWithAffectedRecord(instance, "An error occurred during fields mapping", jobExecutionId, connectionParams.getTenantId());
+      errorLogService.saveGeneralError("An error occurred during fields mapping", jobExecutionId, connectionParams.getTenantId());
       return Optional.empty();
     }
   }
 
-  protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> rules) {
+  protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, String jobExecutionId,  List<Rule> rules, OkapiConnectionParams connectionParams) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance);
     RecordWriter recordWriter = new MarcRecordWriter();
-    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException  -> {}));
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException -> {
+      LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
+      String reason = String.format("An error occurred during fields mapping, reason: %s, cause: %s", translationException.getErrorCode().getDescription(), translationException.getMessage());
+      errorLogService.saveWithAffectedRecord(instance, reason, jobExecutionId, translationException, connectionParams);
+    }));
     return Optional.of(record);
   }
 
@@ -110,7 +114,11 @@ public class MappingServiceImpl implements MappingService {
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException -> {}));
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException ->
+      errorLogService.saveGeneralError(String.format("An error occurred during fields mapping for srs record with " +
+          "id: %s, reason: %s, cause: %s ", translationException.getRecordInfo().getId(),
+        translationException.getErrorCode().getDescription(), translationException.getMessage()),
+        jobExecutionId, connectionParams.getTenantId())));
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {

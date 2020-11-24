@@ -2,34 +2,33 @@ package org.folio.service.logs;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.ErrorLogDao;
+import org.folio.processor.error.RecordInfo;
+import org.folio.processor.error.TranslationException;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.util.HelperUtils;
+import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
-import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.INSTANCE;
-import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndReasons;
@@ -37,15 +36,14 @@ import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAnd
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String HRID_KEY = "hrid";
-  private static final String ID_KEY = "id";
-  private static final String TITLE_KEY = "title";
-  private static final String ITEMS = "items";
-  private static final String HOLDINGS_RECORD_ID = "holdingsRecordId";
   private static final String COMMA_SEPARATOR = ", ";
 
   @Autowired
   private ErrorLogDao errorLogDao;
+
+  @Autowired
+  @Qualifier("affectedRecordBuilders")
+  private Map<String, AffectedRecordBuilder> affectedRecordsBuilders;
 
   @Override
   public Future<ErrorLogCollection> get(String jobExecutionId, int offset, int limit, String tenantId) {
@@ -86,22 +84,28 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, String tenantId) {
-    JsonObject instance = record.getJsonObject(INSTANCE.toString().toLowerCase());
-    AffectedRecord instanceRecord = new AffectedRecord();
-    if (Objects.isNull(instance)) {
-      instanceRecord.setRecordType(INSTANCE);
-    } else {
-      instanceRecord = getAffectedRecordFromJson(record.getJsonObject(INSTANCE.toString().toLowerCase()), INSTANCE);
-      List<AffectedRecord> holdingsAndAssociatedItems = getRecordsForHoldingAndAssociatedItems(record);
-      instanceRecord.setAffectedRecords(holdingsAndAssociatedItems);
+  public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, TranslationException translationException, OkapiConnectionParams params) {
+    AffectedRecord affectedRecord = new AffectedRecord();
+    RecordInfo recordInfo = translationException.getRecordInfo();
+    if (recordInfo.getType().isInstance()) {
+      affectedRecord = affectedRecordsBuilders
+        .get(AffectedRecordInstanceBuilder.class.getName())
+        .build(record, jobExecutionId, recordInfo.getId(), true, params);
+    } else if (recordInfo.getType().isHolding()) {
+      affectedRecord = affectedRecordsBuilders
+        .get(AffectedRecordHoldingBuilder.class.getName())
+        .build(record, jobExecutionId, recordInfo.getId(), true, params);
+    } else if (recordInfo.getType().isItem()){
+      affectedRecord = affectedRecordsBuilders
+        .get(AffectedRecordItemBuilder.class.getName())
+        .build(record, jobExecutionId, recordInfo.getId(), true, params);
     }
     ErrorLog errorLog = new ErrorLog()
-      .withAffectedRecord(instanceRecord)
+      .withAffectedRecord(affectedRecord)
       .withReason(reason)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId);
-    return save(errorLog, tenantId);
+    return save(errorLog, params.getTenantId());
   }
 
   @Override
@@ -155,45 +159,6 @@ public class ErrorLogServiceImpl implements ErrorLogService {
         .onFailure(ar -> promise.complete(false));
 
     return promise.future();
-  }
-
-  private List<AffectedRecord> getRecordsForHoldingAndAssociatedItems(JsonObject record) {
-    List<AffectedRecord> holdingsAndAssociatedItems = new ArrayList<>();
-    JsonArray holdings = record.getJsonArray(HOLDINGS.toString().toLowerCase());
-    if (Objects.nonNull(holdings)) {
-      for (Object holding : holdings) {
-        JsonObject holdingJson = JsonObject.mapFrom(holding);
-        AffectedRecord holdingRecord = getAffectedRecordFromJson(holdingJson, AffectedRecord.RecordType.HOLDINGS);
-        holdingRecord.setAffectedRecords(getAssociatedItemRecords(holdingJson.getJsonArray(ITEMS)));
-        holdingsAndAssociatedItems.add(holdingRecord);
-      }
-    }
-    return holdingsAndAssociatedItems;
-  }
-
-  private List<AffectedRecord> getAssociatedItemRecords(JsonArray items) {
-    List<AffectedRecord> associatedItemRecords = new ArrayList<>();
-    if (Objects.nonNull(items)) {
-      for (Object item : items) {
-        associatedItemRecords.add(getAffectedRecordFromJson(JsonObject.mapFrom(item), ITEM));
-      }
-    }
-    return associatedItemRecords;
-  }
-
-  private AffectedRecord getAffectedRecordFromJson(JsonObject recordJson, AffectedRecord.RecordType recordType) {
-    AffectedRecord record = new AffectedRecord()
-      .withRecordType(recordType);
-    if (StringUtils.isNotBlank(recordJson.getString(HRID_KEY))) {
-      record.setHrid(recordJson.getString(HRID_KEY));
-    }
-    if (StringUtils.isNotBlank(recordJson.getString(ID_KEY))) {
-      record.setId(recordJson.getString(ID_KEY));
-    }
-    if (StringUtils.isNotBlank(recordJson.getString(TITLE_KEY))) {
-      record.setTitle(recordJson.getString(TITLE_KEY));
-    }
-    return record;
   }
 
 }

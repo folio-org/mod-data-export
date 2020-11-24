@@ -6,6 +6,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
+import org.folio.processor.error.TranslationException;
 import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.ErrorLog;
@@ -46,34 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_PREFIX_FIELD_PATH;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_ID;
-import static org.folio.TestUtil.CALLNUMBER_SUFFIX_FIELD_PATH;
-import static org.folio.TestUtil.EFFECTIVECALLNUMBER_CALL_NUMBER_FIELD_ID;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_LINKTEXT_FIELD_ID;
-import static org.folio.TestUtil.ELECTRONIC_ACCESS_URI_FIELD_ID;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.HOLDINGS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_ELECTRONIC_ACCESS_URI_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_HR_ID_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_HR_ID_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_METADATA_CREATED_DATE_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_METADATA_CREATED_DATE_FIELD_PATH;
-import static org.folio.TestUtil.INSTANCE_METADATA_UPDATED_DATE_FIELD_ID;
-import static org.folio.TestUtil.INSTANCE_METADATA_UPDATED_DATE_FIELD_PATH;
-import static org.folio.TestUtil.ITEMS_EFFECTIVE_CALL_NUMBER_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_LINK_TEXT_PATH;
-import static org.folio.TestUtil.ITEMS_ELECTRONIC_ACCESS_URI_PATH;
-import static org.folio.TestUtil.MATERIALTYPE_FIELD_ID;
-import static org.folio.TestUtil.MATERIAL_TYPE_ID_PATH;
-import static org.folio.TestUtil.getFileFromResources;
-import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.TestUtil.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -91,6 +65,7 @@ import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -164,9 +139,40 @@ class MappingServiceUnitTest {
 
   }
 
+  @Test
+  void shouldCallSaveAffectedRecord_whenReferenceDataIsNull() {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instanceHolding.json"));
+    List<JsonObject> instances = Collections.singletonList(instance);
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(null);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    // then
+    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping, reason: undefined, cause: java.lang.NullPointerException"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
+
+  }
 
   @Test
-  void shouldPopulateErrorLog_whenMappingFailed() throws FileNotFoundException {
+  void shouldSaveGeneralError_whenReferenceDataIsNull() {
+    // given
+    JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
+    String expectedReason = "An error occurred during fields mapping for srs record with id: 65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61, reason: undefined, cause: java.lang.NullPointerException ";
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(Collections.singletonList(createTransformations("holdings.permanentlocation.test", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS)));
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(null);
+    // when
+    List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
+    // then
+    verify(errorLogService).saveGeneralError(eq(expectedReason), eq(jobExecutionId), any());
+  }
+
+
+  @Test
+  void shouldPopulateErrorLog_whenMappingFailed() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
@@ -174,11 +180,11 @@ class MappingServiceUnitTest {
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
-    doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyList());
+    doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyString(), anyList(), any(OkapiConnectionParams.class));
     // when
     mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(instance, "An error occurred during fields mapping", jobExecutionId, params.getTenantId());
+    verify(errorLogService).saveGeneralError(eq("An error occurred during fields mapping"), eq(jobExecutionId),  any());
   }
 
   @Test

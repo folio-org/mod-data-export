@@ -20,6 +20,10 @@
       "type": "object",
       "$ref": "../profiles/recordTypes.json"
     },
+    "inventoryRecordLink": {
+      "description": "Link to the affected inventory record",
+      "type": "string"
+    },
     "affectedRecords": {
       "description": "Affected record",
       "type": "array",

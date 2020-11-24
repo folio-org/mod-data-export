@@ -10,11 +10,15 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.assertj.core.util.Lists;
 import org.folio.dao.impl.ErrorLogDaoImpl;
+import org.folio.processor.error.RecordInfo;
+import org.folio.processor.error.RecordType;
+import org.folio.processor.error.TranslationException;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -66,6 +71,7 @@ class ErrorLogServiceUnitTest {
   private static final String ITEMS = "items";
   private static ErrorLog errorLog;
   private static ErrorLogCollection errorLogCollection;
+  private static OkapiConnectionParams params;
 
   @Spy
   @InjectMocks
@@ -74,9 +80,17 @@ class ErrorLogServiceUnitTest {
   private ErrorLogDaoImpl errorLogDao;
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogCaptor;
+  @Mock
+  private Map<String, AffectedRecordBuilder> affectedRecordsBuilders;
+  private static AffectedRecordInstanceBuilder affectedRecordInstanceBuilder = Mockito.mock(AffectedRecordInstanceBuilder.class);
+  private static AffectedRecordHoldingBuilder affectedRecordHoldingBuilder = Mockito.mock(AffectedRecordHoldingBuilder.class);
+  private static AffectedRecordItemBuilder affectedRecordItemBuilder = Mockito.mock(AffectedRecordItemBuilder.class);
 
   @BeforeAll
-  static void beforeEach() {
+  static void beforeAll() {
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    params = new OkapiConnectionParams(headers);
     errorLog = new ErrorLog()
       .withId(UUID.randomUUID().toString())
       .withJobExecutionId(UUID.randomUUID().toString())
@@ -89,8 +103,7 @@ class ErrorLogServiceUnitTest {
     errorLogCollection = new ErrorLogCollection()
       .withErrorLogs(Lists.newArrayList(errorLog))
       .withTotalRecords(1);
-    Map<String, String> headers = new HashedMap<>();
-    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+
   }
 
   @Test
@@ -137,17 +150,21 @@ class ErrorLogServiceUnitTest {
   }
 
   @Test
-  void saveWithAffectedRecord_shouldSaveSuccessfully(VertxTestContext context) {
+  void saveWithAffectedRecord_shouldCallBuildAffectedInstanceRecord(VertxTestContext context) {
     // given
+
+    RecordInfo recordInfo = new RecordInfo(INSTANCE_ID, RecordType.INSTANCE);
+    TranslationException translationException = new TranslationException(recordInfo, null);
+    when(affectedRecordsBuilders.get(AffectedRecordInstanceBuilder.class.getName())).thenReturn(affectedRecordInstanceBuilder);
     JsonObject instanceRecord = new JsonObject()
       .put("hrid", "1")
-      .put("id", "c8b50e3f-0446-429c-960e-03774b88223f")
+      .put("id", INSTANCE_ID)
       .put("title", INSTANCE_TITLE);
     JsonObject record = new JsonObject();
     record.put("instance", instanceRecord);
-    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    when(errorLogDao.save(any(ErrorLog.class), anyString())).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -156,54 +173,36 @@ class ErrorLogServiceUnitTest {
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_REASON, errorLog.getReason());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
-      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
-      Assert.assertEquals(INSTANCE_HR_ID, errorLog.getAffectedRecord().getHrid());
-      Assert.assertEquals(INSTANCE_ID, errorLog.getAffectedRecord().getId());
-      Assert.assertEquals(INSTANCE_TITLE, errorLog.getAffectedRecord().getTitle());
-      Assert.assertTrue(errorLog.getAffectedRecord().getAffectedRecords().isEmpty());
+      verify(affectedRecordInstanceBuilder).build(eq(record), eq(JOB_EXECUTION_ID), eq(recordInfo.getId()), eq(true), eq(params));
       context.completeNow();
     }));
   }
 
   @Test
-  void saveWithAffectedRecord_shouldSaveWithoutAffectedRecordInfo_whenRecordFieldsAreMissing(VertxTestContext context) {
+  void saveWithAffectedRecord_shouldCallBuildAffectedItemRecord(VertxTestContext context) {
     // given
-    JsonObject instanceRecord = new JsonObject();
+    RecordInfo recordItemInfo = new RecordInfo(ITEM_ID, RecordType.ITEM);
+    TranslationException translationException = new TranslationException(recordItemInfo, null);
+    when(affectedRecordsBuilders.get(AffectedRecordItemBuilder.class.getName())).thenReturn(affectedRecordItemBuilder);
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
+    JsonObject record = createRecord();
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceRecord, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
-      ErrorLog errorLog = errorLogCaptor.getValue();
-      Assert.assertEquals(ERROR, errorLog.getLogLevel());
-      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
-      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
-      Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, errorLog.getAffectedRecord().getRecordType());
+      verify(affectedRecordItemBuilder).build(eq(record), eq(JOB_EXECUTION_ID), eq(recordItemInfo.getId()), eq(true), eq(params));
       context.completeNow();
     }));
   }
 
   @Test
-  void saveWithAffectedRecord_shouldSaveWithHoldingsAndItemsInfo(VertxTestContext context) {
+  void saveWithAffectedRecord_shouldCallBuildAffectedHoldingRecord(VertxTestContext context) {
     // given
-    when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
-    // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(createRecord(), ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
-    // then
-    future.onComplete(ar -> context.verify(() -> {
-      assertTrue(ar.succeeded());
-      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
-      ErrorLog errorLog = errorLogCaptor.getValue();
-      assertErrorLogWithHoldingsAndItems(errorLog, true);
-      context.completeNow();
-    }));
-  }
-
-  @Test
-  void saveWithAffectedRecord_shouldSaveWithHoldingsInfo(VertxTestContext context) {
-    // given
+    RecordInfo recordHoldingInfo = new RecordInfo(HOLDINGS_ID, RecordType.HOLDING);
+    TranslationException translationException = new TranslationException(recordHoldingInfo, null);
+    when(affectedRecordsBuilders.get(AffectedRecordHoldingBuilder.class.getName())).thenReturn(affectedRecordHoldingBuilder);
     JsonObject instanceObject = new JsonObject();
     JsonObject defaultRecord = createRecord();
     instanceObject.put("instance", defaultRecord.getJsonObject("instance"));
@@ -215,13 +214,12 @@ class ErrorLogServiceUnitTest {
     }
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
-      ErrorLog errorLog = errorLogCaptor.getValue();
-      assertErrorLogWithHoldingsAndItems(errorLog, false);
+      verify(affectedRecordHoldingBuilder).build(eq(instanceObject), eq(JOB_EXECUTION_ID), eq(recordHoldingInfo.getId()), eq(true), eq(params));
       context.completeNow();
     }));
   }
