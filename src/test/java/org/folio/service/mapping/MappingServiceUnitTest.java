@@ -6,7 +6,6 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
-import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.TranslationException;
 import org.folio.processor.referencedata.ReferenceData;
 import org.folio.processor.rule.Rule;
@@ -69,7 +68,6 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -144,7 +142,7 @@ class MappingServiceUnitTest {
   @Test
   void shouldCallSaveAffectedRecord_whenReferenceDataIsNull_asManyTimes_asErrorsOccurs() {
     // given
-    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instance.json"));
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instanceHolding.json"));
     List<JsonObject> instances = Collections.singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(null);
@@ -155,6 +153,21 @@ class MappingServiceUnitTest {
     // then
     verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping, reason: undefined, cause: java.lang.NullPointerException"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
+  }
+
+  @Test
+  void shouldReturnVariableFieldsForHoldingsAndItem_whenMappingProfileTransformationsAreProvided2() throws FileNotFoundException {
+    // given
+    JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
+    String expectedReason = "An error occurred during fields mapping for srs record with id: 65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61, reason: undefined, cause: java.lang.NullPointerException ";
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setTransformations(Collections.singletonList(createTransformations("holdings.permanentlocation.test", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS)));
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(null);
+    // when
+    List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
+    // then
+    verify(errorLogService).saveGeneralError(eq(expectedReason), eq(jobExecutionId), any());
   }
 
 

@@ -28,31 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
-import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
-import static org.folio.util.ExternalPathResolver.CAMPUSES;
-import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
-import static org.folio.util.ExternalPathResolver.CONTENT_TERMS;
-import static org.folio.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
-import static org.folio.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
-import static org.folio.util.ExternalPathResolver.HOLDING;
-import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
-import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
-import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
-import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
-import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
-import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
-import static org.folio.util.ExternalPathResolver.ITEM;
-import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
-import static org.folio.util.ExternalPathResolver.LIBRARIES;
-import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
-import static org.folio.util.ExternalPathResolver.LOCATIONS;
-import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.SRS;
-import static org.folio.util.ExternalPathResolver.USERS;
-import static org.folio.util.ExternalPathResolver.resourcesPath;
+import static org.folio.util.ExternalPathResolver.*;
 import static org.junit.Assert.fail;
 
 public class MockServer {
@@ -517,6 +493,10 @@ public class MockServer {
         JsonObject host = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH_FOR_HOST));
         addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, host);
         serverResponse(ctx, 200, APPLICATION_JSON, host.encodePrettily());
+      } else if (ctx.request().getParam("query").contains("FAIL")) {
+        ctx.response()
+          .setStatusCode(500)
+          .end();
       } else {
         JsonObject rulesFromConfig = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH));
         URL url = Resources.getResource("rules/rulesDefault.json");
