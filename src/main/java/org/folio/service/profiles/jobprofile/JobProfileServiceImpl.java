@@ -48,6 +48,11 @@ public class JobProfileServiceImpl implements JobProfileService {
   }
 
   @Override
+  public Future<JobProfile> getDefault(String tenantId) {
+    return getById(DEFAULT_JOB_PROFILE_ID, tenantId);
+  }
+
+  @Override
   public Future<JobProfile> save(JobProfile jobProfile, OkapiConnectionParams params) {
     if (jobProfile.getId() == null) {
       jobProfile.setId(UUID.randomUUID().toString());

@@ -12,6 +12,8 @@ import java.util.Objects;
 
 public final class TestUtil {
 
+  public static final String DATA_EXPORT_JOB_PROFILES_ENDPOINT = "/data-export/job-profiles";
+  public static final String DATA_EXPORT_MAPPING_PROFILES_ENDPOINT = "/data-export/mapping-profiles";
   public static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
   public static final String PERMANENT_LOCATION_CODE_FIELD_ID = "holdings.permanentlocation.code";
   public static final String PERMANENT_LOCATION_LIBRARY_NAME_FIELD_ID = "holdings.permanentlocation.library.name";

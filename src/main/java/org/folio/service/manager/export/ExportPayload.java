@@ -1,5 +1,6 @@
 package org.folio.service.manager.export;
 
+import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
@@ -17,6 +18,7 @@ public class ExportPayload {
   private OkapiConnectionParams okapiConnectionParams;
   private String jobExecutionId;
   private MappingProfile mappingProfile;
+  private ExportRequest.RecordType recordType;
   private int exportedRecordsNumber;
   private int failedRecordsNumber;
 
@@ -75,6 +77,10 @@ public class ExportPayload {
   public MappingProfile getMappingProfile() { return mappingProfile; }
 
   public void setMappingProfile(MappingProfile mappingProfile) { this.mappingProfile = mappingProfile; }
+
+  public ExportRequest.RecordType getRecordType() { return recordType; }
+
+  public void setRecordType(ExportRequest.RecordType recordType) { this.recordType = recordType; }
 
   public int getExportedRecordsNumber() {
     return exportedRecordsNumber;

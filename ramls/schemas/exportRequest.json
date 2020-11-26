@@ -12,6 +12,15 @@
       "description": "Related Job profile id",
       "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
+    "recordType": {
+      "description": "Defines a type of records to search by criteria or UUIDs",
+      "type": "string",
+      "enum": [
+        "INSTANCE",
+        "HOLDINGS",
+        "ITEM"
+      ]
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",

@@ -122,6 +122,38 @@
         },
         {
           "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/quick-export",
+          "permissionsRequired": [
+            "data-export.quick.export.post"
+          ],
+          "modulePermissions": [
+            "users.item.get",
+            "source-storage.sourceRecords.get",
+            "inventory-storage.instances.collection.get",
+            "inventory-storage.holdings.collection.get",
+            "inventory-storage.items.collection.get",
+            "inventory-storage.nature-of-content-terms.collection.get",
+            "inventory-storage.identifier-types.collection.get",
+            "inventory-storage.contributor-name-types.collection.get",
+            "inventory-storage.locations.collection.get",
+            "inventory-storage.location-units.libraries.collection.get",
+            "inventory-storage.location-units.campuses.collection.get",
+            "inventory-storage.location-units.institutions.collection.get",
+            "inventory-storage.loan-types.collection.get",
+            "inventory-storage.material-types.collection.get",
+            "inventory-storage.instance-types.collection.get",
+            "inventory-storage.instance-formats.collection.get",
+            "inventory-storage.electronic-access-relationships.collection.get",
+            "configuration.entries.collection.get",
+            "inventory-storage.holdings-note-types.collection.get",
+            "inventory-storage.item-note-types.collection.get",
+            "inventory-storage.call-number-types.collection.get"
+          ]
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export/file-definitions/{fileDefinitionId}",
@@ -405,6 +437,10 @@
       "permissionName": "data-export.export.post",
       "displayName": "Starts export process",
       "description": "Entry point to start export for the given file definition using job profile"
+    },{
+      "permissionName": "data-export.quick.export.post",
+      "displayName": "Starts export process from inventory",
+      "description": "Entry point to start quick export process from inventory"
     },
     {
       "permissionName": "data-export.file-definitions.item.get",
@@ -531,7 +567,8 @@
         "data-export.transformation-fields.collection.get",
         "data-export.expire-jobs.post",
         "data-export.logs.collection.get",
-        "data-export.clean-up-files.post"
+        "data-export.clean-up-files.post",
+        "data-export.quick.export.post"
       ],
       "visible": false
     }

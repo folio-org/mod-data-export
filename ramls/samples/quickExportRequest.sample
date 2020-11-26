@@ -1,6 +1,8 @@
 {
-  "fileDefinitionId": "e5f54eb6-6d11-11ea-bc55-0242ac130003",
   "jobProfileId": "2fd2bf30-9d03-4f7e-9393-df55eaef2c2f",
+  "criteria": "(source==\"MARC\" and discoverySuppress==\"true\")",
+  "uuids": [],
+  "type": "cql",
   "recordType": "INSTANCE",
   "metadata": {
     "createdDate": "2019-07-22T11:22:07Z",

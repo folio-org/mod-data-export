@@ -17,6 +17,7 @@ import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.strategy.InstanceExportStrategyImpl;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
 import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
@@ -47,9 +48,8 @@ import java.util.stream.Stream;
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ExportManagerUnitTest {
+class InstanceExportStrategyUnitTest {
   private static final int LIMIT = 50;
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   @Mock
   private RecordLoaderService recordLoaderService;
@@ -64,7 +64,7 @@ class ExportManagerUnitTest {
   @Mock
   private MappingProfileService mappingProfileService;
   @InjectMocks
-  private ExportManagerImpl exportManager = Mockito.spy(new ExportManagerImpl());
+  private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl());
 
   @Test
   @Order(1)
@@ -86,7 +86,7 @@ class ExportManagerUnitTest {
     MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.SRS));
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
-    exportManager.exportBlocking(exportPayload, Promise.promise());
+    instanceExportManager.export(exportPayload, Promise.promise());
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
@@ -117,7 +117,7 @@ class ExportManagerUnitTest {
 
     Assertions.assertThrows(ServiceException.class, () -> {
       // when
-      exportManager.exportBlocking(exportPayload, Promise.promise());
+      instanceExportManager.export(exportPayload, Promise.promise());
     });
 
     // then
@@ -143,7 +143,7 @@ class ExportManagerUnitTest {
       new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.INSTANCE));
     // when
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
-    exportManager.exportBlocking(exportPayload, Promise.promise());
+    instanceExportManager.export(exportPayload, Promise.promise());
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
