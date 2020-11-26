@@ -3,7 +3,6 @@ package org.folio.service.profiles.jobprofile;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
-import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.util.OkapiConnectionParams;
 
 public interface JobProfileService {
