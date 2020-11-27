@@ -113,7 +113,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             if (QuickExportRequest.Type.CQL.equals(request.getType())) {
               uploadFileWithCQLQueryQuickExport(request, inProgressFileDef, jobExecution, params)
                 .onSuccess(promise::complete)
-                .onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+                .onFailure(ar -> failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.getCause(), params));
             } else {
               List<String> uuids = request.getUuids();
               fileStorage.saveFileDataAsyncCQL(uuids, inProgressFileDef)
@@ -123,13 +123,13 @@ public class FileUploadServiceImpl implements FileUploadService {
                       .onSuccess(promise::complete)
                       .onFailure(async -> promise.fail(async.getCause()));
                   } else {
-                    failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.cause(), params);
+                    failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.cause(), params);
                   }
                 });
             }
-          }).onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.getCause(), params))
+          }).onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params))
 
-      ).onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, null, request, ar.getCause(), params));
+      ).onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, null, request, ar.getCause(), params));
 
     return promise.future();
   }
@@ -140,11 +140,11 @@ public class FileUploadServiceImpl implements FileUploadService {
     if (instancesUUIDs.isPresent()) {
       saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
         .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
     } else {
       saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
         .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
     }
     return promise.future();
   }
@@ -169,13 +169,30 @@ public class FileUploadServiceImpl implements FileUploadService {
       : fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), params.getTenantId());
   }
 
-
   private Future<FileDefinition> updateFileDefinitionWithJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
     return jobExecutionService.save(jobExecution, tenantId)
       .compose(savedJob -> fileDefinitionService.update(fileDefinition.withJobExecutionId(savedJob.getId()), tenantId));
   }
 
-  private void failFileDefinitionAndJob(Promise<FileDefinition> promise, FileDefinition fileDefinition, JobExecution jobExecution, QuickExportRequest request, Throwable cause, OkapiConnectionParams params) {
+  private Future<FileDefinition> updateFileDefinitionAndJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, QuickExportRequest request, OkapiConnectionParams params) {
+    Promise<FileDefinition> promise = Promise.promise();
+    jobExecutionService.update(jobExecution, params.getTenantId())
+      .onSuccess(savedJob ->
+        fileDefinitionService.update(fileDefinition, params.getTenantId())
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, savedJob, request, ar.getCause(), params)))
+      .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+
+    return promise.future();
+  }
+
+  private void failFileDefinition(Promise<FileDefinition> promise, FileDefinition fileDefinition, String tenantId, Throwable cause) {
+    fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId)
+      .onSuccess(fileDef -> promise.fail(cause))
+      .onFailure(fileDef -> promise.fail(fileDef.getCause()));
+  }
+
+  private void failFileDefinitionAndJobExecution(Promise<FileDefinition> promise, FileDefinition fileDefinition, JobExecution jobExecution, QuickExportRequest request, Throwable cause, OkapiConnectionParams params) {
     if (!Objects.isNull(jobExecution)) {
       errorLogService.saveGeneralError("Fail to upload file for job execution with id: " + jobExecution.getId(), jobExecution.getId(), params.getTenantId());
       jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL), params.getTenantId());
@@ -188,24 +205,6 @@ public class FileUploadServiceImpl implements FileUploadService {
       }
     }
     failFileDefinition(promise, fileDefinition, params.getTenantId(), cause);
-  }
-
-  private void failFileDefinition (Promise<FileDefinition> promise, FileDefinition fileDefinition, String tenantId, Throwable cause) {
-    fileDefinitionService.update(fileDefinition.withStatus(ERROR), tenantId)
-      .onSuccess(fileDef -> promise.fail(cause))
-      .onFailure(fileDef -> promise.fail(fileDef.getCause()));
-  }
-
-  private Future<FileDefinition> updateFileDefinitionAndJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, QuickExportRequest request, OkapiConnectionParams params) {
-    Promise<FileDefinition> promise = Promise.promise();
-    jobExecutionService.update(jobExecution, params.getTenantId())
-      .onSuccess(savedJob ->
-        fileDefinitionService.update(fileDefinition, params.getTenantId())
-          .onSuccess(promise::complete)
-          .onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, savedJob, request, ar.getCause(), params)))
-      .onFailure(ar -> failFileDefinitionAndJob(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-
-    return promise.future();
   }
 
 }
