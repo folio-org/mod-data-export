@@ -133,6 +133,44 @@
     }
   },
   {
+    "id": "instance.identifiers.cancelled.system.control.numbers",
+    "field": "019",
+    "description": "Cancelled system control numbers",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Cancelled system control numbers"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+    }
+  },
+  {
     "id": "instance.identifiers.issn",
     "field": "022",
     "description": "Identifier ISSN",
@@ -162,6 +200,82 @@
           "function": "set_value",
           "parameters": {
             "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "id": "instance.identifiers.other.standard.identifier",
+    "field": "024",
+    "description": "Other standard identifier",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Other standard identifier"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+    }
+  },
+  {
+    "id": "instance.identifiers.publisher.or.distributor.number",
+    "field": "028",
+    "description": "Publisher or distributor number",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Publisher or distributor number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "5"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
           }
         }
       }

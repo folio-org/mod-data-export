@@ -647,6 +647,13 @@
          "recordType":"INSTANCE"
       },
       {
+        "fieldId":"instance.identifiers.cancelled.system.control.numbers",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"Cancelled system control numbers",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='2c12660a-7393-4876-9a67-62ef5372512f')].value",
+        "recordType":"INSTANCE"
+      },
+      {
          "fieldId":"instance.identifiers.gpo.item.number",
          "displayNameKey":"instance.identifiers",
          "referenceDataValue":"GPO item number",
@@ -668,6 +675,13 @@
          "recordType":"INSTANCE"
       },
       {
+         "fieldId":"instance.identifiers.other.standard.identifier",
+         "displayNameKey":"instance.identifiers",
+         "referenceDataValue":"Other standard identifier",
+         "path":"$.instance.identifiers[?(@.identifierTypeId=='2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5')].value",
+         "recordType":"INSTANCE"
+      },
+      {
          "fieldId":"instance.identifiers.lccn",
          "displayNameKey":"instance.identifiers",
          "referenceDataValue":"LCCN",
@@ -679,6 +693,13 @@
          "displayNameKey":"instance.identifiers",
          "referenceDataValue":"OCLC",
          "path":"$.instance.identifiers[?(@.identifierTypeId=='439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef')].value",
+         "recordType":"INSTANCE"
+      },
+      {
+         "fieldId":"instance.identifiers.publisher.or.distributor.number",
+         "displayNameKey":"instance.identifiers",
+         "referenceDataValue":"Publisher or distributor number",
+         "path":"$.instance.identifiers[?(@.identifierTypeId=='b5d8cdc4-9441-487c-90cf-0c7ec97728eb')].value",
          "recordType":"INSTANCE"
       },
       {
