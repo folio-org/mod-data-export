@@ -25,6 +25,7 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   private static final String CSV_FILE_FORMAT = ".csv";
+  private static final String QUICK_EXPORT = "quick-export";
 
   @Autowired
   private FileDefinitionDao fileDefinitionDao;
@@ -66,7 +67,7 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
         FileDefinition fileDefinition = new FileDefinition()
           .withUploadFormat(getUploadFormatByType(type))
           .withJobExecutionId(jobExecution.getId())
-          .withFileName(jobExecution.getId() + CSV_FILE_FORMAT)
+          .withFileName(QUICK_EXPORT + CSV_FILE_FORMAT)
           .withStatus(NEW);
         save(fileDefinition, tenantId)
           .onSuccess(promise::complete)

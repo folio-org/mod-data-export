@@ -195,7 +195,6 @@ public class FileUploadServiceImpl implements FileUploadService {
   private void failFileDefinitionAndJobExecution(Promise<FileDefinition> promise, FileDefinition fileDefinition, JobExecution jobExecution, QuickExportRequest request, Throwable cause, OkapiConnectionParams params) {
     if (!Objects.isNull(jobExecution)) {
       errorLogService.saveGeneralError("Fail to upload file for job execution with id: " + jobExecution.getId(), jobExecution.getId(), params.getTenantId());
-      jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL), params.getTenantId());
       Optional<JsonObject> optionalUser = usersClient.getById(request.getMetadata().getCreatedByUserId(), jobExecution.getId(), params);
       if (optionalUser.isPresent()) {
         jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileDefinition, optionalUser.get(), 0, true, params.getTenantId());

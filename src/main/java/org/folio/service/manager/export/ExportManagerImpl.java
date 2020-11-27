@@ -62,8 +62,6 @@ public class ExportManagerImpl implements ExportManager {
 
   @Override
   public void exportData(JsonObject request) {
-    // after implementing functionality to quick export holdings || items, get record type from exportPayload, switch
-    // by type and choose right implementation, that should be created in scope of adding possibility to quick export holdings || items
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
     this.executor.executeBlocking(blockingPromise -> instanceExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
   }
