@@ -293,7 +293,6 @@ class MappingServiceUnitTest {
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
-
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_instance_transformationFields.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
