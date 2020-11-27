@@ -29,7 +29,22 @@
       "id": "351ebc1c-3aae-4825-8765-c6d50dbf011f",
       "name": "GPO item number",
       "source": "folio"
+    },
+    {
+      "id": "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5",
+      "name": "Other standard identifier",
+      "source": "folio"
+    },
+    {
+      "id": "b5d8cdc4-9441-487c-90cf-0c7ec97728eb",
+      "name": "Publisher or distributor number",
+      "source": "folio"
+    },
+    {
+      "id": "2c12660a-7393-4876-9a67-62ef5372512f",
+      "name": "Cancelled system control numbers",
+      "source": "folio"
     }
   ],
-  "totalRecords": 6
+  "totalRecords": 9
 }
