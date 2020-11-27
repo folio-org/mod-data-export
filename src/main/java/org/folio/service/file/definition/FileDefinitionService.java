@@ -2,6 +2,7 @@ package org.folio.service.file.definition;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.QuickExportRequest;
 
 public interface FileDefinitionService {
 
@@ -31,5 +32,14 @@ public interface FileDefinitionService {
    * @return future with {@link FileDefinition}
    */
   Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId);
+
+  /**
+   * Create {@link FileDefinition} with related jobExecution
+   *
+   * @param type     type from {@link QuickExportRequest}
+   * @param tenantId tenant id
+   * @return future with {@link FileDefinition}
+   */
+  Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest.Type type, String jobProfileId, String tenantId);
 
 }

@@ -2,15 +2,22 @@ package org.folio.rest.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.upload.FileUploadService;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.profiles.jobprofile.JobProfileService;
@@ -46,6 +53,9 @@ public class DataExportImpl implements DataExport {
   private FileDefinitionService fileDefinitionService;
 
   @Autowired
+  private FileUploadService fileUploadService;
+
+  @Autowired
   private DataExportHelper dataExportHelper;
 
   @Autowired
@@ -76,6 +86,31 @@ public class DataExportImpl implements DataExport {
                     jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
                       .onSuccess(updatedJobExecution -> {
                         inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                        succeededFuture()
+                          .map(PostDataExportExportResponse.respond204())
+                          .map(Response.class::cast)
+                          .onComplete(asyncResultHandler);
+                      }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+                  .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+              .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+          .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+      .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
+  }
+
+  @Override
+  public void postDataExportQuickExport(QuickExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    LOGGER.info("Starting the data-quick-export process, request: {}", entity);
+    getJobProfileForQuickExport(entity)
+      .onSuccess(jobProfile ->
+        getFileDefinitionForQuickExport(entity, jobProfile.getId(), new OkapiConnectionParams(okapiHeaders), asyncResultHandler)
+          .onSuccess(requestFileDefinition ->
+            mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
+              .onSuccess(mappingProfile ->
+                jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
+                  .onSuccess(jobExecution ->
+                    jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
+                      .onSuccess(updatedJobExecution -> {
+                        inputDataManager.init(JsonObject.mapFrom(buildExportRequest(requestFileDefinition.getId(), jobProfile.getId(), entity)), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                         succeededFuture()
                           .map(PostDataExportExportResponse.respond204())
                           .map(Response.class::cast)
@@ -126,14 +161,6 @@ public class DataExportImpl implements DataExport {
       .onComplete(asyncResultHandler));
   }
 
-  private void failToFetchObjectHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {
-    LOGGER.error(errorMessage);
-    succeededFuture()
-      .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
-      .map(Response.class::cast)
-      .onComplete(asyncResultHandler);
-  }
-
   @Override
   public void deleteDataExportJobExecutionsById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
@@ -145,6 +172,44 @@ public class DataExportImpl implements DataExport {
         .map(Response.class::cast).otherwise(ExceptionToResponseMapper::map)
         .onComplete(asyncResultHandler);
 
+  }
+
+  private void failToFetchObjectHelper(String errorMessage, Handler<AsyncResult<Response>> asyncResultHandler) {
+    LOGGER.error(errorMessage);
+    succeededFuture()
+      .map(PostDataExportExportResponse.respond400WithTextPlain(errorMessage))
+      .map(Response.class::cast)
+      .onComplete(asyncResultHandler);
+  }
+
+  private Future<FileDefinition> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
+    Promise<FileDefinition> promise = Promise.promise();
+    fileDefinitionService.prepareFileDefinitionForQuickExport(request.getType(), jobProfileId, tenantId)
+      .onSuccess(fileDefinition -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, fileDefinition, params)
+        .onSuccess(uploadedFileDefinition -> fileUploadService.completeUploading(uploadedFileDefinition, tenantId))
+        .onSuccess(promise::complete)
+        .onFailure(ar -> promise.fail(ar.getCause()))
+        .onFailure(ar -> promise.fail(ar.getCause())))
+      .onFailure(handler -> failToFetchObjectHelper(handler.getMessage(), asyncResultHandler));
+    return promise.future();
+  }
+
+  /**
+   * In the current implementation UI will not send jobProfileId. Remove this method and make jobProfileId
+   * as required in quickExportRequest when we support all profiles.
+   */
+  private Future<JobProfile> getJobProfileForQuickExport(QuickExportRequest request) {
+    return StringUtils.isNotEmpty(request.getJobProfileId())
+      ? jobProfileService.getById(request.getJobProfileId(), tenantId)
+      : jobProfileService.getDefault(tenantId);
+  }
+
+  private ExportRequest buildExportRequest(String fileDefinitionId, String jobProfileId, QuickExportRequest entity) {
+    return new ExportRequest()
+      .withFileDefinitionId(fileDefinitionId)
+      .withJobProfileId(jobProfileId)
+      .withMetadata(entity.getMetadata())
+      .withRecordType(ExportRequest.RecordType.fromValue(entity.getRecordType().toString()));
   }
 
 }

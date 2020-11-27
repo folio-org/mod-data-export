@@ -63,6 +63,7 @@ public class MockServer {
   private static final String HOLDING_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_holding_note_types_response.json";
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
+  private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -477,9 +478,16 @@ public class MockServer {
   private void handleGetInstanceBulkIds(RoutingContext ctx) {
     logger.info("Handle get instance bulk ids: " + ctx.request().path());
     try {
-      JsonObject bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
-      serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+      JsonObject bulkIds;
+      if (ctx.request().getParam("query").contains("(languages=\"eng\")")) {
+        bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH));
+        addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
+        serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+      } else {
+        bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
+        addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
+        serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+      }
     } catch (IOException e) {
       ctx.response().setStatusCode(500).end();
     }

@@ -13,6 +13,7 @@ types:
   errors: !include raml-util/schemas/errors.schema
   fileDefinition: !include schemas/fileDefinition.json
   exportRequest: !include schemas/exportRequest.json
+  quickExportRequest: !include schemas/quickExportRequest.json
   jobExecutionCollection: !include schemas/jobExecutionCollection.json
   jobExecution: !include schemas/jobExecution.json
   fileDownload: !include schemas/fileDownload.json
@@ -48,6 +49,34 @@ resourceTypes:
           body:
              text/plain:
                example: "Bad request"
+        422:
+          description: "Unprocessable Entity"
+          body:
+            application/json:
+              type: errors
+        500:
+          description: "Internal server error"
+          body:
+            text/plain:
+              example: "Internal server error"
+  /quick-export:
+    displayName: Export manager service
+    description: Starts the quick export process
+    post:
+      description: Starts the export process
+      is: [validate]
+      body:
+        application/json:
+          type: quickExportRequest
+          example:
+            value: !include samples/quickExportRequest.sample
+      responses:
+        204:
+        400:
+          description: "Bad request"
+          body:
+            text/plain:
+              example: "Bad request"
         422:
           description: "Unprocessable Entity"
           body:

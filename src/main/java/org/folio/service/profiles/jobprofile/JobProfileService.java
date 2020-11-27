@@ -9,9 +9,9 @@ public interface JobProfileService {
 
 
   /**
-   * Searches for {@link JobProfile} by id
+   * Searches for {@link JobProfile} by query
    *
-   * @param id       jobProfile id
+   * @param query    query for search
    * @param tenantId tenant id
    * @return future with optional {@link JobProfile}
    */
@@ -25,6 +25,14 @@ public interface JobProfileService {
    * @return future with optional {@link JobProfile}
    */
   Future<JobProfile> getById(String id, String tenantId);
+
+  /**
+   * Gets default {@link JobProfile}
+   *
+   * @param tenantId tenant id
+   * @return future with default {@link JobProfile}
+   */
+  Future<JobProfile> getDefault(String tenantId);
 
   /**
    * Saves {@link JobProfile} to database
