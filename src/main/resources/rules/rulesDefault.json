@@ -133,7 +133,7 @@
     }
   },
   {
-    "id": "instance.identifiers.issn",
+    "id": "instance.identifiers.cancelled.system.control.numbers",
     "field": "019",
     "description": "Cancelled system control numbers",
     "dataSources": [
