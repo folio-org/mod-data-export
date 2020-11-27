@@ -102,6 +102,7 @@
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
+            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -114,7 +115,6 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.instance-formats.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get"
@@ -134,6 +134,7 @@
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
+            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -146,7 +147,6 @@
             "inventory-storage.instance-types.collection.get",
             "inventory-storage.instance-formats.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get"
@@ -439,7 +439,7 @@
       "description": "Entry point to start export for the given file definition using job profile"
     },{
       "permissionName": "data-export.quick.export.post",
-      "displayName": "Starts export process from inventory",
+      "displayName": "Starts quick export process from inventory",
       "description": "Entry point to start quick export process from inventory"
     },
     {

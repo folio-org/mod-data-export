@@ -194,7 +194,10 @@ public class DataExportImpl implements DataExport {
     return promise.future();
   }
 
-  // for now UI will not send jobProfileId, after we will support all profiles, remove this method, and make jobProfileId as required in quickExportRequest
+  /**
+   * In the current implementation UI will not send jobProfileId. Remove this method and make jobProfileId
+   * as required in quickExportRequest when we support all profiles.
+   */
   private Future<JobProfile> getJobProfileForQuickExport(QuickExportRequest request) {
     return StringUtils.isNotEmpty(request.getJobProfileId())
       ? jobProfileService.getById(request.getJobProfileId(), tenantId)
