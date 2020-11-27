@@ -220,7 +220,7 @@ class FileUploadServiceUnitTest {
     fileDefinitionFuture.onComplete(ar ->
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(fileDefinitionService, times(2)).update(eq(fileDefinition), eq(TENANT_ID));
+        verify(fileDefinitionService, times(2)).update(any(FileDefinition.class), eq(TENANT_ID));
         verify(usersClient).getById(anyString(), anyString(), eq(params));
         verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), eq(user), anyInt(), anyBoolean(), anyString());
         context.completeNow();
