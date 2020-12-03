@@ -15,8 +15,8 @@ stages:
   - name: Deploy
     steps:
       - applyAppConfig:
-          catalogTemplate: p-rlq5p:concorde-helmcharts-mod-data-export
-          version: 0.1.30
+          catalogTemplate: p-v4mss:concorde-helmcharts-mod-data-export
+          version: 0.1.32
           answers:
             image.repository: docker.dev.folio.org/mod-data-export
             image.tag: concorde-${CICD_EXECUTION_SEQUENCE}
