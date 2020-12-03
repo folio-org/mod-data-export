@@ -13,6 +13,7 @@ import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.service.ApplicationTestConfig;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
 import org.folio.util.HelperUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
@@ -110,7 +111,7 @@ class ConfigurationsClientTest extends RestVerticleTestBase {
     vertx.setTimer(2000L, handler ->
       context.verify(() -> {
         Assert.assertTrue(recordLink.isEmpty());
-        Criterion criterion = HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(JOB_EXECUTION_ID, "Error while query the configs from mod configuration by query");
+        Criterion criterion = HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorMessageCode(JOB_EXECUTION_ID, ErrorCode.ERROR_QUERY_CONFIGURATIONS.getCode());
         errorLogService.getByQuery(criterion, okapiConnectionParams.getTenantId())
           .onSuccess(errorLogList -> {
             Assertions.assertNotNull(errorLogList);

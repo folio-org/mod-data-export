@@ -3,7 +3,8 @@
    "jobExecutionId":"67dfac11-1caf-4470-9ad1-d533f6360bdd",
    "createdDate":"2019-07-22T11:22:07Z",
    "logLevel":"ERROR",
-   "reason" : "Error reason",
+   "errorMessageCode":"error.code",
+   "errorMessageValues": ["value"],
    "affectedRecord": {
        "id": "57c79d87-6510-4354-b212-96832fbf3fa1",
        "hrid": "200",

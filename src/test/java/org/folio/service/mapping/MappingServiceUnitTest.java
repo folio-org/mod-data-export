@@ -18,6 +18,7 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -151,7 +153,7 @@ class MappingServiceUnitTest {
     // when
     List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq("An error occurred during fields mapping, reason: undefined, cause: java.lang.NullPointerException"), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
+    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode()), eq(Arrays.asList("undefined", "java.lang.NullPointerException")), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
   }
 
@@ -167,7 +169,7 @@ class MappingServiceUnitTest {
     // when
     List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
-    verify(errorLogService).saveGeneralError(eq(expectedReason), eq(jobExecutionId), any());
+    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_FIELDS_MAPPING_SRS.getCode()), eq(Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "undefined", "java.lang.NullPointerException")), eq(jobExecutionId), any());
   }
 
 
@@ -184,7 +186,7 @@ class MappingServiceUnitTest {
     // when
     mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
-    verify(errorLogService).saveGeneralError(eq("An error occurred during fields mapping"), eq(jobExecutionId),  any());
+    verify(errorLogService).saveGeneralError(eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY.getCode()), eq(jobExecutionId),  any());
   }
 
   @Test

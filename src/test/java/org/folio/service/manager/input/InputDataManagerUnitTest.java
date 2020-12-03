@@ -187,7 +187,7 @@ class InputDataManagerUnitTest {
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
     assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + jobExecution.getHrId() + ".mrc"));
-    verify(errorLogService).saveGeneralError("Error while reading from input file with uuids or file is empty", JOB_EXECUTION_ID, TENANT_ID);
+    verify(errorLogService).saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), JOB_EXECUTION_ID, TENANT_ID);
   }
 
   @Test

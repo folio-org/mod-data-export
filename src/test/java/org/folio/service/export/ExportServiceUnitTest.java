@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.util.ErrorCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,7 +113,7 @@ class ExportServiceUnitTest {
     // when
     exportService.exportInventoryRecords(inventoryRecords, fileDefinition, TENANT);
     // then
-    verify(errorLogService).saveGeneralError("Error during saving record to file", JOB_EXECUTION_ID, TENANT);
+    verify(errorLogService).saveGeneralError(ErrorCode.ERROR_SAVING_RECORD_TO_FILE.getCode(), JOB_EXECUTION_ID, TENANT);
   }
 
   @Test
@@ -133,7 +135,7 @@ class ExportServiceUnitTest {
       exportService.postExport(fileDefinition, TENANT);
     });
 
-    verify(errorLogService).saveGeneralError("Invalid export file definition id: ", "", TENANT);
+    verify(errorLogService).saveGeneralError(ErrorCode.INVALID_EXPORT_FILE_DEFINITION.getCode(), "", TENANT);
   }
 
   @Test
@@ -148,6 +150,6 @@ class ExportServiceUnitTest {
       exportService.postExport(fileDefinition, TENANT);
     });
     // then
-    verify(errorLogService).saveGeneralError("Invalid export file definition id: " + FILE_DEFINITION_ID, JOB_EXECUTION_ID, TENANT);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode(), Arrays.asList(FILE_DEFINITION_ID), JOB_EXECUTION_ID, TENANT);
   }
 }

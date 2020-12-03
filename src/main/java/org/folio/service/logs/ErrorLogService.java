@@ -60,23 +60,35 @@ public interface ErrorLogService {
   /**
    * Creates and saves {@link ErrorLog} to database
    *
-   * @param reason         the reason of the error
+   * @param errorMessageCode the code of the error message
    * @param jobExecutionId id of specific job execution
    * @param tenantId       id of specific tenant
    * @return future with saved {@link ErrorLog}
    */
-  Future<ErrorLog> saveGeneralError(String reason, String jobExecutionId, String tenantId);
+  Future<ErrorLog> saveGeneralError(String errorMessageCode, String jobExecutionId, String tenantId);
+
+  /**
+   * Creates and saves {@link ErrorLog} with values for error message to database
+   *
+   * @param errorMessageCode the code of the error message
+   * param errorMessageValues the values to replace placeholders in error message
+   * @param jobExecutionId id of specific job execution
+   * @param tenantId       id of specific tenant
+   * @return future with saved {@link ErrorLog}
+   */
+  Future<ErrorLog> saveGeneralErrorWithMessageValues(String errorMessageCode, List<String> errorMessageValues, String jobExecutionId, String tenantId);
 
   /**
    * Creates and saves {@link ErrorLog} to database
    *
    * @param record         {@link JsonObject} inventory record that is cause of the error
-   * @param reason         the reason of the error
+   * @param errorMessageCode the code of the error message
+   * @param errorMessageValues the values to replace placeholders in error message
    * @param jobExecutionId id of specific job execution
    * @param params         okapi connection parameters
    * @return future with saved {@link ErrorLog}
    */
-  Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, TranslationException recordInfo, OkapiConnectionParams params);
+  Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String errorMessageCode, List<String> errorMessageValues, String jobExecutionId, TranslationException recordInfo, OkapiConnectionParams params);
 
   /**
    * Gets {@link ErrorLog}

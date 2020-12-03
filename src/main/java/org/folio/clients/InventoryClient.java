@@ -30,6 +30,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +66,7 @@ public class InventoryClient {
           QUERY_PATTERN_INVENTORY));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralError("Error while getting instances by ids. " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -78,7 +80,7 @@ public class InventoryClient {
       return Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
       LOGGER.error(e.getMessage(), e.getCause());
-      errorLogService.saveGeneralError("Error while getting instances by ids. " + e.getMessage(), StringUtils.EMPTY, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(e.getMessage()), StringUtils.EMPTY, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -176,7 +178,7 @@ public class InventoryClient {
       responseBody = Optional.of(ClientUtil.getRequest(params, queryEndpoint));
     } catch (HttpClientException e) {
       if (StringUtils.isNotEmpty(jobExecutionId)) {
-        errorLogService.saveGeneralError("Error while getting reference data from inventory during the export process by calling  " + url, jobExecutionId, params.getTenantId());
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_REFERENCE_DATA.getCode(), Arrays.asList(url), jobExecutionId, params.getTenantId());
       }
       return map;
     }
@@ -199,7 +201,7 @@ public class InventoryClient {
     try {
       return Optional.of(getRequest(params, endpoint));
     } catch (HttpClientException exception) {
-      errorLogService.saveGeneralError(format("Error while getting holdings by instance id: %s, message: %s", instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_HOLDINGS_BY_INSTANCE_ID.getCode(), Arrays.asList(instanceID, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -210,7 +212,7 @@ public class InventoryClient {
           QUERY_PATTERN_ITEM));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralError("Error while getting items by holding ids " + exception.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_ITEM_BY_HOLDINGS_ID.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

@@ -13,7 +13,7 @@ import java.util.List;
 public class HelperUtils {
 
   private static final String JOB_EXECUTION_ID_FIELD = "'jobExecutionId'";
-  private static final String REASON_FIELD = "'reason'";
+  private static final String ERROR_MESSAGE_CODE_FIELD = "'errorMessageCode'";
 
   private HelperUtils() {
 
@@ -54,19 +54,19 @@ public class HelperUtils {
    * Builds Criterion by which db result is filtered to get error logs by job execution id and reason
    *
    * @param jobExecutionId - job execution id to which error log related
-   * @param reason         - query string to filter error logs based on matching reason in fields
+   * @param errorMessageCode - query string to filter error logs based on matching reason in fields
    * @return - {@link Criterion}}
    */
-  public static Criterion getErrorLogCriterionByJobExecutionIdAndReason(String jobExecutionId, String reason) {
+  public static Criterion getErrorLogCriterionByJobExecutionIdAndErrorMessageCode(String jobExecutionId, String errorMessageCode) {
     Criterion criterion = new Criterion();
     Criteria jobExecutionIdCriteria = new Criteria();
     jobExecutionIdCriteria.addField(JOB_EXECUTION_ID_FIELD)
       .setOperation("=")
       .setVal(jobExecutionId);
     Criteria reasonCriteria = new Criteria();
-    reasonCriteria.addField(REASON_FIELD)
-      .setOperation("LIKE")
-      .setVal("%" + reason + "%");
+    reasonCriteria.addField(ERROR_MESSAGE_CODE_FIELD)
+      .setOperation("=")
+      .setVal(errorMessageCode);
     criterion.addCriterion(jobExecutionIdCriteria);
     criterion.addCriterion(reasonCriteria);
     return criterion;
@@ -82,7 +82,7 @@ public class HelperUtils {
         .setVal(jobExecutionId);
     Criteria reasonCriteria = new Criteria();
     reasonCriteria
-        .addField(REASON_FIELD)
+        .addField(ERROR_MESSAGE_CODE_FIELD)
         .setOperation("SIMILAR TO")
         .setVal(
             reasons.size() > 1

@@ -57,8 +57,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      errorLogService.saveGeneralError("S3 bucket is not provided", jobExecutionId, tenantId);
-      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
+      errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_IS_NOT_PROVIDED.getCode(), jobExecutionId, tenantId);
+      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     }
     GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, keyName)
       .withMethod(HttpMethod.GET)
@@ -101,8 +101,8 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String folderInS3 = tenantId + "/" + fileDefinition.getJobExecutionId();
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      errorLogService.saveGeneralError("S3 bucket is not provided", fileDefinition.getJobExecutionId(), tenantId);
-      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NOT_PROVIDED);
+      errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getCode(), fileDefinition.getJobExecutionId(), tenantId);
+      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
       try {

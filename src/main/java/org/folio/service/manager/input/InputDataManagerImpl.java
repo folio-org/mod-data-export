@@ -123,7 +123,7 @@ class InputDataManagerImpl implements InputDataManager {
         }
       });
     } else {
-      errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
+      errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);

@@ -32,6 +32,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -41,8 +42,6 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.AffectedRecord.RecordType.ITEM;
 import static org.folio.rest.jaxrs.model.ErrorLog.LogLevel.ERROR;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.junit.Assert.assertEquals;
@@ -69,6 +68,8 @@ class ErrorLogServiceUnitTest {
   private static final String HOLDINGS_ID = "77d8456b-aec2-48ec-8deb-37c0a65983e6";
   private static final String ITEM_ID = "e2ecf553-3892-4205-aaff-6761a4d6ccfc";
   private static final String ITEMS = "items";
+  private static final String ERROR_MESSAGE_CODE = "error.messageCode";
+  private static final String ERROR_MESSAGE_VALUE = "errorMessageValue";
   private static ErrorLog errorLog;
   private static ErrorLogCollection errorLogCollection;
   private static OkapiConnectionParams params;
@@ -95,7 +96,7 @@ class ErrorLogServiceUnitTest {
       .withId(UUID.randomUUID().toString())
       .withJobExecutionId(UUID.randomUUID().toString())
       .withLogLevel(ERROR)
-      .withReason("Error reason")
+      .withErrorMessageCode(ERROR_MESSAGE_CODE)
       .withCreatedDate(new Date())
       .withMetadata(new Metadata()
         .withCreatedByUserId(UUID.randomUUID().toString())
@@ -163,15 +164,17 @@ class ErrorLogServiceUnitTest {
     JsonObject record = new JsonObject();
     record.put("instance", instanceRecord);
     when(errorLogDao.save(any(ErrorLog.class), anyString())).thenReturn(succeededFuture(errorLog));
+
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
-      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(ERROR_MESSAGE_CODE, errorLog.getErrorMessageCode());
+      Assert.assertEquals(ERROR_MESSAGE_VALUE, errorLog.getErrorMessageValues().get(0));
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       verify(affectedRecordInstanceBuilder).build(eq(record), eq(JOB_EXECUTION_ID), eq(recordInfo.getId()), eq(true), eq(params));
       context.completeNow();
@@ -187,7 +190,7 @@ class ErrorLogServiceUnitTest {
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     JsonObject record = createRecord();
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -214,7 +217,7 @@ class ErrorLogServiceUnitTest {
     }
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_REASON, JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -229,14 +232,14 @@ class ErrorLogServiceUnitTest {
     // given
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveGeneralError(ERROR_REASON, JOB_EXECUTION_ID, TENANT_ID);
+    Future<ErrorLog> future = errorLogService.saveGeneralError(ERROR_MESSAGE_CODE, JOB_EXECUTION_ID, TENANT_ID);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
-      Assert.assertEquals(ERROR_REASON, errorLog.getReason());
+      Assert.assertEquals(ERROR_MESSAGE_CODE, errorLog.getErrorMessageCode());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
     }));
@@ -289,7 +292,8 @@ class ErrorLogServiceUnitTest {
     ErrorLog errorLog = new ErrorLog()
       .withLogLevel(ERROR)
       .withJobExecutionId(JOB_EXECUTION_ID)
-      .withReason(SOME_RECORDS_FAILED.getDescription() + 1);
+      .withErrorMessageCode(SOME_RECORDS_FAILED.getCode())
+      .withErrorMessageValues(Arrays.asList("1"));
     int number = 1;
     when(errorLogDao.getByQuery(any(Criterion.class), anyString())).thenReturn(succeededFuture(singletonList(errorLog)));
     // when
@@ -298,29 +302,6 @@ class ErrorLogServiceUnitTest {
     verify(errorLogDao).update(errorLog, TENANT_ID);
 
     context.completeNow();
-  }
-
-  private void assertErrorLogWithHoldingsAndItems(ErrorLog errorLog, boolean isItemPresent) {
-    Assert.assertEquals(ERROR, errorLog.getLogLevel());
-    Assert.assertEquals(ERROR_REASON, errorLog.getReason());
-    Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
-    AffectedRecord instanceAffectedRecord = errorLog.getAffectedRecord();
-    Assert.assertEquals(AffectedRecord.RecordType.INSTANCE, instanceAffectedRecord.getRecordType());
-    Assert.assertEquals(INSTANCE_HR_ID, instanceAffectedRecord.getHrid());
-    Assert.assertEquals(INSTANCE_ID, instanceAffectedRecord.getId());
-    Assert.assertEquals(INSTANCE_TITLE, instanceAffectedRecord.getTitle());
-    AffectedRecord holdingAffectedRecord = errorLog.getAffectedRecord().getAffectedRecords().get(0);
-    Assert.assertEquals(HOLDINGS_HR_ID, holdingAffectedRecord.getHrid());
-    Assert.assertEquals(HOLDINGS_ID, holdingAffectedRecord.getId());
-    Assert.assertEquals(HOLDINGS, holdingAffectedRecord.getRecordType());
-    if (isItemPresent) {
-      AffectedRecord itemAffectedRecord = holdingAffectedRecord.getAffectedRecords().get(0);
-      Assert.assertEquals(ITEM_HR_ID, itemAffectedRecord.getHrid());
-      Assert.assertEquals(ITEM_ID, itemAffectedRecord.getId());
-      Assert.assertEquals(ITEM, itemAffectedRecord.getRecordType());
-    } else {
-      Assert.assertTrue(holdingAffectedRecord.getAffectedRecords().isEmpty());
-    }
   }
 
   private JsonObject createRecord() {

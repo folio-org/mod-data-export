@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.processor.rule.Rule;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
 import org.slf4j.Logger;
@@ -17,13 +18,13 @@ import org.springframework.stereotype.Component;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
@@ -44,7 +45,7 @@ public class ConfigurationsClient {
     try {
       response = Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
-      errorLogService.saveGeneralError("Error while query the configs from mod configuration by query: " + query + SPACE + e.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_CONFIGURATIONS.getCode(), Arrays.asList(query, e.getMessage()), jobExecutionId, params.getTenantId());
       response = Optional.empty();
     }
     return response;
@@ -57,8 +58,8 @@ public class ConfigurationsClient {
       JsonArray configs = jsonObject.get().getJsonArray("configs");
       if (configs.size() == 0) {
         LOGGER.error("No configuration for host in mod config. There will be no link to the failed entry");
-        errorLogService.saveGeneralError("Error while query the configs from mod configuration by query: "
-          + query + SPACE + "No configuration for host in mod config. There will be no link to the failed record", jobExecutionId, params.getTenantId());
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_CONFIGURATIONS.getCode(), Arrays.asList(query, "No configuration for host in mod config. There will be no link to the failed record"),
+          jobExecutionId, params.getTenantId());
         return EMPTY;
       }
       return configs.getJsonObject(0).getString("value") + query;
@@ -80,7 +81,7 @@ public class ConfigurationsClient {
     try {
       rulesFromConfig = Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
-      errorLogService.saveGeneralError("Error while query the rules from mod configuration: " + e.getMessage(), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_RULES_FROM_CONFIGURATIONS.getCode(), Arrays.asList(e.getMessage()), jobExecutionId, params.getTenantId());
       rulesFromConfig = Optional.empty();
     }
     return rulesFromConfig.map(entries -> constructRulesFromJson(entries, params.getTenantId())).orElse(emptyList());

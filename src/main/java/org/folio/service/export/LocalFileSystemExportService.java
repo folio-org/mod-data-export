@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -79,7 +80,7 @@ public class LocalFileSystemExportService implements ExportService {
         try {
           fileStorage.saveFileDataBlocking(bytes, fileDefinition);
         } catch (RuntimeException e) {
-          errorLogService.saveGeneralError("Error during saving record to file", fileDefinition.getJobExecutionId(), tenantId);
+          errorLogService.saveGeneralError(ErrorCode.ERROR_SAVING_RECORD_TO_FILE.getCode(), fileDefinition.getJobExecutionId(), tenantId);
           LOGGER.error("Error during saving inventory record to file with content: {}", record);
         }
       }
@@ -90,9 +91,9 @@ public class LocalFileSystemExportService implements ExportService {
   public void postExport(FileDefinition fileDefinition, String tenantId) {
     if (!isValidFileDefinition(fileDefinition)) {
       if (fileDefinition != null && fileDefinition.getJobExecutionId() != null) {
-        errorLogService.saveGeneralError(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription() + fileDefinition.getId(), fileDefinition.getJobExecutionId(), tenantId);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode(), Arrays.asList(fileDefinition.getId()), fileDefinition.getJobExecutionId(), tenantId);
       } else {
-        errorLogService.saveGeneralError(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription(), EMPTY, tenantId);
+        errorLogService.saveGeneralError(ErrorCode.INVALID_EXPORT_FILE_DEFINITION.getCode(), EMPTY, tenantId);
       }
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
     }

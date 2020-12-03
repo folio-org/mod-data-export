@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -75,16 +76,19 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public Future<ErrorLog> saveGeneralError(String reason, String jobExecutionId, String tenantId) {
-    ErrorLog errorLog = new ErrorLog()
-      .withReason(reason)
-      .withLogLevel(ErrorLog.LogLevel.ERROR)
-      .withJobExecutionId(jobExecutionId);
+  public Future<ErrorLog> saveGeneralError(String errorMessageCode, String jobExecutionId, String tenantId) {
+    return save(getGeneralErrorLog(errorMessageCode, jobExecutionId), tenantId);
+  }
+
+  @Override
+  public Future<ErrorLog> saveGeneralErrorWithMessageValues(String errorMessageCode, List<String> errorMessageValues, String jobExecutionId, String tenantId) {
+    ErrorLog errorLog = getGeneralErrorLog(errorMessageCode, jobExecutionId)
+      .withErrorMessageValues(errorMessageValues);
     return save(errorLog, tenantId);
   }
 
   @Override
-  public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String reason, String jobExecutionId, TranslationException translationException, OkapiConnectionParams params) {
+  public Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String errorMessageCode, List<String> errorMessageValues, String jobExecutionId, TranslationException translationException, OkapiConnectionParams params) {
     AffectedRecord affectedRecord = new AffectedRecord();
     RecordInfo recordInfo = translationException.getRecordInfo();
     if (recordInfo.getType().isInstance()) {
@@ -102,7 +106,8 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     }
     ErrorLog errorLog = new ErrorLog()
       .withAffectedRecord(affectedRecord)
-      .withReason(reason)
+      .withErrorMessageCode(errorMessageCode)
+      .withErrorMessageValues(errorMessageValues)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId);
     return save(errorLog, params.getTenantId());
@@ -110,17 +115,17 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public void populateUUIDsNotFoundErrorLog(String jobExecutionId, Collection<String> notFoundUUIDs, String tenantId) {
-    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
+    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorMessageCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           List<ErrorLog> errorLogs = ar.result();
+          List<String> newUUIDs = Arrays.asList(StringUtils.joinWith(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY));
           if (errorLogs.isEmpty()) {
-            saveGeneralError(SOME_UUIDS_NOT_FOUND.getDescription() +
-              StringUtils.joinWith(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY), jobExecutionId, tenantId);
+            saveGeneralErrorWithMessageValues(SOME_UUIDS_NOT_FOUND.getCode(), newUUIDs, jobExecutionId, tenantId);
           } else {
             ErrorLog errorLog = errorLogs.get(0);
-            String reason = errorLog.getReason();
-            errorLog.setReason(reason + COMMA_SEPARATOR + StringUtils.joinWith(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY));
+            String savedUUIDs = errorLog.getErrorMessageValues().get(0);
+            errorLog.setErrorMessageValues(Arrays.asList(savedUUIDs + COMMA_SEPARATOR + newUUIDs));
             update(errorLog, tenantId);
           }
         } else {
@@ -131,17 +136,20 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Override
   public void populateUUIDsNotFoundNumberErrorLog(String jobExecutionId, int numberOfNotFoundUUIDs, String tenantId) {
-    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId,SOME_RECORDS_FAILED.getDescription()), tenantId)
+    errorLogDao.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorMessageCode(jobExecutionId,SOME_RECORDS_FAILED.getCode()), tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           List<ErrorLog> errorLogs = ar.result();
           if (errorLogs.isEmpty()) {
-            saveGeneralError(SOME_RECORDS_FAILED.getDescription() + numberOfNotFoundUUIDs, jobExecutionId, tenantId);
+            //replace message with code
+            //split values from code
+            saveGeneralErrorWithMessageValues(SOME_RECORDS_FAILED.getCode(), Arrays.asList(String.valueOf(numberOfNotFoundUUIDs)), jobExecutionId, tenantId);
           } else {
             ErrorLog errorLog = errorLogs.get(0);
-            String reason = errorLog.getReason();
-            int updatedNumberOfNotFoundUUIDs = Integer.parseInt(reason.replaceAll("\\D+", "")) + numberOfNotFoundUUIDs;
-            errorLog.setReason(reason.replaceAll("\\d", EMPTY).trim() + SPACE + updatedNumberOfNotFoundUUIDs);
+            List<String> errorMessageValues = errorLog.getErrorMessageValues();
+            //get values form errorMessageValues to increase and save to appropriate field
+            int updatedNumberOfNotFoundUUIDs = Integer.parseInt(errorMessageValues.get(0)) + numberOfNotFoundUUIDs;
+            errorLog.setErrorMessageValues(Arrays.asList(String.valueOf(updatedNumberOfNotFoundUUIDs)));
             update(errorLog, tenantId);
           }
         } else {
@@ -159,6 +167,13 @@ public class ErrorLogServiceImpl implements ErrorLogService {
         .onFailure(ar -> promise.complete(false));
 
     return promise.future();
+  }
+
+  private ErrorLog getGeneralErrorLog(String errorMessageCode, String jobExecutionId) {
+    return new ErrorLog()
+      .withErrorMessageCode(errorMessageCode)
+      .withLogLevel(ErrorLog.LogLevel.ERROR)
+      .withJobExecutionId(jobExecutionId);
   }
 
 }

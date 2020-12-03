@@ -96,10 +96,10 @@ public class ExportManagerImpl implements ExportManager {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
-        errorLogService.saveGeneralError(serviceException.getMessage(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+        errorLogService.saveGeneralError(serviceException.getErrorCode().getCode(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
         return ExportResult.failed(serviceException.getErrorCode());
       }
-      errorLogService.saveGeneralError(ErrorCode.GENERIC_ERROR_CODE.getDescription(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
+      errorLogService.saveGeneralError(ErrorCode.GENERIC_ERROR_CODE.getCode(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
       return ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE);
     } else {
       LOGGER.info("Export batch has successfully completed");

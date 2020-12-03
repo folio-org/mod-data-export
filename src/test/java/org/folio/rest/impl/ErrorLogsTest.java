@@ -59,7 +59,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(logId)
       .withAffectedRecord(instanceRecord)
-      .withReason("Error reason");
+      .withErrorMessageCode("error.messageCode");
     errorLogDao.save(errorLog, okapiConnectionParams.getTenantId());
 
     // when
@@ -78,7 +78,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
         Assert.assertEquals(jobExecutionId, errorLog1.getJobExecutionId());
         Assert.assertEquals(ErrorLog.LogLevel.ERROR, errorLog1.getLogLevel());
         Assert.assertEquals(logId, errorLog1.getId());
-        Assert.assertEquals("Error reason", errorLog1.getReason());
+        Assert.assertEquals("error.messageCode", errorLog1.getErrorMessageCode());
         AffectedRecord affectedRecord = errorLog1.getAffectedRecord();
         Assert.assertEquals(recordId, affectedRecord.getId());
         Assert.assertEquals("instance hrid", affectedRecord.getHrid());
@@ -110,14 +110,14 @@ class ErrorLogsTest extends RestVerticleTestBase {
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())
-      .withReason("Error reason")
+      .withErrorMessageCode("error.messageCode")
       .withAffectedRecord(holdingRecord);
     ErrorLog errorLog2 = new ErrorLog()
       .withCreatedDate(new Date())
       .withJobExecutionId(jobExecutionId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withId(UUID.randomUUID().toString())
-      .withReason("Error reason")
+      .withErrorMessageCode("error.messageCode")
       .withAffectedRecord(holdingRecord);
 
     // when

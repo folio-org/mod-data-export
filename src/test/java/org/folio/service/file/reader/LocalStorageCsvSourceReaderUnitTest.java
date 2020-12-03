@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 
 class LocalStorageCsvSourceReaderUnitTest {
@@ -89,7 +90,7 @@ class LocalStorageCsvSourceReaderUnitTest {
       Assert.assertFalse(uuid.contains("\""));
     }
     assertEquals(TOTAL_COUNT_3, actualTotalCount);
-    Mockito.verify(errorLogService).saveGeneralError(anyString(), anyString(), anyString());
+    Mockito.verify(errorLogService).saveGeneralErrorWithMessageValues(anyString(), anyList(),anyString(), anyString());
   }
 
   @Test
