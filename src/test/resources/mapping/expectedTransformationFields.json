@@ -647,9 +647,9 @@
          "recordType":"INSTANCE"
       },
       {
-        "fieldId":"instance.identifiers.cancelled.system.control.numbers",
+        "fieldId":"instance.identifiers.cancelled.system.control.number",
         "displayNameKey":"instance.identifiers",
-        "referenceDataValue":"Cancelled system control numbers",
+        "referenceDataValue":"Cancelled system control number",
         "path":"$.instance.identifiers[?(@.identifierTypeId=='2c12660a-7393-4876-9a67-62ef5372512f')].value",
         "recordType":"INSTANCE"
       },
