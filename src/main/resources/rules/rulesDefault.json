@@ -133,9 +133,9 @@
     }
   },
   {
-    "id": "instance.identifiers.cancelled.system.control.numbers",
+    "id": "instance.identifiers.cancelled.system.control.number",
     "field": "019",
-    "description": "Cancelled system control numbers",
+    "description": "Cancelled system control number",
     "dataSources": [
       {
         "from": "$.instance.identifiers[*].value",
@@ -143,7 +143,7 @@
         "translation": {
           "function": "set_identifier",
           "parameters": {
-            "type": "Cancelled system control numbers"
+            "type": "Cancelled system control number"
           }
         }
       },
