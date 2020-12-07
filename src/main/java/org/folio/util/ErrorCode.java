@@ -37,7 +37,8 @@ public enum ErrorCode {
   UNDEFINED("error.mapping.undefined", "Undefined error during the mapping process"),
   ERROR_FIELDS_MAPPING_INVENTORY("error.mapping.fieldsMappingInventory", "An error occurred during fields mapping for inventory record"),
   ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON("error.mapping.fieldsMappingInventoryWithReason", "An error occurred during fields mapping for inventory record, reason: %s, cause: %s"),
-  ERROR_FIELDS_MAPPING_SRS("error.mapping.fieldsMappingSrs", "An error occurred during fields mapping for srs record with id: %s, reason: %s, cause: %s");
+  ERROR_FIELDS_MAPPING_SRS("error.mapping.fieldsMappingSrs", "An error occurred during fields mapping for srs record with id: %s, reason: %s, cause: %s"),
+  ERROR_MESSAGE_PLACEHOLDER("error.messagePlaceholder", "%s");
 
   private final String code;
   private final String description;
