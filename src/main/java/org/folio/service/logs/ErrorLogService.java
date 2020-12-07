@@ -71,7 +71,7 @@ public interface ErrorLogService {
    * Creates and saves {@link ErrorLog} with values for error message to database
    *
    * @param errorMessageCode the code of the error message
-   * param errorMessageValues the values to replace placeholders in error message
+   * @param errorMessageValues the values to replace placeholders in error message
    * @param jobExecutionId id of specific job execution
    * @param tenantId       id of specific tenant
    * @return future with saved {@link ErrorLog}
@@ -111,10 +111,10 @@ public interface ErrorLogService {
   /**
    * If error log with description from error code is present - then true, otherwise - false
    *
-   * @param reasons               reasons using for querying the logs
+   * @param errorCodes            error codes using for querying the logs
    * @param jobExecutionId        id of job execution
    * @param tenantId              tenant id
    */
-  Future<Boolean> isErrorsByReasonPresent(List<String> reasons, String jobExecutionId, String tenantId);
+  Future<Boolean> isErrorsByErrorCodePresent(List<String> errorCodes, String jobExecutionId, String tenantId);
 
 }

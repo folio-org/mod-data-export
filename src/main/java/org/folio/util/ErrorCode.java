@@ -64,13 +64,13 @@ public enum ErrorCode {
     return new Error().withCode(code).withMessage(description);
   }
 
-  public static List<String> reasonsAccordingToExport() {
+  public static List<String> errorCodesAccordingToExport() {
     List<String> errorCodesForUUIDs = new ArrayList<>();
-    errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND.getDescription());
-    errorCodesForUUIDs.add(SOME_RECORDS_FAILED.getDescription());
-    errorCodesForUUIDs.add(INVALID_UUID_FORMAT.getDescription());
-    errorCodesForUUIDs.add(DATE_PARSE_ERROR_CODE.getDescription());
-    errorCodesForUUIDs.add(UNDEFINED.getDescription());
+    errorCodesForUUIDs.add(SOME_UUIDS_NOT_FOUND.getCode());
+    errorCodesForUUIDs.add(SOME_RECORDS_FAILED.getCode());
+    errorCodesForUUIDs.add(INVALID_UUID_FORMAT.getCode());
+    errorCodesForUUIDs.add(DATE_PARSE_ERROR_CODE.getCode());
+    errorCodesForUUIDs.add(UNDEFINED.getCode());
     return errorCodesForUUIDs;
   }
 }

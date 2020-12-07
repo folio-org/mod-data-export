@@ -10,7 +10,6 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
-import static org.folio.util.ErrorCode.NOTHING_TO_EXPORT;
 import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.Assert.assertFalse;
@@ -155,7 +154,7 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          errorLogService.isErrorsByReasonPresent(ErrorCode.reasonsAccordingToExport(), jobExecutionId, tenantId).onSuccess(isErrorsPresent -> {
+          errorLogService.isErrorsByErrorCodePresent(ErrorCode.errorCodesAccordingToExport(), jobExecutionId, tenantId).onSuccess(isErrorsPresent -> {
             context.verify(() -> {
               FileDefinition fileExportDefinition = optionalFileDefinition.get();
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);

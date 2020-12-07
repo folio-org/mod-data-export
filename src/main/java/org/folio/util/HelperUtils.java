@@ -72,8 +72,8 @@ public class HelperUtils {
     return criterion;
   }
 
-  public static Criterion getErrorLogCriterionByJobExecutionIdAndReasons(
-      String jobExecutionId, List<String> reasons) {
+  public static Criterion getErrorLogCriterionByJobExecutionIdAndErrorCodes(
+      String jobExecutionId, List<String> errorCodes) {
     Criterion criterion = new Criterion();
     Criteria jobExecutionIdCriteria = new Criteria();
     jobExecutionIdCriteria
@@ -85,9 +85,9 @@ public class HelperUtils {
         .addField(ERROR_MESSAGE_CODE_FIELD)
         .setOperation("SIMILAR TO")
         .setVal(
-            reasons.size() > 1
-                ? "%(" + String.join("|", reasons) + ")%"
-                : "%" + reasons.get(0) + "%");
+            errorCodes.size() > 1
+                ? "%(" + String.join("|", errorCodes) + ")%"
+                : "%" + errorCodes.get(0) + "%");
 
     criterion.addCriterion(jobExecutionIdCriteria);
     criterion.addCriterion(reasonCriteria);

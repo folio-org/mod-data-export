@@ -29,10 +29,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndReasons;
+import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorCodes;
 
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
@@ -159,10 +158,10 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   @Override
-  public Future<Boolean> isErrorsByReasonPresent(
-      List<String> reasons, String jobExecutionId, String tenantId) {
+  public Future<Boolean> isErrorsByErrorCodePresent(
+      List<String> errorCodes, String jobExecutionId, String tenantId) {
     Promise<Boolean> promise = Promise.promise();
-    getByQuery(getErrorLogCriterionByJobExecutionIdAndReasons(jobExecutionId, reasons), tenantId)
+    getByQuery(getErrorLogCriterionByJobExecutionIdAndErrorCodes(jobExecutionId, errorCodes), tenantId)
         .onSuccess(errorLogList -> promise.complete(CollectionUtils.isNotEmpty(errorLogList)))
         .onFailure(ar -> promise.complete(false));
 
