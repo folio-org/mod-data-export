@@ -123,7 +123,7 @@
     {
       "run": "after",
       "snippetPath": "migrate_error_log_reason_to_errorMessageCode.sql",
-      "fromModuleVersion": "mod-data-export-3.0.2"
+      "fromModuleVersion": "mod-data-export-3.1.0"
     }
   ]
 }
