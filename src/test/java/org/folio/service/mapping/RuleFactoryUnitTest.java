@@ -49,6 +49,7 @@ import static org.folio.TestUtil.TEMPORARY_LOCATION_FIELD_ID;
 import static org.folio.TestUtil.TEMPORARY_LOCATION_PATH;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import static org.folio.util.ExternalPathResolver.CAMPUSES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
 import static org.folio.util.ExternalPathResolver.LIBRARIES;
@@ -65,6 +66,7 @@ class RuleFactoryUnitTest {
   private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
   private static final String FIELD_ID_1 = "fieldId1";
   private static final String FIELD_ID_2 = "fieldId2";
+  private static final String DEFAULT_RULE_ID = "defaultRuleId";
   private static final String TRANSFORMATIONS_PATH_1 = "transformationsPath1";
   private static final String TRANSFORMATION_FIELD_VALUE_1 = "002";
   private static final String TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD = "002  $a";
@@ -202,7 +204,7 @@ class RuleFactoryUnitTest {
     Transformations transformations = new Transformations()
       .withEnabled(true)
       .withPath(TRANSFORMATIONS_PATH_1)
-      .withFieldId(FIELD_ID_1)
+      .withFieldId(DEFAULT_RULE_ID)
       .withTransformation(EMPTY)
       .withRecordType(INSTANCE);
     MappingProfile mappingProfile = new MappingProfile()
@@ -215,7 +217,7 @@ class RuleFactoryUnitTest {
 
     // then
     assertEquals(1, rules.size());
-    assertEquals(FIELD_ID_1, rules.get(0).getId());
+    assertEquals(DEFAULT_RULE_ID, rules.get(0).getId());
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
@@ -771,12 +773,46 @@ class RuleFactoryUnitTest {
     assertEquals(0, rules.size());
   }
 
+  @Test
+  void shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations() {
+    // given
+    Transformations holdingsTransformations = new Transformations()
+      .withEnabled(true)
+      .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(HOLDINGS);
+    Transformations itemTransformations = new Transformations()
+      .withEnabled(true)
+      .withPath(TRANSFORMATIONS_PATH_2)
+      .withFieldId(FIELD_ID_2)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_2)
+      .withRecordType(ITEM);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(DEFAULT_MAPPING_PROFILE_ID)
+      .withTransformations(ImmutableList.of(holdingsTransformations, itemTransformations))
+      .withRecordTypes(ImmutableList.of(INSTANCE, HOLDINGS, ITEM));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(3, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(1).getDataSources().get(0).getFrom());
+    assertEquals(DEFAULT_RULE_ID, rules.get(2).getId());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(2).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(2).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(2).getDataSources().get(0).getFrom());
+  }
 
   private void setUpDefaultRules() {
     DataSource dataSource = new DataSource();
     dataSource.setFrom(DEFAULT_RULE_FROM_VALUE);
     Rule defaultRule = new Rule();
-    defaultRule.setId(FIELD_ID_1);
+    defaultRule.setId(DEFAULT_RULE_ID);
     defaultRule.setField(DEFAULT_RULE_FIELD_VALUE);
     defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
     defaultRule.setDataSources(Lists.newArrayList(dataSource));

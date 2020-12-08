@@ -14,6 +14,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.strategy.ExportStrategy;
 import org.folio.service.manager.export.strategy.InstanceExportStrategyImpl;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
@@ -49,7 +50,7 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private ErrorLogService errorLogService;
   @Autowired
-  private InstanceExportStrategyImpl instanceExportManager;
+  private ExportStrategy instanceExportManager;
 
   public ExportManagerImpl() {
   }

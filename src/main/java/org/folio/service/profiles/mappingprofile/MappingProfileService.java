@@ -56,16 +56,24 @@ public interface MappingProfileService {
   /**
    * Gets default {@link MappingProfile}
    *
-   * @param tenantId         tenant id
+   * @param tenantId tenant id
    * @return future with default {@link MappingProfile}
    */
   Future<MappingProfile> getDefault(String tenantId);
+
+//  /**
+//   * Check is mapping profile default or not {@link MappingProfile}
+//   *
+//   * @param mappingProfileId tenant id
+//   * @return future with default {@link MappingProfile}
+//   */
+//  boolean isDefault(String mappingProfileId);
 
   /**
    * Validates {@link MappingProfile}
    *
    * @param mappingProfile {@link MappingProfile} to validate
-   * @param params {@link OkapiConnectionParams} okapi headers and connection parameters
+   * @param params         {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with {@link Void}
    */
   Future<Void> validate(MappingProfile mappingProfile, OkapiConnectionParams params);
