@@ -64,7 +64,7 @@ public class ExternalPathResolver {
     apis.put(ISSUANCE_MODES, "/modes-of-issuance");
     apis.put(HOLDING_NOTE_TYPES, "/holdings-note-types");
     apis.put(ITEM_NOTE_TYPES, "/item-note-types");
-    apis.put(INSTANCE_BULK_IDS, "/instance-bulk/ids");
+    apis.put(INSTANCE_BULK_IDS, "/record-bulk/ids");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 
