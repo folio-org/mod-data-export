@@ -75,7 +75,7 @@ class JobProfileDaoUnitTest {
   }
 
   @Test
-  void shouldFailToUpdateJobExecution_whenPgClientTReturnedFailedFuture(VertxTestContext context) {
+  void shouldFailToUpdateJobExecution_whenPgClientReturnedFailedFuture(VertxTestContext context) {
     // given
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
