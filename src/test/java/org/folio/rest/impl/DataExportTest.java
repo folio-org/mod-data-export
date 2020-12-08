@@ -9,6 +9,8 @@ import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
+import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -152,7 +154,7 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          errorLogService.isErrorsByReasonPresent(ErrorCode.reasonsAccordingToExport(), jobExecutionId, tenantId).onSuccess(isErrorsPresent -> {
+          errorLogService.isErrorsByErrorCodePresent(ErrorCode.errorCodesAccordingToExport(), jobExecutionId, tenantId).onSuccess(isErrorsPresent -> {
             context.verify(() -> {
               FileDefinition fileExportDefinition = optionalFileDefinition.get();
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
@@ -183,7 +185,7 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndReason(jobExecutionId, SOME_UUIDS_NOT_FOUND.getDescription()), tenantId)
+          errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorMessageCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()), tenantId)
             .onComplete(ar -> {
               context.verify(() -> {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
@@ -581,17 +583,17 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
     for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
-      Assert.assertTrue(errorLog.getReason().contains("Get invalid response with status: 500")
-        || errorLog.getReason().contains("Nothing to export: no binary file generated")
-        || errorLog.getReason().contains(SOME_UUIDS_NOT_FOUND.getDescription())
-        || errorLog.getReason().contains("Invalid export file definition id:"));
+      Assert.assertTrue(errorLog.getErrorMessageCode().contains(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode())
+        || errorLog.getErrorMessageCode().contains(NO_FILE_GENERATED.getCode())
+        || errorLog.getErrorMessageCode().contains(SOME_UUIDS_NOT_FOUND.getCode())
+        || errorLog.getErrorMessageCode().contains(INVALID_EXPORT_FILE_DEFINITION_ID.getCode()));
     }
   }
 
   private void assertNotFoundUUIDsErrorLog(ErrorLog errorLog, String jobExecutionId) {
     Assertions.assertEquals(jobExecutionId, errorLog.getJobExecutionId());
     Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
-    Assertions.assertTrue(errorLog.getReason().contains(SOME_UUIDS_NOT_FOUND.getDescription()));
+    Assertions.assertTrue(errorLog.getErrorMessageCode().contains(SOME_UUIDS_NOT_FOUND.getCode()));
   }
 
   private void validateExternalCalls() {

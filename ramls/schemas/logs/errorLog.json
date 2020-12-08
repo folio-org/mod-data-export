@@ -27,9 +27,16 @@
       ],
       "default": "ERROR"
     },
-    "reason": {
-      "description": "Error reason",
+    "errorMessageCode": {
+      "description": "Code of error message",
       "type": "string"
+    },
+    "errorMessageValues": {
+      "description": "Values should be used to replace placeholders in error messages",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "affectedRecord": {
       "type": "object",

@@ -119,6 +119,11 @@
       "run": "after",
       "snippetPath": "migration_scripts/update_transformations_mapping_profile.sql",
       "fromModuleVersion": "mod-data-export-3.0.2"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/migrate_error_log_reason_to_errorMessageCode.sql",
+      "fromModuleVersion": "mod-data-export-3.1.0"
     }
   ]
 }

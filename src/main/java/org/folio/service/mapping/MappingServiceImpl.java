@@ -1,5 +1,9 @@
 package org.folio.service.mapping;
 
+import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY;
+import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON;
+import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -23,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -88,7 +93,7 @@ public class MappingServiceImpl implements MappingService {
       return mapInstance(instance, referenceData, jobExecutionId, finalRules, connectionParams);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
-      errorLogService.saveGeneralError("An error occurred during fields mapping", jobExecutionId, connectionParams.getTenantId());
+      errorLogService.saveGeneralError(ERROR_FIELDS_MAPPING_INVENTORY.getCode(), jobExecutionId, connectionParams.getTenantId());
       return Optional.empty();
     }
   }
@@ -98,8 +103,8 @@ public class MappingServiceImpl implements MappingService {
     RecordWriter recordWriter = new MarcRecordWriter();
     String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
-      String reason = String.format("An error occurred during fields mapping, reason: %s, cause: %s", translationException.getErrorCode().getDescription(), translationException.getMessage());
-      errorLogService.saveWithAffectedRecord(instance, reason, jobExecutionId, translationException, connectionParams);
+      List<String> errorMessageValues = Arrays.asList(translationException.getErrorCode().getDescription(), translationException.getMessage());
+      errorLogService.saveWithAffectedRecord(instance, ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode(), errorMessageValues, jobExecutionId, translationException, connectionParams);
     }));
     return Optional.of(record);
   }
@@ -114,11 +119,10 @@ public class MappingServiceImpl implements MappingService {
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
     EntityReader entityReader = new JPathSyntaxEntityReader(record);
     RecordWriter recordWriter = new MarcRecordWriter();
-    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException ->
-      errorLogService.saveGeneralError(String.format("An error occurred during fields mapping for srs record with " +
-          "id: %s, reason: %s, cause: %s ", translationException.getRecordInfo().getId(),
-        translationException.getErrorCode().getDescription(), translationException.getMessage()),
-        jobExecutionId, connectionParams.getTenantId())));
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException -> {
+      List<String> errorMessageValues = Arrays.asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(), translationException.getMessage());
+      errorLogService.saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), errorMessageValues, jobExecutionId, connectionParams.getTenantId());
+    }));
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {

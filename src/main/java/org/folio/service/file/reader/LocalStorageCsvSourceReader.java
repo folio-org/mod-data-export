@@ -13,6 +13,7 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +106,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
         }
       }).count();
     if (CollectionUtils.isNotEmpty(invalidUUIDs)) {
-      errorLogService.saveGeneralError(INVALID_UUID_FORMAT.getDescription() + String.join(COMMA, invalidUUIDs), jobExecutionId, tenantId);
+      errorLogService.saveGeneralErrorWithMessageValues(INVALID_UUID_FORMAT.getCode(), Arrays.asList(String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
     }
     return (int) count;
   }

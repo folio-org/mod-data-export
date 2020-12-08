@@ -5,10 +5,12 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.folio.util.ExternalPathResolver.USERS;
@@ -29,7 +31,7 @@ public class UsersClient {
     try {
       return Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException exception) {
-      errorLogService.saveGeneralError(String.format("Error while getting user with id = %s, message: %s", userId, exception.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_USER.getCode(), Arrays.asList(userId, exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

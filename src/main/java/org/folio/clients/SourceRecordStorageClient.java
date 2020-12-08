@@ -8,6 +8,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +43,7 @@ public class SourceRecordStorageClient {
       return Optional.ofNullable(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpPost.getURI(), e);
-      errorLogService.saveGeneralError(String.format("Exception while calling %s, message: %s", httpPost.getURI(), e.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_CALLING_URI.getCode(), Arrays.asList(httpPost.getURI().toString(), e.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }

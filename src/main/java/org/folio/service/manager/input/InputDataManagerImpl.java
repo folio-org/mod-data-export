@@ -40,7 +40,7 @@ import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
-import static org.folio.util.ErrorCode.reasonsAccordingToExport;
+import static org.folio.util.ErrorCode.errorCodesAccordingToExport;
 
 /**
  * Acts a source of a uuids to be exported.
@@ -123,7 +123,7 @@ class InputDataManagerImpl implements InputDataManager {
         }
       });
     } else {
-      errorLogService.saveGeneralError("Error while reading from input file with uuids or file is empty", jobExecutionId, tenantId);
+      errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
@@ -199,7 +199,7 @@ class InputDataManagerImpl implements InputDataManager {
   private Future<Boolean> isSelectedErrorsPresent(String jobExecutionId, String tenantId) {
     Promise<Boolean> promise = Promise.promise();
     errorLogService
-        .isErrorsByReasonPresent(reasonsAccordingToExport(), jobExecutionId, tenantId)
+        .isErrorsByErrorCodePresent(errorCodesAccordingToExport(), jobExecutionId, tenantId)
         .onSuccess(promise::complete)
         .onFailure(ar -> promise.complete(false));
 

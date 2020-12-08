@@ -65,7 +65,7 @@ class DataExportHelperUnitTest {
     // given
     Mockito
       .when(exportStorageService.getFileDownloadLink(anyString(), anyString(), anyString()))
-      .thenThrow(new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NOT_PROVIDED));
+      .thenThrow(new ServiceException(HttpStatus.HTTP_BAD_REQUEST, ErrorCode.S3_BUCKET_NAME_NOT_FOUND));
 
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile));

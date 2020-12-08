@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -187,7 +186,7 @@ class InputDataManagerUnitTest {
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
     assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + jobExecution.getHrId() + ".mrc"));
-    verify(errorLogService).saveGeneralError("Error while reading from input file with uuids or file is empty", JOB_EXECUTION_ID, TENANT_ID);
+    verify(errorLogService).saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), JOB_EXECUTION_ID, TENANT_ID);
   }
 
   @Test
@@ -317,7 +316,7 @@ class InputDataManagerUnitTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(false));
+    when(errorLogService.isErrorsByErrorCodePresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(false));
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
@@ -343,7 +342,7 @@ class InputDataManagerUnitTest {
     when(inputDataLocalMap.containsKey(JOB_EXECUTION_ID)).thenReturn(true);
     when(inputDataLocalMap.get(JOB_EXECUTION_ID)).thenReturn(inputDataContext);
     when(inputDataContext.getSourceReader()).thenReturn(sourceReader);
-    when(errorLogService.isErrorsByReasonPresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(true));
+    when(errorLogService.isErrorsByErrorCodePresent(anyList(), anyString(), anyString())).thenReturn(Future.succeededFuture(true));
 
     //when
     inputDataManager.proceedBlocking(JsonObject.mapFrom(exportPayload), ExportResult.completed());
