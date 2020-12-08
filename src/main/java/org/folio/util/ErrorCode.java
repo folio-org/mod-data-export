@@ -17,7 +17,7 @@ public enum ErrorCode {
   NOTHING_TO_EXPORT("error.nothingToExport", "No exported records, nothing to export"),
   FAIL_TO_UPDATE_JOB("error.jobExecution.failToUpdateJob", "Fail to prepare job execution for export"),
   ERROR_QUERY_RULES_FROM_CONFIGURATIONS("error.configurations.queryRules", "Error while query the rules from mod configuration: %s"),
-  ERROR_QUERY_CONFIGURATIONS("error.configurations.queryConfigs", "Error while query the configs from mod configuration by query: %s %s"),
+  ERROR_QUERY_CONFIGURATIONS("error.configurations.queryConfigs", "Error while query the configs from mod configuration by query: %s, %s"),
   ERROR_GETTING_INSTANCES_BY_IDS("error.inventory.gettingInstancesByIds", "Error while getting instances by ids. %s"),
   ERROR_GETTING_REFERENCE_DATA("error.inventory.gettingReferenceData  ", "Error while getting reference data from inventory during the export process by calling %s"),
   ERROR_GETTING_HOLDINGS_BY_INSTANCE_ID("error.inventory.gettingHoldingsByInstanceId", "Error while getting holdings by instance id: %s, message: %s"),
