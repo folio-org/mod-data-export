@@ -101,7 +101,7 @@ class ExportServiceUnitTest {
     String inventoryRecord = StringUtils.EMPTY;
     FileDefinition fileDefinition = new FileDefinition();
     // when
-    exportService.exportInventoryRecords(Collections.singletonList(inventoryRecord), fileDefinition, TENANT);
+    exportService.exportSrsRecord(Collections.singletonList(inventoryRecord), fileDefinition);
     // then
     Mockito.verify(fileStorage, never()).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
