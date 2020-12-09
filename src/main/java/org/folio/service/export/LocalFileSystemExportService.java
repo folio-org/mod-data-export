@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Service
@@ -46,7 +47,9 @@ public class LocalFileSystemExportService implements ExportService {
       for (String jsonRecord : jsonRecords) {
         byte[] bytes = convertJsonRecordToMarcRecord(jsonRecord);
         try {
-          fileStorage.saveFileDataBlocking(bytes, fileDefinition);
+          if (isNotEmpty(bytes)) {
+            fileStorage.saveFileDataBlocking(bytes, fileDefinition);
+          }
         } catch (RuntimeException e) {
           LOGGER.error("Error during saving srs record to file with content: {}", jsonRecord);
         }
@@ -78,7 +81,9 @@ public class LocalFileSystemExportService implements ExportService {
       for (String record : inventoryRecords) {
         byte[] bytes = record.getBytes(StandardCharsets.UTF_8);
         try {
-          fileStorage.saveFileDataBlocking(bytes, fileDefinition);
+          if (isNotEmpty(bytes)) {
+            fileStorage.saveFileDataBlocking(bytes, fileDefinition);
+          }
         } catch (RuntimeException e) {
           errorLogService.saveGeneralError(ErrorCode.ERROR_SAVING_RECORD_TO_FILE.getCode(), fileDefinition.getJobExecutionId(), tenantId);
           LOGGER.error("Error during saving inventory record to file with content: {}", record);

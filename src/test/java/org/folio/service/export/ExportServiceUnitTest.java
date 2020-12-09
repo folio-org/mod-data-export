@@ -1,24 +1,10 @@
 package org.folio.service.export;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.vertx.core.json.JsonObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
+import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.folio.TestUtil;
 import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.file.storage.FileStorage;
@@ -28,15 +14,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -91,6 +83,29 @@ class ExportServiceUnitTest {
     // then
     Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
   }
+
+  @Test
+  void shouldNotStoreFile_whenInventoryRecordIsEmpty() {
+    // given
+    String inventoryRecord = StringUtils.EMPTY;
+    FileDefinition fileDefinition = new FileDefinition();
+    // when
+    exportService.exportInventoryRecords(Collections.singletonList(inventoryRecord), fileDefinition, TENANT);
+    // then
+    Mockito.verify(fileStorage, never()).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+  }
+
+  @Test
+  void shouldNotStoreFile_whenSRSRecordIsEmpty() {
+    // given
+    String inventoryRecord = StringUtils.EMPTY;
+    FileDefinition fileDefinition = new FileDefinition();
+    // when
+    exportService.exportInventoryRecords(Collections.singletonList(inventoryRecord), fileDefinition, TENANT);
+    // then
+    Mockito.verify(fileStorage, never()).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+  }
+
 
   @Test
   void shouldPassExportFor_NULL_InventoryRecords() {
