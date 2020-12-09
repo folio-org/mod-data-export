@@ -33,7 +33,7 @@ public class ExternalPathResolver {
   public static final String HOLDING = "holding";
   public static final String ITEM = "item";
   public static final String CONFIGURATIONS = "configurations";
-  public static final String INSTANCE_BULK_IDS = "bulkIds";
+  public static final String RECORD_BULK_IDS = "bulkIds";
 
 
   private static final Map<String, String> EXTERNAL_APIS;
@@ -64,7 +64,7 @@ public class ExternalPathResolver {
     apis.put(ISSUANCE_MODES, "/modes-of-issuance");
     apis.put(HOLDING_NOTE_TYPES, "/holdings-note-types");
     apis.put(ITEM_NOTE_TYPES, "/item-note-types");
-    apis.put(INSTANCE_BULK_IDS, "/record-bulk/ids");
+    apis.put(RECORD_BULK_IDS, "/record-bulk/ids");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
 

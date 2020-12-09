@@ -13,7 +13,7 @@ import static org.folio.util.ExternalPathResolver.HOLDING;
 import static org.folio.util.ExternalPathResolver.HOLDING_NOTE_TYPES;
 import static org.folio.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTANCE;
-import static org.folio.util.ExternalPathResolver.INSTANCE_BULK_IDS;
+import static org.folio.util.ExternalPathResolver.RECORD_BULK_IDS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
@@ -75,7 +75,7 @@ public class InventoryClient {
     if (StringUtils.isEmpty(query)) {
       return Optional.empty();
     }
-    String endpoint = format(resourcesPathWithPrefix(INSTANCE_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
+    String endpoint = format(resourcesPathWithPrefix(RECORD_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
     try {
       return Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
