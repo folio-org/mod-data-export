@@ -85,7 +85,7 @@ class ExportServiceUnitTest {
   }
 
   @Test
-  void shouldNotStoreFile_whenInventoryRecordIsEmpty() {
+  void shouldNotStoreMarcInFile_whenInventoryRecordIsEmpty() {
     // given
     String inventoryRecord = StringUtils.EMPTY;
     FileDefinition fileDefinition = new FileDefinition();
@@ -96,7 +96,7 @@ class ExportServiceUnitTest {
   }
 
   @Test
-  void shouldNotStoreFile_whenSRSRecordIsEmpty() {
+  void shouldNotStoreMarcInFile_whenSRSRecordIsEmpty() {
     // given
     String inventoryRecord = StringUtils.EMPTY;
     FileDefinition fileDefinition = new FileDefinition();
