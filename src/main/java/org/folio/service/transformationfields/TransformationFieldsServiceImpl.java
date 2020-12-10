@@ -8,6 +8,7 @@ import org.folio.processor.referencedata.ReferenceData;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.transformationfields.builder.DisplayNameKeyBuilder;
 import org.folio.service.transformationfields.builder.FieldIdBuilder;
@@ -49,6 +50,41 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
     transformationFields.sort(Comparator.comparing(TransformationField::getFieldId));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
+    return promise.future();
+  }
+
+  @Override
+  public Future<Void> validateTransformations(List<Transformations> transformations) {
+    Promise<Void> promise = Promise.promise();
+    transformations.forEach(elem -> {
+      String transformation = elem.getTransformation();
+      if (elem.getTransformation().isEmpty()) {
+        if (elem.getRecordType().equals(ITEM)) {
+          promise.fail("Transformations of fields with item record type cannot be empty. Please provide a value");
+        } else {
+          promise.complete();
+        }
+      } else {
+          String tag = transformation.substring(0,3);
+          String firstIndicator = transformation.substring(3,4);
+          String secondIndicator = transformation.substring(4,5);
+          String subfield = transformation.substring(5);
+          if(!tag.matches("\\d{3}")) {
+            promise.fail("Tag has an invalid value: '%s'. Tag should have 3 digits only.");
+          }
+          else if(!firstIndicator.matches("(\\s|\\d|[a-z])")) {
+            promise.fail("Invalid value for first indicator provided: '%s'. Indicator can be empty, digit or character at lowercase.");
+          }
+          else if(!secondIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
+            promise.fail("Invalid value for second indicator provided: '%s'. Indicator ");
+          }
+          else if(!subfield.matches("(\\$([a-zA-Z]|[\\d]{1,2}))?")) {
+            promise.fail("Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits");
+          } else {
+            promise.complete();
+          }
+        }
+      });
     return promise.future();
   }
 

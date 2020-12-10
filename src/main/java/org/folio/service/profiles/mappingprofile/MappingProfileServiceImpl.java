@@ -124,7 +124,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   @Override
   public Future<Void> validate(MappingProfile mappingProfile, OkapiConnectionParams params) {
     if (CollectionUtils.isNotEmpty(mappingProfile.getTransformations())) {
-      return transformationFieldsService.getTransformationFields(params).compose(transformationFieldCollection -> {
+      transformationFieldsService.validateTransformations(mappingProfile.getTransformations())
+        .compose(v -> transformationFieldsService.getTransformationFields(params)
+        .compose(transformationFieldCollection -> {
         List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
         for (Transformations transformation : mappingProfile.getTransformations()) {
           String fieldId = transformation.getFieldId();
@@ -145,7 +147,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
           }
         }
         return Future.succeededFuture();
-      });
+      }));
     }
     return Future.succeededFuture();
   }
