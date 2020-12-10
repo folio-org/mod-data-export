@@ -7,8 +7,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
