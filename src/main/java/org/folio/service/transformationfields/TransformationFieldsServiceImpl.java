@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.referencedata.ReferenceData;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.TransformationField;
@@ -67,7 +68,7 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
   public Future<Void> validateTransformations(List<Transformations> transformations) {
     Promise<Void> promise = Promise.promise();
     Optional<Transformations> invalidTransformation = transformations.stream().filter(elem -> {
-      if (elem.getTransformation().isEmpty()) {
+      if (StringUtils.isEmpty(elem.getTransformation())) {
         if (elem.getRecordType().value().equals(ITEM.value())) {
           promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE));
           return true;
