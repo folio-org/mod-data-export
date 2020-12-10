@@ -86,10 +86,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-      future.onComplete(ar -> {
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(()->{
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -98,9 +95,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
           assertFileDefinitionIsRemoved();
           context.completeNow();
         });
-
       });
-      return Promise.promise().future();
     });
   }
 
@@ -117,10 +112,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveFileDefinition1Ar -> {
       return fileDefinitionDao.save(fileDefinition2, TENANT_ID).compose(saveFileDefinition2Ar -> {
-        Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-        // then
-        future.onComplete(ar -> {
+        return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
           context.verify(() -> {
             assertTrue(ar.succeeded());
             assertTrue(ar.result());
@@ -131,9 +123,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
             assertFileDefinitionIsRemoved();
             context.completeNow();
           });
-
         });
-        return Promise.promise().future();
       });
     });
   }
@@ -150,10 +140,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-      future.onComplete(ar -> {
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -161,9 +148,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
           assertFileDefinitionIsRemoved();
           context.completeNow();
         });
-
       });
-      return Promise.promise().future();
     });
   }
 
@@ -177,10 +162,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-      future.onComplete(ar -> {
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
@@ -188,9 +170,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
           assertFileDefinitionIsRemoved();
           context.completeNow();
         });
-
       });
-      return Promise.promise().future();
     });
   }
 
@@ -202,18 +182,14 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     //when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-        future.onComplete(ar -> {
-          context.verify(() -> {
-            assertTrue(ar.succeeded());
-            assertTrue(ar.result());
-            assertFileDefinitionIsRemoved();
-            context.completeNow();
-          });
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+          assertTrue(ar.result());
+          assertFileDefinitionIsRemoved();
+          context.completeNow();
         });
-      return Promise.promise().future();
+      });
     });
   }
 
@@ -226,18 +202,14 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-        future.onComplete(ar -> {
-          context.verify(() -> {
-            assertTrue(ar.succeeded());
-            assertFalse(ar.result());
-            assertFileDefinitionIsNotRemoved();
-            context.completeNow();
-          });
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+          assertFalse(ar.result());
+          assertFileDefinitionIsNotRemoved();
+          context.completeNow();
         });
-      return Promise.promise().future();
+      });
     });
   }
 
@@ -250,18 +222,14 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     // when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      Future<Boolean> future = storageCleanupService.cleanStorage(okapiConnectionParams);
-
-      // then
-        future.onComplete(ar -> {
-          context.verify(() -> {
-            assertTrue(ar.succeeded());
-            assertFalse(ar.result());
-            assertFileDefinitionIsNotRemoved();
-            context.completeNow();
-          });
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
+        context.verify(() -> {
+          assertTrue(ar.succeeded());
+          assertFalse(ar.result());
+          assertFileDefinitionIsNotRemoved();
+          context.completeNow();
         });
-      return Promise.promise().future();
+      });
     });
   }
 
