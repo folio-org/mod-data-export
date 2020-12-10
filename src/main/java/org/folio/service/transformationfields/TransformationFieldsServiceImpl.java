@@ -1,10 +1,21 @@
 package org.folio.service.transformationfields;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
+import static java.lang.String.format;
+import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.commons.collections4.MapUtils;
 import org.folio.processor.referencedata.ReferenceData;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
@@ -17,20 +28,19 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 
 @Service
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
 
   private static final String REFERENCE_DATA_NAME_KEY = "name";
+  private static final String ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
+  private static final String INVALID_TAG_ERROR_MESSAGE = "Tag has an invalid value: '%s'. Tag should have 3 digits only.";
+  private static final String INVALID_INDICATOR_ERROR_MESSAGE = "Invalid value for %s indicator provided: '%s'. Indicator can be an empty, a digit or a character.";
+  private static final String INVALID_SUBFIELD_ERROR_MESSAGE = "Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits.";
+
   @Autowired
   private PathBuilder pathBuilder;
   @Autowired
@@ -56,35 +66,40 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
   @Override
   public Future<Void> validateTransformations(List<Transformations> transformations) {
     Promise<Void> promise = Promise.promise();
-    transformations.forEach(elem -> {
-      String transformation = elem.getTransformation();
+    Optional<Transformations> invalidTransformation = transformations.stream().filter(elem -> {
       if (elem.getTransformation().isEmpty()) {
-        if (elem.getRecordType().equals(ITEM)) {
-          promise.fail("Transformations of fields with item record type cannot be empty. Please provide a value");
+        if (elem.getRecordType().value().equals(ITEM.value())) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE));
+          return true;
         } else {
-          promise.complete();
+          return false;
         }
       } else {
-          String tag = transformation.substring(0,3);
-          String firstIndicator = transformation.substring(3,4);
-          String secondIndicator = transformation.substring(4,5);
-          String subfield = transformation.substring(5);
-          if(!tag.matches("\\d{3}")) {
-            promise.fail("Tag has an invalid value: '%s'. Tag should have 3 digits only.");
-          }
-          else if(!firstIndicator.matches("(\\s|\\d|[a-z])")) {
-            promise.fail("Invalid value for first indicator provided: '%s'. Indicator can be empty, digit or character at lowercase.");
-          }
-          else if(!secondIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
-            promise.fail("Invalid value for second indicator provided: '%s'. Indicator ");
-          }
-          else if(!subfield.matches("(\\$([a-zA-Z]|[\\d]{1,2}))?")) {
-            promise.fail("Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits");
-          } else {
-            promise.complete();
-          }
+        String transformation = elem.getTransformation();
+        String tag = transformation.substring(0, 3);
+        String firstIndicator = transformation.substring(3, 4);
+        String secondIndicator = transformation.substring(4, 5);
+        String subfield = transformation.substring(5);
+        if (!tag.matches("\\d{3}")) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_TAG_ERROR_MESSAGE, tag)));
+          return true;
+        } else if (!firstIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "first", firstIndicator)));
+          return true;
+        } else if (!secondIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "second", secondIndicator)));
+          return true;
+        } else if (!subfield.matches("(\\$([a-zA-Z]|[\\d]{1,2}))?")) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_SUBFIELD_ERROR_MESSAGE, subfield)));
+          return true;
+        } else {
+          return false;
         }
-      });
+      }
+    }).findFirst();
+    if (invalidTransformation.isEmpty()) {
+      promise.complete();
+    }
     return promise.future();
   }
 
