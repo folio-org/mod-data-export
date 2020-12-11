@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
@@ -41,6 +42,9 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
   private static final String INVALID_INDICATOR_ERROR_MESSAGE = "Invalid value for %s indicator provided: '%s'. Indicator can be an empty, a digit or a character.";
   private static final String INVALID_SUBFIELD_ERROR_MESSAGE = "Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits.";
   private static final String TRANSFORMATION_MISSING_ELEMENTS_ERROR_MESSAGE = "Transformation missing some elements. Tag and both indicators are mandatory.";
+  private static final Pattern TAG_PATTERN = Pattern.compile("\\d{3}");
+  private static final Pattern INDICATOR_PATTERN = Pattern.compile("(\\s|\\d|[a-zA-Z])");
+  private static final Pattern SUBFIELD_PATTERN = Pattern.compile("(\\$([a-zA-Z]|[\\d]{1,2}))?");
   private static final int TRANSFORMATION_MIN_ACCEPTABLE_LENGTH = 5;
 
 
@@ -87,16 +91,16 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
         String firstIndicator = transformation.substring(3, 4);
         String secondIndicator = transformation.substring(4, 5);
         String subfield = transformation.substring(5);
-        if (!tag.matches("\\d{3}")) {
+        if (!TAG_PATTERN.matcher(tag).matches()) {
           promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_TAG_ERROR_MESSAGE, tag)));
           return true;
-        } else if (!firstIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
+        } else if (!INDICATOR_PATTERN.matcher(tag).matches()) {
           promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "first", firstIndicator)));
           return true;
-        } else if (!secondIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
+        } else if (!INDICATOR_PATTERN.matcher(tag).matches()) {
           promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "second", secondIndicator)));
           return true;
-        } else if (!subfield.matches("(\\$([a-zA-Z]|[\\d]{1,2}))?")) {
+        } else if (!SUBFIELD_PATTERN.matcher(tag).matches()) {
           promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_SUBFIELD_ERROR_MESSAGE, subfield)));
           return true;
         } else {
