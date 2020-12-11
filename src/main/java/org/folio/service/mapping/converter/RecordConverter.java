@@ -26,7 +26,6 @@ public class RecordConverter {
   private RecordLoaderService recordLoaderService;
 
    protected boolean isTransformationRequired(MappingProfile mappingProfile) {
-     //TODO potential NPE if Mapping Profile is null
      List<Transformations> transformations = mappingProfile.getTransformations();
      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
      return isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM));
