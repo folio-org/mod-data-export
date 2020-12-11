@@ -224,7 +224,7 @@ class MappingProfileServiceUnitTest {
     future.onComplete(ar -> {
       assertTrue(ar.failed());
       assertEquals(ServiceException.class, ar.cause().getClass());
-      assertEquals("Transformation doesn't exist by provided fieldId: " + MISSING_FIELD_ID, ar.cause().getMessage());
+      assertEquals("Transformation doesn't exist for provided fieldId: " + MISSING_FIELD_ID, ar.cause().getMessage());
       context.completeNow();
     });
   }
