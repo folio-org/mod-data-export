@@ -119,6 +119,10 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return mappingProfileDao.delete(mappingProfileId, tenantId);
   }
 
+  /**
+   * Due to many validation methods are presented at this class,
+   * they should vbe moved to a separate place.
+   */
   @Override
   public Future<Void> validate(MappingProfile mappingProfile, OkapiConnectionParams params) {
     Promise<Void> promise = Promise.promise();
