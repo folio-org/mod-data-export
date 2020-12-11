@@ -40,7 +40,7 @@ class EntitiesCrudTest extends RestVerticleTestBase {
       .log()
       .all()
       .statusCode(200)
-      .body("totalRecords", equalTo(1));
+      .body("totalRecords", equalTo(2));
   }
 
   @ParameterizedTest
