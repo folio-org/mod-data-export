@@ -137,7 +137,7 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-    router.get(resourcesPath(INSTANCE_BULK_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
+    router.get(resourcesPath(RECORD_BULK_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
     return router;
   }
 
@@ -481,11 +481,11 @@ public class MockServer {
       JsonObject bulkIds;
       if (ctx.request().getParam("query").contains("(languages=\"eng\")")) {
         bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH));
-        addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
+        addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
         serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
       } else {
         bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
-        addServerRqRsData(HttpMethod.GET, INSTANCE_BULK_IDS, bulkIds);
+        addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
         serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
       }
     } catch (IOException e) {
