@@ -59,7 +59,6 @@ public class RuleFactory {
     .build();
 
   private List<Rule> defaultRules;
-  private MappingProfileService mappingProfileService;
 
   public List<Rule> create(MappingProfile mappingProfile) {
     return create(mappingProfile, getDefaultRulesFromFile());

@@ -61,14 +61,6 @@ public interface MappingProfileService {
    */
   Future<MappingProfile> getDefault(String tenantId);
 
-//  /**
-//   * Check is mapping profile default or not {@link MappingProfile}
-//   *
-//   * @param mappingProfileId tenant id
-//   * @return future with default {@link MappingProfile}
-//   */
-//  boolean isDefault(String mappingProfileId);
-
   /**
    * Validates {@link MappingProfile}
    *
