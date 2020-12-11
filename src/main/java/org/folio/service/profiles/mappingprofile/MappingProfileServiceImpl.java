@@ -1,17 +1,10 @@
 package org.folio.service.profiles.mappingprofile;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.ws.rs.NotFoundException;
-
+import com.amazonaws.services.elastictranscoder.model.VideoParameters;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
@@ -27,10 +20,16 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import javax.ws.rs.NotFoundException;
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the MappingProfileService, calls MappingProfileDao to access MappingProfile metadata.
@@ -129,31 +128,50 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     if (CollectionUtils.isNotEmpty(mappingProfile.getTransformations())) {
       transformationFieldsService.validateTransformations(mappingProfile.getTransformations())
         .compose(v -> transformationFieldsService.getTransformationFields(params)
-          .compose(transformationFieldCollection -> {
-            List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
-            for (Transformations transformation : mappingProfile.getTransformations()) {
-              String fieldId = transformation.getFieldId();
-              if (StringUtils.isBlank(fieldId)) {
-                throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
-              }
-              Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
-                .filter(transformationField -> fieldId.equals(transformationField.getFieldId()))
-                .findFirst();
-              if (transformationFieldOptional.isEmpty()) {
-                throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", fieldId));
-              }
-              TransformationField transformationField = transformationFieldOptional.get();
-              TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
-              if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
-                throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
-                  "expected record type: %s", fieldId, expectedRecordType));
-              }
-            }
-            return Future.succeededFuture();
-          })).onSuccess(v -> promise.complete())
-        .onFailure(th -> promise.fail(th));
+          .compose(transformationFieldCollection -> validateTransformation(mappingProfile, transformationFieldCollection)))
+        .onSuccess(v -> promise.complete())
+        .onFailure(promise::fail);
+    } else {
+      promise.complete();
     }
     return promise.future();
+  }
+
+  private Future<Void> validateTransformation(MappingProfile mappingProfile, org.folio.rest.jaxrs.model.TransformationFieldCollection transformationFieldCollection) {
+    Promise<Void> promise = Promise.promise();
+    List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
+    try {
+      mappingProfile.getTransformations().stream()
+        .filter(transformation -> {
+          String fieldId = transformation.getFieldId();
+          if (StringUtils.isBlank(fieldId)) {
+            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
+          }
+          return false;
+        }).forEach(transformation -> {
+        Optional<TransformationField> transformationFieldOptional = getTransformationField(transformationFields, transformation);
+        TransformationField transformationField = transformationFieldOptional.get();
+        TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
+        if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
+          throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
+            "expected record type: %s", transformation.getFieldId(), expectedRecordType));
+        }
+      });
+    } catch (Exception ex) {
+      promise.fail(ex);
+    }
+    promise.complete();
+    return promise.future();
+  }
+
+  private Optional<TransformationField> getTransformationField(List<TransformationField> transformationFields, Transformations transformation) {
+    Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
+      .filter(transformationField -> transformation.getFieldId().equals(transformationField.getFieldId()))
+      .findFirst();
+    if (transformationFieldOptional.isEmpty()) {
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", transformation.getFieldId()));
+    }
+    return transformationFieldOptional;
   }
 
 

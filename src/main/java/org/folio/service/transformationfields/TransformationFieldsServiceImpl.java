@@ -1,18 +1,8 @@
 package org.folio.service.transformationfields;
 
-import static java.lang.String.format;
-import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.referencedata.ReferenceData;
@@ -29,9 +19,18 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.lang.String.format;
+import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
 
 @Service
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
@@ -41,6 +40,9 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
   private static final String INVALID_TAG_ERROR_MESSAGE = "Tag has an invalid value: '%s'. Tag should have 3 digits only.";
   private static final String INVALID_INDICATOR_ERROR_MESSAGE = "Invalid value for %s indicator provided: '%s'. Indicator can be an empty, a digit or a character.";
   private static final String INVALID_SUBFIELD_ERROR_MESSAGE = "Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits.";
+  private static final String TRANSFORMATION_MISSING_ELEMENTS_ERROR_MESSAGE = "Transformation missing some elements. Tag and both indicators are mandatory.";
+  private static final int TRANSFORMATION_MIN_ACCEPTABLE_LENGTH = 5;
+
 
   @Autowired
   private PathBuilder pathBuilder;
@@ -77,6 +79,10 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
         }
       } else {
         String transformation = elem.getTransformation();
+        if (transformation.length() < TRANSFORMATION_MIN_ACCEPTABLE_LENGTH) {
+          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, TRANSFORMATION_MISSING_ELEMENTS_ERROR_MESSAGE));
+          return true;
+        }
         String tag = transformation.substring(0, 3);
         String firstIndicator = transformation.substring(3, 4);
         String secondIndicator = transformation.substring(4, 5);

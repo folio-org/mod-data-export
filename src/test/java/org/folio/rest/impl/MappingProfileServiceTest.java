@@ -28,7 +28,7 @@ class MappingProfileServiceTest extends RestVerticleTestBase {
   private static final String INVALID_SECOND_INDICATOR = "123 ,$a";
   private static final String INVALID_SUBFIELD = "123  $1234";
   private static final String EMPTY_TRANSFORMATION = "";
-  private static final String VALID_TRANSFORMATION = "13qq$q";
+  private static final String INVALID_TRANSFORMATION_MISSING_INDICATOR = "132q";
 
   @Test
   void postMappingProfile_return422Status_whenTransformationFieldIdDoesntExist() {
@@ -148,6 +148,18 @@ class MappingProfileServiceTest extends RestVerticleTestBase {
         .withRecordType(RecordType.INSTANCE)
         .withTransformation(EMPTY_TRANSFORMATION)));
     postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_CREATED);
+  }
+
+  @Test
+  void postMappingProfile_return422Status_whenTransformationMissingMandatoryParameters() {
+    MappingProfile mappingProfile = new MappingProfile()
+      .withName("mappingProfileName_missingIndicator")
+      .withRecordTypes(Lists.newArrayList(RecordType.INSTANCE))
+      .withTransformations(Lists.newArrayList(new Transformations()
+        .withFieldId("item.chronology")
+        .withRecordType(RecordType.INSTANCE)
+        .withTransformation(INVALID_TRANSFORMATION_MISSING_INDICATOR)));
+    postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
   }
 
   private void postMappingProfileAndVerifyStatusCode(MappingProfile mappingProfile, int expectedStatusCode) {
