@@ -26,8 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -99,11 +97,11 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return mappingProfileDao.getById(mappingProfileId, tenantId)
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {
-          return succeededFuture(optionalMappingProfile.get());
+          return Future.succeededFuture(optionalMappingProfile.get());
         } else {
           String errorMessage = String.format("Mapping profile not found with id %s", mappingProfileId);
           LOGGER.error(errorMessage);
-          return failedFuture(new NotFoundException(errorMessage));
+          return Future.failedFuture(new NotFoundException(errorMessage));
         }
       });
   }
@@ -156,9 +154,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
         }
       });
     } catch (Exception ex) {
-      return failedFuture(ex);
+      return Future.failedFuture(ex);
     }
-    return succeededFuture();
+    return Future.succeededFuture();
   }
 
   private Optional<TransformationField> getTransformationField(List<TransformationField> transformationFields, Transformations transformation) {
