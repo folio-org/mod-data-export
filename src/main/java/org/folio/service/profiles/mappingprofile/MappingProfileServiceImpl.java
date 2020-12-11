@@ -138,7 +138,6 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   private Future<Void> validateTransformation(MappingProfile mappingProfile, org.folio.rest.jaxrs.model.TransformationFieldCollection transformationFieldCollection) {
-    Promise<Void> promise = Promise.promise();
     List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
     try {
       mappingProfile.getTransformations().stream()
@@ -158,10 +157,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
         }
       });
     } catch (Exception ex) {
-      promise.fail(ex);
+      return failedFuture(ex);
     }
-    promise.complete();
-    return promise.future();
+    return succeededFuture();
   }
 
   private Optional<TransformationField> getTransformationField(List<TransformationField> transformationFields, Transformations transformation) {
