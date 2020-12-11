@@ -269,7 +269,7 @@ class MappingServiceUnitTest {
     Assert.assertEquals(38, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
     Assert.assertEquals(41, appendedMarcRecords.size());
   }
-//kek
+
   @Test
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmptyAndRulesFromModConfig() throws IOException {
     // given
