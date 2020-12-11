@@ -34,6 +34,18 @@ class EntitiesCrudTest extends RestVerticleTestBase {
   @ParameterizedTest
   @Order(1)
   @EnumSource(TestEntities.class)
+  void testVerifyCollection(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-data-export %s test: Verifying database's initial state ... ", testEntity.name()));
+    getRequest(testEntity.getEndpoint()).then()
+      .log()
+      .all()
+      .statusCode(200)
+      .body("totalRecords", equalTo(2));
+  }
+
+  @ParameterizedTest
+  @Order(2)
+  @EnumSource(TestEntities.class)
   void testPostData(TestEntities testEntity) throws IOException {
     logger.info(String.format("--- mod-data-export %s test: Creating %s ... ", testEntity.name(), testEntity.name()));
     sample = getSample(testEntity.getSampleFileName());
@@ -44,18 +56,6 @@ class EntitiesCrudTest extends RestVerticleTestBase {
     response.then().log()
       .all()
       .statusCode(201);
-  }
-
-  @ParameterizedTest
-  @Order(2)
-  @EnumSource(TestEntities.class)
-  void testVerifyCollection(TestEntities testEntity) throws MalformedURLException {
-    logger.info(String.format("--- mod-data-export %s test: Verifying database's initial state ... ", testEntity.name()));
-    getRequest(testEntity.getEndpoint()).then()
-      .log()
-      .all()
-      .statusCode(200)
-      .body("totalRecords", equalTo(2));
   }
 
   @ParameterizedTest
