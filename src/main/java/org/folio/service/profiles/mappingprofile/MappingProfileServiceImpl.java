@@ -1,6 +1,5 @@
 package org.folio.service.profiles.mappingprofile;
 
-import com.amazonaws.services.elastictranscoder.model.VideoParameters;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -146,7 +145,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
           if (StringUtils.isBlank(fieldId)) {
             throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
           }
-          return false;
+          return true;
         }).forEach(transformation -> {
         Optional<TransformationField> transformationFieldOptional = getTransformationField(transformationFields, transformation);
         TransformationField transformationField = transformationFieldOptional.get();
