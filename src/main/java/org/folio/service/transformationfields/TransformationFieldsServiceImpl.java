@@ -3,6 +3,7 @@ package org.folio.service.transformationfields;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.referencedata.ReferenceData;
@@ -37,12 +38,6 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
 
   private static final String REFERENCE_DATA_NAME_KEY = "name";
   private static final String ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
-  private static final String INVALID_TAG_ERROR_MESSAGE = "Tag has an invalid value: '%s'. Tag should have 3 digits only.";
-  private static final String INVALID_INDICATOR_ERROR_MESSAGE = "Invalid value for %s indicator provided: '%s'. Indicator can be an empty, a digit or a character.";
-  private static final String INVALID_SUBFIELD_ERROR_MESSAGE = "Invalid value for subfield provided: '%s'. Subfield should be a '$' sign followed with single character or one-two digits.";
-  private static final String TRANSFORMATION_MISSING_ELEMENTS_ERROR_MESSAGE = "Transformation missing some elements. Tag and both indicators are mandatory.";
-  private static final int TRANSFORMATION_MIN_ACCEPTABLE_LENGTH = 5;
-
 
   @Autowired
   private PathBuilder pathBuilder;
@@ -69,43 +64,14 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
   @Override
   public Future<Void> validateTransformations(List<Transformations> transformations) {
     Promise<Void> promise = Promise.promise();
-    Optional<Transformations> invalidTransformation = transformations.stream().filter(elem -> {
-      if (StringUtils.isEmpty(elem.getTransformation())) {
-        if (elem.getRecordType().value().equals(ITEM.value())) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE));
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        String transformation = elem.getTransformation();
-        if (transformation.length() < TRANSFORMATION_MIN_ACCEPTABLE_LENGTH) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, TRANSFORMATION_MISSING_ELEMENTS_ERROR_MESSAGE));
-          return true;
-        }
-        String tag = transformation.substring(0, 3);
-        String firstIndicator = transformation.substring(3, 4);
-        String secondIndicator = transformation.substring(4, 5);
-        String subfield = transformation.substring(5);
-        if (!tag.matches("\\d{3}")) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_TAG_ERROR_MESSAGE, tag)));
-          return true;
-        } else if (!firstIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "first", firstIndicator)));
-          return true;
-        } else if (!secondIndicator.matches("(\\s|\\d|[a-zA-Z])")) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_INDICATOR_ERROR_MESSAGE, "second", secondIndicator)));
-          return true;
-        } else if (!subfield.matches("(\\$([a-zA-Z]|[\\d]{1,2}))?")) {
-          promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, format(INVALID_SUBFIELD_ERROR_MESSAGE, subfield)));
-          return true;
-        } else {
-          return false;
-        }
-      }
-    }).findFirst();
+    Optional<Transformations> invalidTransformation = transformations.stream()
+      .filter(elem -> StringUtils.isEmpty(elem.getTransformation()))
+      .filter(elem -> elem.getRecordType().value().equals(ITEM.value()))
+      .findFirst();
     if (invalidTransformation.isEmpty()) {
       promise.complete();
+    } else {
+      promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE));
     }
     return promise.future();
   }

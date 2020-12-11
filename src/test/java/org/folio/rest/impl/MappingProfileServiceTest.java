@@ -23,10 +23,6 @@ import io.vertx.junit5.VertxExtension;
 class MappingProfileServiceTest extends RestVerticleTestBase {
 
   private static final String INVALID_TRANSFORMATION = "123qq$qweqwe";
-  private static final String INVALID_TAG = "12a  $a";
-  private static final String INVALID_FIRST_INDICATOR = "123. $a";
-  private static final String INVALID_SECOND_INDICATOR = "123 ,$a";
-  private static final String INVALID_SUBFIELD = "123  $1234";
   private static final String EMPTY_TRANSFORMATION = "";
   private static final String INVALID_TRANSFORMATION_MISSING_INDICATOR = "132q";
 
@@ -61,54 +57,6 @@ class MappingProfileServiceTest extends RestVerticleTestBase {
         .withFieldId("instance.id")
         .withRecordType(RecordType.INSTANCE)
         .withTransformation(INVALID_TRANSFORMATION)));
-    postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-  }
-
-  @Test
-  void postMappingProfile_return422Status_whenTransformationHasInvalidTag() {
-    MappingProfile mappingProfile = new MappingProfile()
-      .withName("mappingProfileName")
-      .withRecordTypes(Lists.newArrayList(RecordType.HOLDINGS))
-      .withTransformations(Lists.newArrayList(new Transformations()
-        .withFieldId("instance.id")
-        .withRecordType(RecordType.INSTANCE)
-        .withTransformation(INVALID_TAG)));
-    postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-  }
-
-  @Test
-  void postMappingProfile_return422Status_whenTransformationHasInvalidFirstIndicator() {
-    MappingProfile mappingProfile = new MappingProfile()
-      .withName("mappingProfileName")
-      .withRecordTypes(Lists.newArrayList(RecordType.HOLDINGS))
-      .withTransformations(Lists.newArrayList(new Transformations()
-        .withFieldId("instance.id")
-        .withRecordType(RecordType.INSTANCE)
-        .withTransformation(INVALID_FIRST_INDICATOR)));
-    postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-  }
-
-  @Test
-  void postMappingProfile_return422Status_whenTransformationHasInvalidSecondIndicator() {
-    MappingProfile mappingProfile = new MappingProfile()
-      .withName("mappingProfileName")
-      .withRecordTypes(Lists.newArrayList(RecordType.HOLDINGS))
-      .withTransformations(Lists.newArrayList(new Transformations()
-        .withFieldId("instance.id")
-        .withRecordType(RecordType.INSTANCE)
-        .withTransformation(INVALID_SECOND_INDICATOR)));
-    postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
-  }
-
-  @Test
-  void postMappingProfile_return422Status_whenTransformationHasInvalidSubfield() {
-    MappingProfile mappingProfile = new MappingProfile()
-      .withName("mappingProfileName")
-      .withRecordTypes(Lists.newArrayList(RecordType.HOLDINGS))
-      .withTransformations(Lists.newArrayList(new Transformations()
-        .withFieldId("instance.id")
-        .withRecordType(RecordType.INSTANCE)
-        .withTransformation(INVALID_SUBFIELD)));
     postMappingProfileAndVerifyStatusCode(mappingProfile, HttpStatus.SC_UNPROCESSABLE_ENTITY);
   }
 

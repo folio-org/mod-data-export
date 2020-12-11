@@ -69,10 +69,6 @@ class TransformationFieldsServiceUnitTest {
   private static final String FIELD_ID = "fieldId";
   private static final String TENANT_ID = "diku";
 
-  private static final String INVALID_TAG = "12a  $a";
-  private static final String INVALID_FIRST_INDICATOR = "123. $a";
-  private static final String INVALID_SECOND_INDICATOR = "123 ,$a";
-  private static final String INVALID_SUBFIELD = "123  $1234";
   private static final String EMPTY_TRANSFORMATION = "";
 
   private final OkapiConnectionParams okapiConnectionParams;
@@ -135,62 +131,6 @@ class TransformationFieldsServiceUnitTest {
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordType.class), anyString(), anyString());
     when(referenceDataProvider.getReferenceDataForTransformationFields(any(OkapiConnectionParams.class))).thenReturn(referenceData);
-  }
-
-  @Test
-  void shouldReturnFailedFuture_whenValidateTransformationsWithInvalidTag(VertxTestContext testContext) {
-    testContext.verify(() -> {
-      List<Transformations> list = getTransformationsList(INSTANCE, INVALID_TAG);
-      fieldNamesService.validateTransformations(list).onComplete(res -> {
-          assertTrue(res.failed());
-          assertTrue(res.cause() instanceof ServiceException);
-          assertNotNull(res.cause().getMessage());
-          testContext.completeNow();
-        }
-      );
-    });
-  }
-
-  @Test
-  void shouldReturnFailedFuture_whenValidateTransformationsWithInvalidFirstIndicator(VertxTestContext testContext) {
-    testContext.verify(() -> {
-      List<Transformations> list = getTransformationsList(INSTANCE, INVALID_FIRST_INDICATOR);
-      fieldNamesService.validateTransformations(list).onComplete(res -> {
-          assertTrue(res.failed());
-          assertTrue(res.cause() instanceof ServiceException);
-          assertNotNull(res.cause().getMessage());
-          testContext.completeNow();
-        }
-      );
-    });
-  }
-
-  @Test
-  void shouldReturnFailedFuture_whenValidateTransformationsWithInvalidSecondIndicator(VertxTestContext testContext) {
-    testContext.verify(() -> {
-      List<Transformations> list = getTransformationsList(INSTANCE, INVALID_SECOND_INDICATOR);
-      fieldNamesService.validateTransformations(list).onComplete(res -> {
-          assertTrue(res.failed());
-          assertTrue(res.cause() instanceof ServiceException);
-          assertNotNull(res.cause().getMessage());
-          testContext.completeNow();
-        }
-      );
-    });
-  }
-
-  @Test
-  void shouldReturnFailedFuture_whenValidateTransformationsWithInvalidSubfield(VertxTestContext testContext) {
-    testContext.verify(() -> {
-      List<Transformations> list = getTransformationsList(INSTANCE, INVALID_SUBFIELD);
-      fieldNamesService.validateTransformations(list).onComplete(res -> {
-          assertTrue(res.failed());
-          assertTrue(res.cause() instanceof ServiceException);
-          assertNotNull(res.cause().getMessage());
-          testContext.completeNow();
-        }
-      );
-    });
   }
 
   @Test
