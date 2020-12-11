@@ -18,6 +18,13 @@ public interface TransformationFieldsService {
    */
   Future<TransformationFieldCollection> getTransformationFields(OkapiConnectionParams okapiConnectionParams);
 
+  /**
+   * Validates transformations fields on the correctness of inputs for each separate
+   * part of the transformation: tag, indicators and subfield.
+   *
+   * @param transformations - transformations to be validated
+   * @return future
+   */
   Future<Void> validateTransformations(List<Transformations> transformations);
 
 
