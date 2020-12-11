@@ -79,8 +79,8 @@
       "version": "1.0"
     },
     {
-      "id": "instance-bulk",
-      "version": "0.1"
+      "id": "inventory-record-bulk",
+      "version": "1.0"
     }
   ],
   "provides": [
@@ -183,7 +183,7 @@
             "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
-            "inventory-storage.instance-bulk.ids.get"
+            "inventory-storage.record-bulk.ids.get"
           ]
         },
         {
