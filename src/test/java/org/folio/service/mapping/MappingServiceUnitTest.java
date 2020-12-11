@@ -2,6 +2,7 @@ package org.folio.service.mapping;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtil;
@@ -18,12 +19,16 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
+import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.marc4j.marc.VariableField;
@@ -35,6 +40,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,9 +76,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 class MappingServiceUnitTest {
@@ -85,6 +95,8 @@ class MappingServiceUnitTest {
   private ReferenceDataProvider referenceDataProvider;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private TransformationFieldsService transformationFieldsService;
 
   private String jobExecutionId = "67429e0e-601a-423b-9a29-dec4a30c8534";
   private OkapiConnectionParams params = new OkapiConnectionParams();
@@ -93,7 +105,13 @@ class MappingServiceUnitTest {
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogArgumentCaptor;
 
-  MappingServiceUnitTest() {
+  @BeforeEach
+  void setUp() {
+    setUpReferenceData();
+    when(transformationFieldsService.validateTransformations(anyList())).thenReturn(Future.succeededFuture());
+  }
+
+  private void setUpReferenceData() {
     referenceData.put(CONTENT_TERMS, ReferenceDataResponseUtil.getNatureOfContentTerms());
     referenceData.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     referenceData.put(CONTRIBUTOR_NAME_TYPES, ReferenceDataResponseUtil.getContributorNameTypes());
@@ -251,7 +269,7 @@ class MappingServiceUnitTest {
     Assert.assertEquals(38, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
     Assert.assertEquals(41, appendedMarcRecords.size());
   }
-
+//kek
   @Test
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmptyAndRulesFromModConfig() throws IOException {
     // given
