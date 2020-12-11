@@ -39,7 +39,6 @@ public enum ErrorCode {
   ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON("error.mapping.fieldsMappingInventoryWithReason", "An error occurred during fields mapping for inventory record, reason: %s, cause: %s"),
   ERROR_FIELDS_MAPPING_SRS("error.mapping.fieldsMappingSrs", "An error occurred during fields mapping for srs record with id: %s, reason: %s, cause: %s"),
   ERROR_MESSAGE_PLACEHOLDER("error.messagePlaceholder", "%s"),
-  MAPPING_PROFILE_MISSING("error.mappingProfile.missing", "Mapping profile is missing during export process"),
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type during export process");
 
   private final String code;

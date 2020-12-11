@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class InstanceExportStrategyImpl implements ExportStrategy {
@@ -55,12 +54,8 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
 
-    if (Objects.isNull(mappingProfile)) {
-      errorLogService.saveGeneralError(ErrorCode.MAPPING_PROFILE_MISSING.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
-      throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.MAPPING_PROFILE_MISSING);
-    }
-
     if (mappingProfile.getRecordTypes().contains(RecordType.SRS)) {
+      //TODO Move validation of combination SRS and INSTANCE type to MappingProfileService before saving profile to database
       if (!mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
         SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
         LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
@@ -68,17 +63,21 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
           exportPayload.getJobExecutionId(), params);
         exportService.exportSrsRecord(marcToExport, fileExportDefinition);
         LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
-        mappingProfileService.getDefault(params.getTenantId())
-          .onSuccess(defaultMappingProfile -> {
-            defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
-            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
-            blockingPromise.complete();
-          })
-          .onFailure(ar -> {
-            LOGGER.error("Failed to fetch default mapping profile");
-            errorLogService.saveGeneralError(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
-            throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
-          });
+        if(isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
+          mappingProfileService.getDefault(params.getTenantId())
+            .onSuccess(defaultMappingProfile -> {
+              defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
+              generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
+              blockingPromise.complete();
+            })
+            .onFailure(ar -> {
+              LOGGER.error("Failed to fetch default mapping profile");
+              errorLogService.saveGeneralError(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
+              throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
+            });
+        } else{
+          blockingPromise.complete();
+        }
       } else {
         errorLogService.saveGeneralError(ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
         throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE);

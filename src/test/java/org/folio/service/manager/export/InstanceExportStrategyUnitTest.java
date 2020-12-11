@@ -208,27 +208,6 @@ class InstanceExportStrategyUnitTest {
 
   @Test
   @Order(5)
-  void exportBlocking_shouldThrowServerErrorException_whenMappingProfileIsNull() {
-    // given
-    List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
-    boolean isLast = true;
-    FileDefinition fileExportDefinition = new FileDefinition()
-      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
-    Map<String, String> params = new HashMap<>();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", null);
-
-    Assertions.assertThrows(ServiceException.class, () -> {
-      // when
-      instanceExportManager.export(exportPayload, Promise.promise());
-    });
-
-    // then
-    Mockito.verify(errorLogService).saveGeneralError(eq(ErrorCode.MAPPING_PROFILE_MISSING.getCode()), anyString(), anyString());
-  }
-
-  @Test
-  @Order(6)
   void exportBlocking_shouldThrowServerErrorException_whenMappingProfileContainsSrsAndInstanceRecordType() {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
