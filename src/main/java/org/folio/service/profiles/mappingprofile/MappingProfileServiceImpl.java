@@ -166,7 +166,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
       .filter(transformationField -> transformation.getFieldId().equals(transformationField.getFieldId()))
       .findFirst();
     if (transformationFieldOptional.isEmpty()) {
-      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", transformation.getFieldId()));
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist for provided fieldId: %s", transformation.getFieldId()));
     }
     return transformationFieldOptional;
   }
