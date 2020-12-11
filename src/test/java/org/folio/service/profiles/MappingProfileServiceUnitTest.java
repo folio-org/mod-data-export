@@ -1,17 +1,5 @@
 package org.folio.service.profiles;
 
-import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
-import static java.util.Collections.singletonList;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
-import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import io.vertx.core.Future;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
@@ -31,6 +19,7 @@ import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.util.OkapiConnectionParams;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,7 +35,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.Assert;
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -191,6 +190,7 @@ class MappingProfileServiceUnitTest {
   @Test
   void validate_shouldThrowExceptionWhenTransformationFieldIdMissing(VertxTestContext context) {
     // given
+    when(transformationFieldsService.validateTransformations(anyList())).thenReturn(Future.succeededFuture());
     Transformations transformations = new Transformations();
     expectedMappingProfile.setTransformations(singletonList(transformations));
     TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection()
@@ -210,6 +210,7 @@ class MappingProfileServiceUnitTest {
   @Test
   void validate_shouldThrowExceptionWhenTransformationFieldDoesntExistByProvidedFieldId(VertxTestContext context) {
     // given
+    when(transformationFieldsService.validateTransformations(anyList())).thenReturn(Future.succeededFuture());
     Transformations transformations = new Transformations()
       .withFieldId(MISSING_FIELD_ID);
     expectedMappingProfile.setTransformations(singletonList(transformations));
@@ -223,7 +224,7 @@ class MappingProfileServiceUnitTest {
     future.onComplete(ar -> {
       assertTrue(ar.failed());
       assertEquals(ServiceException.class, ar.cause().getClass());
-      assertEquals("Transformation doesn't exist by provided fieldId: " + MISSING_FIELD_ID, ar.cause().getMessage());
+      assertEquals("Transformation doesn't exist for provided fieldId: " + MISSING_FIELD_ID, ar.cause().getMessage());
       context.completeNow();
     });
   }
@@ -231,6 +232,7 @@ class MappingProfileServiceUnitTest {
   @Test
   void validate_shouldThrowExceptionWhenTransformationRecordTypeIncorrect(VertxTestContext context) {
     // given
+    when(transformationFieldsService.validateTransformations(anyList())).thenReturn(Future.succeededFuture());
     Transformations transformations = new Transformations()
       .withFieldId(FIELD_ID)
       .withRecordType(RecordType.HOLDINGS);
@@ -255,6 +257,7 @@ class MappingProfileServiceUnitTest {
   @Test
   void validate_shouldReturnSucceededFuture(VertxTestContext context) {
     // given
+    when(transformationFieldsService.validateTransformations(anyList())).thenReturn(Future.succeededFuture());
     Transformations transformations = new Transformations()
       .withFieldId(FIELD_ID)
       .withRecordType(RecordType.INSTANCE);

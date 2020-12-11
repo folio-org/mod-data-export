@@ -54,8 +54,8 @@ class EntitiesCrudTest extends RestVerticleTestBase {
       .extract()
       .path("id"));
     response.then().log()
-    .all()
-    .statusCode(201);
+      .all()
+      .statusCode(201);
   }
 
   @ParameterizedTest

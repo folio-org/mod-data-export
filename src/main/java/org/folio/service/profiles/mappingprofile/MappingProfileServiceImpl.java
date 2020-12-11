@@ -1,9 +1,5 @@
 package org.folio.service.profiles.mappingprofile;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
@@ -29,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the MappingProfileService, calls MappingProfileDao to access MappingProfile metadata.
@@ -99,11 +97,11 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return mappingProfileDao.getById(mappingProfileId, tenantId)
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {
-          return succeededFuture(optionalMappingProfile.get());
+          return Future.succeededFuture(optionalMappingProfile.get());
         } else {
           String errorMessage = String.format("Mapping profile not found with id %s", mappingProfileId);
           LOGGER.error(errorMessage);
-          return failedFuture(new NotFoundException(errorMessage));
+          return Future.failedFuture(new NotFoundException(errorMessage));
         }
       });
   }
@@ -121,33 +119,58 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return mappingProfileDao.delete(mappingProfileId, tenantId);
   }
 
+  /**
+   * Due to many validation methods are presented at this class,
+   * they should vbe moved to a separate place.
+   */
   @Override
   public Future<Void> validate(MappingProfile mappingProfile, OkapiConnectionParams params) {
+    Promise<Void> promise = Promise.promise();
     if (CollectionUtils.isNotEmpty(mappingProfile.getTransformations())) {
-      return transformationFieldsService.getTransformationFields(params).compose(transformationFieldCollection -> {
-        List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
-        for (Transformations transformation : mappingProfile.getTransformations()) {
+      transformationFieldsService.validateTransformations(mappingProfile.getTransformations())
+        .compose(v -> transformationFieldsService.getTransformationFields(params)
+          .compose(transformationFieldCollection -> validateTransformation(mappingProfile, transformationFieldCollection)))
+        .onSuccess(v -> promise.complete())
+        .onFailure(promise::fail);
+    } else {
+      promise.complete();
+    }
+    return promise.future();
+  }
+
+  private Future<Void> validateTransformation(MappingProfile mappingProfile, org.folio.rest.jaxrs.model.TransformationFieldCollection transformationFieldCollection) {
+    List<TransformationField> transformationFields = transformationFieldCollection.getTransformationFields();
+    try {
+      mappingProfile.getTransformations().stream()
+        .filter(transformation -> {
           String fieldId = transformation.getFieldId();
           if (StringUtils.isBlank(fieldId)) {
             throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, "Field id is missing for mapping profile transformation");
           }
-          Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
-            .filter(transformationField -> fieldId.equals(transformationField.getFieldId()))
-            .findFirst();
-          if (transformationFieldOptional.isEmpty()) {
-            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist by provided fieldId: %s", fieldId));
-          }
-          TransformationField transformationField = transformationFieldOptional.get();
-          TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
-          if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
-            throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
-              "expected record type: %s", fieldId, expectedRecordType));
-          }
+          return true;
+        }).forEach(transformation -> {
+        Optional<TransformationField> transformationFieldOptional = getTransformationField(transformationFields, transformation);
+        TransformationField transformationField = transformationFieldOptional.get();
+        TransformationField.RecordType expectedRecordType = transformationField.getRecordType();
+        if (Objects.isNull(transformation.getRecordType()) || !transformation.getRecordType().toString().equals(expectedRecordType.toString())) {
+          throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation record type is missing or incorrect according to provided fieldId: %s, " +
+            "expected record type: %s", transformation.getFieldId(), expectedRecordType));
         }
-        return Future.succeededFuture();
       });
+    } catch (Exception ex) {
+      return Future.failedFuture(ex);
     }
     return Future.succeededFuture();
+  }
+
+  private Optional<TransformationField> getTransformationField(List<TransformationField> transformationFields, Transformations transformation) {
+    Optional<TransformationField> transformationFieldOptional = transformationFields.stream()
+      .filter(transformationField -> transformation.getFieldId().equals(transformationField.getFieldId()))
+      .findFirst();
+    if (transformationFieldOptional.isEmpty()) {
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist for provided fieldId: %s", transformation.getFieldId()));
+    }
+    return transformationFieldOptional;
   }
 
 

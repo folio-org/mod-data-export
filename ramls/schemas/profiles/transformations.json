@@ -21,7 +21,7 @@
     "transformation": {
       "description": "Mapping expression",
       "type": "string",
-      "pattern": "(\\d{3}[\\s\\d]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)"
+      "pattern": "((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))"
     },
     "recordType": {
       "description": "Mapping Profile type",

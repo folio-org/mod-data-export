@@ -3,11 +3,15 @@ package org.folio.service.transformationfields;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.referencedata.ReferenceData;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
+import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.transformationfields.builder.DisplayNameKeyBuilder;
 import org.folio.service.transformationfields.builder.FieldIdBuilder;
@@ -20,8 +24,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.String.format;
+import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
@@ -30,6 +37,8 @@ import static org.folio.rest.jaxrs.model.TransformationField.RecordType.ITEM;
 public class TransformationFieldsServiceImpl implements TransformationFieldsService {
 
   private static final String REFERENCE_DATA_NAME_KEY = "name";
+  private static final String ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
+
   @Autowired
   private PathBuilder pathBuilder;
   @Autowired
@@ -49,6 +58,21 @@ public class TransformationFieldsServiceImpl implements TransformationFieldsServ
     transformationFields.addAll(buildTransformationFields(ITEM, TransformationConfigConstants.ITEM_FIELDS_CONFIGS, referenceData));
     transformationFields.sort(Comparator.comparing(TransformationField::getFieldId));
     promise.complete(new TransformationFieldCollection().withTransformationFields(transformationFields).withTotalRecords(transformationFields.size()));
+    return promise.future();
+  }
+
+  @Override
+  public Future<Void> validateTransformations(List<Transformations> transformations) {
+    Promise<Void> promise = Promise.promise();
+    Optional<Transformations> invalidTransformation = transformations.stream()
+      .filter(elem -> StringUtils.isEmpty(elem.getTransformation()))
+      .filter(elem -> elem.getRecordType().value().equals(ITEM.value()))
+      .findFirst();
+    if (invalidTransformation.isEmpty()) {
+      promise.complete();
+    } else {
+      promise.fail(new ServiceException(HTTP_UNPROCESSABLE_ENTITY, ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE));
+    }
     return promise.future();
   }
 
