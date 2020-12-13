@@ -76,6 +76,11 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
               throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
             });
         } else{
+          exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size());
+          exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+          if (exportPayload.isLast()) {
+            exportService.postExport(fileExportDefinition, params.getTenantId());
+          }
           blockingPromise.complete();
         }
       } else {
