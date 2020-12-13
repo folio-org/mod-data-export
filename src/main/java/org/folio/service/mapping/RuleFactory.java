@@ -3,6 +3,7 @@ package org.folio.service.mapping;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
@@ -19,10 +20,13 @@ import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.rulebuilder.CombinedRuleBuilder;
 import org.folio.service.mapping.rulebuilder.DefaultRuleBuilder;
 import org.folio.service.mapping.rulebuilder.RuleBuilder;
 import org.folio.service.mapping.rulebuilder.TransformationRuleBuilder;
+import org.folio.service.profiles.mappingprofile.MappingProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 
 import javax.ws.rs.NotFoundException;
 import java.io.IOException;
@@ -65,7 +69,11 @@ public class RuleFactory {
       LOGGER.info("No Mapping rules specified, using default mapping rules");
       return defaultRules;
     }
-    return new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
+    List<Rule> rules =  new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
+    if(MappingProfileServiceImpl.isDefault(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
+      rules.addAll(defaultRules);
+    }
+    return rules;
   }
 
   public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {

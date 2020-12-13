@@ -91,10 +91,10 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
   private static final String INSTANCE_ID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
-  public static final int EXPORTED_RECORDS_EMPTY = 0;
-  public static final int EXPORTED_RECORDS_NUMBER_1 = 1;
-  public static final int EXPORTED_RECORDS_NUMBER_2 = 2;
-  public static final int EXPORTED_RECORDS_NUMBER_3 = 3;
+  private static final int EXPORTED_RECORDS_EMPTY = 0;
+  private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
+  private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
+  private static final int EXPORTED_RECORDS_NUMBER_3 = 3;
   private static final String CUSTOM_TEST_TENANT = "custom_test_tenant";
   private static final Header CUSTOM_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, CUSTOM_TEST_TENANT);
 
@@ -139,7 +139,7 @@ class DataExportTest extends RestVerticleTestBase {
 
   @Test
   @Order(2)
-  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_job(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnlyWithProfileTransformations_COMPLETED_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_JOB, CSV, buildRequestSpecification(tenantId));
@@ -159,8 +159,8 @@ class DataExportTest extends RestVerticleTestBase {
               FileDefinition fileExportDefinition = optionalFileDefinition.get();
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
               assertFalse(isErrorsPresent);
-              assertCompletedFileDefinitionAndExportedFile(fileExportDefinition);
-              validateExternalCalls();
+              assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "GeneratedFileForSrsRecordsOnly.mrc");
+              validateExternalCallsForSrs();
               context.completeNow();
             });
           });
@@ -170,7 +170,7 @@ class DataExportTest extends RestVerticleTestBase {
 
   @Test
   @Order(3)
-  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnlyWithProfileTransformations_COMPLETED_WITH_ERRORS_job(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB, CSV, buildRequestSpecification(tenantId));
@@ -189,7 +189,7 @@ class DataExportTest extends RestVerticleTestBase {
             .onComplete(ar -> {
               context.verify(() -> {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-                validateExternalCallsForInventory(1);
+                validateExternalCallsForSrsAndInventory(1);
                 assertTrue(ar.succeeded());
                 List<ErrorLog> errorLogList = ar.result();
                 assertEquals(1, errorLogList.size());
@@ -203,7 +203,7 @@ class DataExportTest extends RestVerticleTestBase {
 
   @Test
   @Order(4)
-  void testExportByCSV_UnderlyingSrsOnly_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
+  void testExportByCSV_UnderlyingSrsOnlyWithProfileTransformations_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(UUIDS_INVENTORY_TWO_BATCHES, CSV, buildRequestSpecification(tenantId));
@@ -220,7 +220,7 @@ class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-            validateExternalCallsForInventory(2);
+            validateExternalCallsForSrsAndInventory(2);
             context.completeNow();
           });
         });
@@ -247,7 +247,8 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForInventory(1);
+              validateExternalCallsForSrsAndInventory(1);
+              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsByDefaultRulesAndTransformations.mrc");
               context.completeNow();
             });
           });
@@ -281,41 +282,12 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForInventory(1);
+              validateExternalCallsForSrsAndInventory(1);
               context.completeNow();
             });
           });
         });
     });
-  }
-
-  @Disabled("Disabled for Q3-2020(and until futher decision is made) as we are going to generate marc on the fly for custom profiles")
-  @Test
-  void testExportByCSV_UnderlyingSrsWithProfileTransformations(VertxTestContext context) throws IOException {
-    postToTenant(CUSTOM_TENANT_HEADER);
-    // given
-    String tenantId = CUSTOM_TEST_TENANT;
-    FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
-    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
-    // when
-    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
-    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
-    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    // then
-    vertx.setTimer(TIMER_DELAY, handler ->
-      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-          context.verify(() -> {
-            FileDefinition fileExportDefinition = optionalFileDefinition.get();
-            assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-            assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "expected_marc_MappingTransformations.json");
-            validateExternalCallsForMappingProfileTransformations();
-            context.completeNow();
-          });
-        });
-      }));
   }
 
   @Test
@@ -338,7 +310,7 @@ class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-            validateExternalCallsForMappingProfileTransformations();
+            validateExternalCallsForInventoryAndReferenceData();
             context.completeNow();
           });
         });
@@ -545,18 +517,10 @@ class DataExportTest extends RestVerticleTestBase {
       .withRecordType(QuickExportRequest.RecordType.INSTANCE);
   }
 
-  private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition) {
+  private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition, String fileName) {
     String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
-    String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "GeneratedFileForSrsRecordsOnly.mrc");
+    String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
     assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
-    assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
-  }
-
-  private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition, String fileName) throws FileNotFoundException {
-    String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
-    File expectedJsonRecords = getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
-    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
-    assertEquals(expectedMarcRecord, actualGeneratedFileContent);
     assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
 
@@ -596,43 +560,26 @@ class DataExportTest extends RestVerticleTestBase {
     Assertions.assertTrue(errorLog.getErrorMessageCode().contains(SOME_UUIDS_NOT_FOUND.getCode()));
   }
 
-  private void validateExternalCalls() {
+  private void validateExternalCallsForSrs() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
-    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS));
-    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES));
   }
 
-  private void validateExternalCallsForInventory(int expectedNumber) {
+  private void validateExternalCallsForSrsAndInventory(int expectedNumber) {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
-    validateExternalCallsForReferenceData();
   }
 
   /**
    * No calls to SRS to be made in case of custom profile
    */
-  private void validateExternalCallsForMappingProfileTransformations() {
+  private void validateExternalCallsForInventoryAndReferenceData() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
     assertNull(MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS));
-    validateExternalCallsForReferenceDataForMappingProfileTransformations();
+    validateExternalCallsForReferenceData();
   }
 
   private void validateExternalCallsForReferenceData() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTRIBUTOR_NAME_TYPES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.LOCATIONS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.LIBRARIES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CAMPUSES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTITUTIONS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.MATERIAL_TYPES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_FORMATS).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE_TYPES).size());
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS).size());
-  }
-
-  private void validateExternalCallsForReferenceDataForMappingProfileTransformations() {
     assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTENT_TERMS).size());
     assertEquals(2, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.IDENTIFIER_TYPES).size());
     assertEquals(2, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.CONTRIBUTOR_NAME_TYPES).size());

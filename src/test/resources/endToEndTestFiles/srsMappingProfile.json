@@ -3,7 +3,17 @@
   "name": "IT Mapping profile",
   "description": "Mapping profile for Testing Int Tests",
   "recordTypes": [
-    "SRS"
+    "SRS",
+    "HOLDINGS"
   ],
-  "outputFormat": "MARC"
+  "outputFormat": "MARC",
+  "transformations": [
+    {
+      "fieldId": "holdings.callnumber",
+      "path": "$.holdings[*].callNumber",
+      "transformation": "90011$a",
+      "enabled": true,
+      "recordType": "HOLDINGS"
+    }
+  ]
 }

@@ -173,5 +173,8 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return transformationFieldOptional;
   }
 
+  public static boolean isDefault(String mappingProfileId) {
+    return DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfileId);
+  }
 
 }
