@@ -36,10 +36,10 @@ public interface FileDefinitionService {
   /**
    * Create {@link FileDefinition} with related jobExecution
    *
-   * @param type     type from {@link QuickExportRequest}
+   * @param request  {@link QuickExportRequest}
    * @param tenantId tenant id
    * @return future with {@link FileDefinition}
    */
-  Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest.Type type, String jobProfileId, String tenantId);
+  Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId);
 
 }
