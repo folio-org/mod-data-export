@@ -37,6 +37,10 @@
         "ITEM"
       ]
     },
+    "fileName": {
+      "description": "Name of the file to export",
+      "type": "string"
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",

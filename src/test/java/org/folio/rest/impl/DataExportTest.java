@@ -2,7 +2,6 @@ package org.folio.rest.impl;
 
 import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
 import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
-import static org.folio.TestUtil.getFileFromResources;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
@@ -51,7 +50,6 @@ import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.HelperUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -67,7 +65,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,6 +88,8 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String UUIDS_CQL = "InventoryUUIDs.cql";
   private static final String INSTANCE_ID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
+  private static final String JOB_EXECUTION_ID_FIELD = "jobExecutionId";
+  private static final String JOB_EXECUTION_HR_ID_FIELD = "jobExecutionHrId";
   private static final int EXPORTED_RECORDS_EMPTY = 0;
   private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
@@ -354,12 +353,15 @@ class DataExportTest extends RestVerticleTestBase {
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     QuickExportRequest exportRequest = buildQuickCqlExportRequest("test");
-    postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL);
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
           assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_1);
           context.completeNow();
         });
@@ -374,13 +376,16 @@ class DataExportTest extends RestVerticleTestBase {
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     QuickExportRequest exportRequest = buildQuickCqlExportRequest("(languages=\"eng\")");
-    postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL);
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
           assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
           context.completeNow();
         });
       }));
@@ -394,13 +399,16 @@ class DataExportTest extends RestVerticleTestBase {
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     QuickExportRequest exportRequest = buildQuickExportRequest(Collections.singletonList(INSTANCE_ID));
-    postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL);
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
           assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
           context.completeNow();
         });
       }));
@@ -417,13 +425,44 @@ class DataExportTest extends RestVerticleTestBase {
     uuids.add(UUID.randomUUID().toString());
     // when
     QuickExportRequest exportRequest = buildQuickExportRequest(uuids);
-    postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL);
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
     // then
     vertx.setTimer(TIMER_DELAY, handler ->
       jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
         JobExecution jobExecution = optionalJobExecution.get();
         context.verify(() -> {
           assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_1);
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
+          context.completeNow();
+        });
+      }));
+  }
+
+  @Test
+  @Order(13)
+  void testQuickExport_uploadingUuidType_customFileName(VertxTestContext context) {
+    //given
+    String tenantId = okapiConnectionParams.getTenantId();
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    List<String> uuids = new ArrayList<>();
+    uuids.add(INSTANCE_ID);
+    uuids.add(UUID.randomUUID().toString());
+    // when
+    QuickExportRequest exportRequest = buildQuickExportRequest(uuids);
+    exportRequest.setFileName("testName");
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
+          assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_1);
+          assertEquals("testName-" + jobExecution.getHrId() + ".mrc", fileExportDefinitionCaptor.getValue().getFileName());
           context.completeNow();
         });
       }));

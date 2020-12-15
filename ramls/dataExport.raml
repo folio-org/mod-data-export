@@ -14,6 +14,7 @@ types:
   fileDefinition: !include schemas/fileDefinition.json
   exportRequest: !include schemas/exportRequest.json
   quickExportRequest: !include schemas/quickExportRequest.json
+  quickExportResponse: !include schemas/quickExportResponse.json
   jobExecutionCollection: !include schemas/jobExecutionCollection.json
   jobExecution: !include schemas/jobExecution.json
   fileDownload: !include schemas/fileDownload.json
@@ -71,7 +72,12 @@ resourceTypes:
           example:
             value: !include samples/quickExportRequest.sample
       responses:
-        204:
+        200:
+          body:
+            application/json:
+              type: quickExportResponse
+              example:
+                value: !include samples/quickExportResponse.sample
         400:
           description: "Bad request"
           body:

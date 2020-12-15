@@ -4,10 +4,11 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
-import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.service.job.JobExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,14 +61,14 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
   }
 
   @Override
-  public Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest.Type type, String jobProfileId, String tenantId) {
+  public Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId) {
     Promise<FileDefinition> promise = Promise.promise();
     jobExecutionService.save(new JobExecution(), tenantId)
       .onSuccess(jobExecution -> {
         FileDefinition fileDefinition = new FileDefinition()
-          .withUploadFormat(getUploadFormatByType(type))
+          .withUploadFormat(getUploadFormatByType(request.getType()))
           .withJobExecutionId(jobExecution.getId())
-          .withFileName(QUICK_EXPORT + CSV_FILE_FORMAT)
+          .withFileName(getFileNameByRequest(request))
           .withStatus(NEW);
         save(fileDefinition, tenantId)
           .onSuccess(promise::complete)
@@ -82,6 +83,12 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
     return QuickExportRequest.Type.CQL.equals(type)
       ? FileDefinition.UploadFormat.CQL
       : FileDefinition.UploadFormat.CSV;
+  }
+
+  private String getFileNameByRequest(QuickExportRequest request) {
+    return StringUtils.isEmpty(request.getFileName())
+      ? QUICK_EXPORT + CSV_FILE_FORMAT
+      : request.getFileName() + CSV_FILE_FORMAT;
   }
 
 }
