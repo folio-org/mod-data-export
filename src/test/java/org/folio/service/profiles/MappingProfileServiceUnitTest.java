@@ -25,6 +25,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -44,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +60,7 @@ class MappingProfileServiceUnitTest {
   private static final String MISSING_FIELD_ID = "missingFieldId";
   private static MappingProfile expectedMappingProfile;
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String PATH = "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='4bb300a4-04c9-414b-bfbc-9c032f74b7b2')].alternativeTitle";
 
   @Spy
   @InjectMocks
@@ -67,6 +71,8 @@ class MappingProfileServiceUnitTest {
   private UsersClient usersClient;
   @Mock
   private TransformationFieldsService transformationFieldsService;
+  @Captor
+  private ArgumentCaptor<MappingProfile> mappingProfileCaptor;
 
   private static OkapiConnectionParams okapiConnectionParams;
 
@@ -98,6 +104,35 @@ class MappingProfileServiceUnitTest {
       assertTrue(ar.failed());
       verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
       assertTrue(ar.cause() instanceof NotFoundException);
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getById_shouldUpdateProfile_whenReferenceDataUpdated(VertxTestContext context) {
+    // given
+    when(mappingProfileDao.getById(MAPPING_PROFILE_ID, TENANT_ID)).thenReturn(succeededFuture(Optional.of(expectedMappingProfile)));
+    Transformations transformations = new Transformations()
+      .withFieldId(FIELD_ID)
+      .withRecordType(RecordType.INSTANCE)
+      .withPath(PATH);
+    expectedMappingProfile.setTransformations(singletonList(transformations));
+    TransformationField transformationField = new TransformationField()
+          .withFieldId(FIELD_ID + 1)
+          .withReferenceDataValue("alternativeTitle")
+          .withPath(PATH)
+          .withRecordType(INSTANCE);
+    TransformationFieldCollection transformationFieldCollection = new TransformationFieldCollection().withTransformationFields(singletonList(transformationField));
+    when(transformationFieldsService.getTransformationFields(okapiConnectionParams)).thenReturn(succeededFuture(transformationFieldCollection));
+    // when
+    Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, okapiConnectionParams);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      verify(mappingProfileDao).update(mappingProfileCaptor.capture(), eq(TENANT_ID));
+      assertTrue(ar.failed());
+      verify(mappingProfileDao).getById(eq(MAPPING_PROFILE_ID), eq(TENANT_ID));
+      verify(mappingProfileDao).update(eq(mappingProfileCaptor.getValue()), eq(TENANT_ID));
+      assertEquals(transformationField.getFieldId(), mappingProfileCaptor.getValue().getTransformations().get(0).getFieldId());
       context.completeNow();
     }));
   }
@@ -274,6 +309,12 @@ class MappingProfileServiceUnitTest {
       assertTrue(ar.succeeded());
       context.completeNow();
     });
+  }
+
+  private ArgumentCaptor<MappingProfile> captureMappingProfile() {
+    ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor = ArgumentCaptor.forClass(MappingProfile.class);
+    when(mappingProfileDao.update(mappingProfileArgumentCaptor.capture(), eq(TENANT_ID))).thenReturn(succeededFuture(mappingProfileArgumentCaptor.getValue()));
+    return mappingProfileArgumentCaptor;
   }
 
 }

@@ -114,7 +114,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
           if (transformationField.getReferenceDataValue() != null) {
             String profileTransformationPath = profileTransformation.getPath();
             String transformationFieldPath = transformationField.getPath();
-            String profileTransformationId = transformationField.getFieldId();
+            String profileTransformationId = profileTransformation.getFieldId();
             String transformationFieldId = transformationField.getFieldId();
             if (profileTransformationPath.equals(transformationFieldPath) && !profileTransformationId.equals(transformationFieldId)) {
               profileTransformation.setFieldId(transformationFieldId);

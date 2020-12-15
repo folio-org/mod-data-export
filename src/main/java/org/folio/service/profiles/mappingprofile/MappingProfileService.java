@@ -48,7 +48,7 @@ public interface MappingProfileService {
    * Gets {@link MappingProfile}
    *
    * @param mappingProfileId job id
-   * @param params         {@link OkapiConnectionParams} okapi headers and connection parameters
+   * @param params           {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with {@link MappingProfile}
    */
   Future<MappingProfile> getById(String mappingProfileId, OkapiConnectionParams params);
@@ -56,7 +56,7 @@ public interface MappingProfileService {
   /**
    * Gets default {@link MappingProfile}
    *
-   * @param params         {@link OkapiConnectionParams} okapi headers and connection parameters
+   * @param params {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with default {@link MappingProfile}
    */
   Future<MappingProfile> getDefault(OkapiConnectionParams params);
