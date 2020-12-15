@@ -93,11 +93,11 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<MappingProfile> getById(String mappingProfileId, String tenantId) {
-    return mappingProfileDao.getById(mappingProfileId, tenantId)
+  public Future<MappingProfile> getById(String mappingProfileId, OkapiConnectionParams params) {
+    return mappingProfileDao.getById(mappingProfileId, params.getTenantId())
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {
-          return Future.succeededFuture(optionalMappingProfile.get());
+          return updateTransformationFields(optionalMappingProfile.get(), params);
         } else {
           String errorMessage = String.format("Mapping profile not found with id %s", mappingProfileId);
           LOGGER.error(errorMessage);
@@ -106,9 +106,32 @@ public class MappingProfileServiceImpl implements MappingProfileService {
       });
   }
 
+  private Future<MappingProfile> updateTransformationFields(MappingProfile mappingProfile, OkapiConnectionParams params) {
+    return transformationFieldsService.getTransformationFields(params).compose(fieldCollection -> {
+      boolean updateMappingProfile = false;
+      for (Transformations profileTransformation : mappingProfile.getTransformations()) {
+        for (TransformationField transformationField : fieldCollection.getTransformationFields()) {
+          if (transformationField.getReferenceDataValue() != null) {
+            String profileTransformationPath = profileTransformation.getPath();
+            String transformationFieldPath = transformationField.getPath();
+            String profileTransformationId = transformationField.getFieldId();
+            String transformationFieldId = transformationField.getFieldId();
+            if (profileTransformationPath.equals(transformationFieldPath) && !profileTransformationId.equals(transformationFieldId)) {
+              profileTransformation.setFieldId(transformationFieldId);
+              updateMappingProfile = true;
+            }
+          }
+        }
+      }
+      return updateMappingProfile
+        ? mappingProfileDao.update(mappingProfile, params.getTenantId())
+        : Future.succeededFuture(mappingProfile);
+    });
+  }
+
   @Override
-  public Future<MappingProfile> getDefault(String tenantId) {
-    return getById(DEFAULT_MAPPING_PROFILE_ID, tenantId);
+  public Future<MappingProfile> getDefault(OkapiConnectionParams params) {
+    return getById(DEFAULT_MAPPING_PROFILE_ID, params);
   }
 
   @Override

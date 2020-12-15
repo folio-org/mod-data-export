@@ -56,7 +56,7 @@ public class DataExportImplMappingProfilesImpl implements DataExportMappingProfi
   @Override
   public void getDataExportMappingProfilesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     succeededFuture()
-      .compose(ar -> mappingProfileService.getById(id, tenantId))
+      .compose(ar -> mappingProfileService.getById(id, new OkapiConnectionParams(okapiHeaders)))
       .map(GetDataExportMappingProfilesByIdResponse::respond200WithApplicationJson)
       .map(Response.class::cast)
       .otherwise(ExceptionToResponseMapper::map)

@@ -92,7 +92,7 @@ class MappingProfileServiceUnitTest {
     // given
     when(mappingProfileDao.getById(MAPPING_PROFILE_ID, TENANT_ID)).thenReturn(succeededFuture(Optional.empty()));
     // when
-    Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, TENANT_ID);
+    Future<MappingProfile> future = mappingProfileService.getById(MAPPING_PROFILE_ID, okapiConnectionParams);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.failed());

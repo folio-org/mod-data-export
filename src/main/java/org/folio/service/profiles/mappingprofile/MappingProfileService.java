@@ -48,18 +48,18 @@ public interface MappingProfileService {
    * Gets {@link MappingProfile}
    *
    * @param mappingProfileId job id
-   * @param tenantId         tenant id
+   * @param params         {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with {@link MappingProfile}
    */
-  Future<MappingProfile> getById(String mappingProfileId, String tenantId);
+  Future<MappingProfile> getById(String mappingProfileId, OkapiConnectionParams params);
 
   /**
    * Gets default {@link MappingProfile}
    *
-   * @param tenantId tenant id
+   * @param params         {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with default {@link MappingProfile}
    */
-  Future<MappingProfile> getDefault(String tenantId);
+  Future<MappingProfile> getDefault(OkapiConnectionParams params);
 
   /**
    * Validates {@link MappingProfile}
