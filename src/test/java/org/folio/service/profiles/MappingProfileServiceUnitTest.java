@@ -310,11 +310,4 @@ class MappingProfileServiceUnitTest {
       context.completeNow();
     });
   }
-
-  private ArgumentCaptor<MappingProfile> captureMappingProfile() {
-    ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor = ArgumentCaptor.forClass(MappingProfile.class);
-    when(mappingProfileDao.update(mappingProfileArgumentCaptor.capture(), eq(TENANT_ID))).thenReturn(succeededFuture(mappingProfileArgumentCaptor.getValue()));
-    return mappingProfileArgumentCaptor;
-  }
-
 }
