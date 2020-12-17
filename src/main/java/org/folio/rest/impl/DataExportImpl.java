@@ -13,6 +13,7 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
+import org.folio.rest.jaxrs.model.QuickExportResponse;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.file.cleanup.StorageCleanupService;
@@ -114,7 +115,9 @@ public class DataExportImpl implements DataExport {
                       .onSuccess(updatedJobExecution -> {
                         inputDataManager.init(JsonObject.mapFrom(buildExportRequest(requestFileDefinition.getId(), jobProfile.getId(), entity)), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                         succeededFuture()
-                          .map(PostDataExportExportResponse.respond204())
+                          .map(PostDataExportQuickExportResponse.respond200WithApplicationJson(new QuickExportResponse()
+                            .withJobExecutionId(jobExecution.getId())
+                            .withJobExecutionHrId(jobExecution.getHrId())))
                           .map(Response.class::cast)
                           .onComplete(asyncResultHandler);
                       }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
@@ -186,7 +189,7 @@ public class DataExportImpl implements DataExport {
 
   private Future<FileDefinition> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
     Promise<FileDefinition> promise = Promise.promise();
-    fileDefinitionService.prepareFileDefinitionForQuickExport(request.getType(), jobProfileId, tenantId)
+    fileDefinitionService.prepareFileDefinitionForQuickExport(request, jobProfileId, tenantId)
       .onSuccess(fileDefinition -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, fileDefinition, params)
         .onSuccess(uploadedFileDefinition -> fileUploadService.completeUploading(uploadedFileDefinition, tenantId))
         .onSuccess(promise::complete)
