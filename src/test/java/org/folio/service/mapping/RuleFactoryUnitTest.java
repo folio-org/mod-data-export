@@ -1,6 +1,7 @@
 package org.folio.service.mapping;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.commons.collections4.CollectionUtils;
 import org.assertj.core.util.Lists;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
@@ -16,11 +17,14 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.folio.TestUtil.CALLNUMBER_FIELD_ID;
@@ -62,11 +66,15 @@ import static org.junit.Assert.assertNull;
 class RuleFactoryUnitTest {
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   private static final String DEFAULT_RULE_FIELD_VALUE = "001";
+  private static final String DEFAULT_HOLDING_RULE_FIELD_VALUE = "002";
   private static final String DEFAULT_RULE_DESCRIPTION = "defaultRuleDescription";
+  private static final String DEFAULT_HOLDING_RULE_DESCRIPTION = "defaultHoldingRuleDescription";
   private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
+  private static final String DEFAULT_HOLDING_RULE_FROM_VALUE = "defaultHoldingFromValue";
   private static final String FIELD_ID_1 = "fieldId1";
   private static final String FIELD_ID_2 = "fieldId2";
   private static final String DEFAULT_RULE_ID = "defaultRuleId";
+  private static final String DEFAULT_HOLDING_RULE_ID = "defaultHoldingRuleId";
   private static final String TRANSFORMATIONS_PATH_1 = "transformationsPath1";
   private static final String TRANSFORMATION_FIELD_VALUE_1 = "002";
   private static final String TRANSFORMATION_FIELD_VALUE_WITH_SUBFIELD = "002  $a";
@@ -89,12 +97,14 @@ class RuleFactoryUnitTest {
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
 
-  private static List<Rule> defaultRules;
+  private static List<Rule> defaultInstanceRules;
+  private static List<Rule> defaultHoldingsRules;
 
   @BeforeEach
   public void setUp() {
     setUpDefaultRules();
-    Mockito.lenient().doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
+    Mockito.lenient().doReturn(defaultInstanceRules).when(ruleFactory).getDefaultRulesFromFile();
+    Mockito.lenient().doReturn(defaultHoldingsRules).when(ruleFactory).getDefaultHoldingsRulesFromFile();
   }
 
   @Test
@@ -113,7 +123,8 @@ class RuleFactoryUnitTest {
   void shouldReturnDefaultRules_whenMappingProfileIsDefault() {
     // given
     MappingProfile mappingProfile = new MappingProfile()
-      .withId(DEFAULT_MAPPING_PROFILE_ID);
+      .withId(DEFAULT_MAPPING_PROFILE_ID)
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -129,7 +140,8 @@ class RuleFactoryUnitTest {
   void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty() {
     // given
     MappingProfile mappingProfile = new MappingProfile()
-      .withId(UUID.randomUUID().toString());
+      .withId(UUID.randomUUID().toString())
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -142,6 +154,43 @@ class RuleFactoryUnitTest {
   }
 
   @Test
+  void shouldReturnDefaultHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingRecordType() {
+    // given
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withRecordTypes(singletonList(HOLDINGS));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(DEFAULT_HOLDING_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_HOLDING_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_HOLDING_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+  }
+
+  @Test
+  void shouldReturnDefaultInstanceAndHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingAndInstanceRecordTypes() {
+    // given
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(UUID.randomUUID().toString())
+      .withRecordTypes(Arrays.asList(HOLDINGS,INSTANCE));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(0).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(0).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(DEFAULT_HOLDING_RULE_FIELD_VALUE, rules.get(1).getField());
+    assertEquals(DEFAULT_HOLDING_RULE_DESCRIPTION, rules.get(1).getDescription());
+    assertEquals(DEFAULT_HOLDING_RULE_FROM_VALUE, rules.get(1).getDataSources().get(0).getFrom());
+  }
+
+  @Test
   void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled() {
     // given
     Transformations transformations = new Transformations()
@@ -150,7 +199,7 @@ class RuleFactoryUnitTest {
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(ImmutableList.of(transformations))
-      .withRecordTypes(Collections.singletonList(INSTANCE));
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -169,7 +218,7 @@ class RuleFactoryUnitTest {
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(ImmutableList.of(transformations))
-      .withRecordTypes(Collections.singletonList(INSTANCE));
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -210,7 +259,7 @@ class RuleFactoryUnitTest {
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
       .withTransformations(ImmutableList.of(transformations))
-      .withRecordTypes(Collections.singletonList(INSTANCE));
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -816,7 +865,15 @@ class RuleFactoryUnitTest {
     defaultRule.setField(DEFAULT_RULE_FIELD_VALUE);
     defaultRule.setDescription(DEFAULT_RULE_DESCRIPTION);
     defaultRule.setDataSources(Lists.newArrayList(dataSource));
-    defaultRules = Lists.newArrayList(defaultRule);
+    defaultInstanceRules = Lists.newArrayList(defaultRule);
+    DataSource holdingDataSource = new DataSource();
+    holdingDataSource.setFrom(DEFAULT_HOLDING_RULE_FROM_VALUE);
+    Rule holdingDefaultRule = new Rule();
+    holdingDefaultRule.setId(DEFAULT_HOLDING_RULE_ID);
+    holdingDefaultRule.setField(DEFAULT_HOLDING_RULE_FIELD_VALUE);
+    holdingDefaultRule.setDescription(DEFAULT_HOLDING_RULE_DESCRIPTION);
+    holdingDefaultRule.setDataSources(Lists.newArrayList(holdingDataSource));
+    defaultHoldingsRules = Lists.newArrayList(holdingDefaultRule);
   }
 
   private List<Rule> setUpElectorincAccesDefaultRuleWithIdicators() {

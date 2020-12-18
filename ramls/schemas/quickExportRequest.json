@@ -38,7 +38,7 @@
       ]
     },
     "fileName": {
-      "description": "Name of the file to export",
+      "description": "Name of the generated marc file",
       "type": "string"
     },
     "metadata": {

@@ -6,7 +6,8 @@
   "properties": {
     "jobExecutionId": {
       "description": "UUID of the job execution, that is used for quick export",
-      "type": "string"
+      "type": "string",
+      "$ref": "../../ramls/raml-util/schemas/uuid.schema"
     },
     "jobExecutionHrId": {
       "description": "HrId of the job execution, that is used for quick export",

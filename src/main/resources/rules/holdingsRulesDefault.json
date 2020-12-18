@@ -1,0 +1,280 @@
+[
+  {
+    "id": "holdings.hrid",
+    "field": "001",
+    "description": "The human readable ID",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].hrid"
+      }
+    ]
+  },
+  {
+    "id": "holdings.instancehrid",
+    "field": "014",
+    "description": "Unique hrId of the related instance record",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].instanceHrId",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "1"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.permanent.location",
+    "field": "852",
+    "description": "Holdings permanent location",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].permanentLocationId",
+        "subfield": "b",
+        "translation": {
+          "function": "set_holdings_permanent_location"
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "temporaryLocationId": "$.holdings[*].temporaryLocationId"
+    }
+  },
+  {
+    "id": "holdings.holdingsstatements.statement",
+    "field": "866",
+    "description": "Holdings statement",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatements[*].statement",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.holdingsstatements.note",
+    "field": "866",
+    "description": "Holdings statement - note",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatements[*].note",
+        "subfield": "z"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.holdingsstatementsforsupplements.statement",
+    "field": "867",
+    "description": "Holdings statement for supplements",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatementsForSupplements[*].statement",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.holdingsstatementsforsupplements.note",
+    "field": "867",
+    "description": "Holdings statement for supplements - note",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatementsForSupplements[*].note",
+        "subfield": "z"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.holdingsstatementsforindexes.statement",
+    "field": "868",
+    "description": "Holdings statement for indexes",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatementsForIndexes[*].statement",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.holdingsstatementsforindexes.note",
+    "field": "868",
+    "description": "Holdings statement for indexes - note",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].holdingsStatementsForIndexes[*].note",
+        "subfield": "z"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "holdings.id",
+    "field": "999",
+    "description": "Unique ID of the holding record",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].id",
+        "subfield": "i"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "f"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "f"
+          }
+        }
+      }
+    ]
+  }
+]
+
