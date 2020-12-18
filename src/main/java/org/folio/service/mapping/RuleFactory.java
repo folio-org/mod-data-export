@@ -8,9 +8,7 @@ import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.RecordType.INSTANCE;
 import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
@@ -20,12 +18,10 @@ import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
-import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.rulebuilder.CombinedRuleBuilder;
 import org.folio.service.mapping.rulebuilder.DefaultRuleBuilder;
 import org.folio.service.mapping.rulebuilder.RuleBuilder;
 import org.folio.service.mapping.rulebuilder.TransformationRuleBuilder;
-import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 
 import javax.ws.rs.NotFoundException;
@@ -35,7 +31,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +64,8 @@ public class RuleFactory {
       LOGGER.info("No Mapping rules specified, using default mapping rules");
       return defaultRules;
     }
-    List<Rule> rules =  new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
-    if(MappingProfileServiceImpl.isDefault(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
+    List<Rule> rules = new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
+    if (MappingProfileServiceImpl.isDefault(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
       rules.addAll(defaultRules);
     }
     return rules;
@@ -80,14 +75,13 @@ public class RuleFactory {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
-    markItemTransformationsWithSameTag(mappingTransformations);
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
         rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation);
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
-      } else if(HOLDINGS.equals(mappingTransformation.getRecordType()) || ITEM.equals(mappingTransformation.getRecordType()) ) {
+      } else if (HOLDINGS.equals(mappingTransformation.getRecordType()) || ITEM.equals(mappingTransformation.getRecordType())) {
         LOGGER.error(String.format("No transformation provided for field name: %s, and with record type: %s",
           mappingTransformation.getFieldId(), mappingTransformation.getRecordType()));
       }
@@ -96,23 +90,6 @@ public class RuleFactory {
       }
     }
     return rules;
-  }
-
-  private void markItemTransformationsWithSameTag(List<Transformations> mappingTransformations) {
-    Multimap<String, Transformations> tagToTransformationMap = ArrayListMultimap.create();
-    for (Transformations transformation : mappingTransformations) {
-      if (transformation.getRecordType().equals(ITEM)) {
-        String itemTag = transformation.getTransformation().substring(0, 3);
-        tagToTransformationMap.put(itemTag, transformation);
-      }
-    }
-
-    for (String tag: tagToTransformationMap.keySet()) {
-      Collection<Transformations> transformations = tagToTransformationMap.get(tag);
-      if (transformations.size() > 1) {
-        transformations.forEach(transformation -> transformation.setHasSameTagInItems(true));
-      }
-    }
   }
 
   public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {

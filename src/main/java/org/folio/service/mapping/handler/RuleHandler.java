@@ -39,7 +39,7 @@ public class RuleHandler {
     List<Rule> starredRules = new ArrayList<>();
     List<Rule> indexedRules = new ArrayList<>();
     for (Rule originRule : originalRules) {
-      if (originRule.isHasSameTagInItems()) {
+      if (originRule.isItemTypeRule()) {
         for (int holdingIndex = 0; holdingIndex < numberOfHoldings; holdingIndex++) {
           Rule indexedRule = createIndexedRule(originRule, holdingIndex);
           indexedRules.add(indexedRule);
