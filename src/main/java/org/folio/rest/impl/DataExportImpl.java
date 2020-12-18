@@ -76,11 +76,12 @@ public class DataExportImpl implements DataExport {
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.info("Starting the data-export process, request: {}", entity);
+    OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
       .onSuccess(requestFileDefinition ->
         jobProfileService.getById(entity.getJobProfileId(), tenantId)
           .onSuccess(jobProfile ->
-            mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
+            mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
               .onSuccess(mappingProfile ->
                 jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
                   .onSuccess(jobExecution ->
@@ -101,11 +102,12 @@ public class DataExportImpl implements DataExport {
   @Override
   public void postDataExportQuickExport(QuickExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.info("Starting the data-quick-export process, request: {}", entity);
+    OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     getJobProfileForQuickExport(entity)
       .onSuccess(jobProfile ->
-        getFileDefinitionForQuickExport(entity, jobProfile.getId(), new OkapiConnectionParams(okapiHeaders), asyncResultHandler)
+        getFileDefinitionForQuickExport(entity, jobProfile.getId(), params, asyncResultHandler)
           .onSuccess(requestFileDefinition ->
-            mappingProfileService.getById(jobProfile.getMappingProfileId(), tenantId)
+            mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
               .onSuccess(mappingProfile ->
                 jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
                   .onSuccess(jobExecution ->
