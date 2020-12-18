@@ -2,6 +2,7 @@ package org.folio.service.mapping;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import com.sun.xml.bind.StringInputStream;
 import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -29,6 +30,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.marc4j.MarcJsonReader;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamWriter;
+import org.marc4j.MarcWriter;
+import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -41,9 +47,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -363,7 +373,7 @@ class MappingServiceUnitTest {
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
 
-    File expectedJsonRecords = getFileFromResources("mapping/expected_marc_holdings_transformationFields.json");
+    File expectedJsonRecords = getFileFromResources("mapping/expected_holding_with_default_rules.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
