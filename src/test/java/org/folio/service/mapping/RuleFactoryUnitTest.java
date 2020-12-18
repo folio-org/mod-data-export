@@ -766,7 +766,8 @@ class RuleFactoryUnitTest {
     List<Transformations> transformations = Lists.newArrayList(transformation);
     MappingProfile mappingProfile = new MappingProfile()
       .withId(UUID.randomUUID().toString())
-      .withTransformations(transformations);
+      .withTransformations(transformations)
+      .withRecordTypes(singletonList(INSTANCE));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);

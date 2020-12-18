@@ -65,12 +65,12 @@ public class RuleFactory {
     return createRulesDependsOnRecordType(mappingProfile);
   }
 
-  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules, boolean isHoldingsCheckNeeded) {
+  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules, boolean appendDefaultHoldingsRules) {
+    if (appendDefaultHoldingsRules && mappingProfile != null && mappingProfile.getRecordTypes().contains(HOLDINGS)) {
+      defaultRules.addAll(getDefaultHoldingsRulesFromFile());
+    }
     if (mappingProfile == null || isEmpty(mappingProfile.getTransformations())) {
       LOGGER.info("No Mapping rules specified, using default mapping rules");
-      if (isHoldingsCheckNeeded && mappingProfile != null && mappingProfile.getRecordTypes().contains(HOLDINGS)) {
-        defaultRules.addAll(getDefaultHoldingsRulesFromFile());
-      }
       return defaultRules;
     }
     List<Rule> rules = new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
@@ -203,21 +203,14 @@ public class RuleFactory {
   }
 
   private List<Rule> createRulesDependsOnRecordType(MappingProfile mappingProfile) {
-    List<Rule> rules = new ArrayList<>();
-    if (mappingProfile == null || mappingProfile.getRecordTypes().contains(INSTANCE) || isEmptyTransformationsByRecordTypePresent(mappingProfile, INSTANCE)) {
-      rules.addAll(getDefaultRulesFromFile());
+    List<Rule> combinedDefaultRules = new ArrayList<>();
+    if (mappingProfile == null || mappingProfile.getRecordTypes().contains(INSTANCE)) {
+      combinedDefaultRules.addAll(getDefaultRulesFromFile());
     }
-    if (mappingProfile != null && (mappingProfile.getRecordTypes().contains(HOLDINGS) || isEmptyTransformationsByRecordTypePresent(mappingProfile, HOLDINGS))) {
-      rules.addAll(getDefaultHoldingsRulesFromFile());
+    if (mappingProfile != null && (mappingProfile.getRecordTypes().contains(HOLDINGS))) {
+      combinedDefaultRules.addAll(getDefaultHoldingsRulesFromFile());
     }
-    return create(mappingProfile, rules, false);
-  }
-
-  private boolean isEmptyTransformationsByRecordTypePresent(MappingProfile mappingProfile, RecordType recordType) {
-    return mappingProfile.getTransformations()
-      .stream()
-      .anyMatch(transformation -> StringUtils.isEmpty(transformation.getTransformation())
-        && transformation.getRecordType().equals(recordType));
+    return create(mappingProfile, combinedDefaultRules, false);
   }
 
 }
