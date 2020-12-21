@@ -25,10 +25,8 @@ import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.ReferenceDataResponseUtil;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.marc4j.marc.VariableField;
@@ -55,6 +53,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.TestUtil.*;
 import static org.folio.rest.jaxrs.model.RecordType.HOLDINGS;
@@ -142,13 +141,13 @@ class MappingServiceUnitTest {
   void shouldMapInstance_to_marcRecord_whenMappingProfileTransformationsEmpty() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
     // then
     Assert.assertEquals(1, actualMarcRecords.size());
     String actualMarcRecord = actualMarcRecords.get(0);
@@ -162,13 +161,13 @@ class MappingServiceUnitTest {
   void shouldCallSaveAffectedRecord_whenReferenceDataIsNull() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_small_instanceHolding.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(null);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
     // then
     verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode()), eq(Arrays.asList("Undefined error during the mapping process", "java.lang.NullPointerException")), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
@@ -180,7 +179,7 @@ class MappingServiceUnitTest {
     JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
     String expectedReason = "An error occurred during fields mapping for srs record with id: 65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61, reason: undefined, cause: java.lang.NullPointerException ";
     MappingProfile mappingProfile = new MappingProfile();
-    mappingProfile.setTransformations(Collections.singletonList(createTransformations("holdings.permanentlocation.test", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS)));
+    mappingProfile.setTransformations(singletonList(createTransformations("holdings.permanentlocation.test", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS)));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(null);
     // when
@@ -194,7 +193,7 @@ class MappingServiceUnitTest {
   void shouldPopulateErrorLog_whenMappingFailed() {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
@@ -210,10 +209,10 @@ class MappingServiceUnitTest {
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
-    mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
+    mappingProfile.setRecordTypes(singletonList(INSTANCE));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
@@ -233,11 +232,11 @@ class MappingServiceUnitTest {
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmpty_AndSomeInstanceFieldProvided() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
     mappingProfile.getTransformations().addAll(createInstanceFieldsTransformation());
-    mappingProfile.setRecordTypes(Collections.singletonList(INSTANCE));
+    mappingProfile.setRecordTypes(singletonList(INSTANCE));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
@@ -273,7 +272,7 @@ class MappingServiceUnitTest {
   void shouldMapInstanceHoldingsAndItem_to_marcRecord_whenMappingProfileTransformationsAreNotEmptyAndRulesFromModConfig() throws IOException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
@@ -299,7 +298,7 @@ class MappingServiceUnitTest {
   void shouldMapInstances_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createInstanceTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
@@ -325,7 +324,7 @@ class MappingServiceUnitTest {
   void shouldMapHoldings_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_Holdings.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createHoldingsTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
@@ -345,6 +344,30 @@ class MappingServiceUnitTest {
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
   }
 
+  @Test
+  void shouldMapHoldings_to_marcRecord_whenTransformationsEmpty_RecordTypeHolding() throws FileNotFoundException {
+    // given
+    JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_Holdings.json"));
+    List<JsonObject> instances = singletonList(instance);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withRecordTypes(singletonList(HOLDINGS));
+    Mockito.when(referenceDataProvider.get(jobExecutionId, params))
+      .thenReturn(referenceData);
+    Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
+      .thenReturn(Collections.emptyList());
+
+    // when
+    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+
+    // then
+    Assert.assertEquals(1, actualMarcRecords.size());
+    String actualMarcRecord = actualMarcRecords.get(0);
+
+    File expectedJsonRecords = getFileFromResources("mapping/expected_holding_with_default_rules.json");
+    String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
+    Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+  }
+
   /**
    * This test makes sure if the path specified in transformation Fields, is correct and parsable,
    * by creating the mapping profile from the transformation fields for all Items records
@@ -353,7 +376,7 @@ class MappingServiceUnitTest {
   void shouldMapItems_to_marcRecord_withMappingProfileFromTransformationFields() throws FileNotFoundException {
     // given
     JsonObject instance = new JsonObject(readFileContentFromResources("mapping/given_inventory_instance.json"));
-    List<JsonObject> instances = Collections.singletonList(instance);
+    List<JsonObject> instances = singletonList(instance);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(createItemTransformationsFromTransformationFields());
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
