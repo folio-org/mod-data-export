@@ -10,8 +10,8 @@ import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +31,7 @@ import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 @Component
 public class ConfigurationsClient {
   public static final String QUERY_VALUE_FOR_HOST = "code=\"FOLIO_HOST\"";
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String QUERY = "?query=";
   private static final String QUERY_VALUE = "code=\"RULES_OVERRIDE\" AND enabled==true";
   private static final String RECORDS_URL_PART = "/inventory/view/";

@@ -4,8 +4,8 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.spring.SpringContextUtil;
@@ -16,7 +16,7 @@ import java.util.Map;
 import static io.vertx.core.Future.succeededFuture;
 
 public class ModTenantAPI extends TenantAPI {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ModTenantAPI.class);
+  private static final Logger LOGGER = LogManager.getLogger(ModTenantAPI.class);
 
 
   public ModTenantAPI() { //NOSONAR

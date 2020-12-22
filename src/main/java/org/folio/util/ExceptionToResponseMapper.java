@@ -5,8 +5,8 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
@@ -18,7 +18,7 @@ import org.folio.rest.tools.utils.ValidationHelper;
 
 public final class ExceptionToResponseMapper {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionToResponseMapper.class);
+  private static final Logger LOGGER = LogManager.getLogger(ExceptionToResponseMapper.class);
 
   private ExceptionToResponseMapper() {
   }

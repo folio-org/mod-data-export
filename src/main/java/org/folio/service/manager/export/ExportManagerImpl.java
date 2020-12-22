@@ -7,8 +7,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.file.storage.FileStorage;
@@ -32,7 +32,7 @@ import java.util.Collections;
  */
 @Service
 public class ExportManagerImpl implements ExportManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 2;
   public static final int SRS_LOAD_PARTITION_SIZE = 50;
   public static final int INVENTORY_LOAD_PARTITION_SIZE = 50;

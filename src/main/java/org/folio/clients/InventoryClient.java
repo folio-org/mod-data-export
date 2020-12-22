@@ -33,8 +33,8 @@ import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +47,7 @@ import java.util.Optional;
 
 @Component
 public class InventoryClient {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";

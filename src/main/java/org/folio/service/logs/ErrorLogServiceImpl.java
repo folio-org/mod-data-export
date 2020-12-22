@@ -3,8 +3,8 @@ package org.folio.service.logs;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.ErrorLogDao;
@@ -35,7 +35,7 @@ import static org.folio.util.HelperUtils.getErrorLogCriterionByJobExecutionIdAnd
 
 @Service
 public class ErrorLogServiceImpl implements ErrorLogService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String COMMA_SEPARATOR = ", ";
 
   @Autowired

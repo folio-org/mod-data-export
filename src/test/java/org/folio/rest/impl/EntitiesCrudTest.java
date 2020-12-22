@@ -2,8 +2,8 @@ package org.folio.rest.impl;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.TestUtil;
 import org.folio.util.TestEntities;
 import org.junit.jupiter.api.MethodOrderer;
@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EntitiesCrudTest extends RestVerticleTestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
+  private final Logger logger = LogManager.getLogger(EntitiesCrudTest.class);
   private String sample = null;
 
   static Stream<TestEntities> deleteOrder() {

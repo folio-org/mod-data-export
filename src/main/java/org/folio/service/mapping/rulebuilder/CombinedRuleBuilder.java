@@ -1,8 +1,8 @@
 package org.folio.service.mapping.rulebuilder;
 
 import com.google.common.base.Splitter;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Metadata;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CombinedRuleBuilder extends DefaultRuleBuilder {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private int transformationFieldKeyIndex;
   private String defaultFieldId;

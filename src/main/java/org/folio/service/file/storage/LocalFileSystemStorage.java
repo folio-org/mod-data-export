@@ -7,8 +7,8 @@ import io.vertx.core.WorkerExecutor;
 import io.vertx.core.file.FileSystem;
 import org.folio.clients.InventoryClient;
 import org.folio.rest.jaxrs.model.FileDefinition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ import static java.lang.String.format;
 @Component("LocalFileSystemStorage")
 public class LocalFileSystemStorage implements FileStorage {
   private static final String FILE_STORAGE_PATH = "./storage/files";
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private WorkerExecutor workerExecutor;
   private FileSystem fileSystem;

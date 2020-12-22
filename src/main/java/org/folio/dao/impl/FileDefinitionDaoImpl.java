@@ -2,8 +2,8 @@ package org.folio.dao.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.lang.invoke.MethodHandles;
@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Repository
 public class FileDefinitionDaoImpl implements FileDefinitionDao {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String SOURCE_PATH_FIELD = "'sourcePath'";
   private static final String NOT_EQUAL_OPERATION = "<>";

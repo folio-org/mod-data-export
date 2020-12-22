@@ -9,8 +9,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -32,7 +32,7 @@ import static org.folio.util.ExternalPathResolver.*;
 import static org.junit.Assert.fail;
 
 public class MockServer {
-  private static final Logger logger = LoggerFactory.getLogger(MockServer.class);
+  private static final Logger logger = LogManager.getLogger(MockServer.class);
 
   // Mock data paths
   public static final String BASE_MOCK_DATA_PATH = "mockData/";

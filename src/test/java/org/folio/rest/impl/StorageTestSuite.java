@@ -4,8 +4,8 @@ import io.restassured.http.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -32,7 +32,7 @@ import static org.folio.rest.tools.client.Response.isSuccess;
 
 @RunWith(JUnitPlatform.class)
 public class StorageTestSuite {
-  private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
+  private static final Logger logger = LogManager.getLogger(StorageTestSuite.class);
 
   private static Vertx vertx;
   private static MockServer mockServer;

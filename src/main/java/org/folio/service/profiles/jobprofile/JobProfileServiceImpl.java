@@ -2,8 +2,8 @@ package org.folio.service.profiles.jobprofile;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.HttpStatus;
 import org.folio.clients.UsersClient;
 import org.folio.dao.JobProfileDao;
@@ -25,7 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Service
 public class JobProfileServiceImpl implements JobProfileService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
 
   @Autowired

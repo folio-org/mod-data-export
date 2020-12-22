@@ -5,8 +5,8 @@ import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASO
 import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.RuleProcessor;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MappingServiceImpl implements MappingService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int MAPPING_POOL_SIZE = 4;
 
   private ExecutorService mappingThreadPool;

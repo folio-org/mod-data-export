@@ -13,8 +13,8 @@ import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")

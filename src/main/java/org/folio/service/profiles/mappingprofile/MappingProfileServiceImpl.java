@@ -2,8 +2,8 @@ package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
@@ -33,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  */
 @Service
 public class MappingProfileServiceImpl implements MappingProfileService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   @Autowired

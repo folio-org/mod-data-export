@@ -3,8 +3,8 @@ package org.folio.service.mapping.converter;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.invoke.MethodHandles;
@@ -33,7 +33,7 @@ public class SrsRecordConverterService extends RecordConverter {
   private MappingService mappingService;
 
   private SortedMarcFactoryImpl sortedMarcFactory = new SortedMarcFactoryImpl();
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup()
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup()
     .lookupClass());
 
   public List<String> transformSrsRecords(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,

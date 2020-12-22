@@ -7,8 +7,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.core.shareddata.LocalMap;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.clients.UsersClient;
@@ -47,7 +47,7 @@ import static org.folio.util.ErrorCode.errorCodesAccordingToExport;
  */
 @Service
 class InputDataManagerImpl implements InputDataManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 2;
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";

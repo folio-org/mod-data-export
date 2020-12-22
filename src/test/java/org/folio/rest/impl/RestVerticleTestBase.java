@@ -16,7 +16,7 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +45,8 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public abstract class RestVerticleTestBase {
   static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
+    //TODO
+    System.setProperty(LogManager.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
   }
 
   private static final String HOST = "http://localhost:";

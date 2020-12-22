@@ -3,8 +3,8 @@ package org.folio.service.file.cleanup;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.file.storage.FileStorage;
@@ -16,14 +16,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
-
 @Service
 public class StorageCleanupServiceImpl implements StorageCleanupService {
 
   private static final long FILE_DEFINITION_EXPIRATION_TIME_IN_MILLS = 3600_000;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(StorageCleanupServiceImpl.class);
+  private static final Logger LOGGER = LogManager.getLogger(StorageCleanupServiceImpl.class);
 
   @Autowired
   private FileDefinitionDao fileDefinitionDao;

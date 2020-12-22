@@ -35,15 +35,15 @@ import org.springframework.stereotype.Service;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Implementation of the JobExecutionService, calls JobExecutionDao to access JobExecution metadata.
  */
 @Service
 public class JobExecutionServiceImpl implements JobExecutionService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
   private JobExecutionDao jobExecutionDao;

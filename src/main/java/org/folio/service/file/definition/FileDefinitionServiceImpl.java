@@ -2,8 +2,8 @@ package org.folio.service.file.definition;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -24,7 +24,7 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 @Service
 public class FileDefinitionServiceImpl implements FileDefinitionService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String CSV_FILE_FORMAT = ".csv";
   private static final String QUICK_EXPORT = "quick-export";
 

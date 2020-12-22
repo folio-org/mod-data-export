@@ -4,8 +4,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,7 +19,7 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class RecordConverter {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup()
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup()
       .lookupClass());
 
   @Autowired
