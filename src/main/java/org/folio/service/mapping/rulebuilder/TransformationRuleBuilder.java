@@ -7,6 +7,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.Translation;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.mapping.translationbuilder.DefaultTranslationBuilder;
 import org.folio.service.mapping.translationbuilder.LocationTranslationBuilder;
@@ -93,12 +94,12 @@ public class TransformationRuleBuilder implements RuleBuilder {
     //If there is already an existing rule, then just append the subfield, without indicators
     if (existingRule.isPresent()) {
       rule = existingRule.get();
-      rule.setHasSameTagInItems(mappingTransformation.getHasSameTagInItems());
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
     } else {
       rule = new Rule();
       rule.setField(field);
       setDataSources(rule, mappingTransformation);
+      rule.setItemTypeRule(RecordType.ITEM.equals(mappingTransformation.getRecordType()));
     }
     if (MapUtils.isNotEmpty(mappingTransformation.getMetadataParameters())) {
       Map<String, String> metadata = new HashMap<>();

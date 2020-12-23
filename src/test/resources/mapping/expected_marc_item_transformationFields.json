@@ -1,11 +1,14 @@
 {
-  "leader": "02852nam a2201009 a 4500",
+  "leader": "05163nam a2201225 a 4500",
   "fields": [
     {
       "925": {
         "subfields": [
           {
             "a": "101010"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -17,6 +20,9 @@
         "subfields": [
           {
             "a": "202020"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -28,6 +34,9 @@
         "subfields": [
           {
             "a": "303030"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -39,6 +48,9 @@
         "subfields": [
           {
             "a": "6066.I0119 C760 "
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -50,6 +62,9 @@
         "subfields": [
           {
             "a": "6076.I4588 B749 "
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -61,6 +76,9 @@
         "subfields": [
           {
             "a": "9901.I4981"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -72,6 +90,9 @@
         "subfields": [
           {
             "a": "testPrefix1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -83,6 +104,9 @@
         "subfields": [
           {
             "a": "testPrefix2"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -94,6 +118,9 @@
         "subfields": [
           {
             "a": "testSuffix1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -105,6 +132,20 @@
         "subfields": [
           {
             "a": "testSuffix2"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "929": {
+        "subfields": [
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -116,6 +157,9 @@
         "subfields": [
           {
             "a": "MOYS"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -127,6 +171,9 @@
         "subfields": [
           {
             "a": "1979:Jan.-June"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -138,6 +185,9 @@
         "subfields": [
           {
             "a": "1987:Jan.-June"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -149,6 +199,9 @@
         "subfields": [
           {
             "a": "Copy 1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -160,6 +213,9 @@
         "subfields": [
           {
             "a": "Copy 2"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -171,6 +227,9 @@
         "subfields": [
           {
             "a": "test description of pieces 1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -182,6 +241,9 @@
         "subfields": [
           {
             "a": "test description of pieces 2"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -193,6 +255,23 @@
         "subfields": [
           {
             "a": "OSC"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "933": {
+        "subfields": [
+          {
+            "a": "RS"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -204,6 +283,37 @@
         "subfields": [
           {
             "a": "Other Side Campus"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "934": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "935": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -215,6 +325,9 @@
         "subfields": [
           {
             "a": "Special Reading Room Code"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -226,6 +339,23 @@
         "subfields": [
           {
             "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "936": {
+        "subfields": [
+          {
+            "a": "ML"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -237,6 +367,23 @@
         "subfields": [
           {
             "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "937": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -248,6 +395,23 @@
         "subfields": [
           {
             "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "938": {
+        "subfields": [
+          {
+            "a": "ML"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -259,6 +423,37 @@
         "subfields": [
           {
             "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "939": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "940": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -270,6 +465,9 @@
         "subfields": [
           {
             "a": "Special Reading Room"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -281,6 +479,9 @@
         "subfields": [
           {
             "a": "Electronic resource (FCF)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -292,6 +493,9 @@
         "subfields": [
           {
             "a": "Electronic resource (OTT)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -303,6 +507,9 @@
         "subfields": [
           {
             "a": "Electronic resource (XML)"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -314,6 +521,9 @@
         "subfields": [
           {
             "a": "Electronic resource (audio streaming)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -325,6 +535,9 @@
         "subfields": [
           {
             "a": "Electronic resource (RTF)"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -336,6 +549,9 @@
         "subfields": [
           {
             "a": "Novel"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -347,6 +563,9 @@
         "subfields": [
           {
             "a": "Table of contents"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -358,6 +577,9 @@
         "subfields": [
           {
             "a": "Access to audio file"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -369,6 +591,9 @@
         "subfields": [
           {
             "a": "Table of contents only"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -380,6 +605,9 @@
         "subfields": [
           {
             "a": "test public note 3"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -391,6 +619,9 @@
         "subfields": [
           {
             "a": "test public note 4"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -402,6 +633,9 @@
         "subfields": [
           {
             "a": "Table of contents only"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -413,6 +647,9 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/01"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -424,6 +661,9 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150175923/04"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -435,6 +675,9 @@
         "subfields": [
           {
             "a": "http://www.folio.org/"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -446,6 +689,9 @@
         "subfields": [
           {
             "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -457,6 +703,9 @@
         "subfields": [
           {
             "a": "http://d-nb.info/1150176652/04"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -468,6 +717,9 @@
         "subfields": [
           {
             "a": "v.73:no.1-6"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -479,6 +731,9 @@
         "subfields": [
           {
             "a": "v.81:no.1-6"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -490,6 +745,9 @@
         "subfields": [
           {
             "a": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -501,6 +759,9 @@
         "subfields": [
           {
             "a": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -512,6 +773,9 @@
         "subfields": [
           {
             "a": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -523,6 +787,9 @@
         "subfields": [
           {
             "a": "itemHrid000000000001"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -534,6 +801,9 @@
         "subfields": [
           {
             "a": "itemHrid000000000003"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -545,6 +815,9 @@
         "subfields": [
           {
             "a": "0b96a642-5e7f-452d-9cae-9cee66c9a892"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -556,6 +829,9 @@
         "subfields": [
           {
             "a": "23992e08-b55a-4ed8-a570-0172c5bcdd76"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -567,6 +843,9 @@
         "subfields": [
           {
             "a": "5b31ec8c-95a7-4b91-95cc-b551a74b91ca"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -578,6 +857,9 @@
         "subfields": [
           {
             "a": "Signed by the author"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -589,6 +871,23 @@
         "subfields": [
           {
             "a": "book"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "973": {
+        "subfields": [
+          {
+            "a": "book"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -600,6 +899,9 @@
         "subfields": [
           {
             "a": "dvd"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -611,6 +913,9 @@
         "subfields": [
           {
             "a": "e85d73af-ea83-5cc6-946a-4d14a790f087"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -622,6 +927,9 @@
         "subfields": [
           {
             "a": "f72758e1-659c-4c31-94d0-5c700e53cf4c"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -633,6 +941,9 @@
         "subfields": [
           {
             "a": "2020-08-02:11-03-04"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -644,6 +955,9 @@
         "subfields": [
           {
             "a": "2020-09-03:10-53-54"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -655,6 +969,9 @@
         "subfields": [
           {
             "a": "e85d73af-ea83-5cc6-946a-4d14a790f087"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -666,6 +983,9 @@
         "subfields": [
           {
             "a": "f72758e1-659c-4c31-94d0-5c700e53cf4c"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -677,6 +997,9 @@
         "subfields": [
           {
             "a": "2019-08-04:01-03-15"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -688,6 +1011,9 @@
         "subfields": [
           {
             "a": "2020-09-03:12-43-25"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -699,6 +1025,9 @@
         "subfields": [
           {
             "a": "1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -710,6 +1039,9 @@
         "subfields": [
           {
             "a": "2"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -721,6 +1053,9 @@
         "subfields": [
           {
             "a": "Reading room"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -732,6 +1067,23 @@
         "subfields": [
           {
             "a": "Reading room"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "980": {
+        "subfields": [
+          {
+            "a": "OSC"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -743,6 +1095,23 @@
         "subfields": [
           {
             "a": "RS"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "981": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -754,6 +1123,9 @@
         "subfields": [
           {
             "a": "Riverside Campus"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -765,6 +1137,37 @@
         "subfields": [
           {
             "a": "Miller Code"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "982": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "983": {
+        "subfields": [
+          {
+            "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -776,6 +1179,23 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "984": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -787,6 +1207,23 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "985": {
+        "subfields": [
+          {
+            "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -798,6 +1235,23 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "986": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -809,6 +1263,9 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -820,6 +1277,23 @@
         "subfields": [
           {
             "a": "Miller General Stacks"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": "f",
+        "ind2": "f"
+      }
+    },
+    {
+      "987": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -831,6 +1305,9 @@
         "subfields": [
           {
             "a": "Available"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -842,6 +1319,9 @@
         "subfields": [
           {
             "a": "Available"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -853,6 +1333,9 @@
         "subfields": [
           {
             "a": "test volume 1"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -864,6 +1347,9 @@
         "subfields": [
           {
             "a": "test volume 2"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",
@@ -875,6 +1361,9 @@
         "subfields": [
           {
             "a": "test volume 3"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -886,6 +1375,9 @@
         "subfields": [
           {
             "a": "1940"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": "f",
@@ -897,6 +1389,9 @@
         "subfields": [
           {
             "a": "1944"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": "f",

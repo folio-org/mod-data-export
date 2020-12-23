@@ -1,5 +1,5 @@
 {
-  "leader": "01988nam a2200625 a 4500",
+  "leader": "03636nam a2201021 a 4500",
   "fields": [
     {
       "900": {
@@ -182,6 +182,23 @@
         "subfields": [
           {
             "a": "book"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "907": {
+        "subfields": [
+          {
+            "a": "book"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -193,6 +210,9 @@
         "subfields": [
           {
             "a": "dvd"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -211,10 +231,43 @@
       }
     },
     {
+      "908": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "909": {
         "subfields": [
           {
             "a": "Miller Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "909": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "910": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
           }
         ],
         "ind1": " ",
@@ -236,7 +289,29 @@
       "911": {
         "subfields": [
           {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "911": {
+        "subfields": [
+          {
             "a": "ML"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "912": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
           }
         ],
         "ind1": " ",
@@ -258,6 +333,17 @@
       "913": {
         "subfields": [
           {
+            "a": "OSC"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "913": {
+        "subfields": [
+          {
             "a": "RS"
           }
         ],
@@ -269,7 +355,29 @@
       "914": {
         "subfields": [
           {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "914": {
+        "subfields": [
+          {
             "a": "Main Library"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "915": {
+        "subfields": [
+          {
+            "a": "ALR"
           }
         ],
         "ind1": " ",
@@ -299,10 +407,43 @@
       }
     },
     {
+      "916": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "917": {
         "subfields": [
           {
             "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "917": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "918": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
           }
         ],
         "ind1": " ",
@@ -332,10 +473,43 @@
       }
     },
     {
+      "919": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "920": {
         "subfields": [
           {
             "a": "Other Side Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "920": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "921": {
+        "subfields": [
+          {
+            "a": "OSC"
           }
         ],
         "ind1": " ",
@@ -365,6 +539,28 @@
       }
     },
     {
+      "922": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "923": {
+        "subfields": [
+          {
+            "a": "ALR"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
       "923": {
         "subfields": [
           {
@@ -380,6 +576,23 @@
         "subfields": [
           {
             "a": "Miller General Stacks"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "924": {
+        "subfields": [
+          {
+            "a": "Special Reading Room"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -391,6 +604,37 @@
         "subfields": [
           {
             "a": "Miller Code"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "925": {
+        "subfields": [
+          {
+            "a": "Special Reading Room Code"
+          },
+          {
+            "3": "holdingHrid00002"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "926": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -402,6 +646,23 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "927": {
+        "subfields": [
+          {
+            "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -413,6 +674,23 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "928": {
+        "subfields": [
+          {
+            "a": "Other Side Campus"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -424,6 +702,23 @@
         "subfields": [
           {
             "a": "Riverside Campus"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "929": {
+        "subfields": [
+          {
+            "a": "OSC"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -435,6 +730,23 @@
         "subfields": [
           {
             "a": "RS"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "930": {
+        "subfields": [
+          {
+            "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -446,6 +758,23 @@
         "subfields": [
           {
             "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "931": {
+        "subfields": [
+          {
+            "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -457,6 +786,23 @@
         "subfields": [
           {
             "a": "ML"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "932": {
+        "subfields": [
+          {
+            "a": "Miller General Stacks"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -468,6 +814,23 @@
         "subfields": [
           {
             "a": "Special Reading Room"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "933": {
+        "subfields": [
+          {
+            "a": "Miller Code"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -479,6 +842,9 @@
         "subfields": [
           {
             "a": "Special Reading Room Code"
+          },
+          {
+            "3": "holdingHrid00001"
           }
         ],
         "ind1": " ",
@@ -490,6 +856,23 @@
         "subfields": [
           {
             "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "934": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -501,6 +884,23 @@
         "subfields": [
           {
             "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "935": {
+        "subfields": [
+          {
+            "a": "ML"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -512,6 +912,23 @@
         "subfields": [
           {
             "a": "Other Side Campus"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "936": {
+        "subfields": [
+          {
+            "a": "Riverside Campus"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -523,6 +940,23 @@
         "subfields": [
           {
             "a": "OSC"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "937": {
+        "subfields": [
+          {
+            "a": "RS"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -534,6 +968,23 @@
         "subfields": [
           {
             "a": "Agriculture Library Reserve"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "938": {
+        "subfields": [
+          {
+            "a": "Main Library"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",
@@ -545,6 +996,23 @@
         "subfields": [
           {
             "a": "ALR"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "939": {
+        "subfields": [
+          {
+            "a": "ML"
+          },
+          {
+            "3": "holdingHrid00002"
           }
         ],
         "ind1": " ",

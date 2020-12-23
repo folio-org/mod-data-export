@@ -16,6 +16,7 @@ import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.handler.RuleHandler;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
@@ -35,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -126,11 +129,14 @@ public class MappingServiceImpl implements MappingService {
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {
+    if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
+      return ruleFactory.create(mappingProfile);
+    }
     List<Rule> rulesFromConfig = configurationsClient.getRulesFromConfiguration(jobExecutionId, params);
-    if (mappingProfile != null && CollectionUtils.isNotEmpty(rulesFromConfig)) {
+    if (mappingProfile != null && isNotEmpty(rulesFromConfig)) {
       LOGGER.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
     }
-    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : ruleFactory.create(mappingProfile, rulesFromConfig);
+    return CollectionUtils.isEmpty(rulesFromConfig) ? ruleFactory.create(mappingProfile) : ruleFactory.create(mappingProfile, rulesFromConfig, true);
   }
 
 }

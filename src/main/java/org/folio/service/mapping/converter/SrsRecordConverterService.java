@@ -63,9 +63,10 @@ public class SrsRecordConverterService extends RecordConverter {
     JsonObject externalIdsHolder = srsRecord.getJsonObject("externalIdsHolder");
     if (externalIdsHolder != null) {
       String instanceId = externalIdsHolder.getString("instanceId");
+      String instanceHrId = externalIdsHolder.getString("instanceHrid");
       if (isNotBlank(instanceId)) {
         JsonObject holdingsAndItems = new JsonObject();
-        fetchHoldingsAndItems(mappingProfile, connectionParams, instanceId, holdingsAndItems, jobExecutionId);
+        fetchHoldingsAndItems(mappingProfile, connectionParams, instanceId, instanceHrId, holdingsAndItems, jobExecutionId);
         LOGGER.debug("Processing mapping for appending to SRS records for instanceID: {}", instanceId);
         mappedFields = mappingService.mapFields(holdingsAndItems, mappingProfile, jobExecutionId, connectionParams);
       }

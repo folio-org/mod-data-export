@@ -64,7 +64,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
         exportService.exportSrsRecord(marcToExport, fileExportDefinition);
         LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
         if(isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
-          mappingProfileService.getDefault(params.getTenantId())
+          mappingProfileService.getDefault(params)
             .onSuccess(defaultMappingProfile -> {
               defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
               generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);

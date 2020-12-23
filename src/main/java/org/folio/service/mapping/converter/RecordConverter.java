@@ -26,9 +26,8 @@ public class RecordConverter {
   private RecordLoaderService recordLoaderService;
 
    protected boolean isTransformationRequired(MappingProfile mappingProfile) {
-     List<Transformations> transformations = mappingProfile.getTransformations();
      List<RecordType> recordTypes = mappingProfile.getRecordTypes();
-     return isNotEmpty(transformations) && (recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM));
+     return recordTypes.contains(RecordType.HOLDINGS) || recordTypes.contains(RecordType.ITEM);
    }
 
   /**
@@ -41,7 +40,7 @@ public class RecordConverter {
    * @param appendHoldingsItems
    */
    protected void fetchHoldingsAndItems(MappingProfile mappingProfile, OkapiConnectionParams params, String instanceUUID,
-       JsonObject appendHoldingsItems, String jobExecutionId) {
+       String instanceHrId, JsonObject appendHoldingsItems, String jobExecutionId) {
      if (isTransformationRequired(mappingProfile)) {
        LOGGER.debug("Fetching holdings/items for instance");
        List<JsonObject> holdings = recordLoaderService.getHoldingsForInstance(instanceUUID, jobExecutionId, params);
@@ -56,6 +55,7 @@ public class RecordConverter {
            holding.put("items", currentItems);
          }
        }
+       holdings.forEach(holding -> holding.put("instanceHrId", instanceHrId));
        appendHoldingsItems.put("holdings", new JsonArray(holdings));
      }
    }

@@ -28,11 +28,6 @@
       "type": "string",
       "$ref": "recordTypes.json"
     },
-    "hasSameTagInItems": {
-      "description": "The sign that means the current transformation has same marc tag in other item transformations",
-      "type": "boolean",
-      "default": false
-    },
     "metadataParameters": {
       "description": "Additional parameters used for mapping",
       "type": "object",

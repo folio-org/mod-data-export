@@ -17,6 +17,7 @@ public class InventoryRecordConverterService extends RecordConverter {
   @Autowired
   private MappingService mappingService;
   private static final String ID_FIELD = "id";
+  private static final String HR_ID_FIELD = "hrid";
 
   public List<String> transformInventoryRecords(List<JsonObject> instances, String jobExecutionId, MappingProfile mappingProfile,
       OkapiConnectionParams params) {
@@ -38,7 +39,7 @@ public class InventoryRecordConverterService extends RecordConverter {
     for (JsonObject instance : instances) {
       JsonObject instanceWithHoldingsAndItems = new JsonObject();
       instanceWithHoldingsAndItems.put(INSTANCE, instance);
-      fetchHoldingsAndItems(mappingProfile, params, instance.getString(ID_FIELD), instanceWithHoldingsAndItems, jobExecutionId);
+      fetchHoldingsAndItems(mappingProfile, params, instance.getString(ID_FIELD), instance.getString(HR_ID_FIELD), instanceWithHoldingsAndItems, jobExecutionId);
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     return instancesWithHoldingsAndItems;

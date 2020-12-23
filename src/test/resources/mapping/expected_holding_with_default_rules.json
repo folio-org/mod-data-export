@@ -1,0 +1,151 @@
+{
+  "leader":"00520nam a2200193 a 4500",
+  "fields":[
+    {
+      "001":"ho00000000002"
+    },
+    {
+      "866":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 1b"
+          }
+        ]
+      }
+    },
+    {
+      "866":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 2b"
+          }
+        ]
+      }
+    },
+    {
+      "866":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement public note"
+          }
+        ]
+      }
+    },
+    {
+      "866":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement public note2"
+          }
+        ]
+      }
+    },
+    {
+      "867":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 1a"
+          }
+        ]
+      }
+    },
+    {
+      "867":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 2a"
+          }
+        ]
+      }
+    },
+    {
+      "867":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement supplements public note"
+          }
+        ]
+      }
+    },
+    {
+      "867":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement supplements public note2"
+          }
+        ]
+      }
+    },
+    {
+      "868":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 1c"
+          }
+        ]
+      }
+    },
+    {
+      "868":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "a":"Line 2c"
+          }
+        ]
+      }
+    },
+    {
+      "868":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement indexes public note"
+          }
+        ]
+      }
+    },
+    {
+      "868":{
+        "ind1":" ",
+        "ind2":"0",
+        "subfields":[
+          {
+            "z":"Statement indexes public note2"
+          }
+        ]
+      }
+    },
+    {
+      "999":{
+        "ind1":"f",
+        "ind2":"f",
+        "subfields":[
+          {
+            "i":"34d282fe-2844-48fb-9945-2f44ac6d04ae"
+          }
+        ]
+      }
+    }
+  ]
+}
