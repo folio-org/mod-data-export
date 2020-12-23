@@ -100,10 +100,10 @@ public class StorageTestSuite {
         tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
         try {
           tenantClient.postTenant(tenantAttributes, res2 -> {
-            if (isSuccess(res2.statusCode())){
+            if (isSuccess(res2.result().statusCode())){
               deploymentComplete.complete(res.result());
             } else {
-              deploymentComplete.completeExceptionally(new Exception(res2.statusMessage()));
+              deploymentComplete.completeExceptionally(new Exception(res2.result().statusMessage()));
             }
           });
         } catch (Exception e) {

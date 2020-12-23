@@ -17,6 +17,7 @@ import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,10 +45,6 @@ import org.junit.jupiter.api.BeforeEach;
  * Class for tests that base on testing code using Vertx REST verticle
  */
 public abstract class RestVerticleTestBase {
-  static {
-    //TODO
-    System.setProperty(LogManager.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
-  }
 
   private static final String HOST = "http://localhost:";
   protected static final String OKAPI_HEADER_URL = "x-okapi-url";
