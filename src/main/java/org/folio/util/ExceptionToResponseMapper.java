@@ -54,7 +54,7 @@ public final class ExceptionToResponseMapper {
 
 
     Promise<Response> validationFuture = Promise.promise();
-    ValidationHelper.handleError(throwable, validationFuture.future());
+    ValidationHelper.handleError(throwable, validationFuture);
     if (validationFuture.future().isComplete()) {
       Response response = validationFuture.future().result();
       if (response.getStatus() == INTERNAL_SERVER_ERROR.getStatusCode()) {
