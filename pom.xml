@@ -14,7 +14,7 @@
   </licenses>
 
   <properties>
-    <raml-module-builder.version>32.0.0</raml-module-builder.version>
+    <raml-module-builder.version>32.0.1</raml-module-builder.version>
     <vertx.version>4.0.0</vertx.version>
     <junit.version>5.4.2</junit.version>
     <rest-assured.version>3.3.0</rest-assured.version>
