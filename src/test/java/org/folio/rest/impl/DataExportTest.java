@@ -50,6 +50,7 @@ import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.HelperUtils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,7 @@ import org.springframework.context.annotation.Primary;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,6 +115,13 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
+
+  @BeforeAll
+  public static void setup() throws MalformedURLException {
+    // the tenant API is now async, so creating the custom tenant prior to running
+    postToTenant(CUSTOM_TENANT_HEADER).statusCode(201);
+  }
+
 
   @Test
   @Order(1)
@@ -292,7 +301,6 @@ class DataExportTest extends RestVerticleTestBase {
   @Test
   @Order(7)
   void testExportByCSV_UnderlyingSrsWithProfileTransformationsNoCallToSRS(VertxTestContext context) throws IOException {
-    postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
     FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
@@ -319,7 +327,6 @@ class DataExportTest extends RestVerticleTestBase {
   @Test
   @Order(8)
   void shouldNotExportFile_whenInventoryReturnServerError(VertxTestContext context) throws IOException, InterruptedException {
-    postToTenant(CUSTOM_TENANT_HEADER);
     // given
     String tenantId = CUSTOM_TEST_TENANT;
     //given
