@@ -11,8 +11,8 @@ import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ import static org.folio.util.ExternalPathResolver.SRS;
 
 @Component
 public class SourceRecordStorageClient {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String GET_RECORDS_QUERY = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=INSTANCE";
   @Autowired
   private ErrorLogService errorLogService;

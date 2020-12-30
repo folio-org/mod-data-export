@@ -14,11 +14,11 @@ import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.input.InputDataManager;
 import org.folio.spring.SpringContextUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class InitAPIImpl implements InitAPI {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
 
   @Override

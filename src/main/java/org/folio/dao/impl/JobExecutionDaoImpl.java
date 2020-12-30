@@ -2,8 +2,8 @@ package org.folio.dao.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.cql2pgjson.exception.FieldException;
@@ -29,7 +29,7 @@ import static org.folio.util.HelperUtils.constructCriteria;
 
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "job_executions";
   private static final String ID_FIELD = "'id'";

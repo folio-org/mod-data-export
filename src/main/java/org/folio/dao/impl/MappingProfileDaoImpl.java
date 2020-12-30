@@ -5,8 +5,8 @@ import static org.folio.util.HelperUtils.getCQLWrapper;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.lang.invoke.MethodHandles;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class MappingProfileDaoImpl implements MappingProfileDao {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "mapping_profiles";
   private static final String ID_FIELD = "'id'";

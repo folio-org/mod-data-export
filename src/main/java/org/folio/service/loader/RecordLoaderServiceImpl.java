@@ -2,8 +2,8 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.util.OkapiConnectionParams;
@@ -23,7 +23,7 @@ import java.util.Set;
  */
 @Service
 public class RecordLoaderServiceImpl implements RecordLoaderService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private SourceRecordStorageClient srsClient;
   private InventoryClient inventoryClient;
 

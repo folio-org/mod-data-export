@@ -4,8 +4,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -32,7 +32,7 @@ import java.util.List;
 
 @Service
 public class InstanceExportStrategyImpl implements ExportStrategy {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
   private SrsRecordConverterService srsRecordService;

@@ -386,25 +386,6 @@
       ]
     },
     {
-      "id": "_tenant",
-      "version": "1.2",
-      "interfaceType": "system",
-      "handlers": [
-        {
-          "methods": [
-            "POST"
-          ],
-          "pathPattern": "/_/tenant"
-        },
-        {
-          "methods": [
-            "DELETE"
-          ],
-          "pathPattern": "/_/tenant"
-        }
-      ]
-    },
-    {
       "id": "_timer",
       "version": "1.0",
       "interfaceType": "system",

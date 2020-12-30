@@ -11,10 +11,10 @@ import static org.folio.rest.jaxrs.model.RecordType.ITEM;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import io.vertx.core.json.Json;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
@@ -38,7 +38,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public class RuleFactory {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String DEFAULT_RULES_PATH = "rules/rulesDefault.json";
   private static final String DEFAULT_HOLDINGS_RULES_PATH = "rules/holdingsRulesDefault.json";
