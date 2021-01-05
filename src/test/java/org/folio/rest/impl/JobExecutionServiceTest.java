@@ -48,7 +48,7 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
 
   public JobExecutionServiceTest() {
     Context vertxContext = vertx.getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, JobExecutionServiceTest.TestMock.class);
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
@@ -166,18 +166,6 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
           context.completeNow();
         }));
     });
-
-  }
-
-  @Configuration
-  @Import(ApplicationConfig.class)
-  public static class TestMock {
-
-    @Bean
-    @Primary
-    public ExportStorageService getMockExportStorageService() {
-      return mockExportStorageService;
-    }
 
   }
 

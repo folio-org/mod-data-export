@@ -38,7 +38,7 @@ class ErrorLogsTest extends RestVerticleTestBase {
 
   public ErrorLogsTest() {
     Context vertxContext = vertx.getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
