@@ -1,14 +1,27 @@
 package org.folio.service.job;
 
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.HttpStatus;
+import org.folio.dao.JobExecutionDao;
+import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.ExportedFile;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobExecutionCollection;
+import org.folio.rest.jaxrs.model.Progress;
+import org.folio.rest.jaxrs.model.RunBy;
+import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import static io.vertx.core.Future.failedFuture;
-import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
-import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
-
+import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
 import java.util.Date;
 import java.util.List;
@@ -17,26 +30,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.NotFoundException;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.folio.dao.JobExecutionDao;
-import org.folio.rest.jaxrs.model.ExportedFile;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.JobExecutionCollection;
-import org.folio.rest.jaxrs.model.Progress;
-import org.folio.rest.jaxrs.model.RunBy;
-import org.folio.service.profiles.jobprofile.JobProfileService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import static io.vertx.core.Future.failedFuture;
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 
 /**
  * Implementation of the JobExecutionService, calls JobExecutionDao to access JobExecution metadata.
@@ -49,6 +49,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   private JobExecutionDao jobExecutionDao;
   @Autowired
   private JobProfileService jobProfileService;
+  @Autowired
+  private ExportStorageService exportStorageService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
@@ -230,8 +232,23 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
-    return jobExecutionDao.deleteById(id, tenantId);
-
+    Promise<Boolean> promise = Promise.promise();
+    jobExecutionDao.getById(id, tenantId)
+      .onSuccess(jobExecution -> {
+        if (jobExecution.isPresent() && !IN_PROGRESS.equals(jobExecution.get().getStatus())) {
+          jobExecutionDao.deleteById(id, tenantId)
+            .onSuccess(result -> {
+              exportStorageService.removeFilesRelatedToJobExecution(jobExecution.get(), tenantId);
+              promise.complete(result);
+            })
+            .onFailure(ar -> promise.fail(ar.getCause()));
+        } else {
+          jobExecution.ifPresentOrElse(
+            job -> promise.fail(new ServiceException(HttpStatus.HTTP_FORBIDDEN, String.format("Fail to delete jobExecution with id %s, status is IN_PROGRESS", job.getId()))),
+            () -> promise.complete(false));
+        }
+      }).onFailure(ar -> promise.fail(ar.getCause()));
+    return promise.future();
   }
 
 }

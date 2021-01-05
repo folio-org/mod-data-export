@@ -1,17 +1,11 @@
 package org.folio.service.export.storage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import io.vertx.core.Future;
@@ -21,7 +15,9 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ErrorLog;
+import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.logs.ErrorLogService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -41,17 +37,20 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
@@ -176,7 +175,7 @@ class ExportStorageServiceUnitTest {
   }
 
   @Test
-  void testbucketNameNotFoundInS3(VertxTestContext testContext) {
+  void testBucketNameNotFoundInS3(VertxTestContext testContext) {
     // given
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
@@ -201,7 +200,7 @@ class ExportStorageServiceUnitTest {
   }
 
   @Test
-  void testbucketNameNotProvidedInSystemProperty() {
+  void testBucketNameNotProvidedInSystemProperty() {
     System.clearProperty("bucket.name");
 
     AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);
@@ -210,6 +209,46 @@ class ExportStorageServiceUnitTest {
     Assertions.assertThrows(ServiceException.class, () -> {
       exportStorageService.getFileDownloadLink(null, null, null);
     });
-
   }
+
+  @Test
+  void testSuccessfullyRemoveFilesFromS3() {
+    // given
+    ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID().toString()).withFileName("testFile-timestemp.mrc");
+    JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile))
+      .withId(UUID.randomUUID().toString());
+    AmazonS3 s3ClientMock = Mockito.mock(AmazonS3.class);
+    when(amazonFactory.getS3Client()).thenReturn(s3ClientMock);
+    ObjectListing objectListing = Mockito.mock(ObjectListing.class);
+    S3ObjectSummary s3ObjectSummary = new S3ObjectSummary();
+    s3ObjectSummary.setKey(jobExecution.getId() + "/" + exportedFile.getFileName());
+    when(objectListing.getObjectSummaries()).thenReturn(List.of(s3ObjectSummary));
+    when(s3ClientMock.listObjects(anyString(), eq(TENANT_ID + "/" + jobExecution.getId()))).thenReturn(objectListing);
+    // when
+    exportStorageService.removeFilesRelatedToJobExecution(jobExecution, TENANT_ID);
+
+    // then
+    Mockito.verify(s3ClientMock).deleteObjects(any(DeleteObjectsRequest.class));
+    Mockito.verify(s3ClientMock).shutdown();
+  }
+
+
+  @Test
+  void testBucketNameNotProvidedInSystemPropertyWhileRemovingFilesFromS3() {
+    System.clearProperty("bucket.name");
+
+    Assertions.assertThrows(ServiceException.class, () -> {
+      exportStorageService.removeFilesRelatedToJobExecution(null, null);
+    });
+  }
+
+  @Test
+  void testRemovingFilesFromS3ExportedFilesIsEmpty() {
+    // when
+    exportStorageService.removeFilesRelatedToJobExecution(new JobExecution(), TENANT_ID);
+
+    // then
+    Mockito.verify(amazonFactory, never()).getTransferManager();
+  }
+
 }

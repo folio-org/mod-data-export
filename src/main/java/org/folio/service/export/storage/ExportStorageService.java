@@ -3,6 +3,8 @@ package org.folio.service.export.storage;
 
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
+
 /**
  * File retrieval service. Provides methods for retrieving the exported files.
  */
@@ -24,4 +26,13 @@ public interface ExportStorageService {
    * @param tenantId       tenant id
    */
   void storeFile(FileDefinition fileDefinition, String tenantId);
+
+  /**
+   * Remove exported files related to JobExecution from S3
+   *
+   * @param jobExecution {@link JobExecution}
+   * @param tenantId     tenant id
+   */
+  void removeFilesRelatedToJobExecution(JobExecution jobExecution, String tenantId);
+
 }

@@ -2,20 +2,25 @@ package org.folio.service.export.storage;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.util.StringUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +28,9 @@ import java.lang.invoke.MethodHandles;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.System.getProperty;
 
@@ -118,6 +126,32 @@ public class AWSStorageServiceImpl implements ExportStorageService {
         Thread.currentThread().interrupt();
       } finally {
         transferManager.shutdownNow();
+      }
+    }
+  }
+
+  @Override
+  public void removeFilesRelatedToJobExecution(JobExecution jobExecution, String tenantId) {
+    String bucketName = getProperty(BUCKET_PROP_KEY);
+    if (StringUtils.isNullOrEmpty(bucketName)) {
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
+    } else {
+      if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
+        AmazonS3 s3Client = amazonFactory.getS3Client();
+        ObjectListing objectList = s3Client.listObjects(bucketName, tenantId + "/" + jobExecution.getId());
+        List<KeyVersion> keys = objectList.getObjectSummaries().stream()
+          .flatMap(object -> Stream.of(new KeyVersion(object.getKey())))
+          .collect(Collectors.toList());
+        DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
+          .withKeys(keys)
+          .withQuiet(false);
+        try {
+          s3Client.deleteObjects(multiObjectDeleteRequest);
+        } finally {
+          s3Client.shutdown();
+        }
+      } else {
+        LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
       }
     }
   }
