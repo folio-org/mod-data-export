@@ -135,24 +135,23 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
-    } else {
-      if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
-        AmazonS3 s3Client = amazonFactory.getS3Client();
-        ObjectListing objectList = s3Client.listObjects(bucketName, tenantId + "/" + jobExecution.getId());
-        List<KeyVersion> keys = objectList.getObjectSummaries().stream()
-          .flatMap(object -> Stream.of(new KeyVersion(object.getKey())))
-          .collect(Collectors.toList());
-        DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
-          .withKeys(keys)
-          .withQuiet(false);
-        try {
-          s3Client.deleteObjects(multiObjectDeleteRequest);
-        } finally {
-          s3Client.shutdown();
-        }
-      } else {
-        LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
+    }
+    if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
+      AmazonS3 s3Client = amazonFactory.getS3Client();
+      ObjectListing objectList = s3Client.listObjects(bucketName, tenantId + "/" + jobExecution.getId());
+      List<KeyVersion> keys = objectList.getObjectSummaries().stream()
+        .flatMap(object -> Stream.of(new KeyVersion(object.getKey())))
+        .collect(Collectors.toList());
+      DeleteObjectsRequest multiObjectDeleteRequest = new DeleteObjectsRequest(bucketName)
+        .withKeys(keys)
+        .withQuiet(false);
+      try {
+        s3Client.deleteObjects(multiObjectDeleteRequest);
+      } finally {
+        s3Client.shutdown();
       }
+    } else {
+      LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
     }
   }
 
