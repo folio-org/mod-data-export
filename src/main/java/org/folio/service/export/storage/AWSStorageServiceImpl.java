@@ -134,7 +134,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
   public void removeFilesRelatedToJobExecution(JobExecution jobExecution, String tenantId) {
     String bucketName = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucketName)) {
-      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
+      throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
     } else {
       if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
         AmazonS3 s3Client = amazonFactory.getS3Client();
