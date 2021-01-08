@@ -12,6 +12,7 @@ import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
+import org.folio.service.ApplicationTestConfig;
 import org.folio.spring.SpringContextUtil;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;

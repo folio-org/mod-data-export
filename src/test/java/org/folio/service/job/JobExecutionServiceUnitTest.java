@@ -8,7 +8,9 @@ import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Sets;
+import org.folio.HttpStatus;
 import org.folio.dao.impl.JobExecutionDaoImpl;
+import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
@@ -16,6 +18,7 @@ import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Progress;
+import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +38,7 @@ import static java.util.Collections.singletonList;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -71,6 +75,8 @@ class JobExecutionServiceUnitTest {
   private JobExecutionDaoImpl jobExecutionDao;
   @Mock
   private JobProfileService jobProfileService;
+  @Mock
+  private ExportStorageService exportStorageService;
 
 
   @Test
@@ -392,6 +398,39 @@ class JobExecutionServiceUnitTest {
         context.completeNow();
       })
     );
+  }
+
+  @Test
+  void deleteById_shouldReturnFailFuture_whenStatusIsInProgress(VertxTestContext context) {
+    //given
+    JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
+      .withStatus(IN_PROGRESS);
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
+    //when
+    Future<Boolean> future = jobExecutionService.deleteById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.failed());
+      assertEquals(String.format("Fail to delete jobExecution with id %s, status is IN_PROGRESS", JOB_EXECUTION_ID), ar.cause().getMessage());
+      ServiceException serviceException = (ServiceException) ar.cause();
+      assertEquals(HttpStatus.HTTP_FORBIDDEN.toInt(), serviceException.getCode());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void deleteById_shouldReturnFalseFuture_whenJobExecutionNotFound(VertxTestContext context) {
+    //given
+    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
+    //when
+    Future<Boolean> future = jobExecutionService.deleteById(JOB_EXECUTION_ID, TENANT_ID);
+    //then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      assertFalse(ar.result());
+      context.completeNow();
+    }));
   }
 
   private ExportedFile getFirstExportedFile(JobExecution updatedJobExecution) {

@@ -1,7 +1,29 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import io.restassured.RestAssured;
+import io.vertx.core.Context;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
+import org.apache.http.HttpStatus;
+import org.folio.config.ApplicationConfig;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.JobExecution.Status;
+import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.job.JobExecutionService;
+import org.folio.spring.SpringContextUtil;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -9,36 +31,30 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.http.HttpStatus;
-import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.rest.jaxrs.model.JobExecution.Status;
-import org.folio.service.job.JobExecutionService;
-import org.folio.spring.SpringContextUtil;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import io.restassured.RestAssured;
-import io.vertx.core.Context;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 class JobExecutionServiceTest extends RestVerticleTestBase {
 
+  private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
+
   @Autowired
-  JobExecutionService jobExecutionService;
+  private JobExecutionService jobExecutionService;
 
   public JobExecutionServiceTest() {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  @BeforeAll
+  static void beforeAll() {
+    Mockito.doNothing().when(mockExportStorageService).removeFilesRelatedToJobExecution(any(JobExecution.class), anyString());
   }
 
   @Test
@@ -107,7 +123,7 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
   @Test
   void deleteJobExecutions_return200_IfJobExecutionWithGivenIdPresent(VertxTestContext context) {
     //create a Job Execution
-    JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString()).withStatus(Status.IN_PROGRESS);
+    JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString()).withStatus(Status.COMPLETED);
 
     jobExecutionService.save(jobExecution, TENANT_ID);
 
@@ -118,10 +134,35 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
         .delete(JOB_EXECUTIONS_URL + "/" + jobExecution.getId()).then()
         .statusCode(HttpStatus.SC_NO_CONTENT);
 
-      //verify the jobexecution is not present
+      //verify the jobExecution is not present
       jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
         .onComplete(jobExec -> context.verify(() -> {
-          Assertions.assertEquals(true, jobExec.failed());
+          Assertions.assertTrue(jobExec.failed());
+          context.completeNow();
+        }));
+    });
+
+  }
+
+  @Test
+  void deleteJobExecutions_return403_IfJobExecutionStatusIsInProgress(VertxTestContext context) {
+    //create a Job Execution
+    JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString()).withStatus(Status.IN_PROGRESS);
+
+    jobExecutionService.save(jobExecution, TENANT_ID);
+
+    vertx.setTimer(3000L, handler -> {
+
+      //delete of the above job execution is a success
+      RestAssured.given().spec(jsonRequestSpecification).when()
+        .delete(JOB_EXECUTIONS_URL + "/" + jobExecution.getId()).then()
+        .statusCode(HttpStatus.SC_FORBIDDEN);
+
+      //verify the jobExecution is present
+      jobExecutionService.getById(jobExecution.getId(), TENANT_ID)
+        .onComplete(jobExec -> context.verify(() -> {
+          Assertions.assertTrue(jobExec.succeeded());
+          Assertions.assertNotNull(jobExec.result());
           context.completeNow();
         }));
     });
