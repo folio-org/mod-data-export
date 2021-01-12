@@ -91,7 +91,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -129,7 +129,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -178,7 +178,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -238,7 +238,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -276,7 +276,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -314,7 +314,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -352,7 +352,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -390,7 +390,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -439,7 +439,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
