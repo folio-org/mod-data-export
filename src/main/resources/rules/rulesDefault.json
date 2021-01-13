@@ -202,7 +202,7 @@
         "translation": {
           "function": "set_related_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISSN,Invalid ISSN",
+            "relatedIdentifierTypes": "ISSN",
             "type": "Linking ISSN"
           }
         }
