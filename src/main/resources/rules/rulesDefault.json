@@ -91,45 +91,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
-    }
-  },
-  {
-    "id": "instance.identifiers.isbn",
-    "field": "020",
-    "description": "Identifier ISBN",
-    "dataSources": [
-      {
-        "from": "$.instance.identifiers[*].value",
-        "subfield": "a",
-        "translation": {
-          "function": "set_identifier",
-          "parameters": {
-            "type": "ISBN"
-          }
-        }
-      },
-      {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      }
-    ],
-    "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -167,13 +129,13 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
-    "id": "instance.identifiers.issn",
-    "field": "022",
-    "description": "Identifier ISSN",
+    "id": "instance.identifiers.isbn",
+    "field": "020",
+    "description": "Identifier ISBN",
     "dataSources": [
       {
         "from": "$.instance.identifiers[*].value",
@@ -181,7 +143,18 @@
         "translation": {
           "function": "set_identifier",
           "parameters": {
-            "type": "ISSN"
+            "type": "ISBN"
+          }
+        }
+      },
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "z",
+        "translation": {
+          "function": "set_related_identifier",
+          "parameters": {
+            "relatedIdentifierTypes": "ISBN",
+            "type": "Invalid ISBN"
           }
         }
       },
@@ -205,7 +178,67 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
+    }
+  },
+  {
+    "id": "instance.identifiers.issn",
+    "field": "022",
+    "description": "Identifier ISSN",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISSN"
+          }
+        }
+      },
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "i",
+        "translation": {
+          "function": "set_related_identifier",
+          "parameters": {
+            "relatedIdentifierTypes": "ISSN",
+            "type": "Linking ISSN"
+          }
+        }
+      },
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "z",
+        "translation": {
+          "function": "set_related_identifier",
+          "parameters": {
+            "relatedIdentifierTypes": "ISSN",
+            "type": "Invalid ISSN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -243,7 +276,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -281,7 +314,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -319,7 +352,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -357,7 +390,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
@@ -372,6 +405,17 @@
           "function": "set_identifier",
           "parameters": {
             "type": "GPO item number"
+          }
+        }
+      },
+      {
+        "from": "$.instance.identifiers[*].value",
+        "subfield": "z",
+        "translation": {
+          "function": "set_related_identifier",
+          "parameters": {
+            "relatedIdentifierTypes": "GPO item number",
+            "type": "Cancelled GPO item number"
           }
         }
       },
@@ -395,7 +439,7 @@
       }
     ],
     "metadata": {
-      "identifierTypeId": "$.instance.identifiers[*].identifierTypeId"
+      "identifierType": "$.instance.identifiers[*]"
     }
   },
   {
