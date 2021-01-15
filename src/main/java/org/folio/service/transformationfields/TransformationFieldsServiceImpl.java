@@ -6,12 +6,12 @@ import io.vertx.core.json.JsonObject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.processor.referencedata.ReferenceData;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.transformationfields.builder.DisplayNameKeyBuilder;
 import org.folio.service.transformationfields.builder.FieldIdBuilder;
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.lang.String.format;
 import static org.folio.HttpStatus.HTTP_UNPROCESSABLE_ENTITY;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.HOLDINGS;
 import static org.folio.rest.jaxrs.model.TransformationField.RecordType.INSTANCE;
