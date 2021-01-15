@@ -1,7 +1,6 @@
 package org.folio.service.mapping.referencedata;
 
 import io.vertx.core.json.JsonObject;
-import org.folio.processor.referencedata.ReferenceData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,4 +19,8 @@ public class ReferenceDataImpl implements ReferenceData {
     referenceDataMap.put(key, value);
   }
 
+  @Override
+  public Map<String, Map<String, JsonObject>> getReferenceData() {
+    return referenceDataMap;
+  }
 }

@@ -1,16 +1,30 @@
 package org.folio.service.mapping;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY;
 import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON;
 import static org.folio.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.RuleProcessor;
-import org.folio.processor.referencedata.ReferenceData;
+import org.folio.processor.referencedata.JsonObjectWrapper;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.referencedata.ReferenceDataWrapperImpl;
 import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.folio.reader.EntityReader;
@@ -19,6 +33,7 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.service.mapping.handler.RuleHandler;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.writer.RecordWriter;
@@ -26,18 +41,6 @@ import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.marc.VariableField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -102,9 +105,10 @@ public class MappingServiceImpl implements MappingService {
   }
 
   protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, String jobExecutionId,  List<Rule> rules, OkapiConnectionParams connectionParams) {
-    EntityReader entityReader = new JPathSyntaxEntityReader(instance);
+    EntityReader entityReader = new JPathSyntaxEntityReader(instance.encode());
     RecordWriter recordWriter = new MarcRecordWriter();
-    String record = ruleProcessor.process(entityReader, recordWriter, referenceData, rules, (translationException -> {
+    ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
+    String record = ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
       List<String> errorMessageValues = Arrays.asList(translationException.getErrorCode().getDescription(), translationException.getMessage());
       errorLogService.saveWithAffectedRecord(instance, ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode(), errorMessageValues, jobExecutionId, translationException, connectionParams);
@@ -120,12 +124,23 @@ public class MappingServiceImpl implements MappingService {
   public List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
-    EntityReader entityReader = new JPathSyntaxEntityReader(record);
+    EntityReader entityReader = new JPathSyntaxEntityReader(record.encode());
     RecordWriter recordWriter = new MarcRecordWriter();
-    return ruleProcessor.processFields(entityReader, recordWriter, referenceData, rules, (translationException -> {
+    ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
+    return ruleProcessor.processFields(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       List<String> errorMessageValues = Arrays.asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(), translationException.getMessage());
       errorLogService.saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), errorMessageValues, jobExecutionId, connectionParams.getTenantId());
     }));
+  }
+
+  private ReferenceDataWrapper getReferenceDataWrapper(ReferenceData referenceData) {
+    if (referenceData == null) {
+      return null;
+    }
+    Map<String, Map<String, JsonObjectWrapper>> referenceDataWrapper = referenceData.getReferenceData().entrySet().stream()
+      .collect(Collectors.toMap(Entry::getKey, entry -> entry.getValue().entrySet().stream()
+          .collect(Collectors.toMap(Entry::getKey, value -> new JsonObjectWrapper(value.getValue().getMap())))));
+    return new ReferenceDataWrapperImpl(referenceDataWrapper);
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams params) {

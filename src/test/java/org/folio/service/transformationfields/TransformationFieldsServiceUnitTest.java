@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.processor.referencedata.ReferenceData;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.TransformationField.RecordType;
 import org.folio.rest.jaxrs.model.TransformationFieldCollection;
 import org.folio.rest.jaxrs.model.Transformations;
+import org.folio.service.mapping.referencedata.ReferenceData;
 import org.folio.service.mapping.referencedata.ReferenceDataImpl;
 import org.folio.service.mapping.referencedata.ReferenceDataProvider;
 import org.folio.service.transformationfields.builder.DisplayNameKeyBuilderImpl;
