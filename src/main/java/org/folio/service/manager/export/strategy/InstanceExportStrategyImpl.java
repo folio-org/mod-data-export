@@ -57,7 +57,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
 
     if (mappingProfile.getRecordTypes().contains(RecordType.SRS) || MappingProfileServiceImpl.isDefault(mappingProfile.getId())) {
       //TODO Move validation of combination SRS and INSTANCE type to MappingProfileService before saving profile to database
-      if (!mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
+
         SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
         LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
         List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
@@ -84,10 +84,10 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
           }
           blockingPromise.complete();
         }
-      } else {
-        errorLogService.saveGeneralError(ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
-        throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE);
-      }
+//       else {
+//        errorLogService.saveGeneralError(ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE.getCode(), exportPayload.getJobExecutionId(), params.getTenantId());
+//        throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE);
+//      }
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
