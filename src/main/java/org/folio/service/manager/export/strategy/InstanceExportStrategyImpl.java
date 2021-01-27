@@ -21,6 +21,7 @@ import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
 import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     MappingProfile mappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
 
-    if (mappingProfile.getRecordTypes().contains(RecordType.SRS)) {
+    if (mappingProfile.getRecordTypes().contains(RecordType.SRS) || MappingProfileServiceImpl.isDefault(mappingProfile.getId())) {
       //TODO Move validation of combination SRS and INSTANCE type to MappingProfileService before saving profile to database
       if (!mappingProfile.getRecordTypes().contains(RecordType.INSTANCE)) {
         SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
