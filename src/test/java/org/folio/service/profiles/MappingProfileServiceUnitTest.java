@@ -4,6 +4,11 @@ import io.vertx.core.Future;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import javax.ws.rs.NotFoundException;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
@@ -32,11 +37,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.ws.rs.NotFoundException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -46,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -310,4 +309,23 @@ class MappingProfileServiceUnitTest {
       context.completeNow();
     });
   }
+
+  @Test
+  void saveMappingProfile_shouldThrowExceptionWhenTypesAreInstanceAndSRS() {
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(Arrays.asList(RecordType.INSTANCE, RecordType.SRS));
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.save(mappingProfile, okapiConnectionParams);
+    });
+  }
+
+  @Test
+  void updateMappingProfile_shouldThrowExceptionWhenTypesAreInstanceAndSRS() {
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(Arrays.asList(RecordType.INSTANCE, RecordType.SRS));
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.update(mappingProfile, okapiConnectionParams);
+    });
+  }
+
 }

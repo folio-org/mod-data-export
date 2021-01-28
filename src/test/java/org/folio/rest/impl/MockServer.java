@@ -9,13 +9,9 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +22,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.*;
@@ -64,6 +63,7 @@ public class MockServer {
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
+  private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -481,6 +481,10 @@ public class MockServer {
       JsonObject bulkIds;
       if (ctx.request().getParam("query").contains("(languages=\"eng\")")) {
         bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH));
+        addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
+        serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+      } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
+        bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_WITH_RANDOM));
         addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
         serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
       } else {

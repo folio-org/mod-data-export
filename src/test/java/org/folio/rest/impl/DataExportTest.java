@@ -101,7 +101,9 @@ class DataExportTest extends RestVerticleTestBase {
 
   private static ExportStorageService mockExportStorageService = Mockito.mock(ExportStorageService.class);
   private static String srsJobProfileId;
+  private static String customJobProfileId;
   private static String srsMappingProfileId;
+  private static String customMappingProfileId;
 
   @Autowired
   private JobExecutionDao jobExecutionDao;
@@ -306,8 +308,8 @@ class DataExportTest extends RestVerticleTestBase {
     FileDefinition uploadedFileDefinition = uploadFile("uuids_forTransformation.csv", CSV, tenantId, buildRequestSpecification(tenantId));
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    String jobProfileId = buildCustomJobProfile(CUSTOM_TEST_TENANT);
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, jobProfileId);
+    buildCustomJobProfile(CUSTOM_TEST_TENANT);
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, customJobProfileId);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
@@ -331,8 +333,9 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = CUSTOM_TEST_TENANT;
     //given
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    buildCustomJobProfile(CUSTOM_TEST_TENANT);
     FileDefinition uploadedFileDefinition = uploadFile(FILE_WHEN_INVENTORY_RETURNS_500, CSV, CUSTOM_TEST_TENANT, buildRequestSpecification(tenantId));
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a");
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, customJobProfileId);
 
     //when
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL, tenantId);
@@ -359,7 +362,7 @@ class DataExportTest extends RestVerticleTestBase {
     String tenantId = okapiConnectionParams.getTenantId();
     ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    QuickExportRequest exportRequest = buildQuickCqlExportRequest("test");
+    QuickExportRequest exportRequest = buildQuickCqlExportRequest("(languages=\"uk\")");
     JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
       .body().prettyPrint());
     // then
@@ -475,18 +478,23 @@ class DataExportTest extends RestVerticleTestBase {
       }));
   }
 
-
-  private String buildCustomJobProfile(String tenantID) {
-    String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
-    JsonObject mappingProfilejs = new JsonObject(mappingProfile);
-    postRequest(mappingProfilejs, DATA_EXPORT_MAPPING_PROFILES_ENDPOINT, tenantID);
-
-    String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
-    JsonObject jobProfilejs = new JsonObject(jobProfile);
-    Response response = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID);
-    return response.then()
-      .extract()
-      .path("id");
+  private void buildCustomJobProfile(String tenantID) {
+    if (customMappingProfileId == null) {
+      String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
+      JsonObject mappingProfilejs = new JsonObject(mappingProfile);
+      customMappingProfileId = postRequest(mappingProfilejs, DATA_EXPORT_MAPPING_PROFILES_ENDPOINT, tenantID)
+        .then()
+        .extract()
+        .path("id");
+    }
+    if (customJobProfileId == null) {
+      String jobProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "jobProfile.json");
+      JsonObject jobProfilejs = new JsonObject(jobProfile);
+      customJobProfileId = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID)
+        .then()
+        .extract()
+        .path("id");;
+    }
   }
 
   private void buildSrsJobProfile(String tenantID) {

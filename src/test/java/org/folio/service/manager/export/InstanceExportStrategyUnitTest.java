@@ -206,28 +206,4 @@ class InstanceExportStrategyUnitTest {
     assertThat(actualMappingProfile.getTransformations(), hasItems(holdingsTransformations, itemTransformations));
   }
 
-  @Test
-  @Order(5)
-  void exportBlocking_shouldThrowServerErrorException_whenMappingProfileContainsSrsAndInstanceRecordType() {
-    // given
-    List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
-    boolean isLast = true;
-    FileDefinition fileExportDefinition = new FileDefinition()
-      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
-    Map<String, String> params = new HashMap<>();
-    OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
-    MappingProfile mappingProfile =
-      new MappingProfile().withRecordTypes(Arrays.asList(RecordType.INSTANCE, RecordType.SRS));
-    ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
-
-    Assertions.assertThrows(ServiceException.class, () -> {
-      // when
-      instanceExportManager.export(exportPayload, Promise.promise());
-    });
-
-    // then
-    Mockito.verify(errorLogService).saveGeneralError(eq(ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE.getCode()), anyString(), anyString());
-  }
-
-
 }
