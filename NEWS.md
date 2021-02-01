@@ -1,3 +1,12 @@
+## 01/02/2021 v3.0.5 Released
+This release contains updating of generate-marc-utils library version up to 1.0.2.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.4...v3.0.5)
+
+### Bug Fixes
+* [MDEXP-369](https://issues.folio.org/browse/MDEXP-369) - Inconsistent results when exporting the same dataset with default mapping profile
+
+
 ## 11/13/2020 v3.0.4 Released
 This is a bugfix release for fixing the wrong job execution state if upload an empty file, that breaks UI
 
