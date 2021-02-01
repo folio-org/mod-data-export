@@ -159,7 +159,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>generate-marc-utils</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <version>1.0.2</version>
       <type>jar</type>
     </dependency>
   </dependencies>
