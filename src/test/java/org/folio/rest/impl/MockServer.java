@@ -7,15 +7,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +21,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.folio.util.ExternalPathResolver.*;
@@ -64,6 +62,7 @@ public class MockServer {
   private static final String ITEM_NOTE_TYPES_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_item_note_types_response.json";
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
+  private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -149,16 +148,12 @@ public class MockServer {
       if (ctx.request()
         .getParam("query")
         .contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
-        item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_IN00041_MOCK_DATA_PATH));
+        getMockResponseFromPathWith200Status(ITEM_RECORDS_IN00041_MOCK_DATA_PATH, ITEM, ctx);
       } else {
-        item = new JsonObject(RestVerticleTestBase.getMockData(ITEM_RECORDS_MOCK_DATA_PATH));
+        getMockResponseFromPathWith200Status(ITEM_RECORDS_MOCK_DATA_PATH, ITEM, ctx);
       }
-      addServerRqRsData(HttpMethod.GET, ITEM, item);
-      serverResponse(ctx, 200, APPLICATION_JSON, item.encodePrettily());
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -170,35 +165,27 @@ public class MockServer {
       if (ctx.request()
         .getParam("query")
         .contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
-        holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_IN00041_MOCK_DATA_PATH));
+        getMockResponseFromPathWith200Status(HOLDING_RECORDS_IN00041_MOCK_DATA_PATH, HOLDING, ctx);
       } else {
-        holding = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_RECORDS_MOCK_DATA_PATH));
+        getMockResponseFromPathWith200Status(HOLDING_RECORDS_MOCK_DATA_PATH, HOLDING, ctx);
       }
-      addServerRqRsData(HttpMethod.GET, HOLDING, holding);
-      serverResponse(ctx, 200, APPLICATION_JSON, holding.encodePrettily());
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
   private void handleGetInstanceRecord(RoutingContext ctx) {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
+    String query = ctx.request().getParam("query");
+    if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+      serverResponse(ctx, 500, APPLICATION_JSON, null);
+    }
     JsonObject instance = null;
     try {
-      instance = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE, instance);
-      String query = ctx.request().getParam("query");
-      if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
-        serverResponse(ctx, 500, APPLICATION_JSON, null);
-      }
-      serverResponse(ctx, 200, APPLICATION_JSON, instance.encodePrettily());
+      getMockResponseFromPathWith200Status(INSTANCE_RECORDS_MOCK_DATA_PATH, INSTANCE, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -223,9 +210,7 @@ public class MockServer {
       addServerRqRsData(HttpMethod.POST, SRS, srsRecords);
       serverResponse(ctx, 200, APPLICATION_JSON, srsRecords.encodePrettily());
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -233,13 +218,9 @@ public class MockServer {
     logger.info("handleGet Nature of content terms Record got: " + ctx.request()
       .path());
     try {
-      JsonObject contentTerms = new JsonObject(RestVerticleTestBase.getMockData(CONTENT_TERMS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CONTENT_TERMS, contentTerms);
-      serverResponse(ctx, 200, APPLICATION_JSON, contentTerms.encodePrettily());
+      getMockResponseFromPathWith200Status(CONTENT_TERMS_RECORDS_MOCK_DATA_PATH, CONTENT_TERMS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -247,13 +228,9 @@ public class MockServer {
     logger.info("handleGet Identifier types Record got: " + ctx.request()
       .path());
     try {
-      JsonObject identifierTypes = new JsonObject(RestVerticleTestBase.getMockData(IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, IDENTIFIER_TYPES, identifierTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, identifierTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH, IDENTIFIER_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -261,13 +238,9 @@ public class MockServer {
     logger.info("handleGet Libraries Record: " + ctx.request()
       .path());
     try {
-      JsonObject libraries = new JsonObject(RestVerticleTestBase.getMockData(LIBRARIES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, LIBRARIES, libraries);
-      serverResponse(ctx, 200, APPLICATION_JSON, libraries.encodePrettily());
+      getMockResponseFromPathWith200Status(LIBRARIES_RECORDS_MOCK_DATA_PATH, LIBRARIES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -275,13 +248,9 @@ public class MockServer {
     logger.info("handleGet Campuses Record: " + ctx.request()
       .path());
     try {
-      JsonObject campuses = new JsonObject(RestVerticleTestBase.getMockData(CAMPUSES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CAMPUSES, campuses);
-      serverResponse(ctx, 200, APPLICATION_JSON, campuses.encodePrettily());
+      getMockResponseFromPathWith200Status(CAMPUSES_RECORDS_MOCK_DATA_PATH, CAMPUSES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -289,13 +258,9 @@ public class MockServer {
     logger.info("handleGet Institutions Record: " + ctx.request()
       .path());
     try {
-      JsonObject institutions = new JsonObject(RestVerticleTestBase.getMockData(INSTITUTIONS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTITUTIONS, institutions);
-      serverResponse(ctx, 200, APPLICATION_JSON, institutions.encodePrettily());
+      getMockResponseFromPathWith200Status(INSTITUTIONS_RECORDS_MOCK_DATA_PATH, INSTITUTIONS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -303,13 +268,9 @@ public class MockServer {
     logger.info("handleGet Locations Record: " + ctx.request()
       .path());
     try {
-      JsonObject locations = new JsonObject(RestVerticleTestBase.getMockData(LOCATIONS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, LOCATIONS, locations);
-      serverResponse(ctx, 200, APPLICATION_JSON, locations.encodePrettily());
+      getMockResponseFromPathWith200Status(LOCATIONS_RECORDS_MOCK_DATA_PATH, LOCATIONS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -317,13 +278,9 @@ public class MockServer {
     logger.info("handleGet Material types Record: " + ctx.request()
       .path());
     try {
-      JsonObject materialTypes = new JsonObject(RestVerticleTestBase.getMockData(MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, MATERIAL_TYPES, materialTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, materialTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(MATERIAL_TYPES_RECORDS_MOCK_DATA_PATH, MATERIAL_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -331,13 +288,9 @@ public class MockServer {
     logger.info("handleGet Instance types Record: " + ctx.request()
       .path());
     try {
-      JsonObject instanceTypes = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE_TYPES, instanceTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, instanceTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(INSTANCE_TYPES_MOCK_DATA_PATH, INSTANCE_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -345,13 +298,9 @@ public class MockServer {
     logger.info("handleGet Instance formats Record: " + ctx.request()
       .path());
     try {
-      JsonObject instanceFormats = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_FORMATS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, INSTANCE_FORMATS, instanceFormats);
-      serverResponse(ctx, 200, APPLICATION_JSON, instanceFormats.encodePrettily());
+      getMockResponseFromPathWith200Status(INSTANCE_FORMATS_MOCK_DATA_PATH, INSTANCE_FORMATS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -359,13 +308,9 @@ public class MockServer {
     logger.info("handleGet ContributorName types Record got: " + ctx.request()
       .path());
     try {
-      JsonObject contributorTypes = new JsonObject(RestVerticleTestBase.getMockData(CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CONTRIBUTOR_NAME_TYPES, contributorTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, contributorTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(CONTRIBUTOR_NAME_TYPES_RECORDS_MOCK_DATA_PATH, CONTRIBUTOR_NAME_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -373,13 +318,9 @@ public class MockServer {
     logger.info("handleGet Electronic access relationship types Record: " + ctx.request()
       .path());
     try {
-      JsonObject electronicAccessRelationship = new JsonObject(RestVerticleTestBase.getMockData(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ELECTRONIC_ACCESS_RELATIONSHIPS, electronicAccessRelationship);
-      serverResponse(ctx, 200, APPLICATION_JSON, electronicAccessRelationship.encodePrettily());
+      getMockResponseFromPathWith200Status(ELECTRONIC_ACCESS_RELATIONSHIPS_MOCK_DATA_PATH, ELECTRONIC_ACCESS_RELATIONSHIPS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -387,13 +328,9 @@ public class MockServer {
     logger.info("handleGet Alternative types: " + ctx.request()
       .path());
     try {
-      JsonObject alternativeTypes = new JsonObject(RestVerticleTestBase.getMockData(ALTERNATIVE_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ALTERNATIVE_TITLE_TYPES, alternativeTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, alternativeTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(ALTERNATIVE_TYPES_MOCK_DATA_PATH, ALTERNATIVE_TITLE_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -401,13 +338,9 @@ public class MockServer {
     logger.info("handleGet Loan types: " + ctx.request()
       .path());
     try {
-      JsonObject loanTypes = new JsonObject(RestVerticleTestBase.getMockData(LOAN_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, LOAN_TYPES, loanTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, loanTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(LOAN_TYPES_MOCK_DATA_PATH, LOAN_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -415,13 +348,9 @@ public class MockServer {
     logger.info("handleGet issuance modes: " + ctx.request()
       .path());
     try {
-      JsonObject issuanceModes = new JsonObject(RestVerticleTestBase.getMockData(ISSUANCE_MODES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ISSUANCE_MODES, issuanceModes);
-      serverResponse(ctx, 200, APPLICATION_JSON, issuanceModes.encodePrettily());
+      getMockResponseFromPathWith200Status(ISSUANCE_MODES_MOCK_DATA_PATH, ISSUANCE_MODES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -429,22 +358,16 @@ public class MockServer {
     logger.info("handleGet call number types: " + ctx.request()
       .path());
     try {
-      JsonObject callNumberTypes = new JsonObject(RestVerticleTestBase.getMockData(CALL_NUMBER_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, CALL_NUMBER_TYPES, callNumberTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, callNumberTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(CALL_NUMBER_TYPES_MOCK_DATA_PATH, CALL_NUMBER_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
   private void handleGetHoldingNoteTypes(RoutingContext ctx) {
     logger.info("handle Get holding note types: " + ctx.request().path());
     try {
-      JsonObject holdingNoteTypes = new JsonObject(RestVerticleTestBase.getMockData(HOLDING_NOTE_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, HOLDING_NOTE_TYPES, holdingNoteTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, holdingNoteTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(HOLDING_NOTE_TYPES_MOCK_DATA_PATH, HOLDING_NOTE_TYPES, ctx);
     } catch (IOException e) {
       ctx.response().setStatusCode(500).end();
     }
@@ -453,11 +376,9 @@ public class MockServer {
   private void handleGetItemNoteTypes(RoutingContext ctx) {
     logger.info("handle Get item note types: " + ctx.request().path());
     try {
-      JsonObject itemNoteTypes = new JsonObject(RestVerticleTestBase.getMockData(ITEM_NOTE_TYPES_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, ITEM_NOTE_TYPES_MOCK_DATA_PATH, itemNoteTypes);
-      serverResponse(ctx, 200, APPLICATION_JSON, itemNoteTypes.encodePrettily());
+      getMockResponseFromPathWith200Status(ITEM_NOTE_TYPES_MOCK_DATA_PATH, ITEM_NOTE_TYPES, ctx);
     } catch (IOException e) {
-      ctx.response().setStatusCode(500).end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -465,13 +386,9 @@ public class MockServer {
     logger.info("handleGetUsersRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject user = new JsonObject(RestVerticleTestBase.getMockData(USERS_RECORDS_MOCK_DATA_PATH));
-      addServerRqRsData(HttpMethod.GET, USERS, user);
-      serverResponse(ctx, 200, APPLICATION_JSON, user.encodePrettily());
+      getMockResponseFromPathWith200Status(USERS_RECORDS_MOCK_DATA_PATH, USERS, ctx);
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -480,16 +397,14 @@ public class MockServer {
     try {
       JsonObject bulkIds;
       if (ctx.request().getParam("query").contains("(languages=\"eng\")")) {
-        bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH));
-        addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
-        serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
+      } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, RECORD_BULK_IDS, ctx);
       } else {
-        bulkIds = new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_MOCK_DATA_PATH));
-        addServerRqRsData(HttpMethod.GET, RECORD_BULK_IDS, bulkIds);
-        serverResponse(ctx, 200, APPLICATION_JSON, bulkIds.encodePrettily());
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       }
     } catch (IOException e) {
-      ctx.response().setStatusCode(500).end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -498,9 +413,7 @@ public class MockServer {
       .path());
     try {
       if (ctx.request().getParam("query").contains("FOLIO_HOST")) {
-        JsonObject host = new JsonObject(RestVerticleTestBase.getMockData(CONFIGURATIONS_MOCK_DATA_PATH_FOR_HOST));
-        addServerRqRsData(HttpMethod.GET, CONFIGURATIONS, host);
-        serverResponse(ctx, 200, APPLICATION_JSON, host.encodePrettily());
+        getMockResponseFromPathWith200Status(CONFIGURATIONS_MOCK_DATA_PATH_FOR_HOST, CONFIGURATIONS, ctx);
       } else if (ctx.request().getParam("query").contains("FAIL")) {
         ctx.response()
           .setStatusCode(500)
@@ -518,9 +431,7 @@ public class MockServer {
         serverResponse(ctx, 200, APPLICATION_JSON, rulesFromConfig.encodePrettily());
       }
     } catch (IOException e) {
-      ctx.response()
-        .setStatusCode(500)
-        .end();
+      mockResponseWith500Status(ctx);
     }
   }
 
@@ -545,10 +456,15 @@ public class MockServer {
     return serverRqRs.get(objName, method);
   }
 
-  private JsonObject buildEmptyCollection(String entryType) {
-    JsonObject result = new JsonObject();
-    result.put(entryType, new JsonArray());
-    result.put("totalRecords", 0);
-    return result;
+  private JsonObject getMockResponseFromPathWith200Status(String mockDataPath, String uri, RoutingContext ctx) throws IOException {
+    JsonObject jsonObject = new JsonObject(RestVerticleTestBase.getMockData(mockDataPath));
+    addServerRqRsData(HttpMethod.GET, uri, jsonObject);
+    serverResponse(ctx, 200, APPLICATION_JSON, jsonObject.encodePrettily());
+    return jsonObject;
   }
+
+  private void mockResponseWith500Status(RoutingContext ctx) {
+    ctx.response().setStatusCode(500).end();
+  }
+
 }

@@ -2,6 +2,7 @@ package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import java.util.Arrays;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,9 +13,11 @@ import org.folio.dao.MappingProfileDao;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
+import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.TransformationField;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.transformationfields.TransformationFieldsService;
+import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,6 +56,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     if (mappingProfile.getId() == null) {
       mappingProfile.setId(UUID.randomUUID().toString());
     }
+    validateProfileRecordTypes(mappingProfile);
     Promise<MappingProfile> mappingProfilePromise = Promise.promise();
     if (mappingProfile.getMetadata() != null && mappingProfile.getMetadata().getCreatedByUserId() != null) {
       usersClient.getUserInfoAsync(mappingProfile.getMetadata().getCreatedByUserId(), params)
@@ -76,6 +80,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     if (DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfile.getId())) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
     }
+    validateProfileRecordTypes(mappingProfile);
     if (mappingProfile.getMetadata() != null && isNotEmpty(mappingProfile.getMetadata().getUpdatedByUserId())) {
       usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
         .onComplete(userInfoAr -> {
@@ -194,6 +199,13 @@ public class MappingProfileServiceImpl implements MappingProfileService {
       throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, String.format("Transformation doesn't exist for provided fieldId: %s", transformation.getFieldId()));
     }
     return transformationFieldOptional;
+  }
+
+  private void validateProfileRecordTypes(MappingProfile mappingProfile) {
+    if (mappingProfile.getRecordTypes().containsAll(Arrays.asList(RecordType.INSTANCE, RecordType.SRS))) {
+      LOGGER.error("SRS record type cannot be combined together with INSTANCE record type in mapping profile");
+      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE);
+    }
   }
 
   public static boolean isDefault(String mappingProfileId) {
