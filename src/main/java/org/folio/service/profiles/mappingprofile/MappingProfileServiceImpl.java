@@ -2,6 +2,7 @@ package org.folio.service.profiles.mappingprofile;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import java.util.Arrays;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
@@ -201,7 +202,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   private void validateProfileRecordTypes(MappingProfile mappingProfile) {
-    if (mappingProfile.getRecordTypes().contains(RecordType.INSTANCE) && mappingProfile.getRecordTypes().contains(RecordType.SRS)) {
+    if (mappingProfile.getRecordTypes().containsAll(Arrays.asList(RecordType.INSTANCE, RecordType.SRS))) {
       LOGGER.error("SRS record type cannot be combined together with INSTANCE record type in mapping profile");
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, ErrorCode.INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE);
     }
