@@ -13,7 +13,6 @@ import org.folio.dao.impl.ErrorLogDaoImpl;
 import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.RecordType;
 import org.folio.processor.error.TranslationException;
-import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -59,7 +58,6 @@ class ErrorLogServiceUnitTest {
   private static final String QUERY = "query";
   private static final String TENANT_ID = "diku";
   private static final String JOB_EXECUTION_ID = "jobExecutionId";
-  private static final String ERROR_REASON = "Error reason";
   private static final String INSTANCE_TITLE = "The Journal of ecclesiastical history";
   private static final String INSTANCE_HR_ID = "1";
   private static final String HOLDINGS_HR_ID = "2";
@@ -69,7 +67,6 @@ class ErrorLogServiceUnitTest {
   private static final String ITEM_ID = "e2ecf553-3892-4205-aaff-6761a4d6ccfc";
   private static final String ITEMS = "items";
   private static final String ERROR_MESSAGE_CODE = "error.messageCode";
-  private static final String ERROR_MESSAGE_VALUE = "errorMessageValue";
   private static ErrorLog errorLog;
   private static ErrorLogCollection errorLogCollection;
   private static OkapiConnectionParams params;
@@ -155,6 +152,8 @@ class ErrorLogServiceUnitTest {
     // given
 
     RecordInfo recordInfo = new RecordInfo(INSTANCE_ID, RecordType.INSTANCE);
+    recordInfo.setFieldName("id");
+    recordInfo.setFieldValue("1234");
     TranslationException translationException = new TranslationException(recordInfo, null);
     when(affectedRecordsBuilders.get(AffectedRecordInstanceBuilder.class.getName())).thenReturn(affectedRecordInstanceBuilder);
     JsonObject instanceRecord = new JsonObject()
@@ -166,7 +165,7 @@ class ErrorLogServiceUnitTest {
     when(errorLogDao.save(any(ErrorLog.class), anyString())).thenReturn(succeededFuture(errorLog));
 
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -174,7 +173,8 @@ class ErrorLogServiceUnitTest {
       ErrorLog errorLog = errorLogCaptor.getValue();
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_MESSAGE_CODE, errorLog.getErrorMessageCode());
-      Assert.assertEquals(ERROR_MESSAGE_VALUE, errorLog.getErrorMessageValues().get(0));
+      Assert.assertEquals("id", errorLog.getErrorMessageValues().get(0));
+      Assert.assertEquals("1234", errorLog.getErrorMessageValues().get(1));
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       verify(affectedRecordInstanceBuilder).build(eq(record), eq(JOB_EXECUTION_ID), eq(recordInfo.getId()), eq(true), eq(params));
       context.completeNow();
@@ -190,7 +190,7 @@ class ErrorLogServiceUnitTest {
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     JsonObject record = createRecord();
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(record, ERROR_MESSAGE_CODE, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
@@ -217,7 +217,7 @@ class ErrorLogServiceUnitTest {
     }
     when(errorLogDao.save(any(ErrorLog.class), eq(TENANT_ID))).thenReturn(succeededFuture(errorLog));
     // when
-    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_MESSAGE_CODE, Arrays.asList(ERROR_MESSAGE_VALUE), JOB_EXECUTION_ID, translationException, params);
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceObject, ERROR_MESSAGE_CODE, JOB_EXECUTION_ID, translationException, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
