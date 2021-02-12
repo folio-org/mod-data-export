@@ -167,9 +167,9 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
+    mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
     // then
-    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode()), eq(Arrays.asList("Undefined error during the mapping process", "java.lang.NullPointerException")), eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
+    verify(errorLogService).saveWithAffectedRecord(any(JsonObject.class), eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode()),  eq(jobExecutionId), any(TranslationException.class), any(OkapiConnectionParams.class));
 
   }
 
@@ -177,13 +177,12 @@ class MappingServiceUnitTest {
   void shouldSaveGeneralError_whenReferenceDataIsNull() {
     // given
     JsonObject srsRecord = new JsonObject(readFileContentFromResources("mapping/given_HoldingsItems.json"));
-    String expectedReason = "An error occurred during fields mapping for srs record with id: 65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61, reason: undefined, cause: java.lang.NullPointerException ";
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setTransformations(singletonList(createTransformations("holdings.permanentlocation.test", "$.holdings[*].permanentLocationId", "908  $a", HOLDINGS)));
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(null);
     // when
-    List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
+    mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_FIELDS_MAPPING_SRS.getCode()), eq(Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "Undefined error during the mapping process", "java.lang.NullPointerException")), eq(jobExecutionId), any());
   }

@@ -110,8 +110,7 @@ public class MappingServiceImpl implements MappingService {
     ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
     String record = ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
-      List<String> errorMessageValues = Arrays.asList(translationException.getErrorCode().getDescription(), translationException.getMessage());
-      errorLogService.saveWithAffectedRecord(instance, ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode(), errorMessageValues, jobExecutionId, translationException, connectionParams);
+      errorLogService.saveWithAffectedRecord(instance, ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode(), jobExecutionId, translationException, connectionParams);
     }));
     return Optional.of(record);
   }
