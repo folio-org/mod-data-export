@@ -6,8 +6,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.processor.rule.Rule;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
+import org.folio.util.HelperUtils;
 import org.folio.util.OkapiConnectionParams;
 import org.folio.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +26,9 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.folio.util.ErrorCode.ERROR_QUERY_HOST;
 import static org.folio.util.ExternalPathResolver.CONFIGURATIONS;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
@@ -57,9 +61,8 @@ public class ConfigurationsClient {
     if (jsonObject.isPresent()) {
       JsonArray configs = jsonObject.get().getJsonArray("configs");
       if (configs.size() == 0) {
-        LOGGER.error("No configuration for host in mod config. There will be no link to the failed entry");
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_CONFIGURATIONS.getCode(), Arrays.asList(query, "No configuration for host in mod config. There will be no link to the failed record"),
-          jobExecutionId, params.getTenantId());
+        LOGGER.error(ERROR_QUERY_HOST.getDescription());
+        populateHostNotFoundErrorLog(jobExecutionId, params);
         return EMPTY;
       }
       return configs.getJsonObject(0).getString("value") + query;
@@ -81,10 +84,23 @@ public class ConfigurationsClient {
     try {
       rulesFromConfig = Optional.of(ClientUtil.getRequest(params, endpoint));
     } catch (HttpClientException e) {
-      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_RULES_FROM_CONFIGURATIONS.getCode(), Arrays.asList(e.getMessage()), jobExecutionId, params.getTenantId());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_RULES_FROM_CONFIGURATIONS.getCode(), singletonList(e.getMessage()), jobExecutionId, params.getTenantId());
       rulesFromConfig = Optional.empty();
     }
     return rulesFromConfig.map(entries -> constructRulesFromJson(entries, params.getTenantId())).orElse(emptyList());
+  }
+
+  private void populateHostNotFoundErrorLog(String jobExecutionId, OkapiConnectionParams params) {
+    Criterion criterion = HelperUtils.getErrorLogCriterionByJobExecutionIdAndErrorCodes(jobExecutionId,
+      singletonList(ERROR_QUERY_HOST.getCode()));
+    errorLogService.getByQuery(criterion, params.getTenantId())
+      .onSuccess(errorLogList -> {
+        long numberOfHostErrorForJob = errorLogList.stream()
+          .filter(errorLog -> errorLog.getErrorMessageCode().contains(ERROR_QUERY_HOST.getCode())).count();
+        if (numberOfHostErrorForJob == 0) {
+          errorLogService.saveGeneralError(ERROR_QUERY_HOST.getCode(), jobExecutionId, params.getTenantId());
+        }
+      });
   }
 
   private List<Rule> constructRulesFromJson(JsonObject configRules, String tenantId) {
@@ -92,7 +108,7 @@ public class ConfigurationsClient {
     configRules
       .getJsonArray("configs")
       .stream()
-      .map(object -> (JsonObject) object)
+      .map(JsonObject.class::cast)
       .map(object -> getRules(object, tenantId))
       .forEach(rules::addAll);
 
@@ -108,7 +124,7 @@ public class ConfigurationsClient {
     try {
       new JsonArray(configEntry.getString("value"))
         .stream()
-        .map(object -> (JsonObject) object)
+        .map(JsonObject.class::cast)
         .forEach(element ->
           rulesFromConfig.add(Json.decodeValue(format(element.toString(), StandardCharsets.UTF_8), Rule.class)));
 

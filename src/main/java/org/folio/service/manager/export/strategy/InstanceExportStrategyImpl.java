@@ -4,6 +4,7 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.HttpStatus;
@@ -58,9 +59,9 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     if (mappingProfile.getRecordTypes().contains(RecordType.SRS) || MappingProfileServiceImpl.isDefault(mappingProfile.getId())) {
       SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
-      List<String> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
+      Pair<List<String>, Integer> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params);
-      exportService.exportSrsRecord(marcToExport, fileExportDefinition);
+      exportService.exportSrsRecord(marcToExport.getKey(), fileExportDefinition);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
         mappingProfileService.getDefault(params)
@@ -75,7 +76,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND);
           });
       } else {
-        exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size());
+        exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
         exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
         if (exportPayload.isLast()) {
           exportService.postExport(fileExportDefinition, params.getTenantId());
@@ -99,10 +100,12 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     if (numberOfNotFoundRecords > 0) {
       errorLogService.populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
     }
-    List<String> mappedMarcRecords = inventoryRecordService.transformInventoryRecords(instances.getInstances(),
+    Pair<List<String>, Integer> mappedPairResult = inventoryRecordService.transformInventoryRecords(instances.getInstances(),
       exportPayload.getJobExecutionId(), mappingProfile, params);
+    List<String> mappedMarcRecords = mappedPairResult.getKey();
+    int failedRecordsCount = mappedPairResult.getValue();
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size());
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size() - failedRecordsCount);
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());

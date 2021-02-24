@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -89,6 +90,10 @@ class InstanceExportStrategyUnitTest {
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
     Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(new MappingProfile()));
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
+    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -116,6 +121,8 @@ class InstanceExportStrategyUnitTest {
     Mockito.when(marcLoadResult.getInstanceIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.failedFuture(new NotFoundException()));
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -144,6 +151,8 @@ class InstanceExportStrategyUnitTest {
     InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
     Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
+    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -171,6 +180,10 @@ class InstanceExportStrategyUnitTest {
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
+    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+      Pair.of(Collections.emptyList(), 0));
     MappingProfile defaultMappingProfile = new MappingProfile()
       .withId(DEFAULT_MAPPING_PROFILE_ID)
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE));
