@@ -42,7 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class ConfigurationsClientUnitTest {
+class ConfigurationsClientUnitTests {
 
   private static OkapiConnectionParams okapiConnectionParams;
 
