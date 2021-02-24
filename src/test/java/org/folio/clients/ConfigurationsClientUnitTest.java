@@ -42,8 +42,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
-class ConfigurationClientUnitTest {
-
+class ConfigurationsClientUnitTest {
 
   private static OkapiConnectionParams okapiConnectionParams;
 
@@ -86,7 +85,7 @@ class ConfigurationClientUnitTest {
       .thenReturn(Future.succeededFuture(
         getMockErrorLogList()));
 
-    configurationsClient.getInventoryRecordLink("", "", okapiConnectionParams);
+    configurationsClient.getInventoryRecordLink(EMPTY, EMPTY, okapiConnectionParams);
 
     Mockito.verify(errorLogService, never()).saveGeneralError(anyString(), anyString(), anyString());
   }
