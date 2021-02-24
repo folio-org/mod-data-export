@@ -47,7 +47,7 @@ public class ConfigurationsClient {
     String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
     Optional<JsonObject> response;
     try {
-      response = Optional.of(ClientUtil.getRequest(params, endpoint));
+      response = getResponseFromGetRequest(endpoint, params);
     } catch (HttpClientException e) {
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_CONFIGURATIONS.getCode(), Arrays.asList(query, e.getMessage()), jobExecutionId, params.getTenantId());
       response = Optional.empty();
@@ -82,12 +82,17 @@ public class ConfigurationsClient {
     String endpoint = format(resourcesPathWithPrefix(CONFIGURATIONS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(QUERY_VALUE);
     Optional<JsonObject> rulesFromConfig ;
     try {
-      rulesFromConfig = Optional.of(ClientUtil.getRequest(params, endpoint));
+      rulesFromConfig = getResponseFromGetRequest(endpoint, params);
     } catch (HttpClientException e) {
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_QUERY_RULES_FROM_CONFIGURATIONS.getCode(), singletonList(e.getMessage()), jobExecutionId, params.getTenantId());
       rulesFromConfig = Optional.empty();
     }
     return rulesFromConfig.map(entries -> constructRulesFromJson(entries, params.getTenantId())).orElse(emptyList());
+  }
+
+  protected Optional<JsonObject> getResponseFromGetRequest(String endpoint, OkapiConnectionParams params)
+    throws HttpClientException {
+    return Optional.of(ClientUtil.getRequest(params, endpoint));
   }
 
   private void populateHostNotFoundErrorLog(String jobExecutionId, OkapiConnectionParams params) {
