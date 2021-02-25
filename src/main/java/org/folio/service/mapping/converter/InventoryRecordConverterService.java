@@ -1,6 +1,7 @@
 package org.folio.service.mapping.converter;
 
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.service.mapping.MappingService;
 import org.folio.util.OkapiConnectionParams;
@@ -19,7 +20,7 @@ public class InventoryRecordConverterService extends RecordConverter {
   private static final String ID_FIELD = "id";
   private static final String HR_ID_FIELD = "hrid";
 
-  public List<String> transformInventoryRecords(List<JsonObject> instances, String jobExecutionId, MappingProfile mappingProfile,
+  public Pair<List<String>, Integer> transformInventoryRecords(List<JsonObject> instances, String jobExecutionId, MappingProfile mappingProfile,
       OkapiConnectionParams params) {
     instances = appendHoldingsAndItems(instances, mappingProfile, jobExecutionId, params);
     return mappingService.map(instances, mappingProfile, jobExecutionId, params);

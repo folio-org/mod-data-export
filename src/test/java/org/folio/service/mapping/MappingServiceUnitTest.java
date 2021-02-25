@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtil;
 import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.error.TranslationException;
@@ -130,10 +131,11 @@ class MappingServiceUnitTest {
     // given
     List<JsonObject> givenInstances = Collections.emptyList();
     // when
-    List<String> actualRecords = mappingService.map(givenInstances, new MappingProfile(), jobExecutionId, params);
+    Pair<List<String>, Integer> actualRecords = mappingService.map (givenInstances, new MappingProfile(), jobExecutionId, params);
     // then
     Assert.assertNotNull(actualRecords);
-    Assert.assertEquals(0, actualRecords.size());
+    Assert.assertEquals(0, actualRecords.getKey().size());
+    Assert.assertEquals(0, actualRecords.getValue().intValue());
     verify(referenceDataProvider, Mockito.never()).get(any(String.class), any(OkapiConnectionParams.class));
   }
 
@@ -147,10 +149,11 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, new MappingProfile().withRecordTypes(singletonList(INSTANCE)), jobExecutionId, params);
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
@@ -199,9 +202,10 @@ class MappingServiceUnitTest {
       .thenReturn(Collections.emptyList());
     doThrow(RuntimeException.class).when(mappingService).mapInstance(any(JsonObject.class), any(ReferenceData.class), anyString(), anyList(), any(OkapiConnectionParams.class));
     // when
-    mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
+    Pair<List<String>, Integer> mappedRecord = mappingService.map(instances, new MappingProfile(), jobExecutionId, params);
     // then
     verify(errorLogService).saveGeneralError(eq(ErrorCode.ERROR_FIELDS_MAPPING_INVENTORY.getCode()), eq(jobExecutionId),  any());
+    Assert.assertEquals(0, mappedRecord.getValue().intValue());
   }
 
   @Test
@@ -217,14 +221,15 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   @Test
@@ -241,14 +246,15 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items_and_instances.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   @Test
@@ -260,11 +266,12 @@ class MappingServiceUnitTest {
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
       .thenReturn(referenceData);
     // when
-    List<VariableField> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
+    Pair<List<VariableField>, Integer> appendedMarcRecords = mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
     //all transformations provided in the mapping profile must be mapped
-    Assert.assertEquals(38, appendedMarcRecords.stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(41, appendedMarcRecords.size());
+    Assert.assertEquals(38, appendedMarcRecords.getKey().stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
+    Assert.assertEquals(41, appendedMarcRecords.getKey().size());
+    Assert.assertEquals(0, appendedMarcRecords.getValue().intValue());
   }
 
   @Test
@@ -279,14 +286,15 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(getDefaultRules());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
-
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_record_with_only_holdings_and_items.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+
   }
 
   /**
@@ -305,14 +313,15 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
 
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_instance_transformationFields.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   /**
@@ -332,15 +341,16 @@ class MappingServiceUnitTest {
       .thenReturn(Collections.emptyList());
 
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
 
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_holdings_transformationFields.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   @Test
@@ -356,15 +366,16 @@ class MappingServiceUnitTest {
       .thenReturn(Collections.emptyList());
 
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
 
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
 
     File expectedJsonRecords = getFileFromResources("mapping/expected_holding_with_default_rules.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   /**
@@ -383,13 +394,14 @@ class MappingServiceUnitTest {
     Mockito.when(configurationsClient.getRulesFromConfiguration(eq(jobExecutionId), any(OkapiConnectionParams.class)))
       .thenReturn(Collections.emptyList());
     // when
-    List<String> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
+    Pair<List<String>, Integer> actualMarcRecords = mappingService.map(instances, mappingProfile, jobExecutionId, params);
     // then
-    Assert.assertEquals(1, actualMarcRecords.size());
-    String actualMarcRecord = actualMarcRecords.get(0);
+    Assert.assertEquals(1, actualMarcRecords.getKey().size());
+    String actualMarcRecord = actualMarcRecords.getKey().get(0);
     File expectedJsonRecords = getFileFromResources("mapping/expected_marc_item_transformationFields.json");
     String expectedMarcRecord = TestUtil.getMarcFromJson(expectedJsonRecords);
     Assert.assertEquals(expectedMarcRecord, actualMarcRecord);
+    Assert.assertEquals(0, actualMarcRecords.getValue().intValue());
   }
 
   private List<Transformations> createHoldingsAndItemSimpleFieldTransformations() {

@@ -9,15 +9,18 @@ import io.vertx.core.json.JsonObject;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.clients.ConfigurationsClient;
@@ -65,54 +68,61 @@ public class MappingServiceImpl implements MappingService {
   }
 
   @Override
-  public List<String> map(List<JsonObject> instances, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
+  public Pair<List<String>, Integer> map(List<JsonObject> instances, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
     if (CollectionUtils.isEmpty(instances)) {
-      return Collections.emptyList();
+      return Pair.of(Collections.emptyList(), 0);
     }
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
     return mapInstances(instances, referenceData, rules, jobExecutionId, connectionParams);
   }
 
-  private List<String> mapInstances(List<JsonObject> instances, ReferenceData referenceData, List<Rule> rules, String jobExecutionId, OkapiConnectionParams connectionParams) {
+  private Pair<List<String>, Integer> mapInstances(List<JsonObject> instances, ReferenceData referenceData,
+    List<Rule> rules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     List<Rule> synchronizedRules = Collections.synchronizedList(rules);
     List<String> records = null;
+    int failedCount = 0;
     try {
-      records = mappingThreadPool.submit(() -> instances.parallelStream()
+      List<Pair<Optional<String>, Integer>> list = mappingThreadPool.submit(() -> instances.parallelStream()
         .map(instance -> mapInstance(instance, referenceData, synchronizedRules, jobExecutionId, connectionParams))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
         .collect(Collectors.toList()))
         .get();
+      failedCount = list.stream().mapToInt(Pair::getValue).sum();
+      records = list.stream()
+        .filter(integerPair -> integerPair.getKey().isPresent())
+        .map(result -> result.getKey().get())
+        .collect(Collectors.toList());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       LOGGER.warn("Interrupting the current thread {}", Thread.currentThread().getName());
     } catch (ExecutionException e) {
-      LOGGER.error("Exception occurred while run mapping {}", e);
+      LOGGER.error("Exception occurred while run mapping {}", e.getMessage());
     }
-    return records;
+    return Pair.of(records, failedCount);
   }
 
-  private Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules, String jobExecutionId, OkapiConnectionParams connectionParams) {
+  private Pair<Optional<String>, Integer> mapInstance(JsonObject instance, ReferenceData referenceData, List<Rule> originalRules, String jobExecutionId, OkapiConnectionParams connectionParams) {
     try {
       List<Rule> finalRules = RuleHandler.preHandle(instance, originalRules);
       return mapInstance(instance, referenceData, jobExecutionId, finalRules, connectionParams);
     } catch (Exception e) {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", e, instance);
       errorLogService.saveGeneralError(ERROR_FIELDS_MAPPING_INVENTORY.getCode(), jobExecutionId, connectionParams.getTenantId());
-      return Optional.empty();
+      return Pair.of(Optional.empty(), 0);
     }
   }
 
-  protected Optional<String> mapInstance(JsonObject instance, ReferenceData referenceData, String jobExecutionId,  List<Rule> rules, OkapiConnectionParams connectionParams) {
+  protected Pair<Optional<String>, Integer> mapInstance(JsonObject instance, ReferenceData referenceData, String jobExecutionId,  List<Rule> rules, OkapiConnectionParams connectionParams) {
     EntityReader entityReader = new JPathSyntaxEntityReader(instance.encode());
     RecordWriter recordWriter = new MarcRecordWriter();
+    Set<String> failedCount = new HashSet<>();
     ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
     String record = ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       LOGGER.debug("Exception occurred while mapping, exception: {}, inventory instance: {}", translationException.getCause(), instance);
       errorLogService.saveWithAffectedRecord(instance, ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode(), jobExecutionId, translationException, connectionParams);
+      failedCount.add(translationException.getRecordInfo().getId());
     }));
-    return Optional.of(record);
+    return Pair.of(Optional.of(record), failedCount.size());
   }
 
   /**
@@ -120,16 +130,25 @@ public class MappingServiceImpl implements MappingService {
    * later appended to SRS records.
    */
   @Override
-  public List<VariableField> mapFields(JsonObject record, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams connectionParams) {
+  public Pair<List<VariableField>, Integer> mapFields(JsonObject record, MappingProfile mappingProfile,
+    String jobExecutionId, OkapiConnectionParams connectionParams) {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
+    Set<String> failedCount = new HashSet<>();
     EntityReader entityReader = new JPathSyntaxEntityReader(record.encode());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
-    return ruleProcessor.processFields(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
-      List<String> errorMessageValues = Arrays.asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(), translationException.getMessage());
-      errorLogService.saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), errorMessageValues, jobExecutionId, connectionParams.getTenantId());
-    }));
+    List<VariableField> mappedRecord = ruleProcessor
+      .processFields(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+        List<String> errorMessageValues = Arrays
+          .asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(),
+            translationException.getMessage());
+        errorLogService
+          .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), errorMessageValues, jobExecutionId,
+            connectionParams.getTenantId());
+        failedCount.add(translationException.getRecordInfo().getId());
+      }));
+    return Pair.of(mappedRecord, failedCount.size());
   }
 
   private ReferenceDataWrapper getReferenceDataWrapper(ReferenceData referenceData) {
