@@ -8,19 +8,19 @@
     },
     {
       "id": "users",
-      "version": "15.2"
+      "version": "15.3"
     },
     {
       "id": "instance-storage",
-      "version": "7.5"
+      "version": "7.6"
     },
     {
       "id": "holdings-storage",
-      "version": "4.4"
+      "version": "4.5"
     },
     {
       "id": "item-storage",
-      "version": "8.6"
+      "version": "8.9"
     },
     {
       "id": "nature-of-content-terms",
@@ -86,7 +86,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "3.0",
+      "version": "4.0",
       "handlers": [
         {
           "methods": [
