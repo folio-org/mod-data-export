@@ -1,3 +1,46 @@
+## 03/12/2020 v4.0.0 Released
+ Major version release which includes below features :
+ * allow a user to append holdings and item data with MARC bib record when the user wants to export the record from SRS
+ * improve validation for mapping profile transformations: add general backend validation during saving; allow to pass transformations with empty value; allow characters in indicator fields  
+ * improve error logs: reflect in error logs what record exactly leads to the exception during the export and append exactly the field name that causes the error; append a link to the inventory record if the export fails
+ * add a quick export feature: provide an endpoint to trigger the export based on a provided list of identifiers or CQL statement and can be used in triggering exports by external scripts
+ * add more Instance fields to append during generating MARC bib record on the fly: Invalid ISBN, Linking ISBN, Invalid ISSN, Cancelled GPO Item Number identifiers; other standard identifiers, publisher or distributor number, and canceled system control numbers
+ * add specific MARC for Holdings record fields mapping rules to map holdings data during generating MARC bib record on the fly
+ * add personal data disclosure form
+ * upgrade RMB to version 32.2.0
+ 
+ [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.4...v4.0.0)
+ 
+### Stories
+* [MDEXP-265](https://issues.folio.org/browse/MDEXP-265) - Applying mapping profile - holdings and item transformations provided - entire SRS record
+* [MDEXP-315](https://issues.folio.org/browse/MDEXP-315) - Add validation to the transformation elements
+* [GMU-1](https://issues.folio.org/browse/GMU-1) - Detect which record exactly leads to the exception during the export to the error logs
+* [MDEXP-262](https://issues.folio.org/browse/MDEXP-262) - Create a link to the inventory record if the export fails
+* [MDEXP-285](https://issues.folio.org/browse/MDEXP-285) - Provide endpoint for quick inventory instance export
+* [MDEXP-182](https://issues.folio.org/browse/MDEXP-182) - Generate MARC bib record - Identifiers part II - conditionally replacing keys with values
+* [MDEXP-344](https://issues.folio.org/browse/MDEXP-344) - Allow to pass transformations with empty transformation
+* [MDEXP-348](https://issues.folio.org/browse/MDEXP-348) - Allow characters in indicator fields
+* [MDEXP-349](https://issues.folio.org/browse/MDEXP-349) - Enhancements to /data-export/quick-export endpoint
+* [MDEXP-346](https://issues.folio.org/browse/MDEXP-346) - The field name is missing if the reference name has changed
+* [MDEXP-12](https://issues.folio.org/browse/MDEXP-12) - Create Inventory Holdings to MFHD record mapping rules  
+* [MDEXP-353](https://issues.folio.org/browse/MDEXP-353) - Upgrade to RMB 32
+* [MDEXP-191](https://issues.folio.org/browse/MDEXP-191) - Generate MARC bib record - Identifiers part III - appending subfields
+* [MDEXP-358](https://issues.folio.org/browse/MDEXP-358) - Add personal data disclosure form
+* [GMU-2](https://issues.folio.org/browse/GMU-2) - Remove RMB and vertx dependencies
+* [MDEXP-372](https://issues.folio.org/browse/MDEXP-372) - Update dependencies in data-export before Iris release
+
+### Bug Fixes
+* [MDEXP-318](https://issues.folio.org/browse/MDEXP-318) - Missing error code for some error messages
+* [MDEXP-351](https://issues.folio.org/browse/MDEXP-351) - Missing directory and data in leader when exporting holdings only records with custom mapping profile
+* [MDEXP-343](https://issues.folio.org/browse/MDEXP-343) - Fix unstable StorageCleanupServiceImplTest
+* [MDEXP-347](https://issues.folio.org/browse/MDEXP-347) - Holdings and items data is not appended to SRS entire record in custom mapping profile
+* [MDEXP-345](https://issues.folio.org/browse/MDEXP-345) - Subfield $3 not always present when multiple holdings and items are associated with the instance
+* [MDEXP-360](https://issues.folio.org/browse/MDEXP-360) - Most of data-export APIs returned unauthorized at all envs
+* [MDEXP-365](https://issues.folio.org/browse/MDEXP-365) - Fix generated records on the fly for default profile
+* [MDEXP-367](https://issues.folio.org/browse/MDEXP-367) - Provide granular error in the error log so that the same information is not repeated multiple times
+* [MDEXP-377](https://issues.folio.org/browse/MDEXP-377) - Job completed with errors does not show how many records failed3
+* [MDEXP-310](https://issues.folio.org/browse/MDEXP-310) - Delete file in S3
+
 ## 11/13/2020 v3.0.4 Released
 This is a bugfix release for fixing the wrong job execution state if upload an empty file, that breaks UI
 
