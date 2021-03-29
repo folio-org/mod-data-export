@@ -270,7 +270,7 @@ class MappingServiceUnitTest {
     // then
     //all transformations provided in the mapping profile must be mapped
     Assert.assertEquals(38, appendedMarcRecords.getKey().stream().map(vf -> vf.getTag()).collect(Collectors.toSet()).size());
-    Assert.assertEquals(41, appendedMarcRecords.getKey().size());
+    Assert.assertEquals(43, appendedMarcRecords.getKey().size());
     Assert.assertEquals(0, appendedMarcRecords.getValue().intValue());
   }
 

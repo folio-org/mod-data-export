@@ -1,5 +1,5 @@
 {
-  "leader": "03774nam a2201081 a 4500",
+  "leader": "04003nam a2201105 a 4500",
   "fields": [
     {
       "001": "instance00001"
@@ -146,6 +146,46 @@
         ],
         "ind1": "1",
         "ind2": "2"
+      }
+    },
+    {
+      "904": {
+        "subfields": [
+          {
+            "a": "6066.I0119 C760 "
+          },
+          {
+            "a": "Electronic resource (FCF)"
+          },
+          {
+            "a": "http://www.gbv.de/dms/zbw/880159367.pdf"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
+      }
+    },
+    {
+      "904": {
+        "subfields": [
+          {
+            "a": "6066.I0119 C760 "
+          },
+          {
+            "a": "Electronic resource (OTT)"
+          },
+          {
+            "a": "http://d-nb.info/1150175923/04"
+          },
+          {
+            "3": "holdingHrid00001"
+          }
+        ],
+        "ind1": " ",
+        "ind2": " "
       }
     },
     {
