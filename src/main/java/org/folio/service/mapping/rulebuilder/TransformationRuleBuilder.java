@@ -1,7 +1,21 @@
 package org.folio.service.mapping.rulebuilder;
 
+import static java.util.Comparator.comparing;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
+import static org.apache.commons.lang3.StringUtils.substring;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.folio.processor.rule.DataSource;
@@ -13,21 +27,6 @@ import org.folio.service.mapping.translationbuilder.DefaultTranslationBuilder;
 import org.folio.service.mapping.translationbuilder.LocationTranslationBuilder;
 import org.folio.service.mapping.translationbuilder.TranslationBuilder;
 import org.folio.service.transformationfields.TransformationFieldsConfig;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.util.Comparator.comparing;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.isNumeric;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 public class TransformationRuleBuilder implements RuleBuilder {
 
@@ -95,6 +94,11 @@ public class TransformationRuleBuilder implements RuleBuilder {
     if (existingRule.isPresent()) {
       rule = existingRule.get();
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
+
+      if (!existingRule.get().isItemTypeRule() && mappingTransformation.getRecordType().equals(RecordType.ITEM)) {
+        rule.setItemTypeRule(RecordType.ITEM.equals(mappingTransformation.getRecordType()));
+      }
+
     } else {
       rule = new Rule();
       rule.setField(field);
