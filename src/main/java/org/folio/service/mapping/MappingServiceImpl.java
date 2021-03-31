@@ -134,12 +134,13 @@ public class MappingServiceImpl implements MappingService {
     String jobExecutionId, OkapiConnectionParams connectionParams) {
     ReferenceData referenceData = referenceDataProvider.get(jobExecutionId, connectionParams);
     List<Rule> rules = getRules(mappingProfile, jobExecutionId, connectionParams);
+    List<Rule> finalRules = RuleHandler.preHandle(record, rules);
     Set<String> failedCount = new HashSet<>();
     EntityReader entityReader = new JPathSyntaxEntityReader(record.encode());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = getReferenceDataWrapper(referenceData);
     List<VariableField> mappedRecord = ruleProcessor
-      .processFields(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+      .processFields(entityReader, recordWriter, referenceDataWrapper, finalRules, (translationException -> {
         List<String> errorMessageValues = Arrays
           .asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(),
             translationException.getMessage());
