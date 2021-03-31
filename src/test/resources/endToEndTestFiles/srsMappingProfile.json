@@ -4,7 +4,8 @@
   "description": "Mapping profile for Testing Int Tests",
   "recordTypes": [
     "SRS",
-    "HOLDINGS"
+    "HOLDINGS",
+    "ITEM"
   ],
   "outputFormat": "MARC",
   "transformations": [
@@ -14,6 +15,13 @@
       "transformation": "90011$a",
       "enabled": true,
       "recordType": "HOLDINGS"
+    },
+    {
+      "fieldId": "item.barcode",
+      "path": "$.holdings[*].items[*].barcode",
+      "transformation": "90111$b",
+      "enabled": true,
+      "recordType": "ITEM"
     }
   ]
 }
