@@ -1,3 +1,12 @@
+## 04/02/2021 v4.0.1 - Released
+This bugfix release includes fix for inconsistent results when holdings and items data incorrectly appended to the srs record
+in MARC file.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.0.0...v4.0.1)
+
+### Bug Fixes
+* [MDEXP-385](https://issues.folio.org/browse/MDEXP-385) - Holdings and items data incorrectly appended to the srs record
+
 ## 03/12/2020 v4.0.0 Released
  Major version release which includes below features :
  * allow a user to append holdings and item data with MARC bib record when the user wants to export the record from SRS
