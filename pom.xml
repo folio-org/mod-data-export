@@ -14,18 +14,25 @@
   </licenses>
 
   <properties>
+    <java.version>11</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <argLine>-Dfile.encoding=UTF-8</argLine>
+
     <raml-module-builder.version>32.2.0</raml-module-builder.version>
     <vertx.version>4.0.2</vertx.version>
     <junit.version>5.4.2</junit.version>
     <rest-assured.version>3.3.0</rest-assured.version>
     <marc4j.version>2.9.1</marc4j.version>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <sonar.exclusions>**/OkapiConnectionParams.java</sonar.exclusions>
-    <sonar.exclusions>**/ModTenantAPI.java</sonar.exclusions>
-    <sonar.exclusions>**/ExportPayload.java</sonar.exclusions>
-    <sonar.exclusions>**/InputDataContext.java</sonar.exclusions>
-    <sonar.exclusions>**/InitAPIImpl.java</sonar.exclusions>
+
+    <sonar.exclusions>
+      **/OkapiConnectionParams.java,
+      **/ModTenantAPI.java,
+      **/ExportPayload.java,
+      **/InputDataContext.java,
+      **/InitAPIImpl.java
+    </sonar.exclusions>
   </properties>
 
   <dependencyManagement>
@@ -127,7 +134,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-       <groupId>org.mockito</groupId>
+      <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
       <version>2.23.4</version>
       <scope>test</scope>
@@ -144,7 +151,7 @@
       <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-junit5</artifactId>
       <version>${vertx.version}</version>
@@ -482,16 +489,15 @@
             </vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
           <excludes>
-           <!--  The tests in these packages are run as part of a test Suite -->
+            <!--  The tests in these packages are run as part of a test Suite -->
             <exclude>org/folio/rest/impl/**Test.java</exclude>
             <exclude>org/folio/clients/**Test.java</exclude>
           </excludes>
           <includes>
-             <include>org/folio/rest/impl/StorageTestSuite.java</include>
-             <include>**/*Test.java</include>
-             <include>**/*Tests.java</include>
+            <include>org/folio/rest/impl/StorageTestSuite.java</include>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
           </includes>
-          <argLine>-Dfile.encoding=UTF-8</argLine>
         </configuration>
       </plugin>
 
