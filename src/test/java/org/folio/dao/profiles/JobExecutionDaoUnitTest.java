@@ -24,7 +24,6 @@ import org.folio.dao.impl.JobExecutionDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,7 +59,7 @@ class JobExecutionDaoUnitTest {
     // given
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doThrow(RuntimeException.class)
-      .when(postgresClient).update(eq(TABLE), eq(jobExecutions), any(Criterion.class), eq(true), any(Handler.class));
+      .when(postgresClient).update(eq(TABLE), eq(jobExecutions), eq((String) null), any(Handler.class));
 
     // when
     Future<JobExecution> future = jobExecutionDao.update(jobExecutions, TENANT_ID);
@@ -69,7 +68,7 @@ class JobExecutionDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(jobExecutions), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(jobExecutions), eq((String) null), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
@@ -82,10 +81,10 @@ class JobExecutionDaoUnitTest {
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doAnswer(invocationOnMock -> {
-      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(4);
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(3);
       replyHandler.handle(updateResult);
       return null;
-    }).when(postgresClient).update(eq(TABLE), eq(jobExecutions), any(Criterion.class), eq(true), any(Handler.class));
+    }).when(postgresClient).update(eq(TABLE), eq(jobExecutions), eq((String) null), any(Handler.class));
 
     // when
     Future<JobExecution> future = jobExecutionDao.update(jobExecutions, TENANT_ID);
@@ -94,7 +93,7 @@ class JobExecutionDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(jobExecutions), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(jobExecutions), eq((String) null), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });

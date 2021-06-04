@@ -1,6 +1,5 @@
 package org.folio.dao.impl;
 
-import static org.folio.util.HelperUtils.constructCriteria;
 import static org.folio.util.HelperUtils.getCQLWrapper;
 
 import io.vertx.core.Future;
@@ -16,8 +15,6 @@ import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.MappingProfileDao;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.MappingProfileCollection;
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +25,6 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "mapping_profiles";
-  private static final String ID_FIELD = "'id'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -60,8 +56,7 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
   public Future<MappingProfile> update(MappingProfile mappingProfile, String tenantId) {
     Promise<MappingProfile> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, mappingProfile.getId());
-      pgClientFactory.getInstance(tenantId).update(TABLE, mappingProfile, new Criterion(idCrit), true, updateResult -> {
+      pgClientFactory.getInstance(tenantId).update(TABLE, mappingProfile, mappingProfile.getId(), updateResult -> {
         if (updateResult.failed()) {
           LOGGER.error("Could not update mappingProfile with id {}", mappingProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
@@ -77,17 +72,16 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
       LOGGER.error("Error updating jobExecution", e);
       promise.fail(e);
     }
-    return promise.future().map(mappingProfile);
+    return promise.future();
   }
 
   @Override
   public Future<Boolean> delete(String mappingProfileId, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, mappingProfileId);
-      pgClientFactory.getInstance(tenantId).delete(TABLE, new Criterion(idCrit), promise);
+      pgClientFactory.getInstance(tenantId).delete(TABLE, mappingProfileId, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
     return promise.future().map(updateResult -> updateResult.rowCount() == 1);
@@ -95,16 +89,13 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
 
   @Override
   public Future<Optional<MappingProfile>> getById(String mappingProfileId, String tenantId) {
-    Promise<Results<MappingProfile>> promise = Promise.promise();
+    Promise<MappingProfile> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, mappingProfileId);
-      pgClientFactory.getInstance(tenantId).get(TABLE, MappingProfile.class, new Criterion(idCrit), false, promise);
+      pgClientFactory.getInstance(tenantId).getById(TABLE, mappingProfileId, MappingProfile.class, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
-    return promise.future()
-      .map(Results::getResults)
-      .map(mappingProfiles -> mappingProfiles.isEmpty() ? Optional.empty() : Optional.of(mappingProfiles.get(0)));
+    return promise.future().map(Optional::ofNullable);
   }
 }

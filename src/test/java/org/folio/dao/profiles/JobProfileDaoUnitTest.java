@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -67,7 +68,7 @@ class JobProfileDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(jobProfile), anyString(), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
@@ -80,10 +81,10 @@ class JobProfileDaoUnitTest {
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doAnswer(invocationOnMock -> {
-      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(4);
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(3);
       replyHandler.handle(updateResult);
       return null;
-    }).when(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
+    }).when(postgresClient).update(eq(TABLE), eq(jobProfile), anyString(), any(Handler.class));
 
     // when
     Future<JobProfile> future = jobProfileDao.update(jobProfile, TENANT_ID);
@@ -92,7 +93,7 @@ class JobProfileDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(jobProfile), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(jobProfile), anyString(), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
