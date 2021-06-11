@@ -1,3 +1,18 @@
+## 11/06/2021 v4.1.0 Released
+This release includes the interface version bumping for SRS and mod-inventory related dependencies.
+
+### Stories
+* [MDEXP-403](https://issues.folio.org/browse/MDEXP-403) align dependency versions affected by Inventory's Optimistic Locking
+* [MDEXP-407](https://issues.folio.org/browse/MDEXP-407) Update srs interface version 
+
+### Bug Fixes
+* [MDEXP-388](https://issues.folio.org/browse/MDEXP-388) 0% coverage reported by Sonarcloud for mod-data-export
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.0.1...v4.1.0)
+
+### Bug Fixes
+* [MDEXP-338](https://issues.folio.org/browse/MDEXP-338) - Fix periodically wrong jobExecution state when uploading an empty file
+
 ## 04/02/2021 v4.0.1 - Released
 This bugfix release includes fix for inconsistent results when holdings and items data incorrectly appended to the srs record
 in MARC file.
