@@ -2,6 +2,7 @@
     "holdingsRecords": [
         {
             "id": "68872d8a-bf16-420b-829f-206da38f6c10",
+            "_version": 4,
             "hrid": "hold000000000008",
             "formerIds": [],
             "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226",
@@ -40,6 +41,7 @@
         },
         {
             "id": "c9dd55da-7f48-478b-982c-a527b7cf9ec3",
+            "_version": 4,
             "hrid": "ho00000000004",
             "formerIds": [],
             "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226",

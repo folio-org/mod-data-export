@@ -1,6 +1,7 @@
 {
   "items" : [ {
     "id" : "1b6d3338-186e-4e35-9e75-1b886b0da53e",
+    "_version": 5,
     "status" : {
       "name" : "Checked out"
     },
@@ -57,6 +58,7 @@
     }
   }, {
     "id" : "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+    "_version": 5,
     "status" : {
       "name" : "Available"
     },
