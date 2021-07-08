@@ -11,4 +11,4 @@ SET jsonb = jsonb_set(jsonb, '{progress}', jsonb_build_object('total', jsonb -> 
 WHERE jsonb -> 'progress' IS NOT NULL AND jsonb -> 'progress' <> '{}'
 AND jsonb -> 'progress' -> 'exported' IS NOT NULL
 AND jsonb -> 'progress' -> 'total' IS NULL
-AND jsonb -> 'progress' -> 'failed' IS NULL
+AND jsonb -> 'progress' -> 'failed' IS NULL;
