@@ -1,7 +1,6 @@
 package org.folio.service.mapping;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.collections4.CollectionUtils;
 import org.assertj.core.util.Lists;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
@@ -17,10 +16,9 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -93,6 +91,9 @@ class RuleFactoryUnitTest {
   private static final String CODE_FIELD = "code";
   private static final String INSTITUTION_ID_FIELD = "institutionId";
   private static final String LIBRARY_ID_FIELD = "libraryId";
+  private static final String METADATA_CREATED_DATE = "created date";
+  private static final String METADATA_CREATED_DATE_VALUE = "2021-07-15T11:07:49.212+00:00";
+  private static final Map<String, String> METADATA = Map.of(METADATA_CREATED_DATE, METADATA_CREATED_DATE_VALUE);
 
   @Spy
   private static RuleFactory ruleFactory = new RuleFactory();
@@ -856,6 +857,35 @@ class RuleFactoryUnitTest {
     assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(2).getField());
     assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(2).getDescription());
     assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(2).getDataSources().get(0).getFrom());
+  }
+
+  @Test
+  void shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata() {
+    // given
+    Transformations itemTransformation = new Transformations()
+      .withEnabled(true)
+      .withPath(TRANSFORMATIONS_PATH_1)
+      .withFieldId(FIELD_ID_1)
+      .withTransformation(TRANSFORMATION_FIELD_VALUE_1)
+      .withRecordType(ITEM)
+      .withMetadataParameters(METADATA);
+    MappingProfile mappingProfile = new MappingProfile()
+      .withId(DEFAULT_MAPPING_PROFILE_ID)
+      .withTransformations(ImmutableList.of(itemTransformation))
+      .withRecordTypes(ImmutableList.of(ITEM));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(METADATA_CREATED_DATE_VALUE, rules.get(0).getMetadata().getData().get(METADATA_CREATED_DATE).getFrom());
+    assertEquals(DEFAULT_RULE_ID, rules.get(1).getId());
+    assertEquals(DEFAULT_RULE_FIELD_VALUE, rules.get(1).getField());
+    assertEquals(DEFAULT_RULE_DESCRIPTION, rules.get(1).getDescription());
+    assertEquals(DEFAULT_RULE_FROM_VALUE, rules.get(1).getDataSources().get(0).getFrom());
   }
 
   private void setUpDefaultRules() {
