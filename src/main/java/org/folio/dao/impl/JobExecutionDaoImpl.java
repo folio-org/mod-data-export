@@ -25,14 +25,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.folio.util.HelperUtils.constructCriteria;
-
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "job_executions";
-  private static final String ID_FIELD = "'id'";
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
   private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
   private static final String STATUS_FIELD = "'status'";
@@ -78,8 +75,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   public Future<JobExecution> update(JobExecution jobExecution, String tenantId) {
     Promise<JobExecution> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, jobExecution.getId());
-      pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, new Criterion(idCrit), true, updateResult -> {
+      pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, jobExecution.getId(), updateResult -> {
         if (updateResult.failed()) {
           LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
@@ -100,17 +96,14 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   @Override
   public Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId) {
-    Promise<Results<JobExecution>> promise = Promise.promise();
+    Promise<JobExecution> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, jobExecutionId);
-      pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, new Criterion(idCrit), false, promise);
+      pgClientFactory.getInstance(tenantId).getById(TABLE, jobExecutionId, JobExecution.class, promise);
     } catch (Exception e) {
       LOGGER.error(e);
       promise.fail(e);
     }
-    return promise.future()
-      .map(Results::getResults)
-      .map(jobExecutions -> jobExecutions.isEmpty() ? Optional.empty() : Optional.of(jobExecutions.get(0)));
+    return promise.future().map(Optional::ofNullable);
   }
 
 

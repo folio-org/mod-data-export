@@ -1,7 +1,5 @@
 package org.folio.dao.impl;
 
-import static org.folio.util.HelperUtils.constructCriteria;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.apache.logging.log4j.Logger;
@@ -14,8 +12,6 @@ import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobProfileDao;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 import org.folio.util.HelperUtils;
@@ -32,7 +28,6 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
 
   private static final String TABLE = "job_profiles";
-  private static final String ID_FIELD = "'id'";
 
   private PostgresClientFactory pgClientFactory;
 
@@ -42,17 +37,14 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
   @Override
   public Future<Optional<JobProfile>> getById(String id, String tenantId) {
-    Promise<Results<JobProfile>> promise = Promise.promise();
+    Promise<JobProfile> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, id);
-      pgClientFactory.getInstance(tenantId).get(TABLE, JobProfile.class, new Criterion(idCrit), false, promise);
+      pgClientFactory.getInstance(tenantId).getById(TABLE, id, JobProfile.class, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
-    return promise.future()
-      .map(Results::getResults)
-      .map(jobProfiles -> jobProfiles.isEmpty() ? Optional.empty() : Optional.of(jobProfiles.get(0)));
+    return promise.future().map(Optional::ofNullable);
   }
 
 
@@ -67,8 +59,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
   public Future<JobProfile> update(JobProfile jobProfile, String tenantId) {
     Promise<JobProfile> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, jobProfile.getId());
-      pgClientFactory.getInstance(tenantId).update(TABLE, jobProfile, new Criterion(idCrit), true, updateResult -> {
+      pgClientFactory.getInstance(tenantId).update(TABLE, jobProfile, jobProfile.getId(), updateResult -> {
         if (updateResult.failed()) {
           LOGGER.error("Could not update jobProfile with id {}", jobProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
@@ -84,7 +75,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
       LOGGER.error("Error updating jobExecution", e);
       promise.fail(e);
     }
-    return promise.future().map(jobProfile);
+    return promise.future();
   }
 
   @Override

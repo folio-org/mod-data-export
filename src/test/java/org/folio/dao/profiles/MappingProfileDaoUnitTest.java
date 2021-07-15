@@ -11,7 +11,6 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.MappingProfileDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -58,7 +58,7 @@ class MappingProfileDaoUnitTest {
     // given
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doThrow(RuntimeException.class)
-      .when(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
+      .when(postgresClient).update(eq(TABLE), eq(mappingProfile), anyString(), any(Handler.class));
 
     // when
     Future<MappingProfile> future = mappingProfileDao.update(mappingProfile, TENANT_ID);
@@ -67,7 +67,7 @@ class MappingProfileDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(mappingProfile), anyString(), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
@@ -80,10 +80,10 @@ class MappingProfileDaoUnitTest {
     when(updateResult.failed()).thenReturn(true);
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doAnswer(invocationOnMock -> {
-      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(4);
+      Handler<AsyncResult<RowSet<Row>>> replyHandler = invocationOnMock.getArgument(3);
       replyHandler.handle(updateResult);
       return null;
-    }).when(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
+    }).when(postgresClient).update(eq(TABLE), eq(mappingProfile), anyString(), any(Handler.class));
 
     // when
     Future<MappingProfile> future = mappingProfileDao.update(mappingProfile, TENANT_ID);
@@ -92,7 +92,7 @@ class MappingProfileDaoUnitTest {
     future.onComplete(ar -> {
       context.verify(() -> {
         assertTrue(ar.failed());
-        verify(postgresClient).update(eq(TABLE), eq(mappingProfile), any(Criterion.class), eq(true), any(Handler.class));
+        verify(postgresClient).update(eq(TABLE), eq(mappingProfile), anyString(), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
         context.completeNow();
       });
