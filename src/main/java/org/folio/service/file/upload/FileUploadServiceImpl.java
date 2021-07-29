@@ -2,6 +2,7 @@ package org.folio.service.file.upload;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.swing.ProgressMonitor;
 
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
@@ -77,19 +80,29 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
-      Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
-      List<String> ids = new ArrayList<>();
-      if (instancesUUIDs.isPresent()) {
-        JsonArray jsonIds = instancesUUIDs.get().getJsonArray("ids");
-        if (jsonIds.size() > 0) {
-          for (Object id : jsonIds) {
-            ids.add(((JsonObject) id).getString("id"));
+      Promise<Optional<JsonObject>> instancesIdsPromise = Promise.promise();
+      Vertx.vertx().executeBlocking((blockingFeature) -> {
+        Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
+        instancesIdsPromise.complete(instancesUUIDs);
+        blockingFeature.complete();
+      });
+      return instancesIdsPromise.future().compose(optionalInstancesUUIDs -> {
+        List<String> ids = new ArrayList<>();
+        if (optionalInstancesUUIDs.isPresent()) {
+          JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
+          if (jsonIds.size() > 0) {
+            for (Object id : jsonIds) {
+              ids.add(((JsonObject) id).getString("id"));
+            }
+            JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
+            return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+              .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
+          } else {
+            return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
           }
-          JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
-          return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-            .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
         }
-      }
+        return Future.succeededFuture();
+      });
     }
     if (Objects.isNull(fileDefinition.getJobExecutionId())) {
       return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
