@@ -31,7 +31,6 @@ import org.springframework.stereotype.Service;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class InstanceExportStrategyImpl implements ExportStrategy {
@@ -62,13 +61,13 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
       Pair<List<String>, Integer> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params);
-      exportService.exportSrsRecord(marcToExport, exportPayload);
+      exportService.exportSrsRecord(marcToExport.getKey(), exportPayload);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
         mappingProfileService.getDefault(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
-            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult, marcToExport.getValue());
+            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult);
             blockingPromise.complete();
           })
           .onFailure(ar -> {
@@ -87,13 +86,13 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
-      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult, 0);
+      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult);
       blockingPromise.complete();
     }
   }
 
   private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
-                                       MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
+                                       MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult) {
     InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
@@ -106,7 +105,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     List<String> mappedMarcRecords = mappedPairResult.getKey();
     int failedRecordsCount = mappedPairResult.getValue();
     exportService.exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() + mappedMarcRecords.size() - failedRecordsCount);
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       exportService.postExport(fileExportDefinition, params.getTenantId());

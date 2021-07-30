@@ -1,10 +1,7 @@
 package org.folio.service.export;
 
 import io.vertx.core.json.JsonObject;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.util.Lists;
 import org.folio.TestUtil;
 import org.folio.clients.InventoryClient;
@@ -36,7 +33,6 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -77,25 +73,22 @@ class ExportServiceUnitTest {
     // given
     String response = TestUtil.readFileContentFromResources(RECORDS_RESPONSE_JSON_FILE_PATH);
     String jsonRecord = new JsonObject(response).getJsonArray("sourceRecords").getJsonObject(0).toString();
-    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(jsonRecord), 0);
 
     when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when
-    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    exportService.exportSrsRecord(Collections.singletonList(jsonRecord), exportPayload);
     // then
     Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
-    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
   void shouldPassExportFor_NULL_SrsRecords() {
     // given
-    Pair<List<String>, Integer> marcRecordsToExport = Pair.of(null, 0);
+    List<String> marcRecords = null;
     // when
-    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    exportService.exportSrsRecord(marcRecords, exportPayload);
     // then
     Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
-    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
@@ -105,14 +98,12 @@ class ExportServiceUnitTest {
     String stringJson = TestUtil.readFileContentFromResources(INSTANCES_RESPONSE_JSON_FILE_PATH);
     JsonObject instances = new JsonObject(stringJson);
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
-    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
     when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
-    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    exportService.exportSrsRecord(Collections.singletonList(record), exportPayload);
     //then
     Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
-    assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
@@ -142,13 +133,10 @@ class ExportServiceUnitTest {
   void shouldNotStoreMarcInFile_whenSRSRecordIsEmpty() {
     // given
     String inventoryRecord = StringUtils.EMPTY;
-    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(inventoryRecord), 0);
-
     // when
-    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    exportService.exportSrsRecord(Collections.singletonList(inventoryRecord), exportPayload);
     // then
     Mockito.verify(fileStorage, never()).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
-    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
 
