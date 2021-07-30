@@ -1,6 +1,7 @@
 package org.folio.service.export;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.service.manager.export.ExportPayload;
 
 import java.util.List;
 
@@ -14,9 +15,9 @@ public interface ExportService {
    * Performs converting from json to marc format.
    *
    * @param jsonRecords    collection of srs records on export
-   * @param fileDefinition definition of file on export
+   * @param exportPayload  export payload on export
    */
-  void exportSrsRecord(List<String> jsonRecords, FileDefinition fileDefinition);
+  void exportSrsRecord(List<String> jsonRecords, ExportPayload exportPayload);
 
   /**
    * Exports collection of marc records to the destination.
