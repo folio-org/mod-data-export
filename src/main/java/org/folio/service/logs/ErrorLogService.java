@@ -7,6 +7,7 @@ import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.util.OkapiConnectionParams;
+import org.marc4j.MarcException;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,6 +89,18 @@ public interface ErrorLogService {
    * @return future with saved {@link ErrorLog}
    */
   Future<ErrorLog> saveWithAffectedRecord(JsonObject record, String errorMessageCode, String jobExecutionId, TranslationException recordInfo, OkapiConnectionParams params);
+
+  /**
+   * Creates and saves {@link ErrorLog} to database
+   *
+   * @param instance           {@link JsonObject} instance that is cause of the error
+   * @param errorMessageCode   the code of the error message
+   * @param jobExecutionId     id of specific job execution
+   * @param marcException      exception that is saved with error log
+   * @param params             okapi connection parameters
+   * @return future with saved {@link ErrorLog}
+   */
+  Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessageCode, String jobExecutionId, MarcException marcException, OkapiConnectionParams params);
 
   /**
    * Gets {@link ErrorLog}

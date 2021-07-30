@@ -61,7 +61,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
       Pair<List<String>, Integer> marcToExport = srsRecordService.transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params);
-      exportService.exportSrsRecord(marcToExport.getKey(), fileExportDefinition);
+      exportService.exportSrsRecord(marcToExport.getKey(), exportPayload);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
         mappingProfileService.getDefault(params)

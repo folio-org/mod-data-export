@@ -1,12 +1,18 @@
 package org.folio.service.logs;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.dao.ErrorLogDao;
 import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.TranslationException;
@@ -16,17 +22,14 @@ import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.util.HelperUtils;
 import org.folio.util.OkapiConnectionParams;
+import org.marc4j.MarcException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
@@ -40,7 +43,8 @@ public class ErrorLogServiceImpl implements ErrorLogService {
 
   @Autowired
   private ErrorLogDao errorLogDao;
-
+  @Autowired
+  private ConfigurationsClient configurationsClient;
   @Autowired
   @Qualifier("affectedRecordBuilders")
   private Map<String, AffectedRecordBuilder> affectedRecordsBuilders;
@@ -110,6 +114,26 @@ public class ErrorLogServiceImpl implements ErrorLogService {
       .withErrorMessageValues(errorMessageValues)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId);
+    return save(errorLog, params.getTenantId());
+  }
+
+  public Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessageCode, String jobExecutionId, MarcException marcException, OkapiConnectionParams params) {
+    String instId = instance.getString("id");
+    String hrId = instance.getString("hrid");
+    String title = instance.getString("title");
+    AffectedRecord affectedRecord = new AffectedRecord()
+      .withId(instId)
+      .withHrid(hrId)
+      .withTitle(title)
+      .withRecordType(AffectedRecord.RecordType.INSTANCE)
+      .withInventoryRecordLink(configurationsClient.getInventoryRecordLink(instId, jobExecutionId, params));
+    ErrorLog errorLog = new ErrorLog()
+      .withErrorMessageCode(errorMessageCode)
+      .withErrorMessageValues(Collections.singletonList(marcException.getMessage()))
+      .withLogLevel(ErrorLog.LogLevel.DEBUG)
+      .withJobExecutionId(jobExecutionId)
+      .withAffectedRecord(affectedRecord)
+      .withCreatedDate(new Date());
     return save(errorLog, params.getTenantId());
   }
 
