@@ -130,7 +130,7 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     ErrorLog errorLog = new ErrorLog()
       .withErrorMessageCode(errorMessageCode)
       .withErrorMessageValues(Collections.singletonList(marcException.getMessage()))
-      .withLogLevel(ErrorLog.LogLevel.DEBUG)
+      .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId)
       .withAffectedRecord(affectedRecord)
       .withCreatedDate(new Date());
