@@ -9,6 +9,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.assertj.core.util.Lists;
+import org.folio.clients.ConfigurationsClient;
 import org.folio.dao.impl.ErrorLogDaoImpl;
 import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.RecordType;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.marc4j.MarcException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -67,6 +69,7 @@ class ErrorLogServiceUnitTest {
   private static final String ITEM_ID = "e2ecf553-3892-4205-aaff-6761a4d6ccfc";
   private static final String ITEMS = "items";
   private static final String ERROR_MESSAGE_CODE = "error.messageCode";
+  private static final String ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC = "Record is too long to be a valid MARC binary record, it's length would be 117743 which is more than 99999 bytes";
   private static ErrorLog errorLog;
   private static ErrorLogCollection errorLogCollection;
   private static OkapiConnectionParams params;
@@ -76,6 +79,8 @@ class ErrorLogServiceUnitTest {
   private ErrorLogServiceImpl errorLogService;
   @Mock
   private ErrorLogDaoImpl errorLogDao;
+  @Mock
+  private ConfigurationsClient configurationsClient;
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogCaptor;
   @Mock
@@ -143,6 +148,32 @@ class ErrorLogServiceUnitTest {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(eq(errorLog), eq(TENANT_ID));
       Assert.assertNotNull(ar.result().getId());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void shouldSaveErrorLogWithRecordLink_whenSaveWithAffectedRecordWithMarcException(VertxTestContext context) {
+    // given
+    MarcException marcException = new MarcException(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC);
+    JsonObject instanceRecord = new JsonObject()
+      .put("hrid", "1")
+      .put("id", INSTANCE_ID)
+      .put("title", INSTANCE_TITLE);
+    when(errorLogDao.save(any(ErrorLog.class), anyString())).thenReturn(succeededFuture(errorLog));
+
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(instanceRecord, ERROR_MESSAGE_CODE, JOB_EXECUTION_ID, marcException, params);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      Assert.assertEquals(ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_MESSAGE_CODE, errorLog.getErrorMessageCode());
+      Assert.assertEquals(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC, errorLog.getErrorMessageValues().get(0));
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      verify(configurationsClient).getInventoryRecordLink(eq(INSTANCE_ID), eq(JOB_EXECUTION_ID), eq(params));
       context.completeNow();
     }));
   }
