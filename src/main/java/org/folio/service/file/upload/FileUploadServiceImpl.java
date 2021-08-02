@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.swing.ProgressMonitor;
-
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
@@ -97,17 +95,12 @@ public class FileUploadServiceImpl implements FileUploadService {
             JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
             return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
               .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
-          } else {
-            return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
           }
         }
-        return Future.succeededFuture();
+        return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
       });
     }
-    if (Objects.isNull(fileDefinition.getJobExecutionId())) {
-      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
-    }
-    return Future.succeededFuture(fileDefinition);
+    return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
   }
 
   @Override
