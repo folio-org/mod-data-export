@@ -73,7 +73,7 @@ public class LocalFileSystemStorage implements FileStorage {
         blockingFuture.complete();
       }
       promise.complete(fileDefinition);
-    }, null);
+    });
     return promise.future();
   }
 
