@@ -51,9 +51,11 @@ public class LocalFileSystemStorage implements FileStorage {
       } catch (Exception e) {
         LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
         promise.fail(e);
+      } finally {
+        blockingFuture.complete();
       }
       promise.complete(fileDefinition);
-    }, null);
+    });
     return promise.future();
   }
 
@@ -67,9 +69,11 @@ public class LocalFileSystemStorage implements FileStorage {
       } catch (Exception e) {
         LOGGER.error("Error during save data to the local system's storage. FileId: {}", fileDefinition.getId(), e);
         promise.fail(e);
+      } finally {
+        blockingFuture.complete();
       }
       promise.complete(fileDefinition);
-    }, null);
+    });
     return promise.future();
   }
 
