@@ -186,6 +186,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           List<JobExecution> jobExecutionList = asyncResult.result();
           jobExecutionList.forEach(jobExe -> {
             jobExe.setStatus(FAIL);
+            jobExe.setCompletedDate(new Date());
             jobExecutionDao.update(jobExe, tenantId);
           });
           jobExecutionPromise.complete();
