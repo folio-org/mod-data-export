@@ -97,10 +97,18 @@ public class FileUploadServiceImpl implements FileUploadService {
               .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
           }
         }
-        return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
+        return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
       });
+    } else {
+      return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
     }
-    return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
+  }
+
+  private Future<FileDefinition> updateFileDefinitionWithEmptyProgressIfAbsent(FileDefinition fileDefinition, String tenantId) {
+    if(Objects.isNull(fileDefinition.getJobExecutionId())) {
+      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
+    }
+    return Future.succeededFuture(fileDefinition);
   }
 
   @Override
