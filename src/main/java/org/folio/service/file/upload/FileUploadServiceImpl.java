@@ -5,6 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.InventoryClient;
@@ -105,7 +106,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
   private Future<FileDefinition> updateFileDefinitionWithEmptyProgressIfAbsent(FileDefinition fileDefinition, String tenantId) {
-    if(Objects.isNull(fileDefinition.getJobExecutionId())) {
+    if (Objects.isNull(fileDefinition.getJobExecutionId())) {
       return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
     }
     return Future.succeededFuture(fileDefinition);
