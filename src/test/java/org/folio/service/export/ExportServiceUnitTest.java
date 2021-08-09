@@ -3,6 +3,7 @@ package org.folio.service.export;
 import io.vertx.core.json.JsonObject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.assertj.core.util.Lists;
 import org.folio.TestUtil;
@@ -75,7 +76,7 @@ class ExportServiceUnitTest {
     // given
     String response = TestUtil.readFileContentFromResources(RECORDS_RESPONSE_JSON_FILE_PATH);
     String jsonRecord = new JsonObject(response).getJsonArray("sourceRecords").getJsonObject(0).toString();
-    Pair<List<String>, Integer> marcRecordsToExport = Pair.of(Collections.singletonList(jsonRecord), 0);
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(jsonRecord), 0);
 
     when(fileStorage.saveFileDataBlocking(any(byte[].class), any(FileDefinition.class))).thenReturn(fileDefinition);
     // when
@@ -101,7 +102,7 @@ class ExportServiceUnitTest {
     String stringJson = TestUtil.readFileContentFromResources(INSTANCES_RESPONSE_JSON_FILE_PATH);
     JsonObject instances = new JsonObject(stringJson);
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
-    Pair<List<String>, Integer> marcRecordsToExport = Pair.of(Collections.singletonList(record), 0);
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
     when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
@@ -137,7 +138,7 @@ class ExportServiceUnitTest {
   void shouldNotStoreMarcInFile_whenSRSRecordIsEmpty() {
     // given
     String inventoryRecord = StringUtils.EMPTY;
-    Pair<List<String>, Integer> marcRecordsToExport = Pair.of(Collections.singletonList(inventoryRecord), 0);
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(inventoryRecord), 0);
 
     // when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
