@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import io.vertx.core.json.JsonObject;
 import java.util.Collections;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +43,7 @@ public class SrsRecordConverterService extends RecordConverter {
     if (isTransformationRequired(mappingProfile)) {
       return transformSrsRecord(mappingProfile, srsRecords, jobExecutionId, connectionParams);
     } else {
-      return Pair.of(getRecordContent(srsRecords), 0);
+      return MutablePair.of(getRecordContent(srsRecords), 0);
     }
   }
 
@@ -57,7 +58,7 @@ public class SrsRecordConverterService extends RecordConverter {
       marcRecords.add(convert(srsRecord.encode(), mappedFields.getKey()));
       failedCount = failedCount + mappedFields.getValue();
     }
-    return Pair.of(marcRecords, failedCount);
+    return MutablePair.of(marcRecords, failedCount);
   }
 
   private Pair<List<VariableField>, Integer> getMappedFields(MappingProfile mappingProfile, String jobExecutionId,

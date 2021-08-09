@@ -76,6 +76,7 @@ public enum ErrorCode {
     errorCodesForUUIDs.add(DATE_PARSE_ERROR_CODE.getCode());
     errorCodesForUUIDs.add(ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode());
     errorCodesForUUIDs.add(ERROR_FIELDS_MAPPING_SRS.getCode());
+    errorCodesForUUIDs.add(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode());
     errorCodesForUUIDs.add(UNDEFINED.getCode());
     return errorCodesForUUIDs;
   }
