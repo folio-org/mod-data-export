@@ -28,6 +28,7 @@ import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
+import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -106,7 +107,7 @@ class InstanceExportStrategyUnitTest {
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
-    Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(ExportPayload.class));
+    Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
     Mockito.verify(errorLogService).populateUUIDsNotFoundErrorLog(anyString(), anyList(), anyString());
@@ -139,7 +140,7 @@ class InstanceExportStrategyUnitTest {
 
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), anyString(), any(OkapiConnectionParams.class));
-    Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(anyList(), any(ExportPayload.class));
+    Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
     Mockito.verify(errorLogService).saveGeneralError(eq(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getCode()), anyString(), anyString());
   }
 
