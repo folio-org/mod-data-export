@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -83,6 +84,7 @@ class ExportServiceUnitTest {
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     // then
     Mockito.verify(fileStorage, Mockito.times(1)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
@@ -93,6 +95,7 @@ class ExportServiceUnitTest {
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     // then
     Mockito.verify(fileStorage, Mockito.times(0)).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
@@ -109,6 +112,7 @@ class ExportServiceUnitTest {
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
     Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
   @Test
@@ -144,6 +148,7 @@ class ExportServiceUnitTest {
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     // then
     Mockito.verify(fileStorage, never()).saveFileDataBlocking(any(byte[].class), any(FileDefinition.class));
+    assertEquals(0, marcRecordsToExport.getValue().intValue());
   }
 
 
