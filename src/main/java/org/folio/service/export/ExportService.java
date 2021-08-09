@@ -1,5 +1,6 @@
 package org.folio.service.export;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.manager.export.ExportPayload;
 
@@ -14,10 +15,10 @@ public interface ExportService {
    * Exports collection of srs records to the destination.
    * Performs converting from json to marc format.
    *
-   * @param jsonRecords    collection of srs records on export
+   * @param marcToExport   collection of srs records on export and count of failed records
    * @param exportPayload  export payload on export
    */
-  void exportSrsRecord(List<String> jsonRecords, ExportPayload exportPayload);
+  void exportSrsRecord(Pair<List<String>, Integer> marcToExport, ExportPayload exportPayload);
 
   /**
    * Exports collection of marc records to the destination.

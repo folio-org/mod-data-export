@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
@@ -63,11 +64,13 @@ public class LocalFileSystemExportService implements ExportService {
   private InventoryClient inventoryClient;
 
   @Override
-  public void exportSrsRecord(List<String> jsonRecords, ExportPayload exportPayload) {
+  public void exportSrsRecord(Pair<List<String>, Integer> marcToExport, ExportPayload exportPayload) {
     FileDefinition fileDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = exportPayload.getJobExecutionId();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
+    List<String> jsonRecords = marcToExport.getKey();
     if (CollectionUtils.isNotEmpty(jsonRecords) && fileDefinition != null) {
+      int failedRecords = 0;
       for (String jsonRecord : jsonRecords) {
         try {
           byte[] bytes = convertJsonRecordToMarcRecord(jsonRecord);
@@ -75,15 +78,18 @@ public class LocalFileSystemExportService implements ExportService {
             fileStorage.saveFileDataBlocking(bytes, fileDefinition);
           }
         } catch (MarcException e) {
+          failedRecords++;
           String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
           inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesJson -> {
             JsonArray instances = instancesJson.getJsonArray(INSTANCES);
             errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode(), jobExecutionId, e, params);
           });
         } catch (RuntimeException e) {
+          failedRecords++;
           LOGGER.error("Error during saving srs record to file with content: {}", jsonRecord);
         }
       }
+      marcToExport.setValue(failedRecords);
     }
   }
 
