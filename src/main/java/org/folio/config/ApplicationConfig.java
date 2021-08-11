@@ -1,6 +1,10 @@
 package org.folio.config;
 
 import com.google.common.collect.ImmutableMap;
+import io.vertx.core.Vertx;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
+
 import org.folio.service.logs.AffectedRecordBuilder;
 import org.folio.service.logs.AffectedRecordHoldingBuilder;
 import org.folio.service.logs.AffectedRecordInstanceBuilder;
@@ -21,6 +25,8 @@ import java.util.Map;
   "org.folio.rest.impl"})
 public class ApplicationConfig {
 
+  private static final int REQUEST_TIMEOUT_TWO_HOURS = 3600000;
+
   @Bean
   @Qualifier("affectedRecordBuilders")
   public Map<String, AffectedRecordBuilder> getBuilders(@Autowired AffectedRecordInstanceBuilder affectedRecordInstanceBuilder,
@@ -32,4 +38,13 @@ public class ApplicationConfig {
       .put(AffectedRecordItemBuilder.class.getName(), affectedRecordItemBuilder)
       .build();
   }
+
+  @Bean
+  public WebClient getWebClient(@Autowired Vertx vertx) {
+    WebClientOptions webClientOptions = new WebClientOptions()
+      .setKeepAliveTimeout(REQUEST_TIMEOUT_TWO_HOURS)
+      .setConnectTimeout(REQUEST_TIMEOUT_TWO_HOURS);
+    return WebClient.create(vertx, webClientOptions);
+  }
+
 }

@@ -3,6 +3,8 @@ package org.folio.clients;
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
 import static org.folio.clients.ClientUtil.getRequest;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.util.ExternalPathResolver.CALL_NUMBER_TYPES;
 import static org.folio.util.ExternalPathResolver.CAMPUSES;
@@ -26,9 +28,18 @@ import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpRequest;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -44,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.ws.rs.core.MediaType;
 
 @Component
 public class InventoryClient {
@@ -54,11 +66,14 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final String QUERY = "?query=";
+  private static final String ERROR_MESSAGE = "Exception while calling %s, message: Get invalid response with status: %s";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
   @Autowired
   private ErrorLogService errorLogService;
+  @Autowired
+  private WebClient webClient;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
@@ -71,18 +86,39 @@ public class InventoryClient {
     }
   }
 
-  public Optional<JsonObject> getInstancesBulkUUIDs(String query, OkapiConnectionParams params) {
+  public Future<Optional<JsonObject>> getInstancesBulkUUIDsAsync(String query, OkapiConnectionParams params) {
+    Promise<Optional<JsonObject>> promise = Promise.promise();
     if (StringUtils.isEmpty(query)) {
-      return Optional.empty();
+      promise.complete(Optional.empty());
+      return promise.future();
     }
     String endpoint = format(resourcesPathWithPrefix(RECORD_BULK_IDS), params.getOkapiUrl()) + QUERY + StringUtil.urlEncode(query);
-    try {
-      return Optional.of(ClientUtil.getRequest(params, endpoint));
-    } catch (HttpClientException e) {
-      LOGGER.error(e.getMessage(), e.getCause());
-      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(e.getMessage()), StringUtils.EMPTY, params.getTenantId());
-      return Optional.empty();
-    }
+    HttpRequest<Buffer> request = webClient.getAbs(endpoint);
+    request.putHeader(OKAPI_HEADER_TOKEN, params.getToken());
+    request.putHeader(OKAPI_HEADER_TENANT, params.getTenantId());
+    request.putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    request.putHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
+    request.ssl(true);
+    request.send(res -> {
+      if (res.failed()) {
+        logError(res.cause(), params);
+        promise.complete(Optional.empty());
+      } else {
+        HttpResponse<Buffer> response = res.result();
+        if (response.statusCode() == HttpStatus.SC_OK && response.bodyAsJsonObject() != null) {
+          promise.complete(Optional.of(response.bodyAsJsonObject()));
+        } else {
+          logError(new IllegalStateException(format(ERROR_MESSAGE, endpoint, response.statusCode())), params);
+          promise.complete(Optional.empty());
+        }
+      }
+    });
+    return promise.future();
+  }
+
+  private void logError(Throwable throwable, OkapiConnectionParams params) {
+    LOGGER.error(throwable.getMessage(), throwable.getCause());
+    errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(throwable.getMessage()), StringUtils.EMPTY, params.getTenantId());
   }
 
   public Map<String, JsonObject> getNatureOfContentTerms(String jobExecutionId, OkapiConnectionParams params) {

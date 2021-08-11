@@ -1,5 +1,6 @@
 package org.folio.service.file.upload;
 
+import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -53,6 +54,8 @@ public class FileUploadServiceImpl implements FileUploadService {
   private ErrorLogService errorLogService;
   @Autowired
   private UsersClient usersClient;
+  @Autowired
+  private Vertx vertx;
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
@@ -84,15 +87,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
-      Promise<Optional<JsonObject>> instancesIdsPromise = Promise.promise();
-      VertxOptions workerThreadOption = new VertxOptions().setMaxWorkerExecuteTimeUnit(TimeUnit.HOURS)
-        .setMaxWorkerExecuteTime(WORKER_EXECUTE_TIME_IN_HOURS);
-      Vertx.vertx(workerThreadOption).executeBlocking((blockingFeature) -> {
-        Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
-        instancesIdsPromise.complete(instancesUUIDs);
-        blockingFeature.complete();
-      });
-      return instancesIdsPromise.future().compose(optionalInstancesUUIDs -> {
+      return inventoryClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
         List<String> ids = new ArrayList<>();
         if (optionalInstancesUUIDs.isPresent()) {
           JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
@@ -158,16 +153,18 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   private Future<FileDefinition> uploadFileWithCQLQueryQuickExport(QuickExportRequest request, FileDefinition fileDefinition, JobExecution jobExecution, OkapiConnectionParams params) {
     Promise<FileDefinition> promise = Promise.promise();
-    Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(request.getCriteria(), params);
-    if (instancesUUIDs.isPresent()) {
-      saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    } else {
-      saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    }
+    inventoryClient.getInstancesBulkUUIDsAsync(request.getCriteria(), params).onComplete(instancesUUIDsResult -> {
+      Optional<JsonObject> instancesUUIDs = instancesUUIDsResult.result();
+      if (instancesUUIDs.isPresent()) {
+        saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      } else {
+        saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      }
+    });
     return promise.future();
   }
 
