@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(VertxUnitRunner.class)
 class InventoryClientTest extends RestVerticleTestBase {
@@ -49,16 +50,16 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldRetrieveInstanceBulkUUIDS(VertxTestContext testContext) {
+  void shouldRetrieveInstanceBulkUUIDS() {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     String query = "cql query";
     // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onComplete(testContext.succeeding(inventoryResponse -> {
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
       Assert.assertTrue(inventoryResponse.isPresent());
       Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
-    }));
+    }).onFailure(fail());
   }
 
   @Test
