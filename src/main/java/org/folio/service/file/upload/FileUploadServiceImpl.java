@@ -3,6 +3,7 @@ package org.folio.service.file.upload;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
@@ -36,6 +38,9 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
+
+  private static final int WORKER_EXECUTE_TIME_IN_HOURS = 2;
+
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
@@ -80,7 +85,9 @@ public class FileUploadServiceImpl implements FileUploadService {
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
       Promise<Optional<JsonObject>> instancesIdsPromise = Promise.promise();
-      Vertx.vertx().executeBlocking((blockingFeature) -> {
+      VertxOptions workerThreadOption = new VertxOptions().setMaxWorkerExecuteTimeUnit(TimeUnit.HOURS)
+        .setMaxWorkerExecuteTime(WORKER_EXECUTE_TIME_IN_HOURS);
+      Vertx.vertx(workerThreadOption).executeBlocking((blockingFeature) -> {
         Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
         instancesIdsPromise.complete(instancesUUIDs);
         blockingFeature.complete();
