@@ -98,7 +98,9 @@ public class InventoryClient {
     request.putHeader(OKAPI_HEADER_TENANT, params.getTenantId());
     request.putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
     request.putHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-    request.ssl(true);
+    if (params.getOkapiUrl().contains("https")) {
+      request.ssl(true);
+    }
     request.send(res -> {
       if (res.failed()) {
         logError(res.cause(), params);
