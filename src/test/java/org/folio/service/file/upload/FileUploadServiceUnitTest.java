@@ -149,6 +149,7 @@ class FileUploadServiceUnitTest {
     when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture());
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
+    when(inventoryClient.getInstancesBulkUUIDsAsync(eq("test"), any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(Optional.empty()));
 
     // when
     Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
@@ -182,7 +183,7 @@ class FileUploadServiceUnitTest {
     when(jobExecutionService.update(any(JobExecution.class), eq(TENANT_ID))).thenReturn(succeededFuture(jobExecution));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
-    when(inventoryClient.getInstancesBulkUUIDs(anyString(), eq(params))).thenReturn(of(new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH))));
+    when(inventoryClient.getInstancesBulkUUIDsAsync(anyString(), eq(params))).thenReturn(Future.succeededFuture(of(new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH)))));
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(succeededFuture(completedDef));
 
     // when
