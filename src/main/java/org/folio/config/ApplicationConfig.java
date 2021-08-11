@@ -25,7 +25,7 @@ import java.util.Map;
   "org.folio.rest.impl"})
 public class ApplicationConfig {
 
-  private static final int REQUEST_TIMEOUT_TWO_HOURS = 3600000;
+  private static final int REQUEST_TIMEOUT_ONE_HOURS = 3600000;
 
   @Bean
   @Qualifier("affectedRecordBuilders")
@@ -42,8 +42,8 @@ public class ApplicationConfig {
   @Bean
   public WebClient getWebClient(@Autowired Vertx vertx) {
     WebClientOptions webClientOptions = new WebClientOptions()
-      .setKeepAliveTimeout(REQUEST_TIMEOUT_TWO_HOURS)
-      .setConnectTimeout(REQUEST_TIMEOUT_TWO_HOURS);
+      .setKeepAliveTimeout(REQUEST_TIMEOUT_ONE_HOURS)
+      .setConnectTimeout(REQUEST_TIMEOUT_ONE_HOURS);
     return WebClient.create(vertx, webClientOptions);
   }
 
