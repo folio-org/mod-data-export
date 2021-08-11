@@ -2,6 +2,8 @@ package org.folio.rest.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxTestContext;
+
 import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
@@ -47,15 +49,16 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldRetrieveInstanceBulkUUIDS() {
+  void shouldRetrieveInstanceBulkUUIDS(VertxTestContext testContext) {
     // given
     InventoryClient inventoryClient = new InventoryClient();
     String query = "cql query";
     // when
-    Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesBulkUUIDs(query, okapiConnectionParams);
-    // then
-    Assert.assertTrue(inventoryResponse.isPresent());
-    Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onComplete(testContext.succeeding(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isPresent());
+      Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
+    }));
   }
 
   @Test
