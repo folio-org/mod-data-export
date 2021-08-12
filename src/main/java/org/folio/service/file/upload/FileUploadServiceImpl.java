@@ -1,11 +1,9 @@
 package org.folio.service.file.upload;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.InventoryClient;
@@ -24,10 +22,11 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
@@ -36,6 +35,7 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
+
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
@@ -48,6 +48,8 @@ public class FileUploadServiceImpl implements FileUploadService {
   private ErrorLogService errorLogService;
   @Autowired
   private UsersClient usersClient;
+  @Autowired
+  private Vertx vertx;
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
@@ -79,13 +81,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
-      Promise<Optional<JsonObject>> instancesIdsPromise = Promise.promise();
-      Vertx.vertx().executeBlocking((blockingFeature) -> {
-        Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
-        instancesIdsPromise.complete(instancesUUIDs);
-        blockingFeature.complete();
-      });
-      return instancesIdsPromise.future().compose(optionalInstancesUUIDs -> {
+      return inventoryClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
         List<String> ids = new ArrayList<>();
         if (optionalInstancesUUIDs.isPresent()) {
           JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
@@ -151,16 +147,18 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   private Future<FileDefinition> uploadFileWithCQLQueryQuickExport(QuickExportRequest request, FileDefinition fileDefinition, JobExecution jobExecution, OkapiConnectionParams params) {
     Promise<FileDefinition> promise = Promise.promise();
-    Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(request.getCriteria(), params);
-    if (instancesUUIDs.isPresent()) {
-      saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    } else {
-      saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    }
+    inventoryClient.getInstancesBulkUUIDsAsync(request.getCriteria(), params).onComplete(instancesUUIDsResult -> {
+      Optional<JsonObject> instancesUUIDs = instancesUUIDsResult.result();
+      if (instancesUUIDs.isPresent()) {
+        saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      } else {
+        saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      }
+    });
     return promise.future();
   }
 
