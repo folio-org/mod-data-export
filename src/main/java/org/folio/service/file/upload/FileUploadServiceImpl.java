@@ -36,8 +36,6 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
 
-  private static final int WORKER_EXECUTE_TIME_IN_HOURS = 2;
-
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
