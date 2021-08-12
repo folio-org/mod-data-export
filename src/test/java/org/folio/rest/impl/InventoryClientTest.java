@@ -3,6 +3,8 @@ package org.folio.rest.impl;
 import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
 import java.util.UUID;
 
@@ -12,10 +14,10 @@ import org.folio.config.ApplicationConfig;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,6 +29,7 @@ import java.util.Optional;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(VertxExtension.class)
 @RunWith(VertxUnitRunner.class)
 class InventoryClientTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
@@ -59,7 +62,7 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldRetrieveInstanceBulkUUIDS() {
+  void shouldRetrieveInstanceBulkUUIDS(VertxTestContext testContext) {
     // given
     String query = "cql query";
     // when
@@ -67,29 +70,56 @@ class InventoryClientTest extends RestVerticleTestBase {
       //then
       Assert.assertTrue(inventoryResponse.isPresent());
       Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
-    }).onFailure(Assertions::fail);
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
   }
 
   @Test
-  void shouldReturnEmptyOptional_whenErrorOccurredWhileRequestingInstanceBulkUUIDS() {
+  void shouldReturnEmptyOptional_whenErrorOccurredWhileRequestingInstanceBulkUUIDS(VertxTestContext testContext) {
     // given
     String query = "error from client";
     // when
     inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
       Assert.assertTrue(inventoryResponse.isEmpty());
-    }).onFailure(Assertions::fail);
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
   }
 
   @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned() {
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext) {
     // given
     String query = "inventory 500";
     // when
     inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
       Assert.assertTrue(inventoryResponse.isEmpty());
-    }).onFailure(Assertions::fail);
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "empty json response";
+    // when
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "invalid json returned";
+    // when
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
   }
 
   @Test
