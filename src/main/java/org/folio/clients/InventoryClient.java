@@ -31,6 +31,7 @@ import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpRequest;
@@ -66,7 +67,9 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final String QUERY = "?query=";
-  private static final String ERROR_MESSAGE = "Exception while calling %s, message: Get invalid response with status: %s";
+  private static final String ERROR_MESSAGE_INVALID_STATUS_CODE = "Exception while calling %s, message: Get invalid response with status: %s";
+  private static final String ERROR_MESSAGE_INVALID_BODY = "Exception while calling %s, message: Got invalid response body: %s";
+  private static final String ERROR_MESSAGE_EMPTY_BODY = "Exception while calling %s, message: empty body returned.";
   private static final int REFERENCE_DATA_LIMIT = 200;
   private static final int HOLDINGS_LIMIT = 1000;
 
@@ -78,7 +81,7 @@ public class InventoryClient {
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
       return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
-          QUERY_PATTERN_INVENTORY));
+        QUERY_PATTERN_INVENTORY));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
@@ -107,11 +110,23 @@ public class InventoryClient {
         promise.complete(Optional.empty());
       } else {
         HttpResponse<Buffer> response = res.result();
-        if (response.statusCode() == HttpStatus.SC_OK && response.bodyAsJsonObject() != null) {
-          promise.complete(Optional.of(response.bodyAsJsonObject()));
-        } else {
-          logError(new IllegalStateException(format(ERROR_MESSAGE, endpoint, response.statusCode())), params);
+        if (response.statusCode() != HttpStatus.SC_OK) {
+          logError(new IllegalStateException(format(ERROR_MESSAGE_INVALID_STATUS_CODE, endpoint, response.statusCode())), params);
           promise.complete(Optional.empty());
+        } else {
+          try {
+            JsonObject instances = response.bodyAsJsonObject();
+            if (instances != null) {
+              promise.complete(Optional.of(response.bodyAsJsonObject()));
+            } else {
+              logError(new IllegalStateException(format(ERROR_MESSAGE_EMPTY_BODY, endpoint)), params);
+              promise.complete(Optional.empty());
+            }
+          } catch (DecodeException ex) {
+            LOGGER.debug("Cannot process instances, invalid json body returned.", ex);
+            logError(new IllegalStateException(format(ERROR_MESSAGE_INVALID_BODY, endpoint, response.bodyAsString())), params);
+            promise.complete(Optional.empty());
+          }
         }
       }
     });
