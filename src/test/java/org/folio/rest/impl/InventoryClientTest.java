@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(VertxUnitRunner.class)
@@ -75,6 +74,17 @@ class InventoryClientTest extends RestVerticleTestBase {
   void shouldReturnEmptyOptional_whenErrorOccurredWhileRequestingInstanceBulkUUIDS() {
     // given
     String query = "error from client";
+    // when
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+    }).onFailure(Assertions::fail);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned() {
+    // given
+    String query = "inventory 500";
     // when
     inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
