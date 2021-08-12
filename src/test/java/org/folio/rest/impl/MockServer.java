@@ -400,8 +400,6 @@ public class MockServer {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, RECORD_BULK_IDS, ctx);
-      } else if (ctx.request().getParam("query").contains("error from client")) {
-        throw new IllegalStateException("client exception");
       } else if (ctx.request().getParam("query").contains("inventory 500")) {
         mockResponseWith500Status(ctx);
       } else if (ctx.request().getParam("query").contains("empty json response")) {

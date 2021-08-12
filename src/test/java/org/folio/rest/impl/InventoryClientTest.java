@@ -75,18 +75,6 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldReturnEmptyOptional_whenErrorOccurredWhileRequestingInstanceBulkUUIDS(VertxTestContext testContext) {
-    // given
-    String query = "error from client";
-    // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
-
-  @Test
   void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext) {
     // given
     String query = "inventory 500";
