@@ -12,6 +12,7 @@ import org.folio.config.ApplicationConfig;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -67,10 +68,7 @@ class InventoryClientTest extends RestVerticleTestBase {
       //then
       Assert.assertTrue(inventoryResponse.isPresent());
       Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
-    }).onFailure(throwable -> {
-      System.out.println("kek");
-      fail(throwable);
-    });
+    }).onFailure(Assertions::fail);
   }
 
   @Test
