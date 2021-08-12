@@ -72,6 +72,17 @@ class InventoryClientTest extends RestVerticleTestBase {
   }
 
   @Test
+  void shouldReturnEmptyOptional_whenErrorOccurredWhileRequestingInstanceBulkUUIDS() {
+    // given
+    String query = "error from client";
+    // when
+    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+    }).onFailure(Assertions::fail);
+  }
+
+  @Test
   void shouldRetrieveNatureOfContentTerms() {
     // when
     Map<String, JsonObject> natureOfContentTerms = inventoryClient.getNatureOfContentTerms(JOB_EXECUTION_ID, okapiConnectionParams);
