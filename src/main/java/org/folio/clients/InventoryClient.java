@@ -117,7 +117,7 @@ public class InventoryClient {
           try {
             JsonObject instances = response.bodyAsJsonObject();
             if (instances != null) {
-              promise.complete(Optional.of(response.bodyAsJsonObject()));
+              promise.complete(Optional.of(instances));
             } else {
               logError(new IllegalStateException(format(ERROR_MESSAGE_EMPTY_BODY, endpoint)), params);
               promise.complete(Optional.empty());
