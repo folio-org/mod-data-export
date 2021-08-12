@@ -1,18 +1,22 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxTestContext;
 
 import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.InventoryClient;
+import org.folio.config.ApplicationConfig;
+import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,25 +26,30 @@ import java.util.Optional;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(VertxUnitRunner.class)
 class InventoryClientTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static OkapiConnectionParams okapiConnectionParams;
 
+  @Autowired
+  private InventoryClient inventoryClient;
+
   @BeforeAll
-  static void beforeClass() {
+  void beforeClass() {
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
     headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
     okapiConnectionParams = new OkapiConnectionParams(headers);
+    Context context = vertx.getOrCreateContext();
+    SpringContextUtil.init(vertx, context, ApplicationConfig.class);
+    SpringContextUtil.autowireDependencies(this, context);
   }
 
 
   @Test
   void shouldRetrieveExistingInstances() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     List<String> uuids = Arrays.asList("7fbd5d84-62d1-44c6-9c45-6cb173998bbd", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     // when
     Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesByIds(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
@@ -52,20 +61,20 @@ class InventoryClientTest extends RestVerticleTestBase {
   @Test
   void shouldRetrieveInstanceBulkUUIDS() {
     // given
-    InventoryClient inventoryClient = new InventoryClient();
     String query = "cql query";
     // when
     inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
       Assert.assertTrue(inventoryResponse.isPresent());
       Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
-    }).onFailure(fail());
+    }).onFailure(throwable -> {
+      System.out.println("kek");
+      fail(throwable);
+    });
   }
 
   @Test
   void shouldRetrieveNatureOfContentTerms() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> natureOfContentTerms = inventoryClient.getNatureOfContentTerms(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -75,8 +84,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveLocations() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> locations = inventoryClient.getLocations(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -86,8 +93,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveLibraries() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> libraries = inventoryClient.getLibraries(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -97,8 +102,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveCampuses() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> locations = inventoryClient.getCampuses(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -108,8 +111,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveInstitutions() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> locations = inventoryClient.getInstitutions(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -119,8 +120,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveMaterialTypes() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> materialTypes = inventoryClient.getMaterialTypes(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -131,7 +130,6 @@ class InventoryClientTest extends RestVerticleTestBase {
   @Test
   void shouldRetrieveExistingHoldings() {
     // given
-    InventoryClient inventoryClient = new InventoryClient();
     String instanceID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
     // when
     Optional<JsonObject> holdingsResponse = inventoryClient.getHoldingsByInstanceId(instanceID, JOB_EXECUTION_ID, okapiConnectionParams);
@@ -143,7 +141,6 @@ class InventoryClientTest extends RestVerticleTestBase {
   @Test
   void shouldRetrieveExistingItems() {
     // given
-    InventoryClient inventoryClient = new InventoryClient();
     List<String> holdingIDs = Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61");
     // when
     Optional<JsonObject> itemsResponse = inventoryClient.getItemsByHoldingIds(holdingIDs, JOB_EXECUTION_ID, okapiConnectionParams);
@@ -154,8 +151,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveContributorNameTypes() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> contributorNameTypes = inventoryClient.getContributorNameTypes(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -165,8 +160,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveElectronicAccessRelationships() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> electronicAccessRelationships = inventoryClient.getElectronicAccessRelationships(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
@@ -176,8 +169,6 @@ class InventoryClientTest extends RestVerticleTestBase {
 
   @Test
   void shouldRetrieveCallNumberTypes() {
-    // given
-    InventoryClient inventoryClient = new InventoryClient();
     // when
     Map<String, JsonObject> electronicAccessRelationships = inventoryClient.getCallNumberTypes(JOB_EXECUTION_ID, okapiConnectionParams);
     // then
