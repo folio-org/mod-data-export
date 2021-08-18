@@ -393,6 +393,8 @@ class JobExecutionServiceUnitTest {
     future.onComplete(ar ->
       context.verify(() -> {
         assertTrue(ar.succeeded());
+        assertNotNull(jobExecution.getCompletedDate());
+        assertNotNull(secondJobExecution.getCompletedDate());
         verify(jobExecutionDao).update(eq(jobExecution.withStatus(FAIL)), eq(TENANT_ID));
         verify(jobExecutionDao).update(eq(secondJobExecution.withStatus(FAIL)), eq(TENANT_ID));
         context.completeNow();

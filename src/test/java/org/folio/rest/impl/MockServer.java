@@ -400,6 +400,12 @@ public class MockServer {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, RECORD_BULK_IDS, ctx);
+      } else if (ctx.request().getParam("query").contains("inventory 500")) {
+        mockResponseWith500Status(ctx);
+      } else if (ctx.request().getParam("query").contains("empty json response")) {
+        ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
+      } else if (ctx.request().getParam("query").contains("invalid json returned")) {
+        ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end("{qwe");
       } else {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       }

@@ -1,9 +1,9 @@
 package org.folio.service.file.upload;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.InventoryClient;
@@ -22,10 +22,11 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
@@ -34,6 +35,7 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.NEW;
 
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
+
   @Autowired
   private FileDefinitionService fileDefinitionService;
   @Autowired
@@ -46,6 +48,8 @@ public class FileUploadServiceImpl implements FileUploadService {
   private ErrorLogService errorLogService;
   @Autowired
   private UsersClient usersClient;
+  @Autowired
+  private Vertx vertx;
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
@@ -77,22 +81,29 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
-      Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(query, params);
-      List<String> ids = new ArrayList<>();
-      if (instancesUUIDs.isPresent()) {
-        JsonArray jsonIds = instancesUUIDs.get().getJsonArray("ids");
-        if (jsonIds.size() > 0) {
-          for (Object id : jsonIds) {
-            ids.add(((JsonObject) id).getString("id"));
+      return inventoryClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
+        List<String> ids = new ArrayList<>();
+        if (optionalInstancesUUIDs.isPresent()) {
+          JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
+          if (jsonIds.size() > 0) {
+            for (Object id : jsonIds) {
+              ids.add(((JsonObject) id).getString("id"));
+            }
+            JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
+            return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+              .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
           }
-          JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
-          return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-            .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
         }
-      }
+        return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
+      });
+    } else {
+      return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
     }
+  }
+
+  private Future<FileDefinition> updateFileDefinitionWithEmptyProgressIfAbsent(FileDefinition fileDefinition, String tenantId) {
     if (Objects.isNull(fileDefinition.getJobExecutionId())) {
-      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId());
+      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
     }
     return Future.succeededFuture(fileDefinition);
   }
@@ -136,16 +147,18 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   private Future<FileDefinition> uploadFileWithCQLQueryQuickExport(QuickExportRequest request, FileDefinition fileDefinition, JobExecution jobExecution, OkapiConnectionParams params) {
     Promise<FileDefinition> promise = Promise.promise();
-    Optional<JsonObject> instancesUUIDs = inventoryClient.getInstancesBulkUUIDs(request.getCriteria(), params);
-    if (instancesUUIDs.isPresent()) {
-      saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    } else {
-      saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
-        .onSuccess(promise::complete)
-        .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
-    }
+    inventoryClient.getInstancesBulkUUIDsAsync(request.getCriteria(), params).onComplete(instancesUUIDsResult -> {
+      Optional<JsonObject> instancesUUIDs = instancesUUIDsResult.result();
+      if (instancesUUIDs.isPresent()) {
+        saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      } else {
+        saveUUIDsFromJson(new JsonObject(), fileDefinition, jobExecution, request, params)
+          .onSuccess(promise::complete)
+          .onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
+      }
+    });
     return promise.future();
   }
 
