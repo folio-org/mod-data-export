@@ -31,7 +31,8 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.folio.rest.tools.PomReader;
+import org.folio.rest.tools.utils.ModuleName;
+import org.folio.rest.tools.utils.RmbVersion;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -207,7 +208,7 @@ public abstract class RestVerticleTestBase {
   }
 
   public static ValidatableResponse postToTenant(Header tenantHeader) throws MalformedURLException {
-    String moduleId = String.format("%s-%s", PomReader.INSTANCE.getModuleName(), PomReader.INSTANCE.getVersion());
+    String moduleId = String.format("%s-%s", ModuleName.getModuleName(), RmbVersion.getRmbVersion());
     JsonObject jsonBody = new JsonObject();
     jsonBody.put("module_to", moduleId);
     URL url = new URL("http", "localhost", port, "/_/tenant");
@@ -221,15 +222,14 @@ public abstract class RestVerticleTestBase {
   }
 
   public static void deleteTenant(Header tenantHeader)
-      throws MalformedURLException {
-      given()
-        .header(tenantHeader)
-        .contentType(ContentType.JSON)
-        .delete("/_/tenant")
-        .then()
-        .statusCode(204);
-    }
-
+    throws MalformedURLException {
+    given()
+      .header(tenantHeader)
+      .contentType(ContentType.JSON)
+      .delete("/_/tenant")
+      .then()
+      .statusCode(204);
+  }
 
   protected RequestSpecification buildCustomJsonRequestSpecification(String tenantId) {
     return new RequestSpecBuilder()
