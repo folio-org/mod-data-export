@@ -10,7 +10,8 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
+import org.folio.postgres.testing.PostgresTesterContainer;
+import org.folio.rest.tools.utils.ModuleName;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.jupiter.api.*;
 import org.junit.platform.runner.JUnitPlatform;
@@ -62,10 +63,8 @@ public class StorageTestSuite {
     mockServer = new MockServer(mockPort);
     mockServer.start();
 
-    logger.info("Start embedded database");
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-
+    logger.info("Start postgres tester container");
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
     deployVerticle();
   }
@@ -84,8 +83,8 @@ public class StorageTestSuite {
     });
 
     undeploymentComplete.get(20, TimeUnit.SECONDS);
-    logger.info("Stop database");
-    PostgresClient.stopEmbeddedPostgres();
+    logger.info("Stop postgres tester container");
+    PostgresClient.stopPostgresTester();
     mockServer.close();
   }
 
@@ -97,7 +96,7 @@ public class StorageTestSuite {
     vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
       if (res.succeeded()) {
         TenantAttributes tenantAttributes = new TenantAttributes();
-        tenantAttributes.setModuleTo(PomReader.INSTANCE.getModuleName());
+        tenantAttributes.setModuleTo(ModuleName.getModuleName());
         try {
           tenantClient.postTenant(tenantAttributes, res2 -> {
             if (isSuccess(res2.result().statusCode())){
