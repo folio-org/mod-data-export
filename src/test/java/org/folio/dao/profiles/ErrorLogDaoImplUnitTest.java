@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -115,7 +116,7 @@ class ErrorLogDaoImplUnitTest {
     // given
     when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
     doThrow(RuntimeException.class)
-      .when(postgresClient).get(eq(TABLE), eq(ErrorLog.class), any(Criterion.class), any(Boolean.class), any(Handler.class));
+      .when(postgresClient).getById(eq(TABLE), anyString(), eq(ErrorLog.class), any(Handler.class));
 
     // when
     Future<Optional<ErrorLog>> future = errorLogDao.getById(errorLog.getId(), TENANT_ID);

@@ -9,7 +9,6 @@ import io.vertx.sqlclient.RowSet;
 import org.folio.dao.ErrorLogDao;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
-import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
@@ -21,7 +20,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Optional;
 
-import static org.folio.util.HelperUtils.constructCriteria;
 import static org.folio.util.HelperUtils.getCQLWrapper;
 
 @Repository
@@ -29,7 +27,6 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   private static final String TABLE = "error_logs";
-  private static final String ID_FIELD = "'id'";
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -73,8 +70,7 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
   public Future<ErrorLog> update(ErrorLog errorLog, String tenantId) {
     Promise<ErrorLog> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, errorLog.getId());
-      pgClientFactory.getInstance(tenantId).update(TABLE, errorLog, new Criterion(idCrit), true, updateResult -> {
+      pgClientFactory.getInstance(tenantId).update(TABLE, errorLog, errorLog.getId(), updateResult -> {
         if (updateResult.failed()) {
           LOGGER.error("Could not update errorLog with id {}", errorLog.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
@@ -90,17 +86,16 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
       LOGGER.error("Error updating errorLog", e);
       promise.fail(e);
     }
-    return promise.future().map(errorLog);
+    return promise.future();
   }
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, id);
-      pgClientFactory.getInstance(tenantId).delete(TABLE, new Criterion(idCrit), promise);
+      pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
     return promise.future().map(updateResult -> updateResult.rowCount() == 1);
@@ -108,17 +103,14 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
 
   @Override
   public Future<Optional<ErrorLog>> getById(String id, String tenantId) {
-    Promise<Results<ErrorLog>> promise = Promise.promise();
+    Promise<ErrorLog> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, id);
-      pgClientFactory.getInstance(tenantId).get(TABLE, ErrorLog.class, new Criterion(idCrit), false, promise);
+      pgClientFactory.getInstance(tenantId).getById(TABLE, id, ErrorLog.class, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
-    return promise.future()
-      .map(Results::getResults)
-      .map(mappingProfiles -> mappingProfiles.isEmpty() ? Optional.empty() : Optional.of(mappingProfiles.get(0)));
+    return promise.future().map(Optional::ofNullable);
   }
 
 }

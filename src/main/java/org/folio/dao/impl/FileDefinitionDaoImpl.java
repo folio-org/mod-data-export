@@ -18,7 +18,6 @@ import org.folio.rest.persist.interfaces.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import static org.folio.util.HelperUtils.constructCriteria;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @Repository
@@ -32,7 +31,6 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
   private static final String LESS_OR_EQUAL_OPERATION = "<=";
   private static final String AND_OPERATION = "AND";
   private static final String TABLE = "file_definitions";
-  private static final String ID_FIELD = "'id'";
 
   private PostgresClientFactory pgClientFactory;
 
@@ -42,17 +40,14 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
 
   @Override
   public Future<Optional<FileDefinition>> getById(String id, String tenantId) {
-    Promise<Results<FileDefinition>> promise = Promise.promise();
+    Promise<FileDefinition> promise = Promise.promise();
     try {
-      Criteria idCrit = constructCriteria(ID_FIELD, id);
-      pgClientFactory.getInstance(tenantId).get(TABLE, FileDefinition.class, new Criterion(idCrit), false, promise);
+      pgClientFactory.getInstance(tenantId).getById(TABLE, id, FileDefinition.class, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error(e.getMessage(), e);
       promise.fail(e);
     }
-    return promise.future()
-      .map(Results::getResults)
-      .map(fileDefinitions -> fileDefinitions.isEmpty() ? Optional.empty() : Optional.of(fileDefinitions.get(0)));
+    return promise.future().map(Optional::ofNullable);
   }
 
   @Override
