@@ -3,6 +3,8 @@ package org.folio.service.mapping.converter;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import io.vertx.core.json.JsonObject;
+
+import java.io.IOException;
 import java.util.Collections;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -80,17 +82,22 @@ public class SrsRecordConverterService extends RecordConverter {
   }
 
   public String convert(String jsonRecord, List<VariableField> additionalFields) {
-    MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    MarcWriter marcStreamWriter = new MarcJsonWriter(byteArrayOutputStream);
-    while (marcJsonReader.hasNext()) {
-      Record record = marcJsonReader.next();
-      if (CollectionUtils.isNotEmpty(additionalFields)) {
-        record = appendAdditionalFields(record, additionalFields);
+    var byteArrayInputStream = new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
+    var byteArrayOutputStream = new ByteArrayOutputStream();
+    try (byteArrayInputStream; byteArrayOutputStream) {
+      MarcReader marcJsonReader = new MarcJsonReader(byteArrayInputStream);
+      MarcWriter marcStreamWriter = new MarcJsonWriter(byteArrayOutputStream);
+      while (marcJsonReader.hasNext()) {
+        Record record = marcJsonReader.next();
+        if (CollectionUtils.isNotEmpty(additionalFields)) {
+          record = appendAdditionalFields(record, additionalFields);
+        }
+        marcStreamWriter.write(record);
       }
-      marcStreamWriter.write(record);
+      return byteArrayOutputStream.toString();
+    } catch (IOException e) {
+      return null;
     }
-    return byteArrayOutputStream.toString();
   }
 
   private Record appendAdditionalFields(Record record, List<VariableField> additionalFields) {
