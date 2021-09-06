@@ -95,6 +95,7 @@ public class SrsRecordConverterService extends RecordConverter {
 
   private Record appendAdditionalFields(Record record, List<VariableField> additionalFields) {
     Record sortedRecord = sortedMarcFactory.newRecord();
+    sortedRecord.getLeader().setRecordStatus(record.getLeader().getRecordStatus());
     for (VariableField recordField : record.getVariableFields()) {
       sortedRecord.addVariableField(recordField);
     }
