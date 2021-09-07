@@ -2,6 +2,7 @@ package org.folio.service.export;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -122,14 +123,19 @@ public class LocalFileSystemExportService implements ExportService {
    * @return array of bytes
    */
   private byte[] convertJsonRecordToMarcRecord(String jsonRecord) {
-    MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
-    while (marcJsonReader.hasNext()) {
-      Record record = marcJsonReader.next();
-      marcStreamWriter.write(record);
+    var byteArrayInputStream = new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
+    var byteArrayOutputStream = new ByteArrayOutputStream();
+    try (byteArrayInputStream; byteArrayOutputStream) {
+      MarcReader marcJsonReader = new MarcJsonReader(byteArrayInputStream);
+      MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
+      while (marcJsonReader.hasNext()) {
+        Record record = marcJsonReader.next();
+        marcStreamWriter.write(record);
+      }
+      return byteArrayOutputStream.toByteArray();
+    } catch (IOException e) {
+      return null;
     }
-    return byteArrayOutputStream.toByteArray();
   }
 
 
