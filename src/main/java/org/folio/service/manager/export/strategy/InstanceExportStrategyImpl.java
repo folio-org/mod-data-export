@@ -125,6 +125,7 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
         jobExecutionService.prepareAndSaveJobForFailedExport(res, fileExportDefinition, optionalUser.get(),
           0, true, params.getTenantId());
       });
+        throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
       }
     }
   }
