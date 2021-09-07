@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
@@ -63,7 +62,14 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public boolean hasNext() {
-    return iterator.hasNext();
+    boolean result;
+    try {
+      //handle unchecked java.nio.charset exception
+      result = iterator.hasNext();
+    } catch (Exception exc) {
+      result = false;
+    }
+    return result;
   }
 
   @Override
