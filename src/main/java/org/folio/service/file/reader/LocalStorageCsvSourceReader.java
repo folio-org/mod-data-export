@@ -93,7 +93,8 @@ public class LocalStorageCsvSourceReader implements SourceReader {
     if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
         return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines);
-      } catch (IOException e) {
+        // handle unchecked java.nio.charset exception
+      } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
       }
     }
