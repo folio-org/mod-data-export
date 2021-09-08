@@ -122,8 +122,12 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
         jobExecutionService.getById(exportPayload.getJobExecutionId(), params.getTenantId()).onSuccess(res -> {
           Optional<JsonObject> optionalUser = usersClient.getById(fileExportDefinition.getMetadata().getCreatedByUserId(),
             exportPayload.getJobExecutionId(), params);
-        jobExecutionService.prepareAndSaveJobForFailedExport(res, fileExportDefinition, optionalUser.get(),
-          0, true, params.getTenantId());
+          if (optionalUser.isPresent()) {
+            jobExecutionService.prepareAndSaveJobForFailedExport(res, fileExportDefinition, optionalUser.get(),
+              0, true, params.getTenantId());
+          } else {
+            LOGGER.error("User which created file export definition does not exist: job failed export cannot be performed.");
+          }
       });
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
       }

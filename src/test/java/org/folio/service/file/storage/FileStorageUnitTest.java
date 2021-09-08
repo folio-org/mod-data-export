@@ -50,6 +50,9 @@ class FileStorageUnitTest {
     String sourcePath = savedFileDefinition.getSourcePath();
     savedFileDefinition.setSourcePath(null);
     assertFalse(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
+    // case when path is empty
+    savedFileDefinition.setSourcePath("");
+    assertFalse(fileStorage.isFileExist(savedFileDefinition.getSourcePath()));
     savedFileDefinition.setSourcePath(sourcePath);
     // clean up storage
     FileUtils.deleteDirectory(new File("./storage"));

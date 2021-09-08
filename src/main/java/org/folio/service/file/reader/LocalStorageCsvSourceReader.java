@@ -62,12 +62,12 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public boolean hasNext() {
-    boolean result;
+    boolean result = false;
     try {
       //handle unchecked java.nio.charset exception
       result = iterator.hasNext();
     } catch (Exception exc) {
-      result = false;
+      LOGGER.error(exc.getMessage(), exc);
     }
     return result;
   }
