@@ -128,7 +128,7 @@ public class LocalFileSystemStorage implements FileStorage {
 
   @Override
   public boolean isFileExist(String path) {
-    return fileSystem.existsBlocking(path);
+    return path != null && !path.isEmpty() && fileSystem.existsBlocking(path);
   }
 
   private void deleteParentDirectory(Path filePath) throws IOException {

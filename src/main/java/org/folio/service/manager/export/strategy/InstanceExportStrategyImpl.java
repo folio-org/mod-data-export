@@ -4,15 +4,18 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.HttpStatus;
+import org.folio.clients.UsersClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.export.ExportService;
+import org.folio.service.job.JobExecutionService;
 import org.folio.service.loader.InventoryLoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
@@ -49,6 +52,10 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
   private ErrorLogService errorLogService;
   @Autowired
   private MappingProfileService mappingProfileService;
+  @Autowired
+  private JobExecutionService jobExecutionService;
+  @Autowired
+  private UsersClient usersClient;
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
@@ -109,7 +116,21 @@ public class InstanceExportStrategyImpl implements ExportStrategy {
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
-      exportService.postExport(fileExportDefinition, params.getTenantId());
+      try {
+        exportService.postExport(fileExportDefinition, params.getTenantId());
+      } catch (ServiceException exc) {
+        jobExecutionService.getById(exportPayload.getJobExecutionId(), params.getTenantId()).onSuccess(res -> {
+          Optional<JsonObject> optionalUser = usersClient.getById(fileExportDefinition.getMetadata().getCreatedByUserId(),
+            exportPayload.getJobExecutionId(), params);
+          if (optionalUser.isPresent()) {
+            jobExecutionService.prepareAndSaveJobForFailedExport(res, fileExportDefinition, optionalUser.get(),
+              0, true, params.getTenantId());
+          } else {
+            LOGGER.error("User which created file export definition does not exist: job failed export cannot be performed.");
+          }
+      });
+        throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
+      }
     }
   }
 

@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
@@ -63,7 +62,14 @@ public class LocalStorageCsvSourceReader implements SourceReader {
 
   @Override
   public boolean hasNext() {
-    return iterator.hasNext();
+    boolean result = false;
+    try {
+      //handle unchecked java.nio.charset exception
+      result = iterator.hasNext();
+    } catch (Exception exc) {
+      LOGGER.error(exc.getMessage(), exc);
+    }
+    return result;
   }
 
   @Override
@@ -87,7 +93,8 @@ public class LocalStorageCsvSourceReader implements SourceReader {
     if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
         return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines);
-      } catch (IOException e) {
+        // handle unchecked java.nio.charset exception
+      } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
       }
     }
