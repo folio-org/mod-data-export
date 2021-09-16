@@ -8,6 +8,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,6 +43,7 @@ import io.vertx.core.json.JsonObject;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
+import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
@@ -53,6 +58,8 @@ public class LocalFileSystemExportService implements ExportService {
   private static final int SINGLE_INSTANCE_INDEX = 0;
   private static final String INSTANCES = "instances";
   private static final int SINGLE_INSTANCE = 1;
+  private static final String CONTROL_CHARACTERS_PATTERN = "\\p{Cntrl}";
+  private static final String CONTROL_CHARACTERS_REPLACE_PATTERN = "[\\p{Cntrl}&&[^\n\r]]";
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
@@ -80,11 +87,11 @@ public class LocalFileSystemExportService implements ExportService {
           }
         } catch (MarcException e) {
           failedRecords++;
-          String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
-          inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesJson -> {
-            JsonArray instances = instancesJson.getJsonArray(INSTANCES);
-            errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode(), jobExecutionId, e, params);
-          });
+          if (Pattern.compile(CONTROL_CHARACTERS_PATTERN).matcher(jsonRecord).find()) {
+            handleControlCharacters(jsonRecord, jobExecutionId, params);
+          } else {
+            handleMarcException(new JsonObject(jsonRecord), jobExecutionId, params, ERROR_MARC_RECORD_CANNOT_BE_CONVERTED, e.getMessage());
+          }
         } catch (RuntimeException e) {
           failedRecords++;
           LOGGER.error("Error during saving srs record to file with content: {}", jsonRecord);
@@ -92,6 +99,36 @@ public class LocalFileSystemExportService implements ExportService {
       }
       marcToExport.setValue(failedRecords);
     }
+  }
+
+  private void handleControlCharacters(String jsonRecord, String jobExecutionId, OkapiConnectionParams params) {
+    final String controlCharacterMarker = UUID.randomUUID().toString();
+    ErrorCode errorCode = ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
+    // Replace all control characters with markers, otherwise JsonObject cannot be instantiated.
+    jsonRecord = jsonRecord.replaceAll(CONTROL_CHARACTERS_REPLACE_PATTERN, controlCharacterMarker);
+    JsonObject marcRecord = new JsonObject(jsonRecord);
+    // Find all affected fields.
+    List<String> affectedFields = new ArrayList<>();
+    for (Object field: marcRecord.getJsonArray("fields")) {
+      if (field instanceof JsonObject) {
+        JsonObject fieldJson = (JsonObject) field;
+        fieldJson.fieldNames().forEach(fieldName -> {
+          if (fieldJson.getString(fieldName).contains(controlCharacterMarker)) {
+            affectedFields.add(fieldName);
+          }
+        });
+      }
+    }
+    String errorLogMessage = errorCode.getDescription() + String.join(", ", affectedFields);
+    handleMarcException(marcRecord, jobExecutionId, params, errorCode, errorLogMessage);
+  }
+
+  private void handleMarcException(JsonObject marcRecord, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
+    String instId = getInstanceIdFromMarcRecord(marcRecord);
+    inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
+      JsonArray instances = instancesByIds.getJsonArray(INSTANCES);
+      errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
+    });
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -128,9 +165,14 @@ public class LocalFileSystemExportService implements ExportService {
     try (byteArrayInputStream; byteArrayOutputStream) {
       MarcReader marcJsonReader = new MarcJsonReader(byteArrayInputStream);
       MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
-      while (marcJsonReader.hasNext()) {
-        Record record = marcJsonReader.next();
-        marcStreamWriter.write(record);
+      try {
+        while (marcJsonReader.hasNext()) {
+          Record record = marcJsonReader.next();
+          marcStreamWriter.write(record);
+        }
+        // Handle unchecked json parse exception when parser encounters with control character.
+      } catch (Exception e) {
+        throw new MarcException(e.getMessage());
       }
       return byteArrayOutputStream.toByteArray();
     } catch (IOException e) {
