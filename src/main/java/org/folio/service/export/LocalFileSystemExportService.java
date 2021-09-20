@@ -60,6 +60,7 @@ public class LocalFileSystemExportService implements ExportService {
   private static final String CONTROL_CHARACTERS_PATTERN = "\\p{Cntrl}";
   private static final String CONTROL_CHARACTERS_REPLACE_PATTERN = "[\\p{Cntrl}&&[^\n\r]]";
   private static final String BETWEEN_DOUBLE_QUOTES_REPLACE_PATTERN = "\".*?\"";
+  private static final String JSON_CHARACTERS_EXCEPT_DOUBLE_QUOTES = ":{}[] ,\r\n";
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
@@ -108,7 +109,7 @@ public class LocalFileSystemExportService implements ExportService {
     // First, remove all data inside double quotes.
     jsonRecord = jsonRecord.replaceAll(BETWEEN_DOUBLE_QUOTES_REPLACE_PATTERN, EMPTY);
     // Then, split by the rest of possible json characters to allocate only data after a closing double quote.
-    return StringUtils.split(jsonRecord, ":{}[] ,\r\n");
+    return StringUtils.split(jsonRecord, JSON_CHARACTERS_EXCEPT_DOUBLE_QUOTES);
   }
 
   private void handleControlCharacters(String jsonRecord, String jobExecutionId, OkapiConnectionParams params) {
@@ -135,7 +136,7 @@ public class LocalFileSystemExportService implements ExportService {
   private void findAllAffectedFieldsAndHandleException(String jsonRecord, ErrorCode errorCode, String marker, String jobExecutionId, OkapiConnectionParams params) {
     JsonObject marcRecord = new JsonObject(jsonRecord);
     List<String> affectedFields = new ArrayList<>();
-    for (Object field : marcRecord.getJsonArray("fields")) {
+    for (Object field: marcRecord.getJsonArray("fields")) {
       if (field instanceof JsonObject) {
         JsonObject fieldJson = (JsonObject) field;
         fieldJson.fieldNames().forEach(fieldName -> {
