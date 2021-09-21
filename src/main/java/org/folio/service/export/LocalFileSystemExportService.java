@@ -61,6 +61,9 @@ public class LocalFileSystemExportService implements ExportService {
   private static final String CONTROL_CHARACTERS_REPLACE_PATTERN = "[\\p{Cntrl}&&[^\n\r]]";
   private static final String BETWEEN_DOUBLE_QUOTES_REPLACE_PATTERN = "\".*?\"";
   private static final String JSON_CHARACTERS_EXCEPT_DOUBLE_QUOTES = ":{}[] ,\r\n";
+  private static final int NUMBER_OF_SYMBOLS_IN_UUID = 36;
+  private static final String INSTANCE_FIELD = "\"999\":";
+  private static final String INSTANCE_SUBFIELD = "\"i\":\"";
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
@@ -89,12 +92,17 @@ public class LocalFileSystemExportService implements ExportService {
         } catch (MarcException e) {
           failedRecords++;
           String[] dataAfterClosingQuote = getDataAfterClosingQuote(jsonRecord);
-          if (dataAfterClosingQuote.length != 0) {
-            handleDataAfterClosingQuote(dataAfterClosingQuote, jsonRecord, jobExecutionId, params);
-          } else if (Pattern.compile(CONTROL_CHARACTERS_PATTERN).matcher(jsonRecord).find()) {
-            handleControlCharacters(jsonRecord, jobExecutionId, params);
-          } else {
-            handleMarcException(new JsonObject(jsonRecord), jobExecutionId, params, ERROR_MARC_RECORD_CANNOT_BE_CONVERTED, e.getMessage());
+          try {
+            if (dataAfterClosingQuote.length != 0) {
+              handleDataAfterClosingQuote(dataAfterClosingQuote, jsonRecord, jobExecutionId, params);
+            } else if (Pattern.compile(CONTROL_CHARACTERS_PATTERN).matcher(jsonRecord).find()) {
+              handleControlCharacters(jsonRecord, jobExecutionId, params);
+            } else {
+              String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
+              handleMarcException(instId, jobExecutionId, params, ERROR_MARC_RECORD_CANNOT_BE_CONVERTED, e.getMessage());
+            }
+          } catch (Exception jsonIsInvalidException) {
+            handleSpecificExceptionWhenJsonIsInvalid(jsonRecord, jobExecutionId, params, e.getMessage());
           }
         } catch (RuntimeException e) {
           failedRecords++;
@@ -103,6 +111,32 @@ public class LocalFileSystemExportService implements ExportService {
       }
       marcToExport.setValue(failedRecords);
     }
+  }
+
+  private void handleSpecificExceptionWhenJsonIsInvalid(String jsonRecord, String jobExecutionId, OkapiConnectionParams params, String marcExceptionMessage) {
+    ErrorCode errorCode = ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
+    String affectedField = StringUtils.substringAfter(marcExceptionMessage, "Member Name: ");
+    if (affectedField.isBlank()) {
+      affectedField = ": affected fields cannot be determined";
+    }
+    String errorLogMessage = errorCode.getDescription() + String.join(", ", affectedField);
+    String instId = tryToRetrieveInstanceIdWhenJsonIsInvalid(jsonRecord);
+    if (!instId.isEmpty()) {
+      handleMarcException(instId, jobExecutionId, params, ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS, errorLogMessage);
+    } else {
+      errorLogService.saveWithAffectedRecord(new JsonObject(), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
+    }
+  }
+
+  private String tryToRetrieveInstanceIdWhenJsonIsInvalid(String jsonRecord) {
+    String instId = EMPTY;
+    try {
+      jsonRecord = StringUtils.deleteWhitespace(jsonRecord);
+      instId = StringUtils.substringAfterLast(StringUtils.substringAfter(jsonRecord, INSTANCE_FIELD), INSTANCE_SUBFIELD).substring(0, NUMBER_OF_SYMBOLS_IN_UUID);
+    } catch (IndexOutOfBoundsException e) {
+      // Case when instance id cannot be found.
+    }
+    return instId;
   }
 
   private String[] getDataAfterClosingQuote(String jsonRecord) {
@@ -147,11 +181,11 @@ public class LocalFileSystemExportService implements ExportService {
       }
     }
     String errorLogMessage = errorCode.getDescription() + String.join(", ", affectedFields);
-    handleMarcException(marcRecord, jobExecutionId, params, errorCode, errorLogMessage);
+    String instId = getInstanceIdFromMarcRecord(marcRecord);
+    handleMarcException(instId, jobExecutionId, params, errorCode, errorLogMessage);
   }
 
-  private void handleMarcException(JsonObject marcRecord, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
-    String instId = getInstanceIdFromMarcRecord(marcRecord);
+  private void handleMarcException(String instId, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
     inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
       JsonArray instances = instancesByIds.getJsonArray(INSTANCES);
       errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
