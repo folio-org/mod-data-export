@@ -92,13 +92,13 @@ public class LocalFileSystemExportService implements ExportService {
           }
         } catch (MarcException e) {
           failedRecords++;
-          String[] dataAfterClosingQuote = getDataAfterClosingQuote(jsonRecord);
           try {
             try {
               String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
               handleMarcException(instId, jobExecutionId, params, ERROR_MARC_RECORD_CANNOT_BE_CONVERTED, e.getMessage());
             } catch (Exception jsonIsInvalidException) {
               // Try to catch data after closing quote or control characters.
+              String[] dataAfterClosingQuote = getDataAfterClosingQuote(jsonRecord);
               if (dataAfterClosingQuote.length != 0) {
                 handleDataAfterClosingQuote(dataAfterClosingQuote, jsonRecord, jobExecutionId, params);
               } else if (Pattern.compile(CONTROL_CHARACTERS_PATTERN).matcher(jsonRecord).find()) {
