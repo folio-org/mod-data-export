@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
-import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -135,7 +134,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
@@ -158,7 +157,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
@@ -181,7 +180,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
@@ -204,7 +203,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
@@ -223,7 +222,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
