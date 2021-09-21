@@ -2,11 +2,13 @@ package org.folio.service.export;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,6 +54,9 @@ public class LocalFileSystemExportService implements ExportService {
   private static final int SINGLE_INSTANCE_INDEX = 0;
   private static final String INSTANCES = "instances";
   private static final int SINGLE_INSTANCE = 1;
+  private static final int NUMBER_OF_SYMBOLS_IN_UUID = 36;
+  private static final String INSTANCE_FIELD = "\"999\":";
+  private static final String INSTANCE_SUBFIELD = "\"i\":\"";
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
@@ -79,11 +84,13 @@ public class LocalFileSystemExportService implements ExportService {
           }
         } catch (MarcException e) {
           failedRecords++;
-          String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
-          inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesJson -> {
-            JsonArray instances = instancesJson.getJsonArray(INSTANCES);
-            errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode(), jobExecutionId, e, params);
-          });
+          ErrorCode errorCode = ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
+          if (isJsonValid(jsonRecord)) {
+            String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
+            handleMarcException(instId, jobExecutionId, params, errorCode, e.getMessage());
+          } else {
+            handleSpecificExceptionWhenJsonIsInvalid(jsonRecord, jobExecutionId, params, errorCode, e.getMessage());
+          }
         } catch (RuntimeException e) {
           failedRecords++;
           LOGGER.error("Error during saving srs record to file with content: {}", jsonRecord);
@@ -91,6 +98,47 @@ public class LocalFileSystemExportService implements ExportService {
       }
       marcToExport.setValue(failedRecords);
     }
+  }
+
+  private boolean isJsonValid(String jsonRecord) {
+    try {
+      new JsonObject(jsonRecord);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  private void handleSpecificExceptionWhenJsonIsInvalid(String jsonRecord, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String marcExceptionMessage) {
+    String affectedField = StringUtils.substringAfter(marcExceptionMessage, "Member Name: ");
+    if (affectedField.isBlank()) {
+      affectedField = ": affected field cannot be determined";
+    }
+    String errorLogMessage = StringUtils.substringBefore(marcExceptionMessage, ";") + ". Field name " + String.join(", ", affectedField);
+    String instId = tryToRetrieveInstanceIdWhenJsonIsInvalid(jsonRecord);
+    if (!instId.isEmpty()) {
+      handleMarcException(instId, jobExecutionId, params, errorCode, errorLogMessage);
+    } else {
+      errorLogService.saveWithAffectedRecord(new JsonObject(), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
+    }
+  }
+
+  private String tryToRetrieveInstanceIdWhenJsonIsInvalid(String jsonRecord) {
+    String instId = EMPTY;
+    try {
+      jsonRecord = StringUtils.deleteWhitespace(jsonRecord);
+      instId = StringUtils.substringAfterLast(StringUtils.substringAfter(jsonRecord, INSTANCE_FIELD), INSTANCE_SUBFIELD).substring(0, NUMBER_OF_SYMBOLS_IN_UUID);
+    } catch (IndexOutOfBoundsException e) {
+      // Case when instance id cannot be found.
+    }
+    return instId;
+  }
+
+  private void handleMarcException(String instId, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
+    inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
+      JsonArray instances = instancesByIds.getJsonArray(INSTANCES);
+      errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
+    });
   }
 
   @SuppressWarnings("OptionalGetWithoutIsPresent")
@@ -122,14 +170,25 @@ public class LocalFileSystemExportService implements ExportService {
    * @return array of bytes
    */
   private byte[] convertJsonRecordToMarcRecord(String jsonRecord) {
-    MarcReader marcJsonReader = new MarcJsonReader(new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8)));
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
-    while (marcJsonReader.hasNext()) {
-      Record record = marcJsonReader.next();
-      marcStreamWriter.write(record);
+    var byteArrayInputStream = new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
+    var byteArrayOutputStream = new ByteArrayOutputStream();
+    try (byteArrayInputStream; byteArrayOutputStream) {
+      MarcReader marcJsonReader = new MarcJsonReader(byteArrayInputStream);
+      MarcWriter marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
+      try {
+        while (marcJsonReader.hasNext()) {
+          Record record = marcJsonReader.next();
+          marcStreamWriter.write(record);
+        }
+        // Handle unchecked json parse exception when parser encounters with control character or
+        // any other unexpected data.
+      } catch (Exception e) {
+        throw new MarcException(e.getMessage());
+      }
+      return byteArrayOutputStream.toByteArray();
+    } catch (IOException e) {
+      return null;
     }
-    return byteArrayOutputStream.toByteArray();
   }
 
 
