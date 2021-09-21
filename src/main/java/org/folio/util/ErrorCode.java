@@ -41,7 +41,6 @@ public enum ErrorCode {
   ERROR_FIELDS_MAPPING_SRS("error.mapping.fieldsMappingSrs", "An error occurred during fields mapping for srs record with id: %s, reason: %s, cause: %s"),
   ERROR_MESSAGE_PLACEHOLDER("error.messagePlaceholder", "%s"),
   ERROR_MARC_RECORD_CANNOT_BE_CONVERTED("error.messagePlaceholder", "Json record cannot be converted to marc format, cause: %s"),
-  ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS(ERROR_MESSAGE_PLACEHOLDER.code, "A quoted literal may not contain any control character. Field name "),
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type");
 
   private final String code;
@@ -78,7 +77,6 @@ public enum ErrorCode {
     errorCodesForUUIDs.add(ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON.getCode());
     errorCodesForUUIDs.add(ERROR_FIELDS_MAPPING_SRS.getCode());
     errorCodesForUUIDs.add(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode());
-    errorCodesForUUIDs.add(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode());
     errorCodesForUUIDs.add(UNDEFINED.getCode());
     return errorCodesForUUIDs;
   }
