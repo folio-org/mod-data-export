@@ -70,7 +70,7 @@ public class InventoryClient {
   private static final String ERROR_MESSAGE_INVALID_STATUS_CODE = "Exception while calling %s, message: Get invalid response with status: %s";
   private static final String ERROR_MESSAGE_INVALID_BODY = "Exception while calling %s, message: Got invalid response body: %s";
   private static final String ERROR_MESSAGE_EMPTY_BODY = "Exception while calling %s, message: empty body returned.";
-  private static final int REFERENCE_DATA_LIMIT = 200;
+  private static final int REFERENCE_DATA_LIMIT = 1000;
   private static final int HOLDINGS_LIMIT = 1000;
 
   @Autowired
