@@ -8,9 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +40,6 @@ import io.vertx.core.json.JsonObject;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
-import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
 
 @Service
 public class LocalFileSystemExportService implements ExportService {
@@ -58,10 +54,9 @@ public class LocalFileSystemExportService implements ExportService {
   private static final int SINGLE_INSTANCE_INDEX = 0;
   private static final String INSTANCES = "instances";
   private static final int SINGLE_INSTANCE = 1;
-  private static final String CONTROL_CHARACTERS_PATTERN = "\\p{Cntrl}";
-  private static final String CONTROL_CHARACTERS_REPLACE_PATTERN = "[\\p{Cntrl}&&[^\n\r]]";
-  private static final String BETWEEN_DOUBLE_QUOTES_REPLACE_PATTERN = "\".*?\"";
-  private static final String JSON_CHARACTERS_EXCEPT_DOUBLE_QUOTES = ":{}[] ,\r\n";
+  private static final int NUMBER_OF_SYMBOLS_IN_UUID = 36;
+  private static final String INSTANCE_FIELD = "\"999\":";
+  private static final String INSTANCE_SUBFIELD = "\"i\":\"";
 
   @Autowired
   @Qualifier("LocalFileSystemStorage")
@@ -89,13 +84,12 @@ public class LocalFileSystemExportService implements ExportService {
           }
         } catch (MarcException e) {
           failedRecords++;
-          String[] dataAfterClosingQuote = getDataAfterClosingQuote(jsonRecord);
-          if (dataAfterClosingQuote.length != 0) {
-            handleDataAfterClosingQuote(dataAfterClosingQuote, jsonRecord, jobExecutionId, params);
-          } else if (Pattern.compile(CONTROL_CHARACTERS_PATTERN).matcher(jsonRecord).find()) {
-            handleControlCharacters(jsonRecord, jobExecutionId, params);
+          ErrorCode errorCode = ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
+          if (isJsonValid(jsonRecord)) {
+            String instId = getInstanceIdFromMarcRecord(new JsonObject(jsonRecord));
+            handleMarcException(instId, jobExecutionId, params, errorCode, e.getMessage());
           } else {
-            handleMarcException(new JsonObject(jsonRecord), jobExecutionId, params, ERROR_MARC_RECORD_CANNOT_BE_CONVERTED, e.getMessage());
+            handleSpecificExceptionWhenJsonIsInvalid(jsonRecord, jobExecutionId, params, errorCode, e.getMessage());
           }
         } catch (RuntimeException e) {
           failedRecords++;
@@ -106,53 +100,41 @@ public class LocalFileSystemExportService implements ExportService {
     }
   }
 
-  private String[] getDataAfterClosingQuote(String jsonRecord) {
-    // First, remove all data inside double quotes.
-    jsonRecord = jsonRecord.replaceAll(BETWEEN_DOUBLE_QUOTES_REPLACE_PATTERN, EMPTY);
-    // Then, split by the rest of possible json characters to allocate only data after a closing double quote.
-    return StringUtils.split(jsonRecord, JSON_CHARACTERS_EXCEPT_DOUBLE_QUOTES);
-  }
-
-  private void handleControlCharacters(String jsonRecord, String jobExecutionId, OkapiConnectionParams params) {
-    final String controlCharacterMarker = UUID.randomUUID().toString();
-    ErrorCode errorCode = ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
-    // Replace all control characters with markers, otherwise JsonObject cannot be instantiated.
-    jsonRecord = jsonRecord.replaceAll(CONTROL_CHARACTERS_REPLACE_PATTERN, controlCharacterMarker);
-    findAllAffectedFieldsAndHandleException(jsonRecord, errorCode, controlCharacterMarker, jobExecutionId, params);
-  }
-
-  private void handleDataAfterClosingQuote(String[] dataAfterClosingQuote, String jsonRecord, String jobExecutionId, OkapiConnectionParams params) {
-    final String dataAfterClosingQuoteMarker = UUID.randomUUID().toString();
-    ErrorCode errorCode = ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
-    // Remove all data after a closing double quote to make a valid json.
-    for (String data: dataAfterClosingQuote) {
-      jsonRecord = jsonRecord.replace("\"" + data, dataAfterClosingQuoteMarker + "\"")
-        // Needs to handle mix case when record contains control characters as well, however
-        // the error message should be the same (see https://issues.folio.org/browse/MDEXP-442).
-        .replaceAll(CONTROL_CHARACTERS_REPLACE_PATTERN, dataAfterClosingQuoteMarker);
+  private boolean isJsonValid(String jsonRecord) {
+    try {
+      new JsonObject(jsonRecord);
+      return true;
+    } catch (Exception e) {
+      return false;
     }
-    findAllAffectedFieldsAndHandleException(jsonRecord, errorCode, dataAfterClosingQuoteMarker, jobExecutionId, params);
   }
 
-  private void findAllAffectedFieldsAndHandleException(String jsonRecord, ErrorCode errorCode, String marker, String jobExecutionId, OkapiConnectionParams params) {
-    JsonObject marcRecord = new JsonObject(jsonRecord);
-    List<String> affectedFields = new ArrayList<>();
-    for (Object field: marcRecord.getJsonArray("fields")) {
-      if (field instanceof JsonObject) {
-        JsonObject fieldJson = (JsonObject) field;
-        fieldJson.fieldNames().forEach(fieldName -> {
-          if (fieldJson.getString(fieldName).contains(marker)) {
-            affectedFields.add(fieldName);
-          }
-        });
-      }
+  private void handleSpecificExceptionWhenJsonIsInvalid(String jsonRecord, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String marcExceptionMessage) {
+    String affectedField = StringUtils.substringAfter(marcExceptionMessage, "Member Name: ");
+    if (affectedField.isBlank()) {
+      affectedField = ": affected field cannot be determined";
     }
-    String errorLogMessage = errorCode.getDescription() + String.join(", ", affectedFields);
-    handleMarcException(marcRecord, jobExecutionId, params, errorCode, errorLogMessage);
+    String errorLogMessage = StringUtils.substringBefore(marcExceptionMessage, ";") + ". Field name " + String.join(", ", affectedField);
+    String instId = tryToRetrieveInstanceIdWhenJsonIsInvalid(jsonRecord);
+    if (!instId.isEmpty()) {
+      handleMarcException(instId, jobExecutionId, params, errorCode, errorLogMessage);
+    } else {
+      errorLogService.saveWithAffectedRecord(new JsonObject(), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
+    }
   }
 
-  private void handleMarcException(JsonObject marcRecord, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
-    String instId = getInstanceIdFromMarcRecord(marcRecord);
+  private String tryToRetrieveInstanceIdWhenJsonIsInvalid(String jsonRecord) {
+    String instId = EMPTY;
+    try {
+      jsonRecord = StringUtils.deleteWhitespace(jsonRecord);
+      instId = StringUtils.substringAfterLast(StringUtils.substringAfter(jsonRecord, INSTANCE_FIELD), INSTANCE_SUBFIELD).substring(0, NUMBER_OF_SYMBOLS_IN_UUID);
+    } catch (IndexOutOfBoundsException e) {
+      // Case when instance id cannot be found.
+    }
+    return instId;
+  }
+
+  private void handleMarcException(String instId, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
     inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
       JsonArray instances = instancesByIds.getJsonArray(INSTANCES);
       errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
@@ -198,7 +180,8 @@ public class LocalFileSystemExportService implements ExportService {
           Record record = marcJsonReader.next();
           marcStreamWriter.write(record);
         }
-        // Handle unchecked json parse exception when parser encounters with control character.
+        // Handle unchecked json parse exception when parser encounters with control character or
+        // any other unexpected data.
       } catch (Exception e) {
         throw new MarcException(e.getMessage());
       }

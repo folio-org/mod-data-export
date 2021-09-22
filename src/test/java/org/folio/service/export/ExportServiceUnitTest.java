@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CANNOT_BE_CONVERTED;
-import static org.folio.util.ErrorCode.ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -135,7 +134,7 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 
@@ -158,7 +157,72 @@ class ExportServiceUnitTest {
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
-    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CONTAINS_CONTROL_CHARACTERS.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    assertEquals(1, marcRecordsToExport.getValue().intValue());
+  }
+
+  @Test
+  void shouldSaveErrorLog_whenJsonCannotBeConvertedToMarcRecordBecauseOfNotClosingQuote() {
+    //given
+    String record = "{\"leader\":\"00000nam a2200000 a 4500\",\"fields\":[" +
+      "{\"001\":\"in00000000011\"}," +
+      "{\"005\":\"20210728150129.6}," + // Here there is no closing quotes.
+      "{\"008\":\"950721s1996    nyua     b    000 0 eng  \"}," +
+      "{\"945\":{\"subfields\":[{\"z\":\"05-22-15\"}],\"ind1\":\" \",\"ind2\":\" \"}}," +
+      "{\"999\":{\"subfields\":[{\"s\":\"b26859f1-8c79-47b3-b047-1ecde668492f\"}," +
+      "{\"i\":\"6666df22-5df3-412b-b9cc-cbdddb928e93\"}],\"ind1\":\"f\",\"ind2\":\"f\"}}]}\n";
+    String stringJson = TestUtil.readFileContentFromResources(INSTANCES_RESPONSE_JSON_FILE_PATH);
+    JsonObject instances = new JsonObject(stringJson);
+    JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
+
+    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    //when
+    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    //then
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    assertEquals(1, marcRecordsToExport.getValue().intValue());
+  }
+
+  @Test
+  void shouldSaveErrorLog_whenJsonCannotBeConvertedToMarcRecordBecauseOfRedundantClosingQuote() {
+    //given
+    String record = "{\"leader\":\"00000nam a2200000 a 4500\",\"fields\":[" +
+      "{\"001\":\"in00000000011\"}," +
+      "{\"005\":\"20210728150129.6\"\"}," + // Here there is a redundant closing quotes.
+      "{\"008\":\"950721s1996    nyua     b    000 0 eng  \"}," +
+      "{\"945\":{\"subfields\":[{\"z\":\"05-22-15\"}],\"ind1\":\" \",\"ind2\":\" \"}}," +
+      "{\"999\":{\"subfields\":[{\"s\":\"b26859f1-8c79-47b3-b047-1ecde668492f\"}," +
+      "{\"i\":\"6666df22-5df3-412b-b9cc-cbdddb928e93\"}],\"ind1\":\"f\",\"ind2\":\"f\"}}]}\n";
+    String stringJson = TestUtil.readFileContentFromResources(INSTANCES_RESPONSE_JSON_FILE_PATH);
+    JsonObject instances = new JsonObject(stringJson);
+    JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
+
+    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    //when
+    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    //then
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
+    assertEquals(1, marcRecordsToExport.getValue().intValue());
+  }
+
+  @Test
+  void shouldSaveErrorLog_whenJsonCannotBeConvertedToMarcRecordBecauseOfInvalidInstanceField_999() {
+    //given
+    String record = "{\"leader\":\"00000nam a2200000 a 4500\",\"fields\":[" +
+      "{\"001\":\"in00000000011\"}," +
+      "{\"005\":\"20210728150129.6\"}," +
+      "{\"008\":\"950721s1996    nyua     b    000 0 eng  \"}," +
+      "{\"945\":{\"subfields\":[{\"z\":\"05-22-15\"}],\"ind1\":\" \",\"ind2\":\" \"}}," +
+      "{999\":{\"subfields\":[{\"s\":\"b26859f1-8c79-47b3-b047-1ecde668492f\"}," + // Invalid instance field: no opening quotes.
+      "{\"i\":\"6666df22-5df3-412b-b9cc-cbdddb928e93\"}],\"ind1\":\"f\",\"ind2\":\"f\"}}]}\n";
+    JsonObject instance = new JsonObject(); // In this case instance is just empty object because 999 field is corrupted.
+    Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
+    //when
+    exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
+    //then
+    Mockito.verify(errorLogService, Mockito.times(1)).saveWithAffectedRecord(eq(instance), eq(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode()), eq(jobExecutionId), any(MarcException.class), eq(params));
     assertEquals(1, marcRecordsToExport.getValue().intValue());
   }
 

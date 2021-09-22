@@ -127,6 +127,15 @@ public class ErrorLogServiceImpl implements ErrorLogService {
       .withTitle(title)
       .withRecordType(AffectedRecord.RecordType.INSTANCE)
       .withInventoryRecordLink(configurationsClient.getInventoryRecordLink(instId, jobExecutionId, params));
+    if (instId == null) {
+      affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
+    }
+    if (hrId == null) {
+      affectedRecord.setHrid("HRID cannot be determined because record is invalid: UUID not found");
+    }
+    if (title == null) {
+      affectedRecord.setTitle("Title cannot be determined because record is invalid: UUID not found");
+    }
     ErrorLog errorLog = new ErrorLog()
       .withErrorMessageCode(errorMessageCode)
       .withErrorMessageValues(Collections.singletonList(marcException.getMessage()))
