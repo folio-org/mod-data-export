@@ -1,3 +1,17 @@
+## 4.2.0 - Unreleased
+
+## 23/09/2021 v4.1.1 Released
+This release includes handling of errors caused by MARC records that exceed a size limit, as well as any other errors like
+no-escaped control characters in quoted literals, or data after closing quotes.
+
+### Stories
+* [MDEXP-422](https://issues.folio.org/browse/MDEXP-422) Gracefully handle MARC records that exceed the size limit
+
+### Bug Fixes
+* [MDEXP-426](https://issues.folio.org/browse/MDEXP-426) Escape control characters in quoted literals
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.1.0...v4.1.1)
+
 ## 11/06/2021 v4.1.0 Released
 This release includes the interface version bumping for SRS and mod-inventory related dependencies.
 
