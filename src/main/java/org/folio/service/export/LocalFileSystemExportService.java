@@ -2,6 +2,7 @@ package org.folio.service.export;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -188,7 +189,6 @@ public class LocalFileSystemExportService implements ExportService {
     } catch (IOException e) {
       return null;
     }
-    return byteArrayOutputStream.toByteArray();
   }
 
 
