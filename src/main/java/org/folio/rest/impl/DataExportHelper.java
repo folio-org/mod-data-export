@@ -8,14 +8,12 @@ import org.folio.rest.jaxrs.model.FileDownload;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.job.JobExecutionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DataExportHelper {
 
   @Autowired
-  @Qualifier("minioStorageService")
   private ExportStorageService exportStorageService;
   @Autowired
   private JobExecutionService jobExecutionService;

@@ -51,7 +51,6 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   @Autowired
   private JobProfileService jobProfileService;
   @Autowired
-  @Qualifier("minioStorageService")
   private ExportStorageService exportStorageService;
 
   @Override

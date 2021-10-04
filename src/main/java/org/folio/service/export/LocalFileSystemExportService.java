@@ -62,7 +62,6 @@ public class LocalFileSystemExportService implements ExportService {
   @Qualifier("LocalFileSystemStorage")
   private FileStorage fileStorage;
   @Autowired
-  @Qualifier("minioStorageService")
   private ExportStorageService exportStorageService;
   @Autowired
   private ErrorLogService errorLogService;
