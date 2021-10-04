@@ -39,8 +39,7 @@ import io.vertx.core.Vertx;
 /**
  * Saves files into Amazon cloud and provides access for files being stored there via MinIO
  */
-@Service
-@Primary
+@Service("minioStorageService")
 public class MinioStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int EXPIRATION_TIME_IN_MINUTES = 10;
