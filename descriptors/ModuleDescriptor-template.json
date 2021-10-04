@@ -593,7 +593,12 @@
       { "name": "DB_DATABASE", "value": "okapi_modules" },
       { "name": "DB_QUERYTIMEOUT", "value": "60000" },
       { "name": "DB_CHARSET", "value": "UTF-8" },
-      { "name": "DB_MAXPOOLSIZE", "value": "5" }
+      { "name": "DB_MAXPOOLSIZE", "value": "5" },
+      {"name": "AWS_URL", "value": "http://127.0.0.1:9000/"},
+      {"name": "AWS_REGION", "value": ""},
+      {"name": "AWS_BUCKET", "value": "test-bucket2"},
+      {"name": "AWS_ACCESS_KEY_ID", "value": "AKIAIOSFODNN7EXAMPLE"},
+      {"name": "AWS_SECRET_ACCESS_KEY", "value": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"}
     ]
   }
 }

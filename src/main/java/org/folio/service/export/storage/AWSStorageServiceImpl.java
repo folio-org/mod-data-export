@@ -38,6 +38,7 @@ import static java.lang.System.getProperty;
  * Saves files into Amazon cloud and provides an access for files being stored there
  */
 @Service
+@Deprecated
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int EXPIRATION_TEN_MINUTES = 1000 * 10 * 60;

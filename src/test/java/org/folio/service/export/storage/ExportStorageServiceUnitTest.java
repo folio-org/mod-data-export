@@ -55,6 +55,7 @@ import static org.mockito.Mockito.when;
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
+@Deprecated
 class ExportStorageServiceUnitTest {
 
   @Mock

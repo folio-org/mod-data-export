@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 
 @Component
+@Deprecated
 public class AmazonFactory {
 
   public AmazonS3 getS3Client() {
