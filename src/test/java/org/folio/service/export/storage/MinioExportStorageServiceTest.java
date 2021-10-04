@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -56,25 +57,30 @@ class MinioExportStorageServiceTest {
 
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "test-bucket";
+  private static Path file1, file2;
 
   @BeforeEach
   void setUp() throws IOException {
     System.setProperty(BUCKET_PROP_KEY, BUCKET_NAME);
-    Files.deleteIfExists(Paths.get("files/generatedBinaryFile-1.mrc"));
-    Files.deleteIfExists(Paths.get("files/generatedBinaryFile-2.mrc"));
-    Files.createFile(Paths.get("files/generatedBinaryFile-1.mrc"));
-    Files.createFile(Paths.get("files/generatedBinaryFile-2.mrc"));
+    if (file1 != null) {
+      Files.deleteIfExists(Paths.get(file1.toString()));
+    }
+    if (file2 != null) {
+      Files.deleteIfExists(Paths.get(file2.toString()));
+    }
+    file1 = Files.createFile(Paths.get("files/generatedBinaryFile-1.mrc"));
+    file2 = Files.createFile(Paths.get("files/generatedBinaryFile-2.mrc"));
   }
 
   @AfterEach
   void tearDown() throws IOException {
     System.clearProperty(BUCKET_PROP_KEY);
-    Files.deleteIfExists(Paths.get("files/generatedBinaryFile-1.mrc"));
-    Files.deleteIfExists(Paths.get("files/generatedBinaryFile-2.mrc"));
+    Files.deleteIfExists(Paths.get(file1.toString()));
+    Files.deleteIfExists(Paths.get(file2.toString()));
   }
 
   @Test
-  void storeFile_shouldPass() throws InterruptedException, ServerException, InsufficientDataException, ErrorResponseException,
+  void storeFile_shouldPass() throws ServerException, InsufficientDataException, ErrorResponseException,
       IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
     // given
     String jobId = UUID.randomUUID()
@@ -82,7 +88,7 @@ class MinioExportStorageServiceTest {
     String parentFolder = TENANT_ID + "/" + jobId;
 
     FileDefinition exportFileDefinition = new FileDefinition().withJobExecutionId(jobId)
-      .withSourcePath("files/generatedBinaryFile-1.mrc");
+      .withSourcePath(file1.toString());
 
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
@@ -97,11 +103,10 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void storeFile_shouldFailIfBucketNameIsNotSet() throws ServerException, InsufficientDataException, ErrorResponseException,
-      IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty(BUCKET_PROP_KEY);
-    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath("files/mockData/generatedBinaryFile.mrc");
+    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(file1.toString());
 
     // when
     Assertions.assertThrows(ServiceException.class, () -> {
@@ -114,7 +119,7 @@ class MinioExportStorageServiceTest {
   void storeFile_shouldFailOnUploadDirectory() throws ServerException, InsufficientDataException, ErrorResponseException,
       IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
     // given
-    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath("files/generatedBinaryFile-1.mrc");
+    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(file1.toString());
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
     Mockito.when(client.uploadObject(any(UploadObjectArgs.class)))
