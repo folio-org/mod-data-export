@@ -141,7 +141,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       });
 
       client.removeObjects(getRemoveObjectsArgs(bucketName, objects));
-
     } else {
       LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
     }

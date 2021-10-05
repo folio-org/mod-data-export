@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.UUID;
 
+import io.minio.messages.Version;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportedFile;
@@ -147,11 +148,11 @@ class MinioExportStorageServiceTest {
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
 
-    var s3ClientMock = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(s3ClientMock);
+    var client = Mockito.mock(MinioClient.class);
+    when(minioClientFactory.getClient()).thenReturn(client);
 
     var response = "https://test-aws-export-vk.s3.amazonaws.com";
-    when(s3ClientMock.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class))).thenReturn(response);
+    when(client.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class))).thenReturn(response);
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
     // then
@@ -173,10 +174,10 @@ class MinioExportStorageServiceTest {
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
 
-    var s3ClientMock = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(s3ClientMock);
+    var client = Mockito.mock(MinioClient.class);
+    when(minioClientFactory.getClient()).thenReturn(client);
 
-    doThrow(new ServerException("Bucket Not Found", null)).when(s3ClientMock)
+    doThrow(new ServerException("Bucket Not Found", null)).when(client)
       .getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class));
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, TENANT_ID);
@@ -195,8 +196,8 @@ class MinioExportStorageServiceTest {
   void testBucketNameNotProvidedInSystemProperty() {
     System.clearProperty(BUCKET_PROP_KEY);
 
-    var s3ClientMock = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(s3ClientMock);
+    var client = Mockito.mock(MinioClient.class);
+    when(minioClientFactory.getClient()).thenReturn(client);
 
     Assertions.assertThrows(ServiceException.class, () -> {
       exportStorageService.getFileDownloadLink(null, null, null);
@@ -212,25 +213,32 @@ class MinioExportStorageServiceTest {
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile))
       .withId(UUID.randomUUID()
         .toString());
-    var s3ClientMock = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(s3ClientMock);
+    var client = Mockito.mock(MinioClient.class);
+    when(minioClientFactory.getClient()).thenReturn(client);
 
-    when(s3ClientMock.listObjects(any(ListObjectsArgs.class))).thenReturn(() -> new Iterator<>() {
+    when(client.listObjects(any(ListObjectsArgs.class))).thenReturn(() -> new Iterator<>() {
+
+      private boolean hasNext = true;
+
       @Override
       public boolean hasNext() {
-        return false;
+        try {
+          return hasNext;
+        } finally {
+          hasNext = false;
+        }
       }
 
       @Override
       public Result<Item> next() {
-        return null;
+        return new Result<>(new Version());
       }
     });
     // when
     exportStorageService.removeFilesRelatedToJobExecution(jobExecution, TENANT_ID);
 
     // then
-    Mockito.verify(s3ClientMock)
+    Mockito.verify(client)
       .removeObjects(any(RemoveObjectsArgs.class));
   }
 
