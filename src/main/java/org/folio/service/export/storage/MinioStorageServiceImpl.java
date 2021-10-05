@@ -6,11 +6,18 @@ import static org.folio.service.export.storage.ClientFactory.BUCKET_PROP_KEY;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.ListObjectsArgs;
+import io.minio.RemoveObjectsArgs;
+import io.minio.UploadObjectArgs;
+import io.minio.http.Method;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,11 +32,6 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.util.StringUtils;
 
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.ListObjectsArgs;
-import io.minio.RemoveObjectsArgs;
-import io.minio.UploadObjectArgs;
-import io.minio.http.Method;
 import io.minio.messages.DeleteObject;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -40,7 +42,9 @@ import io.vertx.core.Vertx;
  */
 @Service
 public class MinioStorageServiceImpl implements ExportStorageService {
-  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup()
+    .lookupClass());
+
   private static final int EXPIRATION_TIME_IN_MINUTES = 10;
 
   @Autowired
@@ -70,16 +74,10 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     }
 
-    var generatePresignedUrlRequest = GetPresignedObjectUrlArgs.builder()
-      .bucket(bucketName)
-      .object(keyName)
-      .method(Method.GET)
-      .expiry(EXPIRATION_TIME_IN_MINUTES, TimeUnit.MINUTES);
-
     vertx.executeBlocking(blockingFuture -> {
       String url = null;
       try {
-        url = client.getPresignedObjectUrl(generatePresignedUrlRequest.build());
+        url = client.getPresignedObjectUrl(getGetPresignedObjectUrlArgs(keyName, bucketName));
       } catch (Exception e) {
         blockingFuture.fail(e);
       }
@@ -105,25 +103,20 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     } else {
       var client = clientFactory.getClient();
-      try {
-        Files.walk(Paths.get(fileDefinition.getSourcePath())
-          .getParent())
-          .filter(Files::isRegularFile)
-          .forEach(file -> {
-            try {
-              var uploadObjectArgs = UploadObjectArgs.builder()
-                .bucket(bucketName)
-                .object(file.getName(file.getNameCount() - 1)
-                  .toString())
-                .filename(file.toString());
-              client.uploadObject(uploadObjectArgs.build());
-            } catch (Exception e) {
-              throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-            }
-          });
-      } catch (IOException e) {
-        throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-      }
+      vertx.fileSystem()
+        .readDirBlocking(Paths.get(fileDefinition.getSourcePath())
+          .getParent()
+          .toString())
+        .stream()
+        .map(Paths::get)
+        .filter(Files::isRegularFile)
+        .forEach(file -> {
+          try {
+            client.uploadObject(getUploadObjectArgs(bucketName, file));
+          } catch (Exception e) {
+            throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
+          }
+        });
     }
   }
 
@@ -135,12 +128,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
     }
     if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
       var client = clientFactory.getClient();
-      var listObjectsArgs = ListObjectsArgs.builder()
-        .bucket(bucketName)
-        .prefix(tenantId + "/" + jobExecution.getId())
-        .build();
-
-      var objectList = client.listObjects(listObjectsArgs);
+      var objectList = client.listObjects(getListObjectsArgs(jobExecution, tenantId, bucketName));
       List<DeleteObject> objects = new LinkedList<>();
 
       objectList.forEach(obj -> {
@@ -152,15 +140,42 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         }
       });
 
-      var multiObjectDeleteRequest = RemoveObjectsArgs.builder()
-        .bucket(bucketName)
-        .objects(objects)
-        .build();
-
-      client.removeObjects(multiObjectDeleteRequest);
+      client.removeObjects(getRemoveObjectsArgs(bucketName, objects));
 
     } else {
       LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
     }
+  }
+
+  public GetPresignedObjectUrlArgs getGetPresignedObjectUrlArgs(String keyName, String bucketName) {
+    return GetPresignedObjectUrlArgs.builder()
+      .bucket(bucketName)
+      .object(keyName)
+      .method(Method.GET)
+      .expiry(EXPIRATION_TIME_IN_MINUTES, TimeUnit.MINUTES)
+      .build();
+  }
+
+  public RemoveObjectsArgs getRemoveObjectsArgs(String bucketName, List<DeleteObject> objects) {
+    return RemoveObjectsArgs.builder()
+      .bucket(bucketName)
+      .objects(objects)
+      .build();
+  }
+
+  public ListObjectsArgs getListObjectsArgs(JobExecution jobExecution, String tenantId, String bucketName) {
+    return ListObjectsArgs.builder()
+      .bucket(bucketName)
+      .prefix(tenantId + "/" + jobExecution.getId())
+      .build();
+  }
+
+  public UploadObjectArgs getUploadObjectArgs(String bucketName, Path file) throws IOException {
+    return UploadObjectArgs.builder()
+      .bucket(bucketName)
+      .object(file.getName(file.getNameCount() - 1)
+        .toString())
+      .filename(file.toString())
+      .build();
   }
 }

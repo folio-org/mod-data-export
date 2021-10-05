@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -43,6 +42,10 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 class MinioExportStorageServiceTest {
 
+  public static final String TMP_DIR = "files";
+  public static final String TMP_FILE_1 = "file-1.mrc";
+  public static final String TMP_FILE_2 = "file-2.mrc";
+
   @Mock
   private ClientFactory minioClientFactory;
   @Mock
@@ -57,38 +60,42 @@ class MinioExportStorageServiceTest {
 
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "test-bucket";
-  private static Path file1, file2;
 
   @BeforeEach
   void setUp() throws IOException {
     System.setProperty(BUCKET_PROP_KEY, BUCKET_NAME);
-    if (file1 != null) {
-      Files.deleteIfExists(Paths.get(file1.toString()));
-    }
-    if (file2 != null) {
-      Files.deleteIfExists(Paths.get(file2.toString()));
-    }
-    file1 = Files.createFile(Paths.get("files/generatedBinaryFile-1.mrc"));
-    file2 = Files.createFile(Paths.get("files/generatedBinaryFile-2.mrc"));
+    cleanUpTmpFiles();
+    setUpTmpFiles();
   }
 
   @AfterEach
   void tearDown() throws IOException {
     System.clearProperty(BUCKET_PROP_KEY);
-    Files.deleteIfExists(Paths.get(file1.toString()));
-    Files.deleteIfExists(Paths.get(file2.toString()));
+    cleanUpTmpFiles();
+  }
+
+  private void setUpTmpFiles() throws IOException {
+    Files.createDirectory(Paths.get(TMP_DIR));
+    Files.createFile(Paths.get(TMP_DIR + "/" + TMP_FILE_1));
+    Files.createFile(Paths.get(TMP_DIR + "/" + TMP_FILE_2));
+  }
+
+  private void cleanUpTmpFiles() throws IOException {
+    Files.deleteIfExists(Paths.get(TMP_DIR + "/" + TMP_FILE_1));
+    Files.deleteIfExists(Paths.get(TMP_DIR + "/" + TMP_FILE_2));
+    Files.deleteIfExists(Paths.get(TMP_DIR));
   }
 
   @Test
-  void storeFile_shouldPass() throws ServerException, InsufficientDataException, ErrorResponseException,
-      IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+  void storeFile_shouldPass() throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
+      NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
     // given
     String jobId = UUID.randomUUID()
       .toString();
     String parentFolder = TENANT_ID + "/" + jobId;
 
     FileDefinition exportFileDefinition = new FileDefinition().withJobExecutionId(jobId)
-      .withSourcePath(file1.toString());
+      .withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
 
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
@@ -106,7 +113,7 @@ class MinioExportStorageServiceTest {
   void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
     System.clearProperty(BUCKET_PROP_KEY);
-    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(file1.toString());
+    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
 
     // when
     Assertions.assertThrows(ServiceException.class, () -> {
@@ -119,7 +126,7 @@ class MinioExportStorageServiceTest {
   void storeFile_shouldFailOnUploadDirectory() throws ServerException, InsufficientDataException, ErrorResponseException,
       IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
     // given
-    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(file1.toString());
+    FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
     Mockito.when(client.uploadObject(any(UploadObjectArgs.class)))
