@@ -32,7 +32,7 @@ public class MinioClientFactory {
       return client;
     }
 
-    final String accessKey = getProperty(ACCESS_KEY_PROP_KEY);;
+    final String accessKey = getProperty(ACCESS_KEY_PROP_KEY);
     final String endpoint = getProperty(ENDPOINT_PROP_KEY);
     final String region = getProperty(REGION_PROP_KEY);
     final String bucket = getProperty(BUCKET_PROP_KEY);
