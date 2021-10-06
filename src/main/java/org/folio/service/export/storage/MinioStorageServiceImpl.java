@@ -1,7 +1,7 @@
 package org.folio.service.export.storage;
 
 import static java.lang.System.getProperty;
-import static org.folio.service.export.storage.ClientFactory.BUCKET_PROP_KEY;
+import static org.folio.service.export.storage.MinioClientFactory.BUCKET_PROP_KEY;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.ListObjectsArgs;
@@ -48,7 +47,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
   private static final int EXPIRATION_TIME_IN_MINUTES = 10;
 
   @Autowired
-  private ClientFactory clientFactory;
+  private MinioClientFactory minioClientFactory;
   @Autowired
   private Vertx vertx;
   @Autowired
@@ -65,7 +64,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
   @Override
   public Future<String> getFileDownloadLink(String jobExecutionId, String exportFileName, String tenantId) {
     Promise<String> promise = Promise.promise();
-    var client = clientFactory.getClient();
+    var client = minioClientFactory.getClient();
     var keyName = tenantId + "/" + jobExecutionId + "/" + exportFileName;
     var bucketName = getProperty(BUCKET_PROP_KEY);
 
@@ -102,7 +101,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getCode(), fileDefinition.getJobExecutionId(), tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     } else {
-      var client = clientFactory.getClient();
+      var client = minioClientFactory.getClient();
       vertx.fileSystem()
         .readDirBlocking(Paths.get(fileDefinition.getSourcePath())
           .getParent()
@@ -127,7 +126,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
     }
     if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
-      var client = clientFactory.getClient();
+      var client = minioClientFactory.getClient();
       var objectList = client.listObjects(getListObjectsArgs(jobExecution, tenantId, bucketName));
       List<DeleteObject> objects = new LinkedList<>();
 

@@ -1,6 +1,6 @@
 package org.folio.service.export.storage;
 
-import static org.folio.service.export.storage.ClientFactory.BUCKET_PROP_KEY;
+import static org.folio.service.export.storage.MinioClientFactory.BUCKET_PROP_KEY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.UUID;
 
-import io.minio.messages.Version;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportedFile;
@@ -32,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.Item;
+import io.minio.messages.Version;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -48,7 +48,7 @@ class MinioExportStorageServiceTest {
   public static final String TMP_FILE_2 = "file-2.mrc";
 
   @Mock
-  private ClientFactory minioClientFactory;
+  private MinioClientFactory minioClientFactory;
   @Mock
   private ErrorLogService errorLogService;
   @Spy

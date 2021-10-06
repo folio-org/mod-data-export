@@ -14,7 +14,7 @@ import java.lang.invoke.MethodHandles;
 import static java.lang.System.getProperty;
 
 @Component
-public class ClientFactory {
+public class MinioClientFactory {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
