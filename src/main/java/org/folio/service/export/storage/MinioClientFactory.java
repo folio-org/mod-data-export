@@ -18,11 +18,11 @@ public class MinioClientFactory {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  public static final String ACCESS_KEY_PROP_KEY = "AWS_ACCESS_KEY_ID";
-  public static final String ENDPOINT_PROP_KEY = "AWS_URL";
-  public static final String REGION_PROP_KEY = "AWS_REGION";
-  public static final String SECRET_KEY_PROP_KEY = "AWS_SECRET_ACCESS_KEY";
-  public static final String BUCKET_PROP_KEY = "AWS_BUCKET";
+  public static final String ACCESS_KEY_PROP_KEY = "aws.accessKeyId";
+  public static final String ENDPOINT_PROP_KEY = "aws.url";
+  public static final String REGION_PROP_KEY = "aws.region";
+  public static final String SECRET_KEY_PROP_KEY = "aws.secretKey";
+  public static final String BUCKET_PROP_KEY = "bucket.name";
 
   private MinioClient client;
 
