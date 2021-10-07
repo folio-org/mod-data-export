@@ -88,6 +88,12 @@ curl -w '\n' -X POST -D -   \
     http://localhost:9130/_/proxy/tenants/<tenant_name>/modules
 ```
 
+## Storage configuration
+MinIO remote storage or Amazon S3 can be used as storage for generated files MARC files. 
+The storage is selected by specifying the url of S3-compatible storage - `aws.url`. In addition, 
+the following parameters must be specified: `aws.accessKeyId`, `aws.region`, `aws.secretKey`, `bucket.name`.
+Typically, this is done by choosing Java options.
+
 ## Issue tracker
 
 See project [MDEXP](https://issues.folio.org/browse/MDEXP)

@@ -22,7 +22,6 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
@@ -37,7 +36,7 @@ import static java.lang.System.getProperty;
 /**
  * Saves files into Amazon cloud and provides an access for files being stored there
  */
-@Service
+@Deprecated(forRemoval = true)
 public class AWSStorageServiceImpl implements ExportStorageService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int EXPIRATION_TEN_MINUTES = 1000 * 10 * 60;
