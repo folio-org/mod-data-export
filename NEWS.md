@@ -11,6 +11,7 @@ This release includes bug fixes, code improvements, RMB upgrade, unexpected erro
 * [MDEXP-398](https://issues.folio.org/browse/MDEXP-398) Improve code coverage on new code
 * [MDEXP-395](https://issues.folio.org/browse/MDEXP-395) data-export- Upgrade to RMB 33
 * [MDEXP-394](https://issues.folio.org/browse/MDEXP-394) Memory leaks in mod-data-export
+* [MDEXP-180](https://issues.folio.org/browse/MDEXP-180) Implement using minio as gateway for AWS
 
 ### Bug Fixes
 * [MDEXP-440](https://issues.folio.org/browse/MDEXP-440) Reference data is missing when there are more than 200 entities.
