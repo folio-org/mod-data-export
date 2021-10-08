@@ -1,3 +1,28 @@
+## v4.2.1 Unreleased
+
+## 10/08/2021 v4.2.0 Released
+This release includes bug fixes, code improvements, RMB upgrade, unexpected error handling.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.1.0...v4.2.0)
+
+### Stories
+* [MDEXP-429](https://issues.folio.org/browse/MDEXP-429) Update generate-marc-utils version to 1.2.0-SNAPSHOT
+* [MDEXP-422](https://issues.folio.org/browse/MDEXP-422) Gracefully handle MARC records that exceed the size limit
+* [MDEXP-398](https://issues.folio.org/browse/MDEXP-398) Improve code coverage on new code
+* [MDEXP-395](https://issues.folio.org/browse/MDEXP-395) data-export- Upgrade to RMB 33
+* [MDEXP-394](https://issues.folio.org/browse/MDEXP-394) Memory leaks in mod-data-export
+* [MDEXP-180](https://issues.folio.org/browse/MDEXP-180) Implement using minio as gateway for AWS
+
+### Bug Fixes
+* [MDEXP-440](https://issues.folio.org/browse/MDEXP-440) Reference data is missing when there are more than 200 entities.
+* [MDEXP-430](https://issues.folio.org/browse/MDEXP-430) Leader Record status changes from "c" to "n" when exporting holdings and items data
+* [MDEXP-426](https://issues.folio.org/browse/MDEXP-426) Escape control characters in quoted literals
+* [MDEXP-425](https://issues.folio.org/browse/MDEXP-425) When a highly inefficient query is done, vertx main thread is blocked
+* [MDEXP-421](https://issues.folio.org/browse/MDEXP-421) Export job triggered with invalid data stays in status New (and does not fail)
+* [MDEXP-409](https://issues.folio.org/browse/MDEXP-409) DaoImpl: Use single id methods for get, delete, update
+* [MDEXP-402](https://issues.folio.org/browse/MDEXP-402) Migration Script does not handle all cases
+* [MDEXP-400](https://issues.folio.org/browse/MDEXP-400) Failed jobs listed always on top of the queue when completeDate is missing
+
 ## 11/06/2021 v4.1.0 Released
 This release includes the interface version bumping for SRS and mod-inventory related dependencies.
 
