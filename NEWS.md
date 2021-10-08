@@ -1,9 +1,9 @@
-## v4.2.0 Unreleased
+## v4.2.1 Unreleased
 
-## 10/08/2021 v4.1.2 Released
+## 10/08/2021 v4.2.0 Released
 This release includes bug fixes, code improvements, RMB upgrade, unexpected error handling.
 
-[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.1.0...v4.1.2)
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.1.0...v4.2.0)
 
 ### Stories
 * [MDEXP-429](https://issues.folio.org/browse/MDEXP-429) Update generate-marc-utils version to 1.2.0-SNAPSHOT
