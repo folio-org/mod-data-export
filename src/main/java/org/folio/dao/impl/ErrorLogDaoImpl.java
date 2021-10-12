@@ -72,7 +72,7 @@ public class ErrorLogDaoImpl implements ErrorLogDao {
     try {
       pgClientFactory.getInstance(tenantId).update(TABLE, errorLog, errorLog.getId(), updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.error("Could not update errorLog with id {}", errorLog.getId(), updateResult.cause().getMessage());
+          LOGGER.error("Could not update errorLog with id {}, cause: {}", errorLog.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("ErrorLog with id '%s' was not found", errorLog.getId());
