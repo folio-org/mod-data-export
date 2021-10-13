@@ -134,6 +134,16 @@
       "run": "after",
       "snippetPath": "migration_scripts/rename_default_job_profile.sql",
       "fromModuleVersion": "mod-data-export-4.3.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "default_data/create_default_holdings_mapping_profile.sql",
+      "fromModuleVersion": "mod-data-export-4.3.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "default_data/create_default_holdings_job_profile.sql",
+      "fromModuleVersion": "mod-data-export-4.3.0"
     }
   ]
 }
