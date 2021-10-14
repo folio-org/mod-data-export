@@ -221,7 +221,7 @@ class InputDataManagerImpl implements InputDataManager {
 
   private Future<Void> handleExportResult(AsyncResult asyncResult) {
     if (asyncResult.failed()) {
-      LOGGER.error("Export of identifiers chunk is failed", asyncResult.cause().getMessage());
+      LOGGER.error("Export of identifiers chunk is failed: {}", asyncResult.cause().getMessage());
     } else {
       LOGGER.info("Export of identifiers chunk has been successfully completed");
     }

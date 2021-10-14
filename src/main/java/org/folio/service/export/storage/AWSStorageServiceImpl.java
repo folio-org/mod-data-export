@@ -113,7 +113,7 @@ public class AWSStorageServiceImpl implements ExportStorageService {
     } else {
       TransferManager transferManager = amazonFactory.getTransferManager();
       try {
-        LOGGER.info("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
+        LOGGER.debug("Uploading generated binary file {} to bucket {}", fileDefinition, bucketName);
         MultipleFileUpload multipleFileUpload = transferManager.uploadDirectory(
           bucketName,
           folderInS3,
