@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import java.util.Map;
   "org.folio.service",
   "org.folio.clients",
   "org.folio.rest.impl"})
+@PropertySource("classpath:minio.properties")
 public class ApplicationConfig {
 
   private static final int REQUEST_TIMEOUT_ONE_HOUR = 3600000;

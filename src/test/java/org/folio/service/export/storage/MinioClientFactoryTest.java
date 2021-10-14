@@ -1,38 +1,41 @@
 package org.folio.service.export.storage;
 
-import static org.folio.service.export.storage.MinioClientFactory.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import io.vertx.core.Vertx;
+import org.folio.config.ApplicationConfig;
+import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import io.vertx.core.Context;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+
+@RunWith(VertxUnitRunner.class)
+@ExtendWith(VertxExtension.class)
 class MinioClientFactoryTest {
 
-  @Test
-  void getClientStaticProviderTest() {
-    System.setProperty(ACCESS_KEY_PROP_KEY, "test-access-key");
-    System.setProperty(ENDPOINT_PROP_KEY, "http://localhost:21345");
-    System.setProperty(REGION_PROP_KEY, "test-region");
-    System.setProperty(BUCKET_PROP_KEY, "test-bucket");
-    System.setProperty(SECRET_KEY_PROP_KEY, "test-secret-key");
+  @Spy
+  private Vertx vertx = Vertx.vertx();
 
-    var factory = new MinioClientFactory();
-    var client = factory.getClient();
-    assertNotNull(client);
-    assertEquals(client, factory.getClient());
+  public MinioClientFactoryTest() {
+    Context vertxContext = vertx.getOrCreateContext();
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationConfig.class);
+    SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @Test
-  void getClientIamProviderTest() {
-    System.clearProperty(ACCESS_KEY_PROP_KEY);
-    System.clearProperty(SECRET_KEY_PROP_KEY);
-    System.setProperty(ENDPOINT_PROP_KEY, "http://localhost:21345");
-    System.setProperty(REGION_PROP_KEY, "test-region");
-    System.setProperty(BUCKET_PROP_KEY, "test-bucket");
+  @Autowired
+  private MinioClientFactory minioClientFactory;
 
-    var factory = new MinioClientFactory();
-    var client = factory.getClient();
+  @Test
+  void getClientFromFactoryTest() {
+    var client = minioClientFactory.getClient();
     assertNotNull(client);
-    assertEquals(client, factory.getClient());
+    assertEquals(client, minioClientFactory.getClient());
   }
 }

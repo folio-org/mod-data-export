@@ -1,8 +1,5 @@
 package org.folio.service.export.storage;
 
-import static java.lang.System.getProperty;
-import static org.folio.service.export.storage.MinioClientFactory.BUCKET_PROP_KEY;
-
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
@@ -22,6 +19,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.util.StringUtils;
@@ -53,6 +51,9 @@ public class MinioStorageServiceImpl implements ExportStorageService {
   @Autowired
   private ErrorLogService errorLogService;
 
+  @Value("${minio.bucket}")
+  private String bucket;
+
   /**
    * Fetch the link to download a file for a given job by fileName
    *
@@ -66,7 +67,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
     Promise<String> promise = Promise.promise();
     var client = minioClientFactory.getClient();
     var key = buildPrefix(tenantId, jobExecutionId) + "/" + exportFileName;
-    var bucket = getProperty(BUCKET_PROP_KEY);
 
     if (StringUtils.isNullOrEmpty(bucket)) {
       errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_IS_NOT_PROVIDED.getCode(), jobExecutionId, tenantId);
@@ -96,7 +96,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
   @Override
   public void storeFile(FileDefinition fileDefinition, String tenantId) {
     var folderToSave = buildPrefix(tenantId, fileDefinition.getJobExecutionId());
-    var bucket = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucket)) {
       errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getCode(), fileDefinition.getJobExecutionId(), tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
@@ -121,7 +120,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
 
   @Override
   public void removeFilesRelatedToJobExecution(JobExecution jobExecution, String tenantId) {
-    var bucket = getProperty(BUCKET_PROP_KEY);
     if (StringUtils.isNullOrEmpty(bucket)) {
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
     }

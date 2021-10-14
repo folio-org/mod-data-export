@@ -7,22 +7,30 @@ import io.minio.credentials.StaticProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.lang.invoke.MethodHandles;
-
-import static java.lang.System.getProperty;
 
 @Component
 public class MinioClientFactory {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  public static final String ACCESS_KEY_PROP_KEY = "aws.accessKeyId";
-  public static final String ENDPOINT_PROP_KEY = "aws.url";
-  public static final String REGION_PROP_KEY = "aws.region";
-  public static final String SECRET_KEY_PROP_KEY = "aws.secretKey";
-  public static final String BUCKET_PROP_KEY = "bucket.name";
+  @Value("${minio.endpoint}")
+  private String endpoint;
+
+  @Value("${minio.accessKey}")
+  private String accessKey;
+
+  @Value("${minio.secretKey}")
+  private String secretKey;
+
+  @Value("${minio.bucket}")
+  private String bucket;
+
+  @Value("${minio.region}")
+  private String region;
 
   private MinioClient client;
 
@@ -31,12 +39,6 @@ public class MinioClientFactory {
     if (client != null) {
       return client;
     }
-
-    final String accessKey = getProperty(ACCESS_KEY_PROP_KEY);
-    final String endpoint = getProperty(ENDPOINT_PROP_KEY);
-    final String region = getProperty(REGION_PROP_KEY);
-    final String bucket = getProperty(BUCKET_PROP_KEY);
-    final String secretKey = getProperty(SECRET_KEY_PROP_KEY);
 
     LOGGER.info("Creating MinIO client endpoint {},region {},bucket {},accessKey {},secretKey {}.", endpoint, region, bucket,
       StringUtils.isNotBlank(accessKey) ? "<set>" : "<not set>", StringUtils.isNotBlank(secretKey) ? "<set>" : "<not set>");
