@@ -29,8 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
 import io.minio.*;
 import io.minio.errors.*;
@@ -60,8 +58,6 @@ class MinioExportStorageServiceTest {
   private Vertx vertx = Vertx.vertx();
   @InjectMocks
   private ExportStorageService exportStorageService = new MinioStorageServiceImpl();
-  @Autowired
-  private Environment env;
 
   @Captor
   private ArgumentCaptor<ErrorLog> errorLogCaptor;
