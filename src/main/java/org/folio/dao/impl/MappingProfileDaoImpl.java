@@ -58,7 +58,7 @@ public class MappingProfileDaoImpl implements MappingProfileDao {
     try {
       pgClientFactory.getInstance(tenantId).update(TABLE, mappingProfile, mappingProfile.getId(), updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.error("Could not update mappingProfile with id {}", mappingProfile.getId(), updateResult.cause().getMessage());
+          LOGGER.error("Could not update mappingProfile with id {}, cause: {}", mappingProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("MappingProfile with id '%s' was not found", mappingProfile.getId());

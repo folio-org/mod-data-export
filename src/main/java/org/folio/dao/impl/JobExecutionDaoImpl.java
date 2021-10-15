@@ -63,7 +63,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
         pgClientFactory.getInstance(tenantId)
           .save(TABLE, jobExecution.getId(), jobExecution, promise);
       } else {
-        LOGGER.error("Error while fetching next HRID in sequence", getHrIdResult.cause().getMessage());
+        LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
         promise.fail(getHrIdResult.cause());
       }
     });

@@ -473,7 +473,7 @@
     <url>https://github.com/folio-org/mod-data-export</url>
     <connection>scm:git:git://github.com/folio-org/mod-data-export</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-data-export.git</developerConnection>
-    <tag>v4.2.0</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
