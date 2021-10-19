@@ -1,6 +1,5 @@
 package org.folio.service.export.storage;
 
-import static org.folio.service.export.storage.MinioClientFactory.BUCKET_PROP_KEY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -13,12 +12,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.UUID;
 
+import org.folio.config.ApplicationConfig;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,12 +27,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.Item;
 import io.minio.messages.Version;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -62,16 +65,20 @@ class MinioExportStorageServiceTest {
   private final static String TENANT_ID = "testTenant";
   private final static String BUCKET_NAME = "test-bucket";
 
+  public MinioExportStorageServiceTest() {
+    Context vertxContext = vertx.getOrCreateContext();
+    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationConfig.class);
+    SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
   @BeforeEach
   void setUp() throws IOException {
-    System.setProperty(BUCKET_PROP_KEY, BUCKET_NAME);
     cleanUpTmpFiles();
     setUpTmpFiles();
   }
 
   @AfterEach
   void tearDown() throws IOException {
-    System.clearProperty(BUCKET_PROP_KEY);
     cleanUpTmpFiles();
   }
 
@@ -89,7 +96,7 @@ class MinioExportStorageServiceTest {
 
   @Test
   void storeFile_shouldPass() throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
-      NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
     // given
     String jobId = UUID.randomUUID()
       .toString();
@@ -100,6 +107,7 @@ class MinioExportStorageServiceTest {
 
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
 
     // when
     exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
@@ -113,7 +121,6 @@ class MinioExportStorageServiceTest {
   @Test
   void storeFile_shouldFailIfBucketNameIsNotSet() {
     // given
-    System.clearProperty(BUCKET_PROP_KEY);
     FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
 
     // when
@@ -125,13 +132,15 @@ class MinioExportStorageServiceTest {
 
   @Test
   void storeFile_shouldFailOnUploadDirectory() throws ServerException, InsufficientDataException, ErrorResponseException,
-      IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
     // given
     FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
     Mockito.when(client.uploadObject(any(UploadObjectArgs.class)))
       .thenThrow(new RuntimeException());
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
+
     // when
     Assertions.assertThrows(ServiceException.class, () -> {
       exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
@@ -141,8 +150,8 @@ class MinioExportStorageServiceTest {
 
   @Test
   void testSuccessfulGenerateURL(VertxTestContext testContext)
-      throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
-      InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
+    InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
     // given
     String tenantId = "testAWS";
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
@@ -153,6 +162,7 @@ class MinioExportStorageServiceTest {
 
     var response = "https://test-aws-export-vk.s3.amazonaws.com";
     when(client.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class))).thenReturn(response);
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
     // then
@@ -168,8 +178,8 @@ class MinioExportStorageServiceTest {
 
   @Test
   void testBucketNameNotFoundInS3(VertxTestContext testContext)
-      throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-      InvalidKeyException, InvalidResponseException, XmlParserException, InternalException {
+    throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
+    InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
     // given
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
@@ -177,8 +187,11 @@ class MinioExportStorageServiceTest {
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
 
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
+
     doThrow(new ServerException("Bucket Not Found", null)).when(client)
       .getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class));
+
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, TENANT_ID);
     // then
@@ -194,7 +207,6 @@ class MinioExportStorageServiceTest {
 
   @Test
   void testBucketNameNotProvidedInSystemProperty() {
-    System.clearProperty(BUCKET_PROP_KEY);
 
     var client = Mockito.mock(MinioClient.class);
     when(minioClientFactory.getClient()).thenReturn(client);
@@ -205,7 +217,7 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void testSuccessfullyRemoveFilesFromS3() {
+  void testSuccessfullyRemoveFilesFromS3() throws NoSuchFieldException {
     // given
     ExportedFile exportedFile = new ExportedFile().withFileId(UUID.randomUUID()
       .toString())
@@ -234,6 +246,8 @@ class MinioExportStorageServiceTest {
         return new Result<>(new Version());
       }
     });
+
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
     // when
     exportStorageService.removeFilesRelatedToJobExecution(jobExecution, TENANT_ID);
 
@@ -244,18 +258,17 @@ class MinioExportStorageServiceTest {
 
   @Test
   void testBucketNameNotProvidedInSystemPropertyWhileRemovingFilesFromS3() {
-    System.clearProperty(BUCKET_PROP_KEY);
-
     Assertions.assertThrows(ServiceException.class, () -> {
       exportStorageService.removeFilesRelatedToJobExecution(null, null);
     });
   }
 
   @Test
-  void testRemovingFilesFromS3ExportedFilesIsEmpty() {
+  void testRemovingFilesFromS3ExportedFilesIsEmpty() throws NoSuchFieldException {
+    // given
+    FieldSetter.setField(exportStorageService, exportStorageService.getClass().getDeclaredField("bucket"), BUCKET_NAME);
     // when
     exportStorageService.removeFilesRelatedToJobExecution(new JobExecution(), TENANT_ID);
-
     // then
     Mockito.verify(minioClientFactory, never())
       .getClient();
