@@ -17,15 +17,8 @@ FOLIO data export module.
 #### Important notes
 
 ## LIMITATIONS OF THE MODULE
-For current releases, the only supported file storage to store the exported MARC files is S3. 
-This means that it is expected that AWS credentials are properly configured in a hosting environment as per:https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/setup-credentials.html.
-The credential chain looks for the credentials in multiple places and the order of precedence in case it is specified in multiple places is given here: https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html
-
-## CONFIGURATIONS NEEDED
-The module also expects the bucket name to be passed in the JVM as the system parameter with name `bucket.name`
-
-example: java mod-data-export-fat.jar -Dbucket.name=diku_export
-
+For current releases, S3-compatible file storage (using MinIO client) is supported 
+to store the exported MARC files.
 
 ## OTHER
 In a multi-tenant cluster, each tenant data is stored in it's own folder(prefix) under one bucket. For example, if the tenants are tenant001, tenant002, and bucket name "exportMarc" below is the pattern used stored in the bucket
@@ -90,9 +83,8 @@ curl -w '\n' -X POST -D -   \
 
 ## Storage configuration
 MinIO remote storage or Amazon S3 can be used as storage for generated files MARC files. 
-The storage is selected by specifying the url of S3-compatible storage - `aws.url`. In addition, 
-the following parameters must be specified: `aws.accessKeyId`, `aws.region`, `aws.secretKey`, `bucket.name`.
-Typically, this is done by choosing Java options.
+The storage is selected by specifying the url of S3-compatible storage by using ENV variable `AWS_URL`. In addition, 
+the following ENV variables can be specified: `AWS_REGION`, `AWS_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
 
 ## Issue tracker
 

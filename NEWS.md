@@ -1,4 +1,12 @@
-## v4.2.1 Unreleased
+## v4.3.0 Unreleased
+
+## 10/15/2021 v4.2.1 Released
+This release includes module configuration improvement
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.2.0...v4.2.1)
+
+### Stories
+* [MDEXP-455](https://issues.folio.org/browse/MDEXP-455) Improve MinIO configuration process
 
 ## 10/08/2021 v4.2.0 Released
 This release includes bug fixes, code improvements, RMB upgrade, unexpected error handling.
