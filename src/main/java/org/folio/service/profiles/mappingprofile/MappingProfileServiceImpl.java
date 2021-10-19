@@ -37,7 +37,8 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 @Service
 public class MappingProfileServiceImpl implements MappingProfileService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String DEFAULT_HOLDINGS_MAPPING_PROFILE_ID = "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13";
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
@@ -77,7 +78,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   @Override
   public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
     Promise<MappingProfile> mappingProfilePromise = Promise.promise();
-    if (DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfile.getId())) {
+    String newId = mappingProfile.getId();
+    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(newId) ||
+      DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(newId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
     }
     validateProfileRecordTypes(mappingProfile);
@@ -136,12 +139,12 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   @Override
   public Future<MappingProfile> getDefault(OkapiConnectionParams params) {
-    return getById(DEFAULT_MAPPING_PROFILE_ID, params);
+    return getById(DEFAULT_INSTANCE_MAPPING_PROFILE_ID, params);
   }
 
   @Override
   public Future<Boolean> deleteById(String mappingProfileId, String tenantId) {
-    if (DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
+    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default mapping profile is forbidden");
     }
     return mappingProfileDao.delete(mappingProfileId, tenantId);
@@ -209,7 +212,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   public static boolean isDefault(String mappingProfileId) {
-    return DEFAULT_MAPPING_PROFILE_ID.equals(mappingProfileId);
+    return DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId);
   }
 
 }
