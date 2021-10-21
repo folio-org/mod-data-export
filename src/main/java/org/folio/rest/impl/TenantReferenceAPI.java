@@ -69,7 +69,7 @@ public class TenantReferenceAPI extends TenantAPI {
         loadSample = Boolean.parseBoolean(parameter.getValue());
       }
     }
-    return loadSample;
+    return true;
 
   }
 
