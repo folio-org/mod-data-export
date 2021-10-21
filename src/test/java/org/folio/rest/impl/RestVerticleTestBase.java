@@ -43,7 +43,7 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * Class for tests that base on testing code using Vertx REST verticle
  */
-public abstract class RestVerticleTestBase extends TenantReferenceAPI {
+public abstract class RestVerticleTestBase {
 
   private static final String HOST = "http://localhost:";
   protected static final String OKAPI_HEADER_URL = "x-okapi-url";

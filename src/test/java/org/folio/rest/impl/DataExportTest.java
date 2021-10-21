@@ -123,17 +123,6 @@ class DataExportTest extends RestVerticleTestBase {
     SpringContextUtil.autowireDependencies(this, vertxContext);
   }
 
-  @Override
-  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
-    Parameter param1 = new Parameter();
-    param1.setKey("loadSample");
-    param1.setValue("true");
-
-    attributes.getParameters().add(param1);
-
-    return super.loadData(attributes, tenantId, headers, vertxContext);
-  }
-
   @BeforeAll
   public static void setup() throws MalformedURLException {
     // the tenant API is now async, so creating the custom tenant prior to running
