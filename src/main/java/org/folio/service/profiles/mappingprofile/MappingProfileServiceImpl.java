@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class MappingProfileServiceImpl implements MappingProfileService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
-  private static final String DEFAULT_HOLDINGS_MAPPING_PROFILE_ID = "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13";
+//  private static final String DEFAULT_HOLDINGS_MAPPING_PROFILE_ID = "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13";
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
@@ -78,11 +78,11 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   @Override
   public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
     Promise<MappingProfile> mappingProfilePromise = Promise.promise();
-    String newId = mappingProfile.getId();
-    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(newId) ||
-      DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(newId)) {
-      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
-    }
+//    String newId = mappingProfile.getId();
+//    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(newId) ||
+//      DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(newId)) {
+//      throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
+//    }
     validateProfileRecordTypes(mappingProfile);
     if (mappingProfile.getMetadata() != null && isNotEmpty(mappingProfile.getMetadata().getUpdatedByUserId())) {
       usersClient.getUserInfoAsync(mappingProfile.getMetadata().getUpdatedByUserId(), params)
