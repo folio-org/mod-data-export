@@ -27,6 +27,7 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -43,7 +44,9 @@ import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.FileDefinition.UploadFormat;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
+import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
@@ -72,6 +75,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -117,6 +121,17 @@ class DataExportTest extends RestVerticleTestBase {
     Context vertxContext = vertx.getOrCreateContext();
     SpringContextUtil.init(vertxContext.owner(), vertxContext, DataExportTest.TestMock.class);
     SpringContextUtil.autowireDependencies(this, vertxContext);
+  }
+
+  @Override
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
+    Parameter param1 = new Parameter();
+    param1.setKey("loadSample");
+    param1.setValue("true");
+
+    attributes.getParameters().add(param1);
+
+    return super.loadData(attributes, tenantId, headers, vertxContext);
   }
 
   @BeforeAll
