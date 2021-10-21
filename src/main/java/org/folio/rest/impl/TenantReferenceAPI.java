@@ -34,6 +34,13 @@ public class TenantReferenceAPI extends TenantAPI {
 
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
+    if (attributes.getParameters().stream().noneMatch(param -> param.getKey().equals(PARAMETER_LOAD_SAMPLE))) {
+      Parameter newParam = new Parameter();
+      newParam.setKey(PARAMETER_LOAD_SAMPLE);
+      newParam.setValue(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE, "false"));
+
+      attributes.getParameters().add(newParam);
+    }
 
     tl.perform(attributes, headers, vertx, res1 -> {
       if (res1.failed()) {

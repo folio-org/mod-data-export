@@ -1,13 +1,5 @@
 package org.folio.rest.impl;
 
-import static io.restassured.RestAssured.given;
-import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
-import static org.folio.rest.impl.StorageTestSuite.mockPort;
-import static org.folio.rest.impl.StorageTestSuite.port;
-
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -15,9 +7,19 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
-import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.tools.utils.ModuleName;
+import org.folio.rest.tools.utils.RmbVersion;
+import org.folio.util.OkapiConnectionParams;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,19 +32,14 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.folio.rest.jaxrs.model.Parameter;
-import org.folio.rest.jaxrs.model.TenantAttributes;
-import org.folio.rest.tools.utils.ModuleName;
-import org.folio.rest.tools.utils.RmbVersion;
-import org.folio.rest.tools.utils.TenantLoading;
-import org.folio.util.OkapiConnectionParams;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+
+import static io.restassured.RestAssured.given;
+import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
+import static org.folio.rest.impl.StorageTestSuite.mockPort;
+import static org.folio.rest.impl.StorageTestSuite.port;
 
 
 /**
@@ -91,28 +88,6 @@ public abstract class RestVerticleTestBase {
       StorageTestSuite.before();
       vertx = StorageTestSuite.getVertx();
     }
-    Promise<Integer> promise = Promise.promise();
-    TenantLoading tl = new TenantLoading();
-
-    Parameter param1 = new Parameter();
-    param1.setKey("loadSample");
-    param1.setValue("true");
-
-    TenantAttributes attributes = new TenantAttributes();
-    attributes.getParameters().add(param1);
-
-    Map<String, String> headers = new HashedMap<>();
-    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
-    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
-    headers.put(OKAPI_HEADER_TOKEN, TOKEN);
-
-    tl.perform(attributes, headers, vertx, res1 -> {
-      if (res1.failed()) {
-        promise.fail(res1.cause());
-      } else {
-        promise.complete(res1.result());
-      }
-    });
   }
 
   @AfterAll
