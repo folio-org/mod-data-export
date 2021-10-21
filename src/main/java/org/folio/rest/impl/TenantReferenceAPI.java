@@ -35,6 +35,12 @@ public class TenantReferenceAPI extends TenantAPI {
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
 
+    Parameter param1 = new Parameter();
+    param1.setKey("loadSample");
+    param1.setValue("true");
+
+    attributes.getParameters().add(param1);
+
     tl.perform(attributes, headers, vertx, res1 -> {
       if (res1.failed()) {
         promise.fail(res1.cause());
@@ -50,7 +56,6 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isLoadSample(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_SAMPLE).withLead("data")
         .withPostOnly()
-        .withAcceptStatus(422)
         .add("mapping-profiles", "data-export/mapping-profiles")
         .add("job-profiles", "data-export/job-profiles");
     }
@@ -64,7 +69,7 @@ public class TenantReferenceAPI extends TenantAPI {
         loadSample = Boolean.parseBoolean(parameter.getValue());
       }
     }
-    return loadSample;
+    return true;
 
   }
 
