@@ -145,16 +145,16 @@ class JobProfileServiceUnitTest {
     }));
   }
 
-//  @Test
-//  void update_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
-//    // given
-//    JobProfile defaultJobProfile = new JobProfile().withId(DEFAULT_JOB_PROFILE_ID);
-//    // assert that exception is thrown
-//    Assertions.assertThrows(ServiceException.class, () -> {
-//      jobProfileService.update(defaultJobProfile, okapiConnectionParams);
-//    });
-//    context.completeNow();
-//  }
+  @Test
+  void update_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
+    // given
+    JobProfile defaultJobProfile = new JobProfile().withId(DEFAULT_JOB_PROFILE_ID);
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      jobProfileService.update(defaultJobProfile, okapiConnectionParams);
+    });
+    context.completeNow();
+  }
 
   @Test
   void get_shouldCallDaoGet(VertxTestContext context) {

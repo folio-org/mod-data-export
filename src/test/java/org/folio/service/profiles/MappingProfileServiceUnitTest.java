@@ -193,16 +193,16 @@ class MappingProfileServiceUnitTest {
     }));
   }
 
-//  @Test
-//  void update_shouldThrowException_ifMappingProfileIsDefault(VertxTestContext context) {
-//    // given
-//    MappingProfile defaultMappingProfile = new MappingProfile().withId(DEFAULT_MAPPING_PROFILE_ID);
-//    // assert that exception is thrown
-//    Assertions.assertThrows(ServiceException.class, () -> {
-//      mappingProfileService.update(defaultMappingProfile, okapiConnectionParams);
-//    });
-//    context.completeNow();
-//  }
+  @Test
+  void update_shouldThrowException_ifMappingProfileIsDefault(VertxTestContext context) {
+    // given
+    MappingProfile defaultMappingProfile = new MappingProfile().withId(DEFAULT_MAPPING_PROFILE_ID);
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.update(defaultMappingProfile, okapiConnectionParams);
+    });
+    context.completeNow();
+  }
 
   @Test
   void get_shouldCallDaoGet(VertxTestContext context) {
