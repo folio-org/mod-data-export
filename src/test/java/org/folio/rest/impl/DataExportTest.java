@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
 import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
+import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
@@ -121,6 +122,7 @@ class DataExportTest extends RestVerticleTestBase {
   @BeforeAll
   public static void setup() throws MalformedURLException {
     // the tenant API is now async, so creating the custom tenant prior to running
+    MODULE_SPECIFIC_ARGS.put("loadSample", "true");
     postToTenant(CUSTOM_TENANT_HEADER).statusCode(201);
   }
 
