@@ -26,7 +26,8 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 public class JobProfileServiceImpl implements JobProfileService {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static final String DEFAULT_INSTANCE_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static final String DEFAULT_HOLDINGS_JOB_PROFILE_ID = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
 
   @Autowired
   private JobProfileDao jobProfileDao;
@@ -49,7 +50,7 @@ public class JobProfileServiceImpl implements JobProfileService {
 
   @Override
   public Future<JobProfile> getDefault(String tenantId) {
-    return getById(DEFAULT_JOB_PROFILE_ID, tenantId);
+    return getById(DEFAULT_INSTANCE_JOB_PROFILE_ID, tenantId);
   }
 
   @Override
@@ -77,7 +78,9 @@ public class JobProfileServiceImpl implements JobProfileService {
   @Override
   public Future<JobProfile> update(JobProfile jobProfile, OkapiConnectionParams params) {
     Promise<JobProfile> jobProfilePromise = Promise.promise();
-    if (DEFAULT_JOB_PROFILE_ID.equals(jobProfile.getId())) {
+    String newId = jobProfile.getId();
+    if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(newId) ||
+    DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(newId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default job profile is forbidden");
     }
     if (jobProfile.getMetadata() != null && isNotEmpty(jobProfile.getMetadata().getUpdatedByUserId())) {
@@ -103,7 +106,7 @@ public class JobProfileServiceImpl implements JobProfileService {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
-    if (DEFAULT_JOB_PROFILE_ID.equals(id)) {
+    if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(id)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default job profile is forbidden");
     }
     return jobProfileDao.deleteById(id, tenantId);

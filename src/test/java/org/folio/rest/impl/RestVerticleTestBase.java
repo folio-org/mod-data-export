@@ -1,12 +1,5 @@
 package org.folio.rest.impl;
 
-import static io.restassured.RestAssured.given;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
-import static org.folio.rest.impl.StorageTestSuite.mockPort;
-import static org.folio.rest.impl.StorageTestSuite.port;
-
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -16,6 +9,17 @@ import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.tools.utils.ModuleName;
+import org.folio.rest.tools.utils.RmbVersion;
+import org.folio.util.OkapiConnectionParams;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,16 +32,16 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.folio.rest.tools.utils.ModuleName;
-import org.folio.rest.tools.utils.RmbVersion;
-import org.folio.util.OkapiConnectionParams;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+
+import static io.restassured.RestAssured.given;
+import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
+import static org.folio.rest.impl.StorageTestSuite.mockPort;
+import static org.folio.rest.impl.StorageTestSuite.port;
+import static org.folio.rest.impl.StorageTestSuite.storageUrl;
+import static org.hamcrest.Matchers.equalTo;
 
 
 /**
@@ -78,6 +82,8 @@ public abstract class RestVerticleTestBase {
    */
   @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    MODULE_SPECIFIC_ARGS.put("loadSample", "true");
+
     vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
@@ -241,5 +247,4 @@ public abstract class RestVerticleTestBase {
       .addHeader("Accept", "text/plain, application/json")
       .build();
   }
-
 }

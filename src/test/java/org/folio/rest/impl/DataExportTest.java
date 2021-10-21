@@ -1,24 +1,5 @@
 package org.folio.rest.impl;
 
-import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
-import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
-import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
-import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
-import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -49,6 +30,7 @@ import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.HelperUtils;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -74,7 +56,24 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
+import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
+import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
+import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
+import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)

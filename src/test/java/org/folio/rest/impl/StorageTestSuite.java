@@ -170,4 +170,8 @@ public class StorageTestSuite {
   class DataExportCleanUpFilesTestNested extends DataExportCleanUpFilesTest {
   }
 
+  @Nested
+  class TenantReferenceAPITestNested extends TenantReferenceAPITest {
+
+  }
 }
