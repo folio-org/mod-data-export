@@ -40,6 +40,8 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.folio.rest.impl.StorageTestSuite.port;
+import static org.folio.rest.impl.StorageTestSuite.storageUrl;
+import static org.hamcrest.Matchers.equalTo;
 
 
 /**
@@ -246,4 +248,18 @@ public abstract class RestVerticleTestBase {
       .build();
   }
 
+  protected void verifyCollectionQuantity(String endpoint, int quantity, Header tenantHeader) throws MalformedURLException {
+    getData(endpoint, tenantHeader)
+      .then()
+      .log().all()
+      .statusCode(200)
+      .body("totalRecords", equalTo(quantity));
+  }
+
+  Response getData(String endpoint, Header tenantHeader) throws MalformedURLException {
+    return given()
+      .header(tenantHeader)
+      .contentType(ContentType.JSON)
+      .get(storageUrl(endpoint));
+  }
 }
