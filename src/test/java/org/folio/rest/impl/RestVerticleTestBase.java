@@ -247,19 +247,4 @@ public abstract class RestVerticleTestBase {
       .addHeader("Accept", "text/plain, application/json")
       .build();
   }
-
-  protected void verifyCollectionQuantity(String endpoint, int quantity, Header tenantHeader) throws MalformedURLException {
-    getData(endpoint, tenantHeader)
-      .then()
-      .log().all()
-      .statusCode(200)
-      .body("totalRecords", equalTo(quantity));
-  }
-
-  Response getData(String endpoint, Header tenantHeader) throws MalformedURLException {
-    return given()
-      .header(tenantHeader)
-      .contentType(ContentType.JSON)
-      .get(storageUrl(endpoint));
-  }
 }
