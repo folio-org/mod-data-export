@@ -15,6 +15,7 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import java.io.File;
@@ -32,8 +33,11 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.jaxrs.model.Parameter;
+import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.tools.utils.ModuleName;
 import org.folio.rest.tools.utils.RmbVersion;
+import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -80,12 +84,35 @@ public abstract class RestVerticleTestBase {
   @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     MODULE_SPECIFIC_ARGS.put("loadSample", "true");
+
     vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
       StorageTestSuite.before();
       vertx = StorageTestSuite.getVertx();
     }
+    Promise<Integer> promise = Promise.promise();
+    TenantLoading tl = new TenantLoading();
+
+    Parameter param1 = new Parameter();
+    param1.setKey("loadSample");
+    param1.setValue("true");
+
+    TenantAttributes attributes = new TenantAttributes();
+    attributes.getParameters().add(param1);
+
+    Map<String, String> headers = new HashedMap<>();
+    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    headers.put(OKAPI_HEADER_URL, MOCK_OKAPI_URL);
+    headers.put(OKAPI_HEADER_TOKEN, TOKEN);
+
+    tl.perform(attributes, headers, vertx, res1 -> {
+      if (res1.failed()) {
+        promise.fail(res1.cause());
+      } else {
+        promise.complete(res1.result());
+      }
+    });
   }
 
   @AfterAll
