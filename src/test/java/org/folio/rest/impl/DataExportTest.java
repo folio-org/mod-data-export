@@ -126,7 +126,6 @@ class DataExportTest extends RestVerticleTestBase {
   @BeforeAll
   public static void setup() throws MalformedURLException {
     // the tenant API is now async, so creating the custom tenant prior to running
-    MODULE_SPECIFIC_ARGS.put("loadSample", "true");
     postToTenant(CUSTOM_TENANT_HEADER).statusCode(201);
   }
 

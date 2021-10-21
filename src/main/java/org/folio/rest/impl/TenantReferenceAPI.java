@@ -36,7 +36,7 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     Parameter param1 = new Parameter();
-    param1.setKey("loadSample");
+    param1.setKey(PARAMETER_LOAD_SAMPLE);
     param1.setValue("true");
 
     attributes.getParameters().add(param1);
@@ -69,7 +69,7 @@ public class TenantReferenceAPI extends TenantAPI {
         loadSample = Boolean.parseBoolean(parameter.getValue());
       }
     }
-    return true;
+    return loadSample;
 
   }
 
