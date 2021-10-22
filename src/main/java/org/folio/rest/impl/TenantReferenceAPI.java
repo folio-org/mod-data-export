@@ -34,7 +34,7 @@ public class TenantReferenceAPI extends TenantAPI {
 
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
-    
+
     if (attributes.getParameters().stream().noneMatch(param -> param.getKey().equals(PARAMETER_LOAD_REFERENCE))) {
       Parameter newParam = new Parameter();
       newParam.setKey(PARAMETER_LOAD_REFERENCE);

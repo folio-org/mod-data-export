@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
-import org.folio.rest.impl.tenantapi.TenantReferenceApiTest;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.postgres.testing.PostgresTesterContainer;
@@ -172,7 +171,7 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class TenantReferenceApiTestNested extends TenantReferenceApiTest {
+  class TenantReferenceAPITestNested extends TenantReferenceAPITest {
 
   }
 }
