@@ -59,6 +59,7 @@ class MappingProfileServiceUnitTest {
   private static final String MISSING_FIELD_ID = "missingFieldId";
   private static MappingProfile expectedMappingProfile;
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String DEFAULT_HOLDINGS_MAPPING_PROFILE_ID = "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13";
   private static final String PATH = "$.instance.alternativeTitles[?(@.alternativeTitleTypeId=='4bb300a4-04c9-414b-bfbc-9c032f74b7b2')].alternativeTitle";
 
   @Spy
@@ -173,6 +174,15 @@ class MappingProfileServiceUnitTest {
     // assert that exception is thrown
     Assertions.assertThrows(ServiceException.class, () -> {
       mappingProfileService.deleteById(DEFAULT_MAPPING_PROFILE_ID, TENANT_ID);
+    });
+    context.completeNow();
+  }
+
+  @Test
+  void delete_shouldThrowException_ifHoldingsMappingProfileIsDefault(VertxTestContext context) {
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      mappingProfileService.deleteById(DEFAULT_HOLDINGS_MAPPING_PROFILE_ID, TENANT_ID);
     });
     context.completeNow();
   }
