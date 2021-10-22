@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
+import org.folio.rest.impl.tenantapi.TenantReferenceApiTest;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.postgres.testing.PostgresTesterContainer;
@@ -70,7 +71,7 @@ public class StorageTestSuite {
   }
 
   @AfterAll
-  public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+  public static void after() throws InterruptedException, ExecutionException, TimeoutException {
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
     vertx.close(res -> {
@@ -171,7 +172,7 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class TenantReferenceAPITestNested extends TenantReferenceAPITest {
+  class TenantReferenceApiTestNested extends TenantReferenceApiTest {
 
   }
 }
