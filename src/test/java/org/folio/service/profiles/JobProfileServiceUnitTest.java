@@ -48,6 +48,7 @@ class JobProfileServiceUnitTest {
   private static final String TENANT_ID = "diku";
   private static JobProfile expectedJobProfile;
   private static String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static String DEFAULT_HOLDINGS_JOB_PROFILE_ID = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
 
   @Spy
   @InjectMocks
@@ -122,6 +123,15 @@ class JobProfileServiceUnitTest {
 
   @Test
   void delete_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      jobProfileService.deleteById(DEFAULT_HOLDINGS_JOB_PROFILE_ID, TENANT_ID);
+    });
+    context.completeNow();
+  }
+
+  @Test
+  void delete_shouldThrowException_ifHoldingsJobProfileIsDefault(VertxTestContext context) {
     // assert that exception is thrown
     Assertions.assertThrows(ServiceException.class, () -> {
       jobProfileService.deleteById(DEFAULT_JOB_PROFILE_ID, TENANT_ID);

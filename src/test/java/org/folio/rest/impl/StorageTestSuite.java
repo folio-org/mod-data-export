@@ -70,7 +70,7 @@ public class StorageTestSuite {
   }
 
   @AfterAll
-  public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+  public static void after() throws InterruptedException, ExecutionException, TimeoutException {
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
     vertx.close(res -> {

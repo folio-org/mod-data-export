@@ -40,8 +40,6 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.folio.rest.impl.StorageTestSuite.port;
-import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.hamcrest.Matchers.equalTo;
 
 
 /**
@@ -82,7 +80,8 @@ public abstract class RestVerticleTestBase {
    */
   @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    MODULE_SPECIFIC_ARGS.put("loadSample", "true");
+
+    MODULE_SPECIFIC_ARGS.put("loadReference", "true");
 
     vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
@@ -96,8 +95,7 @@ public abstract class RestVerticleTestBase {
   public static void testBaseAfterClass()
     throws InterruptedException,
     ExecutionException,
-    TimeoutException,
-    MalformedURLException {
+    TimeoutException {
 
     if (invokeStorageTestSuiteAfter) {
       System.out.println("Running test on own, un-initialising suite manually");
