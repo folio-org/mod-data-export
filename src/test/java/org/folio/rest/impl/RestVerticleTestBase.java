@@ -82,6 +82,7 @@ public abstract class RestVerticleTestBase {
    */
   @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+
     MODULE_SPECIFIC_ARGS.put("loadReference", "true");
 
     vertx = StorageTestSuite.getVertx();

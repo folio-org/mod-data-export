@@ -144,6 +144,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   @Override
   public Future<Boolean> deleteById(String mappingProfileId, String tenantId) {
+
     if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId) ||
     DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default mapping profile is forbidden");

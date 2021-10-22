@@ -34,6 +34,7 @@ public class TenantReferenceAPI extends TenantAPI {
 
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
+    
     if (attributes.getParameters().stream().noneMatch(param -> param.getKey().equals(PARAMETER_LOAD_REFERENCE))) {
       Parameter newParam = new Parameter();
       newParam.setKey(PARAMETER_LOAD_REFERENCE);
@@ -63,14 +64,14 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   private boolean isLoadReference(TenantAttributes tenantAttributes) {
-    boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_REFERENCE, "false"));
+    boolean loadReference = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_REFERENCE, "false"));
     List<Parameter> parameters = tenantAttributes.getParameters();
     for (Parameter parameter : parameters) {
       if (PARAMETER_LOAD_REFERENCE.equals(parameter.getKey())) {
-        loadSample = Boolean.parseBoolean(parameter.getValue());
+        loadReference = Boolean.parseBoolean(parameter.getValue());
       }
     }
-    return loadSample;
+    return loadReference;
 
   }
 
