@@ -106,7 +106,8 @@ public class JobProfileServiceImpl implements JobProfileService {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
-    if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(id)) {
+    if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(id) ||
+    DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(id)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default job profile is forbidden");
     }
     return jobProfileDao.deleteById(id, tenantId);

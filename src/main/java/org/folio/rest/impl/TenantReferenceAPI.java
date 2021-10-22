@@ -24,7 +24,7 @@ public class TenantReferenceAPI extends TenantAPI {
 
   private static final Logger log = LogManager.getLogger(TenantReferenceAPI.class);
 
-  private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
+  private static final String PARAMETER_LOAD_REFERENCE = "loadReference";
 
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
@@ -34,10 +34,10 @@ public class TenantReferenceAPI extends TenantAPI {
 
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
-    if (attributes.getParameters().stream().noneMatch(param -> param.getKey().equals(PARAMETER_LOAD_SAMPLE))) {
+    if (attributes.getParameters().stream().noneMatch(param -> param.getKey().equals(PARAMETER_LOAD_REFERENCE))) {
       Parameter newParam = new Parameter();
-      newParam.setKey(PARAMETER_LOAD_SAMPLE);
-      newParam.setValue(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE, "false"));
+      newParam.setKey(PARAMETER_LOAD_REFERENCE);
+      newParam.setValue(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_REFERENCE, "false"));
 
       attributes.getParameters().add(newParam);
     }
@@ -54,19 +54,19 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   private void buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
-    if (isLoadSample(tenantAttributes)) {
-      tl.withKey(PARAMETER_LOAD_SAMPLE).withLead("data")
+    if (isLoadReference(tenantAttributes)) {
+      tl.withKey(PARAMETER_LOAD_REFERENCE).withLead("data")
         .withPostOnly()
         .add("mapping-profiles", "data-export/mapping-profiles")
         .add("job-profiles", "data-export/job-profiles");
     }
   }
 
-  private boolean isLoadSample(TenantAttributes tenantAttributes) {
-    boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE, "false"));
+  private boolean isLoadReference(TenantAttributes tenantAttributes) {
+    boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_REFERENCE, "false"));
     List<Parameter> parameters = tenantAttributes.getParameters();
     for (Parameter parameter : parameters) {
-      if (PARAMETER_LOAD_SAMPLE.equals(parameter.getKey())) {
+      if (PARAMETER_LOAD_REFERENCE.equals(parameter.getKey())) {
         loadSample = Boolean.parseBoolean(parameter.getValue());
       }
     }
