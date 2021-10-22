@@ -49,6 +49,10 @@ public class SrsRecordConverterService extends RecordConverter {
     }
   }
 
+  public Pair<List<String>, Integer> transformSrsRecordsForHoldingsExport(List<JsonObject> srsRecords) {
+    return MutablePair.of(getRecordContent(srsRecords), 0);
+  }
+
   public Pair<List<String>, Integer> transformSrsRecord(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,
       OkapiConnectionParams connectionParams) {
     List<String> marcRecords = new ArrayList<>();

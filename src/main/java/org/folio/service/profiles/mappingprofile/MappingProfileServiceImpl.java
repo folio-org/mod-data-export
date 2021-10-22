@@ -213,8 +213,12 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     }
   }
 
-  public static boolean isDefault(String mappingProfileId) {
+  public static boolean isDefaultInstanceProfile(String mappingProfileId) {
     return DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId);
+  }
+
+  public static boolean isDefaultHoldingProfile(String mappingProfileId) {
+    return DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId);
   }
 
 }
