@@ -25,62 +25,28 @@ import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 
 @Service
-public class HoldingExportStrategyImpl implements ExportStrategy {
+public class HoldingExportStrategyImpl extends AbstractExportStrategy {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-
-  @Autowired
-  private SrsRecordConverterService srsRecordService;
-  @Autowired
-  private ExportService exportService;
-  @Autowired
-  private RecordLoaderService recordLoaderService;
-  @Autowired
-  private ErrorLogService errorLogService;
-  @Autowired
-  private MappingProfileService mappingProfileService;
-  @Autowired
-  private JobExecutionService jobExecutionService;
-  @Autowired
-  private UsersClient usersClient;
-  @Autowired
-  private InventoryClient inventoryClient;
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
     List<String> identifiers = exportPayload.getIdentifiers();
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    inventoryClient.getInstanceIdsByHoldingIds(identifiers, params).onSuccess(instanceIds -> {
+    getInventoryClient().getInstanceIdsByHoldingIds(identifiers, params).onSuccess(instanceIds -> {
       SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(instanceIds, exportPayload.getJobExecutionId(), params);
-      Pair<List<String>, Integer> marcToExport = srsRecordService.transformSrsRecordsForHoldingsExport(srsLoadResult.getUnderlyingMarcRecords());
-      exportService.exportSrsRecord(marcToExport, exportPayload);
+      Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecordsForHoldingsExport(srsLoadResult.getUnderlyingMarcRecords());
+      getExportService().exportSrsRecord(marcToExport, exportPayload);
       LOGGER.info("Number of holdings without srs: {}", identifiers.size() - srsLoadResult.getUnderlyingMarcRecords().size());
 
       exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
       exportPayload.setFailedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - exportPayload.getExportedRecordsNumber());
       if (exportPayload.isLast()) {
-        exportService.postExport(fileExportDefinition, params.getTenantId());
+        getExportService().postExport(fileExportDefinition, params.getTenantId());
       }
       blockingPromise.complete();
     });
-  }
-
-  /**
-   * Loads marc records from SRS by the given instance identifiers
-   *
-   * @param identifiers instance identifiers
-   * @param params      okapi connection parameters
-   * @return @see SrsLoadResult
-   */
-  private SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId, OkapiConnectionParams params) {
-    SrsLoadResult srsLoadResult = new SrsLoadResult();
-    Lists.partition(identifiers, ExportManagerImpl.SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = recordLoaderService.loadMarcRecordsBlocking(partition, jobExecutionId, params);
-      srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
-      srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
-    });
-    return srsLoadResult;
   }
 
 }
