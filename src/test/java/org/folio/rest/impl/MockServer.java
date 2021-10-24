@@ -63,6 +63,7 @@ public class MockServer {
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
+  private static final String INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS = BASE_MOCK_DATA_PATH + "inventory/instance_bulk_ids_from_holding_records.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -406,6 +407,8 @@ public class MockServer {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
       } else if (ctx.request().getParam("query").contains("invalid json returned")) {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end("{qwe");
+      } else if (ctx.request().getParam("query").contains("id==\"59fed5a1-6381-428f-b2ec-483e498c2bbc\"")) {
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS, RECORD_BULK_IDS, ctx);
       } else {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       }

@@ -28,7 +28,6 @@ import org.folio.service.mapping.converter.SrsRecordConverterService;
 import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -59,7 +58,7 @@ import java.util.stream.Stream;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class InstanceExportStrategyUnitTest {
   private static final int LIMIT = 50;
-  private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
 
   @Mock
   private RecordLoaderService recordLoaderService;
@@ -186,7 +185,7 @@ class InstanceExportStrategyUnitTest {
     Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     MappingProfile defaultMappingProfile = new MappingProfile()
-      .withId(DEFAULT_MAPPING_PROFILE_ID)
+      .withId(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE));
     Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(defaultMappingProfile));
     boolean isLast = true;
@@ -215,7 +214,7 @@ class InstanceExportStrategyUnitTest {
     // then
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), mappingProfileCaptor.capture(), any(OkapiConnectionParams.class));
     MappingProfile actualMappingProfile = mappingProfileCaptor.getValue();
-    assertEquals(DEFAULT_MAPPING_PROFILE_ID, actualMappingProfile.getId());
+    assertEquals(DEFAULT_INSTANCE_MAPPING_PROFILE_ID, actualMappingProfile.getId());
     assertThat(actualMappingProfile.getRecordTypes(), hasItems(RecordType.HOLDINGS, RecordType.ITEM));
     assertThat(actualMappingProfile.getTransformations(), hasItems(holdingsTransformations, itemTransformations));
   }
