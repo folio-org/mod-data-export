@@ -63,7 +63,7 @@ public class MockServer {
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
-  private static final String INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS = BASE_MOCK_DATA_PATH + "inventory/instance_bulk_ids_from_holding_records.json";
+  private static final String INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_from_holding_records.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 

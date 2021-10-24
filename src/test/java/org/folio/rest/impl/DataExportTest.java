@@ -1,17 +1,13 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.vertx.core.Context;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
@@ -47,14 +43,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import io.vertx.core.Context;
+import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
 import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
 import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
@@ -67,11 +67,11 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
 import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
@@ -93,6 +93,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String JOB_EXECUTION_ID_FIELD = "jobExecutionId";
   private static final String JOB_EXECUTION_HR_ID_FIELD = "jobExecutionHrId";
   private static final String DEFAULT_HOLDING_JOB_PROFILE = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
+  private static final String DEFAULT_INSTANCE_JOB_PROFILE = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
   private static final int EXPORTED_RECORDS_EMPTY = 0;
   private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
@@ -498,8 +499,40 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForSrsAndInventory(1);
-              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsByDefaultRulesAndTransformations.mrc");
+              validateExternalCallsForSrsAndInventoryBulkIds(1);
+              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsFromHoldingRecord.mrc");
+              context.completeNow();
+            });
+          });
+        });
+    });
+  }
+
+  @Test
+  @Order(15)
+  void testHoldingsExportByCSV_whenNotDefaultHoldingJobProfileSpecified(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(HOLDING_UUIDS_INVENTORY, CSV, FileDefinition.IdType.HOLDING, buildRequestSpecification(tenantId));
+
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, DEFAULT_INSTANCE_JOB_PROFILE);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
+            context.verify(() -> {
+              assertEquals(FAIL, jobExecution.getStatus());
+              assertNotNull(jobExecution.getCompletedDate());
+              assertNotNull(jobExecution.getRunBy());
+              assertEquals(1, errorLogs.getErrorLogs().size());
+              ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
+              assertEquals(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getCode(), errorLog.getErrorMessageCode());
+              assertEquals(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getDescription(), errorLog.getErrorMessageValues().get(0));
               context.completeNow();
             });
           });
@@ -522,7 +555,7 @@ class DataExportTest extends RestVerticleTestBase {
       customJobProfileId = postRequest(jobProfilejs, DATA_EXPORT_JOB_PROFILES_ENDPOINT, tenantID)
         .then()
         .extract()
-        .path("id");;
+        .path("id");
     }
   }
 
@@ -602,8 +635,8 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   private void assertCompletedFileDefinitionAndExportedFile(FileDefinition fileExportDefinition, String fileName) {
-    String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath());
-    String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName);
+    String actualGeneratedFileContent = TestUtil.readFileContent(fileExportDefinition.getSourcePath()).replaceAll("\n","");
+    String expectedGeneratedFileContent = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + fileName).replaceAll("\n","");
     assertEquals(expectedGeneratedFileContent, actualGeneratedFileContent);
     assertEquals(FileDefinition.Status.COMPLETED, fileExportDefinition.getStatus());
   }
@@ -617,7 +650,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   private void assertErrorLogs(ErrorLogCollection errorLogCollection, String jobExecutionId) {
-    Assert.assertEquals(4, errorLogCollection.getErrorLogs().size());
+    assertEquals(4, errorLogCollection.getErrorLogs().size());
     ErrorLog errorLog1 = errorLogCollection.getErrorLogs().get(0);
     ErrorLog errorLog2 = errorLogCollection.getErrorLogs().get(1);
     ErrorLog errorLog3 = errorLogCollection.getErrorLogs().get(2);
@@ -631,7 +664,7 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog3.getLogLevel());
     assertEquals(ErrorLog.LogLevel.ERROR, errorLog4.getLogLevel());
     for (ErrorLog errorLog : errorLogCollection.getErrorLogs()) {
-      Assert.assertTrue(errorLog.getErrorMessageCode().contains(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode())
+     assertTrue(errorLog.getErrorMessageCode().contains(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode())
         || errorLog.getErrorMessageCode().contains(NO_FILE_GENERATED.getCode())
         || errorLog.getErrorMessageCode().contains(SOME_UUIDS_NOT_FOUND.getCode())
         || errorLog.getErrorMessageCode().contains(INVALID_EXPORT_FILE_DEFINITION_ID.getCode()));
@@ -652,6 +685,11 @@ class DataExportTest extends RestVerticleTestBase {
   private void validateExternalCallsForSrsAndInventory(int expectedNumber) {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+  }
+
+  private void validateExternalCallsForSrsAndInventoryBulkIds(int expectedNumber) {
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
+    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.RECORD_BULK_IDS).size());
   }
 
   /**

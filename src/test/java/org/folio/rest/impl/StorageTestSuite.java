@@ -99,7 +99,7 @@ public class StorageTestSuite {
       if (res.succeeded()) {
         TenantAttributes tenantAttributes = new TenantAttributes();
         tenantAttributes.setModuleTo(ModuleName.getModuleName());
-        tenantAttributes.setParameters(Collections.singletonList(new Parameter().withKey("loadSample").withValue("true")));
+        tenantAttributes.setParameters(Collections.singletonList(new Parameter().withKey("loadReference").withValue("true")));
         try {
           tenantClient.postTenant(tenantAttributes, res2 -> {
             if (isSuccess(res2.result().statusCode())){
