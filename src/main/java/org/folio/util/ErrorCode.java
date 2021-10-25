@@ -13,6 +13,7 @@ public enum ErrorCode {
   NO_FILE_GENERATED("error.binaryFile.notGenerated", "Nothing to export: no binary file generated"),
   USER_NOT_FOUND("error.user.notFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION("error.uploadedFile.invalidExtension", "File name extension does not corresponds csv format"),
+  INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE("error.uploadedFile.invalidExtension", "Only csv format is supported for holdings export"),
   FILE_ALREADY_UPLOADED("error.fileDefinition.fileAlreadyUploaded", "File already uploaded for this FileDefinition"),
   NOTHING_TO_EXPORT("error.nothingToExport", "No exported records, nothing to export"),
   FAIL_TO_UPDATE_JOB("error.jobExecution.failToUpdateJob", "Fail to prepare job execution for export"),
