@@ -1,5 +1,23 @@
 package org.folio.service.manager.export;
 
+import java.lang.invoke.MethodHandles;
+import java.util.Collections;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.service.file.storage.FileStorage;
+import org.folio.service.job.JobExecutionService;
+import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.strategy.ExportStrategy;
+import org.folio.service.manager.input.InputDataManager;
+import org.folio.service.mapping.converter.InventoryRecordConverterService;
+import org.folio.spring.SpringContextUtil;
+import org.folio.util.ErrorCode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -7,24 +25,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.JobExecution;
-import org.folio.service.file.storage.FileStorage;
-import org.folio.service.job.JobExecutionService;
-import org.folio.service.logs.ErrorLogService;
-import org.folio.service.manager.export.strategy.ExportStrategy;
-import org.folio.service.manager.export.strategy.InstanceExportStrategyImpl;
-import org.folio.service.manager.input.InputDataManager;
-import org.folio.service.mapping.converter.InventoryRecordConverterService;
-import org.folio.spring.SpringContextUtil;
-import org.folio.util.ErrorCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.lang.invoke.MethodHandles;
-import java.util.Collections;
 
 /**
  * The ExportManager is a central part of the data-export.
@@ -50,7 +50,11 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   private ErrorLogService errorLogService;
   @Autowired
+  @Qualifier("instanceExportStrategyImpl")
   private ExportStrategy instanceExportManager;
+  @Autowired
+  @Qualifier("holdingExportStrategyImpl")
+  private ExportStrategy holdingExportManager;
 
   public ExportManagerImpl() {
   }
@@ -64,7 +68,14 @@ public class ExportManagerImpl implements ExportManager {
   @Override
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
-    this.executor.executeBlocking(blockingPromise -> instanceExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
+    switch (exportPayload.getFileExportDefinition().getIdType()) {
+      case INSTANCE:
+        this.executor.executeBlocking(blockingPromise -> instanceExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
+        break;
+      case HOLDING:
+        this.executor.executeBlocking(blockingPromise -> holdingExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
+        break;
+    }
   }
 
 

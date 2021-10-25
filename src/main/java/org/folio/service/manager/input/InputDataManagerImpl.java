@@ -24,6 +24,7 @@ import org.folio.service.logs.ErrorLogService;
 import org.folio.service.manager.export.ExportManager;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.manager.export.ExportResult;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,16 +97,30 @@ class InputDataManagerImpl implements InputDataManager {
   }
 
   protected void initBlocking(JsonObject exportRequestJson, JsonObject requestFileDefinitionJson, JsonObject mappingProfileJson, JsonObject jobExecutionJson, Map<String, String> params) {
-    ExportRequest exportRequest = exportRequestJson.mapTo(ExportRequest.class);
-    MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
     FileDefinition requestFileDefinition = requestFileDefinitionJson.mapTo(FileDefinition.class);
+    MappingProfile mappingProfile = mappingProfileJson.mapTo(MappingProfile.class);
     JobExecution jobExecution = jobExecutionJson.mapTo(JobExecution.class);
     OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams(params);
     String tenantId = okapiConnectionParams.getTenantId();
     String jobExecutionId = jobExecution.getId();
+    ExportRequest exportRequest = exportRequestJson.mapTo(ExportRequest.class);
     FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
-    SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
     Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
+    if (requestFileDefinition.getIdType().equals(FileDefinition.IdType.HOLDING) && !MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
+      String errorCode = ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getCode();
+      List<String> errorMessageValues = Collections.singletonList(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getDescription());
+      errorLogService.saveGeneralErrorWithMessageValues(errorCode, errorMessageValues, jobExecutionId, tenantId);
+      fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
+        if (optionalUser.isPresent()) {
+          jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
+        } else {
+          ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+        }
+      });
+      return;
+    }
+    SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
@@ -246,6 +262,7 @@ class InputDataManagerImpl implements InputDataManager {
       .withFileName(fileNameWithoutExtension + DELIMITER + jobExecution.getHrId() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
+      .withIdType(requestFileDefinition.getIdType())
       .withMetadata(exportRequest.getMetadata());
   }
 

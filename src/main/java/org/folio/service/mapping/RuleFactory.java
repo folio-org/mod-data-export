@@ -71,7 +71,7 @@ public class RuleFactory {
       return defaultRules;
     }
     List<Rule> rules = new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
-    if (MappingProfileServiceImpl.isDefault(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
+    if (MappingProfileServiceImpl.isDefaultInstanceProfile(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
       rules.addAll(getDefaultRulesFromFile());
     }
     return rules;

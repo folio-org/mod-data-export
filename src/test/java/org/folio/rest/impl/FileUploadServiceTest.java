@@ -240,6 +240,33 @@ class FileUploadServiceTest extends RestVerticleTestBase {
     FileUtils.deleteDirectory(new File("./storage"));
   }
 
+  @Test
+  void shouldNotPostFileDefinition_whenCqlFormatSpecifiedForHoldingIdType() throws IOException {
+    // given fileToUpload, binaryRequestSpecification and fileDefinition
+    File fileToUpload = getFileByName("InventoryUUIDs.csv");
+    RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TENANT, TENANT_ID)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .build();
+
+    FileDefinition givenFileDefinition = new FileDefinition()
+      .withId(UUID.randomUUID().toString())
+      .withFileName("test.cql")
+      .withUploadFormat(CQL)
+      .withIdType(FileDefinition.IdType.HOLDING);
+    // when created a new file definition
+    RestAssured.given()
+      .spec(jsonRequestSpecification)
+      .body(JsonObject.mapFrom(givenFileDefinition).encode())
+      .when()
+      .post(FILE_DEFINITION_SERVICE_URL)
+      .then()
+      .statusCode(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+    // then we can start file uploading and assert response body and check file content
+  }
+
   @NotNull
   private File getFileByName(String fileName) {
     ClassLoader classLoader = getClass().getClassLoader();

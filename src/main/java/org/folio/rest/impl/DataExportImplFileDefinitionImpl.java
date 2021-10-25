@@ -60,7 +60,8 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+    succeededFuture().compose(ar -> validateIdType(entity))
+      .compose(ar -> validateFileNameExtension(entity.getFileName()))
       .compose(ar -> replaceCQLExtensionToCSV(entity))
       .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
@@ -120,6 +121,16 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   private Future<Void> validateFileNameExtension(String fileName) {
     if (!FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION) && !FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION)) {
       throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION);
+    }
+    return succeededFuture();
+  }
+
+  private Future<Void> validateIdType(FileDefinition fileDefinition) {
+    FileDefinition.UploadFormat uploadFormat = fileDefinition.getUploadFormat();
+    boolean isCqlFileExtension = FilenameUtils.isExtension(fileDefinition.getFileName().toLowerCase(), CQL_FORMAT_EXTENSION);
+    FileDefinition.IdType idType = fileDefinition.getIdType();
+    if ((uploadFormat.equals(CQL) || isCqlFileExtension) && idType.equals(FileDefinition.IdType.HOLDING)) {
+      throw new ServiceException(HttpStatus.HTTP_UNPROCESSABLE_ENTITY, ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE);
     }
     return succeededFuture();
   }
