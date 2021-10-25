@@ -253,8 +253,8 @@ class FileUploadServiceTest extends RestVerticleTestBase {
 
     FileDefinition givenFileDefinition = new FileDefinition()
       .withId(UUID.randomUUID().toString())
-      .withFileName("test.csv")
-      .withUploadFormat(CSV)
+      .withFileName("test.cql")
+      .withUploadFormat(CQL)
       .withIdType(FileDefinition.IdType.HOLDING);
     // when created a new file definition
     RestAssured.given()
