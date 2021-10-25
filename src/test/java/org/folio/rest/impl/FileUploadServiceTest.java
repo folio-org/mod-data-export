@@ -241,7 +241,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldNotPostFileDefinition_whenCqlFormatSpecifiedForHoldingIdType(VertxTestContext context) throws IOException {
+  void shouldNotPostFileDefinition_whenCqlFormatSpecifiedForHoldingIdType() throws IOException {
     // given fileToUpload, binaryRequestSpecification and fileDefinition
     File fileToUpload = getFileByName("InventoryUUIDs.csv");
     RequestSpecification binaryRequestSpecification = new RequestSpecBuilder()
