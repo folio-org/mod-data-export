@@ -60,8 +60,8 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
-      .compose(ar -> validateIdType(entity.getIdType(), entity.getFileName()))
+    succeededFuture().compose(ar -> validateIdType(entity.getIdType(), entity.getFileName()))
+      .compose(ar -> validateFileNameExtension(entity.getFileName()))
       .compose(ar -> replaceCQLExtensionToCSV(entity))
       .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
