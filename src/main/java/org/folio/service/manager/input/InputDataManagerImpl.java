@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
 import static org.folio.util.ErrorCode.errorCodesAccordingToExport;
@@ -106,25 +108,34 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = exportRequestJson.mapTo(ExportRequest.class);
     FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
     Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
-    if (requestFileDefinition.getIdType().equals(FileDefinition.IdType.HOLDING) && !MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
-      String errorCode = ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getCode();
-      List<String> errorMessageValues = Collections.singletonList(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getDescription());
-      errorLogService.saveGeneralErrorWithMessageValues(errorCode, errorMessageValues, jobExecutionId, tenantId);
+    List<ErrorCode> errorCodes = new ArrayList<>();
+    if (exportRequest.getIdType().equals(ExportRequest.IdType.HOLDING)) {
+      if (!MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
+        errorCodes.add(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED);
+      }
+      if (requestFileDefinition.getUploadFormat().equals(CQL)) {
+        errorCodes.add(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE);
+      }
+    }
+
+    if (isNotEmpty(errorCodes)) {
+      errorCodes.forEach(errorCode -> errorLogService.saveGeneralErrorWithMessageValues(errorCode.getCode(), Collections.singletonList(errorCode.getDescription()), jobExecutionId, tenantId));
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
-          ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
       return;
     }
+
     SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
-        ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+        ExportPayload exportPayload = createExportPayload(exportRequest, savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
@@ -144,7 +155,7 @@ class InputDataManagerImpl implements InputDataManager {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
-          ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
@@ -244,15 +255,16 @@ class InputDataManagerImpl implements InputDataManager {
     return succeededFuture();
   }
 
-  private ExportPayload createExportPayload(ExportRequest.RecordType type, FileDefinition fileExportDefinition, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams okapiParams) {
+  private ExportPayload createExportPayload(ExportRequest exportRequest, FileDefinition fileExportDefinition, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams okapiParams) {
     ExportPayload exportPayload = new ExportPayload();
     exportPayload.setFileExportDefinition(fileExportDefinition);
     exportPayload.setMappingProfile(mappingProfile);
     exportPayload.setJobExecutionId(jobExecutionId);
     exportPayload.setOkapiConnectionParams(okapiParams);
-    if (Objects.nonNull(type)) {
-      exportPayload.setRecordType(type);
+    if (Objects.nonNull(exportRequest.getRecordType())) {
+      exportPayload.setRecordType(exportRequest.getRecordType());
     }
+    exportPayload.setIdType(exportRequest.getIdType());
     return exportPayload;
   }
 
@@ -262,7 +274,6 @@ class InputDataManagerImpl implements InputDataManager {
       .withFileName(fileNameWithoutExtension + DELIMITER + jobExecution.getHrId() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
-      .withIdType(requestFileDefinition.getIdType())
       .withMetadata(exportRequest.getMetadata());
   }
 

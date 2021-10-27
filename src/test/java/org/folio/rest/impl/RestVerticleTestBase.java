@@ -207,6 +207,8 @@ public abstract class RestVerticleTestBase {
     return new RequestSpecBuilder()
       .setContentType(ContentType.BINARY)
       .addHeader(OKAPI_HEADER_TENANT, tenantID)
+      .addHeader(OKAPI_HEADER_URL, okapiConnectionParams.getOkapiUrl())
+      .addHeader(OKAPI_HEADER_TOKEN, okapiConnectionParams.getToken())
       .setBaseUri(BASE_OKAPI_URL)
       .build();
   }

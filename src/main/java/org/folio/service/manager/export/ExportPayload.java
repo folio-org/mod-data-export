@@ -19,6 +19,7 @@ public class ExportPayload {
   private String jobExecutionId;
   private MappingProfile mappingProfile;
   private ExportRequest.RecordType recordType;
+  private ExportRequest.IdType idType;
   private int exportedRecordsNumber;
   private int failedRecordsNumber;
 
@@ -81,6 +82,14 @@ public class ExportPayload {
   public ExportRequest.RecordType getRecordType() { return recordType; }
 
   public void setRecordType(ExportRequest.RecordType recordType) { this.recordType = recordType; }
+
+  public ExportRequest.IdType getIdType() {
+    return idType;
+  }
+
+  public void setIdType(ExportRequest.IdType idType) {
+    this.idType = idType;
+  }
 
   public int getExportedRecordsNumber() {
     return exportedRecordsNumber;

@@ -68,7 +68,7 @@ public class ExportManagerImpl implements ExportManager {
   @Override
   public void exportData(JsonObject request) {
     ExportPayload exportPayload = request.mapTo(ExportPayload.class);
-    switch (exportPayload.getFileExportDefinition().getIdType()) {
+    switch (exportPayload.getIdType()) {
       case INSTANCE:
         this.executor.executeBlocking(blockingPromise -> instanceExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
         break;
