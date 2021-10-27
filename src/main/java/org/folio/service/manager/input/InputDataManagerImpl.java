@@ -124,7 +124,7 @@ class InputDataManagerImpl implements InputDataManager {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
-          ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
@@ -135,7 +135,7 @@ class InputDataManagerImpl implements InputDataManager {
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
         initInputDataContext(sourceReader, jobExecutionId);
-        ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+        ExportPayload exportPayload = createExportPayload(exportRequest, savedFileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
@@ -155,7 +155,7 @@ class InputDataManagerImpl implements InputDataManager {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
-          ExportPayload exportPayload = createExportPayload(exportRequest.getRecordType(), fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
+          ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
@@ -255,15 +255,16 @@ class InputDataManagerImpl implements InputDataManager {
     return succeededFuture();
   }
 
-  private ExportPayload createExportPayload(ExportRequest.RecordType type, FileDefinition fileExportDefinition, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams okapiParams) {
+  private ExportPayload createExportPayload(ExportRequest exportRequest, FileDefinition fileExportDefinition, MappingProfile mappingProfile, String jobExecutionId, OkapiConnectionParams okapiParams) {
     ExportPayload exportPayload = new ExportPayload();
     exportPayload.setFileExportDefinition(fileExportDefinition);
     exportPayload.setMappingProfile(mappingProfile);
     exportPayload.setJobExecutionId(jobExecutionId);
     exportPayload.setOkapiConnectionParams(okapiParams);
-    if (Objects.nonNull(type)) {
-      exportPayload.setRecordType(type);
+    if (Objects.nonNull(exportRequest.getRecordType())) {
+      exportPayload.setRecordType(exportRequest.getRecordType());
     }
+    exportPayload.setIdType(exportRequest.getIdType());
     return exportPayload;
   }
 
