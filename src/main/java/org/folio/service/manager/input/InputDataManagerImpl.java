@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.Optional;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
 import static org.folio.util.ErrorCode.errorCodesAccordingToExport;
@@ -106,10 +108,18 @@ class InputDataManagerImpl implements InputDataManager {
     ExportRequest exportRequest = exportRequestJson.mapTo(ExportRequest.class);
     FileDefinition fileExportDefinition = createExportFileDefinition(exportRequest, requestFileDefinition, jobExecution);
     Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
-    if (requestFileDefinition.getIdType().equals(FileDefinition.IdType.HOLDING) && !MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
-      String errorCode = ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getCode();
-      List<String> errorMessageValues = Collections.singletonList(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getDescription());
-      errorLogService.saveGeneralErrorWithMessageValues(errorCode, errorMessageValues, jobExecutionId, tenantId);
+    List<ErrorCode> errorCodes = new ArrayList<>();
+    if (exportRequest.getIdType().equals(ExportRequest.IdType.HOLDING)) {
+      if (!MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
+        errorCodes.add(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED);
+      }
+      if (requestFileDefinition.getUploadFormat().equals(CQL)) {
+        errorCodes.add(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE);
+      }
+    }
+
+    if (isNotEmpty(errorCodes)) {
+      errorCodes.forEach(errorCode -> errorLogService.saveGeneralErrorWithMessageValues(errorCode.getCode(), Collections.singletonList(errorCode.getDescription()), jobExecutionId, tenantId));
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
@@ -120,6 +130,7 @@ class InputDataManagerImpl implements InputDataManager {
       });
       return;
     }
+
     SourceReader sourceReader = initSourceReader(requestFileDefinition, jobExecutionId, tenantId, getBatchSize());
     if (sourceReader.hasNext()) {
       fileDefinitionService.save(fileExportDefinition, tenantId).onSuccess(savedFileExportDefinition -> {
@@ -262,7 +273,6 @@ class InputDataManagerImpl implements InputDataManager {
       .withFileName(fileNameWithoutExtension + DELIMITER + jobExecution.getHrId() + MARC_FILE_EXTENSION)
       .withStatus(FileDefinition.Status.IN_PROGRESS)
       .withJobExecutionId(requestFileDefinition.getJobExecutionId())
-      .withIdType(requestFileDefinition.getIdType())
       .withMetadata(exportRequest.getMetadata());
   }
 

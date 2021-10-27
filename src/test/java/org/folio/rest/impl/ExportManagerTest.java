@@ -43,7 +43,8 @@ class ExportManagerTest extends RestVerticleTestBase {
     // given
     ExportRequest exportRequest = new ExportRequest()
       .withFileDefinitionId(UUID.randomUUID().toString())
-      .withJobProfileId(DEFAULT_JOB_PROFILE_ID);
+      .withJobProfileId(DEFAULT_JOB_PROFILE_ID)
+      .withIdType(ExportRequest.IdType.INSTANCE);
     // when
     Response response = RestAssured.given()
       .spec(jsonRequestSpecification)
@@ -63,7 +64,8 @@ class ExportManagerTest extends RestVerticleTestBase {
     // given
     ExportRequest exportRequest = new ExportRequest()
       .withFileDefinitionId(UUID.randomUUID().toString())
-      .withJobProfileId(UUID.randomUUID().toString());
+      .withJobProfileId(UUID.randomUUID().toString())
+      .withIdType(ExportRequest.IdType.INSTANCE);
     FileDefinition fileDefinition = new FileDefinition()
       .withId(exportRequest.getFileDefinitionId())
       .withFileName("fileName.csv");

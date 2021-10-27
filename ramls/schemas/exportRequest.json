@@ -21,6 +21,15 @@
         "ITEM"
       ]
     },
+    "idType": {
+      "description": "Type of provided uuids",
+      "type": "string",
+      "enum": [
+        "instance",
+        "holding"
+      ],
+      "default": "instance"
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",
@@ -29,6 +38,7 @@
   },
   "required": [
     "fileDefinitionId",
-    "jobProfileId"
+    "jobProfileId",
+    "idType"
   ]
 }
