@@ -541,7 +541,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  @Order(15)
+  @Order(16)
   void testHoldingsExportByCSV_whenCqlIdTypeSpecifiedForFileDefinition(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
