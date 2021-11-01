@@ -3,7 +3,7 @@
     {
       "recordId": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
       "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "recordType": "MARC",
+      "recordType": "MARC_BIB",
       "parsedRecord": {
         "id": "bc5caa84-e85c-4c98-9956-50ccdaad7115",
         "content": {
@@ -541,7 +541,7 @@
     {
       "recordId": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
       "snapshotId": "a3573c50-8b92-41ee-8d9f-ed8fc10c753d",
-      "recordType": "MARC",
+      "recordType": "MARC_BIB",
       "parsedRecord": {
         "id": "f4bb5a49-5011-4ea2-853e-b6922d489bca",
         "content": {

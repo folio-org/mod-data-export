@@ -29,12 +29,15 @@ import static org.folio.util.ExternalPathResolver.SRS;
 @Component
 public class SourceRecordStorageClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
-  private static final String GET_RECORDS_QUERY = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=INSTANCE";
+  private static final String GET_RECORDS_QUERY_BY_INSTANCE_IDS = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=INSTANCE";
+  private static final String GET_RECORDS_QUERY_BY_HOLDING_IDS = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=HOLDINGS";
+
   @Autowired
   private ErrorLogService errorLogService;
 
-  public Optional<JsonObject> getRecordsByInstanceIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
-    HttpPost httpPost = new HttpPost(format(GET_RECORDS_QUERY, params.getOkapiUrl()));
+  public Optional<JsonObject> getRecordsByIds(List<String> ids, String idType, String jobExecutionId, OkapiConnectionParams params) {
+    String uri = idType.equals("instance") ? GET_RECORDS_QUERY_BY_INSTANCE_IDS : GET_RECORDS_QUERY_BY_HOLDING_IDS;
+    HttpPost httpPost = new HttpPost(uri);
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
       httpPost.setEntity(new StringEntity(body));
@@ -47,4 +50,5 @@ public class SourceRecordStorageClient {
       return Optional.empty();
     }
   }
+
 }

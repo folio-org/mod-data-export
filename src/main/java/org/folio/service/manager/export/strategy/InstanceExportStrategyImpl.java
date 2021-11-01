@@ -1,44 +1,37 @@
 package org.folio.service.manager.export.strategy;
 
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-
-import com.google.common.collect.Lists;
-import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-import org.folio.HttpStatus;
-import org.folio.clients.UsersClient;
-import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.jaxrs.model.RecordType;
-import org.folio.service.export.ExportService;
-import org.folio.service.job.JobExecutionService;
-import org.folio.service.loader.InventoryLoadResult;
-import org.folio.service.loader.RecordLoaderService;
-import org.folio.service.loader.SrsLoadResult;
-import org.folio.service.logs.ErrorLogService;
-import org.folio.service.manager.export.ExportManagerImpl;
-import org.folio.service.manager.export.ExportPayload;
-import org.folio.service.mapping.converter.InventoryRecordConverterService;
-import org.folio.service.mapping.converter.SrsRecordConverterService;
-import org.folio.service.profiles.mappingprofile.MappingProfileService;
-import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
-import org.folio.util.ErrorCode;
-import org.folio.util.OkapiConnectionParams;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.HttpStatus;
+import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
+import org.folio.service.loader.InventoryLoadResult;
+import org.folio.service.loader.SrsLoadResult;
+import org.folio.service.manager.export.ExportManagerImpl;
+import org.folio.service.manager.export.ExportPayload;
+import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
+import org.folio.util.ErrorCode;
+import org.folio.util.OkapiConnectionParams;
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Lists;
+import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
+
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
 public class InstanceExportStrategyImpl extends AbstractExportStrategy {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+
+  private static final String INSTANCE_ID_TYPE = "instance";
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
@@ -49,12 +42,12 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
     if (mappingProfile.getRecordTypes().contains(RecordType.SRS) || MappingProfileServiceImpl.isDefaultInstanceProfile(mappingProfile.getId())) {
       SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
-      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs());
+      LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getIdsWithoutSrs());
       Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params);
       getExportService().exportSrsRecord(marcToExport, exportPayload);
-      LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getInstanceIdsWithoutSrs().size());
-      if (isNotEmpty(srsLoadResult.getInstanceIdsWithoutSrs())) {
+      LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getIdsWithoutSrs().size());
+      if (isNotEmpty(srsLoadResult.getIdsWithoutSrs())) {
         getMappingProfileService().getDefault(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
@@ -76,7 +69,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       }
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
-      srsLoadResult.setInstanceIdsWithoutSrs(identifiers);
+      srsLoadResult.setIdsWithoutSrs(identifiers);
       generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult, 0);
       blockingPromise.complete();
     }
@@ -84,7 +77,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
-    InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getInstanceIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+    InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
     int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
@@ -155,6 +148,11 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       defaultMappingProfile.setTransformations(mappingProfile.getTransformations());
     }
     return defaultMappingProfile;
+  }
+
+  @Override
+  protected String getIdType() {
+    return INSTANCE_ID_TYPE;
   }
 
 }

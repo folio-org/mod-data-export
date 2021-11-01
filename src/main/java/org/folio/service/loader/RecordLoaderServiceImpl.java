@@ -33,13 +33,13 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
-    Optional<JsonObject> optionalRecords = srsClient.getRecordsByInstanceIds(uuids, jobExecutionId, okapiConnectionParams);
+  public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, String idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
+    Optional<JsonObject> optionalRecords = srsClient.getRecordsByIds(uuids, idType, jobExecutionId, okapiConnectionParams);
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
       populateLoadResultFromSRS(uuids, optionalRecords.get(), srsLoadResult);
     } else {
-      srsLoadResult.setInstanceIdsWithoutSrs(uuids);
+      srsLoadResult.setIdsWithoutSrs(uuids);
     }
     return srsLoadResult;
   }
@@ -86,7 +86,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
       }
     }
     loadResult.setUnderlyingMarcRecords(marcRecords);
-    loadResult.setInstanceIdsWithoutSrs(new ArrayList<>(singleInstanceIdentifiersSet));
+    loadResult.setIdsWithoutSrs(new ArrayList<>(singleInstanceIdentifiersSet));
   }
 
   /**

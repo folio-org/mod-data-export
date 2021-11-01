@@ -39,7 +39,8 @@ public class MockServer {
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
   private static final String HOLDING_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in00041.json";
   private static final String ITEM_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in00041.json";
-  private static final String SRS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
+  private static final String SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
+  private static final String SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
   private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
@@ -63,7 +64,6 @@ public class MockServer {
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
-  private static final String INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_from_holding_records.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -194,16 +194,19 @@ public class MockServer {
     logger.info("handleGetSRSRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(SRS_RECORDS_MOCK_DATA_PATH));
       //fetch the ids from the query and remove them from the mock if not in the request
-      List<String> instanceIds = ctx.getBodyAsJsonArray().getList();
+      String idType = ctx.request().getParam("idType");
+      List<String> ids = ctx.getBodyAsJsonArray().getList();
+      String path = idType.equals("instance") ? SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH : SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
+      String fieldKey = idType.equals("instance") ? "instanceId" : "holdingId";
+      JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(path));
 
       final Iterator iterator = srsRecords.getJsonArray("sourceRecords")
         .iterator();
       while (iterator.hasNext()) {
         JsonObject srsRec = (JsonObject) iterator.next();
-        if (!instanceIds.contains(srsRec.getJsonObject("externalIdsHolder")
-          .getString("instanceId"))) {
+        if (!ids.contains(srsRec.getJsonObject("externalIdsHolder")
+          .getString(fieldKey))) {
           iterator.remove();
         }
       }
@@ -407,8 +410,6 @@ public class MockServer {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
       } else if (ctx.request().getParam("query").contains("invalid json returned")) {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end("{qwe");
-      } else if (ctx.request().getParam("query").contains("id==\"59fed5a1-6381-428f-b2ec-483e498c2bbc\"")) {
-        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_FROM_HOLDING_RECORDS, RECORD_BULK_IDS, ctx);
       } else {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
       }

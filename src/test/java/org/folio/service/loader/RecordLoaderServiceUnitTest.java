@@ -69,9 +69,9 @@ class RecordLoaderServiceUnitTest{
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(srsClient.getRecordsByInstanceIds(anyList(), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
+    when(srsClient.getRecordsByIds(anyList(), anyString(), eq("instance"), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), "instance", JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
   }
@@ -81,11 +81,11 @@ class RecordLoaderServiceUnitTest{
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("sourceRecords", new JsonArray());
-    when(srsClient.getRecordsByInstanceIds(anyList(), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
+    when(srsClient.getRecordsByIds(anyList(), eq("instance"), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, "instance", JOB_EXECUTION_ID, okapiConnectionParams);
     // then
-    assertThat(srsLoadResult.getInstanceIdsWithoutSrs(), hasSize(2));
+    assertThat(srsLoadResult.getIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
   }
 

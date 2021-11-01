@@ -6,7 +6,7 @@ import java.util.List;
 
 public class SrsLoadResult {
   private List<JsonObject> underlyingMarcRecords = new ArrayList<>();
-  private List<String> instanceIdsWithoutSrs = new ArrayList<>();
+  private List<String> idsWithoutSrs = new ArrayList<>();
 
   public List<JsonObject> getUnderlyingMarcRecords() {
     return underlyingMarcRecords;
@@ -16,11 +16,11 @@ public class SrsLoadResult {
     this.underlyingMarcRecords = underlyingMarcRecords;
   }
 
-  public List<String> getInstanceIdsWithoutSrs() {
-    return instanceIdsWithoutSrs;
+  public List<String> getIdsWithoutSrs() {
+    return idsWithoutSrs;
   }
 
-  public void setInstanceIdsWithoutSrs(List<String> instanceIdsWithoutSrs) {
-    this.instanceIdsWithoutSrs = instanceIdsWithoutSrs;
+  public void setIdsWithoutSrs(List<String> idsWithoutSrs) {
+    this.idsWithoutSrs = idsWithoutSrs;
   }
 }
