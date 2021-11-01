@@ -197,8 +197,8 @@ public class MockServer {
       //fetch the ids from the query and remove them from the mock if not in the request
       String idType = ctx.request().getParam("idType");
       List<String> ids = ctx.getBodyAsJsonArray().getList();
-      String path = idType.equals("instance") ? SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH : SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
-      String fieldKey = idType.equals("instance") ? "instanceId" : "holdingId";
+      String path = idType.equalsIgnoreCase("instance") ? SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH : SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
+      String fieldKey = idType.equalsIgnoreCase("instance") ? "instanceId" : "holdingId";
       JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(path));
 
       final Iterator iterator = srsRecords.getJsonArray("sourceRecords")
