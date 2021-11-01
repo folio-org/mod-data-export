@@ -39,8 +39,8 @@ public class MockServer {
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
   private static final String HOLDING_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in00041.json";
   private static final String ITEM_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in00041.json";
-  private static final String SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
-  private static final String SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_records_response.json";
+  private static final String SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_bib_records_response.json";
+  private static final String SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_bib_records_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
   private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";

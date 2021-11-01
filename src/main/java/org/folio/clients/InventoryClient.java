@@ -1,22 +1,17 @@
 package org.folio.clients;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
@@ -24,7 +19,6 @@ import org.folio.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterables;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
@@ -274,60 +268,6 @@ public class InventoryClient {
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_ITEM_BY_HOLDINGS_ID.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
-  }
-
-  public Future<List<String>> getInstanceIdsByHoldingIds(List<String> holdingIds, OkapiConnectionParams params) {
-    Promise<List<String>> promise = Promise.promise();
-    List<String> holdingBatchUrls = new ArrayList<>();
-    String url = format(resourcesPathWithPrefix(RECORD_BULK_IDS), params.getOkapiUrl()) + BULK_EDIT_HOLDING_QUERY_PREFIX;
-    Iterator<List<String>> idBatches = Iterables.partition(holdingIds, 10).iterator();
-    idBatches.forEachRemaining(ids -> holdingBatchUrls.add(buildBulkEditQuery(ids, url)));
-    List<Future<List<String>>> results = new ArrayList<>();
-    holdingBatchUrls.forEach(holdingBatchUrl -> results.add(requestInstancesIdsByHoldingIds(holdingBatchUrl, params)));
-    GenericCompositeFuture.all(results).onSuccess(v -> {
-      List<String> instanceIds = results.stream()
-        .map(Future::result)
-        .flatMap(List::stream)
-        .collect(Collectors.toList());
-      promise.complete(instanceIds);
-    });
-    return promise.future();
-  }
-
-  private String buildBulkEditQuery(List<String> holdingIds, String queryPrefix) {
-    StringBuilder queryBuilder = new StringBuilder(queryPrefix);
-    holdingIds.forEach(holdingId -> queryBuilder.append("id==\"").append(holdingId).append("\"or+"));
-    return queryBuilder.substring(0, queryBuilder.lastIndexOf("or+"));
-  }
-
-  private Future<List<String>> requestInstancesIdsByHoldingIds(String url, OkapiConnectionParams params) {
-    Promise<List<String>> promise = Promise.promise();
-    HttpRequest<Buffer> request = webClient.getAbs(url);
-    request.putHeader(OKAPI_HEADER_TOKEN, params.getToken());
-    request.putHeader(OKAPI_HEADER_TENANT, params.getTenantId());
-    request.putHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    request.putHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON);
-
-    request.send(res -> {
-      if (res.failed()) {
-        logError(res.cause(), params);
-        promise.complete(Collections.emptyList());
-      } else {
-        HttpResponse<Buffer> response = res.result();
-        if (response.statusCode() != HttpStatus.SC_OK) {
-          logError(new IllegalStateException(format(ERROR_MESSAGE_INVALID_STATUS_CODE, url, response.statusCode())), params);
-          promise.complete(Collections.emptyList());
-        } else {
-          List<String> instanceIds = new ArrayList<>();
-          JsonObject body = response.bodyAsJsonObject();
-          body.getJsonArray("ids").stream()
-            .map(JsonObject.class::cast)
-            .forEach(elem -> instanceIds.add(elem.getString("instanceId")));
-          promise.complete(instanceIds);
-        }
-      }
-    });
-    return promise.future();
   }
 
 }

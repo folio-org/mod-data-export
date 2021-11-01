@@ -75,7 +75,7 @@ class SrsRecordConverterServiceUnitTest {
 
     //given
     JsonArray srsRecords =
-        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+        new JsonObject(readFileContentFromResources("mockData/srs/get_marc_bib_records_response.json"))
           .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
@@ -107,7 +107,7 @@ class SrsRecordConverterServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
 
     JsonArray srsRecords =
-        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+        new JsonObject(readFileContentFromResources("mockData/srs/get_marc_bib_records_response.json"))
           .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))
@@ -144,7 +144,7 @@ class SrsRecordConverterServiceUnitTest {
     mappingProfile.setTransformations(createHoldingsAndItemSimpleFieldTransformations());
 
     JsonArray srsRecords =
-        new JsonObject(readFileContentFromResources("mockData/srs/get_records_response.json"))
+        new JsonObject(readFileContentFromResources("mockData/srs/get_marc_bib_records_response.json"))
           .getJsonArray("sourceRecords");
     JsonObject srsRecord = srsRecords.getJsonObject(0);
     Mockito.when(referenceDataProvider.get(jobExecutionId, params))

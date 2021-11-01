@@ -39,7 +39,7 @@ class RecordLoaderServiceUnitTest{
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
-  protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_records_response.json";
+  protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_marc_bib_records_response.json";
   protected static final String HOLDINGS_RESPONSE_JSON = "mockData/inventory/holdings_in000005.json";
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
 
