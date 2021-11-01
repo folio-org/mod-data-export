@@ -69,7 +69,7 @@ class RecordLoaderServiceUnitTest{
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(srsClient.getRecordsByIds(anyList(), anyString(), eq("instance"), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
+    when(srsClient.getRecordsByIds(anyList(), eq("instance"), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), "instance", JOB_EXECUTION_ID, okapiConnectionParams);
     // then
