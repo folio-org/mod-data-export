@@ -43,7 +43,7 @@ public enum ErrorCode {
   ERROR_MESSAGE_PLACEHOLDER("error.messagePlaceholder", "%s"),
   ERROR_MARC_RECORD_CANNOT_BE_CONVERTED("error.messagePlaceholder", "Json record cannot be converted to marc format, cause: %s"),
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type"),
-  ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED("error.jobProfile.onlyDefaultHoldingJobProfileIsSupported", "For exporting holding records only the default holding job profile is supported");
+  ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting holding records only the default holding job profile is supported");
 
   private final String code;
   private final String description;
