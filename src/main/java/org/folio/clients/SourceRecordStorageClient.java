@@ -37,7 +37,7 @@ public class SourceRecordStorageClient {
 
   public Optional<JsonObject> getRecordsByIds(List<String> ids, String idType, String jobExecutionId, OkapiConnectionParams params) {
     String uri = idType.equals("instance") ? GET_RECORDS_QUERY_BY_INSTANCE_IDS : GET_RECORDS_QUERY_BY_HOLDING_IDS;
-    HttpPost httpPost = new HttpPost(uri);
+    HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
       httpPost.setEntity(new StringEntity(body));
