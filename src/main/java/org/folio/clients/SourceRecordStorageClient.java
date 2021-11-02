@@ -19,7 +19,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -30,7 +32,7 @@ import static org.folio.util.ExternalPathResolver.SRS;
 public class SourceRecordStorageClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String GET_RECORDS_QUERY_BY_INSTANCE_IDS = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=INSTANCE";
-  private static final String GET_RECORDS_QUERY_BY_HOLDING_IDS = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=HOLDINGS";
+  private static final String GET_RECORDS_QUERY_BY_HOLDING_IDS = ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=HOLDINGS&recordType=MARC_HOLDING";
 
   @Autowired
   private ErrorLogService errorLogService;
