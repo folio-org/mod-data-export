@@ -26,7 +26,6 @@ import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.HelperUtils;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -499,7 +498,7 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForSrsAndInventoryBulkIds(1);
+              validateExternalCallsForSrs(1);
               assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsFromHoldingRecord.mrc");
               context.completeNow();
             });
@@ -720,9 +719,8 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
   }
 
-  private void validateExternalCallsForSrsAndInventoryBulkIds(int expectedNumber) {
+  private void validateExternalCallsForSrs(int expectedNumber) {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
-    assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.RECORD_BULK_IDS).size());
   }
 
   /**

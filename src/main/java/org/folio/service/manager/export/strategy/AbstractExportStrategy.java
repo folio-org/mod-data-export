@@ -53,12 +53,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId, OkapiConnectionParams params) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, ExportManagerImpl.SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = getRecordLoaderService().loadMarcRecordsBlocking(partition, jobExecutionId, params);
+      SrsLoadResult partitionLoadResult = getRecordLoaderService().loadMarcRecordsBlocking(partition, getIdType(), jobExecutionId, params);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
-      srsLoadResult.getInstanceIdsWithoutSrs().addAll(partitionLoadResult.getInstanceIdsWithoutSrs());
+      srsLoadResult.getIdsWithoutSrs().addAll(partitionLoadResult.getIdsWithoutSrs());
     });
     return srsLoadResult;
   }
+
+  abstract protected String getIdType();
 
   public SrsRecordConverterService getSrsRecordService() {
     return srsRecordService;

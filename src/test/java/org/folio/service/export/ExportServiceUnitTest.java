@@ -51,7 +51,7 @@ class ExportServiceUnitTest {
   private static final String RECORD_CONTENT = "record content";
   private static final String FILE_DEFINITION_ID = "file definition id";
   private static final String TENANT = "tenant";
-  private static final String RECORDS_RESPONSE_JSON_FILE_PATH = "mockData/srs/get_records_response.json";
+  private static final String RECORDS_RESPONSE_JSON_FILE_PATH = "mockData/srs/get_marc_bib_records_response.json";
   private static final String LONG_SRS_RECORD_JSON_FILE_PATH = "mockData/srs/srs_record_content_117000_characters_length.json";
   private static final String INSTANCES_RESPONSE_JSON_FILE_PATH = "clients/inventory/get_instances_response.json";
   private static final String INSTANCE_ID = "6666df22-5df3-412b-b9cc-cbdddb928e93";
