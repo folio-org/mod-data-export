@@ -84,6 +84,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
   private static final String HOLDING_UUIDS_INVENTORY = "holding_uuids_inventory.csv";
+  private static final String HOLDING_UUIDS_WITHOUT_SRS_RECORD = "holding_uuids_without_srs_record.csv";
   private static final String INSTANCE_UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
@@ -509,6 +510,34 @@ class DataExportTest extends RestVerticleTestBase {
 
   @Test
   @Order(15)
+  void testHoldingsExportByCSV_NoBinaryFileGenerated(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(HOLDING_UUIDS_WITHOUT_SRS_RECORD, CSV, buildRequestSpecification(tenantId));
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, DEFAULT_HOLDING_JOB_PROFILE, ExportRequest.IdType.HOLDING);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
+            context.verify(() -> {
+              assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+              validateExternalCallsForSrs(1);
+              ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
+              assertEquals(ErrorCode.NO_FILE_GENERATED.getCode(), errorLog.getErrorMessageCode());
+              context.completeNow();
+            });
+          });
+        });
+    });
+  }
+
+  @Test
+  @Order(16)
   void testHoldingsExportByCSV_whenNotDefaultHoldingJobProfileSpecified(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -540,7 +569,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  @Order(16)
+  @Order(17)
   void testHoldingsExportByCSV_whenCqlIdTypeSpecifiedForFileDefinition(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
