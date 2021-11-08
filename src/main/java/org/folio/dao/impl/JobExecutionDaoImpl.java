@@ -79,7 +79,8 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     try {
       pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, jobExecution.getId(), updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause().getMessage());
+          LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(),
+            (updateResult.cause() != null ? updateResult.cause().getMessage() : "Job has been expired"));
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("JobExecution with id '%s' was not found", jobExecution.getId());
