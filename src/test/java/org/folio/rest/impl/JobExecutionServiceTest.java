@@ -6,7 +6,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.http.HttpStatus;
-import org.folio.config.ApplicationConfig;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecution.Status;
@@ -24,10 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -92,9 +87,10 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSZ");
     Date date = dateFormat.parse(dateString);
     Progress progress = new Progress().withExported(7).withTotal(777).withFailed(77);
-    String jobExecutionId = UUID.randomUUID().toString();
+    String errorLogId = UUID.randomUUID().toString();
+
     JobExecution jobExecution = new JobExecution()
-      .withId(jobExecutionId)
+      .withHrId(7777)
       .withJobProfileId("6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a")
       .withStatus(Status.IN_PROGRESS)
       .withLastUpdatedDate(date)
@@ -102,13 +98,14 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
 
     ErrorLog errorLog = new ErrorLog()
       .withErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.getCode())
-      .withId(UUID.randomUUID().toString())
+      .withId(errorLogId)
       .withLogLevel(ErrorLog.LogLevel.ERROR)
-      .withJobExecutionId(jobExecutionId)
       .withErrorMessageValues(Collections.emptyList());
-    errorLogService.save(errorLog, "diku");
 
-    jobExecutionService.save(jobExecution, TENANT_ID);
+    jobExecutionService.save(jobExecution, TENANT_ID).onSuccess(jobExecutionAsyncResult -> {
+      errorLog.setJobExecutionId(jobExecutionAsyncResult.getId());
+      errorLogService.save(errorLog, TENANT_ID);
+    });
 
     vertx.setTimer(3000L, handler -> {
 

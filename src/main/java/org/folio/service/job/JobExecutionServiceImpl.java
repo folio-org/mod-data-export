@@ -200,21 +200,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
               jobProgress.setTotal(0);
             }
             jobExe.setCompletedDate(new Date());
-            Future<List<ErrorLog>> listFuture = errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExe.getId()), tenantId);
-            if (listFuture != null) {
-              listFuture.onSuccess(errorLogs -> {
-                if (!errorLogs.isEmpty()) {
-                  ErrorLog errorLog = errorLogs.get(0);
-                  errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
-                  errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
-                  errorLogService.update(errorLog, tenantId);
-                  //remove all the rest logs to have only 1 reason: job is expired
-                  errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
-                    errorLogService.deleteById(redundantLog.getId(), tenantId);
-                  });
-                }
-              });
-            }
+            updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);
             jobExecutionDao.update(jobExe, tenantId);
           });
           jobExecutionPromise.complete();
@@ -226,6 +212,24 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
       });
     return jobExecutionPromise.future();
+  }
+
+  private void updateErrorLogIfJobIsExpired(String jobExecutionId, String tenantId) {
+    Future<List<ErrorLog>> listFuture = errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExecutionId), tenantId);
+    if (listFuture != null) {
+      listFuture.onSuccess(errorLogs -> {
+        if (!errorLogs.isEmpty()) {
+          ErrorLog errorLog = errorLogs.get(0);
+          errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
+          errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
+          errorLogService.update(errorLog, tenantId);
+          //remove all the rest logs to have only 1 reason: job is expired
+          errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
+            errorLogService.deleteById(redundantLog.getId(), tenantId);
+          });
+        }
+      });
+    }
   }
 
   private Future<JobExecution> populateJobProfileNameIfNecessary(JobExecution jobExecution, String tenantId) {
