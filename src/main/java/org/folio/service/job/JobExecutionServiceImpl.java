@@ -207,10 +207,6 @@ public class JobExecutionServiceImpl implements JobExecutionService {
                   errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
                   errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
                   errorLogService.update(errorLog, tenantId);
-                  //remove all the rest of logs if present to have only 1 log for expired job
-                  errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
-                    errorLogService.deleteById(redundantLog.getId(), tenantId);
-                  });
                 }
               });
             jobExecutionDao.update(jobExe, tenantId);
