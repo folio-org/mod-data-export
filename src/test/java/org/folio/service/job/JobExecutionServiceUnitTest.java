@@ -336,6 +336,7 @@ class JobExecutionServiceUnitTest {
   void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID);
     FileDefinition fileDefinition = new FileDefinition()
