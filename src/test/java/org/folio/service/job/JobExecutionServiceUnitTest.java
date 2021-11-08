@@ -379,10 +379,12 @@ class JobExecutionServiceUnitTest {
   void expireJobExecutionsShouldSetStatusToFail(VertxTestContext context) {
     // given
     JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID)
       .withStatus(IN_PROGRESS);
     JobExecution secondJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID)
       .withStatus(NEW);
