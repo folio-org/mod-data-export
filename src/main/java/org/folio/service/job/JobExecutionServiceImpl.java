@@ -16,8 +16,12 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.RunBy;
+import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.folio.util.ErrorCode;
+import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +55,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   private JobProfileService jobProfileService;
   @Autowired
   private ExportStorageService exportStorageService;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
@@ -186,7 +192,24 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           List<JobExecution> jobExecutionList = asyncResult.result();
           jobExecutionList.forEach(jobExe -> {
             jobExe.setStatus(FAIL);
+            //reset progress to skip already exported/failed records
+            jobExe.getProgress().setTotal(0);
+            jobExe.getProgress().setExported(0);
+            jobExe.getProgress().setFailed(0);
             jobExe.setCompletedDate(new Date());
+            errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExe.getId()), tenantId)
+              .onSuccess(errorLogs -> {
+                if (!errorLogs.isEmpty()) {
+                  ErrorLog errorLog = errorLogs.get(0);
+                  errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
+                  errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
+                  errorLogService.update(errorLog, tenantId);
+                  //remove all the rest of logs if present to have only 1 log for expired job
+                  errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
+                    errorLogService.deleteById(redundantLog.getId(), tenantId);
+                  });
+                }
+              });
             jobExecutionDao.update(jobExe, tenantId);
           });
           jobExecutionPromise.complete();
