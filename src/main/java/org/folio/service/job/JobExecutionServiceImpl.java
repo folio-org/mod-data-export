@@ -201,12 +201,15 @@ public class JobExecutionServiceImpl implements JobExecutionService {
             }
             jobExe.setCompletedDate(new Date());
             errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExe.getId()), tenantId)
-              .onSuccess(errorLogs -> {
-                if (!errorLogs.isEmpty()) {
-                  ErrorLog errorLog = errorLogs.get(0);
-                  errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
-                  errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
-                  errorLogService.update(errorLog, tenantId);
+              .onComplete(asyncResultErrorLogs -> {
+                if (asyncResultErrorLogs.succeeded()) {
+                  List<ErrorLog> errorLogs = asyncResultErrorLogs.result();
+                  if (!errorLogs.isEmpty()) {
+                    ErrorLog errorLog = errorLogs.get(0);
+                    errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
+                    errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
+                    errorLogService.update(errorLog, tenantId);
+                  }
                 }
               });
             jobExecutionDao.update(jobExe, tenantId);
