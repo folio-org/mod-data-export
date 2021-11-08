@@ -136,7 +136,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     Criteria lastUpdateDateCriteria = new Criteria();
     lastUpdateDateCriteria.addField(LAST_UPDATED_DATE_FIELD)
       .setOperation("<=")
-      .setVal(DATE_TIME_FORMAT_FOR_POSTGRES.format(expirationDate.toString()));
+      .setVal(DATE_TIME_FORMAT_FOR_POSTGRES.format(expirationDate));
     Criteria statusIsProgressCriteria = new Criteria();
     statusIsProgressCriteria.addField(STATUS_FIELD)
       .setOperation("=")
