@@ -193,9 +193,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           jobExecutionList.forEach(jobExe -> {
             jobExe.setStatus(FAIL);
             //reset progress to skip already exported/failed records
-            jobExe.getProgress().setTotal(0);
-            jobExe.getProgress().setExported(0);
-            jobExe.getProgress().setFailed(0);
+            jobExe.setProgress(new Progress());
             jobExe.setCompletedDate(new Date());
             errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExe.getId()), tenantId)
               .onSuccess(errorLogs -> {

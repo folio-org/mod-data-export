@@ -34,7 +34,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
   private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
   private static final String STATUS_FIELD = "'status'";
-  private static final SimpleDateFormat DATE_TIME_FORMAT_FOR_POSTGRES = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+  private static final SimpleDateFormat DATE_TIME_FORMAT_FOR_POSTGRES = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
