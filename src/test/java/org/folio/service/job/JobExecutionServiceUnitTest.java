@@ -19,6 +19,7 @@ import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,6 +78,8 @@ class JobExecutionServiceUnitTest {
   private JobProfileService jobProfileService;
   @Mock
   private ExportStorageService exportStorageService;
+  @Mock
+  private ErrorLogService errorLogService;
 
 
   @Test
