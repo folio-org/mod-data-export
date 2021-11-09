@@ -4,7 +4,6 @@ import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 
 import java.util.UUID;
 

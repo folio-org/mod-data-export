@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 import io.vertx.core.Context;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
@@ -16,16 +15,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(VertxExtension.class)
-@RunWith(VertxUnitRunner.class)
 public class SearchClientTest extends RestVerticleTestBase {
   private static OkapiConnectionParams okapiConnectionParams;
 
@@ -56,10 +51,34 @@ public class SearchClientTest extends RestVerticleTestBase {
     }).onFailure(testContext::failNow);
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"inventory 500", "empty json response", "invalid json returned"})
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext, String query) {
-    // given query parameter
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext) {
+    // given
+    String query = "inventory 500";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "empty json response";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "invalid json returned";
     // when
     searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
