@@ -4,7 +4,6 @@ import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 
 import java.util.UUID;
 
@@ -61,54 +60,7 @@ class InventoryClientTest extends RestVerticleTestBase {
     Assert.assertEquals(1, inventoryResponse.get().getJsonArray("instances").getList().size());
   }
 
-  @Test
-  void shouldRetrieveInstanceBulkUUIDS(VertxTestContext testContext) {
-    // given
-    String query = "cql query";
-    // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isPresent());
-      Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
 
-  @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext) {
-    // given
-    String query = "inventory 500";
-    // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
-
-  @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
-    // given
-    String query = "empty json response";
-    // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
-
-  @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
-    // given
-    String query = "invalid json returned";
-    // when
-    inventoryClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
 
   @Test
   void shouldRetrieveNatureOfContentTerms() {
