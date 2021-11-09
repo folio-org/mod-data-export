@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
-import org.folio.clients.InventoryClient;
+import org.folio.clients.SearchClient;
 import org.folio.clients.UsersClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -43,7 +43,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Autowired
   private FileStorage fileStorage;
   @Autowired
-  private InventoryClient inventoryClient;
+  private SearchClient searchClient;
   @Autowired
   private ErrorLogService errorLogService;
   @Autowired
@@ -81,7 +81,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
     if (StringUtils.isNotBlank(query)) {
-      return inventoryClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
+      return searchClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
         List<String> ids = new ArrayList<>();
         if (optionalInstancesUUIDs.isPresent()) {
           JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
@@ -147,7 +147,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   private Future<FileDefinition> uploadFileWithCQLQueryQuickExport(QuickExportRequest request, FileDefinition fileDefinition, JobExecution jobExecution, OkapiConnectionParams params) {
     Promise<FileDefinition> promise = Promise.promise();
-    inventoryClient.getInstancesBulkUUIDsAsync(request.getCriteria(), params).onComplete(instancesUUIDsResult -> {
+    searchClient.getInstancesBulkUUIDsAsync(request.getCriteria(), params).onComplete(instancesUUIDsResult -> {
       Optional<JsonObject> instancesUUIDs = instancesUUIDsResult.result();
       if (instancesUUIDs.isPresent()) {
         saveUUIDsFromJson(instancesUUIDs.get(), fileDefinition, jobExecution, request, params)
