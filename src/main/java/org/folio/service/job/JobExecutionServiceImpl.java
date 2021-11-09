@@ -194,10 +194,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
             jobExe.setStatus(FAIL);
             //reset progress to skip already exported/failed records
             if (jobExe.getProgress() != null) {
-              Progress jobProgress = jobExe.getProgress();
-              jobProgress.setFailed(0);
-              jobProgress.setExported(0);
-              jobProgress.setTotal(0);
+              jobExe.getProgress().withExported(0).withTotal(0).withFailed(0);
             }
             jobExe.setCompletedDate(new Date());
             updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);
@@ -219,9 +216,9 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     if (listFuture != null) {
       listFuture.onSuccess(errorLogs -> {
         if (!errorLogs.isEmpty()) {
-          ErrorLog errorLog = errorLogs.get(0);
-          errorLog.setErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode());
-          errorLog.setErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
+          ErrorLog errorLog = errorLogs.get(0)
+            .withErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode())
+            .withErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
           errorLogService.update(errorLog, tenantId);
           //remove all the rest logs to have only 1 reason: job is expired
           errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
