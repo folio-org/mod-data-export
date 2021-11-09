@@ -177,4 +177,9 @@ public class StorageTestSuite {
   class TenantReferenceAPITestNested extends TenantReferenceAPITest {
 
   }
+
+  @Nested
+  class SearchClientTestNested extends SearchClientTest {
+
+  }
 }
