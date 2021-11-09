@@ -34,6 +34,7 @@ public class ExternalPathResolver {
   public static final String ITEM = "item";
   public static final String CONFIGURATIONS = "configurations";
   public static final String RECORD_BULK_IDS = "bulkIds";
+  public static final String SEARCH_IDS = "searchIds";
 
 
   private static final Map<String, String> EXTERNAL_APIS;
@@ -67,6 +68,7 @@ public class ExternalPathResolver {
     apis.put(RECORD_BULK_IDS, "/record-bulk/ids");
     apis.put(USERS, "/users");
     apis.put(CONFIGURATIONS, "/configurations/entries");
+    apis.put(SEARCH_IDS, "/search/instances/ids");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);
     EXTERNAL_APIS_WITH_PREFIX = Collections.unmodifiableMap(apis.entrySet()
