@@ -19,6 +19,7 @@ import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.profiles.jobprofile.JobProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,6 +78,8 @@ class JobExecutionServiceUnitTest {
   private JobProfileService jobProfileService;
   @Mock
   private ExportStorageService exportStorageService;
+  @Mock
+  private ErrorLogService errorLogService;
 
 
   @Test
@@ -336,6 +339,7 @@ class JobExecutionServiceUnitTest {
   void shouldPrepareJobExecutionSuccessfully_whenJobExecutionStartDateIsNull(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID);
     FileDefinition fileDefinition = new FileDefinition()
@@ -378,10 +382,12 @@ class JobExecutionServiceUnitTest {
   void expireJobExecutionsShouldSetStatusToFail(VertxTestContext context) {
     // given
     JobExecution jobExecution = new JobExecution()
+      .withId(JOB_EXECUTION_ID)
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID)
       .withStatus(IN_PROGRESS);
     JobExecution secondJobExecution = new JobExecution()
+      .withId(UUID.randomUUID().toString())
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID)
       .withStatus(NEW);
