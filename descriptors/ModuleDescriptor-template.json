@@ -81,6 +81,10 @@
     {
       "id": "inventory-record-bulk",
       "version": "1.0"
+    },
+    {
+      "id": "search",
+      "version": "0.6"
     }
   ],
   "provides": [
@@ -183,7 +187,8 @@
             "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
-            "inventory-storage.record-bulk.ids.get"
+            "inventory-storage.record-bulk.ids.get",
+            "search.instances.ids.collection.get"
           ]
         },
         {

@@ -137,7 +137,7 @@ public class MockServer {
     router.get(resourcesPath(HOLDING)).handler(ctx -> handleGetHoldingRecord(ctx));
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
-    router.get(resourcesPath(RECORD_BULK_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
+    router.get(resourcesPath(SEARCH_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
     return router;
   }
 
@@ -401,17 +401,19 @@ public class MockServer {
     try {
       JsonObject bulkIds;
       if (ctx.request().getParam("query").contains("(languages=\"eng\")")) {
-        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, SEARCH_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
-        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, RECORD_BULK_IDS, ctx);
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, SEARCH_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("inventory 500")) {
         mockResponseWith500Status(ctx);
       } else if (ctx.request().getParam("query").contains("empty json response")) {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
       } else if (ctx.request().getParam("query").contains("invalid json returned")) {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end("{qwe");
+      } else if (ctx.request().getParam("query").contains("bad request")) {
+        ctx.response().setStatusCode(400).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
       } else {
-        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, RECORD_BULK_IDS, ctx);
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_MOCK_DATA_PATH, SEARCH_IDS, ctx);
       }
     } catch (IOException e) {
       mockResponseWith500Status(ctx);
