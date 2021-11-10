@@ -2,6 +2,7 @@ package org.folio.clients;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
+
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.ExternalPathResolver.SEARCH_IDS;
