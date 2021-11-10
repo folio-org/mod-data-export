@@ -1,6 +1,7 @@
 package org.folio.clients;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.ExternalPathResolver.SEARCH_IDS;
@@ -38,6 +39,7 @@ public class SearchClient {
   private static final String ERROR_MESSAGE_INVALID_STATUS_CODE = "Exception while calling %s, message: Get invalid response with status: %s";
   private static final String ERROR_MESSAGE_INVALID_BODY = "Exception while calling %s, message: Got invalid response body: %s";
   private static final String ERROR_MESSAGE_EMPTY_BODY = "Exception while calling %s, message: empty body returned.";
+  private static final String ERROR_MESSAGE_NO_RECORDS = "Exception while calling %s, message: No UUIDs were found for the query.";
 
   private final WebClient webClient;
   private final ErrorLogService errorLogService;
@@ -75,8 +77,13 @@ public class SearchClient {
         } else {
           try {
             JsonObject instances = response.bodyAsJsonObject();
-            if (instances != null) {
-              promise.complete(Optional.of(instances));
+            if (nonNull(instances)) {
+              if (instances.getJsonArray("ids").isEmpty()) {
+                logError(new IllegalStateException(format(ERROR_MESSAGE_NO_RECORDS, endpoint)), params);
+                promise.complete(Optional.empty());
+              } else {
+                promise.complete(Optional.of(instances));
+              }
             } else {
               logError(new IllegalStateException(format(ERROR_MESSAGE_EMPTY_BODY, endpoint)), params);
               promise.complete(Optional.empty());
