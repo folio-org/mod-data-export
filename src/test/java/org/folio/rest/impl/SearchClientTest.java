@@ -110,4 +110,16 @@ public class SearchClientTest extends RestVerticleTestBase {
       testContext.completeNow();
     }).onFailure(testContext::failNow);
   }
+
+  @Test
+  void shouldReturnEmptyOptional_whenResponseContainsNoRecords(VertxTestContext testContext) {
+    // given
+    String query = "no ids";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
 }

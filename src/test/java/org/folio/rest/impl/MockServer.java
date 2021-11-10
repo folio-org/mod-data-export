@@ -63,6 +63,7 @@ public class MockServer {
   private static final String INSTANCE_BULK_IDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
+  private static final String INSTANCE_BULK_IDS_NO_RECORDS = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_no_records.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -400,6 +401,8 @@ public class MockServer {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH, SEARCH_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("(languages=\"uk\")")) {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_WITH_RANDOM, SEARCH_IDS, ctx);
+      } else if (ctx.request().getParam("query").contains("no ids")) {
+        getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_NO_RECORDS, SEARCH_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("inventory 500")) {
         mockResponseWith500Status(ctx);
       } else if (ctx.request().getParam("query").contains("empty json response")) {
