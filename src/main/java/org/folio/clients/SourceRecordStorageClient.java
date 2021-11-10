@@ -40,7 +40,7 @@ public class SourceRecordStorageClient {
       httpPost.setEntity(new StringEntity(body));
       ClientUtil.setCommonHeaders(httpPost, params);
       CloseableHttpResponse response = client.execute(httpPost);
-      return Optional.ofNullable(getResponseEntity(response));
+      return Optional.of(getResponseEntity(response));
     } catch (IOException e) {
       LOGGER.error("Exception while calling {}", httpPost.getURI(), e);
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_CALLING_URI.getCode(), Arrays.asList(httpPost.getURI().toString(), e.getMessage()), jobExecutionId, params.getTenantId());
