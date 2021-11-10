@@ -37,6 +37,7 @@ import java.util.Optional;
 public class SearchClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String QUERY = "?query=";
+  private static final String IDS_LIST = "ids";
   private static final String ERROR_MESSAGE_INVALID_STATUS_CODE = "Exception while calling %s, message: Get invalid response with status: %s";
   private static final String ERROR_MESSAGE_INVALID_BODY = "Exception while calling %s, message: Got invalid response body: %s";
   private static final String ERROR_MESSAGE_EMPTY_BODY = "Exception while calling %s, message: empty body returned.";
@@ -79,7 +80,7 @@ public class SearchClient {
           try {
             JsonObject instances = response.bodyAsJsonObject();
             if (nonNull(instances)) {
-              if (instances.getJsonArray("ids").isEmpty()) {
+              if (instances.getJsonArray(IDS_LIST).isEmpty()) {
                 logError(new IllegalStateException(format(ERROR_MESSAGE_NO_RECORDS, endpoint)), params);
                 promise.complete(Optional.empty());
               } else {
