@@ -84,7 +84,7 @@
     },
     {
       "id": "search",
-      "version": "0.6"
+      "version": "0.5"
     }
   ],
   "provides": [
