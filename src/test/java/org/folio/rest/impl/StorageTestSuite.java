@@ -146,7 +146,7 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class InventoryClientTestNested extends InventoryClientTest {
+  class InventorySearchClientTestNested extends InventorySearchClientTest {
   }
 
   @Nested
@@ -173,8 +173,4 @@ public class StorageTestSuite {
   class DataExportCleanUpFilesTestNested extends DataExportCleanUpFilesTest {
   }
 
-  @Nested
-  class SearchClientTestNested extends SearchClientTest {
-
-  }
 }

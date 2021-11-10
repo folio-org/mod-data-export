@@ -7,8 +7,10 @@ import io.vertx.junit5.VertxExtension;
 
 import java.util.UUID;
 
+import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.InventoryClient;
+import org.folio.clients.SearchClient;
 import org.folio.config.ApplicationConfig;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
@@ -30,13 +32,16 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(VertxExtension.class)
 @RunWith(VertxUnitRunner.class)
-class InventoryClientTest extends RestVerticleTestBase {
+class InventorySearchClientTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static OkapiConnectionParams okapiConnectionParams;
 
   @Autowired
   private InventoryClient inventoryClient;
+
+  @Autowired
+  private SearchClient searchClient;
 
   @BeforeAll
   void beforeClass() {
@@ -165,4 +170,88 @@ class InventoryClientTest extends RestVerticleTestBase {
     Assert.assertEquals(2, electronicAccessRelationships.size());
   }
 
+  @Test
+  void shouldRetrieveInstanceBulkUUIDS(VertxTestContext testContext) {
+    // given
+    String query = "cql query";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isPresent());
+      Assert.assertEquals(2, inventoryResponse.get().getJsonArray("ids").getList().size());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenQueryIsEmpty(VertxTestContext testContext) {
+    // given
+    String query = "";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidResponseReturned(VertxTestContext testContext) {
+    // given
+    String query = "inventory 500";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "empty json response";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
+    // given
+    String query = "invalid json returned";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenResponseStatusFromSearchIsNotOk(VertxTestContext testContext) {
+    // given
+    String query = "bad request";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenResponseContainsNoRecords(VertxTestContext testContext) {
+    // given
+    String query = "no ids";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
 }
