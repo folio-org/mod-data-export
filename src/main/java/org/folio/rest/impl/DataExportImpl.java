@@ -75,7 +75,7 @@ public class DataExportImpl implements DataExport {
   @Override
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    LOGGER.info("Starting the data-export process, request: {}", entity);
+    LOGGER.debug("Starting the data-export process, request: {}", entity);
     OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
       .onSuccess(requestFileDefinition ->
@@ -101,7 +101,7 @@ public class DataExportImpl implements DataExport {
 
   @Override
   public void postDataExportQuickExport(QuickExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    LOGGER.info("Starting the data-quick-export process, request: {}", entity);
+    LOGGER.debug("Starting the data-quick-export process, request: {}", entity);
     OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     getJobProfileForQuickExport(entity)
       .onSuccess(jobProfile ->

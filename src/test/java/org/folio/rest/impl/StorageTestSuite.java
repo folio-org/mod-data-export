@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.client.TenantClient;
+import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.postgres.testing.PostgresTesterContainer;
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -70,7 +72,7 @@ public class StorageTestSuite {
   }
 
   @AfterAll
-  public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+  public static void after() throws InterruptedException, ExecutionException, TimeoutException {
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
     vertx.close(res -> {
@@ -97,6 +99,7 @@ public class StorageTestSuite {
       if (res.succeeded()) {
         TenantAttributes tenantAttributes = new TenantAttributes();
         tenantAttributes.setModuleTo(ModuleName.getModuleName());
+        tenantAttributes.setParameters(Collections.singletonList(new Parameter().withKey("loadReference").withValue("true")));
         try {
           tenantClient.postTenant(tenantAttributes, res2 -> {
             if (isSuccess(res2.result().statusCode())){
@@ -143,7 +146,7 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class InventoryClientTestNested extends InventoryClientTest {
+  class InventorySearchClientTestNested extends InventorySearchClientTest {
   }
 
   @Nested

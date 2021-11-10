@@ -61,7 +61,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
     try {
       pgClientFactory.getInstance(tenantId).update(TABLE, jobProfile, jobProfile.getId(), updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.error("Could not update jobProfile with id {}", jobProfile.getId(), updateResult.cause().getMessage());
+          LOGGER.error("Could not update jobProfile with id {}, cause: {}", jobProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
           String errorMessage = String.format("JobProfile with id '%s' was not found", jobProfile.getId());

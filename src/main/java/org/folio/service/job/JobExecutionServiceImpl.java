@@ -16,8 +16,12 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.RunBy;
+import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.service.export.storage.ExportStorageService;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.service.profiles.jobprofile.JobProfileService;
+import org.folio.util.ErrorCode;
+import org.folio.util.HelperUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +55,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   private JobProfileService jobProfileService;
   @Autowired
   private ExportStorageService exportStorageService;
+  @Autowired
+  private ErrorLogService errorLogService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
@@ -186,7 +192,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           List<JobExecution> jobExecutionList = asyncResult.result();
           jobExecutionList.forEach(jobExe -> {
             jobExe.setStatus(FAIL);
+            //reset progress to skip already exported/failed records
+            if (jobExe.getProgress() != null) {
+              jobExe.getProgress().withExported(0).withTotal(0).withFailed(0);
+            }
             jobExe.setCompletedDate(new Date());
+            updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);
             jobExecutionDao.update(jobExe, tenantId);
           });
           jobExecutionPromise.complete();
@@ -198,6 +209,24 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
       });
     return jobExecutionPromise.future();
+  }
+
+  private void updateErrorLogIfJobIsExpired(String jobExecutionId, String tenantId) {
+    Future<List<ErrorLog>> listFuture = errorLogService.getByQuery(HelperUtils.getErrorLogCriterionByJobExecutionId(jobExecutionId), tenantId);
+    if (listFuture != null) {
+      listFuture.onSuccess(errorLogs -> {
+        if (!errorLogs.isEmpty()) {
+          ErrorLog errorLog = errorLogs.get(0)
+            .withErrorMessageCode(ErrorCode.ERROR_JOB_IS_EXPIRED.getCode())
+            .withErrorMessageValues(List.of(ErrorCode.ERROR_JOB_IS_EXPIRED.getDescription()));
+          errorLogService.update(errorLog, tenantId);
+          //remove all the rest logs to have only 1 reason: job is expired
+          errorLogs.subList(1, errorLogs.size()).forEach(redundantLog -> {
+            errorLogService.deleteById(redundantLog.getId(), tenantId);
+          });
+        }
+      });
+    }
   }
 
   private Future<JobExecution> populateJobProfileNameIfNecessary(JobExecution jobExecution, String tenantId) {

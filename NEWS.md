@@ -1,5 +1,15 @@
 ## v4.3.0 Unreleased
 
+## 11/10/2021 v4.2.2 Released
+This release includes bug fixes for export fails and CQL file uploading
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.2.1...v4.2.2)
+
+### Bug fixes
+* [MDEXP-473](https://issues.folio.org/browse/MDEXP-473) CQL export fails when effective location is included in the cql statement
+* [MDEXP-470](https://issues.folio.org/browse/MDEXP-470) Export fails after /data-export/expire-jobs endpoint invocation
+* [MDEXP-441](https://issues.folio.org/browse/MDEXP-441) Memory utilisation issues (logging optimisation)
+
 ## 10/15/2021 v4.2.1 Released
 This release includes module configuration improvement
 

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 import javax.ws.rs.NotFoundException;
 import java.lang.invoke.MethodHandles;
 import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
   private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
   private static final String STATUS_FIELD = "'status'";
+  private static final SimpleDateFormat DATE_TIME_FORMAT_FOR_POSTGRES = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   @Autowired
   private PostgresClientFactory pgClientFactory;
@@ -63,7 +65,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
         pgClientFactory.getInstance(tenantId)
           .save(TABLE, jobExecution.getId(), jobExecution, promise);
       } else {
-        LOGGER.error("Error while fetching next HRID in sequence", getHrIdResult.cause().getMessage());
+        LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
         promise.fail(getHrIdResult.cause());
       }
     });
@@ -116,6 +118,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   @Override
   public Future<List<JobExecution>> getExpiredEntries(Date expirationDate, String tenantId) {
+    LOGGER.debug("Expiration date {}", expirationDate);
     Promise<Results<JobExecution>> promise = Promise.promise();
     try {
       Criterion expiredEntriesCriterion = constructExpiredEntriesCriterion(expirationDate);
@@ -133,7 +136,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     Criteria lastUpdateDateCriteria = new Criteria();
     lastUpdateDateCriteria.addField(LAST_UPDATED_DATE_FIELD)
       .setOperation("<=")
-      .setVal(expirationDate.toString());
+      .setVal(DATE_TIME_FORMAT_FOR_POSTGRES.format(expirationDate));
     Criteria statusIsProgressCriteria = new Criteria();
     statusIsProgressCriteria.addField(STATUS_FIELD)
       .setOperation("=")

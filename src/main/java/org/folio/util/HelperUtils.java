@@ -77,4 +77,20 @@ public class HelperUtils {
     criterion.addCriterion(reasonCriteria);
     return criterion;
   }
+
+  /**
+   * Builds Criterion by which db result is filtered to get error logs by job execution id
+   *
+   * @param jobExecutionId - job execution id to which error log related
+   * @return - {@link Criterion}}
+   */
+  public static Criterion getErrorLogCriterionByJobExecutionId(String jobExecutionId) {
+    Criterion criterion = new Criterion();
+    Criteria jobExecutionIdCriteria = new Criteria();
+    jobExecutionIdCriteria.addField(JOB_EXECUTION_ID_FIELD)
+      .setOperation("=")
+      .setVal(jobExecutionId);
+    criterion.addCriterion(jobExecutionIdCriteria);
+    return criterion;
+  }
 }

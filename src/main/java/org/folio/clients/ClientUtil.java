@@ -82,7 +82,9 @@ public final class ClientUtil {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
       try {
-        return new JsonObject(EntityUtils.toString(entity));
+        var body = EntityUtils.toString(entity);
+        LOGGER.debug("Response body: {}", body);
+        return new JsonObject(body);
       } catch (IOException e) {
         LOGGER.error("Exception while building response entity", e);
       }
