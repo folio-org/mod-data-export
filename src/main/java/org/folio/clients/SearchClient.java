@@ -96,10 +96,9 @@ public class SearchClient {
       if (res.failed()) {
         logError(res.cause(), params);
         promise.complete(Optional.empty());
-      }
-      if (res.result().statusCode() != HttpStatus.SC_OK) {
-          logError(new IllegalStateException(format(ERROR_MESSAGE_INVALID_STATUS_CODE, endpoint, res.result().statusCode())), params);
-          promise.complete(Optional.empty());
+      } else if (res.result().statusCode() != HttpStatus.SC_OK) {
+        logError(new IllegalStateException(format(ERROR_MESSAGE_INVALID_STATUS_CODE, endpoint, res.result().statusCode())), params);
+        promise.complete(Optional.empty());
       }
     });
     return promise.future();
