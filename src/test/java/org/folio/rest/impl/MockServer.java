@@ -409,8 +409,6 @@ public class MockServer {
         getMockResponseFromPathWith200Status(INSTANCE_BULK_IDS_NO_RECORDS, SEARCH_IDS, ctx);
       } else if (ctx.request().getParam("query").contains("inventory 500")) {
         mockResponseWith500Status(ctx);
-      } else if (ctx.request().getParam("query").contains("empty json response")) {
-        ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end();
       } else if (ctx.request().getParam("query").contains("invalid json returned")) {
         ctx.response().setStatusCode(200).putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON).end("{qwe");
       } else if (ctx.request().getParam("query").contains("bad request")) {
