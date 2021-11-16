@@ -12,8 +12,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.folio.HttpStatus;
@@ -33,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
@@ -40,7 +39,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   public static final String CSV_FORMAT_EXTENSION = "csv";
   public static final String CQL_FORMAT_EXTENSION = "cql";
 
-  private static final String QUERIES_MAP = "queries";
   private static final String QUERY_KEY = "query";
 
   @Autowired
@@ -49,7 +47,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Autowired
   private FileUploadService fileUploadService;
 
-  private SharedData sharedData;
+  private final Map<String, String> map = new HashMap<>();
 
   /*
       Reference to the Future to keep uploading state in track while uploading happens.
@@ -62,7 +60,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   public DataExportImplFileDefinitionImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
-    this.sharedData = vertx.sharedData();
   }
 
   @Override
@@ -121,7 +118,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   }
 
   private Future<FileDefinition> saveFileDependsOnFileExtension(FileDefinition fileDefinition, byte[] data, OkapiConnectionParams params) {
-    final LocalMap<String, String> map = sharedData.getLocalMap(QUERIES_MAP);
     if (CQL.equals(fileDefinition.getUploadFormat())) {
       var queryChunk = new String(data);
       if (queryChunk.isEmpty()) {
