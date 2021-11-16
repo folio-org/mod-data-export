@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
@@ -30,18 +31,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
   public static final String CSV_FORMAT_EXTENSION = "csv";
   public static final String CQL_FORMAT_EXTENSION = "cql";
+
+  private static final String QUERY_KEY = "query";
+
   @Autowired
   private FileDefinitionService fileDefinitionService;
 
   @Autowired
   private FileUploadService fileUploadService;
 
+  private final Map<String, String> map = new HashMap<>();
 
   /*
       Reference to the Future to keep uploading state in track while uploading happens.
@@ -112,9 +118,17 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   }
 
   private Future<FileDefinition> saveFileDependsOnFileExtension(FileDefinition fileDefinition, byte[] data, OkapiConnectionParams params) {
-    return CQL.equals(fileDefinition.getUploadFormat())
-      ? fileUploadService.saveUUIDsByCQL(fileDefinition, new String(data), params)
-      : fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
+    if (CQL.equals(fileDefinition.getUploadFormat())) {
+      var queryChunk = new String(data);
+      if (queryChunk.isEmpty()) {
+        return fileUploadService.saveUUIDsByCQL(fileDefinition, map.containsKey(QUERY_KEY) ? map.remove(QUERY_KEY) : EMPTY, params);
+      } else {
+        map.put(QUERY_KEY, map.getOrDefault(QUERY_KEY, EMPTY).concat(queryChunk));
+        return Future.succeededFuture(fileDefinition);
+      }
+    } else {
+      return fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
+    }
   }
 
   private Future<Void> validateFileNameExtension(String fileName) {
