@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
@@ -11,6 +12,8 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.shareddata.LocalMap;
+import io.vertx.core.shareddata.SharedData;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.folio.HttpStatus;
@@ -36,12 +39,17 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   public static final String CSV_FORMAT_EXTENSION = "csv";
   public static final String CQL_FORMAT_EXTENSION = "cql";
+
+  private static final String QUERIES_MAP = "queries";
+  private static final String QUERY_KEY = "query";
+
   @Autowired
   private FileDefinitionService fileDefinitionService;
 
   @Autowired
   private FileUploadService fileUploadService;
 
+  private SharedData sharedData;
 
   /*
       Reference to the Future to keep uploading state in track while uploading happens.
@@ -54,6 +62,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   public DataExportImplFileDefinitionImpl(Vertx vertx, String tenantId) { //NOSONAR
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
+    this.sharedData = vertx.sharedData();
   }
 
   @Override
@@ -112,9 +121,18 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   }
 
   private Future<FileDefinition> saveFileDependsOnFileExtension(FileDefinition fileDefinition, byte[] data, OkapiConnectionParams params) {
-    return CQL.equals(fileDefinition.getUploadFormat())
-      ? fileUploadService.saveUUIDsByCQL(fileDefinition, new String(data), params)
-      : fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
+    final LocalMap<String, String> map = sharedData.getLocalMap(QUERIES_MAP);
+    if (CQL.equals(fileDefinition.getUploadFormat())) {
+      var queryChunk = new String(data);
+      if (queryChunk.isEmpty()) {
+        return fileUploadService.saveUUIDsByCQL(fileDefinition, map.containsKey(QUERY_KEY) ? map.remove(QUERY_KEY) : EMPTY, params);
+      } else {
+        map.put(QUERY_KEY, map.getOrDefault(QUERY_KEY, EMPTY).concat(queryChunk));
+        return Future.succeededFuture(fileDefinition);
+      }
+    } else {
+      return fileUploadService.saveFileChunk(fileDefinition, data, tenantId);
+    }
   }
 
   private Future<Void> validateFileNameExtension(String fileName) {
