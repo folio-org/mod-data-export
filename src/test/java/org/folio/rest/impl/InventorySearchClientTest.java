@@ -208,18 +208,6 @@ class InventorySearchClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
-    // given
-    String query = "empty json response";
-    // when
-    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
-
-  @Test
   void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
     // given
     String query = "invalid json returned";

@@ -1,5 +1,13 @@
 ## v4.3.0 Unreleased
 
+## 11/16/2021 v4.2.3 Released
+This release includes fix for the long CQL statements
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.2.2...v4.2.3)
+
+### Bug fixes
+* [MDEXP-475](https://issues.folio.org/browse/MDEXP-475) Bugfest - the export cannot be triggered by the long CQL statement
+
 ## 11/10/2021 v4.2.2 Released
 This release includes bug fixes for export fails and CQL file uploading
 
