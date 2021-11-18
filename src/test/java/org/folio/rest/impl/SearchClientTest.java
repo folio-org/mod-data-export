@@ -76,18 +76,6 @@ public class SearchClientTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndEmptyJsonBodyReturned(VertxTestContext testContext) {
-    // given
-    String query = "empty json response";
-    // when
-    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
-      //then
-      Assert.assertTrue(inventoryResponse.isEmpty());
-      testContext.completeNow();
-    }).onFailure(testContext::failNow);
-  }
-
-  @Test
   void shouldReturnEmptyOptional_whenRequestInstanceBulkUUIDsAndInvalidJsonBodyReturned(VertxTestContext testContext) {
     // given
     String query = "invalid json returned";
@@ -103,6 +91,18 @@ public class SearchClientTest extends RestVerticleTestBase {
   void shouldReturnEmptyOptional_whenResponseStatusFromSearchIsNotOk(VertxTestContext testContext) {
     // given
     String query = "bad request";
+    // when
+    searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
+      //then
+      Assert.assertTrue(inventoryResponse.isEmpty());
+      testContext.completeNow();
+    }).onFailure(testContext::failNow);
+  }
+
+  @Test
+  void shouldReturnEmptyOptional_whenResponseContainsNoRecords(VertxTestContext testContext) {
+    // given
+    String query = "no ids";
     // when
     searchClient.getInstancesBulkUUIDsAsync(query, okapiConnectionParams).onSuccess(inventoryResponse -> {
       //then
