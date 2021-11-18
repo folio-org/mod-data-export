@@ -106,6 +106,19 @@ The description of how to create a configuration in mod-configuration module - h
 
 Testing was done with a mod-data-export docker image memory limit = 512 MiB.
 
+### Updated system requirements
+memory: 844
+
+memoryReservation: 768
+
+cpu: 1024
+
+MetaspaceSize=88m
+
+MaxMetaspaceSize=88m
+
+Xmx=540m
+
 #### Default mapping profile
 
 For default mapping profile, the max usage of memory is 270 MiB during the process of export 1 million records.
