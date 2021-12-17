@@ -1,5 +1,13 @@
 ## v4.3.0 Unreleased
 
+## 12/17/2021 v4.2.4 Released
+This release includes fix for log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.2.3...v4.2.4)
+
+### Bug fixes
+* [MDEXP-484](https://issues.folio.org/browse/MDEXP-484) Kiwi R3 2021 - Log4j vulnerability verification and correction
+
 ## 11/16/2021 v4.2.3 Released
 This release includes fix for the long CQL statements
 
