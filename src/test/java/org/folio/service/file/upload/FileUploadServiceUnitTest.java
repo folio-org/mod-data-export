@@ -7,6 +7,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.InventoryClient;
+import org.folio.clients.SearchClient;
 import org.folio.clients.UsersClient;
 import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -78,6 +79,8 @@ class FileUploadServiceUnitTest {
   UsersClient usersClient;
   @Mock
   InventoryClient inventoryClient;
+  @Mock
+  SearchClient searchClient;
   private OkapiConnectionParams params;
   private FileDefinition fileDefinition;
   private JsonObject user;
@@ -149,7 +152,7 @@ class FileUploadServiceUnitTest {
     when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture());
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
-    when(inventoryClient.getInstancesBulkUUIDsAsync(eq("test"), any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(Optional.empty()));
+    when(searchClient.getInstancesBulkUUIDsAsync(eq("test"), any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(Optional.empty()));
 
     // when
     Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
@@ -183,7 +186,7 @@ class FileUploadServiceUnitTest {
     when(jobExecutionService.update(any(JobExecution.class), eq(TENANT_ID))).thenReturn(succeededFuture(jobExecution));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
-    when(inventoryClient.getInstancesBulkUUIDsAsync(anyString(), eq(params))).thenReturn(Future.succeededFuture(of(new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH)))));
+    when(searchClient.getInstancesBulkUUIDsAsync(anyString(), eq(params))).thenReturn(Future.succeededFuture(of(new JsonObject(RestVerticleTestBase.getMockData(INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH)))));
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(succeededFuture(completedDef));
 
     // when
