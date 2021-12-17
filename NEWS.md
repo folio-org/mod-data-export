@@ -1,5 +1,13 @@
 ## 4.2.0 - Unreleased
 
+## 12/17/2021 v4.1.2 Released
+This release includes fix for log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.1.1...v4.1.2)
+
+### Bug fixes
+* [MDEXP-484](https://issues.folio.org/browse/MDEXP-484) Kiwi R3 2021 - Log4j vulnerability verification and correction
+
 ## 23/09/2021 v4.1.1 Released
 This release includes handling of errors caused by MARC records that exceed a size limit, as well as any other errors like
 no-escaped control characters in quoted literals, or data after closing quotes.
