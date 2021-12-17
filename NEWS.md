@@ -1,3 +1,11 @@
+## 12/17/2021 v4.0.2 Released
+This release includes fix for log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.0.1...v4.0.2)
+
+### Bug fixes
+* [MDEXP-484](https://issues.folio.org/browse/MDEXP-484) Kiwi R3 2021 - Log4j vulnerability verification and correction
+
 ## 04/02/2021 v4.0.1 - Released
 This bugfix release includes fix for inconsistent results when holdings and items data incorrectly appended to the srs record
 in MARC file.
