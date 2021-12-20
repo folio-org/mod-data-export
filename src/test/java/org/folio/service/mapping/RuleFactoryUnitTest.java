@@ -716,7 +716,7 @@ class RuleFactoryUnitTest {
   }
 
   @Test
-  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldsWithSameFieldIdDifferentIndicators() {
+  void shouldReturnDifferentRules_WhenTransformationHasMultipleSubFieldsWithSameFieldIdButDifferentIndicators() {
     // given
     Transformations transformation1 = new Transformations()
       .withEnabled(true)
@@ -745,9 +745,9 @@ class RuleFactoryUnitTest {
 
     //then
     List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).collect(Collectors.toList());
-    assertEquals(1, ruleList.size());
+    assertEquals(3, ruleList.size());
     //3 data sources for subfields $a, $b, $c and 2 for indicators
-    assertEquals(5, ruleList.get(0).getDataSources().size());
+    assertEquals(3, ruleList.get(0).getDataSources().size());
     //the first field's indicators are used
     assertEquals(2, ruleList.get(0).getDataSources().stream().
       filter(ds -> ds.getIndicator() != null && ds.getTranslation().getParameter("value").equals("f")).count());
