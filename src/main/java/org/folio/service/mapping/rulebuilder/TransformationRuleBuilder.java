@@ -85,10 +85,12 @@ public class TransformationRuleBuilder implements RuleBuilder {
   @Override
   public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
+    String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;
     Optional<Rule> existingRule = rules.stream()
       .filter(tagRule -> tagRule.getField()
         .equals(field))
+      .filter(tagRule -> tagRule.getIndicators().equals(indicators))
       .findFirst();
     //If there is already an existing rule, then just append the subfield, without indicators
     if (existingRule.isPresent()) {
@@ -102,6 +104,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
     } else {
       rule = new Rule();
       rule.setField(field);
+      rule.setIndicators(indicators);
       setDataSources(rule, mappingTransformation);
       rule.setItemTypeRule(RecordType.ITEM.equals(mappingTransformation.getRecordType()));
     }
