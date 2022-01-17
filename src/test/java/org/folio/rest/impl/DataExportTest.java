@@ -84,7 +84,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
   private static final String HOLDING_UUIDS_INVENTORY = "holding_uuids_inventory.csv";
-  private static final String HOLDING_UUID_GENERATE_ON_THE_FLY = "holding_uuid_generate_on_the_fly.csv";
+  private static final String HOLDING_UUID_GENERATE_ON_THE_FLY = "holding_uuid.csv";
   private static final String HOLDING_UUIDS_WITHOUT_SRS_RECORD = "holding_uuids_without_srs_record.csv";
   private static final String INSTANCE_UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
@@ -528,8 +528,8 @@ class DataExportTest extends RestVerticleTestBase {
             context.verify(() -> {
               assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
               validateExternalCallsForSrs(1);
-              ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
-              assertEquals(ErrorCode.NO_FILE_GENERATED.getCode(), errorLog.getErrorMessageCode());
+              ErrorLog errorLog = errorLogs.getErrorLogs().get(1);
+              assertEquals(NO_FILE_GENERATED.getCode(), errorLog.getErrorMessageCode());
               context.completeNow();
             });
           });

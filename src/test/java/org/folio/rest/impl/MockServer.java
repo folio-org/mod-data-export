@@ -199,7 +199,7 @@ public class MockServer {
       String idType = ctx.request().getParam("idType");
       List<String> ids = ctx.getBodyAsJsonArray().getList();
       String path = idType.equalsIgnoreCase("instance") ? SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH : SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
-      String fieldKey = idType.equalsIgnoreCase("instance") ? "instanceId" : "holdingId";
+      String fieldKey = idType.equalsIgnoreCase("instance") ? "instanceId" : "holdingsId";
       JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(path));
 
       final Iterator iterator = srsRecords.getJsonArray("sourceRecords")

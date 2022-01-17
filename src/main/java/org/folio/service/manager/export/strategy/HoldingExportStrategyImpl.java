@@ -1,7 +1,6 @@
 package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
@@ -11,7 +10,6 @@ import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.service.loader.LoadResult;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.export.ExportManagerImpl;
@@ -76,6 +74,9 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
     exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
+      if (isNull(fileExportDefinition.getSourcePath())) {
+        throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
+      }
       try {
         getExportService().postExport(fileExportDefinition, params.getTenantId());
       } catch (ServiceException exc) {
@@ -89,7 +90,6 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
             LOGGER.error("User which created file export definition does not exist: job failed export cannot be performed.");
           }
         });
-        throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
       }
     }
   }

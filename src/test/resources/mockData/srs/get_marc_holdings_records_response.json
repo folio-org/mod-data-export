@@ -527,7 +527,7 @@
       "deleted": false,
       "externalIdsHolder": {
         "instanceId": "ae573875-fbc8-40e7-bda7-0ac283354226",
-        "holdingId": "49713f91-2446-467c-a75c-f8cbbe38985f"
+        "holdingsId": "49713f91-2446-467c-a75c-f8cbbe38985f"
       },
       "additionalInfo": {
         "suppressDiscovery": false
@@ -1249,7 +1249,7 @@
       "deleted": false,
       "externalIdsHolder": {
         "instanceId": "5fc04e92-70dd-46b8-97ea-194015762a60",
-        "holdingId": "9701533f-5a1f-45ce-8bd3-0a9666159e2f",
+        "holdingsId": "9701533f-5a1f-45ce-8bd3-0a9666159e2f",
         "holdingsHrid" : "ho0000012"
       },
       "additionalInfo": {
