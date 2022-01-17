@@ -2,7 +2,6 @@ package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -77,22 +75,10 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
       if (isNull(fileExportDefinition.getSourcePath())) {
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
       }
-      try {
-        getExportService().postExport(fileExportDefinition, params.getTenantId());
-      } catch (ServiceException exc) {
-        getJobExecutionService().getById(exportPayload.getJobExecutionId(), params.getTenantId()).onSuccess(res -> {
-          Optional<JsonObject> optionalUser = getUsersClient().getById(fileExportDefinition.getMetadata().getCreatedByUserId(),
-            exportPayload.getJobExecutionId(), params);
-          if (optionalUser.isPresent()) {
-            getJobExecutionService().prepareAndSaveJobForFailedExport(res, fileExportDefinition, optionalUser.get(),
-              0, true, params.getTenantId());
-          } else {
-            LOGGER.error("User which created file export definition does not exist: job failed export cannot be performed.");
-          }
-        });
-      }
+      postExport(exportPayload, fileExportDefinition, params);
     }
   }
+
 
   private LoadResult loadHoldingsInPartitions(List<String> holdingIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
     LoadResult loadResult = new LoadResult();
