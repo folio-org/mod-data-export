@@ -12,7 +12,7 @@ import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
-import org.folio.service.loader.InventoryLoadResult;
+import org.folio.service.loader.LoadResult;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.export.ExportManagerImpl;
 import org.folio.service.manager.export.ExportPayload;
@@ -29,9 +29,8 @@ import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 @Service
 public class InstanceExportStrategyImpl extends AbstractExportStrategy {
-  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final String INSTANCE_ID_TYPE = "instance";
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
@@ -44,11 +43,11 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getIdsWithoutSrs());
       Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
-        exportPayload.getJobExecutionId(), params);
+        exportPayload.getJobExecutionId(), params, getEntityType());
       getExportService().exportSrsRecord(marcToExport, exportPayload);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getIdsWithoutSrs())) {
-        getMappingProfileService().getDefault(params)
+        getMappingProfileService().getDefaultInstanceMappingProfile(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
             generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult, marcToExport.getValue());
@@ -77,14 +76,14 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
-    InventoryLoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
-    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getInstances().size());
-    int numberOfNotFoundRecords = instances.getNotFoundInstancesUUIDs().size();
+    LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+    LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
+    int numberOfNotFoundRecords = instances.getNotFoundEntitiesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);
     if (numberOfNotFoundRecords > 0) {
-      getErrorLogService().populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundInstancesUUIDs(), params.getTenantId());
+      getErrorLogService().populateUUIDsNotFoundErrorLog(exportPayload.getJobExecutionId(), instances.getNotFoundEntitiesUUIDs(), params.getTenantId());
     }
-    Pair<List<String>, Integer> mappedPairResult = getInventoryRecordService().transformInventoryRecords(instances.getInstances(),
+    Pair<List<String>, Integer> mappedPairResult = getInventoryRecordService().transformInstanceRecords(instances.getEntities(),
       exportPayload.getJobExecutionId(), mappingProfile, params);
     List<String> mappedMarcRecords = mappedPairResult.getKey();
     int failedRecordsCount = mappedPairResult.getValue();
@@ -117,15 +116,15 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
    * @param params                    okapi connection parameters
    * @return list of instances
    */
-  private InventoryLoadResult loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
-    InventoryLoadResult inventoryLoadResult = new InventoryLoadResult();
+  private LoadResult loadInventoryInstancesInPartitions(List<String> singleInstanceIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
+    LoadResult loadResult = new LoadResult();
     Lists.partition(singleInstanceIdentifiers, ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        InventoryLoadResult partitionLoadResult = getRecordLoaderService().loadInventoryInstancesBlocking(partition, jobExecutionId, params, ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE);
-        inventoryLoadResult.getInstances().addAll(partitionLoadResult.getInstances());
-        inventoryLoadResult.getNotFoundInstancesUUIDs().addAll(partitionLoadResult.getNotFoundInstancesUUIDs());
+        LoadResult partitionLoadResult = getRecordLoaderService().loadInventoryInstancesBlocking(partition, jobExecutionId, params, ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE);
+        loadResult.getEntities().addAll(partitionLoadResult.getEntities());
+        loadResult.getNotFoundEntitiesUUIDs().addAll(partitionLoadResult.getNotFoundEntitiesUUIDs());
       }
     );
-    return inventoryLoadResult;
+    return loadResult;
   }
 
   /**
@@ -151,8 +150,8 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
   }
 
   @Override
-  protected String getIdType() {
-    return INSTANCE_ID_TYPE;
+  protected EntityType getEntityType() {
+    return EntityType.INSTANCE;
   }
 
 }

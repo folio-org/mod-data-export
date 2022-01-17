@@ -138,8 +138,13 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<MappingProfile> getDefault(OkapiConnectionParams params) {
+  public Future<MappingProfile> getDefaultInstanceMappingProfile(OkapiConnectionParams params) {
     return getById(DEFAULT_INSTANCE_MAPPING_PROFILE_ID, params);
+  }
+
+  @Override
+  public Future<MappingProfile> getDefaultHoldingMappingProfile(OkapiConnectionParams params) {
+    return getById(DEFAULT_HOLDINGS_MAPPING_PROFILE_ID, params);
   }
 
   @Override

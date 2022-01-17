@@ -84,6 +84,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
   private static final String HOLDING_UUIDS_INVENTORY = "holding_uuids_inventory.csv";
+  private static final String HOLDING_UUID_GENERATE_ON_THE_FLY = "holding_uuid_generate_on_the_fly.csv";
   private static final String HOLDING_UUIDS_WITHOUT_SRS_RECORD = "holding_uuids_without_srs_record.csv";
   private static final String INSTANCE_UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
   private static final String EMPTY_FILE = "InventoryUUIDsEmptyFile.csv";
@@ -593,6 +594,34 @@ class DataExportTest extends RestVerticleTestBase {
               ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
               assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(), errorLog.getErrorMessageCode());
               assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription(), errorLog.getErrorMessageValues().get(0));
+              context.completeNow();
+            });
+          });
+        });
+    });
+  }
+
+  @Test
+  @Order(18)
+  void testHoldingsExportByCSV_shouldGenerateRecordsOnTheFly(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(HOLDING_UUID_GENERATE_ON_THE_FLY, CSV, buildRequestSpecification(tenantId));
+
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, DEFAULT_HOLDING_JOB_PROFILE, ExportRequest.IdType.HOLDING);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+            context.verify(() -> {
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "generatedOnTheFlyRecordFromHolding.mrc");
               context.completeNow();
             });
           });

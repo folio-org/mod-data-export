@@ -44,7 +44,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   abstract public void export(ExportPayload exportPayload, Promise<Object> blockingPromise);
 
   /**
-   * Loads marc records from SRS by the given instance identifiers
+   * Loads marc records from SRS by the given identifiers
    *
    * @param identifiers instance identifiers
    * @param params      okapi connection parameters
@@ -53,14 +53,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId, OkapiConnectionParams params) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, ExportManagerImpl.SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
-      SrsLoadResult partitionLoadResult = getRecordLoaderService().loadMarcRecordsBlocking(partition, getIdType(), jobExecutionId, params);
+      SrsLoadResult partitionLoadResult = getRecordLoaderService().loadMarcRecordsBlocking(partition, getEntityType(), jobExecutionId, params);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
       srsLoadResult.getIdsWithoutSrs().addAll(partitionLoadResult.getIdsWithoutSrs());
     });
     return srsLoadResult;
   }
 
-  abstract protected String getIdType();
+  abstract protected EntityType getEntityType();
 
   public SrsRecordConverterService getSrsRecordService() {
     return srsRecordService;
@@ -97,4 +97,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   public InventoryRecordConverterService getInventoryRecordService() {
     return inventoryRecordService;
   }
+
+  public enum EntityType {
+    HOLDING, INSTANCE
+  }
+
 }

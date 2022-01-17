@@ -8,6 +8,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExternalPathResolver;
 import org.folio.util.OkapiConnectionParams;
@@ -37,8 +38,8 @@ public class SourceRecordStorageClient {
   @Autowired
   private ErrorLogService errorLogService;
 
-  public Optional<JsonObject> getRecordsByIds(List<String> ids, String idType, String jobExecutionId, OkapiConnectionParams params) {
-    String uri = idType.equals("instance") ? GET_RECORDS_QUERY_BY_INSTANCE_IDS : GET_RECORDS_QUERY_BY_HOLDING_IDS;
+  public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
+    String uri = idType.equals(AbstractExportStrategy.EntityType.INSTANCE) ? GET_RECORDS_QUERY_BY_INSTANCE_IDS : GET_RECORDS_QUERY_BY_HOLDING_IDS;
     HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {

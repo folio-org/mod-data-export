@@ -38,6 +38,7 @@ public class MockServer {
   private static final String HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in000005.json";
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
   private static final String HOLDING_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in00041.json";
+  private static final String HOLDING_RECORD_HO001_IN000005_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holding_ho001_in000005.json";
   private static final String ITEM_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in00041.json";
   private static final String SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_bib_records_response.json";
   private static final String SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_holdings_records_response.json";
@@ -163,11 +164,11 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     try {
-      JsonObject holding;
-      if (ctx.request()
-        .getParam("query")
-        .contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
+      String query = ctx.request().getParam("query");
+      if (query.contains("ae573875-fbc8-40e7-bda7-0ac283354226")) {
         getMockResponseFromPathWith200Status(HOLDING_RECORDS_IN00041_MOCK_DATA_PATH, HOLDING, ctx);
+      } else if(query.contains("6111ccd9-99bd-43df-93e9-830bb3b8bb0a")) {
+        getMockResponseFromPathWith200Status(HOLDING_RECORD_HO001_IN000005_MOCK_DATA_PATH, HOLDING, ctx);
       } else {
         getMockResponseFromPathWith200Status(HOLDING_RECORDS_MOCK_DATA_PATH, HOLDING, ctx);
       }
@@ -183,7 +184,6 @@ public class MockServer {
     if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
       serverResponse(ctx, 500, APPLICATION_JSON, null);
     }
-    JsonObject instance = null;
     try {
       getMockResponseFromPathWith200Status(INSTANCE_RECORDS_MOCK_DATA_PATH, INSTANCE, ctx);
     } catch (IOException e) {

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.WebClient;
 
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
@@ -50,6 +49,7 @@ public class InventoryClient {
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
+  private static final String QUERY_PATTERN = "?query=(%s)";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 1000;
@@ -57,8 +57,6 @@ public class InventoryClient {
 
   @Autowired
   private ErrorLogService errorLogService;
-  @Autowired
-  private WebClient webClient;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
@@ -67,6 +65,17 @@ public class InventoryClient {
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
+    try {
+      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(HOLDING) + QUERY_PATTERN,
+        QUERY_PATTERN_INVENTORY));
+    } catch (HttpClientException exception) {
+      LOGGER.error(exception.getMessage(), exception.getCause());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_HOLDINGS_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
   }
@@ -195,7 +204,7 @@ public class InventoryClient {
   public Optional<JsonObject> getItemsByHoldingIds(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params) {
     try {
       return Optional.of(ClientUtil.getByIds(holdingIds, params, resourcesPathWithPrefix(ITEM) + QUERY_LIMIT_PATTERN + HOLDINGS_LIMIT,
-          QUERY_PATTERN_ITEM));
+        QUERY_PATTERN_ITEM));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_ITEM_BY_HOLDINGS_ID.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
