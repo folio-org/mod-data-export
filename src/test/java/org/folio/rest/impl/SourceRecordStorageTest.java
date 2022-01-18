@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.SourceRecordStorageClient;
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +37,7 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
     List<String> uuids = Arrays.asList("ae573875-fbc8-40e7-bda7-0ac283354226", "5fc04e92-70dd-46b8-97ea-194015762a60");
     // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, "instance", UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, UUID.randomUUID().toString(), okapiConnectionParams);
     // then
     Assert.assertTrue(srsResponse.isPresent());
     Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
@@ -48,7 +49,7 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient();
     List<String> uuids = Arrays.asList("49713f91-2446-467c-a75c-f8cbbe38985f", "9701533f-5a1f-45ce-8bd3-0a9666159e2f");
     // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, "holding", UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.HOLDING, UUID.randomUUID().toString(), okapiConnectionParams);
     // then
     Assert.assertTrue(srsResponse.isPresent());
     Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());

@@ -59,7 +59,15 @@ public interface MappingProfileService {
    * @param params {@link OkapiConnectionParams} okapi headers and connection parameters
    * @return future with default {@link MappingProfile}
    */
-  Future<MappingProfile> getDefault(OkapiConnectionParams params);
+  Future<MappingProfile> getDefaultInstanceMappingProfile(OkapiConnectionParams params);
+
+  /**
+   * Gets default {@link MappingProfile}
+   *
+   * @param params {@link OkapiConnectionParams} okapi headers and connection parameters
+   * @return future with default {@link MappingProfile}
+   */
+  Future<MappingProfile> getDefaultHoldingMappingProfile(OkapiConnectionParams params);
 
   /**
    * Validates {@link MappingProfile}
