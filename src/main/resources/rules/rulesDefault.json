@@ -242,17 +242,26 @@
     }
   },
   {
-    "id": "instance.identifiers.other.standard.identifier",
+    "id": "instance.identifiers.asin",
     "field": "024",
-    "description": "Other standard identifier",
+    "description": "Identifier ASIN",
     "dataSources": [
       {
-        "from": "$.instance.identifiers[*].value",
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='7f907515-a1bf-4513-8a38-92e1a07c539d')].value",
         "subfield": "a",
         "translation": {
           "function": "set_identifier",
           "parameters": {
-            "type": "Other standard identifier"
+            "type": "ASIN"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "ASIN"
           }
         }
       },
@@ -276,7 +285,195 @@
       }
     ],
     "metadata": {
-      "identifierType": "$.instance.identifiers[*]"
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='7f907515-a1bf-4513-8a38-92e1a07c539d')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.bnb",
+    "field": "024",
+    "description": "Identifier BNB",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='3187432f-9434-40a8-8782-35a111a1491e')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "BNB"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "BNB"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='3187432f-9434-40a8-8782-35a111a1491e')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.local.identifier",
+    "field": "024",
+    "description": "Local identifier",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='5130aed5-1095-4fb6-8f6f-caa3d6cc7aae')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Local identifier"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "Local identifier"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='5130aed5-1095-4fb6-8f6f-caa3d6cc7aae')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.stednl",
+    "field": "024",
+    "description": "Identifier StEdNL",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='3fbacad6-0240-4823-bce8-bb122cfdf229')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "StEdNL"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "StEdNL"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='3fbacad6-0240-4823-bce8-bb122cfdf229')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.ukmac",
+    "field": "024",
+    "description": "Identifier UKMac",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='650ef996-35e3-48ec-bf3a-a0d078a0ca37')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "UkMac"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "UkMac"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='650ef996-35e3-48ec-bf3a-a0d078a0ca37')]"
     }
   },
   {
