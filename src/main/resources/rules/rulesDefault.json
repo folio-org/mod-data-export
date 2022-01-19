@@ -477,6 +477,53 @@
     }
   },
   {
+    "id": "instance.identifiers.other.standard.identifier",
+    "field": "024",
+    "description": "Other standard identifier",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Other standard identifier"
+          }
+        }
+      },
+      {
+        "subfield": "q",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "Other standard identifier"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "8"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5')]"
+    }
+  },
+  {
     "id": "instance.identifiers.publisher.or.distributor.number",
     "field": "028",
     "description": "Publisher or distributor number",
