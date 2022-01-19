@@ -524,6 +524,147 @@
     }
   },
   {
+    "id": "instance.identifiers.doi",
+    "field": "024",
+    "description": "Identifier DOI",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='39554f54-d0bb-4f0a-89a4-e422f6136316')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "DOI"
+          }
+        }
+      },
+      {
+        "subfield": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "doi"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "7"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='39554f54-d0bb-4f0a-89a4-e422f6136316')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.handle",
+    "field": "024",
+    "description": "Identifier Handle",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='216b156b-215e-4839-a53e-ade35cb5702a')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Handle"
+          }
+        }
+      },
+      {
+        "subfield": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "hdl"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "7"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='216b156b-215e-4839-a53e-ade35cb5702a')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.urn",
+    "field": "024",
+    "description": "Identifier URN",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='eb7b2717-f149-4fec-81a3-deefb8f5ee6b')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "URN"
+          }
+        }
+      },
+      {
+        "subfield": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "urn"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "7"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='eb7b2717-f149-4fec-81a3-deefb8f5ee6b')]"
+    }
+  },
+  {
     "id": "instance.identifiers.publisher.or.distributor.number",
     "field": "028",
     "description": "Publisher or distributor number",

@@ -745,6 +745,27 @@
          "recordType":"INSTANCE"
       },
       {
+         "fieldId":"instance.identifiers.doi",
+         "displayNameKey":"instance.identifiers",
+         "referenceDataValue":"DOI",
+         "path":"$.instance.identifiers[?(@.identifierTypeId=='39554f54-d0bb-4f0a-89a4-e422f6136316')].value",
+         "recordType":"INSTANCE"
+      },
+      {
+         "fieldId":"instance.identifiers.handle",
+         "displayNameKey":"instance.identifiers",
+         "referenceDataValue":"Handle",
+         "path":"$.instance.identifiers[?(@.identifierTypeId=='216b156b-215e-4839-a53e-ade35cb5702a')].value",
+         "recordType":"INSTANCE"
+      },
+      {
+         "fieldId":"instance.identifiers.urn",
+         "displayNameKey":"instance.identifiers",
+         "referenceDataValue":"URN",
+         "path":"$.instance.identifiers[?(@.identifierTypeId=='eb7b2717-f149-4fec-81a3-deefb8f5ee6b')].value",
+         "recordType":"INSTANCE"
+      },
+      {
          "fieldId":"instance.identifiers.lccn",
          "displayNameKey":"instance.identifiers",
          "referenceDataValue":"LCCN",
