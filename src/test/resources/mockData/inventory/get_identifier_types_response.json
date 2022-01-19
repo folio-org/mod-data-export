@@ -64,7 +64,22 @@
       "id": "d70f3282-489e-40cd-b144-64e68a3b0514",
       "name": "Cancelled GPO item number",
       "source": "folio"
+    },
+    {
+      "id": "39554f54-d0bb-4f0a-89a4-e422f6136316",
+      "name": "DOI",
+      "source": "folio"
+    },
+    {
+      "id": "216b156b-215e-4839-a53e-ade35cb5702a",
+      "name": "Handle",
+      "source": "folio"
+    },
+    {
+      "id": "eb7b2717-f149-4fec-81a3-deefb8f5ee6b",
+      "name": "URN",
+      "source": "folio"
     }
   ],
-  "totalRecords": 9
+  "totalRecords": 12
 }
