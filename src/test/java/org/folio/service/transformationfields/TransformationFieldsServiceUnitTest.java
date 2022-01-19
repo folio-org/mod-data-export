@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.rest.exceptions.ServiceException;
@@ -105,6 +106,9 @@ class TransformationFieldsServiceUnitTest {
         assertTrue(ar.succeeded());
         TransformationFieldCollection transformationFieldCollection = ar.result();
         System.out.print(transformationFieldCollection);
+        var nullIds = transformationFieldCollection.getTransformationFields()
+            .stream().filter(field -> field.getFieldId() == null)
+            .collect(Collectors.toList());
         transformationFieldCollection.getTransformationFields()
           .forEach(transformationField -> checkIfActualFieldEqualToExpected(expectedFields.get(transformationField.getFieldId()), transformationField));
         assertFalse(transformationFieldCollection.getTransformationFields().isEmpty());

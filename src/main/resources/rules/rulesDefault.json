@@ -432,7 +432,7 @@
   {
     "id": "instance.identifiers.ukmac",
     "field": "024",
-    "description": "Identifier UKMac",
+    "description": "Identifier UkMac",
     "dataSources": [
       {
         "from": "$.instance.identifiers[?(@.identifierTypeId=='650ef996-35e3-48ec-bf3a-a0d078a0ca37')].value",
