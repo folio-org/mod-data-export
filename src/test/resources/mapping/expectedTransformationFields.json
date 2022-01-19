@@ -703,6 +703,41 @@
         "recordType":"INSTANCE"
       },
       {
+        "fieldId":"instance.identifiers.asin",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"ASIN",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='7f907515-a1bf-4513-8a38-92e1a07c539d')].value",
+        "recordType":"INSTANCE"
+      },
+      {
+        "fieldId":"instance.identifiers.bnb",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"BNB",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='3187432f-9434-40a8-8782-35a111a1491e')].value",
+        "recordType":"INSTANCE"
+      },
+      {
+        "fieldId":"instance.identifiers.local.identifier",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"Local identifier",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='5130aed5-1095-4fb6-8f6f-caa3d6cc7aae')].value",
+        "recordType":"INSTANCE"
+      },
+      {
+        "fieldId":"instance.identifiers.stednl",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"StEdNL",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='3fbacad6-0240-4823-bce8-bb122cfdf229')].value",
+        "recordType":"INSTANCE"
+      },
+      {
+        "fieldId":"instance.identifiers.ukmac",
+        "displayNameKey":"instance.identifiers",
+        "referenceDataValue":"UkMac",
+        "path":"$.instance.identifiers[?(@.identifierTypeId=='650ef996-35e3-48ec-bf3a-a0d078a0ca37')].value",
+        "recordType":"INSTANCE"
+      },
+      {
          "fieldId":"instance.identifiers.other.standard.identifier",
          "displayNameKey":"instance.identifiers",
          "referenceDataValue":"Other standard identifier",
