@@ -79,7 +79,32 @@
       "id": "eb7b2717-f149-4fec-81a3-deefb8f5ee6b",
       "name": "URN",
       "source": "folio"
+    },
+    {
+      "id": "7f907515-a1bf-4513-8a38-92e1a07c539d",
+      "name": "ASIN",
+      "source": "folio"
+    },
+    {
+      "id": "3187432f-9434-40a8-8782-35a111a1491e",
+      "name": "BNB",
+      "source": "folio"
+    },
+    {
+      "id": "5130aed5-1095-4fb6-8f6f-caa3d6cc7aae",
+      "name": "Local identifier",
+      "source": "folio"
+    },
+    {
+      "id": "3fbacad6-0240-4823-bce8-bb122cfdf229",
+      "name": "StEdNL",
+      "source": "folio"
+    },
+    {
+      "id": "650ef996-35e3-48ec-bf3a-a0d078a0ca37",
+      "name": "UkMac",
+      "source": "folio"
     }
   ],
-  "totalRecords": 12
+  "totalRecords": 17
 }

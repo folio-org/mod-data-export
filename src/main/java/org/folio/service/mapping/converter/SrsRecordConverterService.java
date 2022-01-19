@@ -1,24 +1,22 @@
 package org.folio.service.mapping.converter;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import io.vertx.core.json.JsonObject;
-
-import java.io.IOException;
-import java.util.Collections;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.MappingProfile;
+import org.folio.rest.jaxrs.model.RecordType;
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.service.mapping.MappingService;
 import org.folio.util.OkapiConnectionParams;
 import org.marc4j.MarcJsonReader;
@@ -31,8 +29,13 @@ import org.marc4j.marc.impl.SortedMarcFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.vertx.core.json.JsonObject;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Service
 public class SrsRecordConverterService extends RecordConverter {
+
   @Autowired
   private MappingService mappingService;
 
@@ -41,25 +44,29 @@ public class SrsRecordConverterService extends RecordConverter {
     .lookupClass());
 
   public Pair<List<String>, Integer> transformSrsRecords(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,
-      OkapiConnectionParams connectionParams) {
+                                                         OkapiConnectionParams connectionParams, AbstractExportStrategy.EntityType entityType) {
     if (isTransformationRequired(mappingProfile)) {
-      return transformSrsRecord(mappingProfile, srsRecords, jobExecutionId, connectionParams);
+      return transformSrsRecord(mappingProfile, srsRecords, jobExecutionId, connectionParams, entityType);
     } else {
       return MutablePair.of(getRecordContent(srsRecords), 0);
     }
   }
 
-  public Pair<List<String>, Integer> transformSrsRecordsForHoldingsExport(List<JsonObject> srsRecords) {
-    return MutablePair.of(getRecordContent(srsRecords), 0);
-  }
-
-  public Pair<List<String>, Integer> transformSrsRecord(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,
-      OkapiConnectionParams connectionParams) {
+  public Pair<List<String>, Integer>  transformSrsRecord(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,
+                                                         OkapiConnectionParams connectionParams, AbstractExportStrategy.EntityType entityType) {
     List<String> marcRecords = new ArrayList<>();
     int failedCount = 0;
     for (JsonObject srsRecord : srsRecords) {
       // generate record fields by mapping profile
-      Pair<List<VariableField>, Integer> mappedFields = getMappedFields(mappingProfile, jobExecutionId, connectionParams, srsRecord);
+      Pair<List<VariableField>, Integer> mappedFields = Pair.of(Collections.emptyList(), 0);
+      switch (entityType) {
+        case HOLDING:
+          mappedFields = getMappedFieldsByHoldingsId(mappingProfile, jobExecutionId, connectionParams, srsRecord);
+          break;
+        case INSTANCE:
+          mappedFields = getMappedFieldsByInstanceId(mappingProfile, jobExecutionId, connectionParams, srsRecord);
+          break;
+      }
       // convert srs record to marc and append generated fields
       marcRecords.add(convert(srsRecord.encode(), mappedFields.getKey()));
       failedCount = failedCount + mappedFields.getValue();
@@ -67,16 +74,34 @@ public class SrsRecordConverterService extends RecordConverter {
     return MutablePair.of(marcRecords, failedCount);
   }
 
-  private Pair<List<VariableField>, Integer> getMappedFields(MappingProfile mappingProfile, String jobExecutionId,
-      OkapiConnectionParams connectionParams, JsonObject srsRecord) {
+  private Pair<List<VariableField>, Integer> getMappedFieldsByHoldingsId(MappingProfile mappingProfile, String jobExecutionId,
+                                                                         OkapiConnectionParams connectionParams, JsonObject srsRecord) {
     Pair<List<VariableField>, Integer> mappedFields = Pair.of(Collections.emptyList(), 0);
     JsonObject externalIdsHolder = srsRecord.getJsonObject("externalIdsHolder");
     if (externalIdsHolder != null) {
+      String holdingId = externalIdsHolder.getString("holdingsId");
+      String holdingHrId = externalIdsHolder.getString("holdingsHrid");
+      if (isNotBlank(holdingId)) {
+        JsonObject holdingsAndItems = new JsonObject();
+        fetchHoldingsAndItems(mappingProfile, connectionParams, holdingId, holdingHrId, RecordType.HOLDINGS, holdingsAndItems, jobExecutionId);
+        LOGGER.debug("Processing mapping for appending to SRS records for holdingId: {}", holdingId);
+        mappedFields = mappingService.mapFields(holdingsAndItems, mappingProfile, jobExecutionId, connectionParams);
+      }
+    }
+
+    return mappedFields;
+  }
+
+  private Pair<List<VariableField>, Integer> getMappedFieldsByInstanceId(MappingProfile mappingProfile, String jobExecutionId,
+                                                                         OkapiConnectionParams connectionParams, JsonObject srsRecord) {
+    Pair<List<VariableField>, Integer> mappedFields = Pair.of(Collections.emptyList(), 0);
+    JsonObject externalIdsHolder = srsRecord.getJsonObject("externalIdsHolder");
+      if (externalIdsHolder != null) {
       String instanceId = externalIdsHolder.getString("instanceId");
       String instanceHrId = externalIdsHolder.getString("instanceHrid");
       if (isNotBlank(instanceId)) {
         JsonObject holdingsAndItems = new JsonObject();
-        fetchHoldingsAndItems(mappingProfile, connectionParams, instanceId, instanceHrId, holdingsAndItems, jobExecutionId);
+        fetchHoldingsAndItems(mappingProfile, connectionParams, instanceId, instanceHrId, RecordType.INSTANCE, holdingsAndItems, jobExecutionId);
         LOGGER.debug("Processing mapping for appending to SRS records for instanceID: {}", instanceId);
         mappedFields = mappingService.mapFields(holdingsAndItems, mappingProfile, jobExecutionId, connectionParams);
       }
