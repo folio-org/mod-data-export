@@ -1,6 +1,8 @@
 package org.folio.service.loader;
 
 import io.vertx.core.json.JsonObject;
+
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 
 import java.util.Collection;
@@ -20,7 +22,7 @@ public interface RecordLoaderService {
    * @param okapiConnectionParams okapi headers and connection parameters
    * @return @see MarcLoadResult
    */
-  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, String idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams);
+  SrsLoadResult loadMarcRecordsBlocking(List<String> instanceIds, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams);
 
   /**
    * Retrieves Inventory instances using blocking http client
@@ -29,9 +31,9 @@ public interface RecordLoaderService {
    * @param jobExecutionId        job execution id
    * @param okapiConnectionParams okapi headers and connection parameters
    * @param partitionSize         inventory query limit
-   * @return {@link InventoryLoadResult}
+   * @return {@link LoadResult}
    */
-  InventoryLoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, int partitionSize);
+  LoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, int partitionSize);
 
   /**
    * Retrieve all the holdings for a given instance UUID
@@ -39,9 +41,17 @@ public interface RecordLoaderService {
    * @param instanceId     instance id
    * @param jobExecutionId job execution id
    * @param params         okapi headers and connection parameters
-   * @param params         okapi headers and connection parameters
    */
   List<JsonObject>  getHoldingsForInstance(String instanceId, String jobExecutionId, OkapiConnectionParams params);
+
+  /**
+   * Retrieve all holdings by the given list of UUIDs
+   *
+   * @param holdingIds     holding ids
+   * @param jobExecutionId job execution id
+   * @param params         okapi headers and connection parameters
+   */
+  LoadResult getHoldingsById(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params);
 
   /**
    * Retrieve all Items for the list of holding UUIDs

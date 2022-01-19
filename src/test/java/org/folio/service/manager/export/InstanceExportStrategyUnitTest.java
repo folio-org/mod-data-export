@@ -18,10 +18,11 @@ import org.folio.rest.jaxrs.model.MappingProfile;
 import org.folio.rest.jaxrs.model.RecordType;
 import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.export.ExportService;
-import org.folio.service.loader.InventoryLoadResult;
+import org.folio.service.loader.LoadResult;
 import org.folio.service.loader.RecordLoaderService;
 import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.service.manager.export.strategy.InstanceExportStrategyImpl;
 import org.folio.service.mapping.converter.InventoryRecordConverterService;
 import org.folio.service.mapping.converter.SrsRecordConverterService;
@@ -84,15 +85,15 @@ class InstanceExportStrategyUnitTest {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
-    InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
+    LoadResult loadResult = Mockito.mock(LoadResult.class);
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
-    Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
-    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq("instance"), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
-    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
-    Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(new MappingProfile()));
-    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+    Mockito.when(loadResult.getNotFoundEntitiesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
+    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(loadResult);
+    Mockito.when(mappingProfileService.getDefaultInstanceMappingProfile(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(new MappingProfile()));
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class), any(AbstractExportStrategy.EntityType.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
-    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+    Mockito.when(inventoryRecordService.transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
@@ -104,10 +105,10 @@ class InstanceExportStrategyUnitTest {
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     instanceExportManager.export(exportPayload, Promise.promise());
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq("instance"), anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
-    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
+    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
     Mockito.verify(errorLogService).populateUUIDsNotFoundErrorLog(anyString(), anyList(), anyString());
   }
@@ -119,9 +120,9 @@ class InstanceExportStrategyUnitTest {
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
-    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq("instance"), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
-    Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.failedFuture(new NotFoundException()));
-    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    Mockito.when(mappingProfileService.getDefaultInstanceMappingProfile(any(OkapiConnectionParams.class))).thenReturn(Future.failedFuture(new NotFoundException()));
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class), any(AbstractExportStrategy.EntityType.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
@@ -138,7 +139,7 @@ class InstanceExportStrategyUnitTest {
     });
 
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq("instance"), anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
     Mockito.verify(errorLogService).saveGeneralError(eq(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getCode()), anyString(), anyString());
   }
@@ -148,10 +149,10 @@ class InstanceExportStrategyUnitTest {
   void exportBlocking_shouldPassExportFor_generatedRecordsOnTheFlyOnly() {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
-    InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
-    Mockito.when(inventoryLoadResult.getNotFoundInstancesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
-    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
-    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+    LoadResult loadResult = Mockito.mock(LoadResult.class);
+    Mockito.when(loadResult.getNotFoundEntitiesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
+    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(loadResult);
+    Mockito.when(inventoryRecordService.transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
@@ -165,7 +166,7 @@ class InstanceExportStrategyUnitTest {
     instanceExportManager.export(exportPayload, Promise.promise());
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
-    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
+    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
     Mockito.verify(errorLogService).populateUUIDsNotFoundErrorLog(anyString(), anyList(), anyString());
   }
@@ -177,17 +178,17 @@ class InstanceExportStrategyUnitTest {
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
-    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq("instance"), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
-    InventoryLoadResult inventoryLoadResult = Mockito.mock(InventoryLoadResult.class);
-    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(inventoryLoadResult);
-    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(
+    Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
+    LoadResult loadResult = Mockito.mock(LoadResult.class);
+    Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(loadResult);
+    Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class), any(AbstractExportStrategy.EntityType.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
-    Mockito.when(inventoryRecordService.transformInventoryRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
+    Mockito.when(inventoryRecordService.transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     MappingProfile defaultMappingProfile = new MappingProfile()
       .withId(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)
       .withRecordTypes(Arrays.asList(RecordType.INSTANCE));
-    Mockito.when(mappingProfileService.getDefault(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(defaultMappingProfile));
+    Mockito.when(mappingProfileService.getDefaultInstanceMappingProfile(any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(defaultMappingProfile));
     boolean isLast = true;
     FileDefinition fileExportDefinition = new FileDefinition()
       .withSourcePath("files/mockData/generatedBinaryFile.mrc");
@@ -212,7 +213,7 @@ class InstanceExportStrategyUnitTest {
     instanceExportManager.export(exportPayload, Promise.promise());
 
     // then
-    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInventoryRecords(anyList(), anyString(), mappingProfileCaptor.capture(), any(OkapiConnectionParams.class));
+    Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInstanceRecords(anyList(), anyString(), mappingProfileCaptor.capture(), any(OkapiConnectionParams.class));
     MappingProfile actualMappingProfile = mappingProfileCaptor.getValue();
     assertEquals(DEFAULT_INSTANCE_MAPPING_PROFILE_ID, actualMappingProfile.getId());
     assertThat(actualMappingProfile.getRecordTypes(), hasItems(RecordType.HOLDINGS, RecordType.ITEM));

@@ -6,6 +6,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
+import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,9 +70,9 @@ class RecordLoaderServiceUnitTest{
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(srsClient.getRecordsByIds(anyList(), eq("instance"), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
+    when(srsClient.getRecordsByIds(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), "instance", JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
   }
@@ -81,9 +82,9 @@ class RecordLoaderServiceUnitTest{
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("sourceRecords", new JsonArray());
-    when(srsClient.getRecordsByIds(anyList(), eq("instance"), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
+    when(srsClient.getRecordsByIds(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, "instance", JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getIdsWithoutSrs(), hasSize(2));
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), empty());
@@ -104,9 +105,9 @@ class RecordLoaderServiceUnitTest{
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
     // when
-    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse.getInstances(), hasSize(2));
+    assertThat(inventoryResponse.getEntities(), hasSize(2));
   }
 
   @Test
@@ -116,9 +117,9 @@ class RecordLoaderServiceUnitTest{
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse.getInstances(), empty());
+    assertThat(inventoryResponse.getEntities(), empty());
   }
 
   @Test
@@ -127,9 +128,9 @@ class RecordLoaderServiceUnitTest{
     when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
-    InventoryLoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
-    assertThat(inventoryResponse.getInstances(), empty());
+    assertThat(inventoryResponse.getEntities(), empty());
   }
 
   @Test
