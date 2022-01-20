@@ -477,6 +477,234 @@
     }
   },
   {
+    "id": "instance.identifiers.coden",
+    "field": "030",
+    "description": "Identifier CODEN",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='593b78cb-32f3-44d1-ba8c-63fd5e6989e6')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "CODEN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='593b78cb-32f3-44d1-ba8c-63fd5e6989e6')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.reportNumber",
+    "field": "088",
+    "description": "Report number identifier",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='37b65e79-0392-450d-adc6-e2a1f47de452')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "Report number"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='37b65e79-0392-450d-adc6-e2a1f47de452')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.ismn",
+    "field": "024",
+    "description": "Identifier ISMN",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='ebfd00b6-61d3-4d87-a6d8-810c941176d5')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "ISMN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='ebfd00b6-61d3-4d87-a6d8-810c941176d5')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.invalid.ismn",
+    "field": "024",
+    "description": "Identifier invalid ISMN",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='4f07ea37-6c7f-4836-add2-14249e628ed1')].value",
+        "subfield": "z",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "invalid ISMN"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='4f07ea37-6c7f-4836-add2-14249e628ed1')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.upc",
+    "field": "024",
+    "description": "Identifier UPC",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')].value",
+        "subfield": "a",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "UPC"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "1"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')]"
+    }
+  },
+  {
+    "id": "instance.identifiers.invalid.upc",
+    "field": "024",
+    "description": "Identifier invalid UPC",
+    "dataSources": [
+      {
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')].value",
+        "subfield": "z",
+        "translation": {
+          "function": "set_identifier",
+          "parameters": {
+            "type": "UPC"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "2"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')]"
+    }
+  },
+  {
     "id": "instance.identifiers.other.standard.identifier",
     "field": "024",
     "description": "Other standard identifier",
