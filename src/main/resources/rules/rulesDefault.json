@@ -672,7 +672,7 @@
     "description": "Identifier invalid UPC",
     "dataSources": [
       {
-        "from": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')].value",
+        "from": "$.instance.identifiers[?(@.identifierTypeId=='b3ea81fb-3324-4c64-9efc-7c0c93d5943c')].value",
         "subfield": "z",
         "translation": {
           "function": "set_identifier",
@@ -686,7 +686,7 @@
         "translation": {
           "function": "set_value",
           "parameters": {
-            "value": "2"
+            "value": "1"
           }
         }
       },
@@ -701,7 +701,7 @@
       }
     ],
     "metadata": {
-      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')]"
+      "identifierType": "$.instance.identifiers[?(@.identifierTypeId=='b3ea81fb-3324-4c64-9efc-7c0c93d5943c')]"
     }
   },
   {
