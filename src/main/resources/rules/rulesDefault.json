@@ -515,7 +515,7 @@
     }
   },
   {
-    "id": "instance.identifiers.reportNumber",
+    "id": "instance.identifiers.report.number",
     "field": "088",
     "description": "Report number identifier",
     "dataSources": [
@@ -601,7 +601,7 @@
         "translation": {
           "function": "set_identifier",
           "parameters": {
-            "type": "invalid ISMN"
+            "type": "Invalid ISMN"
           }
         }
       },
@@ -677,7 +677,7 @@
         "translation": {
           "function": "set_identifier",
           "parameters": {
-            "type": "UPC"
+            "type": "Invalid UPC"
           }
         }
       },
