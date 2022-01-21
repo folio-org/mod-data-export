@@ -104,6 +104,36 @@
       "id": "650ef996-35e3-48ec-bf3a-a0d078a0ca37",
       "name": "UkMac",
       "source": "folio"
+    },
+    {
+      "id": "593b78cb-32f3-44d1-ba8c-63fd5e6989e6",
+      "name": "CODEN",
+      "source": "folio"
+    },
+    {
+      "id":"37b65e79-0392-450d-adc6-e2a1f47de452",
+      "name":"Report number",
+      "source": "folio"
+    },
+    {
+      "id":"ebfd00b6-61d3-4d87-a6d8-810c941176d5",
+      "name":"ISMN",
+      "source": "folio"
+    },
+    {
+      "id": "4f07ea37-6c7f-4836-add2-14249e628ed1",
+      "name": "Invalid ISMN",
+      "source": "folio"
+    },
+    {
+      "id":"1795ea23-6856-48a5-a772-f356e16a8a6c",
+      "name":"UPC",
+      "source": "folio"
+    },
+    {
+      "id": "b3ea81fb-3324-4c64-9efc-7c0c93d5943c",
+      "name": "Invalid UPC",
+      "source": "folio"
     }
   ],
   "totalRecords": 17
