@@ -259,6 +259,30 @@
       {
         "value": "91584334056357",
         "identifierTypeId": "d70f3282-489e-40cd-b144-64e68a3b0514"
+      },
+      {
+        "value": "codec",
+        "identifierTypeId": "593b78cb-32f3-44d1-ba8c-63fd5e6989e6"
+      },
+      {
+        "value": "report number",
+        "identifierTypeId": "37b65e79-0392-450d-adc6-e2a1f47de452"
+      },
+      {
+        "value": "ismn",
+        "identifierTypeId": "ebfd00b6-61d3-4d87-a6d8-810c941176d5"
+      },
+      {
+        "value": "invalid ismn",
+        "identifierTypeId": "4f07ea37-6c7f-4836-add2-14249e628ed1"
+      },
+      {
+        "value": "upc",
+        "identifierTypeId": "1795ea23-6856-48a5-a772-f356e16a8a6c"
+      },
+      {
+        "value": "invalid upc",
+        "identifierTypeId": "1795ea23-6856-48a5-a772-f356e16a8a6c"
       }
     ],
     "contributors": [

@@ -737,6 +737,48 @@
         "path":"$.instance.identifiers[?(@.identifierTypeId=='650ef996-35e3-48ec-bf3a-a0d078a0ca37')].value",
         "recordType":"INSTANCE"
       },
+     {
+       "fieldId":"instance.identifiers.coden",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"CODEN",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='593b78cb-32f3-44d1-ba8c-63fd5e6989e6')].value",
+       "recordType":"INSTANCE"
+     },
+     {
+       "fieldId":"instance.identifiers.report.number",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"Report number",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='37b65e79-0392-450d-adc6-e2a1f47de452')].value",
+       "recordType":"INSTANCE"
+     },
+     {
+       "fieldId":"instance.identifiers.ismn",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"ISMN",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='ebfd00b6-61d3-4d87-a6d8-810c941176d5')].value",
+       "recordType":"INSTANCE"
+     },
+     {
+       "fieldId":"instance.identifiers.invalid.ismn",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"Invalid ISMN",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='4f07ea37-6c7f-4836-add2-14249e628ed1')].value",
+       "recordType":"INSTANCE"
+     },
+     {
+       "fieldId":"instance.identifiers.upc",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"UPC",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='1795ea23-6856-48a5-a772-f356e16a8a6c')].value",
+       "recordType":"INSTANCE"
+     },
+     {
+       "fieldId":"instance.identifiers.invalid.upc",
+       "displayNameKey":"instance.identifiers",
+       "referenceDataValue":"Invalid UPC",
+       "path":"$.instance.identifiers[?(@.identifierTypeId=='b3ea81fb-3324-4c64-9efc-7c0c93d5943c')].value",
+       "recordType":"INSTANCE"
+     },
       {
          "fieldId":"instance.identifiers.other.standard.identifier",
          "displayNameKey":"instance.identifiers",
