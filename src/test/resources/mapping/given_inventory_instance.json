@@ -297,6 +297,9 @@
         "instanceNoteTypeId": "1e4c2471-4604-4249-8f22-efa1715f9ea6"
       }
     ],
+    "editions": [ "first edition", "second edition" ],
+    "publicationFrequency": [ "vol.1 (June 2020)", "vol.2 (May 2021)" ],
+    "publicationRange": [ "2020", "2021" ],
     "contributors": [
       {
         "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
