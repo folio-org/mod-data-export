@@ -285,6 +285,18 @@
         "identifierTypeId": "1795ea23-6856-48a5-a772-f356e16a8a6c"
       }
     ],
+    "notes": [
+      {
+        "note": "Previous edition: 2011",
+        "staffOnly": false,
+        "instanceNoteTypeId": "5b15c7bf-3f86-4e1a-9b05-6895467147c9"
+      },
+      {
+        "note": "Includes bibliographical references and index",
+        "staffOnly": true,
+        "instanceNoteTypeId": "1e4c2471-4604-4249-8f22-efa1715f9ea6"
+      }
+    ],
     "contributors": [
       {
         "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",

@@ -1396,6 +1396,35 @@
     ]
   },
   {
+    "id": "instance.notes.note",
+    "field": "500",
+    "description": "Instance note",
+    "dataSources": [
+      {
+        "from": "$.instance.notes[?(@.staffOnly == false)].note",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "id": "instance.subjects",
     "field": "653",
     "description": "Physical Descriptions",
