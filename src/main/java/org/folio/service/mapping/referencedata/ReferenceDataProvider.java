@@ -77,6 +77,7 @@ public class ReferenceDataProvider {
    */
   private ReferenceDataImpl load(String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
     ReferenceDataImpl referenceData = new ReferenceDataImpl();
+    referenceData.put(ALTERNATIVE_TITLE_TYPES, inventoryClient.getAlternativeTitleTypes(jobExecutionId, okapiConnectionParams));
     referenceData.put(CONTENT_TERMS, inventoryClient.getNatureOfContentTerms(jobExecutionId, okapiConnectionParams));
     referenceData.put(IDENTIFIER_TYPES, inventoryClient.getIdentifierTypes(jobExecutionId, okapiConnectionParams));
     referenceData.put(CONTRIBUTOR_NAME_TYPES, inventoryClient.getContributorNameTypes(jobExecutionId, okapiConnectionParams));

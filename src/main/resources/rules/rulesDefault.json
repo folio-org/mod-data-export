@@ -1199,6 +1199,120 @@
     }
   },
   {
+    "id": "instance.alternativetitletypename.variant.title",
+    "field": "246",
+    "description": "Variant title",
+    "dataSources": [
+      {
+        "from": "$.instance.alternativeTitles[*].alternativeTitle",
+        "subfield": "a",
+        "translation": {
+          "function": "set_alternative_title",
+          "parameters": {
+            "type": "Variant title"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "alternativeTitleTypeId": "$.instance.alternativeTitles[*].alternativeTitleTypeId"
+    }
+  },
+  {
+    "id": "instance.alternativetitletypename.former.title",
+    "field": "247",
+    "description": "Former title",
+    "dataSources": [
+      {
+        "from": "$.instance.alternativeTitles[*].alternativeTitle",
+        "subfield": "a",
+        "translation": {
+          "function": "set_alternative_title",
+          "parameters": {
+            "type": "Former title"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "alternativeTitleTypeId": "$.instance.alternativeTitles[*].alternativeTitleTypeId"
+    }
+  },
+  {
+    "id": "instance.alternativetitletypename.uniform.title",
+    "field": "130",
+    "description": "Uniform title",
+    "dataSources": [
+      {
+        "from": "$.instance.alternativeTitles[*].alternativeTitle",
+        "subfield": "a",
+        "translation": {
+          "function": "set_alternative_title",
+          "parameters": {
+            "type": "Uniform title"
+          }
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "alternativeTitleTypeId": "$.instance.alternativeTitles[*].alternativeTitleTypeId"
+    }
+  },
+  {
     "id": "instance.title",
     "field": "245",
     "description": "Title",
