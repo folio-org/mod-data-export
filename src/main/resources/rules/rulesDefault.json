@@ -1007,6 +1007,35 @@
     }
   },
   {
+    "id": "instance.languages",
+    "field": "041",
+    "description": "Instance languages",
+    "dataSources": [
+      {
+        "from": "$.instance.languages",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "id": "instance.identifiers.gpo.item.number",
     "field": "074",
     "description": "Identifier GPO",
@@ -1313,6 +1342,35 @@
     ]
   },
   {
+    "id": "instance.editions",
+    "field": "250",
+    "description": "Instance editions",
+    "dataSources": [
+      {
+        "from": "$.instance.editions",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "id": "instance.publication",
     "field": "264",
     "description": "Publication",
@@ -1356,6 +1414,35 @@
     "dataSources": [
       {
         "from": "$.instance.physicalDescriptions",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "instance.publication.frequency",
+    "field": "310",
+    "description": "Instance publication frequency",
+    "dataSources": [
+      {
+        "from": "$.instance.publicationFrequency",
         "subfield": "a"
       },
       {
@@ -1466,6 +1553,35 @@
           "function": "set_value",
           "parameters": {
             "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "instance.publication.range",
+    "field": "362",
+    "description": "Instance publication range",
+    "dataSources": [
+      {
+        "from": "$.instance.publicationRange",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "1"
           }
         }
       },
