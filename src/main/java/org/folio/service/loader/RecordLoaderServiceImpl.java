@@ -64,8 +64,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   @Override
-  public LoadResult getHoldingsById(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getHoldingsByIds(holdingIds, jobExecutionId, params);
+  public LoadResult getHoldingsById(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
+    Optional<JsonObject> optionalRecords = inventoryClient.getHoldingsByIds(holdingIds, jobExecutionId, params, partitionSize);
     LoadResult holdingsLoadResult = new LoadResult();
     holdingsLoadResult.setEntityType(AbstractExportStrategy.EntityType.HOLDING);
     if (optionalRecords.isPresent()) {
