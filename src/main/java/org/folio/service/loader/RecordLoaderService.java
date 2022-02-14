@@ -50,8 +50,9 @@ public interface RecordLoaderService {
    * @param holdingIds     holding ids
    * @param jobExecutionId job execution id
    * @param params         okapi headers and connection parameters
+   * @param partitionSize  partition size
    */
-  LoadResult getHoldingsById(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params);
+  LoadResult getHoldingsById(List<String> holdingIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize);
 
   /**
    * Retrieve all Items for the list of holding UUIDs

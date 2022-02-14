@@ -83,7 +83,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
   private LoadResult loadHoldingsInPartitions(List<String> holdingIdentifiers, String jobExecutionId, OkapiConnectionParams params) {
     LoadResult loadResult = new LoadResult();
     Lists.partition(holdingIdentifiers, ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE).forEach(partition -> {
-        LoadResult partitionLoadResult = getRecordLoaderService().getHoldingsById(partition, jobExecutionId, params);
+        LoadResult partitionLoadResult = getRecordLoaderService().getHoldingsById(partition, jobExecutionId, params, ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE);
         loadResult.getEntities().addAll(partitionLoadResult.getEntities());
         loadResult.getNotFoundEntitiesUUIDs().addAll(partitionLoadResult.getNotFoundEntitiesUUIDs());
       }

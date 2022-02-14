@@ -20,9 +20,12 @@ import io.vertx.core.json.JsonObject;
 import static org.folio.service.manager.export.ExportManagerImpl.INVENTORY_LOAD_PARTITION_SIZE;
 
 public class RecordConverter {
+
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup()
     .lookupClass());
+
   private static final int SINGLE_HOLDING_POSITION = 0;
+  private static final int PARTITION_SIZE = 1;
 
   @Autowired
   private RecordLoaderService recordLoaderService;
@@ -44,7 +47,7 @@ public class RecordConverter {
       if (recordType.equals(RecordType.INSTANCE)) {
         holdings = recordLoaderService.getHoldingsForInstance(recordId, jobExecutionId, params);
       } else {
-        LoadResult holding = recordLoaderService.getHoldingsById(Collections.singletonList(recordId), jobExecutionId, params);
+        LoadResult holding = recordLoaderService.getHoldingsById(Collections.singletonList(recordId), jobExecutionId, params, PARTITION_SIZE);
         holdings = holding.getEntities();
       }
       if (mappingProfile.getRecordTypes().contains(RecordType.ITEM) && CollectionUtils.isNotEmpty(holdings)) {

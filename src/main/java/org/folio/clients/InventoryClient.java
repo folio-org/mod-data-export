@@ -49,7 +49,6 @@ public class InventoryClient {
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
-  private static final String QUERY_PATTERN = "?query=(%s)";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 1000;
@@ -69,9 +68,9 @@ public class InventoryClient {
     }
   }
 
-  public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
+  public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
-      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(HOLDING) + QUERY_PATTERN,
+      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(HOLDING) + QUERY_LIMIT_PATTERN + partitionSize,
         QUERY_PATTERN_INVENTORY));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
