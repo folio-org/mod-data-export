@@ -36,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.vertx.core.Promise;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,7 +69,7 @@ public class HoldingExportStrategyUnitTest {
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(loadResult.getNotFoundEntitiesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.HOLDING), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
-    Mockito.when(recordLoaderService.getHoldingsById(anyList(), anyString(), any(OkapiConnectionParams.class))).thenReturn(loadResult);
+    Mockito.when(recordLoaderService.getHoldingsById(anyList(), anyString(), any(OkapiConnectionParams.class), anyInt())).thenReturn(loadResult);
     Mockito.when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class), eq(AbstractExportStrategy.EntityType.HOLDING))).thenReturn(
       Pair.of(Collections.emptyList(), 0));
     Mockito.when(inventoryRecordService.transformHoldingRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
@@ -85,7 +86,7 @@ public class HoldingExportStrategyUnitTest {
     holdingExportManager.export(exportPayload, Promise.promise());
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.HOLDING), anyString(), any(OkapiConnectionParams.class));
-    Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsById(anyList(), anyString(), any(OkapiConnectionParams.class));
+    Mockito.verify(recordLoaderService, Mockito.times(1)).getHoldingsById(anyList(), anyString(), any(OkapiConnectionParams.class), anyInt());
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformHoldingRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
