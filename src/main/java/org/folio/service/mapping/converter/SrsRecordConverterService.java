@@ -45,7 +45,7 @@ public class SrsRecordConverterService extends RecordConverter {
 
   public Pair<List<String>, Integer> transformSrsRecords(MappingProfile mappingProfile, List<JsonObject> srsRecords, String jobExecutionId,
                                                          OkapiConnectionParams connectionParams, AbstractExportStrategy.EntityType entityType) {
-    if (isTransformationRequired(mappingProfile)) {
+    if (entityType.equals(AbstractExportStrategy.EntityType.INSTANCE) && isTransformationRequired(mappingProfile)) {
       return transformSrsRecord(mappingProfile, srsRecords, jobExecutionId, connectionParams, entityType);
     } else {
       return MutablePair.of(getRecordContent(srsRecords), 0);
