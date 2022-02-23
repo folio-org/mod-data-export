@@ -78,19 +78,19 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
     async.execute(() -> {
       try {
         waitForUploadingUUIDsByCQL.acquire();
-        succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
-          .compose(ar -> replaceCQLExtensionToCSV(entity))
-          .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
-          .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
-          .map(Response.class::cast)
-          .otherwise(ExceptionToResponseMapper::map)
-          .onComplete(asyncResultHandler);
       } catch (InterruptedException e) {
         failedFuture(e)
           .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond500WithTextPlain)
           .map(Response.class::cast)
           .onComplete(asyncResultHandler);
       }
+      succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+        .compose(ar -> replaceCQLExtensionToCSV(entity))
+        .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+        .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler);
     });
   }
 
