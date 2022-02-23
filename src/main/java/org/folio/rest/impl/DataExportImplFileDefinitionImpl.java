@@ -34,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
@@ -51,6 +52,9 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   @Autowired
   private Semaphore waitForUploadingUUIDsByCQL;
+
+  @Autowired
+  private ExecutorService async;
 
   private final Map<String, String> map = new HashMap<>();
 
@@ -71,7 +75,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.executeBlocking(future -> {
+    async.execute(() -> {
       try {
         waitForUploadingUUIDsByCQL.acquire();
         succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
