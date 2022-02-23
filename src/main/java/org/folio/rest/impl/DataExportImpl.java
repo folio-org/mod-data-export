@@ -104,10 +104,6 @@ public class DataExportImpl implements DataExport {
                         jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
                           .onSuccess(updatedJobExecution -> {
                             inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
-//                            succeededFuture()
-//                              .map(PostDataExportExportResponse.respond204())
-//                              .map(Response.class::cast)
-//                              .onComplete(asyncResultHandler);
                           }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
                       .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
