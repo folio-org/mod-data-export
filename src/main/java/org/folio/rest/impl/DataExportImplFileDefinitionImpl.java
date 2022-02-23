@@ -75,7 +75,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.executeBlocking(future -> {
+    async.execute(() -> {
       try {
         waitForUploadingUUIDsByCQL.acquire();
       } catch (InterruptedException e) {

@@ -117,6 +117,7 @@ public class DataExportImpl implements DataExport {
           .onComplete(asyncResultHandler);
       }
     });
+    async.shutdown();
   }
 
   @Override

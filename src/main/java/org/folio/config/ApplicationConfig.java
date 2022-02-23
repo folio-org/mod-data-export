@@ -59,7 +59,7 @@ public class ApplicationConfig {
 
   @Bean
   public ExecutorService async() {
-    return Executors.newFixedThreadPool(2);
+    return Executors.newFixedThreadPool(1);
   }
 
 }
