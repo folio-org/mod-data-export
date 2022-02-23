@@ -17,6 +17,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 @Configuration
 @ComponentScan(basePackages = {
@@ -47,6 +50,16 @@ public class ApplicationConfig {
       .setKeepAliveTimeout(REQUEST_TIMEOUT_ONE_HOUR)
       .setConnectTimeout(REQUEST_TIMEOUT_ONE_HOUR);
     return WebClient.create(vertx, webClientOptions);
+  }
+
+  @Bean
+  public Semaphore waitForUploadingUUIDsByCQL() {
+    return new Semaphore(1);
+  }
+
+  @Bean
+  public ExecutorService async() {
+    return Executors.newFixedThreadPool(1);
   }
 
 }

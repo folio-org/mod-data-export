@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Semaphore;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.SearchClient;
@@ -50,6 +52,8 @@ public class FileUploadServiceImpl implements FileUploadService {
   private UsersClient usersClient;
   @Autowired
   private Vertx vertx;
+  @Autowired
+  private Semaphore waitForUploadingUUIDsByCQL;
 
   @Override
   public Future<FileDefinition> startUploading(String fileDefinitionId, String tenantId) {
@@ -91,7 +95,8 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
             JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
             return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-              .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
+              .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()))
+              .onComplete(future -> waitForUploadingUUIDsByCQL.release());
           }
         }
         return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());

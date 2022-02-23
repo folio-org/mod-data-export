@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
@@ -46,6 +48,9 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   @Autowired
   private FileUploadService fileUploadService;
+
+  @Autowired
+  private Semaphore waitForUploadingUUIDsByCQL;
 
   private final Map<String, String> map = new HashMap<>();
 
@@ -66,13 +71,21 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
-      .compose(ar -> replaceCQLExtensionToCSV(entity))
-      .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
-      .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
-      .map(Response.class::cast)
-      .otherwise(ExceptionToResponseMapper::map)
-      .onComplete(asyncResultHandler);
+    try {
+      waitForUploadingUUIDsByCQL.acquire();
+      succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+        .compose(ar -> replaceCQLExtensionToCSV(entity))
+        .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+        .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler);
+    } catch (InterruptedException e) {
+      failedFuture(e)
+        .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond500WithTextPlain)
+        .map(Response.class::cast)
+        .onComplete(asyncResultHandler);
+    }
   }
 
 
@@ -102,11 +115,14 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
         if (fileUploadStateFuture == null) {
           fileUploadStateFuture = fileUploadService.startUploading(fileDefinitionId, tenantId);
         }
-        fileUploadStateFuture = fileUploadStateFuture
-          .compose(fileDefinition -> saveFileDependsOnFileExtension(fileDefinition, data, new OkapiConnectionParams(okapiHeaders)))
-          .compose(fileDefinition -> data.length == 0
-            ? fileUploadService.completeUploading(fileDefinition, tenantId)
-            : succeededFuture(fileDefinition));
+        // Unblocking response to UI.
+        vertxContext.executeBlocking(future -> {
+          fileUploadStateFuture = fileUploadStateFuture
+            .compose(fileDefinition -> saveFileDependsOnFileExtension(fileDefinition, data, new OkapiConnectionParams(okapiHeaders)))
+            .compose(fileDefinition -> data.length == 0
+              ? fileUploadService.completeUploading(fileDefinition, tenantId)
+              : succeededFuture(fileDefinition));
+        });
         responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
       }
       responseFuture.map(Response.class::cast)
