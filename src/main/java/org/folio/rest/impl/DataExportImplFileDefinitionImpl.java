@@ -71,23 +71,24 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    try {
-      waitForUploadingUUIDsByCQL.acquire();
-      succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
-        .compose(ar -> replaceCQLExtensionToCSV(entity))
-        .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
-        .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
-        .map(Response.class::cast)
-        .otherwise(ExceptionToResponseMapper::map)
-        .onComplete(asyncResultHandler);
-    } catch (InterruptedException e) {
-      failedFuture(e)
-        .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond500WithTextPlain)
-        .map(Response.class::cast)
-        .onComplete(asyncResultHandler);
-    }
+    vertxContext.executeBlocking(future -> {
+      try {
+        waitForUploadingUUIDsByCQL.acquire();
+        succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+          .compose(ar -> replaceCQLExtensionToCSV(entity))
+          .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
+          .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
+          .map(Response.class::cast)
+          .otherwise(ExceptionToResponseMapper::map)
+          .onComplete(asyncResultHandler);
+      } catch (InterruptedException e) {
+        failedFuture(e)
+          .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond500WithTextPlain)
+          .map(Response.class::cast)
+          .onComplete(asyncResultHandler);
+      }
+    });
   }
-
 
   @Override
   @Validate
