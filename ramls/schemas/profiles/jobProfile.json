@@ -13,6 +13,12 @@
       "description": "Job Profile name",
       "type": "string"
     },
+    "default" : {
+      "description": "Is default job profile",
+      "type": "boolean",
+      "default": false,
+      "readonly": true
+    },
     "destination": {
       "description": "Final destination place where to send file",
       "type": "string"
