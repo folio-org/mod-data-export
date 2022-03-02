@@ -69,6 +69,8 @@ public class DataExportImpl implements DataExport {
 
   private String tenantId;
 
+  private final long MAX_TRIES_TO_RETRIEVE_JOB_EXECUTIONS = 10;
+
   public DataExportImpl(Vertx vertx, String tenantId) {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     this.tenantId = TenantTool.calculateTenantId(tenantId);
@@ -79,14 +81,14 @@ public class DataExportImpl implements DataExport {
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     AtomicLong timerIdToWaitUntilJobExecutionIsCreated = new AtomicLong();
+    AtomicLong numTriesToRetrieveJobExecution = new AtomicLong();
     timerIdToWaitUntilJobExecutionIsCreated.set(vertxContext.owner().setPeriodic(1000, handler -> {
       fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
         .onSuccess(requestFileDefinition -> {
-          LOGGER.info("Try to retrieve a job execution");
+          LOGGER.debug("Try to retrieve a job execution");
           jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
             .onSuccess(jobExecution -> {
-              if (!Objects.isNull(jobExecution)) {
-                System.out.println("job execution is not null!");
+              if (!Objects.isNull(jobExecution) || numTriesToRetrieveJobExecution.incrementAndGet() > MAX_TRIES_TO_RETRIEVE_JOB_EXECUTIONS) {
                 vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
                 postDataExportExport(entity, okapiHeaders, asyncResultHandler, jobExecution, requestFileDefinition);
               }
@@ -98,7 +100,7 @@ public class DataExportImpl implements DataExport {
   private void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders,
                               Handler<AsyncResult<Response>> asyncResultHandler, JobExecution jobExecution,
                                     FileDefinition requestFileDefinition) {
-    LOGGER.info("Starting the data-export process, request: {}", entity);
+    LOGGER.debug("Starting the data-export process, request: {}", entity);
     OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
     jobProfileService.getById(entity.getJobProfileId(), tenantId)
       .onSuccess(jobProfile ->
