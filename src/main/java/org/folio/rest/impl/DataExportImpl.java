@@ -88,12 +88,16 @@ public class DataExportImpl implements DataExport {
           LOGGER.debug("Try to retrieve a job execution");
           jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
             .onSuccess(jobExecution -> {
-              if (!Objects.isNull(jobExecution) || numTriesToRetrieveJobExecution.incrementAndGet() > MAX_TRIES_TO_RETRIEVE_JOB_EXECUTIONS) {
+              if (!Objects.isNull(jobExecution)) {
                 vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
                 postDataExportExport(entity, okapiHeaders, asyncResultHandler, jobExecution, requestFileDefinition);
               }
             });
         });
+      if (numTriesToRetrieveJobExecution.incrementAndGet() > MAX_TRIES_TO_RETRIEVE_JOB_EXECUTIONS) {
+        vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
+        postDataExportExport(entity, okapiHeaders, asyncResultHandler, null, null);
+      }
     }));
   }
 
