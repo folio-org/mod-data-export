@@ -96,7 +96,7 @@ public class DataExportImpl implements DataExport {
         });
       if (numTriesToRetrieveJobExecution.incrementAndGet() > MAX_TRIES_TO_RETRIEVE_JOB_EXECUTIONS) {
         vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
-        failToFetchObjectHelper("File definition not found with id " + entity.getFileDefinitionId(), asyncResultHandler);
+        failToFetchObjectHelper("File definition or job execution not found", asyncResultHandler);
       }
     }));
   }
