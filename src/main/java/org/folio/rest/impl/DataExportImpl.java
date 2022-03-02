@@ -14,6 +14,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.rest.jaxrs.model.QuickExportResponse;
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.resource.DataExport;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.file.cleanup.StorageCleanupService;
@@ -33,10 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Semaphore;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
 
@@ -65,12 +65,6 @@ public class DataExportImpl implements DataExport {
   @Autowired
   private StorageCleanupService storageCleanupService;
 
-  @Autowired
-  private Semaphore waitForUploadingUUIDsByCQL;
-
-  @Autowired
-  private ExecutorService async;
-
   private InputDataManager inputDataManager;
 
   private String tenantId;
@@ -84,40 +78,42 @@ public class DataExportImpl implements DataExport {
   @Override
   @Validate
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> succeededFuture()
-      .map(PostDataExportExportResponse.respond204())
-      .map(Response.class::cast)
-      .onComplete(asyncResultHandler));
-    async.execute(() -> {
-      try {
-        waitForUploadingUUIDsByCQL.acquire();
-        LOGGER.debug("Starting the data-export process, request: {}", entity);
-        OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
-        fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
-          .onSuccess(requestFileDefinition ->
-            jobProfileService.getById(entity.getJobProfileId(), tenantId)
-              .onSuccess(jobProfile ->
-                mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
-                  .onSuccess(mappingProfile ->
-                    jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
-                      .onSuccess(jobExecution ->
-                        jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
-                          .onSuccess(updatedJobExecution -> {
-                            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
-                          }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-                      .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-                  .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-              .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-          .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
-      } catch (InterruptedException e) {
-        LOGGER.error(e);
-        failedFuture(e)
-          .map(PostDataExportExportResponse.respond500WithTextPlain(e))
-          .map(Response.class::cast)
-          .onComplete(asyncResultHandler);
-      }
-    });
-    async.shutdown();
+    AtomicLong timerIdToWaitUntilJobExecutionIsCreated = new AtomicLong();
+    timerIdToWaitUntilJobExecutionIsCreated.set(vertxContext.owner().setPeriodic(1000, handler -> {
+      fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
+        .onSuccess(requestFileDefinition -> {
+          LOGGER.info("Try to retrieve a job execution");
+          jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
+            .onSuccess(jobExecution -> {
+              if (!Objects.isNull(jobExecution)) {
+                System.out.println("job execution is not null!");
+                vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
+                postDataExportExport(entity, okapiHeaders, asyncResultHandler, jobExecution, requestFileDefinition);
+              }
+            });
+        });
+    }));
+  }
+
+  private void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders,
+                              Handler<AsyncResult<Response>> asyncResultHandler, JobExecution jobExecution,
+                                    FileDefinition requestFileDefinition) {
+    LOGGER.info("Starting the data-export process, request: {}", entity);
+    OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
+    jobProfileService.getById(entity.getJobProfileId(), tenantId)
+      .onSuccess(jobProfile ->
+        mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
+          .onSuccess(mappingProfile ->
+            jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
+              .onSuccess(updatedJobExecution -> {
+                inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                succeededFuture()
+                  .map(PostDataExportExportResponse.respond204())
+                  .map(Response.class::cast)
+                  .onComplete(asyncResultHandler);
+              }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+          .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+      .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
   }
 
   @Override

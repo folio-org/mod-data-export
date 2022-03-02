@@ -1,6 +1,5 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
@@ -34,8 +33,6 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Semaphore;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
@@ -49,12 +46,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   @Autowired
   private FileUploadService fileUploadService;
-
-  @Autowired
-  private Semaphore waitForUploadingUUIDsByCQL;
-
-  @Autowired
-  private ExecutorService async;
 
   private final Map<String, String> map = new HashMap<>();
 
@@ -75,16 +66,6 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    async.execute(() -> {
-      try {
-        waitForUploadingUUIDsByCQL.acquire();
-      } catch (InterruptedException e) {
-        failedFuture(e)
-          .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond500WithTextPlain)
-          .map(Response.class::cast)
-          .onComplete(asyncResultHandler);
-      }
-    });
     succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
       .compose(ar -> replaceCQLExtensionToCSV(entity))
       .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
@@ -93,6 +74,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       .otherwise(ExceptionToResponseMapper::map)
       .onComplete(asyncResultHandler);
   }
+
 
   @Override
   @Validate
