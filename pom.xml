@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export</artifactId>
-  <version>4.3.0-SNAPSHOT</version>
+  <version>4.4.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -27,7 +27,7 @@
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <postgres-testing.version>33.0.0</postgres-testing.version>
     <minio.version>8.3.0</minio.version>
-    <generate-marc-utils-version>1.4.0-SNAPSHOT</generate-marc-utils-version>
+    <generate-marc-utils-version>1.4.0</generate-marc-utils-version>
 
     <sonar.exclusions>
       **/OkapiConnectionParams.java,
