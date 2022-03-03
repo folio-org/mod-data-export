@@ -1,4 +1,27 @@
-## v4.3.0 Unreleased
+## v4.4.0 Unreleased
+
+## 03/03/2022 v4.3.0 Released
+This release includes implemented export flow for holdings MFHD records and bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.2.4...v4.3.0)
+
+### Stories
+
+* [MDEXP-99](https://issues.folio.org/browse/MDEXP-99) Generate MARC bib record additional fields if present -- array of strings to repeatable MARC field
+* [MDEXP-104](https://issues.folio.org/browse/MDEXP-104) Generate MARC bib record - Alternate titles - conditionally replacing keys with values
+* [MDEXP-124](https://issues.folio.org/browse/MDEXP-124) Generate MARC bib record - 500$a/notes
+* [MDEXP-303](https://issues.folio.org/browse/MDEXP-303) Generate MFHD records on the fly
+* [MDEXP-432](https://issues.folio.org/browse/MDEXP-432) Generate MARC bib record - Identifiers part IV - appending subfields
+* [MDEXP-433](https://issues.folio.org/browse/MDEXP-433) Generate MARC bib record - Identifiers part V
+* [MDEXP-434](https://issues.folio.org/browse/MDEXP-434) Generate MARC bib record - Identifiers part VI
+* [MDEXP-437](https://issues.folio.org/browse/MDEXP-437) Create default mapping profile for holdings
+* [MDEXP-438](https://issues.folio.org/browse/MDEXP-438) Create default job profile for holdings
+* [MDEXP-439](https://issues.folio.org/browse/MDEXP-439) Rename Default job profile to Default instance export job profile
+
+### Bug Fixes
+
+* [MDEXP-499](https://issues.folio.org/browse/MDEXP-499) Existing holdings UUIDs are reported as invalid while exporting holdings record
+* [MDEXP-504](https://issues.folio.org/browse/MDEXP-504) Exported holdings MARC records are combined with the records generated on the fly
 
 ## 10/15/2021 v4.2.1 Released
 This release includes module configuration improvement
