@@ -227,7 +227,7 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .statusCode(HttpStatus.SC_OK)
       .extract().body().as(JobExecutionCollection.class);
 
-    vertx.setTimer(12000L, handler -> {
+    vertx.setTimer(3000, handler -> {
       File uploadedFile = new File(uploadedFileDefinition.getSourcePath());
       context.verify(() -> {
         assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
