@@ -109,7 +109,11 @@ public class DataExportImpl implements DataExport {
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
               .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
           }
-        }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
+        }).onFailure(ar -> {
+          if (!responseAlreadySent.get()) {
+            failToFetchObjectHelper(ar.getMessage(), asyncResultHandler);
+          }
+        });
     }));
   }
 
