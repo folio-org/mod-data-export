@@ -1,6 +1,7 @@
 {
   "id": "5e9835fc-0e51-44c8-8a47-f7b8fce35da7",
   "name": "Default holdings export job profile",
+  "default" : true,
   "destination": "fileSystem",
   "description": "Default holdings job profile",
   "userInfo": {
