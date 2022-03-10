@@ -124,6 +124,16 @@
       "run": "after",
       "snippetPath": "migration_scripts/rename_default_job_profile.sql",
       "fromModuleVersion": "mod-data-export-4.3.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/update_job_profile_default_value.sql",
+      "fromModuleVersion": "mod-data-export-4.4.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "migration_scripts/update_mapping_profile_default_value.sql",
+      "fromModuleVersion": "mod-data-export-4.4.0"
     }
   ]
 }

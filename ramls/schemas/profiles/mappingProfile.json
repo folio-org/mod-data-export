@@ -12,6 +12,12 @@
       "description": "Mapping Profile name",
       "type": "string"
     },
+    "default" : {
+      "description": "Is default mapping profile",
+      "type": "boolean",
+      "default": false,
+      "readonly": true
+    },
     "description": {
       "description": "Mapping Profile description",
       "type": "string"

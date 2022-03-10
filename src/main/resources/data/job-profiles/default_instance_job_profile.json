@@ -1,6 +1,7 @@
 {
   "id": "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a",
   "name": "Default instances export job profile",
+  "default" : true,
   "destination": "fileSystem",
   "description": "Default instances export job profile",
   "userInfo": {
