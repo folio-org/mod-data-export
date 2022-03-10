@@ -55,6 +55,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
+import static java.util.Objects.nonNull;
 import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
 import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
@@ -140,14 +141,18 @@ class DataExportTest extends RestVerticleTestBase {
     context.awaitCompletion(5, TimeUnit.SECONDS);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(7000L, handler ->
-      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        context.verify(() -> {
-          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
-          context.completeNow();
-        });
-      }));
+    if (nonNull(jobExecutionId)) {
+      vertx.setTimer(7000L, handler ->
+        jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          context.verify(() -> {
+            assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+            context.completeNow();
+          });
+        }));
+    } else {
+      context.completeNow();
+    }
   }
 
   @Test
@@ -288,19 +293,23 @@ class DataExportTest extends RestVerticleTestBase {
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      jobExecutionDao.getById(jobExecutionId, tenantId)
-        .onSuccess(optionalJobExecution -> {
-          JobExecution jobExecution = optionalJobExecution.get();
-          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-            context.verify(() -> {
-              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForSrsAndInventory(1);
-              context.completeNow();
+    if (nonNull(jobExecutionId)) {
+      vertx.setTimer(TIMER_DELAY, handler -> {
+        jobExecutionDao.getById(jobExecutionId, tenantId)
+          .onSuccess(optionalJobExecution -> {
+            JobExecution jobExecution = optionalJobExecution.get();
+            fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+              context.verify(() -> {
+                assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
+                validateExternalCallsForSrsAndInventory(1);
+                context.completeNow();
+              });
             });
           });
-        });
-    });
+      });
+    } else {
+      context.completeNow();
+    }
   }
 
   @Test
@@ -581,24 +590,28 @@ class DataExportTest extends RestVerticleTestBase {
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      jobExecutionDao.getById(jobExecutionId, tenantId)
-        .onSuccess(optionalJobExecution -> {
-          JobExecution jobExecution = optionalJobExecution.get();
-          errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
-            context.verify(() -> {
-              assertEquals(FAIL, jobExecution.getStatus());
-              assertNotNull(jobExecution.getCompletedDate());
-              assertNotNull(jobExecution.getRunBy());
-              assertEquals(1, errorLogs.getErrorLogs().size());
-              ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
-              assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(), errorLog.getErrorMessageCode());
-              assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription(), errorLog.getErrorMessageValues().get(0));
-              context.completeNow();
+    if (nonNull(jobExecutionId)) {
+      vertx.setTimer(TIMER_DELAY, handler -> {
+        jobExecutionDao.getById(jobExecutionId, tenantId)
+          .onSuccess(optionalJobExecution -> {
+            JobExecution jobExecution = optionalJobExecution.get();
+            errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
+              context.verify(() -> {
+                assertEquals(FAIL, jobExecution.getStatus());
+                assertNotNull(jobExecution.getCompletedDate());
+                assertNotNull(jobExecution.getRunBy());
+                assertEquals(1, errorLogs.getErrorLogs().size());
+                ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
+                assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(), errorLog.getErrorMessageCode());
+                assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription(), errorLog.getErrorMessageValues().get(0));
+                context.completeNow();
+              });
             });
           });
-        });
-    });
+      });
+    } else {
+      context.completeNow();
+    }
   }
 
   @Test
