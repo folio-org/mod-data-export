@@ -105,15 +105,15 @@ public class DataExportImpl implements DataExport {
                             inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition),
                               JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                           }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-                      .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+                      .onFailure(ar -> {
+                        if (!responseAlreadySent.get()) {
+                          failToFetchObjectHelper(ar.getMessage(), asyncResultHandler);
+                        }
+                      }))
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
               .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
           }
-        }).onFailure(ar -> {
-          if (!responseAlreadySent.get()) {
-            failToFetchObjectHelper(ar.getMessage(), asyncResultHandler);
-          }
-        });
+        }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
     }));
   }
 
