@@ -23,7 +23,6 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.rest.annotations.Stream;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
