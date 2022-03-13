@@ -13,7 +13,6 @@ import org.folio.TestUtil;
 import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
-import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ErrorLogCollection;
 import org.folio.rest.jaxrs.model.ExportRequest;
@@ -115,8 +114,6 @@ class DataExportTest extends RestVerticleTestBase {
   private FileDefinitionDao fileDefinitionDao;
   @Autowired
   private ErrorLogService errorLogService;
-  @Autowired
-  private PostgresClientFactory pgClientFactory;
 
   public DataExportTest() {
     Context vertxContext = vertx.getOrCreateContext();
@@ -141,18 +138,16 @@ class DataExportTest extends RestVerticleTestBase {
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, ExportRequest.IdType.INSTANCE);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
     context.awaitCompletion(5, TimeUnit.SECONDS);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(7000L, handler -> {
-      pgClientFactory.getInstance(tenantId)
-        .selectSingle("select * from " + tenantId + "_mod_data_export.job_executions order by jsonb->>'lastUpdatedDate' desc limit 1")
-        .onSuccess(successHandler -> {
-          JobExecution jobExecution = successHandler.toJson().getJsonObject("jsonb").mapTo(JobExecution.class);
-          context.verify(() -> {
-            assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
-            context.completeNow();
-          });
+    vertx.setTimer(7000L, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+          context.completeNow();
         });
-    });
+      }));
   }
 
   @Test
@@ -294,10 +289,9 @@ class DataExportTest extends RestVerticleTestBase {
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
-      pgClientFactory.getInstance(tenantId)
-        .selectSingle("select * from " + tenantId + "_mod_data_export.job_executions order by jsonb->>'lastUpdatedDate' desc limit 1")
-        .onSuccess(successHandler -> {
-          JobExecution jobExecution = successHandler.toJson().getJsonObject("jsonb").mapTo(JobExecution.class);
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
@@ -588,10 +582,9 @@ class DataExportTest extends RestVerticleTestBase {
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
-      pgClientFactory.getInstance(tenantId)
-        .selectSingle("select * from " + tenantId + "_mod_data_export.job_executions order by jsonb->>'lastUpdatedDate' desc limit 1")
-        .onSuccess(successHandler -> {
-          JobExecution jobExecution = successHandler.toJson().getJsonObject("jsonb").mapTo(JobExecution.class);
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
           errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
             context.verify(() -> {
               assertEquals(FAIL, jobExecution.getStatus());

@@ -94,7 +94,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
     try {
       Future<Response> responseFuture;
       if (okapiHeaders.containsKey(STREAM_ABORT)) {
-        fileUploadService.errorUploading(fileDefinitionId, tenantId)
+        responseFuture = fileUploadService.errorUploading(fileDefinitionId, tenantId)
           .map(String.format("Upload stream for the file [id = '%s'] has been interrupted", fileDefinitionId))
           .map(DataExportFileDefinitions.PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond400WithTextPlain);
       } else {
@@ -102,16 +102,16 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
         if (fileUploadStateFuture == null) {
           fileUploadStateFuture = fileUploadService.startUploading(fileDefinitionId, tenantId);
         }
-        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
-        responseFuture.map(Response.class::cast)
-          .otherwise(ExceptionToResponseMapper::map)
-          .onComplete(asyncResultHandler);
         fileUploadStateFuture = fileUploadStateFuture
           .compose(fileDefinition -> saveFileDependsOnFileExtension(fileDefinition, data, new OkapiConnectionParams(okapiHeaders)))
           .compose(fileDefinition -> data.length == 0
             ? fileUploadService.completeUploading(fileDefinition, tenantId)
             : succeededFuture(fileDefinition));
+        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
       }
+      responseFuture.map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler);
     } catch (Exception e) {
       asyncResultHandler.handle(succeededFuture(map(e)));
     }

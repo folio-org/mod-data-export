@@ -33,12 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
-import static java.util.Objects.nonNull;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
@@ -80,41 +77,26 @@ public class DataExportImpl implements DataExport {
   public void postDataExportExport(ExportRequest entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     LOGGER.debug("Starting the data-export process, request: {}", entity);
     OkapiConnectionParams params = new OkapiConnectionParams(okapiHeaders);
-    AtomicLong timerIdToWaitUntilJobExecutionIsCreated = new AtomicLong();
-    AtomicBoolean responseAlreadySent = new AtomicBoolean();
-    timerIdToWaitUntilJobExecutionIsCreated.set(vertxContext.owner().setPeriodic(1000, handler -> {
-      fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
-        .onSuccess(requestFileDefinition -> {
-          if (!responseAlreadySent.get()) {
-            succeededFuture()
-              .map(PostDataExportExportResponse.respond204())
-              .map(Response.class::cast)
-              .onComplete(asyncResultHandler);
-            responseAlreadySent.set(true);
-          }
-          if (nonNull(requestFileDefinition.getJobExecutionId())) {
-            vertxContext.owner().cancelTimer(timerIdToWaitUntilJobExecutionIsCreated.get());
-            jobProfileService.getById(entity.getJobProfileId(), tenantId)
-              .onSuccess(jobProfile ->
-                mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
-                  .onSuccess(mappingProfile ->
-                    jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
-                      .onSuccess(jobExecution ->
-                        jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
-                          .onSuccess(updatedJobExecution -> {
-                            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition),
-                              JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
-                          }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-                      .onFailure(ar -> {
-                        if (!responseAlreadySent.get()) {
-                          failToFetchObjectHelper(ar.getMessage(), asyncResultHandler);
-                        }
-                      }))
+    fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
+      .onSuccess(requestFileDefinition ->
+        jobProfileService.getById(entity.getJobProfileId(), tenantId)
+          .onSuccess(jobProfile ->
+            mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
+              .onSuccess(mappingProfile ->
+                jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
+                  .onSuccess(jobExecution ->
+                    jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
+                      .onSuccess(updatedJobExecution -> {
+                        inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                        succeededFuture()
+                          .map(PostDataExportExportResponse.respond204())
+                          .map(Response.class::cast)
+                          .onComplete(asyncResultHandler);
+                      }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
-              .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
-          }
-        }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
-    }));
+              .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+          .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+      .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler));
   }
 
   @Override
