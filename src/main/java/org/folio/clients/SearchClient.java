@@ -55,7 +55,6 @@ public class SearchClient {
     this.errorLogService = errorLogService;
   }
 
-  @Stream
   public Future<Optional<JsonObject>> getInstancesBulkUUIDsAsync(String query, OkapiConnectionParams params) {
     Promise<Optional<JsonObject>> promise = Promise.promise();
     if (StringUtils.isEmpty(query)) {
