@@ -294,9 +294,10 @@ class DataExportTest extends RestVerticleTestBase {
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
-      jobExecutionDao.getById(jobExecutionId, tenantId)
-        .onSuccess(optionalJobExecution -> {
-          JobExecution jobExecution = optionalJobExecution.get();
+      pgClientFactory.getInstance(tenantId)
+        .selectSingle("select * from " + tenantId + "_mod_data_export.job_executions order by jsonb->>'lastUpdatedDate' desc limit 1")
+        .onSuccess(successHandler -> {
+          JobExecution jobExecution = successHandler.toJson().getJsonObject("jsonb").mapTo(JobExecution.class);
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
