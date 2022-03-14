@@ -89,10 +89,9 @@ public class FileUploadServiceImpl implements FileUploadService {
             for (Object id : jsonIds) {
               ids.add(((JsonObject) id).getString("id"));
             }
-            return jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId())
-              .onSuccess(jobExecution -> fileStorage.saveFileDataAsyncCQL(ids, fileDefinition))
-              .compose(jobExecution -> updateFileDefinitionWithJobExecution(
-                jobExecution.withProgress(new Progress().withTotal(jsonIds.size())), fileDefinition, params.getTenantId()));
+            return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+              .compose(jobExecution -> jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId()))
+              .compose(jobExecution -> updateFileDefinitionWithJobExecution(jobExecution.withProgress(new Progress().withTotal(jsonIds.size())), fileDefinition, params.getTenantId()));
           }
         }
         return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
@@ -184,7 +183,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
   private Future<FileDefinition> updateFileDefinitionWithJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
-    return jobExecutionService.save(jobExecution, tenantId)
+    return jobExecutionService.update(jobExecution, tenantId)
       .compose(savedJob -> fileDefinitionService.update(fileDefinition.withJobExecutionId(savedJob.getId()), tenantId));
   }
 

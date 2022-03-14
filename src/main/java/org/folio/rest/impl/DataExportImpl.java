@@ -99,7 +99,7 @@ public class DataExportImpl implements DataExport {
                         periodicId.set(vertxContext.owner().setPeriodic(1000, handler -> {
                           if (nonNull(fileDefinitionAtomicReference.get().getSourcePath())) {
                             vertxContext.owner().cancelTimer(periodicId.get());
-                            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition),
+                            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(fileDefinitionAtomicReference.get()),
                               JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                           } else {
                             fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
