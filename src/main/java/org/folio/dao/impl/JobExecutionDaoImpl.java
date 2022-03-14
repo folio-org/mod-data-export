@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
+
 @Repository
 public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
@@ -60,7 +62,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     Promise<String> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
       if (getHrIdResult.succeeded()) {
-        jobExecution.withId(UUID.randomUUID().toString())
+        jobExecution.withId(isNull(jobExecution.getId()) ? UUID.randomUUID().toString() : jobExecution.getId())
           .setHrId(getHrIdResult.result().getInteger(0));
         pgClientFactory.getInstance(tenantId)
           .save(TABLE, jobExecution.getId(), jobExecution, promise);

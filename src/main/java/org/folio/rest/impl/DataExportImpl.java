@@ -33,9 +33,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.ws.rs.core.Response;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
@@ -87,11 +90,24 @@ public class DataExportImpl implements DataExport {
                   .onSuccess(jobExecution ->
                     jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
                       .onSuccess(updatedJobExecution -> {
-                        inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                         succeededFuture()
                           .map(PostDataExportExportResponse.respond204())
                           .map(Response.class::cast)
                           .onComplete(asyncResultHandler);
+                        AtomicLong periodicId = new AtomicLong();
+                        AtomicReference<FileDefinition> fileDefinitionAtomicReference = new AtomicReference<>(requestFileDefinition);
+                        periodicId.set(vertxContext.owner().setPeriodic(1000, handler -> {
+                          if (nonNull(fileDefinitionAtomicReference.get().getSourcePath())) {
+                            vertxContext.owner().cancelTimer(periodicId.get());
+                            inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(requestFileDefinition),
+                              JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                          } else {
+                            fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
+                              .onSuccess(fileDefinition -> {
+                                fileDefinitionAtomicReference.set(fileDefinition);
+                              });
+                          }
+                        }));
                       }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
               .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))

@@ -45,9 +45,7 @@ public class ApplicationConfig {
   public WebClient getWebClient(@Autowired Vertx vertx) {
     WebClientOptions webClientOptions = new WebClientOptions()
       .setKeepAliveTimeout(REQUEST_TIMEOUT_ONE_HOUR)
-      .setConnectTimeout(REQUEST_TIMEOUT_ONE_HOUR)
-      .setMaxPoolSize(12)
-      .setMaxChunkSize(16384);
+      .setConnectTimeout(REQUEST_TIMEOUT_ONE_HOUR);
     return WebClient.create(vertx, webClientOptions);
   }
 
