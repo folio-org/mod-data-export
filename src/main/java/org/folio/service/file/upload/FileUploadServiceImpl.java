@@ -97,9 +97,6 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
   private Future<FileDefinition> updateFileDefinitionWithEmptyProgressIfAbsent(FileDefinition fileDefinition, String tenantId) {
-    if (isNull(fileDefinition.getJobExecutionId())) {
-      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
-    }
     return Future.succeededFuture(fileDefinition);
   }
 
