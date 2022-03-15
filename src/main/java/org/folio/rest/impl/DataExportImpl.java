@@ -98,8 +98,7 @@ public class DataExportImpl implements DataExport {
                         AtomicLong periodicId = new AtomicLong();
                         AtomicReference<FileDefinition> fileDefinitionAtomicReference = new AtomicReference<>(requestFileDefinition);
                         periodicId.set(vertxContext.owner().setPeriodic(1000, handler -> {
-                          if (nonNull(fileDefinitionAtomicReference.get().getSourcePath()) ||
-                            isNull(requestFileDefinition.getSize()) || requestFileDefinition.getSize() == 0) {
+                          if (allRecordsLoaded(fileDefinitionAtomicReference.get().getSourcePath(), requestFileDefinition.getSize())) {
                             vertxContext.owner().cancelTimer(periodicId.get());
                             inputDataManager.init(JsonObject.mapFrom(entity), JsonObject.mapFrom(fileDefinitionAtomicReference.get()),
                               JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
@@ -231,6 +230,10 @@ public class DataExportImpl implements DataExport {
       .withJobProfileId(jobProfileId)
       .withMetadata(entity.getMetadata())
       .withRecordType(ExportRequest.RecordType.fromValue(entity.getRecordType().toString()));
+  }
+
+  private boolean allRecordsLoaded(String sourcePath, Integer size) {
+    return nonNull(sourcePath) || isNull(size) || size == 0;
   }
 
 }
