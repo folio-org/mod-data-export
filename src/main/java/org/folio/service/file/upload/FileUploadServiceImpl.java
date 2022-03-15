@@ -65,12 +65,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
     return fileStorage.saveFileDataAsync(data, fileDefinition)
-      .compose(ar -> {
-        if (isNull(fileDefinition.getJobExecutionId())) {
-          return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
-        }
-        return Future.succeededFuture(fileDefinition);
-      });
+      .compose(ar -> Future.succeededFuture(fileDefinition));
   }
 
   @Override
@@ -171,15 +166,11 @@ public class FileUploadServiceImpl implements FileUploadService {
           ids.add(((JsonObject) id).getString("id"));
         }
         return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-          .compose(ar -> isNull(jobExecution)
-            ? updateFileDefinitionWithJobExecution(new JobExecution().withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), params.getTenantId())
-            : updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), request, params));
+          .compose(ar -> updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), request, params));
       }
     }
 
-    return isNull(fileDefinition.getJobExecutionId())
-      ? updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId())
-      : fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), params.getTenantId());
+    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), params.getTenantId());
   }
 
   private Future<FileDefinition> updateFileDefinitionWithJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
