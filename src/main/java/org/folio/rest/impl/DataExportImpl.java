@@ -105,9 +105,7 @@ public class DataExportImpl implements DataExport {
                               JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                           } else {
                             fileDefinitionService.getById(entity.getFileDefinitionId(), tenantId)
-                              .onSuccess(fileDefinition -> {
-                                fileDefinitionAtomicReference.set(fileDefinition);
-                              });
+                              .onSuccess(fileDefinitionAtomicReference::set);
                           }
                         }));
                       }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
