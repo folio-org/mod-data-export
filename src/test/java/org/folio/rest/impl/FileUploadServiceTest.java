@@ -159,7 +159,14 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .statusCode(HttpStatus.SC_OK)
       .body("sourcePath", notNullValue())
       .body("metadata.createdDate", notNullValue())
-      .body("status", is(FileDefinition.Status.IN_PROGRESS.name()))
+      .extract().body().as(FileDefinition.class);
+    RestAssured.given()
+      .spec(binaryRequestSpecification)
+      .when()
+      .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId())
+      .then()
+      .statusCode(HttpStatus.SC_OK)
+      .body("status", is(FileDefinition.Status.COMPLETED.name()))
       .extract().body().as(FileDefinition.class);
     // and then created job execution for current upload file definition
     JobExecutionCollection jobExecutions = RestAssured.given()
@@ -215,9 +222,17 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .post(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId() + "/upload")
       .then()
       .statusCode(HttpStatus.SC_OK)
-      .body("sourcePath", nullValue())
       .body("metadata.createdDate", notNullValue())
-      .body("status", is(FileDefinition.Status.IN_PROGRESS.name()))
+      .extract().body().as(FileDefinition.class);
+
+    RestAssured.given()
+      .spec(binaryRequestSpecification)
+      .when()
+      .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId())
+      .then()
+      .statusCode(HttpStatus.SC_OK)
+      .body("sourcePath", notNullValue())
+      .body("status", is(FileDefinition.Status.COMPLETED.name()))
       .extract().body().as(FileDefinition.class);
     // and then created job execution for current upload file definition
     JobExecutionCollection jobExecutions = RestAssured.given()
