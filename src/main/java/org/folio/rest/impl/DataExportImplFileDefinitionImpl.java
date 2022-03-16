@@ -19,10 +19,12 @@ import org.folio.rest.annotations.Stream;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.file.definition.FileDefinitionService;
 import org.folio.service.file.upload.FileUploadService;
+import org.folio.service.job.JobExecutionService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ErrorCode;
 import org.folio.util.ExceptionToResponseMapper;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
@@ -46,6 +49,9 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
 
   @Autowired
   private FileUploadService fileUploadService;
+
+  @Autowired
+  private JobExecutionService jobExecutionService;
 
   private final Map<String, String> map = new HashMap<>();
 
@@ -66,7 +72,11 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> validateFileNameExtension(entity.getFileName()))
+    JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString());
+    entity.setJobExecutionId(jobExecution.getId());
+    succeededFuture()
+      .compose(ar -> jobExecutionService.save(jobExecution, tenantId))
+      .compose(ar -> validateFileNameExtension(entity.getFileName()))
       .compose(ar -> replaceCQLExtensionToCSV(entity))
       .compose(ar -> fileDefinitionService.save(entity.withStatus(Status.NEW), tenantId))
       .map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse::respond201WithApplicationJson)
@@ -97,21 +107,24 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
         responseFuture = fileUploadService.errorUploading(fileDefinitionId, tenantId)
           .map(String.format("Upload stream for the file [id = '%s'] has been interrupted", fileDefinitionId))
           .map(DataExportFileDefinitions.PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond400WithTextPlain);
+        responseFuture.map(Response.class::cast)
+          .otherwise(ExceptionToResponseMapper::map)
+          .onComplete(asyncResultHandler);
       } else {
         byte[] data = IOUtils.toByteArray(entity);
         if (fileUploadStateFuture == null) {
           fileUploadStateFuture = fileUploadService.startUploading(fileDefinitionId, tenantId);
         }
+        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
+        responseFuture.map(Response.class::cast)
+          .otherwise(ExceptionToResponseMapper::map)
+          .onComplete(asyncResultHandler);
         fileUploadStateFuture = fileUploadStateFuture
           .compose(fileDefinition -> saveFileDependsOnFileExtension(fileDefinition, data, new OkapiConnectionParams(okapiHeaders)))
           .compose(fileDefinition -> data.length == 0
             ? fileUploadService.completeUploading(fileDefinition, tenantId)
             : succeededFuture(fileDefinition));
-        responseFuture = fileUploadStateFuture.map(PostDataExportFileDefinitionsUploadByFileDefinitionIdResponse::respond200WithApplicationJson);
       }
-      responseFuture.map(Response.class::cast)
-        .otherwise(ExceptionToResponseMapper::map)
-        .onComplete(asyncResultHandler);
     } catch (Exception e) {
       asyncResultHandler.handle(succeededFuture(map(e)));
     }
