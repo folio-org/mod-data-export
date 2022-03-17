@@ -116,6 +116,13 @@ class InputDataManagerImpl implements InputDataManager {
       if (requestFileDefinition.getUploadFormat().equals(CQL)) {
         errorCodes.add(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE);
       }
+    } else if (exportRequest.getIdType().equals(ExportRequest.IdType.AUTHORITY)) {
+      if (!MappingProfileServiceImpl.isDefaultAuthorityProfile(mappingProfile.getId())) {
+        errorCodes.add(ErrorCode.ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED);
+      }
+      if (requestFileDefinition.getUploadFormat().equals(CQL)) {
+        errorCodes.add(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE);
+      }
     }
 
     if (isNotEmpty(errorCodes)) {

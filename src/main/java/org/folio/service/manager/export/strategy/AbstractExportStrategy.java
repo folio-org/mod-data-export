@@ -123,7 +123,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   public enum EntityType {
-    HOLDING, INSTANCE
+    HOLDING, INSTANCE, AUTHORITY
   }
 
 }

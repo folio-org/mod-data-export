@@ -55,6 +55,9 @@ public class ExportManagerImpl implements ExportManager {
   @Autowired
   @Qualifier("holdingExportStrategyImpl")
   private ExportStrategy holdingExportManager;
+  @Autowired
+  @Qualifier("authorityExportStrategyImpl")
+  private ExportStrategy authorityExportManager;
 
   public ExportManagerImpl() {
   }
@@ -74,6 +77,9 @@ public class ExportManagerImpl implements ExportManager {
         break;
       case HOLDING:
         this.executor.executeBlocking(blockingPromise -> holdingExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
+        break;
+      case AUTHORITY:
+        this.executor.executeBlocking(blockingPromise -> authorityExportManager.export(exportPayload, blockingPromise), ar -> handleExportResult(ar, exportPayload));
         break;
     }
   }

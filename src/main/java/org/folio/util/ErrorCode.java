@@ -14,6 +14,7 @@ public enum ErrorCode {
   USER_NOT_FOUND("error.user.notFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION("error.uploadedFile.invalidExtension", "File name extension does not corresponds csv format"),
   INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE("error.uploadedFile.invalidExtension", "Only csv format is supported for holdings export"),
+  INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE("error.uploadedFile.invalidExtension", "Only csv format is supported for authority export"),
   FILE_ALREADY_UPLOADED("error.fileDefinition.fileAlreadyUploaded", "File already uploaded for this FileDefinition"),
   NOTHING_TO_EXPORT("error.nothingToExport", "No exported records, nothing to export"),
   FAIL_TO_UPDATE_JOB("error.jobExecution.failToUpdateJob", "Fail to prepare job execution for export"),
@@ -45,6 +46,7 @@ public enum ErrorCode {
   ERROR_MARC_RECORD_CANNOT_BE_CONVERTED("error.messagePlaceholder", "Json record cannot be converted to marc format, cause: %s"),
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type"),
   ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting holding records only the default holding job profile is supported"),
+  ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting authority records only the default authority job profile is supported"),
   ERROR_JOB_IS_EXPIRED("error.messagePlaceholder", "Job was expired: no updates for more than 1 hour");
 
   private final String code;
