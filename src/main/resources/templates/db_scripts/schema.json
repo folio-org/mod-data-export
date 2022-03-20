@@ -127,6 +127,11 @@
     },
     {
       "run": "after",
+      "snippetPath": "migration_scripts/add_default_profiles.sql",
+      "fromModuleVersion": "mod-data-export-4.4.0"
+    },
+    {
+      "run": "after",
       "snippetPath": "migration_scripts/update_job_profile_default_value.sql",
       "fromModuleVersion": "mod-data-export-4.4.0"
     },
