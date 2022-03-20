@@ -3,22 +3,16 @@ package org.folio.service.manager.export.strategy;
 import static java.util.Objects.isNull;
 
 import java.lang.invoke.MethodHandles;
-import java.util.List;
 
 import io.vertx.core.Promise;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import org.folio.HttpStatus;
 import org.folio.rest.exceptions.ServiceException;
-import org.folio.rest.jaxrs.model.FileDefinition;
-import org.folio.rest.jaxrs.model.MappingProfile;
-import org.folio.service.loader.SrsLoadResult;
 import org.folio.service.manager.export.ExportPayload;
 import org.folio.util.ErrorCode;
-import org.folio.util.OkapiConnectionParams;
 
 @Service
 public class AuthorityExportStrategyImpl extends AbstractExportStrategy {
@@ -27,13 +21,12 @@ public class AuthorityExportStrategyImpl extends AbstractExportStrategy {
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
-    List<String> identifiers = exportPayload.getIdentifiers();
-    FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
-    MappingProfile defaultMappingProfile = exportPayload.getMappingProfile();
-    OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
-    String jobExecutionId = fileExportDefinition.getJobExecutionId();
-    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
-    Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecords(defaultMappingProfile, srsLoadResult.getUnderlyingMarcRecords(), jobExecutionId, params, getEntityType());
+    var params = exportPayload.getOkapiConnectionParams();
+    var fileExportDefinition = exportPayload.getFileExportDefinition();
+    var identifiers = exportPayload.getIdentifiers();
+    var srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
+    var marcToExport = getSrsRecordService().transformSrsRecords(exportPayload.getMappingProfile(),
+      srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition.getJobExecutionId(), params, getEntityType());
     getExportService().exportSrsRecord(marcToExport, exportPayload);
     LOGGER.info("Number of authority without srs record: {}", srsLoadResult.getIdsWithoutSrs());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
