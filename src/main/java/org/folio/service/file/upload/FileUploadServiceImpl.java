@@ -2,7 +2,6 @@ package org.folio.service.file.upload;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
@@ -28,6 +27,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import static java.util.Objects.isNull;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.ERROR;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status.IN_PROGRESS;
@@ -65,12 +65,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public Future<FileDefinition> saveFileChunk(FileDefinition fileDefinition, byte[] data, String tenantId) {
     return fileStorage.saveFileDataAsync(data, fileDefinition)
-      .compose(ar -> {
-        if (Objects.isNull(fileDefinition.getJobExecutionId())) {
-          return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
-        }
-        return Future.succeededFuture(fileDefinition);
-      });
+      .compose(ar -> Future.succeededFuture(fileDefinition));
   }
 
   @Override
@@ -89,23 +84,16 @@ public class FileUploadServiceImpl implements FileUploadService {
             for (Object id : jsonIds) {
               ids.add(((JsonObject) id).getString("id"));
             }
-            JobExecution jobExecution = new JobExecution().withProgress(new Progress().withTotal(jsonIds.size()));
             return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-              .compose(ar -> updateFileDefinitionWithJobExecution(jobExecution, fileDefinition, params.getTenantId()));
+              .compose(jobExecution -> jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId()))
+              .compose(jobExecution -> updateFileDefinitionWithJobExecution(jobExecution.withProgress(new Progress().withTotal(jsonIds.size())), fileDefinition, params.getTenantId()));
           }
         }
-        return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
+        return Future.succeededFuture(fileDefinition);
       });
     } else {
-      return updateFileDefinitionWithEmptyProgressIfAbsent(fileDefinition, params.getTenantId());
+      return Future.succeededFuture(fileDefinition);
     }
-  }
-
-  private Future<FileDefinition> updateFileDefinitionWithEmptyProgressIfAbsent(FileDefinition fileDefinition, String tenantId) {
-    if (Objects.isNull(fileDefinition.getJobExecutionId())) {
-      return updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, tenantId);
-    }
-    return Future.succeededFuture(fileDefinition);
   }
 
   @Override
@@ -171,19 +159,15 @@ public class FileUploadServiceImpl implements FileUploadService {
           ids.add(((JsonObject) id).getString("id"));
         }
         return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-          .compose(ar -> Objects.isNull(jobExecution)
-            ? updateFileDefinitionWithJobExecution(new JobExecution().withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), params.getTenantId())
-            : updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), request, params));
+          .compose(ar -> updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(ids.size())), fileDefinition.withStatus(COMPLETED), request, params));
       }
     }
 
-    return Objects.isNull(fileDefinition.getJobExecutionId())
-      ? updateFileDefinitionWithJobExecution(new JobExecution(), fileDefinition, params.getTenantId())
-      : fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), params.getTenantId());
+    return fileDefinitionService.update(fileDefinition.withStatus(COMPLETED), params.getTenantId());
   }
 
   private Future<FileDefinition> updateFileDefinitionWithJobExecution(JobExecution jobExecution, FileDefinition fileDefinition, String tenantId) {
-    return jobExecutionService.save(jobExecution, tenantId)
+    return jobExecutionService.update(jobExecution, tenantId)
       .compose(savedJob -> fileDefinitionService.update(fileDefinition.withJobExecutionId(savedJob.getId()), tenantId));
   }
 
@@ -206,7 +190,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
   private void failFileDefinitionAndJobExecution(Promise<FileDefinition> promise, FileDefinition fileDefinition, JobExecution jobExecution, QuickExportRequest request, Throwable cause, OkapiConnectionParams params) {
-    if (!Objects.isNull(jobExecution)) {
+    if (!isNull(jobExecution)) {
       errorLogService.saveGeneralError("Fail to upload file for job execution with id: " + jobExecution.getId(), jobExecution.getId(), params.getTenantId());
       Optional<JsonObject> optionalUser = usersClient.getById(request.getMetadata().getCreatedByUserId(), jobExecution.getId(), params);
       if (optionalUser.isPresent()) {

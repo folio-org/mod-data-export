@@ -1,4 +1,15 @@
-## v4.4.0 Unreleased
+## v4.5.0 Unreleased
+
+## 03/21/2022 v4.4.0 Released
+This release includes implemented export flow for holdings MFHD records and bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.3.0...v4.4.0)
+
+### Bug Fixes
+
+* [MDEXP-477](https://issues.folio.org/browse/MDEXP-477) Triggering the export with cql statement takes longer than expected
+* [MDEXP-505](https://issues.folio.org/browse/MDEXP-505) Undefined permission 'data-export.mapping-profiles.collection.get , ...
+* [MDEXP-507](https://issues.folio.org/browse/MDEXP-507) Invalid migration scripts for job profiles
 
 ## 03/03/2022 v4.3.0 Released
 This release includes implemented export flow for holdings MFHD records and bug fixes
