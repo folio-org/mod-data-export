@@ -1,6 +1,6 @@
 ## v4.5.0 Unreleased
 
-## 21/03/2022 v4.4.0 Released
+## 03/21/2022 v4.4.0 Released
 This release includes implemented export flow for holdings MFHD records and bug fixes
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.3.0...v4.4.0)
