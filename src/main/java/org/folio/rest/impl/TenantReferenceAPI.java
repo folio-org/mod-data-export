@@ -60,6 +60,11 @@ public class TenantReferenceAPI extends TenantAPI {
         .withPostOnly()
         .add("mapping-profiles", "data-export/mapping-profiles")
         .add("job-profiles", "data-export/job-profiles");
+
+      tl.withKey(PARAMETER_LOAD_REFERENCE).withLead("data")
+              .withPostOnly()
+              .add("mapping-profiles", "data-export/holding-mapping-profiles")
+              .add("job-profiles", "data-export/holding-job-profiles");
     }
   }
 
