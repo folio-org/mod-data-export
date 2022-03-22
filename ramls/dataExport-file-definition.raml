@@ -12,6 +12,7 @@ documentation:
 types:
   errors: !include raml-util/schemas/errors.schema
   fileDefinition: !include schemas/fileDefinition.json
+  error: !include raml-util/schemas/error.schema
 
 traits:
   validate: !include raml-util/traits/validation.raml
@@ -45,8 +46,8 @@ traits:
         413:
           description: "Request entity too large"
           body:
-            text/plain:
-              example: "Request entity too large"
+            application/json:
+              type: error
         422:
           description: "Unprocessable Entity"
           body:

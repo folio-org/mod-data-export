@@ -21,6 +21,7 @@ import org.folio.HttpStatus;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
@@ -84,7 +85,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       String errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", entity.getSize(), MAX_FILE_SIZE);
       LOGGER.error(errorMessage);
       succeededFuture().map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse
-        .respond413WithTextPlain(errorMessage)).map(Response.class::cast).onComplete(asyncResultHandler);
+        .respond413WithApplicationJson(new Error().withMessage(errorMessage))).map(Response.class::cast).onComplete(asyncResultHandler);
       return;
     }
     JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString());
