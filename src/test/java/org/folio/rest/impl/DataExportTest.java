@@ -634,25 +634,14 @@ class DataExportTest extends RestVerticleTestBase {
   void testExportByCSV_whenFileIsTooLarge(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
-    uploadedFileDefinition.setSize(500_001);
-    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    buildSrsJobProfile(okapiConnectionParams.getTenantId());
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId, ExportRequest.IdType.INSTANCE);
-    Response response = postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
-    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    Response response = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId), 500_001);
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
-      jobExecutionDao.getById(jobExecutionId, tenantId)
-        .onSuccess(optionalJobExecution -> {
-          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-            context.verify(() -> {
-              assertEquals(413, response.getStatusCode());
-              context.completeNow();
-            });
-          });
-        });
+      context.verify(() -> {
+        assertEquals(413, response.getStatusCode());
+        context.completeNow();
+      });
     });
   }
 
@@ -719,8 +708,24 @@ class DataExportTest extends RestVerticleTestBase {
       .extract().body().as(FileDefinition.class);
   }
 
+  private Response uploadFile(String fileName, UploadFormat format, String tenantId, RequestSpecification binaryRequestSpecification, Integer size) throws IOException {
+
+    FileDefinition givenFileDefinition = new FileDefinition()
+      .withId(UUID.randomUUID().toString())
+      .withFileName(fileName)
+      .withUploadFormat(format)
+      .withSize(size)
+      .withStatus(FileDefinition.Status.NEW);
+
+    return postRequest(JsonObject.mapFrom(givenFileDefinition), FILE_DEFINITION_SERVICE_URL, tenantId);
+  }
+
   private FileDefinition uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification) throws IOException {
     return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification);
+  }
+
+  private Response uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification, Integer size) throws IOException {
+    return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification, size);
   }
 
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition, ExportRequest.IdType idType) {
