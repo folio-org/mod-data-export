@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.nonNull;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
@@ -79,7 +80,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    if (entity.getSize() > MAX_FILE_SIZE) {
+    if (nonNull(entity.getSize()) && entity.getSize() > MAX_FILE_SIZE) {
       String errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", entity.getSize(), MAX_FILE_SIZE);
       LOGGER.error(errorMessage);
       succeededFuture().map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse
