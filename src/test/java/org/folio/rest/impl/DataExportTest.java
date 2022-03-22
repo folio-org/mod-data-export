@@ -629,6 +629,33 @@ class DataExportTest extends RestVerticleTestBase {
     });
   }
 
+  @Test
+  @Order(19)
+  void testExportByCSV_whenFileIsTooLarge(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
+    uploadedFileDefinition.setSize(500_001);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId, ExportRequest.IdType.INSTANCE);
+    Response response = postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+            context.verify(() -> {
+              assertEquals(413, response.getStatusCode());
+              context.completeNow();
+            });
+          });
+        });
+    });
+  }
+
   private void buildCustomJobProfile(String tenantID) {
     if (customMappingProfileId == null) {
       String mappingProfile = TestUtil.readFileContentFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mappingProfile.json");
