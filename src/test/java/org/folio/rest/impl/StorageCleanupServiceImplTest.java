@@ -5,6 +5,7 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import io.vertx.core.Context;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -180,6 +183,11 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     //when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
+      try {
+        context.awaitCompletion(5, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        fail(e.getMessage());
+      }
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
