@@ -91,8 +91,6 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(()->{
-          LOGGER.info("succeeded: {}, result: {}, exists: {}, files exists: {}, removed: {}",
-            ar.succeeded(), ar.result(), testFile1.exists(), Files.exists(Paths.get(testFile1.getParent())));
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
           assertFalse(testFile1.exists());
@@ -290,6 +288,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private void assertFileDefinitionIsRemoved() {
     fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
+      LOGGER.info("fileDefinitionAr.result.empty: {}", fileDefinitionAr.result().isEmpty());
       assertTrue(fileDefinitionAr.result().isEmpty());
     });
   }
