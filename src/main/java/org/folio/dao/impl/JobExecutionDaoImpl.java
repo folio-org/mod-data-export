@@ -2,6 +2,7 @@ package org.folio.dao.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
@@ -81,7 +82,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     try {
       pgClientFactory.getInstance(tenantId).update(TABLE, jobExecution, jobExecution.getId(), updateResult -> {
         if (updateResult.failed()) {
-          LOGGER.info("jobExecution: {}, cause: {}", jobExecution, updateResult.cause());
+          LOGGER.info("jobExecution: {}, cause: {}", JsonObject.mapFrom(jobExecution), updateResult.cause());
           LOGGER.error("Could not update jobExecution with id {}", jobExecution.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
