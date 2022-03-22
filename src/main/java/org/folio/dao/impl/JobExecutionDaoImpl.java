@@ -2,7 +2,6 @@ package org.folio.dao.impl;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
