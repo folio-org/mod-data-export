@@ -38,6 +38,12 @@ public class InventoryRecordConverterService extends RecordConverter {
     return mappingService.map(holdings, mappingProfile, jobExecutionId, params);
   }
 
+  public Pair<List<String>, Integer> transformAuthorityRecords(List<JsonObject> authorities, String jobExecutionId,
+                                                       MappingProfile mappingProfile,
+                                                             OkapiConnectionParams params) {
+    return mappingService.map(authorities, mappingProfile, jobExecutionId, params);
+  }
+
   /**
    * For Each instance UUID fetches all the holdings and also items for each holding and appends it to a single record
    *

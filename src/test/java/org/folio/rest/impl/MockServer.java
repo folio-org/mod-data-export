@@ -42,6 +42,7 @@ public class MockServer {
   private static final String ITEM_RECORDS_IN00041_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in00041.json";
   private static final String SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_bib_records_response.json";
   private static final String SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_holdings_records_response.json";
+  private static final String SRS_MARC_AUTHORITY_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "srs/get_marc_authority_records_response.json";
   private static final String USERS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "user/get_user_response.json";
   private static final String CONTENT_TERMS_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_nature_of_content_terms_response.json";
   private static final String IDENTIFIER_TYPES_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_identifier_types_response.json";
@@ -198,8 +199,18 @@ public class MockServer {
       //fetch the ids from the query and remove them from the mock if not in the request
       String idType = ctx.request().getParam("idType");
       List<String> ids = ctx.getBodyAsJsonArray().getList();
-      String path = idType.equalsIgnoreCase("instance") ? SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH : SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
-      String fieldKey = idType.equalsIgnoreCase("instance") ? "instanceId" : "holdingsId";
+      String path;
+      String fieldKey;
+      if (idType.equalsIgnoreCase("instance")) {
+        path = SRS_MARC_BIB_RECORDS_MOCK_DATA_PATH;
+        fieldKey = "instanceId";
+      } else if (idType.equalsIgnoreCase("holdings")) {
+        path = SRS_MARC_HOLDING_RECORDS_MOCK_DATA_PATH;
+        fieldKey = "holdingsId";
+      } else {
+        path = SRS_MARC_AUTHORITY_RECORDS_MOCK_DATA_PATH;
+        fieldKey = "authorityId";
+      }
       JsonObject srsRecords = new JsonObject(RestVerticleTestBase.getMockData(path));
 
       final Iterator iterator = srsRecords.getJsonArray("sourceRecords")

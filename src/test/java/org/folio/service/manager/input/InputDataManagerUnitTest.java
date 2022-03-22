@@ -426,6 +426,94 @@ class InputDataManagerUnitTest {
     verify(exportManager, never()).exportData(any(JsonObject.class));
   }
 
+  @Test
+  @Order(11)
+  void shouldFailToExport_whenIsNotDefaultHoldingsProfile() {
+    //given
+    var mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
+    var exportRequest = new ExportRequest()
+      .withIdType(ExportRequest.IdType.HOLDING)
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
+    when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+
+    //then
+    verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString());
+    verify(exportManager, never()).exportData(any(JsonObject.class));
+  }
+
+  @Test
+  @Order(12)
+  void shouldFailToExport_whenIsDefaultHoldingsProfile_andCqlFormat() {
+    //given
+    var mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
+    var exportRequest = new ExportRequest()
+      .withIdType(ExportRequest.IdType.HOLDING)
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId("1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13")
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
+    var requestFileDefinition = new FileDefinition()
+      .withUploadFormat(FileDefinition.UploadFormat.CQL);
+    when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+
+    //then
+    verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString());
+    verify(exportManager, never()).exportData(any(JsonObject.class));
+  }
+
+  @Test
+  @Order(13)
+  void shouldFailToExport_whenIsNotDefaultAuthorityProfile() {
+    //given
+    var mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
+    var exportRequest = new ExportRequest()
+      .withIdType(ExportRequest.IdType.AUTHORITY)
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId(JOB_PROFILE_ID)
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
+    when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+
+    //then
+    verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString());
+    verify(exportManager, never()).exportData(any(JsonObject.class));
+  }
+
+  @Test
+  @Order(14)
+  void shouldFailToExport_whenIsDefaultHAuthorityProfile_andCqlFormat() {
+    //given
+    var mappingProfile = new MappingProfile().withId(MAPPING_PROFILE_ID);
+    var exportRequest = new ExportRequest()
+      .withIdType(ExportRequest.IdType.HOLDING)
+      .withFileDefinitionId(UUID.randomUUID().toString())
+      .withJobProfileId("5d636597-a59d-4391-a270-4e79d5ba70e3")
+      .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
+    var requestFileDefinition = new FileDefinition()
+      .withUploadFormat(FileDefinition.UploadFormat.CQL);
+    when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
+    when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
+
+    //when
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+
+    //then
+    verify(jobExecutionService).prepareAndSaveJobForFailedExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString());
+    verify(exportManager, never()).exportData(any(JsonObject.class));
+  }
+
   private void initializeInputDataManager() {
     context = Mockito.mock(Context.class);
     springContext = Mockito.mock(AbstractApplicationContext.class);

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,6 +30,12 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private static final String INSTANCES = "instances";
   private static final String HOLDINGS_RECORDS = "holdingsRecords";
+
+  private static final Map<AbstractExportStrategy.EntityType, String> entityIdMap = Map.of(
+    AbstractExportStrategy.EntityType.INSTANCE, "instanceId",
+    AbstractExportStrategy.EntityType.HOLDING, "holdingsId",
+    AbstractExportStrategy.EntityType.AUTHORITY, "authorityId"
+  );
 
   private SourceRecordStorageClient srsClient;
   private InventoryClient inventoryClient;
@@ -97,19 +104,19 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult, AbstractExportStrategy.EntityType entityType) {
     JsonArray records = underlyingRecords.getJsonArray("sourceRecords");
     List<JsonObject> marcRecords = new ArrayList<>();
-    Set<String> singleInstanceIdentifiersSet = new HashSet<>(uuids);
+    Set<String> singleRecordIdentifiersSet = new HashSet<>(uuids);
     for (Object o : records) {
       JsonObject record = (JsonObject) o;
       marcRecords.add(record);
       JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
       if (externalIdsHolder != null) {
-        String key = entityType.equals(AbstractExportStrategy.EntityType.INSTANCE) ? "instanceId" : "holdingsId";
+        String key = entityIdMap.get(entityType);
         String id = externalIdsHolder.getString(key);
-        singleInstanceIdentifiersSet.remove(id);
+        singleRecordIdentifiersSet.remove(id);
       }
     }
     loadResult.setUnderlyingMarcRecords(marcRecords);
-    loadResult.setIdsWithoutSrs(new ArrayList<>(singleInstanceIdentifiersSet));
+    loadResult.setIdsWithoutSrs(new ArrayList<>(singleRecordIdentifiersSet));
   }
 
   /**

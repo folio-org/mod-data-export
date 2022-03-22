@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
@@ -49,9 +53,11 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
@@ -84,6 +90,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
   private static final String HOLDING_UUIDS_INVENTORY = "holding_uuids_inventory.csv";
+  private static final String AUTHORITY_UUIDS_INVENTORY = "authority_uuids_inventory.csv";
   private static final String HOLDING_UUID_GENERATE_ON_THE_FLY = "holding_uuid.csv";
   private static final String HOLDING_UUIDS_WITHOUT_SRS_RECORD = "holding_uuids_without_srs_record.csv";
   private static final String INSTANCE_UUIDS_INVENTORY_TWO_BATCHES = "InventoryUUIDsTwoBatches.csv";
@@ -95,6 +102,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String JOB_EXECUTION_HR_ID_FIELD = "jobExecutionHrId";
   private static final String DEFAULT_HOLDING_JOB_PROFILE = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
   private static final String DEFAULT_INSTANCE_JOB_PROFILE = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static final String DEFAULT_AUTHORITY_JOB_PROFILE = "56944b1c-f3f9-475b-bed0-7387c33620ce";
   private static final int EXPORTED_RECORDS_EMPTY = 0;
   private static final int EXPORTED_RECORDS_NUMBER_1 = 1;
   private static final int EXPORTED_RECORDS_NUMBER_2 = 2;
@@ -642,6 +650,35 @@ class DataExportTest extends RestVerticleTestBase {
         assertEquals(413, response.getStatusCode());
         context.completeNow();
       });
+    });
+  }
+  
+  @Test
+  @Order(14)
+  void testAuthorityExportByCSV(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(AUTHORITY_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, DEFAULT_AUTHORITY_JOB_PROFILE, ExportRequest.IdType.AUTHORITY);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+            context.verify(() -> {
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+              validateExternalCallsForSrs(1);
+              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(),
+                "GeneratedRecordsFromAuthorityRecord.mrc");
+              context.completeNow();
+            });
+          });
+        });
     });
   }
 
