@@ -5,7 +5,6 @@ import static org.folio.rest.jaxrs.model.FileDefinition.Status.COMPLETED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import io.vertx.core.Context;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -16,9 +15,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -39,6 +39,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 class StorageCleanupServiceImplTest extends RestVerticleTestBase {
+
+  private static final Logger LOGGER = LogManager.getLogger(StorageCleanupServiceImplTest.class);
 
   private static final String FILE_DEFINITIONS_TABLE = "file_definitions";
   private static final String STORAGE_PATH = "./storage";
@@ -89,6 +91,8 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(()->{
+          LOGGER.info("succeeded: {}, result: {}, exists: {}, files exists: {}, removed: {}",
+            ar.succeeded(), ar.result(), testFile1.exists(), Files.exists(Paths.get(testFile1.getParent())));
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
           assertFalse(testFile1.exists());
@@ -183,11 +187,6 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
     //when
     fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
-      try {
-        context.awaitCompletion(5, TimeUnit.SECONDS);
-      } catch (InterruptedException e) {
-        fail(e.getMessage());
-      }
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
