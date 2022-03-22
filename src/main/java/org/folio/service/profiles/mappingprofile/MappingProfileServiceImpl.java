@@ -1,12 +1,24 @@
 package org.folio.service.profiles.mappingprofile;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import javax.ws.rs.NotFoundException;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import java.util.Arrays;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import org.folio.HttpStatus;
 import org.folio.clients.UsersClient;
 import org.folio.dao.MappingProfileDao;
@@ -19,17 +31,6 @@ import org.folio.rest.jaxrs.model.Transformations;
 import org.folio.service.transformationfields.TransformationFieldsService;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.ws.rs.NotFoundException;
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Implementation of the MappingProfileService, calls MappingProfileDao to access MappingProfile metadata.
@@ -39,6 +40,7 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
   private static final String DEFAULT_HOLDINGS_MAPPING_PROFILE_ID = "1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13";
+  private static final String DEFAULT_AUTHORITY_MAPPING_PROFILE_ID = "5d636597-a59d-4391-a270-4e79d5ba70e3";
 
   @Autowired
   private MappingProfileDao mappingProfileDao;
@@ -79,8 +81,9 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   public Future<MappingProfile> update(MappingProfile mappingProfile, OkapiConnectionParams params) {
     Promise<MappingProfile> mappingProfilePromise = Promise.promise();
     String newId = mappingProfile.getId();
-    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(newId) ||
-      DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(newId)) {
+    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(newId)
+      || DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(newId)
+      || DEFAULT_AUTHORITY_MAPPING_PROFILE_ID.equals(newId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default mapping profile is forbidden");
     }
     validateProfileRecordTypes(mappingProfile);
@@ -148,10 +151,15 @@ public class MappingProfileServiceImpl implements MappingProfileService {
   }
 
   @Override
-  public Future<Boolean> deleteById(String mappingProfileId, String tenantId) {
+  public Future<MappingProfile> getDefaultAuthorityMappingProfile(OkapiConnectionParams params) {
+    return getById(DEFAULT_AUTHORITY_MAPPING_PROFILE_ID, params);
+  }
 
-    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId) ||
-    DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
+  @Override
+  public Future<Boolean> deleteById(String mappingProfileId, String tenantId) {
+    if (DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId)
+      || DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId)
+      || DEFAULT_AUTHORITY_MAPPING_PROFILE_ID.equals(mappingProfileId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default mapping profile is forbidden");
     }
     return mappingProfileDao.delete(mappingProfileId, tenantId);
@@ -224,6 +232,10 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   public static boolean isDefaultHoldingProfile(String mappingProfileId) {
     return DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId);
+  }
+
+  public static boolean isDefaultAuthorityProfile(String mappingProfileId) {
+    return DEFAULT_AUTHORITY_MAPPING_PROFILE_ID.equals(mappingProfileId);
   }
 
 }

@@ -34,7 +34,8 @@
       "enum": [
         "INSTANCE",
         "HOLDINGS",
-        "ITEM"
+        "ITEM",
+        "AUTHORITY"
       ]
     },
     "fileName": {
