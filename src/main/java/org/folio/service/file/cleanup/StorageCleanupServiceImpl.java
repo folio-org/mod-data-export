@@ -62,12 +62,18 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
     Promise<Boolean> promise = Promise.promise();
     return fileStorage.deleteFileAndParentDirectory(fileDefinition)
       .compose(isFileDeleted -> {
+        LOGGER.info("isFileDeleted: {}", isFileDeleted);
         if (Boolean.TRUE.equals(isFileDeleted)) {
-          return fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId);
+          LOGGER.info("ifIsFileDeletedTrue");
+          Future<Boolean> deleted = fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId);
+          LOGGER.info("deleted: {}", deleted);
+          return deleted;
         }
+        LOGGER.info("ifIsFileDeletedFalse");
         return Future.succeededFuture(false);
       })
       .compose(isFileDefinitionDeleted -> {
+        LOGGER.info("isFileDefinitionDeleted: {}", isFileDefinitionDeleted);
         if (Boolean.FALSE.equals(isFileDefinitionDeleted)) {
           LOGGER.error("File definition with id {} was not deleted", fileDefinition.getId());
         }
