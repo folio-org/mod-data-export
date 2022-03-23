@@ -188,8 +188,11 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
+          LOGGER.info("succeeded: {}", ar.succeeded());
           assertTrue(ar.result());
+          LOGGER.info("result: {}", ar.result());
           assertFileDefinitionIsRemoved();
+          LOGGER.info("passed successfully");
           context.completeNow();
         });
       });
@@ -288,8 +291,8 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
 
   private void assertFileDefinitionIsRemoved() {
     fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
-      LOGGER.info("fileDefinitionAr.result.empty: {}", fileDefinitionAr.result().isEmpty());
       assertTrue(fileDefinitionAr.result().isEmpty());
+      LOGGER.info("fileDefinitionAr.result.empty: {}", fileDefinitionAr.result().isEmpty());
     });
   }
 
