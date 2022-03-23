@@ -79,6 +79,7 @@ public class FileDefinitionDaoImpl implements FileDefinitionDao {
 
   @Override
   public Future<Boolean> deleteById(String id, String tenantId) {
+    LOGGER.info("deleteById: {}, {}", id, tenantId);
     Promise<RowSet<Row>> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).delete(TABLE, id, promise);
     return promise.future().map(updateResult -> updateResult.rowCount() == 1);
