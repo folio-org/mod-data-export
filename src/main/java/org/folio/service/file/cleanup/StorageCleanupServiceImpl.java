@@ -57,7 +57,10 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
       .compose(isFileDeleted -> {
         if (Boolean.TRUE.equals(isFileDeleted)) {
           return fileDefinitionDao.getById(fileDefinition.getId(), tenantId)
-            .compose(obtainedFileDefinition -> obtainedFileDefinition.isPresent() ? fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId) : Future.succeededFuture(true));
+            .compose(obtainedFileDefinition -> {
+              LOGGER.info("obtainedFileDefinition: {}, id: {}", obtainedFileDefinition.isPresent(), fileDefinition.getId());
+              return obtainedFileDefinition.isPresent() ? fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId) : Future.succeededFuture(true);
+            });
         }
         return Future.succeededFuture(false);
       })
