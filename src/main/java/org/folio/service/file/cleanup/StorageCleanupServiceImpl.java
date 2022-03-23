@@ -32,9 +32,16 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
   public Future<Boolean> cleanStorage(OkapiConnectionParams params) {
     Promise<Boolean> promise = Promise.promise();
     return fileDefinitionDao.getExpiredEntries(getFileDefinitionExpirationDate(), params.getTenantId())
-      .compose(fileDefinitions -> deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId()))
+      .compose(fileDefinitions -> {
+        LOGGER.info("fileDefinitions: {}", fileDefinitions);
+        Future<CompositeFuture> deleted = deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId());
+        LOGGER.info("deleted: {}", deleted.succeeded());
+        return deleted;
+      })
       .compose(compositeFuture -> {
+        LOGGER.info("isFilesDeleted before");
         promise.complete(isFilesDeleted(compositeFuture));
+        LOGGER.info("isFilesDeleted: {}", isFilesDeleted(compositeFuture));
         return promise.future();
       });
   }
