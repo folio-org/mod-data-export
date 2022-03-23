@@ -86,6 +86,7 @@ import static org.mockito.Mockito.doNothing;
 class DataExportTest extends RestVerticleTestBase {
 
   private static final long TIMER_DELAY = 5000L;
+  private static final int FILE_SIZE_THAT_EXCEEDS_LIMIT = 500_001;
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
@@ -642,7 +643,7 @@ class DataExportTest extends RestVerticleTestBase {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     // when
-    Response response = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId), 500_001);
+    Response response = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId), FILE_SIZE_THAT_EXCEEDS_LIMIT);
     // then
     vertx.setTimer(TIMER_DELAY, handler -> {
       context.verify(() -> {
