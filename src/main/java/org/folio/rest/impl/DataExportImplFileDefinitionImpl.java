@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
@@ -87,6 +88,9 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       succeededFuture().map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse
         .respond413WithApplicationJson(new Error().withMessage(errorMessage).withCode(ErrorCode.ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE.getCode()))).map(Response.class::cast).onComplete(asyncResultHandler);
       return;
+    }
+    if (isNull(entity.getSize())) {
+      LOGGER.error("Size of uploading file is null.");
     }
     JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString());
     entity.setJobExecutionId(jobExecution.getId());
