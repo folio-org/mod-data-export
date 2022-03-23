@@ -86,6 +86,7 @@ import static org.mockito.Mockito.doNothing;
 class DataExportTest extends RestVerticleTestBase {
 
   private static final long TIMER_DELAY = 5000L;
+  private static final int FILE_SIZE_THAT_EXCEEDS_LIMIT = 500_001;
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_JOB = "uuids_for_completed_job.csv";
   private static final String INSTANCE_UUIDS_FOR_COMPLETED_WITH_ERRORS_JOB = "uuids_for_completed_with_errors_job.csv";
   private static final String INSTANCE_UUIDS_INVENTORY = "instance_uuids_inventory.csv";
@@ -135,27 +136,38 @@ class DataExportTest extends RestVerticleTestBase {
     postToTenant(CUSTOM_TENANT_HEADER).statusCode(201);
   }
 
-
   @Test
   @Order(1)
-  void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
-    //given
+  void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
+    // given
     String tenantId = okapiConnectionParams.getTenantId();
-    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
+    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
+      .setContentType(ContentType.BINARY)
+      .addHeader(OKAPI_HEADER_TENANT, tenantId)
+      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
+      .setBaseUri(BASE_OKAPI_URL)
+      .build();
+    FileDefinition uploadedFileDefinition = uploadFile(INSTANCE_UUIDS_CQL, CQL, requestSpecificationForMockServer);
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, ExportRequest.IdType.INSTANCE);
+    buildSrsJobProfile(okapiConnectionParams.getTenantId());
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId, ExportRequest.IdType.INSTANCE);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
-    context.awaitCompletion(5, TimeUnit.SECONDS);
     String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
     // then
-    vertx.setTimer(7000L, handler ->
-      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
-        JobExecution jobExecution = optionalJobExecution.get();
-        context.verify(() -> {
-          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
-          context.completeNow();
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      jobExecutionDao.getById(jobExecutionId, tenantId)
+        .onSuccess(optionalJobExecution -> {
+          JobExecution jobExecution = optionalJobExecution.get();
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
+            context.verify(() -> {
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
+              validateExternalCallsForSrsAndInventory(1);
+              context.completeNow();
+            });
+          });
         });
-      }));
+    });
   }
 
   @Test
@@ -224,6 +236,28 @@ class DataExportTest extends RestVerticleTestBase {
 
   @Test
   @Order(4)
+  void testExport_uploadingCqlEmptyFile_FAILED_job(VertxTestContext context) throws IOException, InterruptedException {
+    //given
+    String tenantId = okapiConnectionParams.getTenantId();
+    FileDefinition uploadedFileDefinition = uploadFile(EMPTY_FILE, CQL, buildRequestSpecification(tenantId));
+    // when
+    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, ExportRequest.IdType.INSTANCE);
+    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
+    context.awaitCompletion(5, TimeUnit.SECONDS);
+    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
+    // then
+    vertx.setTimer(7000L, handler ->
+      jobExecutionDao.getById(jobExecutionId, tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertJobExecution(jobExecution, FAIL, EXPORTED_RECORDS_EMPTY);
+          context.completeNow();
+        });
+      }));
+  }
+
+  @Test
+  @Order(5)
   void testExportByCSV_UnderlyingSrsOnlyWithProfileTransformations_COMPLETED_WITH_ERRORS_With2Batches(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -249,7 +283,7 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
-  @Order(5)
+  @Order(6)
   void testExportByCSV_GenerateRecordsOnFly_whenSrsMarcRecordsEmpty(VertxTestContext context) throws IOException {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
@@ -270,40 +304,6 @@ class DataExportTest extends RestVerticleTestBase {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
               validateExternalCallsForSrsAndInventory(1);
               assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsByDefaultRulesAndTransformations.mrc");
-              context.completeNow();
-            });
-          });
-        });
-    });
-  }
-
-  @Test
-  @Order(6)
-  void testExportByCQL_GenerateRecordsOnFly_andUnderlyingSrs(VertxTestContext context) throws IOException {
-    // given
-    String tenantId = okapiConnectionParams.getTenantId();
-    RequestSpecification requestSpecificationForMockServer = new RequestSpecBuilder()
-      .setContentType(ContentType.BINARY)
-      .addHeader(OKAPI_HEADER_TENANT, tenantId)
-      .addHeader(OKAPI_HEADER_URL, MOCK_OKAPI_URL)
-      .setBaseUri(BASE_OKAPI_URL)
-      .build();
-    FileDefinition uploadedFileDefinition = uploadFile(INSTANCE_UUIDS_CQL, CQL, requestSpecificationForMockServer);
-    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
-    // when
-    buildSrsJobProfile(okapiConnectionParams.getTenantId());
-    ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, srsJobProfileId, ExportRequest.IdType.INSTANCE);
-    postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
-    String jobExecutionId = uploadedFileDefinition.getJobExecutionId();
-    // then
-    vertx.setTimer(TIMER_DELAY, handler -> {
-      jobExecutionDao.getById(jobExecutionId, tenantId)
-        .onSuccess(optionalJobExecution -> {
-          JobExecution jobExecution = optionalJobExecution.get();
-          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
-            context.verify(() -> {
-              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForSrsAndInventory(1);
               context.completeNow();
             });
           });
@@ -638,6 +638,22 @@ class DataExportTest extends RestVerticleTestBase {
   }
 
   @Test
+  @Order(19)
+  void testExportByCSV_whenFileIsTooLarge(VertxTestContext context) throws IOException {
+    // given
+    String tenantId = okapiConnectionParams.getTenantId();
+    // when
+    Response response = uploadFile(INSTANCE_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId), FILE_SIZE_THAT_EXCEEDS_LIMIT);
+    // then
+    vertx.setTimer(TIMER_DELAY, handler -> {
+      context.verify(() -> {
+        assertEquals(413, response.getStatusCode());
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
   @Order(14)
   void testAuthorityExportByCSV(VertxTestContext context) throws IOException {
     // given
@@ -729,8 +745,24 @@ class DataExportTest extends RestVerticleTestBase {
       .extract().body().as(FileDefinition.class);
   }
 
+  private Response uploadFile(String fileName, UploadFormat format, String tenantId, RequestSpecification binaryRequestSpecification, Integer size) throws IOException {
+
+    FileDefinition givenFileDefinition = new FileDefinition()
+      .withId(UUID.randomUUID().toString())
+      .withFileName(fileName)
+      .withUploadFormat(format)
+      .withSize(size)
+      .withStatus(FileDefinition.Status.NEW);
+
+    return postRequest(JsonObject.mapFrom(givenFileDefinition), FILE_DEFINITION_SERVICE_URL, tenantId);
+  }
+
   private FileDefinition uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification) throws IOException {
     return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification);
+  }
+
+  private Response uploadFile(String fileName, UploadFormat format, RequestSpecification binaryRequestSpecification, Integer size) throws IOException {
+    return uploadFile(fileName, format, okapiConnectionParams.getTenantId(), binaryRequestSpecification, size);
   }
 
   private ExportRequest buildExportRequest(FileDefinition uploadedFileDefinition, ExportRequest.IdType idType) {

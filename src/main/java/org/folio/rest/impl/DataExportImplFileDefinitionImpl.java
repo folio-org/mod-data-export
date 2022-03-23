@@ -1,6 +1,8 @@
 package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.folio.rest.RestVerticle.STREAM_ABORT;
 import static org.folio.rest.jaxrs.model.FileDefinition.Status;
@@ -14,10 +16,13 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
 import org.folio.rest.annotations.Stream;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.exceptions.ServiceException;
+import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.resource.DataExportFileDefinitions;
@@ -33,14 +38,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitions {
 
+  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+
   public static final String CSV_FORMAT_EXTENSION = "csv";
   public static final String CQL_FORMAT_EXTENSION = "cql";
+
+  private static final int MAX_FILE_SIZE = 500_000;
 
   private static final String QUERY_KEY = "query";
 
@@ -72,6 +82,16 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
   @Validate
   public void postDataExportFileDefinitions(FileDefinition entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    if (nonNull(entity.getSize()) && entity.getSize() > MAX_FILE_SIZE) {
+      String errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", entity.getSize(), MAX_FILE_SIZE);
+      LOGGER.error(errorMessage);
+      succeededFuture().map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse
+        .respond413WithApplicationJson(new Error().withMessage(errorMessage).withCode(ErrorCode.ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE.getCode()))).map(Response.class::cast).onComplete(asyncResultHandler);
+      return;
+    }
+    if (isNull(entity.getSize())) {
+      LOGGER.error("Size of uploading file is null.");
+    }
     JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString());
     entity.setJobExecutionId(jobExecution.getId());
     succeededFuture()
