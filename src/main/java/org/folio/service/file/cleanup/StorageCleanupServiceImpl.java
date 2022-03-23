@@ -56,7 +56,7 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
     return fileStorage.deleteFileAndParentDirectory(fileDefinition)
       .compose(isFileDeleted -> {
         fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId);
-        return Future.succeededFuture(false);
+        return Future.succeededFuture(true);
       })
       .compose(isFileDefinitionDeleted -> {
         if (Boolean.FALSE.equals(isFileDefinitionDeleted)) {
