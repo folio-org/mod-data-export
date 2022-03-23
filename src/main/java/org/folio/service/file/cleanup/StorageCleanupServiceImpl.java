@@ -32,16 +32,9 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
   public Future<Boolean> cleanStorage(OkapiConnectionParams params) {
     Promise<Boolean> promise = Promise.promise();
     return fileDefinitionDao.getExpiredEntries(getFileDefinitionExpirationDate(), params.getTenantId())
-      .compose(fileDefinitions -> {
-        LOGGER.info("fileDefinitions: {}", fileDefinitions);
-        Future<CompositeFuture> deleted = deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId());
-        LOGGER.info("deleted: {}", deleted.succeeded());
-        return deleted;
-      })
+      .compose(fileDefinitions -> deleteExpiredFilesAndRelatedFileDefinitions(fileDefinitions, params.getTenantId()))
       .compose(compositeFuture -> {
-        LOGGER.info("isFilesDeleted before");
         promise.complete(isFilesDeleted(compositeFuture));
-        LOGGER.info("isFilesDeleted: {}", isFilesDeleted(compositeFuture));
         return promise.future();
       });
   }
@@ -62,18 +55,13 @@ public class StorageCleanupServiceImpl implements StorageCleanupService {
     Promise<Boolean> promise = Promise.promise();
     return fileStorage.deleteFileAndParentDirectory(fileDefinition)
       .compose(isFileDeleted -> {
-        LOGGER.info("isFileDeleted: {}", isFileDeleted);
         if (Boolean.TRUE.equals(isFileDeleted)) {
-          LOGGER.info("ifIsFileDeletedTrue");
-          Future<Boolean> deleted = fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId);
-          LOGGER.info("deleted: {}", deleted);
-          return deleted;
+          return fileDefinitionDao.getById(fileDefinition.getId(), tenantId)
+            .compose(obtainedFileDefinition -> obtainedFileDefinition.isPresent() ? fileDefinitionDao.deleteById(fileDefinition.getId(), tenantId) : Future.succeededFuture(true));
         }
-        LOGGER.info("ifIsFileDeletedFalse");
         return Future.succeededFuture(false);
       })
       .compose(isFileDefinitionDeleted -> {
-        LOGGER.info("isFileDefinitionDeleted: {}", isFileDefinitionDeleted);
         if (Boolean.FALSE.equals(isFileDefinitionDeleted)) {
           LOGGER.error("File definition with id {} was not deleted", fileDefinition.getId());
         }

@@ -15,10 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.Metadata;
@@ -39,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 class StorageCleanupServiceImplTest extends RestVerticleTestBase {
-
-  private static final Logger LOGGER = LogManager.getLogger(StorageCleanupServiceImplTest.class);
 
   private static final String FILE_DEFINITIONS_TABLE = "file_definitions";
   private static final String STORAGE_PATH = "./storage";
@@ -188,11 +183,8 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
-          LOGGER.info("succeeded: {}, result: {}", ar.succeeded(), ar.result());
           assertTrue(ar.result());
-          LOGGER.info("result: {}", ar.result());
           assertFileDefinitionIsRemoved();
-          LOGGER.info("passed successfully");
           context.completeNow();
         });
       });
@@ -292,7 +284,6 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
   private void assertFileDefinitionIsRemoved() {
     fileDefinitionDao.getById(FILE_DEFINITION_ID_1, TENANT_ID).onComplete(fileDefinitionAr -> {
       assertTrue(fileDefinitionAr.result().isEmpty());
-      LOGGER.info("fileDefinitionAr.result.empty: {}", fileDefinitionAr.result().isEmpty());
     });
   }
 
