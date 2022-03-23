@@ -26,7 +26,6 @@ import org.folio.service.file.cleanup.StorageCleanupService;
 import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -173,7 +172,6 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
     });
   }
 
-  @Order(1)
   @Test
   void shouldRemoveFileDefinition_whenFileDoesNotExist_andFileDefinitionWasUpdatedLaterThanHourAgo(VertxTestContext context) {
     // given
