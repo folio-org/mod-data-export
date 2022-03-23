@@ -179,8 +179,8 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       .withUpdatedDate(new Date(new Date().getTime() - ONE_HOUR_ONE_MINUTE_IN_MILLIS));
 
     //when
-    fileDefinitionDao.save(fileDefinition1, TENANT_ID).onSuccess(saveAr -> {
-      storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
+    fileDefinitionDao.save(fileDefinition1, TENANT_ID).compose(saveAr -> {
+      return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
           assertTrue(ar.result());
