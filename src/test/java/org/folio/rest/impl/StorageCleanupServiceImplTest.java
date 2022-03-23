@@ -188,7 +188,7 @@ class StorageCleanupServiceImplTest extends RestVerticleTestBase {
       return storageCleanupService.cleanStorage(okapiConnectionParams).onComplete(ar -> {
         context.verify(() -> {
           assertTrue(ar.succeeded());
-          LOGGER.info("succeeded: {}", ar.succeeded());
+          LOGGER.info("succeeded: {}, result: {}", ar.succeeded(), ar.result());
           assertTrue(ar.result());
           LOGGER.info("result: {}", ar.result());
           assertFileDefinitionIsRemoved();
