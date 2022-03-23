@@ -85,7 +85,7 @@ public class DataExportImplFileDefinitionImpl implements DataExportFileDefinitio
       String errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", entity.getSize(), MAX_FILE_SIZE);
       LOGGER.error(errorMessage);
       succeededFuture().map(DataExportFileDefinitions.PostDataExportFileDefinitionsResponse
-        .respond413WithApplicationJson(new Error().withMessage(errorMessage))).map(Response.class::cast).onComplete(asyncResultHandler);
+        .respond413WithApplicationJson(new Error().withMessage(errorMessage).withCode(ErrorCode.ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE.getCode()))).map(Response.class::cast).onComplete(asyncResultHandler);
       return;
     }
     JobExecution jobExecution = new JobExecution().withId(UUID.randomUUID().toString());

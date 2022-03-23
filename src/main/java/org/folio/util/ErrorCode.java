@@ -47,7 +47,8 @@ public enum ErrorCode {
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type"),
   ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting holding records only the default holding job profile is supported"),
   ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting authority records only the default authority job profile is supported"),
-  ERROR_JOB_IS_EXPIRED("error.messagePlaceholder", "Job was expired: no updates for more than 1 hour");
+  ERROR_JOB_IS_EXPIRED("error.messagePlaceholder", "Job was expired: no updates for more than 1 hour"),
+  ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large");
 
   private final String code;
   private final String description;
