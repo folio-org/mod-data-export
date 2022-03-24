@@ -4,7 +4,7 @@
    "createdDate":"2019-07-22T11:22:07Z",
    "logLevel":"ERROR",
    "errorMessageCode":"error.code",
-   "errorMessageValues": [{"value"}],
+   "errorMessageValues": [{"value": "foo"}],
    "affectedRecord": {
        "id": "57c79d87-6510-4354-b212-96832fbf3fa1",
        "hrid": "200",
