@@ -1,5 +1,16 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.ws.rs.core.Response;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -8,6 +19,10 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -26,20 +41,6 @@ import org.folio.service.profiles.mappingprofile.MappingProfileService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.ExceptionToResponseMapper;
 import org.folio.util.OkapiConnectionParams;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.ws.rs.core.Response;
-import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static io.vertx.core.Future.succeededFuture;
-import static java.lang.String.format;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 public class DataExportImpl implements DataExport {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
@@ -229,7 +230,14 @@ public class DataExportImpl implements DataExport {
       .withFileDefinitionId(fileDefinitionId)
       .withJobProfileId(jobProfileId)
       .withMetadata(entity.getMetadata())
+      .withIdType(getIdType(entity))
       .withRecordType(ExportRequest.RecordType.fromValue(entity.getRecordType().toString()));
+  }
+
+  private ExportRequest.IdType getIdType(QuickExportRequest entity) {
+    return entity.getRecordType() == QuickExportRequest.RecordType.AUTHORITY
+           ? ExportRequest.IdType.AUTHORITY
+           : ExportRequest.IdType.INSTANCE;
   }
 
   private boolean allRecordsLoaded(String sourcePath, Integer size) {
