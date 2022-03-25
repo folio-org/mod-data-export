@@ -99,6 +99,7 @@ class DataExportTest extends RestVerticleTestBase {
   private static final String FILE_WHEN_INVENTORY_RETURNS_500 = "inventoryUUIDReturn500.csv";
   private static final String INSTANCE_UUIDS_CQL = "InventoryUUIDs.cql";
   private static final String INSTANCE_ID = "7fbd5d84-62d1-44c6-9c45-6cb173998bbd";
+  private static final String AUTHORITY_ID = "ae573875-fbc8-40e7-bda7-0ac283354226";
   private static final String JOB_EXECUTION_ID_FIELD = "jobExecutionId";
   private static final String JOB_EXECUTION_HR_ID_FIELD = "jobExecutionHrId";
   private static final String DEFAULT_HOLDING_JOB_PROFILE = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
@@ -680,6 +681,31 @@ class DataExportTest extends RestVerticleTestBase {
           });
         });
     });
+  }
+
+  @Test
+  @Order(15)
+  void testQuickExport_uploadingAuthorityUuidType_COMPLETED_job(VertxTestContext context) {
+    //given
+    String tenantId = okapiConnectionParams.getTenantId();
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
+    // when
+    QuickExportRequest exportRequest = buildQuickExportRequest(Collections.singletonList(AUTHORITY_ID));
+    exportRequest.setRecordType(QuickExportRequest.RecordType.AUTHORITY);
+    exportRequest.setJobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE);
+    JsonObject response = new JsonObject(postRequest(JsonObject.mapFrom(exportRequest), QUICK_EXPORT_URL)
+      .body().prettyPrint());
+    // then
+    vertx.setTimer(TIMER_DELAY, handler ->
+      jobExecutionDao.getById(fileExportDefinitionCaptor.getValue().getJobExecutionId(), tenantId).onSuccess(optionalJobExecution -> {
+        JobExecution jobExecution = optionalJobExecution.get();
+        context.verify(() -> {
+          assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+          assertEquals(jobExecution.getId(), response.getString(JOB_EXECUTION_ID_FIELD));
+          assertEquals(jobExecution.getHrId(), response.getInteger(JOB_EXECUTION_HR_ID_FIELD));
+          context.completeNow();
+        });
+      }));
   }
 
   private void buildCustomJobProfile(String tenantID) {
