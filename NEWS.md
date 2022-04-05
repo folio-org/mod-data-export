@@ -1,5 +1,14 @@
 ## v4.5.0 Unreleased
 
+## 04/05/2022 v4.4.1 Released
+This release includes improvements of data export flow with custom profiles
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.0...v4.4.1)
+
+### Stories
+
+* [MDEXP-516](https://issues.folio.org/browse/MDEXP-516) Preserve LDR 05, 06, 07 values on the export with custom mapping profiles
+
 ## 03/21/2022 v4.4.0 Released
 This release includes implemented export flow for holdings MFHD records and bug fixes
 
