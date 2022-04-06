@@ -1,5 +1,14 @@
 ## v4.5.0 Unreleased
 
+## 04/06/2022 v4.4.2 Released
+This release includes build failure fix
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.1...v4.4.2)
+
+### Bug Fixes
+
+* [MDEXP-509](https://issues.folio.org/browse/MDEXP-509) build-platform-complete-snapshot build failures 3/21
+
 ## 04/05/2022 v4.4.1 Released
 This release includes improvements of data export flow with custom profiles
 
