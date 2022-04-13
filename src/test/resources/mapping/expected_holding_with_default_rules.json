@@ -11,26 +11,7 @@
         "subfields":[
           {
             "a":"Line 1b"
-          }
-        ]
-      }
-    },
-    {
-      "866":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
-          {
-            "a":"Line 2b"
-          }
-        ]
-      }
-    },
-    {
-      "866":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
+          },
           {
             "z":"Statement public note"
           }
@@ -42,6 +23,9 @@
         "ind1":" ",
         "ind2":"0",
         "subfields":[
+          {
+            "a":"Line 2b"
+          },
           {
             "z":"Statement public note2"
           }
@@ -55,26 +39,7 @@
         "subfields":[
           {
             "a":"Line 1a"
-          }
-        ]
-      }
-    },
-    {
-      "867":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
-          {
-            "a":"Line 2a"
-          }
-        ]
-      }
-    },
-    {
-      "867":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
+          },
           {
             "z":"Statement supplements public note"
           }
@@ -86,6 +51,9 @@
         "ind1":" ",
         "ind2":"0",
         "subfields":[
+          {
+            "a":"Line 2a"
+          },
           {
             "z":"Statement supplements public note2"
           }
@@ -99,26 +67,7 @@
         "subfields":[
           {
             "a":"Line 1c"
-          }
-        ]
-      }
-    },
-    {
-      "868":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
-          {
-            "a":"Line 2c"
-          }
-        ]
-      }
-    },
-    {
-      "868":{
-        "ind1":" ",
-        "ind2":"0",
-        "subfields":[
+          },
           {
             "z":"Statement indexes public note"
           }
@@ -130,6 +79,9 @@
         "ind1":" ",
         "ind2":"0",
         "subfields":[
+          {
+            "a":"Line 2c"
+          },
           {
             "z":"Statement indexes public note2"
           }
