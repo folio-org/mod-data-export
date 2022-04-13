@@ -83,31 +83,6 @@
         "subfield": "a"
       },
       {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "0"
-          }
-        }
-      }
-    ]
-  },
-  {
-    "id": "holdings.holdingsstatements.note",
-    "field": "866",
-    "description": "Holdings statement - note",
-    "dataSources": [
-      {
         "from": "$.holdings[*].holdingsStatements[*].note",
         "subfield": "z"
       },
@@ -141,31 +116,6 @@
         "subfield": "a"
       },
       {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "0"
-          }
-        }
-      }
-    ]
-  },
-  {
-    "id": "holdings.holdingsstatementsforsupplements.note",
-    "field": "867",
-    "description": "Holdings statement for supplements - note",
-    "dataSources": [
-      {
         "from": "$.holdings[*].holdingsStatementsForSupplements[*].note",
         "subfield": "z"
       },
@@ -198,31 +148,6 @@
         "from": "$.holdings[*].holdingsStatementsForIndexes[*].statement",
         "subfield": "a"
       },
-      {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "0"
-          }
-        }
-      }
-    ]
-  },
-  {
-    "id": "holdings.holdingsstatementsforindexes.note",
-    "field": "868",
-    "description": "Holdings statement for indexes - note",
-    "dataSources": [
       {
         "from": "$.holdings[*].holdingsStatementsForIndexes[*].note",
         "subfield": "z"
