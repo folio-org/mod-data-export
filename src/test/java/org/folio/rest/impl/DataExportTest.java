@@ -163,7 +163,10 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
-              validateExternalCallsForSrsAndInventory(1);
+              validateExternalCallsForSrsAndInventoryPost(1);
+
+              // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
+              validateExternalCallsForSrsAndInventoryGet(2);
               context.completeNow();
             });
           });
@@ -223,7 +226,10 @@ class DataExportTest extends RestVerticleTestBase {
             .onComplete(ar -> {
               context.verify(() -> {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-                validateExternalCallsForSrsAndInventory(1);
+                validateExternalCallsForSrsAndInventoryPost(1);
+
+                // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
+                validateExternalCallsForSrsAndInventoryGet(2);
                 assertTrue(ar.succeeded());
                 List<ErrorLog> errorLogList = ar.result();
                 assertEquals(1, errorLogList.size());
@@ -276,7 +282,10 @@ class DataExportTest extends RestVerticleTestBase {
         fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
-            validateExternalCallsForSrsAndInventory(2);
+
+            // 4 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
+            validateExternalCallsForSrsAndInventoryGet(4);
+            validateExternalCallsForSrsAndInventoryPost(2);
             context.completeNow();
           });
         });
@@ -303,7 +312,10 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForSrsAndInventory(1);
+              validateExternalCallsForSrsAndInventoryPost(1);
+
+              // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
+              validateExternalCallsForSrsAndInventoryGet(2);
               assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsByDefaultRulesAndTransformations.mrc");
               context.completeNow();
             });
@@ -867,8 +879,11 @@ class DataExportTest extends RestVerticleTestBase {
     assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
   }
 
-  private void validateExternalCallsForSrsAndInventory(int expectedNumber) {
+  private void validateExternalCallsForSrsAndInventoryPost(int expectedNumber) {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
+  }
+
+  private void validateExternalCallsForSrsAndInventoryGet(int expectedNumber) {
     assertEquals(expectedNumber, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
   }
 
@@ -880,7 +895,8 @@ class DataExportTest extends RestVerticleTestBase {
    * No calls to SRS to be made in case of custom profile
    */
   private void validateExternalCallsForInventoryAndReferenceData() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
+    // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
+    assertEquals(2, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
     assertNull(MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS));
     validateExternalCallsForReferenceData();
   }
