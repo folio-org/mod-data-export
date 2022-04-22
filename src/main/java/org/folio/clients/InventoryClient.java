@@ -220,7 +220,7 @@ public class InventoryClient {
   private Optional<JsonObject> enrichInstancesByPrecedingSucceedingTitles(Optional<JsonObject> instanceStorageInstancesOpt, List<String> ids, OkapiConnectionParams params, int partitionSize) throws HttpClientException {
     Optional<JsonObject> inventoryInstancesOpt = Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INVENTORY_INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
       QUERY_PATTERN_INVENTORY));
-    if (instanceStorageInstancesOpt.isPresent() && inventoryInstancesOpt.isPresent()) {
+    if (instanceStorageInstancesOpt.isPresent()) {
       JsonObject instanceStorageInstances = instanceStorageInstancesOpt.get();
       instanceStorageInstances.getJsonArray(INSTANCES).stream().forEach(instance -> enrichInstanceByPrecedingSucceedingTitles((JsonObject) instance, inventoryInstancesOpt.get()));
       return Optional.of(instanceStorageInstances);
