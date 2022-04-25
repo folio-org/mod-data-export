@@ -52,7 +52,9 @@
       "holdingsRecords2": [],
       "natureOfContentTermIds": [
         "44cd89f3-2e76-469f-a955-cc57cb9e0395"
-      ]
+      ],
+      "succeedingTitles": [],
+      "precedingTitles": []
     },
     {
       "id": "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc",
@@ -112,7 +114,9 @@
         "updatedDate": "2020-03-28T02:43:59.709+0000"
       },
       "holdingsRecords2": [],
-      "natureOfContentTermIds": []
+      "natureOfContentTermIds": [],
+      "succeedingTitles": [],
+      "precedingTitles": []
     }
   ],
   "resultInfo": {

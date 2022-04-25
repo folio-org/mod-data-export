@@ -1830,6 +1830,76 @@
     }
   },
   {
+    "id": "instance.preceding.title",
+    "field": "780",
+    "description": "Instance preceding title",
+    "dataSources": [
+      {
+        "from": "$.instance.precedingTitles[*].precedingInstanceId",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "id": "$.instance.succeedingTitles[*].id",
+      "title": "$.instance.succeedingTitles[*].title",
+      "hrid": "$.instance.succeedingTitles[*].hrid",
+      "identifiers": "$.instance.identifiers[*]"
+    }
+  },
+  {
+    "id": "instance.succeeding.title",
+    "field": "785",
+    "description": "Instance succeeding title",
+    "dataSources": [
+      {
+        "from": "$.instance.succeedingTitles[*].succeedingInstanceId",
+        "subfield": "a"
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": "0"
+          }
+        }
+      }
+    ],
+    "metadata": {
+      "id": "$.instance.succeedingTitles[*].id",
+      "title": "$.instance.succeedingTitles[*].title",
+      "hrid": "$.instance.succeedingTitles[*].hrid",
+      "identifiers": "$.instance.identifiers[*]"
+    }
+  },
+  {
     "id": "instance.electronic.access",
     "field": "856",
     "description": "Electronic access",

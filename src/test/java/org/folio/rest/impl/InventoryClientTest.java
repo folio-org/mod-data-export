@@ -33,6 +33,8 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 class InventoryClientTest extends RestVerticleTestBase {
   private static final int LIMIT = 20;
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
+  private static final String PRECEDING_TITLES = "precedingTitles";
+  private static final String SUCCEEDING_TITLES = "succeedingTitles";
   private static OkapiConnectionParams okapiConnectionParams;
 
   @Autowired
@@ -58,6 +60,10 @@ class InventoryClientTest extends RestVerticleTestBase {
     // then
     Assert.assertTrue(inventoryResponse.isPresent());
     Assert.assertEquals(1, inventoryResponse.get().getJsonArray("instances").getList().size());
+    inventoryResponse.get().getJsonArray("instances").stream().forEach(instance -> {
+      Assert.assertTrue(((JsonObject)instance).containsKey(PRECEDING_TITLES));
+      Assert.assertTrue(((JsonObject)instance).containsKey(SUCCEEDING_TITLES));
+    });
   }
 
 

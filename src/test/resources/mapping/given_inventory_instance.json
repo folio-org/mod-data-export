@@ -193,6 +193,24 @@
       "ebbbdef1-00e1-428b-bc11-314dc0705074",
       "none-existing-id"
     ],
+    "precedingTitles": [
+      {
+        "id": "6fd8979f-0752-4397-a0d6-5cac3aba5613",
+        "title": "ABA Journal",
+        "hrid": "inst000000000001",
+        "precedingInstanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+        "identifiers": []
+      }
+    ],
+    "succeedingTitles": [
+      {
+        "id": "537a1403-d05b-400a-a8b6-d85413d1fe50",
+        "title": "American Bar Association journal.",
+        "hrid": "inst000000000002",
+        "succeedingInstanceId": "00f10ab9-d845-4334-92d2-ff55862bf4f9",
+        "identifiers": []
+      }
+    ],
     "publication": [
       {
         "publisher": "Alfred A. Knopf",

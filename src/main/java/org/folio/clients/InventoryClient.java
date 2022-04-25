@@ -41,6 +41,7 @@ import static org.folio.util.ExternalPathResolver.LIBRARIES;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
+import static org.folio.util.ExternalPathResolver.INVENTORY_INSTANCE;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 @Component
@@ -53,14 +54,19 @@ public class InventoryClient {
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 1000;
   private static final int HOLDINGS_LIMIT = 1000;
+  private static final String PRECEDING_TITLES = "precedingTitles";
+  private static final String SUCCEEDING_TITLES = "succeedingTitles";
+  private static final String INSTANCES = "instances";
+  private static final String ID = "id";
 
   @Autowired
   private ErrorLogService errorLogService;
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
-      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+      Optional<JsonObject> instanceStorageInstancesOpt = Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
         QUERY_PATTERN_INVENTORY));
+      return enrichInstancesByPrecedingSucceedingTitles(instanceStorageInstancesOpt, ids, params, partitionSize);
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
@@ -209,6 +215,27 @@ public class InventoryClient {
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_ITEM_BY_HOLDINGS_ID.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
       return Optional.empty();
     }
+  }
+
+  private Optional<JsonObject> enrichInstancesByPrecedingSucceedingTitles(Optional<JsonObject> instanceStorageInstancesOpt, List<String> ids, OkapiConnectionParams params, int partitionSize) throws HttpClientException {
+    Optional<JsonObject> inventoryInstancesOpt = Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INVENTORY_INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
+      QUERY_PATTERN_INVENTORY));
+    if (instanceStorageInstancesOpt.isPresent()) {
+      JsonObject instanceStorageInstances = instanceStorageInstancesOpt.get();
+      instanceStorageInstances.getJsonArray(INSTANCES).stream().forEach(instance -> enrichInstanceByPrecedingSucceedingTitles((JsonObject) instance, inventoryInstancesOpt.get()));
+      return Optional.of(instanceStorageInstances);
+    }
+    return instanceStorageInstancesOpt;
+  }
+
+  private void enrichInstanceByPrecedingSucceedingTitles(JsonObject instanceStorageInstance, JsonObject inventoryInstances) {
+    inventoryInstances.getJsonArray(INSTANCES).stream()
+      .filter(instance -> ((JsonObject)instance).getString(ID).equals(instanceStorageInstance.getString(ID))
+        && ((JsonObject)instance).containsKey(SUCCEEDING_TITLES) && ((JsonObject)instance).containsKey(PRECEDING_TITLES))
+      .findFirst().ifPresent(instance -> {
+      instanceStorageInstance.put(SUCCEEDING_TITLES, ((JsonObject)instance).getJsonArray(SUCCEEDING_TITLES));
+      instanceStorageInstance.put(PRECEDING_TITLES, ((JsonObject)instance).getJsonArray(PRECEDING_TITLES));
+    });
   }
 
 }

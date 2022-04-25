@@ -28,6 +28,7 @@ import static org.folio.TestUtil.readFileContentFromResources;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,6 +44,8 @@ class RecordLoaderServiceUnitTest{
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_marc_bib_records_response.json";
   protected static final String HOLDINGS_RESPONSE_JSON = "mockData/inventory/holdings_in000005.json";
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
+  private static final String PRECEDING_TITLES = "precedingTitles";
+  private static final String SUCCEEDING_TITLES = "succeedingTitles";
 
   @Mock
   SourceRecordStorageClient srsClient;
@@ -108,6 +111,10 @@ class RecordLoaderServiceUnitTest{
     LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
     assertThat(inventoryResponse.getEntities(), hasSize(2));
+    inventoryResponse.getEntities().forEach(entity -> {
+      assertTrue(entity.containsKey(PRECEDING_TITLES));
+      assertTrue(entity.containsKey(SUCCEEDING_TITLES));
+    });
   }
 
   @Test
