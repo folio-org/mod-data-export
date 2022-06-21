@@ -159,9 +159,7 @@ class InputDataManagerImpl implements InputDataManager {
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       })
-        .onFailure(ex -> {
-          LOGGER.error(ex.getMessage());
-        });
+        .onFailure(throwable -> LOGGER.error("Failed to save file definition.", throwable));
     } else {
       errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
