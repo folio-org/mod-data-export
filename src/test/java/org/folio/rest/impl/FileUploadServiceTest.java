@@ -31,7 +31,6 @@ import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -225,34 +224,35 @@ class FileUploadServiceTest extends RestVerticleTestBase {
       .body("metadata.createdDate", notNullValue())
       .extract().body().as(FileDefinition.class);
 
-    RestAssured.given()
-      .spec(binaryRequestSpecification)
-      .when()
-      .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId())
-      .then()
-      .statusCode(HttpStatus.SC_OK)
-      .body("sourcePath", notNullValue())
-      .body("status", is(FileDefinition.Status.COMPLETED.name()))
-      .extract().body().as(FileDefinition.class);
-    // and then created job execution for current upload file definition
-    JobExecutionCollection jobExecutions = RestAssured.given()
-      .spec(jsonRequestSpecification)
-      .when()
-      .get(JOB_EXECUTIONS_URL + "/" + "?query=id=" + uploadedFileDefinition.getJobExecutionId())
-      .then()
-      .statusCode(HttpStatus.SC_OK)
-      .extract().body().as(JobExecutionCollection.class);
+    vertx.setTimer(3000, timerId -> {
+      RestAssured.given()
+        .spec(binaryRequestSpecification)
+        .when()
+        .get(FILE_DEFINITION_SERVICE_URL + givenFileDefinition.getId())
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .body("sourcePath", notNullValue())
+        .body("status", is(FileDefinition.Status.COMPLETED.name()))
+        .extract().body().as(FileDefinition.class);
+      // and then created job execution for current upload file definition
+      JobExecutionCollection jobExecutions = RestAssured.given()
+        .spec(jsonRequestSpecification)
+        .when()
+        .get(JOB_EXECUTIONS_URL + "/" + "?query=id=" + uploadedFileDefinition.getJobExecutionId())
+        .then()
+        .statusCode(HttpStatus.SC_OK)
+        .extract().body().as(JobExecutionCollection.class);
 
-    vertx.setTimer(3000, handler -> {
-      context.verify(() -> {
-        assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
-        assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
-        context.completeNow();
+      vertx.setTimer(3000, handler -> {
+        context.verify(() -> {
+          assertEquals(uploadedFileDefinition.getJobExecutionId(), jobExecutions.getJobExecutions().get(0).getId());
+          assertNotNull(jobExecutions.getJobExecutions().get(0).getHrId());
+          // clean up storage
+          FileUtils.deleteDirectory(new File("./storage"));
+          context.completeNow();
+        });
       });
     });
-
-    // clean up storage
-    FileUtils.deleteDirectory(new File("./storage"));
   }
 
   @NotNull
