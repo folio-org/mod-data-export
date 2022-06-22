@@ -7,6 +7,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.json.JsonObject;
+
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import io.vertx.core.shareddata.LocalMap;
@@ -85,7 +87,8 @@ class InputDataManagerImpl implements InputDataManager {
   @Override
   public void init(JsonObject request, JsonObject requestFileDefinition, JsonObject mappingProfileJson, JsonObject jobExecution, Map<String, String> params) {
     executor.executeBlocking(blockingFuture -> {
-      initBlocking(request, requestFileDefinition, mappingProfileJson, jobExecution, params);
+      CaseInsensitiveMap<String, String> paramsMap = new CaseInsensitiveMap<>(params);
+      initBlocking(request, requestFileDefinition, mappingProfileJson, jobExecution, paramsMap);
       blockingFuture.complete();
     }, this::handleExportInitResult);
   }
@@ -155,7 +158,8 @@ class InputDataManagerImpl implements InputDataManager {
         } else {
           finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
-      });
+      })
+        .onFailure(throwable -> LOGGER.error("Failed to save file definition.", throwable));
     } else {
       errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
