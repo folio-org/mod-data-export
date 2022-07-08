@@ -1,4 +1,43 @@
-## v4.5.0 Unreleased
+## v4.6.0 Unreleased
+
+## 07/08/2022 v4.5.0 Released
+This release includes RMB v34 upgrade, export MARC authority records, default profiles implementation
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.2...v4.5.0)
+
+### Technical tasks
+
+* [MDEXP-533](https://issues.folio.org/browse/MDEXP-533) RMB v34 upgrade - Morning Glory 2022 R2 module release
+* [MDEXP-511](https://issues.folio.org/browse/MDEXP-511) Migrate to use new api-lint and api-doc CI tools
+
+### Stories
+
+* [MDEXP-513](https://issues.folio.org/browse/MDEXP-513) Support quickExport for Authorities IDs
+* [MDEXP-508](https://issues.folio.org/browse/MDEXP-508) Spike: Export MARC authority records
+* [MDEXP-487](https://issues.folio.org/browse/MDEXP-487) Spike: Limit file upload size
+* [MDEXP-213](https://issues.folio.org/browse/MDEXP-213) Implement a way to identify default profiles (instances and holdings)
+
+### Bug Fixes
+
+* [MDEXP-519](https://issues.folio.org/browse/MDEXP-519) Holdings export: subfields for 866, 867 and 868 are entered separately
+
+## 04/06/2022 v4.4.2 Released
+This release includes build failure fix
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.1...v4.4.2)
+
+### Bug Fixes
+
+* [MDEXP-509](https://issues.folio.org/browse/MDEXP-509) build-platform-complete-snapshot build failures 3/21
+
+## 04/05/2022 v4.4.1 Released
+This release includes improvements of data export flow with custom profiles
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.0...v4.4.1)
+
+### Stories
+
+* [MDEXP-516](https://issues.folio.org/browse/MDEXP-516) Preserve LDR 05, 06, 07 values on the export with custom mapping profiles
 
 ## 03/21/2022 v4.4.0 Released
 This release includes implemented export flow for holdings MFHD records and bug fixes
