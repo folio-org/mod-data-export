@@ -1,5 +1,14 @@
 ## v4.6.0 Unreleased
 
+## 07/15/2022 v4.5.1 Released
+This release includes migration scripts fix for mappings and job profiles
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.5.0...v4.5.1)
+
+### Bug Fixes
+
+* [MDEXP-543](https://issues.folio.org/browse/MDEXP-543) Migration fails - mapping and job profiles
+
 ## 07/08/2022 v4.5.0 Released
 This release includes RMB v34 upgrade, export MARC authority records, default profiles implementation
 
