@@ -33,16 +33,6 @@ class TenantReferenceAPITest extends RestVerticleTestBase {
   }
 
   @Test
-  void loadInvalidReferenceDataTest() {
-    TenantReferenceAPI tenantReferenceAPI = new TenantReferenceAPI();
-    TenantAttributes attributes = new TenantAttributes();
-    Map<String, String> headers = new HashMap<>();
-    Context vertxContext = vertx.getOrCreateContext();
-
-    assertTrue(tenantReferenceAPI.loadData(attributes, TENANT_ID, headers, vertxContext).failed());
-  }
-
-  @Test
   void loadValidReferenceDataTest() {
     TenantReferenceAPI tenantReferenceAPI = new TenantReferenceAPI();
     TenantAttributes attributes = new TenantAttributes();
