@@ -28,6 +28,7 @@ public class JobProfileServiceImpl implements JobProfileService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String DEFAULT_INSTANCE_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
   private static final String DEFAULT_HOLDINGS_JOB_PROFILE_ID = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
+  private static final String DEFAULT_AUTHORITY_JOB_PROFILE_ID = "56944b1c-f3f9-475b-bed0-7387c33620ce"; //NOSONAR
 
   @Autowired
   private JobProfileDao jobProfileDao;
@@ -80,7 +81,8 @@ public class JobProfileServiceImpl implements JobProfileService {
     Promise<JobProfile> jobProfilePromise = Promise.promise();
     String newId = jobProfile.getId();
     if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(newId) ||
-    DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(newId)) {
+      DEFAULT_AUTHORITY_JOB_PROFILE_ID.equals(newId) ||
+      DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(newId)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Editing of default job profile is forbidden");
     }
     if (jobProfile.getMetadata() != null && isNotEmpty(jobProfile.getMetadata().getUpdatedByUserId())) {
@@ -108,7 +110,8 @@ public class JobProfileServiceImpl implements JobProfileService {
   public Future<Boolean> deleteById(String id, String tenantId) {
 
     if (DEFAULT_INSTANCE_JOB_PROFILE_ID.equals(id) ||
-    DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(id)) {
+      DEFAULT_AUTHORITY_JOB_PROFILE_ID.equals(id) ||
+      DEFAULT_HOLDINGS_JOB_PROFILE_ID.equals(id)) {
       throw new ServiceException(HttpStatus.HTTP_FORBIDDEN, "Deletion of default job profile is forbidden");
     }
     return jobProfileDao.deleteById(id, tenantId);
