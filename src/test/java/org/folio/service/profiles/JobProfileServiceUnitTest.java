@@ -44,11 +44,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @ExtendWith(VertxExtension.class)
 class JobProfileServiceUnitTest {
-  private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
   private static final String TENANT_ID = "diku";
+  private static final String JOB_PROFILE_ID = UUID.randomUUID().toString();
+  private static final String DEFAULT_INSTANCE_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  private static final String DEFAULT_HOLDINGS_JOB_PROFILE_ID = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
+  private static final String DEFAULT_AUTHORITY_JOB_PROFILE_ID = "56944b1c-f3f9-475b-bed0-7387c33620ce";
+
   private static JobProfile expectedJobProfile;
-  private static String DEFAULT_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
-  private static String DEFAULT_HOLDINGS_JOB_PROFILE_ID = "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
 
   @Spy
   @InjectMocks
@@ -125,7 +127,7 @@ class JobProfileServiceUnitTest {
   void delete_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
     // assert that exception is thrown
     Assertions.assertThrows(ServiceException.class, () -> {
-      jobProfileService.deleteById(DEFAULT_HOLDINGS_JOB_PROFILE_ID, TENANT_ID);
+      jobProfileService.deleteById(DEFAULT_INSTANCE_JOB_PROFILE_ID, TENANT_ID);
     });
     context.completeNow();
   }
@@ -134,7 +136,16 @@ class JobProfileServiceUnitTest {
   void delete_shouldThrowException_ifHoldingsJobProfileIsDefault(VertxTestContext context) {
     // assert that exception is thrown
     Assertions.assertThrows(ServiceException.class, () -> {
-      jobProfileService.deleteById(DEFAULT_JOB_PROFILE_ID, TENANT_ID);
+      jobProfileService.deleteById(DEFAULT_HOLDINGS_JOB_PROFILE_ID, TENANT_ID);
+    });
+    context.completeNow();
+  }
+
+  @Test
+  void delete_shouldThrowException_ifAuthorityJobProfileIsDefault(VertxTestContext context) {
+    // assert that exception is thrown
+    Assertions.assertThrows(ServiceException.class, () -> {
+      jobProfileService.deleteById(DEFAULT_AUTHORITY_JOB_PROFILE_ID, TENANT_ID);
     });
     context.completeNow();
   }
@@ -158,7 +169,7 @@ class JobProfileServiceUnitTest {
   @Test
   void update_shouldThrowException_ifJobProfileIsDefault(VertxTestContext context) {
     // given
-    JobProfile defaultJobProfile = new JobProfile().withId(DEFAULT_JOB_PROFILE_ID);
+    JobProfile defaultJobProfile = new JobProfile().withId(DEFAULT_INSTANCE_JOB_PROFILE_ID);
     // assert that exception is thrown
     Assertions.assertThrows(ServiceException.class, () -> {
       jobProfileService.update(defaultJobProfile, okapiConnectionParams);
