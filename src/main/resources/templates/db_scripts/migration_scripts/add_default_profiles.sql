@@ -21,7 +21,8 @@ INSERT INTO ${myuniversity}_${mymodule}.mapping_profiles(
     "updatedByUserId":"00000000-0000-0000-0000-000000000000",
     "updatedByUsername":"system_process"
   }
-}', NOW(), '00000000-0000-0000-0000-000000000000');
+}', NOW(), '00000000-0000-0000-0000-000000000000')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO ${myuniversity}_${mymodule}.job_profiles(
 	id, jsonb, creation_date, created_by, mappingprofileid)
@@ -44,4 +45,5 @@ INSERT INTO ${myuniversity}_${mymodule}.job_profiles(
     "updatedByUserId":"00000000-0000-0000-0000-000000000000",
     "updatedByUsername":"system_process"
   }
-}', NOW(), '00000000-0000-0000-0000-000000000000', '1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13');
+}', NOW(), '00000000-0000-0000-0000-000000000000', '1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13')
+ON CONFLICT (id) DO NOTHING;
