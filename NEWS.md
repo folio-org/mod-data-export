@@ -1,5 +1,14 @@
 ## v4.5.0 Unreleased
 
+## 07/27/2022 v4.4.3 Released
+This release includes migration script failure fix
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.4.2...v4.4.3)
+
+### Bug Fixes
+
+* [MDEXP-542](https://issues.folio.org/browse/MDEXP-542) Migration script fails if upgrading from version 4.2.4 to version 4.4.2
+
 ## 04/06/2022 v4.4.2 Released
 This release includes build failure fix
 
