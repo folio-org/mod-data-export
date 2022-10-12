@@ -1,5 +1,7 @@
 ## v4.6.0 Unreleased
 
+* [MDEXP-560] (https://issues.folio.org/browse/MDEXP-560) Supports interface 'users' version 16.0
+
 ## 07/15/2022 v4.5.1 Released
 This release includes migration scripts fix for mappings and job profiles
 
