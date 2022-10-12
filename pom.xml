@@ -19,8 +19,8 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <argLine>-Dfile.encoding=UTF-8</argLine>
 
-    <raml-module-builder.version>35.0.0</raml-module-builder.version>
-    <vertx.version>4.3.1</vertx.version>
+    <raml-module-builder.version>35.0.1</raml-module-builder.version>
+    <vertx.version>4.3.4</vertx.version>
     <folio-di-support.version>1.6.0</folio-di-support.version>
     <junit.version>5.4.2</junit.version>
     <rest-assured.version>3.3.0</rest-assured.version>
