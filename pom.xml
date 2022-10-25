@@ -427,7 +427,7 @@
                 <filter>
                   <artifact>*:*</artifact>
                   <excludes>
-                    <exclude>**/Log4j2Plugins.dat</exclude>
+                    <exclude>**/Log4j2Plugins.dat,META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</exclude>
                   </excludes>
                 </filter>
               </filters>
