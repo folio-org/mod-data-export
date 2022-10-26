@@ -1,6 +1,17 @@
-## v4.6.0 Unreleased
+## v4.7.0 Unreleased
 
-* [MDEXP-560] (https://issues.folio.org/browse/MDEXP-560) Supports interface 'users' version 16.0
+## 10/26/2022 v4.6.0 Released
+This release includes dependency updates
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.5.1...v4.6.0)
+
+### Technical tasks
+* [MDEXP-561](https://issues.folio.org/browse/MDEXP-561) Replace generate-marc-utils -SNAPSHOT by release
+* [MDEXP-560](https://issues.folio.org/browse/MDEXP-560) Supports interface 'users' version 16.0
+* [MDEXP-558](https://issues.folio.org/browse/MDEXP-558) mod-data-export: Upgrade RAML Module Builder
+
+### Bug Fixes
+* [MDEXP-564](https://issues.folio.org/browse/MDEXP-564) Upgrade dependencies fixing vulnerabilities
 
 ## 07/15/2022 v4.5.1 Released
 This release includes migration scripts fix for mappings and job profiles
