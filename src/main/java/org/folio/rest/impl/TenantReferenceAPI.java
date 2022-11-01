@@ -57,7 +57,7 @@ public class TenantReferenceAPI extends TenantAPI {
   private void buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
     if (isLoadReference(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_REFERENCE).withLead("data")
-        .withPostOnly()
+        .withPostIgnore()
         .add("mapping-profiles", "data-export/mapping-profiles")
         .add("job-profiles", "data-export/job-profiles");
     }
