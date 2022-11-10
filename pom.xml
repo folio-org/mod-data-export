@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export</artifactId>
-  <version>4.6.1</version>
+  <version>4.6.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -484,7 +484,7 @@
     <url>https://github.com/folio-org/mod-data-export</url>
     <connection>scm:git:git://github.com/folio-org/mod-data-export</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-data-export.git</developerConnection>
-    <tag>v4.6.1</tag>
+    <tag>v4.6.0</tag>
   </scm>
 
   <repositories>
