@@ -1,5 +1,14 @@
 ## v4.7.0 Unreleased
 
+## 11/10/2022 v4.6.0 Released
+This release includes fixes for uploading reference data
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.6.0...v4.6.1)
+
+### Bug Fixes
+* [MDEXP-569](https://issues.folio.org/browse/MDEXP-569) System defined Default profiles are missing in Nolana
+* [MDEXP-567](https://issues.folio.org/browse/MDEXP-567) Nolana - Reenabling module fails when reference data already exists
+
 ## 10/26/2022 v4.6.0 Released
 This release includes dependency updates
 
