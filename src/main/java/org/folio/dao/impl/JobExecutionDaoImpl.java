@@ -59,20 +59,25 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   @Override
   public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
-    Promise<String> promise = Promise.promise();
+    Promise<JobExecution> promise = Promise.promise();
     pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
       if (getHrIdResult.succeeded()) {
         jobExecution.withId(isNull(jobExecution.getId()) ? UUID.randomUUID().toString() : jobExecution.getId())
           .setHrId(getHrIdResult.result().getInteger(0));
         pgClientFactory.getInstance(tenantId)
-          .save(TABLE, jobExecution.getId(), jobExecution, promise);
+          .save(TABLE, jobExecution.getId(), jobExecution, ar -> {
+            if (ar.succeeded()) {
+              promise.complete(jobExecution);
+            } else {
+              promise.fail(ar.cause().getMessage());
+            }
+          });
       } else {
         LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
         promise.fail(getHrIdResult.cause());
       }
     });
-    return promise.future()
-      .map(jobExecution);
+    return promise.future();
   }
 
   @Override

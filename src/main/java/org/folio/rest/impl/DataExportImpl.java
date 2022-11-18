@@ -209,7 +209,6 @@ public class DataExportImpl implements DataExport {
       .onSuccess(fileDefinition -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, fileDefinition, params)
         .onSuccess(uploadedFileDefinition -> fileUploadService.completeUploading(uploadedFileDefinition, tenantId))
         .onSuccess(promise::complete)
-        .onFailure(ar -> promise.fail(ar.getCause()))
         .onFailure(ar -> promise.fail(ar.getCause())))
       .onFailure(handler -> failToFetchObjectHelper(handler.getMessage(), asyncResultHandler));
     return promise.future();
