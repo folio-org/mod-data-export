@@ -70,6 +70,8 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
               promise.complete(jobExecution);
             } else {
               promise.fail(ar.cause().getMessage());
+              LOGGER.error("Job execution is not saved with id  " + jobExecution.getJobProfileId() +
+                " with the reason : " + ar.cause().getMessage());
             }
           });
       } else {
