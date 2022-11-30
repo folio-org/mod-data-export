@@ -60,17 +60,27 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   @Override
   public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     Promise<String> promise = Promise.promise();
-    pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
-      if (getHrIdResult.succeeded()) {
-        jobExecution.withId(isNull(jobExecution.getId()) ? UUID.randomUUID().toString() : jobExecution.getId())
-          .setHrId(getHrIdResult.result().getInteger(0));
-        pgClientFactory.getInstance(tenantId)
-          .save(TABLE, jobExecution.getId(), jobExecution, promise);
-      } else {
-        LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
-        promise.fail(getHrIdResult.cause());
-      }
-    });
+    try {
+      pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
+        LOGGER.info("Inside selectSingle(HR_ID_QUERY) lambda");
+        if (getHrIdResult.succeeded()) {
+          LOGGER.info("getHrIdResult.succeeded");
+          jobExecution.withId(isNull(jobExecution.getId()) ? UUID.randomUUID().toString() : jobExecution.getId())
+            .setHrId(getHrIdResult.result().getInteger(0));
+          try {
+            pgClientFactory.getInstance(tenantId)
+              .save(TABLE, jobExecution.getId(), jobExecution, promise);
+          } catch (Exception ex) {
+            LOGGER.error("Error while saving jobExecution", ex.getMessage());
+          }
+        } else {
+          LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
+          promise.fail(getHrIdResult.cause());
+        }
+      });
+    }catch (Exception ex){
+      LOGGER.error("Outer exception block -- Error while saving jobExecution", ex.getMessage());
+    }
     return promise.future()
       .map(jobExecution);
   }
@@ -101,6 +111,8 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   @Override
   public Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId) {
     Promise<JobExecution> promise = Promise.promise();
+    LOGGER.info("Inside getById");
+    LOGGER.info("jobExecutionId=" + jobExecutionId + "; tenantId=" + tenantId);
     try {
       pgClientFactory.getInstance(tenantId).getById(TABLE, jobExecutionId, JobExecution.class, promise);
     } catch (Exception e) {
