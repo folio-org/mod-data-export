@@ -61,8 +61,6 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     Promise<String> promise = Promise.promise();
     LOGGER.info("JobExecutionDaoImpl.save: Connection Config" +  pgClientFactory.getInstance(tenantId).getConnectionConfig().toString());
-    LOGGER.info("JobExecutionDaoImpl.save: GetConnection()" +  pgClientFactory.getInstance(tenantId).getConnection().result().toString());
-    LOGGER.info("JobExecutionDaoImpl.save: GetReadConnection()" +  pgClientFactory.getInstance(tenantId).getReadConnection().result().toString());
     try {
       pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
         LOGGER.info("JobExecutionDaoImpl.save: Inside selectSingle(HR_ID_QUERY) lambda");
@@ -120,9 +118,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     LOGGER.info("JobExecutionDaoImpl.getById: jobExecutionId=" + jobExecutionId + "; tenantId=" + tenantId);
     try {
       LOGGER.info("JobExecutionDaoImpl.getById: Connection Config" +  pgClientFactory.getInstance(tenantId).getConnectionConfig().toString());
-      LOGGER.info("JobExecutionDaoImpl.getById: GetConnection()" +  pgClientFactory.getInstance(tenantId).getConnection().result().toString());
-      LOGGER.info("JobExecutionDaoImpl.getById: GetReadConnection()" +  pgClientFactory.getInstance(tenantId).getReadConnection().result().toString());
-
+  
       pgClientFactory.getInstance(tenantId).getById(TABLE, jobExecutionId, JobExecution.class, promise);
     } catch (Exception e) {
       LOGGER.error("JobExecutionDaoImpl.getById: Error calling pgClientFactory.GetInstance(tenantId).getById()", e);
