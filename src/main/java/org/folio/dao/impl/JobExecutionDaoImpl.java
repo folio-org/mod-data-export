@@ -60,26 +60,31 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   @Override
   public Future<JobExecution> save(JobExecution jobExecution, String tenantId) {
     Promise<String> promise = Promise.promise();
+    LOGGER.info("JobExecutionDaoImpl.save: Connection Config" +  pgClientFactory.getInstance(tenantId).getConnectionConfig().toString());
+    LOGGER.info("JobExecutionDaoImpl.save: GetConnection()" +  pgClientFactory.getInstance(tenantId).getConnection().result().toString());
+    LOGGER.info("JobExecutionDaoImpl.save: GetReadConnection()" +  pgClientFactory.getInstance(tenantId).getReadConnection().result().toString());
     try {
       pgClientFactory.getInstance(tenantId).selectSingle(HR_ID_QUERY, getHrIdResult -> {
-        LOGGER.info("Inside selectSingle(HR_ID_QUERY) lambda");
+        LOGGER.info("JobExecutionDaoImpl.save: Inside selectSingle(HR_ID_QUERY) lambda");
         if (getHrIdResult.succeeded()) {
-          LOGGER.info("getHrIdResult.succeeded");
+          LOGGER.info("JobExecutionDaoImpl.save: getHrIdResult.succeeded");
           jobExecution.withId(isNull(jobExecution.getId()) ? UUID.randomUUID().toString() : jobExecution.getId())
             .setHrId(getHrIdResult.result().getInteger(0));
           try {
+            LOGGER.info("JobExecutionDaoImpl.save: Before saving");
             pgClientFactory.getInstance(tenantId)
               .save(TABLE, jobExecution.getId(), jobExecution, promise);
+            LOGGER.info("JobExecutionDaoImpl.save: After saving");
           } catch (Exception ex) {
-            LOGGER.error("Error while saving jobExecution", ex.getMessage());
+            LOGGER.error("JobExecutionDaoImpl.save: Error while saving jobExecution", ex);
           }
         } else {
-          LOGGER.error("Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
+          LOGGER.error("JobExecutionDaoImpl.save: Error while fetching next HRID in sequence: {}", getHrIdResult.cause().getMessage());
           promise.fail(getHrIdResult.cause());
         }
       });
     }catch (Exception ex){
-      LOGGER.error("Outer exception block -- Error while saving jobExecution", ex.getMessage());
+      LOGGER.error("JobExecutionDaoImpl.save: Outer exception block -- Error while saving jobExecution", ex);
     }
     return promise.future()
       .map(jobExecution);
@@ -111,12 +116,16 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   @Override
   public Future<Optional<JobExecution>> getById(String jobExecutionId, String tenantId) {
     Promise<JobExecution> promise = Promise.promise();
-    LOGGER.info("Inside getById");
-    LOGGER.info("jobExecutionId=" + jobExecutionId + "; tenantId=" + tenantId);
+    LOGGER.info("JobExecutionDaoImpl.getById: Inside getById");
+    LOGGER.info("JobExecutionDaoImpl.getById: jobExecutionId=" + jobExecutionId + "; tenantId=" + tenantId);
     try {
+      LOGGER.info("JobExecutionDaoImpl.getById: Connection Config" +  pgClientFactory.getInstance(tenantId).getConnectionConfig().toString());
+      LOGGER.info("JobExecutionDaoImpl.getById: GetConnection()" +  pgClientFactory.getInstance(tenantId).getConnection().result().toString());
+      LOGGER.info("JobExecutionDaoImpl.getById: GetReadConnection()" +  pgClientFactory.getInstance(tenantId).getReadConnection().result().toString());
+
       pgClientFactory.getInstance(tenantId).getById(TABLE, jobExecutionId, JobExecution.class, promise);
     } catch (Exception e) {
-      LOGGER.error(e);
+      LOGGER.error("JobExecutionDaoImpl.getById: Error calling pgClientFactory.GetInstance(tenantId).getById()", e);
       promise.fail(e);
     }
     return promise.future().map(Optional::ofNullable);
