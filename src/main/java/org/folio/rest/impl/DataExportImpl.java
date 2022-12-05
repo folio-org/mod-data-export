@@ -204,6 +204,7 @@ public class DataExportImpl implements DataExport {
   }
 
   private Future<FileDefinition> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
+    LOGGER.info("DataExportImpl.getFileDefinitionForQuickExport: Before calling fileDefinitionService.prepareFileDefinitionForQuickExport");
     Promise<FileDefinition> promise = Promise.promise();
     fileDefinitionService.prepareFileDefinitionForQuickExport(request, jobProfileId, tenantId)
       .onSuccess(fileDefinition -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, fileDefinition, params)

@@ -105,9 +105,11 @@ public class MappingProfileServiceImpl implements MappingProfileService {
 
   @Override
   public Future<MappingProfile> getById(String mappingProfileId, OkapiConnectionParams params) {
+    LOGGER.info("MappingProfileServiceImpl.getById: calling mappingProfileDao.getById for mappingProfileId " + mappingProfileId + " and tenantId " + params.getTenantId());
     return mappingProfileDao.getById(mappingProfileId, params.getTenantId())
       .compose(optionalMappingProfile -> {
         if (optionalMappingProfile.isPresent()) {
+          LOGGER.info("MappingProfileServiceImpl.getById: calling updateTransformationFields()");
           return updateTransformationFields(optionalMappingProfile.get(), params);
         } else {
           String errorMessage = String.format("Mapping profile not found with id %s", mappingProfileId);

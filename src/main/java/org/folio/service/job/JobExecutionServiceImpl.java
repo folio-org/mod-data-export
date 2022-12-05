@@ -99,11 +99,13 @@ public class JobExecutionServiceImpl implements JobExecutionService {
 
   @Override
   public Future<JobExecution> update(final JobExecution jobExecution, final String tenantId) {
+    LOGGER.info("JobExecutionServiceImpl.update: Before calling jobExecutionDao.update");
     return jobExecutionDao.update(jobExecution, tenantId);
   }
 
   @Override
   public Future<JobExecution> getById(final String jobExecutionId, final String tenantId) {
+    LOGGER.info("JobExecutionServiceImpl.getById: Before calling jobExecutionDao.getById");
     return jobExecutionDao.getById(jobExecutionId, tenantId)
       .compose(optionalJobExecution -> {
         if (optionalJobExecution.isPresent()) {

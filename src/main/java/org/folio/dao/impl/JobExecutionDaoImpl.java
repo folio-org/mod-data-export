@@ -118,7 +118,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     LOGGER.info("JobExecutionDaoImpl.getById: jobExecutionId=" + jobExecutionId + "; tenantId=" + tenantId);
     try {
       LOGGER.info("JobExecutionDaoImpl.getById: Connection Config" +  pgClientFactory.getInstance(tenantId).getConnectionConfig().toString());
-  
+
       pgClientFactory.getInstance(tenantId).getById(TABLE, jobExecutionId, JobExecution.class, promise);
     } catch (Exception e) {
       LOGGER.error("JobExecutionDaoImpl.getById: Error calling pgClientFactory.GetInstance(tenantId).getById()", e);
