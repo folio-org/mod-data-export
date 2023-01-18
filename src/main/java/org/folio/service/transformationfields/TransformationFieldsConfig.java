@@ -47,7 +47,7 @@ public enum TransformationFieldsConfig {
   LANGUAGES("languages", "$.instance.languages"),
   MODE_OF_ISSUANCE_ID("modeOfIssuanceId", "$.instance[?(@.modeOfIssuanceId=='{id}')].modeOfIssuanceId", ISSUANCE_MODES),
   INSTANCE_TYPE("instanceTypeId", "$.instance[?(@.instanceTypeId=='{id}')].instanceTypeId", INSTANCE_TYPES),
-  SUBJECTS("subjects", "$.instance.subjects"),
+  SUBJECTS("subjects", "$.instance.subjects[*].value"),
   TITLE("title", "$.instance.title"),
 
   //Holdings specific Fields
