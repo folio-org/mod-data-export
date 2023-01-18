@@ -181,8 +181,14 @@
     "hrid": "instance00001",
     "title": "The Journal of ecclesiastical history",
     "series": [
-      "Cooperative information systems",
-      "The lateral history"
+      {
+        "value" : "Cooperative information systems",
+        "authorityId": "c9b50e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "The lateral history",
+        "authorityId": "c1b50e3f-0446-429c-960e-03774b88223f"
+      }
     ],
     "physicalDescriptions": [
       "xx, 238 p. : ill. ; 24 cm.",
@@ -340,11 +346,26 @@
       }
     ],
     "subjects": [
-      "Politicians--Scotland--Biography",
-      "Scotland--Politics and government--21st century",
-      "Politics and government",
-      "Politicians",
-      "Scotland"
+      {
+        "value" : "Politicians--Scotland--Biography",
+        "authorityId": "c9b51e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Scotland--Politics and government--21st century",
+        "authorityId": "c9b52e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Politics and government",
+        "authorityId": "c9b53e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Politicians",
+        "authorityId": "c9b54e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Scotland",
+        "authorityId": "c9b56e3f-0446-429c-960e-03774b88223f"
+      }
     ],
     "languages": [
       "eng",
