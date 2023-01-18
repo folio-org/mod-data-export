@@ -64,7 +64,10 @@
       "alternativeTitles": [],
       "editions": [],
       "series": [
-        "Fritztrainer Tactics"
+        {
+          "authorityId": "561bfbae-75bc-4f74-9fc7-b2a2d47ce3ef",
+          "value" : "Fritztrainer Tactics"
+        }
       ],
       "identifiers": [
         {
@@ -87,7 +90,10 @@
         }
       ],
       "subjects": [
-        "DVD-ROM"
+        {
+          "authorityId": "123bfbae-45bc-4f74-9fc7-b2a2d47ce3ef",
+          "value" : "DVD-ROM"
+        }
       ],
       "classifications": [],
       "publication": [
