@@ -902,7 +902,7 @@
       {
          "fieldId":"instance.subjects",
          "displayNameKey":"instance.subjects",
-         "path":"$.instance.subjects",
+         "path":"$.instance.subjects[*].value",
          "recordType":"INSTANCE"
       },
       {

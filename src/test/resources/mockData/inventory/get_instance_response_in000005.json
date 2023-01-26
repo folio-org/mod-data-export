@@ -28,11 +28,26 @@
         }
       ],
       "subjects": [
-        "Jones, Bridget",
-        "Pregnant women",
-        "England",
-        "Humorous fiction",
-        "Diary fiction"
+        {
+          "value" : "Jones, Bridget",
+          "authorityId": "c9b51e3f-0446-429c-960e-03774b88223f"
+        },
+        {
+          "value" : "Pregnant women",
+          "authorityId": "c9b52e3f-0446-429c-960e-03774b88223f"
+        },
+        {
+          "value" : "England",
+          "authorityId": "c9b53e3f-0446-429c-960e-03774b88223f"
+        },
+        {
+          "value" : "Humorous fiction",
+          "authorityId": "c9b54e3f-0446-429c-960e-03774b88223f"
+        },
+        {
+          "value" : "Diary fiction",
+          "authorityId": "c9b56e3f-0446-429c-960e-03774b88223f"
+        }
       ],
       "classifications": [
         {
