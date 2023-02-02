@@ -11,30 +11,11 @@
   },
   {
     "id": "holdings.instancehrid",
-    "field": "014",
+    "field": "004",
     "description": "Unique hrId of the related instance record",
     "dataSources": [
       {
-        "from": "$.holdings[*].instanceHrId",
-        "subfield": "a"
-      },
-      {
-        "indicator": "1",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": "1"
-          }
-        }
-      },
-      {
-        "indicator": "2",
-        "translation": {
-          "function": "set_value",
-          "parameters": {
-            "value": " "
-          }
-        }
+        "from": "$.holdings[*].instanceHrId"
       }
     ]
   },
