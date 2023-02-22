@@ -1,4 +1,16 @@
-## v4.7.0 Unreleased
+## v4.8.0 Unreleased
+
+## 02/22/2023 v4.7.0 Released
+This release includes export and logging improvements
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.6.0...v4.7.0)
+
+### Technical tasks
+* [MDEXP-582](https://issues.folio.org/browse/MDEXP-582) Align the module with API breaking change
+* [MDEXP-565](https://issues.folio.org/browse/MDEXP-565) Logging improvement - Configuration
+
+### Stories
+* [MDEXP-581](https://issues.folio.org/browse/MDEXP-581) Align MARC holdings record mappings between export and import mapping profiles
 
 ## 10/26/2022 v4.6.0 Released
 This release includes dependency updates
