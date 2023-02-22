@@ -27,7 +27,7 @@
     <marc4j.version>2.9.2</marc4j.version>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <minio.version>8.4.5</minio.version>
-    <generate-marc-utils-version>1.5.0</generate-marc-utils-version>
+    <generate-marc-utils-version>1.6.0</generate-marc-utils-version>
 
     <sonar.exclusions>
       **/OkapiConnectionParams.java,
