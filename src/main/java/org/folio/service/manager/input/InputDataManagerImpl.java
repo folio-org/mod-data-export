@@ -113,9 +113,6 @@ class InputDataManagerImpl implements InputDataManager {
     Optional<JsonObject> optionalUser = usersClient.getById(exportRequest.getMetadata().getCreatedByUserId(), jobExecutionId, okapiConnectionParams);
     List<ErrorCode> errorCodes = new ArrayList<>();
     if (exportRequest.getIdType().equals(ExportRequest.IdType.HOLDING)) {
-      if (!MappingProfileServiceImpl.isDefaultHoldingProfile(mappingProfile.getId())) {
-        errorCodes.add(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED);
-      }
       if (requestFileDefinition.getUploadFormat().equals(CQL)) {
         errorCodes.add(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE);
       }

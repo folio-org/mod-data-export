@@ -230,10 +230,6 @@ public class MappingProfileServiceImpl implements MappingProfileService {
     return DEFAULT_INSTANCE_MAPPING_PROFILE_ID.equals(mappingProfileId);
   }
 
-  public static boolean isDefaultHoldingProfile(String mappingProfileId) {
-    return DEFAULT_HOLDINGS_MAPPING_PROFILE_ID.equals(mappingProfileId);
-  }
-
   public static boolean isDefaultAuthorityProfile(String mappingProfileId) {
     return DEFAULT_AUTHORITY_MAPPING_PROFILE_ID.equals(mappingProfileId);
   }
