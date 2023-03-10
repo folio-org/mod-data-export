@@ -1,5 +1,13 @@
 ## v4.8.0 Unreleased
 
+## 03/10/2023 v4.7.1 Released
+This release includes bug fix for custom mapping profile
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.7.0...v4.7.1)
+
+### Bug Fixes
+* [MDEXP-584](https://issues.folio.org/browse/MDEXP-584) Holdings cannot be exported with custom mapping profile
+
 ## 02/22/2023 v4.7.0 Released
 This release includes export and logging improvements
 
