@@ -205,8 +205,8 @@ public class DataExportImpl implements DataExport {
 
   private Future<FileDefinition> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
     Promise<FileDefinition> promise = Promise.promise();
-    fileDefinitionService.prepareFileDefinitionForQuickExport(request, jobProfileId, tenantId)
-      .onSuccess(fileDefinition -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, fileDefinition, params)
+    fileDefinitionService.prepareJobDataForQuickExport(request, jobProfileId, tenantId)
+      .onSuccess(jobData -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, jobData, params)
         .onSuccess(uploadedFileDefinition -> fileUploadService.completeUploading(uploadedFileDefinition, tenantId))
         .onSuccess(promise::complete)
         .onFailure(ar -> promise.fail(ar.getCause()))

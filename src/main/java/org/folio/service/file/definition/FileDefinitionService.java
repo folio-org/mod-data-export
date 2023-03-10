@@ -34,12 +34,12 @@ public interface FileDefinitionService {
   Future<FileDefinition> update(FileDefinition fileDefinition, String tenantId);
 
   /**
-   * Create {@link FileDefinition} with related jobExecution
+   * Create {@link JobData} with related jobExecution and jobData
    *
    * @param request  {@link QuickExportRequest}
    * @param tenantId tenant id
-   * @return future with {@link FileDefinition}
+   * @return future with {@link JobData}
    */
-  Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId);
+  Future<JobData> prepareJobDataForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId);
 
 }
