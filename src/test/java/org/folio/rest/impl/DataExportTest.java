@@ -1,16 +1,31 @@
 package org.folio.rest.impl;
 
+import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
+import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
+import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
+import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
+import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
+import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
@@ -53,32 +68,11 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import io.vertx.core.Context;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-
-import static org.folio.TestUtil.DATA_EXPORT_JOB_PROFILES_ENDPOINT;
-import static org.folio.TestUtil.DATA_EXPORT_MAPPING_PROFILES_ENDPOINT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
-import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CSV;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.COMPLETED_WITH_ERRORS;
-import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
-import static org.folio.util.ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID;
-import static org.folio.util.ErrorCode.NO_FILE_GENERATED;
-import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 
 @RunWith(VertxUnitRunner.class)
 @ExtendWith(VertxExtension.class)
@@ -564,7 +558,7 @@ class DataExportTest extends RestVerticleTestBase {
     // given
     String tenantId = okapiConnectionParams.getTenantId();
     FileDefinition uploadedFileDefinition = uploadFile(HOLDING_UUIDS_INVENTORY, CSV, buildRequestSpecification(tenantId));
-
+    ArgumentCaptor<FileDefinition> fileExportDefinitionCaptor = captureFileExportDefinition(tenantId);
     // when
     ExportRequest exportRequest = buildExportRequest(uploadedFileDefinition, DEFAULT_INSTANCE_JOB_PROFILE, ExportRequest.IdType.HOLDING);
     postRequest(JsonObject.mapFrom(exportRequest), EXPORT_URL);
@@ -574,15 +568,11 @@ class DataExportTest extends RestVerticleTestBase {
       jobExecutionDao.getById(jobExecutionId, tenantId)
         .onSuccess(optionalJobExecution -> {
           JobExecution jobExecution = optionalJobExecution.get();
-          errorLogService.get("jobExecutionId=" + jobExecutionId, 0, 20, tenantId).onSuccess(errorLogs -> {
+          fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
-              assertEquals(FAIL, jobExecution.getStatus());
-              assertNotNull(jobExecution.getCompletedDate());
-              assertNotNull(jobExecution.getRunBy());
-              assertEquals(1, errorLogs.getErrorLogs().size());
-              ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
-              assertEquals(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getCode(), errorLog.getErrorMessageCode());
-              assertEquals(ErrorCode.ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED.getDescription(), errorLog.getErrorMessageValues().get(0));
+              assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
+              validateExternalCallsForSrs(1);
+              assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsFromHoldingRecord.mrc");
               context.completeNow();
             });
           });
