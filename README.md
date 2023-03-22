@@ -81,6 +81,13 @@ curl -w '\n' -X POST -D -   \
     http://localhost:9130/_/proxy/tenants/<tenant_name>/modules
 ```
 
+
+This module requires default mapping and job profiles for the work. To load them, the `loadRefernce=true` tenant initialization parameter should be passed when installing the module :
+
+```
+curl -w '\n' -X POST -d '[ { "id": "mod-data-export-<module_version>", "action": "enable" } ]' http://localhost:9130/_/proxy/tenants/<tenant_name>/install?tenantParameters=loadReference%3Dtrue
+```
+
 ## Storage configuration
 MinIO remote storage or Amazon S3 can be used as storage for generated files MARC files. 
 The storage is selected by specifying the url of S3-compatible storage by using ENV variable `AWS_URL`. In addition, 
