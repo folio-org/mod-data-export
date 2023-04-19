@@ -15,6 +15,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.definition.JobData;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.logs.ErrorLogService;
@@ -83,6 +84,7 @@ class FileUploadServiceUnitTest {
   SearchClient searchClient;
   private OkapiConnectionParams params;
   private FileDefinition fileDefinition;
+  private JobData jobData;
   private JsonObject user;
 
   @BeforeEach
@@ -91,6 +93,7 @@ class FileUploadServiceUnitTest {
       .withJobExecutionId(JOB_EXECUTION_ID)
       .withId(UUID.randomUUID().toString())
       .withStatus(NEW);
+    jobData = new JobData(fileDefinition, new JobExecution().withId(JOB_EXECUTION_ID));
     Map<String, String> headers = new HashedMap<>();
     headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
     params = new OkapiConnectionParams(headers);
@@ -98,34 +101,14 @@ class FileUploadServiceUnitTest {
   }
 
   @Test
-  void shouldFail_whenGetJobExecutionFail_uploadFileDependsOnTypeFor_emptyResponseInventory_cqlQuickExport(VertxTestContext context) {
-    // given
-    QuickExportRequest quickExportRequest = buildQuickCqlExportRequest("test");
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.failedFuture(new RuntimeException()));
-    when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(fileDefinition));
-
-    // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
-
-    // then
-    fileDefinitionFuture.onComplete(ar ->
-      context.verify(() -> {
-        assertTrue(ar.failed());
-        assertEquals(ERROR, fileDefinition.getStatus());
-        context.completeNow();
-      }));
-  }
-
-  @Test
   void shouldFail_uploadFileDependsOnType_whenGetStartUploadingFail_emptyResponseInventory_cqlQuickExport(VertxTestContext context) {
     // given
     QuickExportRequest quickExportRequest = buildQuickCqlExportRequest("test");
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture(new JobExecution().withId(JOB_EXECUTION_ID)));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(failedFuture(new RuntimeException()))
       .thenReturn(failedFuture(new RuntimeException()));
 
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->
@@ -149,13 +132,12 @@ class FileUploadServiceUnitTest {
       .withStatus(COMPLETED)
       .withJobExecutionId(JOB_EXECUTION_ID);
     QuickExportRequest quickExportRequest = buildQuickCqlExportRequest("test");
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture());
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
     when(searchClient.getInstancesBulkUUIDsAsync(eq("test"), any(OkapiConnectionParams.class))).thenReturn(Future.succeededFuture(Optional.empty()));
 
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->
@@ -182,7 +164,6 @@ class FileUploadServiceUnitTest {
       .withJobExecutionId(JOB_EXECUTION_ID);
     JobExecution jobExecution = new JobExecution().withId(JOB_EXECUTION_ID);
     QuickExportRequest quickExportRequest = buildQuickCqlExportRequest("test");
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture(jobExecution));
     when(jobExecutionService.update(any(JobExecution.class), eq(TENANT_ID))).thenReturn(succeededFuture(jobExecution));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
@@ -190,7 +171,7 @@ class FileUploadServiceUnitTest {
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(succeededFuture(completedDef));
 
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->
@@ -212,13 +193,12 @@ class FileUploadServiceUnitTest {
       .withStatus(IN_PROGRESS)
       .withJobExecutionId(JOB_EXECUTION_ID);
     QuickExportRequest quickExportRequest = buildQuickExportRequest(Collections.singletonList("uuid"));
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture(new JobExecution().withId(JOB_EXECUTION_ID)));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(failedFuture(new RuntimeException()));
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(failedFuture(new RuntimeException()));
     when(usersClient.getById(anyString(), anyString(), any(OkapiConnectionParams.class))).thenReturn(Optional.of(user));
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->
@@ -239,14 +219,13 @@ class FileUploadServiceUnitTest {
       .withStatus(IN_PROGRESS)
       .withJobExecutionId(JOB_EXECUTION_ID);
     QuickExportRequest quickExportRequest = buildQuickExportRequest(Collections.singletonList("uuid"));
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture(new JobExecution().withId(JOB_EXECUTION_ID)));
     when(jobExecutionService.update(any(JobExecution.class), eq(TENANT_ID))).thenReturn(failedFuture(new RuntimeException()));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(failedFuture(new RuntimeException()));
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(succeededFuture(fileDefinition));
 
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->
@@ -270,14 +249,13 @@ class FileUploadServiceUnitTest {
       .withJobExecutionId(JOB_EXECUTION_ID);
     QuickExportRequest quickExportRequest = buildQuickExportRequest(Collections.singletonList("uuid"));
     JobExecution jobExecution = new JobExecution().withId(JOB_EXECUTION_ID);
-    when(jobExecutionService.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(succeededFuture(jobExecution));
     when(jobExecutionService.update(any(JobExecution.class), eq(TENANT_ID))).thenReturn(succeededFuture(jobExecution));
     when(fileDefinitionService.update(any(FileDefinition.class), anyString())).thenReturn(succeededFuture(inProgressDef))
       .thenReturn(succeededFuture(completedDef));
     when(fileStorage.saveFileDataAsyncCQL(anyList(), any(FileDefinition.class))).thenReturn(succeededFuture(completedDef));
 
     // when
-    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, fileDefinition, params);
+    Future<FileDefinition> fileDefinitionFuture = fileUploadService.uploadFileDependsOnTypeForQuickExport(quickExportRequest, jobData, params);
 
     // then
     fileDefinitionFuture.onComplete(ar ->

@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.service.file.definition.JobData;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.folio.rest.annotations.Validate;
@@ -122,21 +123,18 @@ public class DataExportImpl implements DataExport {
     getJobProfileForQuickExport(entity)
       .onSuccess(jobProfile ->
         getFileDefinitionForQuickExport(entity, jobProfile.getId(), params, asyncResultHandler)
-          .onSuccess(requestFileDefinition ->
+          .onSuccess(jobData ->
             mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
               .onSuccess(mappingProfile ->
-                jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
-                  .onSuccess(jobExecution ->
-                    jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
-                      .onSuccess(updatedJobExecution -> {
-                        inputDataManager.init(JsonObject.mapFrom(buildExportRequest(requestFileDefinition.getId(), jobProfile.getId(), entity)), JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
-                        succeededFuture()
-                          .map(PostDataExportQuickExportResponse.respond200WithApplicationJson(new QuickExportResponse()
-                            .withJobExecutionId(jobExecution.getId())
-                            .withJobExecutionHrId(jobExecution.getHrId())))
-                          .map(Response.class::cast)
-                          .onComplete(asyncResultHandler);
-                      }).onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
+                jobExecutionService.update(jobData.getJobExecution().withJobProfileId(jobProfile.getId()), tenantId)
+                  .onSuccess(updatedJobExecution -> {
+                    inputDataManager.init(JsonObject.mapFrom(buildExportRequest(jobData.getFileDefinition().getId(), jobProfile.getId(), entity)), JsonObject.mapFrom(jobData.getFileDefinition()), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
+                    succeededFuture()
+                      .map(PostDataExportQuickExportResponse.respond200WithApplicationJson(new QuickExportResponse()
+                        .withJobExecutionId(jobData.getJobExecution().getId())
+                        .withJobExecutionHrId(jobData.getJobExecution().getHrId())))
+                      .map(Response.class::cast)
+                      .onComplete(asyncResultHandler);})
                   .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
               .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
           .onFailure(ar -> failToFetchObjectHelper(ar.getMessage(), asyncResultHandler)))
@@ -203,12 +201,12 @@ public class DataExportImpl implements DataExport {
       .onComplete(asyncResultHandler);
   }
 
-  private Future<FileDefinition> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
-    Promise<FileDefinition> promise = Promise.promise();
+  private Future<JobData> getFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, OkapiConnectionParams params, Handler<AsyncResult<Response>> asyncResultHandler) {
+    Promise<JobData> promise = Promise.promise();
     fileDefinitionService.prepareJobDataForQuickExport(request, jobProfileId, tenantId)
       .onSuccess(jobData -> fileUploadService.uploadFileDependsOnTypeForQuickExport(request, jobData, params)
         .onSuccess(uploadedFileDefinition -> fileUploadService.completeUploading(uploadedFileDefinition, tenantId))
-        .onSuccess(promise::complete)
+        .onSuccess(fileDefinition -> promise.complete(new JobData(fileDefinition, jobData.getJobExecution())))
         .onFailure(ar -> promise.fail(ar.getCause()))
         .onFailure(ar -> promise.fail(ar.getCause())))
       .onFailure(handler -> failToFetchObjectHelper(handler.getMessage(), asyncResultHandler));
