@@ -71,6 +71,7 @@ public class TenantReferenceAPI extends TenantAPI {
         loadReference = Boolean.parseBoolean(parameter.getValue());
       }
     }
+    log.info("loadReference={}", loadReference);
     return loadReference;
 
   }
