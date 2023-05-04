@@ -72,8 +72,8 @@ class InputDataManagerImpl implements InputDataManager {
   @Autowired
   private ErrorLogService errorLogService;
 
-  private WorkerExecutor executor;
-  private LocalMap<String, InputDataContext> inputDataLocalMap;
+  private WorkerExecutor executor; //NOSONAR
+  private LocalMap<String, InputDataContext> inputDataLocalMap; //NOSONAR
 
   public InputDataManagerImpl() {
   }
