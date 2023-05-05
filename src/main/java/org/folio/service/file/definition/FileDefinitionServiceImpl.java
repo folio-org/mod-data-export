@@ -61,8 +61,8 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
   }
 
   @Override
-  public Future<FileDefinition> prepareFileDefinitionForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId) {
-    Promise<FileDefinition> promise = Promise.promise();
+  public Future<JobData> prepareJobDataForQuickExport(QuickExportRequest request, String jobProfileId, String tenantId) {
+    Promise<JobData> promise = Promise.promise();
     jobExecutionService.save(new JobExecution(), tenantId)
       .onSuccess(jobExecution -> {
         FileDefinition fileDefinition = new FileDefinition()
@@ -70,12 +70,15 @@ public class FileDefinitionServiceImpl implements FileDefinitionService {
           .withJobExecutionId(jobExecution.getId())
           .withFileName(getFileNameByRequest(request))
           .withStatus(NEW);
-        save(fileDefinition, tenantId)
-          .onSuccess(promise::complete)
+          save(fileDefinition, tenantId)
+          .onSuccess(savedFileDefinition -> {
+              var jobData = new JobData(savedFileDefinition, jobExecution);
+              promise.complete(jobData);
+            }
+          )
           .onFailure(ar -> promise.fail(ar.getCause()));
       })
       .onFailure(ar -> promise.fail(ar.getCause()));
-
     return promise.future();
   }
 

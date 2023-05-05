@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
@@ -119,19 +120,25 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public void updateJobStatusById(String id, JobExecution.Status status, String tenantId) {
-    getById(id, tenantId).onSuccess(jobExecution -> {
-      jobExecution.setStatus(status);
-      jobExecution.setCompletedDate(new Date());
-      update(jobExecution, tenantId);
-    });
+  public void updateJobStatusById(String id, JobExecution jobExecution, JobExecution.Status status, String tenantId) {
+    if (isNull(jobExecution)) {
+      getById(id, tenantId)
+        .onSuccess(execution -> update(updateJobStatus(execution, status), tenantId));
+    } else {
+      populateJobProfileNameIfNecessary(jobExecution, tenantId)
+        .onSuccess(execution -> update(updateJobStatus(jobExecution, status), tenantId));
+    }
+  }
+
+  private JobExecution updateJobStatus(JobExecution jobExecution, JobExecution.Status status) {
+    return jobExecution.withStatus(status).withCompletedDate(new Date());
   }
 
   @Override
-  public Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
-    return getById(id, tenantId).compose(jobExecution -> {
-      prepareJobExecution(jobExecution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress);
-      return update(jobExecution, tenantId);
+  public Future<JobExecution> prepareJobForExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId) {
+    return populateJobProfileNameIfNecessary(jobExecution, tenantId).compose(execution -> {
+      prepareJobExecution(execution, fileExportDefinition, IN_PROGRESS, user, totalCount, withProgress);
+      return update(execution, tenantId);
     });
   }
 
