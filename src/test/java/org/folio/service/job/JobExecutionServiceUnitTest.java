@@ -352,11 +352,10 @@ class JobExecutionServiceUnitTest {
       .withId(JOB_PROFILE_ID)
       .withName(JOB_PROFILE_NAME);
     when(jobProfileService.getById(JOB_PROFILE_ID, TENANT_ID)).thenReturn(Future.succeededFuture(jobProfile));
-    when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     when(jobExecutionDao.update(jobExecution, TENANT_ID)).thenReturn(Future.succeededFuture(jobExecution));
 
     //when
-    Future<JobExecution> future = jobExecutionService.prepareJobForExport(JOB_EXECUTION_ID, fileDefinition, user, TOTAL_COUNT, true, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.prepareJobForExport(jobExecution, fileDefinition, user, TOTAL_COUNT, true, TENANT_ID);
 
     //then
     future.onComplete(ar -> {
@@ -376,6 +375,7 @@ class JobExecutionServiceUnitTest {
         context.completeNow();
       });
     });
+    verify(jobExecutionService).update(jobExecution, TENANT_ID);
   }
 
   @Test

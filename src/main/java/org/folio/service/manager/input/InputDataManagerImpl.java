@@ -72,8 +72,8 @@ class InputDataManagerImpl implements InputDataManager {
   @Autowired
   private ErrorLogService errorLogService;
 
-  private WorkerExecutor executor;
-  private LocalMap<String, InputDataContext> inputDataLocalMap;
+  private WorkerExecutor executor; //NOSONAR
+  private LocalMap<String, InputDataContext> inputDataLocalMap; //NOSONAR
 
   public InputDataManagerImpl() {
   }
@@ -132,7 +132,7 @@ class InputDataManagerImpl implements InputDataManager {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
           ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
-          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+          finalizeExport(exportPayload, jobExecution, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
       return;
@@ -146,14 +146,14 @@ class InputDataManagerImpl implements InputDataManager {
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
-          jobExecutionService.prepareJobForExport(jobExecutionId, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId)
+          jobExecutionService.prepareJobForExport(jobExecution, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId)
           .onSuccess(jobExec -> exportNextChunk(exportPayload, sourceReader))
           .onFailure(ar -> {
             jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
-            finalizeExport(exportPayload, ExportResult.failed(ErrorCode.FAIL_TO_UPDATE_JOB));
+            finalizeExport(exportPayload, jobExecution, ExportResult.failed(ErrorCode.FAIL_TO_UPDATE_JOB));
           });
         } else {
-          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+          finalizeExport(exportPayload, jobExecution, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       })
         .onFailure(throwable -> LOGGER.error("Failed to save file definition.", throwable));
@@ -164,7 +164,7 @@ class InputDataManagerImpl implements InputDataManager {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
         } else {
           ExportPayload exportPayload = createExportPayload(exportRequest, fileExportDefinition, mappingProfile, jobExecutionId, okapiConnectionParams);
-          finalizeExport(exportPayload, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
+          finalizeExport(exportPayload, jobExecution, ExportResult.failed(ErrorCode.USER_NOT_FOUND));
         }
       });
       sourceReader.close();
@@ -176,7 +176,7 @@ class InputDataManagerImpl implements InputDataManager {
     if (exportResult.isInProgress()) {
       proceedInProgress(exportPayload);
     } else {
-      finalizeExport(exportPayload, exportResult);
+      finalizeExport(exportPayload, null, exportResult);
     }
   }
 
@@ -186,7 +186,7 @@ class InputDataManagerImpl implements InputDataManager {
     if (nonNull(sourceReader) && sourceReader.hasNext()) {
       exportNextChunk(exportPayload, sourceReader);
     } else {
-      finalizeExport(exportPayload, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE));
+      finalizeExport(exportPayload, null, ExportResult.failed(ErrorCode.GENERIC_ERROR_CODE));
     }
   }
 
@@ -203,7 +203,7 @@ class InputDataManagerImpl implements InputDataManager {
     getExportManager().exportData(JsonObject.mapFrom(exportPayload));
   }
 
-  private void finalizeExport(ExportPayload exportPayload, ExportResult exportResult) {
+  private void finalizeExport(ExportPayload exportPayload, JobExecution jobExecution, ExportResult exportResult) {
     FileDefinition fileExportDefinition = exportPayload.getFileExportDefinition();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
@@ -220,11 +220,11 @@ class InputDataManagerImpl implements InputDataManager {
                     && Boolean.TRUE.equals(isAnyErrorPresent.result())) {
                   expResult.setStatus(COMPLETED_WITH_ERRORS);
                 }
-                jobExecutionService.updateJobStatusById(jobExecutionId, getJobExecutionStatus(expResult), tenantId);
+                jobExecutionService.updateJobStatusById(jobExecutionId, jobExecution, getJobExecutionStatus(expResult), tenantId);
                 updateFileDefinitionStatusByResult(fileExportDefinition, expResult, tenantId);
               });
     } else {
-      jobExecutionService.updateJobStatusById(jobExecutionId, status, tenantId);
+      jobExecutionService.updateJobStatusById(jobExecutionId, jobExecution, status, tenantId);
       updateFileDefinitionStatusByResult(fileExportDefinition, exportResult, tenantId);
     }
     closeSourceReader(jobExecutionId);

@@ -3,6 +3,7 @@ package org.folio.service.file.upload;
 import io.vertx.core.Future;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
+import org.folio.service.file.definition.JobData;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.util.OkapiConnectionParams;
 
@@ -60,9 +61,9 @@ public interface FileUploadService {
    * Upload file for quick export with {@link FileDefinition}
    *
    * @param request        {@link QuickExportRequest}
-   * @param fileDefinition {@link FileDefinition}
+   * @param jobData        {@link JobData}
    * @param params         {@link OkapiConnectionParams}
    * @return {@link FileDefinition}
    */
-  Future<FileDefinition> uploadFileDependsOnTypeForQuickExport(QuickExportRequest request, FileDefinition fileDefinition, OkapiConnectionParams params);
+  Future<FileDefinition> uploadFileDependsOnTypeForQuickExport(QuickExportRequest request, JobData jobData, OkapiConnectionParams params);
 }

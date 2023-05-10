@@ -58,7 +58,7 @@ public interface JobExecutionService {
    * @param status   status to update
    * @param tenantId tenant id
    */
-  void updateJobStatusById(String id, JobExecution.Status status, String tenantId);
+  void updateJobStatusById(String id, JobExecution jobExecution, JobExecution.Status status, String tenantId);
 
   /**
    * Updates {@link JobExecution} status with IN-PROGRESS && updates exported files && updates started date
@@ -69,7 +69,7 @@ public interface JobExecutionService {
    * @param withProgress         condition to add progress
    * @param tenantId             tenant id
    */
-  Future<JobExecution> prepareJobForExport(String id, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId);
+  Future<JobExecution> prepareJobForExport(JobExecution jobExecution, FileDefinition fileExportDefinition, JsonObject user, int totalCount, boolean withProgress, String tenantId);
 
   /**
    * Updates {@link JobExecution} status with specified status && updates exported files && updates started and completed dates

@@ -13,6 +13,7 @@ import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.rest.jaxrs.model.QuickExportRequest;
 import org.folio.service.file.definition.FileDefinitionService;
+import org.folio.service.file.definition.JobData;
 import org.folio.service.file.storage.FileStorage;
 import org.folio.service.job.JobExecutionService;
 import org.folio.service.logs.ErrorLogService;
@@ -103,33 +104,30 @@ public class FileUploadServiceImpl implements FileUploadService {
   }
 
   @Override
-  public Future<FileDefinition> uploadFileDependsOnTypeForQuickExport(QuickExportRequest request, FileDefinition fileDefinition, OkapiConnectionParams params) {
+  public Future<FileDefinition> uploadFileDependsOnTypeForQuickExport(QuickExportRequest request, JobData jobData, OkapiConnectionParams params) {
     Promise<FileDefinition> promise = Promise.promise();
-    jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId())
-      .onSuccess(jobExecution ->
-        fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), params.getTenantId())
-          .onSuccess(inProgressFileDef -> {
-            if (QuickExportRequest.Type.CQL.equals(request.getType())) {
-              uploadFileWithCQLQueryQuickExport(request, inProgressFileDef, jobExecution, params)
-                .onSuccess(promise::complete)
-                .onFailure(ar -> failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.getCause(), params));
-            } else {
-              List<String> uuids = request.getUuids();
-              fileStorage.saveFileDataAsyncCQL(uuids, inProgressFileDef)
-                .onComplete(ar -> {
-                  if (ar.succeeded()) {
-                    updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(uuids.size())), ar.result(), request, params)
-                      .onSuccess(promise::complete)
-                      .onFailure(async -> promise.fail(async.getCause()));
-                  } else {
-                    failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.cause(), params);
-                  }
-                });
-            }
-          }).onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params))
-
-      ).onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, null, request, ar.getCause(), params));
-
+    var jobExecution = jobData.getJobExecution();
+    var fileDefinition = jobData.getFileDefinition();
+    fileDefinitionService.update(fileDefinition.withStatus(IN_PROGRESS), params.getTenantId())
+      .onSuccess(inProgressFileDef -> {
+        if (QuickExportRequest.Type.CQL.equals(request.getType())) {
+          uploadFileWithCQLQueryQuickExport(request, inProgressFileDef, jobExecution, params)
+            .onSuccess(promise::complete)
+            .onFailure(ar -> failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.getCause(), params));
+        } else {
+          List<String> uuids = request.getUuids();
+          fileStorage.saveFileDataAsyncCQL(uuids, inProgressFileDef)
+            .onComplete(ar -> {
+              if (ar.succeeded()) {
+                updateFileDefinitionAndJobExecution(jobExecution.withProgress(new Progress().withTotal(uuids.size())), ar.result(), request, params)
+                  .onSuccess(promise::complete)
+                  .onFailure(async -> promise.fail(async.getCause()));
+              } else {
+                failFileDefinitionAndJobExecution(promise, inProgressFileDef, jobExecution, request, ar.cause(), params);
+              }
+            });
+        }
+      }).onFailure(ar -> failFileDefinitionAndJobExecution(promise, fileDefinition, jobExecution, request, ar.getCause(), params));
     return promise.future();
   }
 
