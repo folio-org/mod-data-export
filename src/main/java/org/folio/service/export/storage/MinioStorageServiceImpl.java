@@ -107,6 +107,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
               client.write(path, is);
             }
           } catch (Exception e) {
+            LOGGER.warn("storeFile:: Error during storing file for jobExecution {} with message {} ",  fileDefinition.getJobExecutionId(), e.getMessage());
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
           }
         });

@@ -38,4 +38,11 @@ class MinioClientFactoryTest {
     assertNotNull(client);
     assertEquals(client, minioClientFactory.getClient());
   }
+
+  @Test
+  void getFolioS3ClientFromFactoryTest() {
+    var folioS3Client = minioClientFactory.getFolioS3Client();
+    assertNotNull(folioS3Client);
+    assertEquals(folioS3Client, minioClientFactory.getFolioS3Client());
+  }
 }
