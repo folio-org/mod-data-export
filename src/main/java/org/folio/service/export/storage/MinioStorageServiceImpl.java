@@ -101,15 +101,13 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .map(Paths::get)
         .filter(Files::isRegularFile)
         .forEach(filePath -> {
-          try {
+          try (var is = Files.newInputStream(filePath)) {
             var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
-            try (var is = Files.newInputStream(filePath)) {
-              client.write(path, is);
-            }
+            client.write(path, is);
           } catch (Exception e) {
             LOGGER.warn("storeFile:: Error during storing file for jobExecution {} with message {} ",  fileDefinition.getJobExecutionId(), e.getMessage());
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-          }
+         }
         });
     }
   }
