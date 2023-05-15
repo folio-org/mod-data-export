@@ -26,9 +26,9 @@
     <rest-assured.version>5.2.0</rest-assured.version>
     <marc4j.version>2.9.2</marc4j.version>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
-    <minio.version>8.4.5</minio.version>
+    <minio.version>8.5.2</minio.version>
     <generate-marc-utils-version>1.6.0</generate-marc-utils-version>
-
+    <folio-s3-client.version>1.1.0-SNAPSHOT</folio-s3-client.version>
     <sonar.exclusions>
       **/OkapiConnectionParams.java,
       **/ModTenantAPI.java,
@@ -77,6 +77,12 @@
       <version>${folio-di-support.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-s3-client</artifactId>
+      <version>${folio-s3-client.version}</version>
+    </dependency>
+
 
     <!-- Vertx dependencies -->
     <dependency>

@@ -1,12 +1,8 @@
 package org.folio.service.export.storage;
 
-import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,11 +21,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.util.StringUtils;
 
 import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.ListObjectsArgs;
-import io.minio.RemoveObjectsArgs;
-import io.minio.UploadObjectArgs;
 import io.minio.http.Method;
-import io.minio.messages.DeleteObject;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -100,7 +92,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getCode(), fileDefinition.getJobExecutionId(), tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     } else {
-      var client = minioClientFactory.getClient();
+      var client = minioClientFactory.getFolioS3Client();
       vertx.fileSystem()
         .readDirBlocking(Paths.get(fileDefinition.getSourcePath())
           .getParent()
@@ -108,9 +100,12 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .stream()
         .map(Paths::get)
         .filter(Files::isRegularFile)
-        .forEach(file -> {
+        .forEach(filePath -> {
           try {
-            client.uploadObject(getUploadObjectArgs(bucket, file, folderToSave + "/" + file.getName(file.getNameCount() - 1)));
+            var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
+            try (var is = Files.newInputStream(filePath)) {
+              client.write(path, is);
+            }
           } catch (Exception e) {
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
           }
@@ -124,19 +119,9 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
     }
     if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
-      var client = minioClientFactory.getClient();
-      var objectList = client.listObjects(getListObjectsArgs(jobExecution, tenantId, bucket));
-      List<DeleteObject> objects = new LinkedList<>();
-
-      objectList.forEach(obj -> {
-        try {
-          objects.add(new DeleteObject(obj.get()
-            .objectName()));
-        } catch (Exception e) {
-          throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-      });
-      client.removeObjects(getRemoveObjectsArgs(bucket, objects));
+      var client = minioClientFactory.getFolioS3Client();
+      var objectList = client.list(buildPrefix(tenantId, jobExecution.getId()));
+      objectList.forEach(client::remove);
     } else {
       LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
     }
@@ -148,28 +133,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       .object(key)
       .method(Method.GET)
       .expiry(EXPIRATION_TIME_IN_MINUTES, TimeUnit.MINUTES)
-      .build();
-  }
-
-  private RemoveObjectsArgs getRemoveObjectsArgs(String bucket, List<DeleteObject> objects) {
-    return RemoveObjectsArgs.builder()
-      .bucket(bucket)
-      .objects(objects)
-      .build();
-  }
-
-  private ListObjectsArgs getListObjectsArgs(JobExecution jobExecution, String tenantId, String bucket) {
-    return ListObjectsArgs.builder()
-      .bucket(bucket)
-      .prefix(buildPrefix(tenantId, jobExecution.getId()))
-      .build();
-  }
-
-  private UploadObjectArgs getUploadObjectArgs(String bucket, Path file, String object) throws IOException {
-    return UploadObjectArgs.builder()
-      .bucket(bucket)
-      .object(object)
-      .filename(file.toString())
       .build();
   }
 

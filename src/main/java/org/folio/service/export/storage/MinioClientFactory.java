@@ -7,6 +7,9 @@ import io.minio.credentials.StaticProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.s3.client.FolioS3Client;
+import org.folio.s3.client.S3ClientFactory;
+import org.folio.s3.client.S3ClientProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +36,27 @@ public class MinioClientFactory {
   private String region;
 
   private MinioClient client;
+
+  private FolioS3Client folioS3Client;
+
+  public FolioS3Client getFolioS3Client() {
+    if (folioS3Client != null) {
+      return folioS3Client;
+    }
+    folioS3Client = createFolioS3Client();
+    return folioS3Client;
+  }
+
+  private FolioS3Client createFolioS3Client() {
+    return S3ClientFactory.getS3Client(S3ClientProperties.builder()
+      .endpoint(endpoint)
+      .secretKey(secretKey)
+      .accessKey(accessKey)
+      .bucket(bucket)
+      .awsSdk(false)
+      .region(region)
+      .build());
+  }
 
   public MinioClient getClient() {
 
