@@ -37,7 +37,7 @@ public class MinioClientFactory {
 
   private MinioClient client;
 
-  private FolioS3Client folioS3Client;
+  private FolioS3Client folioS3Client; //NOSONAR
 
   public FolioS3Client getFolioS3Client() {
     if (folioS3Client != null) {
