@@ -35,6 +35,9 @@ public class MinioClientFactory {
   @Value("${minio.region}")
   private String region;
 
+  @Value("#{ T(Boolean).parseBoolean('${minio.awsSdk}')}")
+  private boolean awsSdk;
+
   private MinioClient client;
 
   private FolioS3Client folioS3Client; //NOSONAR
@@ -53,7 +56,7 @@ public class MinioClientFactory {
       .secretKey(secretKey)
       .accessKey(accessKey)
       .bucket(bucket)
-      .awsSdk(false)
+      .awsSdk(awsSdk)
       .region(region)
       .build());
   }

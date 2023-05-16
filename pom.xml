@@ -29,6 +29,7 @@
     <minio.version>8.5.2</minio.version>
     <generate-marc-utils-version>1.6.0</generate-marc-utils-version>
     <folio-s3-client.version>1.1.0-SNAPSHOT</folio-s3-client.version>
+    <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
     <sonar.exclusions>
       **/OkapiConnectionParams.java,
       **/ModTenantAPI.java,
@@ -104,6 +105,11 @@
     </dependency>
 
     <!-- other dependencies -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>aws-sdk-java</artifactId>
+      <version>${aws-sdk-java.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
