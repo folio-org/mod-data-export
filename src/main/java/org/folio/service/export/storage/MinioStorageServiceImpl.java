@@ -1,5 +1,6 @@
 package org.folio.service.export.storage;
 
+import java.io.BufferedInputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -101,7 +102,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .map(Paths::get)
         .filter(Files::isRegularFile)
         .forEach(filePath -> {
-          try (var is = Files.newInputStream(filePath)) {
+          try (var is =  new BufferedInputStream(Files.newInputStream(filePath))) {
             var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
             client.write(path, is);
           } catch (Exception e) {
