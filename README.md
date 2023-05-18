@@ -89,9 +89,11 @@ curl -w '\n' -X POST -d '[ { "id": "mod-data-export-<module_version>", "action":
 ```
 
 ## Storage configuration
-MinIO remote storage or Amazon S3 can be used as storage for generated files MARC files. 
-The storage is selected by specifying the url of S3-compatible storage by using ENV variable `AWS_URL`. In addition, 
-the following ENV variables can be specified: `AWS_REGION`, `AWS_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
+MinIO remote storage or Amazon S3 can be used as storage for generated files MARC files.
+The storage is selected by specifying the url of S3-compatible storage by using ENV variable `AWS_URL`.
+`AWS_SDK` is used to specify client to communicate with storage.
+It requires `true` in case if S3 usage or `false` in case if MinIO usage. By default it equals to `false`.
+In addition,the following ENV variables can be specified: `AWS_REGION`, `AWS_BUCKET`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
 
 ## Issue tracker
 
