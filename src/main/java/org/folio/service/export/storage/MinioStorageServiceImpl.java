@@ -32,8 +32,6 @@ public class MinioStorageServiceImpl implements ExportStorageService {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final int EXPIRATION_TIME_IN_MINUTES = 10;
-
   @Autowired
   private FolioS3ClientFactory folioS3ClientFactory;
   @Autowired

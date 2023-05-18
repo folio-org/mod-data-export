@@ -1,19 +1,13 @@
 package org.folio.service.export.storage;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.S3ClientFactory;
 import org.folio.s3.client.S3ClientProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.lang.invoke.MethodHandles;
-
 @Component
 public class FolioS3ClientFactory {
-
-  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Value("${minio.endpoint}")
   private String endpoint;
