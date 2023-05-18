@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import org.folio.config.ApplicationConfig;
@@ -18,6 +18,8 @@ import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportedFile;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
+import org.folio.s3.client.FolioS3Client;
+import org.folio.s3.exception.S3ClientException;
 import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterEach;
@@ -29,10 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.minio.*;
 import io.minio.errors.*;
-import io.minio.messages.Item;
-import io.minio.messages.Version;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -50,7 +49,7 @@ class MinioExportStorageServiceTest {
   public static final String TMP_FILE_2 = "file-2.mrc";
 
   @Mock
-  private MinioClientFactory minioClientFactory;
+  private FolioS3ClientFactory folioS3ClientFactory;
   @Mock
   private ErrorLogService errorLogService;
   @Spy
@@ -115,15 +114,15 @@ class MinioExportStorageServiceTest {
     FileDefinition exportFileDefinition = new FileDefinition().withJobExecutionId(jobId)
       .withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
 
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
 
     // when
     exportStorageService.storeFile(exportFileDefinition, TENANT_ID);
 
     // then
     Mockito.verify(client, Mockito.times(2))
-      .uploadObject(any(UploadObjectArgs.class));
+      .write(any(), any());
 
   }
 
@@ -145,9 +144,9 @@ class MinioExportStorageServiceTest {
     IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
     // given
     FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
-    Mockito.when(client.uploadObject(any(UploadObjectArgs.class)))
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
+    Mockito.when(client.write(any(), any()))
       .thenThrow(new RuntimeException());
 
     // when
@@ -158,19 +157,17 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void testSuccessfulGenerateURL(VertxTestContext testContext)
-    throws IOException, ServerException, InsufficientDataException, ErrorResponseException, NoSuchAlgorithmException,
-    InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
+  void testSuccessfulGenerateURL(VertxTestContext testContext) {
     // given
     String tenantId = "testAWS";
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
 
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
 
     var response = "https://test-aws-export-vk.s3.amazonaws.com";
-    when(client.getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class))).thenReturn(response);
+    when(client.getPresignedUrl(any(String.class))).thenReturn(response);
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, tenantId);
     // then
@@ -185,18 +182,16 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void testBucketNameNotFoundInS3(VertxTestContext testContext)
-    throws ServerException, InsufficientDataException, ErrorResponseException, IOException, NoSuchAlgorithmException,
-    InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
+  void testBucketNameNotFoundInS3(VertxTestContext testContext) {
     // given
     String jobExecutionId = "67dfac11-1caf-4470-9ad1-d533f6360bdd";
     String fileId = "448ae575-daec-49c1-8041-d64c8ed8e5b1";
 
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
 
-    doThrow(new ServerException("Bucket Not Found", 404, null)).when(client)
-      .getPresignedObjectUrl(any(GetPresignedObjectUrlArgs.class));
+    doThrow(new S3ClientException("Bucket Not Found")).when(client)
+      .getPresignedUrl(any(String.class));
 
     // when
     Future<String> linkFuture = exportStorageService.getFileDownloadLink(jobExecutionId, fileId, TENANT_ID);
@@ -214,8 +209,8 @@ class MinioExportStorageServiceTest {
   @Test
   void testBucketNameNotProvidedInSystemProperty() {
 
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
 
     setBucket(null);
 
@@ -233,34 +228,14 @@ class MinioExportStorageServiceTest {
     JobExecution jobExecution = new JobExecution().withExportedFiles(Collections.singleton(exportedFile))
       .withId(UUID.randomUUID()
         .toString());
-    var client = Mockito.mock(MinioClient.class);
-    when(minioClientFactory.getClient()).thenReturn(client);
-
-    when(client.listObjects(any(ListObjectsArgs.class))).thenReturn(() -> new Iterator<>() {
-
-      private boolean hasNext = true;
-
-      @Override
-      public boolean hasNext() {
-        try {
-          return hasNext;
-        } finally {
-          hasNext = false;
-        }
-      }
-
-      @Override
-      public Result<Item> next() {
-        return new Result<>(new Version());
-      }
-    });
-
+    var client = Mockito.mock(FolioS3Client.class);
+    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
+    when(client.list(isA(String.class))).thenReturn(List.of("path1", "path2"));
     // when
     exportStorageService.removeFilesRelatedToJobExecution(jobExecution, TENANT_ID);
 
     // then
-    Mockito.verify(client)
-      .removeObjects(any(RemoveObjectsArgs.class));
+    Mockito.verify(client, times(2)).remove(isA(String.class));
   }
 
   @Test
@@ -277,8 +252,8 @@ class MinioExportStorageServiceTest {
     // when
     exportStorageService.removeFilesRelatedToJobExecution(new JobExecution(), TENANT_ID);
     // then
-    Mockito.verify(minioClientFactory, never())
-      .getClient();
+    Mockito.verify(folioS3ClientFactory, never())
+      .getFolioS3Client();
   }
 
 }

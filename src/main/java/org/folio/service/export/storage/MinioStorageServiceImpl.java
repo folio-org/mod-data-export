@@ -1,13 +1,9 @@
 package org.folio.service.export.storage;
 
-import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -24,12 +20,6 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.util.StringUtils;
 
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.ListObjectsArgs;
-import io.minio.RemoveObjectsArgs;
-import io.minio.UploadObjectArgs;
-import io.minio.http.Method;
-import io.minio.messages.DeleteObject;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -42,10 +32,8 @@ public class MinioStorageServiceImpl implements ExportStorageService {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  private static final int EXPIRATION_TIME_IN_MINUTES = 10;
-
   @Autowired
-  private MinioClientFactory minioClientFactory;
+  private FolioS3ClientFactory folioS3ClientFactory;
   @Autowired
   private Vertx vertx;
   @Autowired
@@ -65,7 +53,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
   @Override
   public Future<String> getFileDownloadLink(String jobExecutionId, String exportFileName, String tenantId) {
     Promise<String> promise = Promise.promise();
-    var client = minioClientFactory.getClient();
+    var client = folioS3ClientFactory.getFolioS3Client();
     var key = buildPrefix(tenantId, jobExecutionId) + "/" + exportFileName;
 
     if (StringUtils.isNullOrEmpty(bucket)) {
@@ -76,7 +64,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
     vertx.executeBlocking(blockingFuture -> {
       String url = null;
       try {
-        url = client.getPresignedObjectUrl(getGetPresignedObjectUrlArgs(key, bucket));
+        url = client.getPresignedUrl(key);
       } catch (Exception e) {
         blockingFuture.fail(e);
       }
@@ -100,7 +88,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       errorLogService.saveGeneralError(ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getCode(), fileDefinition.getJobExecutionId(), tenantId);
       throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, ErrorCode.S3_BUCKET_NAME_NOT_FOUND);
     } else {
-      var client = minioClientFactory.getClient();
+      var client = folioS3ClientFactory.getFolioS3Client();
       vertx.fileSystem()
         .readDirBlocking(Paths.get(fileDefinition.getSourcePath())
           .getParent()
@@ -108,12 +96,14 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .stream()
         .map(Paths::get)
         .filter(Files::isRegularFile)
-        .forEach(file -> {
-          try {
-            client.uploadObject(getUploadObjectArgs(bucket, file, folderToSave + "/" + file.getName(file.getNameCount() - 1)));
+        .forEach(filePath -> {
+          try (var is =  new BufferedInputStream(Files.newInputStream(filePath))) {
+            var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
+            client.write(path, is);
           } catch (Exception e) {
+            LOGGER.warn("storeFile:: Error during storing file for jobExecution {} with message {} ",  fileDefinition.getJobExecutionId(), e.getMessage());
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-          }
+         }
         });
     }
   }
@@ -124,53 +114,12 @@ public class MinioStorageServiceImpl implements ExportStorageService {
       throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.S3_BUCKET_NAME_NOT_FOUND.getDescription());
     }
     if (CollectionUtils.isNotEmpty(jobExecution.getExportedFiles())) {
-      var client = minioClientFactory.getClient();
-      var objectList = client.listObjects(getListObjectsArgs(jobExecution, tenantId, bucket));
-      List<DeleteObject> objects = new LinkedList<>();
-
-      objectList.forEach(obj -> {
-        try {
-          objects.add(new DeleteObject(obj.get()
-            .objectName()));
-        } catch (Exception e) {
-          throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-      });
-      client.removeObjects(getRemoveObjectsArgs(bucket, objects));
+      var client = folioS3ClientFactory.getFolioS3Client();
+      var objectList = client.list(buildPrefix(tenantId, jobExecution.getId()));
+      objectList.forEach(client::remove);
     } else {
       LOGGER.error("No exported files is present related to jobExecution with id {}", jobExecution.getId());
     }
-  }
-
-  private GetPresignedObjectUrlArgs getGetPresignedObjectUrlArgs(String key, String bucket) {
-    return GetPresignedObjectUrlArgs.builder()
-      .bucket(bucket)
-      .object(key)
-      .method(Method.GET)
-      .expiry(EXPIRATION_TIME_IN_MINUTES, TimeUnit.MINUTES)
-      .build();
-  }
-
-  private RemoveObjectsArgs getRemoveObjectsArgs(String bucket, List<DeleteObject> objects) {
-    return RemoveObjectsArgs.builder()
-      .bucket(bucket)
-      .objects(objects)
-      .build();
-  }
-
-  private ListObjectsArgs getListObjectsArgs(JobExecution jobExecution, String tenantId, String bucket) {
-    return ListObjectsArgs.builder()
-      .bucket(bucket)
-      .prefix(buildPrefix(tenantId, jobExecution.getId()))
-      .build();
-  }
-
-  private UploadObjectArgs getUploadObjectArgs(String bucket, Path file, String object) throws IOException {
-    return UploadObjectArgs.builder()
-      .bucket(bucket)
-      .object(object)
-      .filename(file.toString())
-      .build();
   }
 
   private String buildPrefix(String tenantId, String jobExecutionId) {

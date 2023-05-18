@@ -30,12 +30,12 @@ class MinioClientFactoryTest {
   }
 
   @Autowired
-  private MinioClientFactory minioClientFactory;
+  private FolioS3ClientFactory folioS3ClientFactory;
 
   @Test
-  void getClientFromFactoryTest() {
-    var client = minioClientFactory.getClient();
-    assertNotNull(client);
-    assertEquals(client, minioClientFactory.getClient());
+  void getFolioS3ClientFromFactoryTest() {
+    var folioS3Client = folioS3ClientFactory.getFolioS3Client();
+    assertNotNull(folioS3Client);
+    assertEquals(folioS3Client, folioS3ClientFactory.getFolioS3Client());
   }
 }
