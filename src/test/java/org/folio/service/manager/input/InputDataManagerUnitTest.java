@@ -1,6 +1,7 @@
 package org.folio.service.manager.input;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -104,6 +108,7 @@ class InputDataManagerUnitTest {
     );
   private static final int TOTAL_COUNT_2 = 2;
   private static final int TOTAL_COUNT_4 = 4;
+  private static final String CQL_FILE_NAME = "query.cql";
 
   @InjectMocks
   @Spy
@@ -169,15 +174,17 @@ class InputDataManagerUnitTest {
 
   }
 
-  @Test
+  @ParameterizedTest
+  @EnumSource(FileDefinition.UploadFormat.class)
   @Order(1)
-  void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty() {
+  void shouldNotInitExportSuccessfully_andSetStatusError_whenSourceStreamReaderEmpty(FileDefinition.UploadFormat uploadFormat) {
     //given
+    var fileDef = CQL.equals(uploadFormat) ? requestFileDefinition.withUploadFormat(uploadFormat).withFileName(FILE_NAME) : requestFileDefinition;
     when(sourceReader.hasNext()).thenReturn(false);
     when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
     doCallRealMethod().when(jobExecutionService).prepareAndSaveJobForFailedExport(any(), any(FileDefinition.class), eq(USER), eq(0), eq(true), eq(TENANT_ID));
     //when
-    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(requestFileDefinition), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
+    inputDataManager.initBlocking(exportRequestJson, JsonObject.mapFrom(fileDef), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(jobExecution), requestParams);
 
     //then
     verify(sourceReader).close();
@@ -187,7 +194,11 @@ class InputDataManagerUnitTest {
     FileDefinition fileDefinition = fileExportDefinitionCaptor.getValue();
     assertThat(fileDefinition.getStatus(), equalTo(FileDefinition.Status.ERROR));
     assertThat(fileDefinition.getFileName(), equalTo("InventoryUUIDs" + DELIMETER + jobExecution.getHrId() + ".mrc"));
-    verify(errorLogService).saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), JOB_EXECUTION_ID, TENANT_ID);
+    if (CQL.equals(uploadFormat)) {
+      verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(FILE_NAME), JOB_EXECUTION_ID, TENANT_ID);
+    } else {
+      verify(errorLogService).saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), JOB_EXECUTION_ID, TENANT_ID);
+    }
   }
 
   @Test
@@ -455,7 +466,7 @@ class InputDataManagerUnitTest {
       .withJobProfileId("1ef7d0ac-f0a8-42b5-bbbb-c7e249009c13")
       .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
     var requestFileDefinition = new FileDefinition()
-      .withUploadFormat(FileDefinition.UploadFormat.CQL);
+      .withUploadFormat(CQL);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
 
@@ -499,7 +510,7 @@ class InputDataManagerUnitTest {
       .withJobProfileId("5d636597-a59d-4391-a270-4e79d5ba70e3")
       .withMetadata(new Metadata().withCreatedByUserId(UUID.randomUUID().toString()));
     var requestFileDefinition = new FileDefinition()
-      .withUploadFormat(FileDefinition.UploadFormat.CQL);
+      .withUploadFormat(CQL);
     when(exportRequestJson.mapTo(ExportRequest.class)).thenReturn(exportRequest);
     when(fileDefinitionService.save(any(FileDefinition.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new FileDefinition()));
 
