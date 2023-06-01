@@ -46,6 +46,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.folio.rest.jaxrs.model.FileDefinition.UploadFormat.CQL;
 import static org.folio.service.manager.export.ExportResult.ExportStatus.COMPLETED_WITH_ERRORS;
+import static org.folio.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
 import static org.folio.util.ErrorCode.errorCodesAccordingToExport;
 
 /**
@@ -158,7 +159,11 @@ class InputDataManagerImpl implements InputDataManager {
       })
         .onFailure(throwable -> LOGGER.error("Failed to save file definition.", throwable));
     } else {
-      errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
+      if (CQL.equals(requestFileDefinition.getUploadFormat())) {
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(requestFileDefinition.getFileName()), jobExecutionId, tenantId);
+      } else {
+        errorLogService.saveGeneralError(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), jobExecutionId, tenantId);
+      }
       fileDefinitionService.save(fileExportDefinition.withStatus(FileDefinition.Status.ERROR), tenantId).onSuccess(savedFileDefinition -> {
         if (optionalUser.isPresent()) {
           jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);

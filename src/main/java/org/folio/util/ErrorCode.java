@@ -35,6 +35,7 @@ public enum ErrorCode {
   INVALID_UUID_FORMAT("error.invalidUuidFormat", "Invalid UUID format: %s"),
   DEFAULT_MAPPING_PROFILE_NOT_FOUND("error.mappingProfile.defaultNotFound", "Default mapping profile not found"),
   ERROR_READING_FROM_INPUT_FILE("error.readingFromInputFile", "Error while reading from input file with uuids or file is empty"),
+  ERROR_INVALID_CQL_SYNTAX("error.invalidCqlSyntax", "Invalid CQL syntax in %s"),
   SOME_UUIDS_NOT_FOUND("error.uuidsNotFound", "UUIDs not found in SRS or inventory: %s"),
   SOME_RECORDS_FAILED("error.someRecordsFailed", "Export is completed with errors, some records have failed to export, number of failed records: %s"),
   DATE_PARSE_ERROR_CODE("error.mapping.dateParse", "An error occurs during parsing the date while the mapping process"),

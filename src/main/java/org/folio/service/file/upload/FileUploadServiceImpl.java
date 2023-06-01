@@ -3,7 +3,6 @@ package org.folio.service.file.upload;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.clients.SearchClient;
 import org.folio.clients.UsersClient;
@@ -76,25 +75,20 @@ public class FileUploadServiceImpl implements FileUploadService {
 
   @Override
   public Future<FileDefinition> saveUUIDsByCQL(FileDefinition fileDefinition, String query, OkapiConnectionParams params) {
-    if (StringUtils.isNotBlank(query)) {
-      return searchClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
-        List<String> ids = new ArrayList<>();
-        if (optionalInstancesUUIDs.isPresent()) {
-          JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
-          if (jsonIds.size() > 0) {
-            for (Object id : jsonIds) {
-              ids.add(((JsonObject) id).getString("id"));
-            }
-            return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
-              .compose(jobExecution -> jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId()))
-              .compose(jobExecution -> updateFileDefinitionWithJobExecution(jobExecution.withProgress(new Progress().withTotal(jsonIds.size())), fileDefinition, params.getTenantId()));
+    return searchClient.getInstancesBulkUUIDsAsync(query, params).compose(optionalInstancesUUIDs -> {
+      List<String> ids = new ArrayList<>();
+      if (optionalInstancesUUIDs.isPresent()) {
+        JsonArray jsonIds = optionalInstancesUUIDs.get().getJsonArray("ids");
+        if (jsonIds.size() > 0) {
+          for (Object id : jsonIds) {
+            ids.add(((JsonObject) id).getString("id"));
           }
         }
-        return Future.succeededFuture(fileDefinition);
-      });
-    } else {
-      return Future.succeededFuture(fileDefinition);
-    }
+      }
+      return fileStorage.saveFileDataAsyncCQL(ids, fileDefinition)
+        .compose(jobExecution -> jobExecutionService.getById(fileDefinition.getJobExecutionId(), params.getTenantId()))
+        .compose(jobExecution -> updateFileDefinitionWithJobExecution(jobExecution.withProgress(new Progress().withTotal(ids.size())), fileDefinition, params.getTenantId()));
+    });
   }
 
   @Override
