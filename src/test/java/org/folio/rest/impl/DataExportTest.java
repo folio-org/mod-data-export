@@ -834,6 +834,7 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
     assertNotNull(jobExecution.getExportedFiles().iterator().next().getFileName());
     assertNotNull(jobExecution.getRunBy());
+    assertNotNull(jobExecution.getJobProfileName());
   }
 
   private void assertErrorLogs(ErrorLogCollection errorLogCollection, String jobExecutionId) {

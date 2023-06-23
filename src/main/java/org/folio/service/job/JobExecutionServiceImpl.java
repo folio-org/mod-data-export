@@ -3,7 +3,6 @@ package org.folio.service.job;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
@@ -65,27 +63,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     jobExecutionDao.get(query, offset, limit, tenantId)
       .onComplete(ar -> {
         if (ar.succeeded()) {
-          JobExecutionCollection jobExecutionCollection = ar.result();
-          if (CollectionUtils.isEmpty(jobExecutionCollection.getJobExecutions())) {
-            jobExecutionPromise.complete(jobExecutionCollection);
-          } else {
-            jobProfileService.get(getAssociatedJobProfileIdsQuery(jobExecutionCollection), 0, limit, tenantId)
-              .onSuccess(jobProfileCollection -> {
-                LOGGER.info("Successfully fetched jobProfiles while querying job execution for tenant {}", tenantId);
-                jobExecutionCollection.getJobExecutions().forEach(jobExecution ->
-                  jobProfileCollection.getJobProfiles()
-                    .stream()
-                    .filter(jobProfile -> jobProfile.getId().equals(jobExecution.getJobProfileId()))
-                    .forEach(jobProfile -> jobExecution.setJobProfileName(jobProfile.getName())));
-                jobExecutionPromise.complete(jobExecutionCollection);
-              })
-              .onFailure(async -> {
-                LOGGER.error("Failed to fetch job profiles while getting job executions by query for tenant {}. An empty jobProfileName will be used for those jobs that do not have jobProfileName", tenantId);
-                jobExecutionCollection.getJobExecutions()
-                  .forEach(JobExecutionServiceImpl::populateEmptyJobProfileName);
-                jobExecutionPromise.complete(jobExecutionCollection);
-              });
-          }
+          jobExecutionPromise.complete(ar.result());
         } else {
           jobExecutionPromise.fail(ar.cause());
         }
@@ -256,15 +234,6 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     if (StringUtils.isEmpty(jobExecution.getJobProfileName())) {
       jobExecution.setJobProfileName(StringUtils.EMPTY);
     }
-  }
-
-  private String getAssociatedJobProfileIdsQuery(JobExecutionCollection jobExecutionCollection) {
-    return String.format("(%s)", jobExecutionCollection
-      .getJobExecutions()
-      .stream()
-      .filter(jobExecution -> isNotEmpty(jobExecution.getJobProfileId()))
-      .map(jobExecution -> "id==" + jobExecution.getJobProfileId())
-      .collect(Collectors.joining(" or ")));
   }
 
   @Override

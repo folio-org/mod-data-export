@@ -91,7 +91,7 @@ public class DataExportImpl implements DataExport {
               .onSuccess(mappingProfile ->
                 jobExecutionService.getById(requestFileDefinition.getJobExecutionId(), tenantId)
                   .onSuccess(jobExecution ->
-                    jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()), tenantId)
+                    jobExecutionService.update(jobExecution.withJobProfileId(jobProfile.getId()).withJobProfileName(jobProfile.getName()), tenantId)
                       .onSuccess(updatedJobExecution -> {
                         succeededFuture()
                           .map(PostDataExportExportResponse.respond204())
@@ -126,7 +126,7 @@ public class DataExportImpl implements DataExport {
           .onSuccess(jobData ->
             mappingProfileService.getById(jobProfile.getMappingProfileId(), params)
               .onSuccess(mappingProfile ->
-                jobExecutionService.update(jobData.getJobExecution().withJobProfileId(jobProfile.getId()), tenantId)
+                jobExecutionService.update(jobData.getJobExecution().withJobProfileId(jobProfile.getId()).withJobProfileName(jobProfile.getName()), tenantId)
                   .onSuccess(updatedJobExecution -> {
                     inputDataManager.init(JsonObject.mapFrom(buildExportRequest(jobData.getFileDefinition().getId(), jobProfile.getId(), entity)), JsonObject.mapFrom(jobData.getFileDefinition()), JsonObject.mapFrom(mappingProfile), JsonObject.mapFrom(updatedJobExecution), okapiHeaders);
                     succeededFuture()
