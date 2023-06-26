@@ -124,49 +124,6 @@ class JobExecutionServiceUnitTest {
   }
 
   @Test
-  void getByQuery_shouldReturnSucceededFuture_withUpdatedJobProfileName_whenJobProfilesIsPresent(VertxTestContext context) {
-    //given
-    JobExecution jobExecution = new JobExecution()
-      .withId(JOB_EXECUTION_ID)
-      .withJobProfileId(JOB_PROFILE_ID)
-      .withJobProfileName(StringUtils.EMPTY);
-    JobExecution secondJobExecution = new JobExecution()
-      .withId(UUID.randomUUID().toString())
-      .withJobProfileId(JOB_PROFILE_ID)
-      .withJobProfileName("Job");
-    JobExecution thirdJobExecution = new JobExecution()
-      .withId(UUID.randomUUID().toString())
-      .withJobProfileId(SECOND_JOB_PROFILE_ID)
-      .withJobProfileName(StringUtils.EMPTY);
-    JobProfile jobProfile = new JobProfile()
-      .withId(JOB_PROFILE_ID)
-      .withName(JOB_PROFILE_NAME);
-    JobProfile secondJobProfile = new JobProfile()
-      .withId(SECOND_JOB_PROFILE_ID)
-      .withName(DEFAULT_JOB_PROFILE_NAME);
-    JobProfile third = new JobProfile()
-      .withId(UUID.randomUUID().toString())
-      .withName(DEFAULT_JOB_PROFILE_NAME);
-    String query = "id=" + jobExecution.getId();
-    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(asList(jobExecution, secondJobExecution, thirdJobExecution))));
-    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.succeededFuture(new JobProfileCollection().withJobProfiles(asList(third, secondJobProfile, jobProfile, secondJobProfile))));
-    //when
-    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
-    //then
-    future.onComplete(ar -> context.verify(() -> {
-      assertTrue(ar.succeeded());
-      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
-      assertEquals(JOB_PROFILE_NAME, fetchedSecondJobExecution.getJobProfileName());
-      JobExecution fetchedThirdJobExecution = ar.result().getJobExecutions().get(2);
-      assertEquals(DEFAULT_JOB_PROFILE_NAME, fetchedThirdJobExecution.getJobProfileName());
-      context.completeNow();
-    }));
-  }
-
-  @Test
   void getById_shouldReturnSucceededFuture_withAbsentJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
     //given
     JobExecution jobExecution = new JobExecution()
@@ -181,33 +138,6 @@ class JobExecutionServiceUnitTest {
       assertTrue(ar.succeeded());
       JobExecution fetchedJobExecution = ar.result();
       assertEquals(StringUtils.EMPTY, fetchedJobExecution.getJobProfileName());
-      context.completeNow();
-    }));
-  }
-
-  @Test
-  void getByQuery_shouldReturnSucceededFuture_withCorrectJobProfileName_whenJobProfilesNotFound(VertxTestContext context) {
-    //given
-    JobExecution jobExecution = new JobExecution()
-      .withId(JOB_EXECUTION_ID)
-      .withJobProfileId(JOB_PROFILE_ID);
-    JobExecution secondJobExecution = new JobExecution()
-      .withId(UUID.randomUUID().toString())
-      .withJobProfileId(JOB_PROFILE_ID)
-      .withJobProfileName(StringUtils.EMPTY);
-    String query = "id=" + jobExecution.getId();
-    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(asList(jobExecution, secondJobExecution))));
-    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.failedFuture(StringUtils.EMPTY));
-    //when
-    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
-    //then
-    future.onComplete(ar -> context.verify(() -> {
-      assertTrue(ar.succeeded());
-      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
-      assertEquals(StringUtils.EMPTY, fetchedJobExecution.getJobProfileName());
-      JobExecution fetchedSecondJobExecution = ar.result().getJobExecutions().get(1);
-      assertEquals(StringUtils.EMPTY, fetchedSecondJobExecution.getJobProfileName());
       context.completeNow();
     }));
   }
@@ -250,28 +180,6 @@ class JobExecutionServiceUnitTest {
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       JobExecution fetchedJobExecution = ar.result();
-      assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
-      context.completeNow();
-    }));
-  }
-
-  @Test
-  void getByQuery_shouldReturnSucceededFuture_withExistingJobProfileName_whenJobProfileNotFound(VertxTestContext context) {
-    //given
-    JobExecution jobExecution = new JobExecution()
-      .withId(JOB_EXECUTION_ID)
-      .withJobProfileId(JOB_PROFILE_ID)
-      .withJobProfileName(JOB_PROFILE_NAME);
-    String query = "id=" + jobExecution.getId();
-    when(jobExecutionDao.get(query, 0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobExecutionCollection()
-      .withJobExecutions(singletonList(jobExecution))));
-    when(jobProfileService.get(anyString(), eq(0), eq(10), eq(TENANT_ID))).thenReturn(Future.failedFuture(StringUtils.EMPTY));
-    //when
-    Future<JobExecutionCollection> future = jobExecutionService.get(query, 0, 10, TENANT_ID);
-    //then
-    future.onComplete(ar -> context.verify(() -> {
-      assertTrue(ar.succeeded());
-      JobExecution fetchedJobExecution = ar.result().getJobExecutions().get(0);
       assertEquals(JOB_PROFILE_NAME, fetchedJobExecution.getJobProfileName());
       context.completeNow();
     }));
