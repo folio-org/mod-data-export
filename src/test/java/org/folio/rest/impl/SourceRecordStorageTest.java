@@ -2,15 +2,12 @@ package org.folio.rest.impl;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.clients.ConsortiaClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

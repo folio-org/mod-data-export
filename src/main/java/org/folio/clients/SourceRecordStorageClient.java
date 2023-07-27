@@ -44,13 +44,11 @@ public class SourceRecordStorageClient {
   private ConsortiaClient consortiaClient;
   private ErrorLogService errorLogService;
 
-
   @Autowired
   public SourceRecordStorageClient(ConsortiaClient consortiaClient, ErrorLogService errorLogService ) {
     this.consortiaClient = consortiaClient;
     this.errorLogService = errorLogService;
   }
-
 
   public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
     String uri = recordTypeUriMap.get(idType);

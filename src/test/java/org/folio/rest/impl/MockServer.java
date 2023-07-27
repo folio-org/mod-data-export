@@ -146,7 +146,7 @@ public class MockServer {
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
     router.get(resourcesPath(SEARCH_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
-    router.get("/user-tenants").handler(ctx -> handleConsortiaRequest(ctx));
+    router.get(resourcesPath(USER_TENANTS_ENDPOINT)).handler(ctx -> handleConsortiaRequest(ctx));
     return router;
   }
 
