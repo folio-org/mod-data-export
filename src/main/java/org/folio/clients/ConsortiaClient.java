@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Objects;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
@@ -53,7 +54,8 @@ public class ConsortiaClient {
 
   private JsonObject getResponseEntity(CloseableHttpResponse response) throws IOException {
     HttpEntity entity = response.getEntity();
-    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {
+    var responseStatus = response.getStatusLine().getStatusCode();
+    if (responseStatus == HttpStatus.SC_OK && Objects.nonNull(entity)) {
       try {
         var body = EntityUtils.toString(entity);
         logger.debug("Response body: {}", body);
@@ -62,7 +64,7 @@ public class ConsortiaClient {
         logger.error("Exception while building response entity", e);
       }
     }
-    throw new IOException("Get invalid response with status: " + response.getStatusLine().getStatusCode());
+    throw new IOException("Get invalid response with status: " + responseStatus);
   }
 }
 

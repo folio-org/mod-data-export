@@ -83,6 +83,6 @@ public class SourceRecordStorageClient {
       return centralTenantId;
     }
     LOGGER.info("No central tenant found");
-    return "";
+    return StringUtils.EMPTY;
   }
 }
