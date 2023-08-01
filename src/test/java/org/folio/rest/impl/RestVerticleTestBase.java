@@ -71,6 +71,7 @@ public abstract class RestVerticleTestBase {
 
   public static final String BASE_OKAPI_URL = HOST + port;
   public static final String TENANT_ID = "diku";
+  public static final String CONSORTIA_TENANT_ID = "consortia";
   public static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6ImJlOTZmNDg4LTgwY2YtNTVhNC05Njg3LTE1ZjAyMmE4ZDkyYiIsImlhdCI6MTU4NDA5ODc3MywidGVuYW50IjoiZGlrdSJ9.fI3FHPS23tvLVyk3vfAknvhnvrRNBABPchJdfjV0UNI";
 
   /**

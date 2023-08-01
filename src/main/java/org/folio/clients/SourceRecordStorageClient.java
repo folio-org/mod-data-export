@@ -2,6 +2,7 @@ package org.folio.clients;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.getResponseEntity;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.util.ExternalPathResolver.SRS;
 
 @Component
@@ -39,11 +41,24 @@ public class SourceRecordStorageClient {
     AbstractExportStrategy.EntityType.AUTHORITY, ExternalPathResolver.resourcesPathWithPrefix(SRS) + "?idType=AUTHORITY&recordType=MARC_AUTHORITY"
   );
 
-  @Autowired
+  private ConsortiaClient consortiaClient;
   private ErrorLogService errorLogService;
+
+  @Autowired
+  public SourceRecordStorageClient(ConsortiaClient consortiaClient, ErrorLogService errorLogService ) {
+    this.consortiaClient = consortiaClient;
+    this.errorLogService = errorLogService;
+  }
 
   public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
     String uri = recordTypeUriMap.get(idType);
+
+    var centralTenantId = getCentralTenantId(params);
+    if (StringUtils.isNotEmpty(centralTenantId)) {
+      var copyHeaders = new HashMap<>(params.getHeaders());
+      copyHeaders.put(OKAPI_HEADER_TENANT, centralTenantId);
+      params = new OkapiConnectionParams(copyHeaders);
+    }
     HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -58,4 +73,16 @@ public class SourceRecordStorageClient {
     }
   }
 
+  private String getCentralTenantId(OkapiConnectionParams params) {
+    var centralTenantIds = consortiaClient.getUserTenants(params);
+    if (!centralTenantIds.isEmpty()) {
+      var centralTenantId = centralTenantIds.getJsonObject(0).getString("centralTenantId");
+      if (centralTenantId.equals(params.getTenantId())) {
+        LOGGER.error("Current tenant is central");
+      }
+      return centralTenantId;
+    }
+    LOGGER.info("No central tenant found");
+    return StringUtils.EMPTY;
+  }
 }

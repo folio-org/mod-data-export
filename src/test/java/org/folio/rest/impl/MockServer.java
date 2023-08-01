@@ -26,6 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.RestVerticleTestBase.CONSORTIA_TENANT_ID;
 import static org.folio.util.ExternalPathResolver.*;
 import static org.junit.Assert.fail;
 
@@ -68,6 +70,7 @@ public class MockServer {
   private static final String INSTANCE_BULK_IDS_ALL_VALID_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_valid_instance_bulk_ids_response.json";
   private static final String INSTANCE_BULK_IDS_WITH_RANDOM = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_with_random.json";
   private static final String INSTANCE_BULK_IDS_NO_RECORDS = BASE_MOCK_DATA_PATH + "inventory/get_instance_bulk_ids_no_records.json";
+  private static final String USER_TENANTS = BASE_MOCK_DATA_PATH + "user-tenants.json";
 
   static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
 
@@ -143,6 +146,7 @@ public class MockServer {
     router.get(resourcesPath(ITEM)).handler(ctx -> handleGetItemRecord(ctx));
     router.get(resourcesPath(CONFIGURATIONS)).handler(ctx -> handleGetConfigurations(ctx));
     router.get(resourcesPath(SEARCH_IDS)).handler(ctx -> handleGetInstanceBulkIds(ctx));
+    router.get(resourcesPath(USER_TENANTS_ENDPOINT)).handler(ctx -> handleConsortiaRequest(ctx));
     return router;
   }
 
@@ -472,6 +476,20 @@ public class MockServer {
       }
     } catch (IOException e) {
       mockResponseWith500Status(ctx);
+    }
+  }
+
+  private void handleConsortiaRequest(RoutingContext ctx)  {
+    var tenant = ctx.request().getHeader(OKAPI_HEADER_TENANT);
+    if (StringUtils.equals(tenant, CONSORTIA_TENANT_ID))  {
+      try {
+        var body = RestVerticleTestBase.getMockData(USER_TENANTS);
+        serverResponse(ctx, 200, APPLICATION_JSON, body);
+      } catch (IOException e) {
+        mockResponseWith500Status(ctx);
+      }
+    } else {
+      serverResponse(ctx, 200, APPLICATION_JSON, StringUtils.EMPTY);
     }
   }
 
