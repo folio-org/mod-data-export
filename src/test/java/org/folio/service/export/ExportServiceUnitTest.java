@@ -107,7 +107,7 @@ class ExportServiceUnitTest {
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
     Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
-    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
@@ -130,7 +130,7 @@ class ExportServiceUnitTest {
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
     Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
-    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
@@ -153,7 +153,7 @@ class ExportServiceUnitTest {
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
     Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
-    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
@@ -176,7 +176,7 @@ class ExportServiceUnitTest {
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
     Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
-    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then
@@ -199,7 +199,7 @@ class ExportServiceUnitTest {
     JsonObject instance = instances.getJsonArray("instances").getJsonObject(0);
     Pair<List<String>, Integer> marcRecordsToExport = MutablePair.of(Collections.singletonList(record), 0);
 
-    when(inventoryClient.getInstancesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(INSTANCE_ID), jobExecutionId, params, 1)).thenReturn(Optional.of(instances));
     //when
     exportService.exportSrsRecord(marcRecordsToExport, exportPayload);
     //then

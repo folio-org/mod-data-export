@@ -49,6 +49,7 @@ public class InventoryClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
+  private static final String QUERY_PATTERN_WITH_SOURCE_INVENTORY = "id==%s and source==";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
@@ -62,11 +63,22 @@ public class InventoryClient {
   @Autowired
   private ErrorLogService errorLogService;
 
-  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
+  public Optional<JsonObject> getInstancesWithPrecedingSucceedingTitlesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
       Optional<JsonObject> instanceStorageInstancesOpt = Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
         QUERY_PATTERN_INVENTORY));
       return enrichInstancesByPrecedingSucceedingTitles(instanceStorageInstancesOpt, ids, params, partitionSize);
+    } catch (HttpClientException exception) {
+      LOGGER.error(exception.getMessage(), exception.getCause());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, String source) {
+    try {
+      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size(),
+        "(" + QUERY_PATTERN_WITH_SOURCE_INVENTORY + source + ")"));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());

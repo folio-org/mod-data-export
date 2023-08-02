@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of #RecordLoaderService that uses blocking http client.
@@ -28,6 +29,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
+  public static final String CONSORTIUM_MARC_INSTANCE_SOURCE = "CONSORTIUM-MARC";
+  private static final String ID_FIELD = "id";
+  private static final String SOURCE_RECORDS_FIELD = "sourceRecords";
+  private static final String TOTAL_RECORDS_FIELD = "totalRecords";
   private static final String INSTANCES = "instances";
   private static final String HOLDINGS_RECORDS = "holdingsRecords";
 
@@ -37,8 +42,8 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     AbstractExportStrategy.EntityType.AUTHORITY, "authorityId"
   );
 
-  private SourceRecordStorageClient srsClient;
-  private InventoryClient inventoryClient;
+  private final SourceRecordStorageClient srsClient;
+  private final InventoryClient inventoryClient;
 
   public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient) {
     this.srsClient = srsClient;
@@ -47,7 +52,12 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   @Override
   public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
-    Optional<JsonObject> optionalRecords = srsClient.getRecordsByIds(uuids, idType, jobExecutionId, okapiConnectionParams);
+    Optional<JsonObject> optionalRecords;
+    if (AbstractExportStrategy.EntityType.INSTANCE == idType) {
+      optionalRecords = getMarcRecordsForInstancesByIds(uuids, jobExecutionId, okapiConnectionParams);
+    } else {
+      optionalRecords = srsClient.getRecordsByIds(uuids, idType, jobExecutionId, okapiConnectionParams);
+    }
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     if (optionalRecords.isPresent()) {
       populateLoadResultFromSRS(uuids, optionalRecords.get(), srsLoadResult, idType);
@@ -59,7 +69,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   @Override
   public LoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
+    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
     LoadResult loadResult = new LoadResult();
     loadResult.setEntityType(AbstractExportStrategy.EntityType.INSTANCE);
     if (optionalRecords.isPresent()) {
@@ -83,6 +93,35 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     return holdingsLoadResult;
   }
 
+  private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
+    var consortiumUUIDs = new ArrayList<String>();
+    Optional<JsonObject> response = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE);
+    if (response.isPresent()) {
+      var inventoryRecords = response.get().getJsonArray(INSTANCES);
+      inventoryRecords.forEach(obj -> {
+        if (obj instanceof JsonObject) {
+          var jsonObject = (JsonObject) obj;
+          consortiumUUIDs.add(jsonObject.getString(ID_FIELD));
+        }});
+    }
+    uuids = uuids.stream().filter(uuid -> !consortiumUUIDs.contains(uuid)).collect(Collectors.toList());
+    Optional<JsonObject> optionalRecords = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
+    if (!consortiumUUIDs.isEmpty()) {
+      Optional<JsonObject> optionalConsortiumRecords = srsClient.getRecordsByIds(consortiumUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams, true);
+      if (optionalConsortiumRecords.isPresent()) {
+        var consortiumSourceRecords = optionalConsortiumRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
+        if (optionalRecords.isEmpty()) {
+          optionalRecords = optionalConsortiumRecords;
+        } else {
+          var records = optionalRecords.get();
+          records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(consortiumSourceRecords);
+          var totalSize = consortiumSourceRecords.size() + records.getInteger(TOTAL_RECORDS_FIELD);
+          records.put(TOTAL_RECORDS_FIELD, totalSize);
+        }
+      }
+    }
+    return optionalRecords;
+  }
 
   private void populateLoadResultFromInventory(Collection<String> entityIds, JsonObject entities, LoadResult loadResult) {
     List<JsonObject> inventoryRecords = new ArrayList<>();

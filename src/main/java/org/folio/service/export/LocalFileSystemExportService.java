@@ -135,7 +135,7 @@ public class LocalFileSystemExportService implements ExportService {
   }
 
   private void handleMarcException(String instId, String jobExecutionId, OkapiConnectionParams params, ErrorCode errorCode, String errorLogMessage) {
-    inventoryClient.getInstancesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
+    inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(Collections.singletonList(instId), jobExecutionId, params, SINGLE_INSTANCE).ifPresent(instancesByIds -> {
       JsonArray instances = instancesByIds.getJsonArray(INSTANCES);
       errorLogService.saveWithAffectedRecord(instances.getJsonObject(SINGLE_INSTANCE_INDEX), errorCode.getCode(), jobExecutionId, new MarcException(errorLogMessage), params);
     });

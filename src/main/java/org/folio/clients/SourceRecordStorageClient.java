@@ -51,10 +51,14 @@ public class SourceRecordStorageClient {
   }
 
   public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
-    String uri = recordTypeUriMap.get(idType);
+    return  getRecordsByIds(ids, idType, jobExecutionId, params, false);
+  }
 
-    var centralTenantId = getCentralTenantId(params);
-    if (StringUtils.isNotEmpty(centralTenantId)) {
+  public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params, boolean supportConsortium) {
+    String uri = recordTypeUriMap.get(idType);
+    if (supportConsortium) {
+      var centralTenantId = getCentralTenantId(params);
+      if (StringUtils.isEmpty(centralTenantId)) return Optional.empty();
       var copyHeaders = new HashMap<>(params.getHeaders());
       copyHeaders.put(OKAPI_HEADER_TENANT, centralTenantId);
       params = new OkapiConnectionParams(copyHeaders);

@@ -56,7 +56,7 @@ class InventoryClientTest extends RestVerticleTestBase {
   void shouldRetrieveExistingInstances() {
     List<String> uuids = Arrays.asList("7fbd5d84-62d1-44c6-9c45-6cb173998bbd", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     // when
-    Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesByIds(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
+    Optional<JsonObject> inventoryResponse = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     // then
     Assert.assertTrue(inventoryResponse.isPresent());
     Assert.assertEquals(1, inventoryResponse.get().getJsonArray("instances").getList().size());
