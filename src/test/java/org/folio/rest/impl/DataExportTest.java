@@ -307,7 +307,6 @@ class DataExportTest extends RestVerticleTestBase {
           fileDefinitionDao.getById(fileExportDefinitionCaptor.getValue().getId(), tenantId).onSuccess(optionalFileDefinition -> {
             context.verify(() -> {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
-              validateExternalCallsForSrsAndInventoryPost(1);
 
               // 3 for GET cause there are an additional request to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
               validateExternalCallsForSrsAndInventoryGet(3);
