@@ -1,5 +1,6 @@
 package org.folio.service.loader;
 
+import com.amazonaws.services.apigateway.model.Op;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
@@ -104,15 +105,16 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
           consortiumUUIDs.add(jsonObject.getString(ID_FIELD));
         }});
     }
+    Optional<JsonObject> optionalRecords = Optional.empty();
     uuids = uuids.stream().filter(uuid -> !consortiumUUIDs.contains(uuid)).collect(Collectors.toList());
-    Optional<JsonObject> optionalRecords = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
+    if (!uuids.isEmpty()) optionalRecords = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
     if (!consortiumUUIDs.isEmpty()) {
       Optional<JsonObject> optionalConsortiumRecords = srsClient.getRecordsByIds(consortiumUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams, true);
       if (optionalConsortiumRecords.isPresent()) {
-        var consortiumSourceRecords = optionalConsortiumRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
         if (optionalRecords.isEmpty()) {
           optionalRecords = optionalConsortiumRecords;
         } else {
+          var consortiumSourceRecords = optionalConsortiumRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
           var records = optionalRecords.get();
           records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(consortiumSourceRecords);
           var totalSize = consortiumSourceRecords.size() + records.getInteger(TOTAL_RECORDS_FIELD);
