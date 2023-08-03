@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "fileDefinitionId": {
+      "description": "File definition id",
+      "type": "string",
+      "format": "uuid"
+    },
+    "jobProfileId": {
+      "description": "Related Job profile id",
+      "type": "string",
+      "format": "uuid"
+    },
+    "recordType": {
+      "description": "Defines a type of records to search by criteria or UUIDs",
+      "type": "string",
+      "enum": [
+        "INSTANCE",
+        "HOLDINGS",
+        "ITEM",
+        "AUTHORITY"
+      ]
+    },
+    "idType": {
+      "description": "Type of provided uuids",
+      "type": "string",
+      "enum": [
+        "instance",
+        "holding",
+        "authority"
+      ],
+      "default": "instance"
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "metadata.json"
+    }
+  },
+  "required": [
+    "fileDefinitionId",
+    "jobProfileId",
+    "idType"
+  ]
+}
