@@ -141,7 +141,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   }
 
   private void populateLoadResultFromSRS(List<String> uuids, JsonObject underlyingRecords, SrsLoadResult loadResult, AbstractExportStrategy.EntityType entityType) {
-    JsonArray records = underlyingRecords.getJsonArray("sourceRecords");
+    JsonArray records = underlyingRecords.getJsonArray(SOURCE_RECORDS_FIELD);
     List<JsonObject> marcRecords = new ArrayList<>();
     Set<String> singleRecordIdentifiersSet = new HashSet<>(uuids);
     for (Object o : records) {
