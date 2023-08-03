@@ -1,6 +1,5 @@
 package org.folio.service.loader;
 
-import com.amazonaws.services.apigateway.model.Op;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
