@@ -159,8 +159,8 @@ class DataExportTest extends RestVerticleTestBase {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
               validateExternalCallsForSrsAndInventoryPost(1);
 
-              // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
-              validateExternalCallsForSrsAndInventoryGet(2);
+              // 3 for GET cause there are an additional request to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
+              validateExternalCallsForSrsAndInventoryGet(3);
               context.completeNow();
             });
           });
@@ -191,7 +191,8 @@ class DataExportTest extends RestVerticleTestBase {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_2);
               assertFalse(isErrorsPresent);
               assertCompletedFileDefinitionAndExportedFile(fileExportDefinition, "GeneratedFileForSrsRecordsOnly.mrc");
-              validateExternalCallsForSrs();
+              assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
+              assertEquals(1, MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE).size());
               context.completeNow();
             });
           });
@@ -222,8 +223,8 @@ class DataExportTest extends RestVerticleTestBase {
                 assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
                 validateExternalCallsForSrsAndInventoryPost(1);
 
-                // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
-                validateExternalCallsForSrsAndInventoryGet(2);
+                // 3 for GET cause there are additional requests to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
+                validateExternalCallsForSrsAndInventoryGet(3);
                 assertTrue(ar.succeeded());
                 List<ErrorLog> errorLogList = ar.result();
                 assertEquals(1, errorLogList.size());
@@ -277,8 +278,8 @@ class DataExportTest extends RestVerticleTestBase {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
 
-            // 4 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
-            validateExternalCallsForSrsAndInventoryGet(4);
+            // 5 for GET cause there are additional requests to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
+            validateExternalCallsForSrsAndInventoryGet(5);
             validateExternalCallsForSrsAndInventoryPost(2);
             context.completeNow();
           });
@@ -308,8 +309,8 @@ class DataExportTest extends RestVerticleTestBase {
               assertJobExecution(jobExecution, COMPLETED, EXPORTED_RECORDS_NUMBER_1);
               validateExternalCallsForSrsAndInventoryPost(1);
 
-              // 2 for GET cause there is an additional request to /inventory/instances to enrich by preceding/succeeding titles
-              validateExternalCallsForSrsAndInventoryGet(2);
+              // 3 for GET cause there are an additional request to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
+              validateExternalCallsForSrsAndInventoryGet(3);
               assertCompletedFileDefinitionAndExportedFile(optionalFileDefinition.get(), "GeneratedRecordsByDefaultRulesAndTransformations.mrc");
               context.completeNow();
             });
@@ -863,11 +864,6 @@ class DataExportTest extends RestVerticleTestBase {
     Assertions.assertEquals(jobExecutionId, errorLog.getJobExecutionId());
     Assertions.assertEquals(ErrorLog.LogLevel.ERROR, errorLog.getLogLevel());
     Assertions.assertTrue(errorLog.getErrorMessageCode().contains(SOME_UUIDS_NOT_FOUND.getCode()));
-  }
-
-  private void validateExternalCallsForSrs() {
-    assertEquals(1, MockServer.getServerRqRsData(HttpMethod.POST, ExternalPathResolver.SRS).size());
-    assertNull(MockServer.getServerRqRsData(HttpMethod.GET, ExternalPathResolver.INSTANCE));
   }
 
   private void validateExternalCallsForSrsAndInventoryPost(int expectedNumber) {
