@@ -19,20 +19,20 @@ paths:
             example:
               $ref: 'examples/exportRequest.json'
       responses:
-        204:
+        '204':
           description: Data export started
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -50,7 +50,7 @@ paths:
             example:
               $ref: 'examples/quickExportRequest.json'
       responses:
-        200:
+        '200':
           description: Data export started
           content:
             application/json:
@@ -58,18 +58,18 @@ paths:
                 $ref: '#/components/schemas/quickExportResponse'
               example:
                 $ref: 'examples/quickExportResponse.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -83,7 +83,7 @@ paths:
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
-        200:
+        '200':
           description: Collection of job executions
           content:
             application/json:
@@ -91,17 +91,17 @@ paths:
                 $ref: '#/components/schemas/jobExecutionCollection'
               example:
                 $ref: 'examples/jobExecutionCollection.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        401:
+        '401':
           description: Not authorized to perform requested action
           content:
             text/plain:
               example: "unauthorized"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -117,19 +117,19 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        204:
+        '204':
           description: Item deleted successfully
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "JobExecution not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -150,7 +150,7 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        200:
+        '200':
           description: Job execution
           content:
             application/json:
@@ -158,12 +158,12 @@ paths:
                 $ref: '#/components/schemas/fileDownload'
               example:
                 $ref: 'examples/fileDownload.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -173,20 +173,20 @@ paths:
       description: Method to expire long running jobs
       operationId: postExpireJobExecution
       responses:
-        204:
+        '204':
           description: Executed
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -196,20 +196,20 @@ paths:
       description: API to start clean up mechanism of file definitions and related generated files
       operationId: postCleanUpFiles
       responses:
-        204:
+        '204':
           description: Executed
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -222,7 +222,7 @@ paths:
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
-        200:
+        '200':
           description: Transformation fields collection
           content:
             application/json:
@@ -230,17 +230,17 @@ paths:
                 $ref: '#/components/schemas/transformationFieldCollection'
               example:
                 $ref: 'examples/transformationFieldCollection.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        401:
+        '401':
           description: Not authorized to perform requested action
           content:
             text/plain:
               example: "unauthorized"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -254,7 +254,7 @@ paths:
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
-        200:
+        '200':
           description: Mapping profiles collection
           content:
             application/json:
@@ -262,17 +262,17 @@ paths:
                 $ref: '#/components/schemas/mappingProfileCollection'
               example:
                 $ref: 'examples/profiles/mappingProfileCollection.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        401:
+        '401':
           description: Not authorized to perform requested action
           content:
             text/plain:
               example: "unauthorized"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -289,7 +289,7 @@ paths:
             example:
               $ref: 'examples/profiles/mappingProfile.json'
       responses:
-        201:
+        '201':
           description: Uploaded
           content:
             application/json:
@@ -297,13 +297,13 @@ paths:
                 $ref: '#/components/schemas/mappingProfile'
               example:
                 $ref: 'examples/profiles/mappingProfile.json'
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -319,7 +319,7 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        200:
+        '200':
           description: Mapping profile
           content:
             application/json:
@@ -327,12 +327,12 @@ paths:
                 $ref: '#/components/schemas/mappingProfile'
               example:
                 $ref: 'examples/profiles/mappingProfile.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -347,19 +347,19 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        204:
+        '204':
           description: Updated
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -374,19 +374,19 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        204:
+        '204':
           description: Deleted
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -400,7 +400,7 @@ paths:
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
-        200:
+        '200':
           description: Collection error logs
           content:
             application/json:
@@ -408,17 +408,17 @@ paths:
                 $ref: '#/components/schemas/errorLogCollection'
               example:
                 $ref: 'examples/logs/errorLogCollection.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        401:
+        '401':
           description: Not authorized to perform requested action
           content:
             text/plain:
               example: "unauthorized"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -432,7 +432,7 @@ paths:
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
-        200:
+        '200':
           description: Job profiles collection
           content:
             application/json:
@@ -440,17 +440,17 @@ paths:
                 $ref: '#/components/schemas/jobProfileCollection'
               example:
                 $ref: 'examples/profiles/jobProfileCollection.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        401:
+        '401':
           description: Not authorized to perform requested action
           content:
             text/plain:
               example: "unauthorized"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -467,7 +467,7 @@ paths:
             example:
               $ref: 'examples/profiles/jobProfile.json'
       responses:
-        201:
+        '201':
           description: Uploaded
           content:
             application/json:
@@ -475,13 +475,13 @@ paths:
                 $ref: '#/components/schemas/jobProfile'
               example:
                 $ref: 'examples/profiles/jobProfile.json'
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -497,7 +497,7 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        200:
+        '200':
           description: Job profile
           content:
             application/json:
@@ -505,17 +505,17 @@ paths:
                 $ref: '#/components/schemas/jobProfile'
               example:
                 $ref: 'examples/profiles/jobProfile.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -530,19 +530,19 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        204:
+        '204':
           description: Updated
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -557,19 +557,19 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        204:
+        '204':
           description: Deleted
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -587,7 +587,7 @@ paths:
             example:
               $ref: 'examples/fileDefinition.json'
       responses:
-        201:
+        '201':
           description: Uploaded
           content:
             application/json:
@@ -595,24 +595,24 @@ paths:
                 $ref: '#/components/schemas/fileDefinition'
               example:
                 $ref: 'examples/fileDefinition.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        413:
+        '413':
           description: Request entity too large
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        422:
+        '422':
           description: Unprocessable Entity
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -628,7 +628,7 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       responses:
-        200:
+        '200':
           description: File definition
           content:
             application/json:
@@ -636,17 +636,17 @@ paths:
                 $ref: '#/components/schemas/fileDefinition'
               example:
                 $ref: 'examples/fileDefinition.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
@@ -669,7 +669,7 @@ paths:
               type: string
               format: binary
       responses:
-        200:
+        '200':
           description: Uploaded
           content:
             application/json:
@@ -677,17 +677,17 @@ paths:
                 $ref: '#/components/schemas/fileDefinition'
               example:
                 $ref: 'examples/fileDefinition.json'
-        400:
+        '400':
           description: Bad request
           content:
             text/plain:
               example: "malformed parameter 'query', syntax error at column 6"
-        404:
+        '404':
           description: Not Found
           content:
             text/plain:
               example: "Mapping profile not found"
-        500:
+        '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
             text/plain:
