@@ -13,16 +13,16 @@ name: api-schema-lint
 # e.g. ''
 
 env:
-  API_DIRECTORIES: 'ramls'
+  API_DIRECTORIES: 'src/main/resources/swagger.api'
   API_EXCLUDES: ''
 
 on:
   push:
     paths:
-      - 'ramls/**'
+      - 'src/main/resources/swagger.api/**'
   pull_request:
     paths:
-      - 'ramls/**'
+      - 'src/main/resources/swagger.api/**'
 
 jobs:
   api-schema-lint:

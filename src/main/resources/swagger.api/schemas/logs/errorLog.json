@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Error log with all details",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier",
+      "format": "uuid"
+    },
+    "jobExecutionId": {
+      "description": "UUID of the related job execution",
+      "format": "uuid"
+    },
+    "createdDate": {
+      "description": "Creation datetime",
+      "type": "string",
+      "format": "date-time"
+    },
+    "logLevel": {
+      "description": "Log level",
+      "type": "string",
+      "enum": [
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR"
+      ],
+      "default": "ERROR"
+    },
+    "errorMessageCode": {
+      "description": "Code of error message",
+      "type": "string"
+    },
+    "errorMessageValues": {
+      "description": "Values should be used to replace placeholders in error messages",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "affectedRecord": {
+      "type": "object",
+      "description": "Affected record log",
+      "$ref": "recordLog.json"
+    },
+    "metadata": {
+      "description": "Metadata provided by the server",
+      "type": "object",
+      "$ref": "../metadata.json",
+      "readonly": true
+    }
+  },
+  "required": [
+    "createdDate",
+    "logLevel",
+    "affectedRecord"
+  ]
+}

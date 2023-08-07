@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data to start export process from inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jobProfileId": {
+      "description": "Job profile id to be used for export",
+      "type": "string",
+      "format": "uuid"
+    },
+    "criteria": {
+      "description": "CQL query for records search",
+      "type": "string"
+    },
+    "uuids": {
+      "description": "List of UUIDs of records to export",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "type": {
+      "description": "Defines a type of searching the records: by UUIDs or CQL query",
+      "type": "string",
+      "enum": [
+        "cql",
+        "uuid"
+      ]
+    },
+    "recordType": {
+      "description": "Defines a type of records to search by criteria or UUIDs",
+      "type": "string",
+      "enum": [
+        "INSTANCE",
+        "HOLDINGS",
+        "ITEM",
+        "AUTHORITY"
+      ]
+    },
+    "fileName": {
+      "description": "Name of the generated marc file",
+      "type": "string"
+    },
+    "metadata": {
+      "description": "Meta information ",
+      "type": "object",
+      "$ref": "metadata.json"
+    }
+  },
+  "required": [
+    "type",
+    "recordType"
+  ]
+}
