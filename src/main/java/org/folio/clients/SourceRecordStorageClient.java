@@ -29,6 +29,7 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.getResponseEntity;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.ExternalPathResolver.SRS;
 
 @Component
@@ -59,8 +60,10 @@ public class SourceRecordStorageClient {
     if (supportConsortium) {
       var centralTenantId = getCentralTenantId(params);
       if (StringUtils.isEmpty(centralTenantId)) return Optional.empty();
-      var copyHeaders = new HashMap<>(params.getHeaders());
+      var copyHeaders = new HashMap<String, String>();
+      copyHeaders.put("x-okapi-url", params.getOkapiUrl());
       copyHeaders.put(OKAPI_HEADER_TENANT, centralTenantId);
+      copyHeaders.put(OKAPI_HEADER_TOKEN, params.getToken());
       params = new OkapiConnectionParams(copyHeaders);
     }
     HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));
