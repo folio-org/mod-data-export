@@ -116,7 +116,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
           var consortiumSourceRecords = optionalConsortiumRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
           var records = optionalRecords.get();
           records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(consortiumSourceRecords);
-          var totalSize = consortiumSourceRecords.size() + records.getInteger(TOTAL_RECORDS_FIELD);
+          var totalSize = records.getInteger(TOTAL_RECORDS_FIELD);
           records.put(TOTAL_RECORDS_FIELD, totalSize);
         }
       }
