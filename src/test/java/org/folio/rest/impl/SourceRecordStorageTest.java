@@ -47,7 +47,7 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
   }
 
   @Test
-  void shouldReturnExistingMarcRecordsForProvidedInstanceUUIDsWhenTenantInConsortia() {
+  void shouldReturnExistingMarcRecordsForProvidedInstanceUUIDsWhenTenantInConsortium() {
     // given
     var copyHeaders = new HashMap<>(okapiConnectionParams.getHeaders());
     copyHeaders.put(OKAPI_HEADER_TENANT, CONSORTIA_TENANT_ID);
@@ -56,7 +56,7 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
     SourceRecordStorageClient srsClient = new SourceRecordStorageClient(new ConsortiaClient(), null);
     List<String> uuids = Arrays.asList("ae573875-fbc8-40e7-bda7-0ac283354226", "5fc04e92-70dd-46b8-97ea-194015762a60");
     // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, UUID.randomUUID().toString(), okapiConnectionParams);
+    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.INSTANCE, UUID.randomUUID().toString(), okapiConnectionParams, true);
     // then
     Assert.assertTrue(srsResponse.isPresent());
     Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
@@ -74,22 +74,5 @@ class SourceRecordStorageTest extends RestVerticleTestBase {
     Assert.assertTrue(srsResponse.isPresent());
     Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
     Assert.assertEquals(TENANT_ID, okapiConnectionParams.getTenantId());
-  }
-
-  @Test
-  void shouldReturnExistingMarcRecordsForProvidedHoldingUUIDsWhenTenantInConsortia() {
-    // given
-    var copyHeaders = new HashMap<>(okapiConnectionParams.getHeaders());
-    copyHeaders.put(OKAPI_HEADER_TENANT, CONSORTIA_TENANT_ID);
-    okapiConnectionParams = new OkapiConnectionParams(copyHeaders);
-
-    SourceRecordStorageClient srsClient = new SourceRecordStorageClient(new ConsortiaClient(), null);
-    List<String> uuids = Arrays.asList("49713f91-2446-467c-a75c-f8cbbe38985f", "9701533f-5a1f-45ce-8bd3-0a9666159e2f");
-    // when
-    Optional<JsonObject> srsResponse = srsClient.getRecordsByIds(uuids, AbstractExportStrategy.EntityType.HOLDING, UUID.randomUUID().toString(), okapiConnectionParams);
-    // then
-    Assert.assertTrue(srsResponse.isPresent());
-    Assert.assertEquals(2, srsResponse.get().getJsonArray("sourceRecords").getList().size());
-    Assert.assertEquals(CONSORTIA_TENANT_ID, okapiConnectionParams.getTenantId());
   }
 }

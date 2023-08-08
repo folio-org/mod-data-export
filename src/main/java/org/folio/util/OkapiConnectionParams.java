@@ -6,6 +6,9 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 
 public class OkapiConnectionParams {
+
+  public static final String OKAPI_HEADER_URL = "x-okapi-url";
+
   private String okapiUrl;
   private String tenantId;
   private String token;
@@ -15,7 +18,7 @@ public class OkapiConnectionParams {
   }
 
   public OkapiConnectionParams(Map<String, String> okapiHeaders) {
-    this.okapiUrl = okapiHeaders.getOrDefault("x-okapi-url", "localhost");
+    this.okapiUrl = okapiHeaders.getOrDefault(OKAPI_HEADER_URL, "localhost");
     this.tenantId = okapiHeaders.getOrDefault(OKAPI_HEADER_TENANT, "");
     this.token = okapiHeaders.getOrDefault(OKAPI_HEADER_TOKEN, "dummy");
     this.headers = okapiHeaders;

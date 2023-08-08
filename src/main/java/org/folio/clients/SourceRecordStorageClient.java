@@ -29,7 +29,9 @@ import java.util.Optional;
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.getResponseEntity;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.ExternalPathResolver.SRS;
+import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
 
 @Component
 public class SourceRecordStorageClient {
@@ -51,12 +53,18 @@ public class SourceRecordStorageClient {
   }
 
   public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
-    String uri = recordTypeUriMap.get(idType);
+    return  getRecordsByIds(ids, idType, jobExecutionId, params, false);
+  }
 
-    var centralTenantId = getCentralTenantId(params);
-    if (StringUtils.isNotEmpty(centralTenantId)) {
-      var copyHeaders = new HashMap<>(params.getHeaders());
+  public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params, boolean supportConsortium) {
+    String uri = recordTypeUriMap.get(idType);
+    if (supportConsortium) {
+      var centralTenantId = getCentralTenantId(params);
+      if (StringUtils.isEmpty(centralTenantId)) return Optional.empty();
+      var copyHeaders = new HashMap<String, String>();
+      copyHeaders.put(OKAPI_HEADER_URL, params.getOkapiUrl());
       copyHeaders.put(OKAPI_HEADER_TENANT, centralTenantId);
+      copyHeaders.put(OKAPI_HEADER_TOKEN, params.getToken());
       params = new OkapiConnectionParams(copyHeaders);
     }
     HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));

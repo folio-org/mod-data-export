@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.folio.TestUtil.readFileContentFromResources;
+import static org.folio.service.loader.RecordLoaderServiceImpl.CONSORTIUM_MARC_INSTANCE_SOURCE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -40,8 +41,10 @@ import static org.mockito.Mockito.when;
 class RecordLoaderServiceUnitTest{
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
+  protected static final String INVENTORY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON = "clients/inventory/get_instances_response_with_consortium_marc_source.json";
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_marc_bib_records_response.json";
+  protected static final String SRS_SINGLE_MARC_RECORD_RESPONSE_JSON = "mockData/srs/single_marc_record_response.json";
   protected static final String HOLDINGS_RESPONSE_JSON = "mockData/inventory/holdings_in000005.json";
   private static final String JOB_EXECUTION_ID = UUID.randomUUID().toString();
   private static final String PRECEDING_TITLES = "precedingTitles";
@@ -57,15 +60,20 @@ class RecordLoaderServiceUnitTest{
 
   protected OkapiConnectionParams okapiConnectionParams = new OkapiConnectionParams();
   static JsonObject dataFromSRS;
+  static JsonObject dataSingleMarcRecordFromSRS;
   static JsonObject dataFromInventory;
+  static JsonObject dataWithConsortiumMarcSourceFromInventory;
   static JsonObject dataFromInventoryHoldings;
 
   RecordLoaderServiceUnitTest() {
     String json = readFileContentFromResources(SRS_RESPONSE_JSON);
     dataFromSRS = new JsonObject(json);
+    String singleMarcRecord = readFileContentFromResources(SRS_SINGLE_MARC_RECORD_RESPONSE_JSON);
+    dataSingleMarcRecordFromSRS = new JsonObject(singleMarcRecord);
     String instancesJson = readFileContentFromResources(INVENTORY_RESPONSE_JSON);
     dataFromInventory = new JsonObject(instancesJson);
-
+    String instancesWithConsortiumMarcSourceJson = readFileContentFromResources(INVENTORY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON);
+    dataWithConsortiumMarcSourceFromInventory = new JsonObject(instancesWithConsortiumMarcSourceJson);
     String holdingssJson = readFileContentFromResources(HOLDINGS_RESPONSE_JSON);
     dataFromInventoryHoldings = new JsonObject(holdingssJson);
   }
@@ -75,9 +83,57 @@ class RecordLoaderServiceUnitTest{
     // given
     when(srsClient.getRecordsByIds(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(new ArrayList<>(), AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(List.of("uuid"), AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
+  }
+
+  @Test
+  void shouldReturnExistingMarcRecordsFromConsortiumAndLocalTenantWhenTenantInConsortium() {
+    // given
+    var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
+    var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+
+    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    // when
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    // then
+    assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
+  }
+
+  @Test
+  void shouldReturnExistingMarcRecordsFromConsortiumWhenMarcRecordFromLocalNotExist() {
+    // given
+    var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
+    var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+
+    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
+    // when
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    // then
+    assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(1));
+  }
+
+  @Test
+  void shouldReturnExistingMarcRecordsFromLocalWhenMarcRecordFromConsortiumNotExist() {
+    // given
+    var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
+    var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
+    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+
+    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.empty());
+    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    // when
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    // then
+    assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(1));
   }
 
   @Test
@@ -106,7 +162,7 @@ class RecordLoaderServiceUnitTest{
   void loadInstanceRecords_shouldReturnTwoRecordsByIds() {
     // given
     List<String> uuids = Arrays.asList("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
-    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(dataFromInventory));
     // when
     LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
     //then
@@ -121,7 +177,7 @@ class RecordLoaderServiceUnitTest{
   void loadInstanceRecords_shouldReturnEmptyList_whenThereInNoRecordsInInventory() {
     // given
     JsonObject data = buildEmptyResponse("instances");
-    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.of(data));
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
     LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
@@ -132,7 +188,7 @@ class RecordLoaderServiceUnitTest{
   @Test
   void loadInstanceRecords_shouldReturnEmptyList_whenOptionalResponseIsNotPresent() {
     // given
-    when(inventoryClient.getInstancesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
+    when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
     LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);
