@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-  <changeSet id="initial_schema" author="firebird">
+  <changeSet id="initial_schema" author="Firebird">
     <sqlFile path="changes/initial_schema.sql" relativeToChangelogFile="true" />
   </changeSet>
 
