@@ -55,6 +55,7 @@
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
   </properties>
 
   <dependencies>
@@ -242,7 +243,6 @@
 
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -257,6 +257,12 @@
             </exclude>
           </excludes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
       </plugin>
 
       <plugin>
