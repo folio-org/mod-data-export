@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -25,4 +27,8 @@ public class DataExportController implements FileDefinitionsApi {
     return new ResponseEntity<>(savedFileDefinition, HttpStatus.CREATED);
   }
 
+  @Override
+  public ResponseEntity<FileDefinition> getFileDefinitionById(UUID fileDefinitionId) {
+      return new ResponseEntity<>(dataExportService.getFileDefinitionById(fileDefinitionId), HttpStatus.OK);
+  }
 }

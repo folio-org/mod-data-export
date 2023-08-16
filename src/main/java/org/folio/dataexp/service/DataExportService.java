@@ -14,6 +14,7 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -55,6 +56,10 @@ public class DataExportService {
       .id(fileDefinition.getId()).fileDefinition(fileDefinition).build();
     var saved = fileDefinitionEntityRepository.save(entity);
     return saved.getFileDefinition();
+  }
+
+  public FileDefinition getFileDefinitionById(UUID fileDefinitionId) {
+    return fileDefinitionEntityRepository.getReferenceById(fileDefinitionId).getFileDefinition();
   }
 
   private boolean isNotValidFileNameExtension(String fileName) {
