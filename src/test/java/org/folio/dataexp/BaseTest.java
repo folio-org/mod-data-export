@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.github.jknack.handlebars.internal.Files;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.spring.DefaultFolioExecutionContext;
@@ -22,6 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
@@ -31,6 +34,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -54,6 +60,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Log4j2
 @DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_CLASS)
 public class BaseTest {
+
+  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
+  protected static final String TENANT = "diku";
+  public static String VIEWS_VARIABLE_FOR_SQL_SCRIPT = "myuniversity";
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
   public static final String S3_ACCESS_KEY = "minio-access-key";
   public static final String S3_SECRET_KEY = "minio-secret-key";
@@ -79,6 +89,22 @@ public class BaseTest {
       );
     s3.start();
     MINIO_ENDPOINT = format("http://%s:%s", s3.getHost(), s3.getFirstMappedPort());
+
+    try {
+      createDataAndTablesForViews();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static void createDataAndTablesForViews() throws IOException{
+    System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, TENANT);
+    var dataSource =  new SingleConnectionDataSource(postgresDBContainer.getJdbcUrl(),postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), true );
+    var jdbcTemplate = new JdbcTemplate(dataSource);
+    try(var is = BaseTest.class.getResourceAsStream("/init_mod_inventory_storage.sql")) {
+      var sql = Files.read(is, StandardCharsets.UTF_8);
+      jdbcTemplate.execute(sql);
+    }
   }
 
   public static LocalDateTimeDeserializer localDateTimeDeserializer = new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
@@ -87,9 +113,6 @@ public class BaseTest {
     .registerModule(new JavaTimeModule().addDeserializer(LocalDateTime.class, localDateTimeDeserializer))
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
-  protected static final String TENANT = "diku";
 
   @Autowired
   protected MockMvc mockMvc;
@@ -164,5 +187,4 @@ public class BaseTest {
   public static String asJsonString(Object value) {
     return OBJECT_MAPPER.writeValueAsString(value);
   }
-
 }
