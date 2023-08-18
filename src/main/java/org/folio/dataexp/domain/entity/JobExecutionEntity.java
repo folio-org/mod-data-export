@@ -25,7 +25,6 @@ import java.util.UUID;
 public class JobExecutionEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
 
   @Type(JsonBinaryType.class)

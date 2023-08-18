@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.rest.resource.FileDefinitionsApi;
 import org.folio.dataexp.service.DataExportService;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,12 @@ public class DataExportController implements FileDefinitionsApi {
 
   @Override
   public ResponseEntity<FileDefinition> getFileDefinitionById(UUID fileDefinitionId) {
-      return new ResponseEntity<>(dataExportService.getFileDefinitionById(fileDefinitionId), HttpStatus.OK);
+    return new ResponseEntity<>(dataExportService.getFileDefinitionById(fileDefinitionId), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<FileDefinition> uploadFile(UUID fileDefinitionId, Resource resource) {
+    var fileDefinition = dataExportService.uploadFile(fileDefinitionId, resource);
+    return new ResponseEntity<>(fileDefinition, HttpStatus.OK);
   }
 }

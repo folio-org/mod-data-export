@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class DataExportControllerTest extends BaseTest {
@@ -29,7 +30,7 @@ public class DataExportControllerTest extends BaseTest {
   @SneakyThrows
   void postFileDefinitionTest() {
     var fileDefinition = new FileDefinition();
-    fileDefinition.setFileName("test.csv");
+    fileDefinition.setFileName("upload.csv");
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
 
@@ -48,15 +49,33 @@ public class DataExportControllerTest extends BaseTest {
   void getFileDefinitionByIdTest() {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
-    fileDefinition.fileName("test.csv");
+    fileDefinition.fileName("upload.csv");
 
-    when(fileDefinitionEntityRepository.getReferenceById(eq(fileDefinition.getId())))
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinition.getId()))
       .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/file-definitions/" + fileDefinition.getId().toString())
         .headers(defaultHeaders())
         .contentType(APPLICATION_JSON))
+      .andExpect(status().isOk());
+  }
+
+  @Test
+  @SneakyThrows
+  void uploadFileTest() {
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+    fileDefinition.fileName("upload.csv");
+
+    when(fileDefinitionEntityRepository.getReferenceById(eq(fileDefinition.getId())))
+      .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .post("/data-export/file-definitions/" + fileDefinition.getId().toString() + "/upload")
+        .headers(defaultHeaders())
+        .contentType(APPLICATION_OCTET_STREAM_VALUE)
+        .content("uuid"))
       .andExpect(status().isOk());
   }
 }

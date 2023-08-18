@@ -34,7 +34,7 @@ public class DataExportServiceTest {
   void postFileDefinitionTest() {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
-    fileDefinition.fileName("test.csv");
+    fileDefinition.fileName("upload.csv");
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
 

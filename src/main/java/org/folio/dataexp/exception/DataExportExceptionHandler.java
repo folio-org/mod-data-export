@@ -17,4 +17,9 @@ public class DataExportExceptionHandler {
   public ResponseEntity<String> handleFileExtensionException(final FileExtensionException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
   }
+
+  @ExceptionHandler(UploadFileException.class)
+  public ResponseEntity<String> handleUploadFileExtensionException(final FileExtensionException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
 }

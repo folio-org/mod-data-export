@@ -9,12 +9,14 @@ import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.FileExtensionException;
 import org.folio.dataexp.exception.FileSizeException;
+import org.folio.dataexp.exception.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.service.file.upload.FileUploadService;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,8 +31,10 @@ public class DataExportService {
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final FileUploadService fileUploadService;
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
+    log.info("Post file definition by id {}", fileDefinition.getId());
     if (Objects.nonNull(fileDefinition.getSize()) && fileDefinition.getSize() > MAX_FILE_SIZE) {
       var errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", fileDefinition.getSize(), MAX_FILE_SIZE);
       log.error(errorMessage);
@@ -60,6 +64,15 @@ public class DataExportService {
 
   public FileDefinition getFileDefinitionById(UUID fileDefinitionId) {
     return fileDefinitionEntityRepository.getReferenceById(fileDefinitionId).getFileDefinition();
+  }
+
+  public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) {
+    try {
+      return fileUploadService.uploadFile(fileDefinitionId, resource);
+    } catch (Exception e) {
+      fileUploadService.errorUploading(fileDefinitionId);
+      throw new UploadFileException(e.getMessage());
+    }
   }
 
   private boolean isNotValidFileNameExtension(String fileName) {
