@@ -12,7 +12,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -68,7 +67,7 @@ public class DataExportControllerTest extends BaseTest {
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
 
-    when(fileDefinitionEntityRepository.getReferenceById(eq(fileDefinition.getId())))
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinition.getId()))
       .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
 
     mockMvc.perform(MockMvcRequestBuilders

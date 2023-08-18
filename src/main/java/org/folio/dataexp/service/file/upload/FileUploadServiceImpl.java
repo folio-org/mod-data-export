@@ -40,7 +40,7 @@ public class FileUploadServiceImpl implements FileUploadService{
   private FileDefinitionEntity startUploading(UUID fileDefinitionId) {
     var fileDefinitionEntity = fileDefinitionEntityRepository.getReferenceById(fileDefinitionId);
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
-    if (!(fileDefinition.getStatus() == FileDefinition.StatusEnum.NEW)) {
+    if (fileDefinition.getStatus() != FileDefinition.StatusEnum.NEW) {
       var errorMessage = ERROR_MESSAGE + fileDefinitionId;
       log.error(errorMessage);
       throw new UploadFileException(errorMessage);
