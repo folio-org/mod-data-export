@@ -20,7 +20,7 @@ import java.util.UUID;
 @Log4j2
 public class FileUploadServiceImpl implements FileUploadService{
 
-  private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/%s/%s";
+  public static final String PATTERN_TO_SAVE_FILE = "mod-data-export/%s/%s";
   private static final String ERROR_MESSAGE = "File already uploaded for file definition with id : ";
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;

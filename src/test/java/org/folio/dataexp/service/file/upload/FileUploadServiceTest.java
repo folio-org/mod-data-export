@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class FileUploadServiceTest {
 
+  private static final String UPLOADED_FILE_PATH = "src/test/resources/upload.csv";
+
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Mock
@@ -45,7 +47,7 @@ public class FileUploadServiceTest {
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource("src/test/resources/upload.csv");
+    var resource = new PathResource(UPLOADED_FILE_PATH);
 
     var mockS3 = Mockito.mock(MinioS3Client.class);
 
