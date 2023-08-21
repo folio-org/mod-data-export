@@ -30,7 +30,7 @@ public class InputFileProcessor {
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
         reader.lines().forEach(id -> {
-        var instanceId = id.replaceAll("\"", StringUtils.EMPTY);
+        var instanceId = id.replace("\"", StringUtils.EMPTY);
         var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
           .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
         exportIdEntityRepository.save(entity);

@@ -6,7 +6,7 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
-import org.folio.spring.scope.FolioExecutionScopeExecutionContextManager;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
@@ -43,20 +43,17 @@ public class InputFileProcessorTest extends BaseTest {
     var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH);
 
-    var task = FolioExecutionScopeExecutionContextManager.getRunnableWithFolioContext(folioExecutionContext,
-      () -> {
-        var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
-        jobExecutionEntityRepository.save(jobExecutionEntity);
-        try {
-          s3Client.write(path, resource.getInputStream());
-          inputFileProcessor.readCsvFile(fileDefinition);
-
-          var total = exportIdEntityRepository.count();
-          assertEquals(total, 2);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      });
-   task.run();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      jobExecutionEntityRepository.save(jobExecutionEntity);
+      try {
+        s3Client.write(path, resource.getInputStream());
+        inputFileProcessor.readCsvFile(fileDefinition);
+        var total = exportIdEntityRepository.count();
+        assertEquals(2, total);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }
