@@ -57,7 +57,7 @@ public class InputFileProcessorTest extends BaseTest {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
+ }
 
   @Test
   @SneakyThrows

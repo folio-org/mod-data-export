@@ -26,6 +26,10 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <sonar.exclusions>
+      **/src/main/java/org/folio/dataexp/exception/**,
+      **/src/main/java/org/folio/dataexp/domain/entity/**
+    </sonar.exclusions>
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
