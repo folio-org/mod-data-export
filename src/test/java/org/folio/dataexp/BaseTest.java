@@ -101,7 +101,12 @@ public class BaseTest {
     System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, TENANT);
     var dataSource =  new SingleConnectionDataSource(postgresDBContainer.getJdbcUrl(),postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), true );
     var jdbcTemplate = new JdbcTemplate(dataSource);
-    try(var is = BaseTest.class.getResourceAsStream("/init_mod_inventory_storage.sql")) {
+    runSqlScript("/init_mod_inventory_storage.sql", jdbcTemplate);
+    runSqlScript("/init_sql_functions.sql", jdbcTemplate);
+  }
+
+  private static void runSqlScript(String path, JdbcTemplate jdbcTemplate) throws IOException {
+    try(var is = BaseTest.class.getResourceAsStream(path)) {
       var sql = Files.read(is, StandardCharsets.UTF_8);
       jdbcTemplate.execute(sql);
     }
