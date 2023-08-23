@@ -78,8 +78,12 @@ public class InputFileProcessorTest extends BaseTest {
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
       inputFileProcessor.readCqlFile(fileDefinition);
-      var total = exportIdEntityRepository.count();
-      assertEquals(1, total);
+      var exportIds = exportIdEntityRepository.findAll();
+
+      assertEquals(1, exportIds.size());
+
+      assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
+      assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"), exportIds.get(0).getInstanceId());
 
       exportIdEntityRepository.deleteAll();
     } catch (IOException e) {

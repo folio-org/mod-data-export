@@ -106,7 +106,7 @@ public class BaseTest {
   }
 
   private static void runSqlScript(String path, JdbcTemplate jdbcTemplate) throws IOException {
-    try(var is = BaseTest.class.getResourceAsStream(path)) {
+    try (var is = BaseTest.class.getResourceAsStream(path)) {
       var sql = Files.read(is, StandardCharsets.UTF_8);
       jdbcTemplate.execute(sql);
     }
