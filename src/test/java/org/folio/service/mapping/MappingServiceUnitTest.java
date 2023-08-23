@@ -187,7 +187,7 @@ class MappingServiceUnitTest {
     // when
     mappingService.mapFields(srsRecord, mappingProfile, jobExecutionId, params);
     // then
-    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_FIELDS_MAPPING_SRS.getCode()), eq(Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "Undefined error during the mapping process", "java.lang.NullPointerException")), eq(jobExecutionId), any());
+    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_FIELDS_MAPPING_SRS.getCode()), eq(Arrays.asList("65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61", "Undefined error during the mapping process", "java.lang.NullPointerException: Cannot invoke \"org.folio.processor.referencedata.ReferenceDataWrapper.get(String)\" because \"referenceData\" is null")), eq(jobExecutionId), any());
   }
 
 
