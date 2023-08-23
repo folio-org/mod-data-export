@@ -14,7 +14,7 @@
   </licenses>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <argLine>-Dfile.encoding=UTF-8</argLine>
@@ -222,7 +222,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>11</release>
+          <release>17</release>
           <encoding>UTF-8</encoding>
           <useIncrementalCompilation>false</useIncrementalCompilation>
           <annotationProcessors>
