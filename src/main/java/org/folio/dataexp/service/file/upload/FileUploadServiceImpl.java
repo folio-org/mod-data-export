@@ -10,7 +10,7 @@ import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.codepipeline.model.JobData;
+
 
 import java.io.IOException;
 import java.util.UUID;
@@ -72,7 +72,7 @@ public class FileUploadServiceImpl implements FileUploadService{
   }
 
   @Override
-  public FileDefinition uploadFileDependsOnTypeForQuickExport(QuickExportRequest request, JobData jobData) {
+  public FileDefinition uploadFileDependsOnTypeForQuickExport(QuickExportRequest request) {
     return null;
   }
 }

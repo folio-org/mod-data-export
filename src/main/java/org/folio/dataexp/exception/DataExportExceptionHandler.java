@@ -19,7 +19,7 @@ public class DataExportExceptionHandler {
   }
 
   @ExceptionHandler(UploadFileException.class)
-  public ResponseEntity<String> handleUploadFileExtensionException(final FileExtensionException e) {
+  public ResponseEntity<String> handleUploadFileException(final UploadFileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }
