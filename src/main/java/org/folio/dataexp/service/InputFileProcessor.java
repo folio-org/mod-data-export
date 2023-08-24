@@ -53,7 +53,7 @@ public class InputFileProcessor {
     }
   }
 
-  public void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException {
+  public void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
     var pathToRead = getPathToRead(fileDefinition);
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     String cql;
@@ -63,15 +63,17 @@ public class InputFileProcessor {
     if (Objects.nonNull(cql)) {
       CQL2PgJSON converter = new CQL2PgJSON("jsonb", Collections.emptyList());
       var whereClause = converter.toSql(cql).toString();
+      //ToDo f_unaccent was replaced as it was dropped
       whereClause = whereClause.replace("f_unaccent(", "unaccent(");
       try (Connection connection = jdbcTemplate.getDataSource().getConnection();
         CallableStatement callableStatement = connection.prepareCall(CALL_SAVE_INSTANCES_IDS_PROCEDURE)) {
         callableStatement.setString(1, fileDefinition.getJobExecutionId().toString());
         callableStatement.setString(2, whereClause);
         callableStatement.executeUpdate();
-      } catch (SQLException e) {
-          log.error("Exception for populate_instances_ids procedure call for fileDefinitionId {} with message {}",
-            fileDefinition.getId(), e.getMessage());
+      } catch (SQLException sqlException) {
+          log.error("Exception for save_instances_ids procedure call for fileDefinitionId {} with message {}",
+            fileDefinition.getId(), sqlException.getMessage());
+          throw sqlException;
       }
     }
   }

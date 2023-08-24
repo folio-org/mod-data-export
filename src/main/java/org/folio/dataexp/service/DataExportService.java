@@ -55,7 +55,6 @@ public class DataExportService {
       log.error(errorMessage);
       throw new FileExtensionException(errorMessage);
     }
-    replaceCQLExtensionToCSV(fileDefinition);
     var entity = FileDefinitionEntity.builder()
       .id(fileDefinition.getId()).fileDefinition(fileDefinition).build();
     var saved = fileDefinitionEntityRepository.save(entity);
@@ -77,12 +76,5 @@ public class DataExportService {
 
   private boolean isNotValidFileNameExtension(String fileName) {
     return !FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION) && !FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION);
-  }
-
-  private void replaceCQLExtensionToCSV(FileDefinition fileDefinition) {
-    String fileName = fileDefinition.getFileName();
-    if (FileDefinition.UploadFormatEnum.CQL == fileDefinition.getUploadFormat() && FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION)) {
-      fileDefinition.setFileName(FilenameUtils.getBaseName(fileName) + "." + CSV_FORMAT_EXTENSION);
-    }
   }
 }
