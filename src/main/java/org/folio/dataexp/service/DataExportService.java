@@ -16,6 +16,7 @@ import org.folio.dataexp.service.file.upload.FileUploadService;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -43,20 +44,19 @@ public class DataExportService {
     if (Objects.isNull(fileDefinition.getSize())) {
       log.error("Size of uploading file is null.");
     }
-    var jobExecution = new JobExecution();
-    jobExecution.setId(UUID.randomUUID());
-    jobExecutionEntityRepository.save(JobExecutionEntity.builder()
-      .id(jobExecution.getId()).jobExecution(jobExecution).build());
-
-    fileDefinition.setJobExecutionId(jobExecution.getId());
-    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     if (isNotValidFileNameExtension(fileDefinition.getFileName())) {
       var errorMessage = String.format("Incorrect file extension of %s", fileDefinition.getFileName());
       log.error(errorMessage);
       throw new FileExtensionException(errorMessage);
     }
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.randomUUID());
+    jobExecutionEntityRepository.save(JobExecutionEntity.builder()
+      .id(jobExecution.getId()).jobExecution(jobExecution).build());
+    fileDefinition.setJobExecutionId(jobExecution.getId());
+    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     var entity = FileDefinitionEntity.builder()
-      .id(fileDefinition.getId()).fileDefinition(fileDefinition).build();
+      .id(fileDefinition.getId()).creationDate(LocalDateTime.now()).fileDefinition(fileDefinition).build();
     var saved = fileDefinitionEntityRepository.save(entity);
     return saved.getFileDefinition();
   }
