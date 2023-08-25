@@ -23,15 +23,6 @@ public interface FileUploadService {
   FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException;
 
   /**
-   * Saves given file data to the storage
-   *
-   * @param fileDefinition {@link FileDefinition}
-   * @param query request query to retrieve uuids
-   * @return {@link FileDefinition}
-   */
-  FileDefinition saveUUIDsByCQL(FileDefinition fileDefinition, String query);
-
-  /**
    * Aborts uploading for the given {@link FileDefinition} by id
    *
    * @param fileDefinitionId id of the {@link FileDefinition}

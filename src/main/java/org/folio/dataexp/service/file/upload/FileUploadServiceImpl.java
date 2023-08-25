@@ -58,11 +58,6 @@ public class FileUploadServiceImpl implements FileUploadService{
   }
 
   @Override
-  public FileDefinition saveUUIDsByCQL(FileDefinition fileDefinition, String query) {
-    return null;
-  }
-
-  @Override
   public FileDefinition errorUploading(UUID fileDefinitionId) {
     var fileDefinitionEntity = fileDefinitionEntityRepository.getReferenceById(fileDefinitionId);
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
