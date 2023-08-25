@@ -8,10 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.github.jknack.handlebars.internal.Files;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.repository.JobExecutionExportFilesRepository;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -123,6 +127,12 @@ public class BaseTest {
   protected MockMvc mockMvc;
   @Autowired
   private FolioModuleMetadata folioModuleMetadata;
+  @Autowired
+  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Autowired
+  private ExportIdEntityRepository exportIdEntityRepository;
+  @Autowired
+  private JobExecutionExportFilesRepository jobExecutionExportFilesRepository;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -167,6 +177,11 @@ public class BaseTest {
 
   @AfterEach
   void eachTearDown() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      exportIdEntityRepository.deleteAll();
+      jobExecutionExportFilesRepository.deleteAll();
+      jobExecutionEntityRepository.deleteAll();
+    }
   }
 
   @SneakyThrows

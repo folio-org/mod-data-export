@@ -52,8 +52,6 @@ public class InputFileProcessorTest extends BaseTest {
       inputFileProcessor.readCsvFile(fileDefinition);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
-
-      exportIdEntityRepository.deleteAll();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -84,8 +82,6 @@ public class InputFileProcessorTest extends BaseTest {
 
       assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
       assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"), exportIds.get(0).getInstanceId());
-
-      exportIdEntityRepository.deleteAll();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
