@@ -15,21 +15,26 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 @Log4j2
 public class SlicerProcessor {
-  private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?)";
+  private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?, ?)";
   private static final String SLICED_FILE_LOCATION_PATH = "mod-data-export/download/%s/";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
   private static final String MARC_EXTENSION = ".mrc";
-
+  private static final int DEFAULT_SLICE_SIZE = 100000;
 
   private final JdbcTemplate jdbcTemplate;
 
   public void sliceInstancesIds(FileDefinition fileDefinition) throws SQLException {
+    sliceInstancesIds(fileDefinition, DEFAULT_SLICE_SIZE);
+  }
+
+  public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize) throws SQLException {
     var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName());
     var pathLocation = String.format(SLICED_FILE_LOCATION_PATH, fileDefinition.getJobExecutionId()) + fileName;
     try (Connection connection = jdbcTemplate.getDataSource().getConnection();
          CallableStatement callableStatement = connection.prepareCall(CALL_SLICE_INSTANCES_IDS_PROCEDURE)) {
       callableStatement.setString(1, fileDefinition.getJobExecutionId().toString());
       callableStatement.setString(2, pathLocation);
+      callableStatement.setInt(3, sliceSize);
       callableStatement.executeUpdate();
     } catch (SQLException sqlException) {
       log.error("Exception for slice_instances_ids procedure call for fileDefinitionId {} with message {}",
