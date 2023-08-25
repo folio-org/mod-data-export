@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
@@ -102,10 +101,6 @@ public class SlicerProcessorTest extends BaseTest {
       assertEquals(expectedFromUUID, joExecutionExportFilesEntity.getFromId());
       assertEquals(expectedToUUID, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
-
 }

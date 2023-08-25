@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
@@ -33,6 +32,7 @@ public class InputFileProcessorTest extends BaseTest {
   private ExportIdEntityRepository exportIdEntityRepository;
 
   @Test
+  @SneakyThrows
   void readCsvFileTest() {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
@@ -52,8 +52,6 @@ public class InputFileProcessorTest extends BaseTest {
       inputFileProcessor.readCsvFile(fileDefinition);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
  }
 
@@ -82,8 +80,6 @@ public class InputFileProcessorTest extends BaseTest {
 
       assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
       assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"), exportIds.get(0).getInstanceId());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 }
