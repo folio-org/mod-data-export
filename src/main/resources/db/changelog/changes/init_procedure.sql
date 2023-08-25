@@ -9,7 +9,7 @@ EXECUTE executeSql;
 END;
 $$;
 
-CREATE EXTENSION pgcrypto;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE OR REPLACE PROCEDURE slice_instances_ids(jobExecutionId text, fileLocation text, sliceSize int)
 LANGUAGE plpgsql
 AS $$
