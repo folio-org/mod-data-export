@@ -6,8 +6,11 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-  <changeSet id="init_procedure" author="Firebird">
-    <createProcedure path="changes/init_procedure.sql" relativeToChangelogFile="true" />
+  <changeSet id="save_instances_ids_procedure" author="Firebird">
+    <createProcedure path="changes/save_instances_ids.sql" relativeToChangelogFile="true" />
   </changeSet>
 
+  <changeSet id="slice_instances_ids_procedure" author="Firebird">
+    <createProcedure path="changes/slice_instances_ids.sql" relativeToChangelogFile="true" />
+  </changeSet>
 </databaseChangeLog>
