@@ -26,6 +26,10 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <sonar.exclusions>
+      **/src/main/java/org/folio/dataexp/exception/**,
+      **/src/main/java/org/folio/dataexp/domain/entity/**
+    </sonar.exclusions>
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
@@ -40,6 +44,7 @@
     <marc4j.version>2.9.2</marc4j.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
     <lombok.mapstruct-binding.version>0.2.0</lombok.mapstruct-binding.version>
+    <cql2pgjson.version>35.0.6</cql2pgjson.version>
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.17.6</testcontainer.version>
@@ -55,6 +60,7 @@
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
   </properties>
 
   <dependencies>
@@ -63,7 +69,11 @@
       <artifactId>folio-spring-base</artifactId>
       <version>${folio-spring-base.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>cql2pgjson</artifactId>
+      <version>${cql2pgjson.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -148,7 +158,7 @@
 
     <dependency>
       <groupId>software.amazon.awssdk</groupId>
-      <artifactId>aws-sdk-java</artifactId>
+      <artifactId>s3</artifactId>
       <version>${aws-sdk-java.version}</version>
     </dependency>
 
@@ -242,7 +252,6 @@
 
   <build>
     <plugins>
-
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -257,6 +266,12 @@
             </exclude>
           </excludes>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
       </plugin>
 
       <plugin>
