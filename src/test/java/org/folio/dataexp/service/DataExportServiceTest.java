@@ -3,10 +3,11 @@ package org.folio.dataexp.service;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.exception.FileExtensionException;
-import org.folio.dataexp.exception.FileSizeException;
+import org.folio.dataexp.exception.export.FileExtensionException;
+import org.folio.dataexp.exception.export.FileSizeException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +30,8 @@ public class DataExportServiceTest {
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Mock
   private JobExecutionEntityRepository jobExecutionEntityRepository;
-
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
   @InjectMocks
   private DataExportService dataExportService;
 
@@ -42,6 +44,7 @@ public class DataExportServiceTest {
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
 
     when(fileDefinitionEntityRepository.save(isA(FileDefinitionEntity.class))).thenReturn(fileDefinitionEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
     var savedFileDefinition = dataExportService.postFileDefinition(fileDefinition);
     assertEquals(FileDefinition.StatusEnum.NEW, savedFileDefinition.getStatus());

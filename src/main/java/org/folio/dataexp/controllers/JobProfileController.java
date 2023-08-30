@@ -1,0 +1,79 @@
+package org.folio.dataexp.controllers;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.JobProfileCollection;
+import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
+import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
+import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.rest.resource.JobProfilesApi;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.data.OffsetRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+@Log4j2
+@RequestMapping("/data-export")
+public class JobProfileController implements JobProfilesApi {
+
+  private final FolioExecutionContext folioExecutionContext;
+  private final JobProfileEntityRepository jobProfileEntityRepository;
+  private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
+
+  @Override
+  public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
+    if (jobProfileEntity.getJobProfile().getDefault())
+      throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
+    jobProfileEntityRepository.deleteById(jobProfileId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<JobProfile> getJobProfileById(UUID jobProfileId) {
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
+    return new ResponseEntity<>(jobProfileEntity.getJobProfile(), HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<JobProfileCollection> getJobProfiles(String query, Integer offset, Integer limit) {
+    var jobProfiles  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit))
+      .map(JobProfileEntity::getJobProfile).stream().toList();
+    var jobProfileCollection = new JobProfileCollection();
+    jobProfileCollection.setJobProfiles(jobProfiles);
+    jobProfileCollection.setTotalRecords(jobProfiles.size());
+    return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
+    var jobProfileEntity = JobProfileEntity.builder()
+      .id(jobProfile.getId())
+      .creationDate(LocalDateTime.now())
+      .jobProfile(jobProfile)
+      .createdBy(folioExecutionContext.getUserId().toString()).build()
+      .withMappingProfileId(jobProfile.getMappingProfileId());
+    var saved = jobProfileEntityRepository.save(jobProfileEntity);
+    return new ResponseEntity<>(saved.getJobProfile(), HttpStatus.CREATED);
+  }
+
+  @Override
+  public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
+    if (jobProfileEntity.getJobProfile().getDefault())
+      throw new DefaultJobProfileException("Editing of default job profile is forbidden");
+    jobProfileEntity.setJobProfile(jobProfile);
+    jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
+    jobProfileEntityRepository.save(jobProfileEntity);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+}

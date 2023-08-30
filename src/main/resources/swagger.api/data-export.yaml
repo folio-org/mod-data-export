@@ -523,6 +523,14 @@ paths:
     put:
       description: Update specific job profile
       operationId: putJobProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/jobProfile'
+            example:
+              $ref: 'examples/profiles/jobProfile.json'
       parameters:
         - name: jobProfileId
           in: path

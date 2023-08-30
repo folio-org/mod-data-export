@@ -7,12 +7,13 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.exception.FileExtensionException;
-import org.folio.dataexp.exception.FileSizeException;
-import org.folio.dataexp.exception.UploadFileException;
+import org.folio.dataexp.exception.export.FileExtensionException;
+import org.folio.dataexp.exception.export.FileSizeException;
+import org.folio.dataexp.exception.export.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.service.file.upload.FileUploadService;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ public class DataExportService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final FileUploadService fileUploadService;
+  private final FolioExecutionContext folioExecutionContext;
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
     log.info("Post file definition by id {}", fileDefinition.getId());
@@ -56,7 +58,10 @@ public class DataExportService {
     fileDefinition.setJobExecutionId(jobExecution.getId());
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     var entity = FileDefinitionEntity.builder()
-      .id(fileDefinition.getId()).creationDate(LocalDateTime.now()).fileDefinition(fileDefinition).build();
+      .id(fileDefinition.getId())
+      .creationDate(LocalDateTime.now())
+      .createdBy(folioExecutionContext.getUserId().toString())
+      .fileDefinition(fileDefinition).build();
     var saved = fileDefinitionEntityRepository.save(entity);
     return saved.getFileDefinition();
   }

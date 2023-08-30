@@ -6,6 +6,7 @@
   "properties": {
     "id": {
       "description": "Unique identifier",
+      "type": "string",
       "format": "uuid"
     },
     "name": {

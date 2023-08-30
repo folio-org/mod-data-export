@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.exception.UploadFileException;
+import org.folio.dataexp.exception.export.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
 import org.springframework.core.io.Resource;
