@@ -166,8 +166,7 @@ public class JobProfileControllerTest extends BaseTest {
     mockMvc.perform(MockMvcRequestBuilders
         .put("/data-export/job-profiles/" + jobProfile.getId().toString())
         .headers(defaultHeaders())
-        .content(asJsonString(jobProfile))
-        .contentType(APPLICATION_JSON))
+        .content(asJsonString(jobProfile)))
       .andExpect(status().isForbidden());
 
     verify(jobProfileEntityRepository, times(0)).save(isA(JobProfileEntity.class));
