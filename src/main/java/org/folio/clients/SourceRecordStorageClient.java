@@ -16,6 +16,7 @@ import org.folio.util.OkapiConnectionParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -52,21 +53,29 @@ public class SourceRecordStorageClient {
     this.errorLogService = errorLogService;
   }
 
-  public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
-    return  getRecordsByIds(ids, idType, jobExecutionId, params, false);
+  public Optional<JsonObject> getRecordsByIdsFromLocalTenant(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
+    return  getRecordsByIds(ids, idType, jobExecutionId, params);
   }
 
-  public Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params, boolean supportConsortium) {
-    String uri = recordTypeUriMap.get(idType);
-    if (supportConsortium) {
-      var centralTenantId = getCentralTenantId(params);
-      if (StringUtils.isEmpty(centralTenantId)) return Optional.empty();
-      var copyHeaders = new HashMap<String, String>();
-      copyHeaders.put(OKAPI_HEADER_URL, params.getOkapiUrl());
-      copyHeaders.put(OKAPI_HEADER_TENANT, centralTenantId);
-      copyHeaders.put(OKAPI_HEADER_TOKEN, params.getToken());
-      params = new OkapiConnectionParams(copyHeaders);
+  public Optional<JsonObject> getRecordsByIdsFromCentralTenant(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
+
+    // TODO - should be cachable
+    var centralTenantId = getCentralTenantId(params);
+
+    if (StringUtils.isEmpty(centralTenantId)) {
+      return Optional.empty();
     }
+
+    var headers = new HashMap<String, String>();
+    headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
+    headers.put(OKAPI_HEADER_TENANT, centralTenantId);
+    headers.put(OKAPI_HEADER_TOKEN, params.getToken());
+
+    return  getRecordsByIds(ids, idType, jobExecutionId, new OkapiConnectionParams(headers));
+  }
+
+  private Optional<JsonObject> getRecordsByIds(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
+    String uri = recordTypeUriMap.get(idType);
     HttpPost httpPost = new HttpPost(format(uri, params.getOkapiUrl()));
     String body = new JsonArray(ids).encode();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
@@ -81,6 +90,7 @@ public class SourceRecordStorageClient {
     }
   }
 
+  @Cacheable
   private String getCentralTenantId(OkapiConnectionParams params) {
     var centralTenantIds = consortiaClient.getUserTenants(params);
     if (!centralTenantIds.isEmpty()) {
