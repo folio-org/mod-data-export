@@ -10,7 +10,8 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesRepository;
+import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -132,7 +133,9 @@ public class BaseTest {
   @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
   @Autowired
-  private JobExecutionExportFilesRepository jobExecutionExportFilesRepository;
+  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  @Autowired
+  private FolioS3ClientFactory folioS3ClientFactory;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -173,13 +176,15 @@ public class BaseTest {
         .collect(Collectors.toMap(Map.Entry::getKey, e -> (Collection<String>) List.of(String.valueOf(e.getValue()))));
 
     folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, localHeaders);
+    var s3Client = folioS3ClientFactory.getFolioS3Client();
+    s3Client.createBucketIfNotExists();
   }
 
   @AfterEach
   void eachTearDown() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       exportIdEntityRepository.deleteAll();
-      jobExecutionExportFilesRepository.deleteAll();
+      jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
     }
   }

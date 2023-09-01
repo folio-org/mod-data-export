@@ -32,6 +32,8 @@ public class DataExportServiceTest {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Mock
   private FolioExecutionContext folioExecutionContext;
+  @Mock
+  private FileDefinitionValidator fileDefinitionValidator;
   @InjectMocks
   private DataExportService dataExportService;
 
@@ -53,24 +55,4 @@ public class DataExportServiceTest {
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
   }
-
-  @Test
-  void postFileDefinitionWithFileSizeExceptionTest() {
-    var fileDefinition = new FileDefinition();
-    fileDefinition.setId(UUID.randomUUID());
-    fileDefinition.fileName("upload.csv");
-    fileDefinition.setSize(500_001);
-
-    assertThrows(FileSizeException.class, () -> dataExportService.postFileDefinition(fileDefinition));
-  }
-
-  @Test
-  void postFileDefinitionWithFileExtensionExceptionTest() {
-    var fileDefinition = new FileDefinition();
-    fileDefinition.setId(UUID.randomUUID());
-    fileDefinition.fileName("upload.txt");
-
-    assertThrows(FileExtensionException.class, () -> dataExportService.postFileDefinition(fileDefinition));
-  }
-
 }

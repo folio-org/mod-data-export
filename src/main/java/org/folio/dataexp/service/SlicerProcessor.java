@@ -15,6 +15,7 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 @Log4j2
 public class SlicerProcessor {
+
   private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?, ?)";
   private static final String SLICED_FILE_LOCATION_PATH = "mod-data-export/download/%s/";
   private static final String FROM_TO_UUID_PART = "_%s_%s";

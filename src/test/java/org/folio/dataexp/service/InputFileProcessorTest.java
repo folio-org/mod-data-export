@@ -37,6 +37,7 @@ public class InputFileProcessorTest extends BaseTest {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
     fileDefinition.setJobExecutionId(UUID.randomUUID());
 
     var s3Client = folioS3ClientFactory.getFolioS3Client();
@@ -49,7 +50,7 @@ public class InputFileProcessorTest extends BaseTest {
       var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readCsvFile(fileDefinition);
+      inputFileProcessor.readFile(fileDefinition);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
     }
@@ -61,6 +62,7 @@ public class InputFileProcessorTest extends BaseTest {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.cql");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
     fileDefinition.setJobExecutionId(UUID.randomUUID());
 
     var s3Client = folioS3ClientFactory.getFolioS3Client();
@@ -73,7 +75,7 @@ public class InputFileProcessorTest extends BaseTest {
       var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readCqlFile(fileDefinition);
+      inputFileProcessor.readFile(fileDefinition);
       var exportIds = exportIdEntityRepository.findAll();
 
       assertEquals(1, exportIds.size());

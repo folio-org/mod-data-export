@@ -9,7 +9,7 @@ paths:
   /export:
     post:
       description: Starts the export process
-      operationId: postDataExportExport
+      operationId: postDataExport
       requestBody:
         required: true
         content:

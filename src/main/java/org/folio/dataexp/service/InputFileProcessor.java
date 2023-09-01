@@ -40,7 +40,15 @@ public class InputFileProcessor {
   private final FolioS3ClientFactory folioS3ClientFactory;
   private final JdbcTemplate jdbcTemplate;
 
-  public void readCsvFile(FileDefinition fileDefinition) throws IOException {
+  public void readFile(FileDefinition fileDefinition) throws Exception {
+    if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
+      readCqlFile(fileDefinition);
+      return;
+    }
+    readCsvFile(fileDefinition);
+  }
+
+  private void readCsvFile(FileDefinition fileDefinition) throws IOException {
     var pathToRead = getPathToRead(fileDefinition);
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -53,7 +61,7 @@ public class InputFileProcessor {
     }
   }
 
-  public void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
+  private void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
     var pathToRead = getPathToRead(fileDefinition);
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     String cql;

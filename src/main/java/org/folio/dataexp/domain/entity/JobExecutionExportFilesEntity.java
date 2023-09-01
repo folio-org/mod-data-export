@@ -1,6 +1,8 @@
 package org.folio.dataexp.domain.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -31,5 +33,6 @@ public class JobExecutionExportFilesEntity {
 
   private UUID toId;
 
-  private String status;
+  @Enumerated(EnumType.STRING)
+  private JobExecutionExportFilesStatus status;
 }

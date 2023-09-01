@@ -1,6 +1,7 @@
 package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.FileExtensionException;
 import org.folio.dataexp.exception.export.FileSizeException;
 import org.folio.dataexp.exception.export.UploadFileException;
@@ -30,5 +31,10 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<String> handleEntityNotFoundException(final EntityNotFoundException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(DataExportException.class)
+  public ResponseEntity<String> handleDataExportException(final DataExportException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

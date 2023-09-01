@@ -2,23 +2,23 @@ package org.folio.dataexp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.FilenameUtils;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.exception.export.FileExtensionException;
-import org.folio.dataexp.exception.export.FileSizeException;
+import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.file.upload.FileUploadService;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -26,31 +26,20 @@ import java.util.UUID;
 @Log4j2
 public class DataExportService {
 
-  private static final String CSV_FORMAT_EXTENSION = "csv";
-  private static final String CQL_FORMAT_EXTENSION = "cql";
-
-  private static final int MAX_FILE_SIZE = 500_000;
-
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobProfileEntityRepository jobProfileEntityRepository;
+  private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final FileUploadService fileUploadService;
+  private final InputFileProcessor inputFileProcessor;
+  private final SlicerProcessor slicerProcessor;
+  private final SingleFileProcessor singleFileProcessor;
+  private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
     log.info("Post file definition by id {}", fileDefinition.getId());
-    if (Objects.nonNull(fileDefinition.getSize()) && fileDefinition.getSize() > MAX_FILE_SIZE) {
-      var errorMessage = String.format("File size is too large: '%d'. Please use file with size less than %d.", fileDefinition.getSize(), MAX_FILE_SIZE);
-      log.error(errorMessage);
-      throw new FileSizeException(errorMessage);
-    }
-    if (Objects.isNull(fileDefinition.getSize())) {
-      log.error("Size of uploading file is null.");
-    }
-    if (isNotValidFileNameExtension(fileDefinition.getFileName())) {
-      var errorMessage = String.format("Incorrect file extension of %s", fileDefinition.getFileName());
-      log.error(errorMessage);
-      throw new FileExtensionException(errorMessage);
-    }
+    fileDefinitionValidator.validate(fileDefinition);
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecutionEntityRepository.save(JobExecutionEntity.builder()
@@ -79,7 +68,23 @@ public class DataExportService {
     }
   }
 
-  private boolean isNotValidFileNameExtension(String fileName) {
-    return !FilenameUtils.isExtension(fileName.toLowerCase(), CSV_FORMAT_EXTENSION) && !FilenameUtils.isExtension(fileName.toLowerCase(), CQL_FORMAT_EXTENSION);
+  public void postDataExport(ExportRequest exportRequest) {
+    log.info("Post data export for file definition {} and job profile {}", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId());
+    var fileDefinition = fileDefinitionEntityRepository.
+      getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
+    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
+    var jobExecution = jobExecutionEntity.getJobExecution();
+    jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
+    jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
+    jobExecutionEntityRepository.save(jobExecutionEntity);
+    try {
+      inputFileProcessor.readFile(fileDefinition);
+      slicerProcessor.sliceInstancesIds(fileDefinition);
+     } catch (Exception e) {
+      throw new DataExportException(e.getMessage());
+    }
+    var jobExecutionExportFilesEntities = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+    singleFileProcessor.exportBySingleFile(jobExecutionExportFilesEntities, exportRequest.getRecordType());
   }
 }
