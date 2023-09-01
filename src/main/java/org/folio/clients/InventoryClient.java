@@ -49,7 +49,7 @@ public class InventoryClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
-  private static final String QUERY_PATTERN_WITH_SOURCE_INVENTORY = "id==%s and source==";
+  private static final String QUERY_PATTERN_WITH_SOURCE = "id==%s and source==";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
@@ -78,7 +78,7 @@ public class InventoryClient {
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, String source) {
     try {
       return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size(),
-        "(" + QUERY_PATTERN_WITH_SOURCE_INVENTORY + source + ")"));
+        "(" + QUERY_PATTERN_WITH_SOURCE + source + ")"));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
