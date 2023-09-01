@@ -10,6 +10,7 @@ import org.folio.HttpStatus;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ExportedFile;
+import org.folio.rest.jaxrs.model.Failed;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
@@ -149,7 +150,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, String tenantId) {
+  public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, int duplicatedSrs, String tenantId) {
     return jobExecutionDao.getById(jobExecutionId, tenantId)
       .compose(jobExecutionOptional -> {
         if (jobExecutionOptional.isPresent()) {
@@ -157,7 +158,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           Progress progress = jobExecution.getProgress();
           if (nonNull(progress)) {
             progress.setExported(progress.getExported() + exported);
-            progress.setFailed(progress.getFailed() + failed);
+            Failed failedRecords = progress.getFailed();
+            if (isNull(failedRecords)) {
+              progress.setFailed(new Failed());
+            }
+            progress.getFailed().withOtherFailed(progress.getFailed().getOtherFailed() + failed)
+              .withDuplicatedSrs(duplicatedSrs);
             jobExecution.setLastUpdatedDate(new Date());
             return jobExecutionDao.update(jobExecution, tenantId);
           }
@@ -179,7 +185,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
             jobExe.setStatus(FAIL);
             //reset progress to skip already exported/failed records
             if (jobExe.getProgress() != null) {
-              jobExe.getProgress().withExported(0).withTotal(0).withFailed(0);
+              jobExe.getProgress().withExported(0).withTotal(0).withFailed(new Failed());
             }
             jobExe.setCompletedDate(new Date());
             updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);

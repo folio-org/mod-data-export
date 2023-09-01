@@ -24,13 +24,13 @@ public class AuthorityExportStrategyImpl extends AbstractExportStrategy {
     var params = exportPayload.getOkapiConnectionParams();
     var fileExportDefinition = exportPayload.getFileExportDefinition();
     var identifiers = exportPayload.getIdentifiers();
-    var srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
+    var srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params, exportPayload);
     var marcToExport = getSrsRecordService().transformSrsRecords(exportPayload.getMappingProfile(),
       srsLoadResult.getUnderlyingMarcRecords(), fileExportDefinition.getJobExecutionId(), params, getEntityType());
     getExportService().exportSrsRecord(marcToExport, exportPayload);
     LOGGER.info("Number of authority without srs record: {}", srsLoadResult.getIdsWithoutSrs());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+    handleFailedRecords(exportPayload, identifiers);
     if (exportPayload.isLast()) {
       if (isNull(fileExportDefinition.getSourcePath())) {
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);

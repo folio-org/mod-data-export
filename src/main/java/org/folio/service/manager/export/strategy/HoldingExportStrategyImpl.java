@@ -35,7 +35,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
     MappingProfile defaultMappingProfile = exportPayload.getMappingProfile();
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
     String jobExecutionId = fileExportDefinition.getJobExecutionId();
-    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
+    SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params, exportPayload);
     Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecords(defaultMappingProfile, srsLoadResult.getUnderlyingMarcRecords(), jobExecutionId, params, getEntityType());
     getExportService().exportSrsRecord(marcToExport, exportPayload);
     LOGGER.info("Number of holdings without srs record: {}", srsLoadResult.getIdsWithoutSrs());
@@ -44,7 +44,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
       blockingPromise.complete();
     } else {
       exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-      exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+      handleFailedRecords(exportPayload, identifiers);
       if (exportPayload.isLast()) {
         if (isNull(fileExportDefinition.getSourcePath())) {
           throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
@@ -70,7 +70,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
-    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+    handleFailedRecords(exportPayload, identifiers);
     if (exportPayload.isLast()) {
       if (isNull(fileExportDefinition.getSourcePath())) {
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);

@@ -22,6 +22,7 @@ public class ExportPayload {
   private ExportRequest.IdType idType;
   private int exportedRecordsNumber;
   private int failedRecordsNumber;
+  private int duplicatedSrs;
 
   public ExportPayload() {
   }
@@ -105,5 +106,13 @@ public class ExportPayload {
 
   public void setFailedRecordsNumber(int failedRecordsNumber) {
     this.failedRecordsNumber = failedRecordsNumber;
+  }
+
+  public int getDuplicatedSrs() {
+    return duplicatedSrs;
+  }
+
+  public void setDuplicatedSrs(int duplicatedSrs) {
+    this.duplicatedSrs = duplicatedSrs;
   }
 }

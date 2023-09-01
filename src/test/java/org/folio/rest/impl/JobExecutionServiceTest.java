@@ -7,6 +7,7 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.http.HttpStatus;
 import org.folio.rest.jaxrs.model.ErrorLog;
+import org.folio.rest.jaxrs.model.Failed;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecution.Status;
 import org.folio.rest.jaxrs.model.Progress;
@@ -86,7 +87,7 @@ class JobExecutionServiceTest extends RestVerticleTestBase {
     String dateString = "2020-09-15T11:02:00.847+0000";
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSZ");
     Date date = dateFormat.parse(dateString);
-    Progress progress = new Progress().withExported(7).withTotal(777).withFailed(77);
+    Progress progress = new Progress().withExported(7).withTotal(777).withFailed(new Failed().withOtherFailed(77));
     String errorLogId = UUID.randomUUID().toString();
 
     JobExecution jobExecution = new JobExecution()

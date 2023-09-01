@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Job Execution Schema",
+  "type": "object",
+  "properties": {
+    "duplicatedSrs": {
+      "description": "Counts number of duplicated SRS records",
+      "type": "integer",
+      "default": 0
+    },
+    "otherFailed": {
+      "description": "Counts number of failed records",
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

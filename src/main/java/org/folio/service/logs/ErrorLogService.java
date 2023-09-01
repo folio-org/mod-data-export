@@ -103,6 +103,17 @@ public interface ErrorLogService {
   Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessageCode, String jobExecutionId, MarcException marcException, OkapiConnectionParams params);
 
   /**
+   * Creates and saves {@link ErrorLog} to database.
+   * @param instance            {@link JsonObject} instance that is cause of the error
+   * @param errorMessage        exception that is saved with error log
+   * @param errorMessageCode    the code of the error message
+   * @param jobExecutionId      id of specific job execution
+   * @param params              okapi connection parameters
+   * @return future with saved {@link ErrorLog}
+   */
+  Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessage, String errorMessageCode, String jobExecutionId, OkapiConnectionParams params);
+
+  /**
    * Gets {@link ErrorLog}
    *
    * @param jobExecutionId id of job execution

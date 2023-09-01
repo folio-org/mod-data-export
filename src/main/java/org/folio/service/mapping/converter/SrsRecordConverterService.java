@@ -142,11 +142,14 @@ public class SrsRecordConverterService extends RecordConverter {
   }
 
   private List<String> getRecordContent(List<JsonObject> records) {
-    return records.parallelStream()
-      .map(jo -> jo.getJsonObject("parsedRecord")
-        .getJsonObject("content")
-        .encode())
+    var res = records.parallelStream()
+      .map(jo -> {
+        var parsedRecord = jo.getJsonObject("parsedRecord");
+        var content = parsedRecord.getJsonObject("content");
+        return content.encode();
+      })
       .collect(Collectors.toList());
+    return res;
   }
 
 }
