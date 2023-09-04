@@ -10,6 +10,8 @@ import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -81,57 +83,60 @@ class RecordLoaderServiceUnitTest{
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(srsClient.getRecordsByIds(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
+    when(srsClient.getRecordsByIdsFromLocalTenant(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(List.of("uuid"), AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
   }
 
-  @Test
-  void shouldReturnExistingMarcRecordsFromConsortiumAndLocalTenantWhenTenantInConsortium() {
+  @ParameterizedTest
+  @EnumSource(value = AbstractExportStrategy.EntityType.class, names = {"INSTANCE", "AUTHORITY"},  mode = EnumSource.Mode.INCLUDE)
+  void shouldReturnExistingMarcRecordsFromConsortiumAndLocalTenantWhenTenantInConsortium(AbstractExportStrategy.EntityType type) {
     // given
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
 
-    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
-    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, type, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(2));
   }
 
-  @Test
-  void shouldReturnExistingMarcRecordsFromConsortiumWhenMarcRecordFromLocalNotExist() {
+  @ParameterizedTest
+  @EnumSource(value = AbstractExportStrategy.EntityType.class, names = {"INSTANCE", "AUTHORITY"},  mode = EnumSource.Mode.INCLUDE)
+  void shouldReturnExistingMarcRecordsFromConsortiumWhenMarcRecordFromLocalNotExist(AbstractExportStrategy.EntityType type) {
     // given
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
 
-    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
-    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
+    when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, type, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(1));
   }
 
-  @Test
-  void shouldReturnExistingMarcRecordsFromLocalWhenMarcRecordFromConsortiumNotExist() {
+  @ParameterizedTest
+  @EnumSource(value = AbstractExportStrategy.EntityType.class, names = {"INSTANCE", "AUTHORITY"},  mode = EnumSource.Mode.INCLUDE)
+  void shouldReturnExistingMarcRecordsFromLocalWhenMarcRecordFromConsortiumNotExist(AbstractExportStrategy.EntityType type) {
     // given
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
 
-    when(srsClient.getRecordsByIds(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams), eq(true))).thenReturn(Optional.empty());
-    when(srsClient.getRecordsByIds(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
+    when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
+    when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     // when
-    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
+    SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, type, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
     assertThat(srsLoadResult.getUnderlyingMarcRecords(), hasSize(1));
   }
@@ -141,7 +146,7 @@ class RecordLoaderServiceUnitTest{
     // given
     List<String> uuids = Arrays.asList("6fc04e92-70dd-46b8-97ea-194015762a61", "be573875-fbc8-40e7-bda7-0ac283354227");
     JsonObject emptyResponse = new JsonObject().put("sourceRecords", new JsonArray());
-    when(srsClient.getRecordsByIds(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
+    when(srsClient.getRecordsByIdsFromLocalTenant(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(emptyResponse));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(uuids, AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
     // then
