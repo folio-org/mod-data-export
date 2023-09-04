@@ -151,7 +151,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public void handleFailedRecords(ExportPayload exportPayload, List<String> identifiers) {
     var numFailedRecords = identifiers.size() - exportPayload.getExportedRecordsNumber();
-    LOGGER.debug("Number of failed records found: {]", numFailedRecords);
+    LOGGER.debug("Number of failed records found: {}", numFailedRecords);
     exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
   }
 
