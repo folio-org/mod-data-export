@@ -40,10 +40,12 @@ import java.util.UUID;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.ErrorLog.LogLevel.ERROR;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -271,6 +273,33 @@ class ErrorLogServiceUnitTest {
       ErrorLog errorLog = errorLogCaptor.getValue();
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
       Assert.assertEquals(ERROR_MESSAGE_CODE, errorLog.getErrorMessageCode());
+      Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void saveWithAffectedRecord_shouldSaveErrorWhenDuplicatedSRS(VertxTestContext context) {
+    // given
+    JsonObject instanceRecord = new JsonObject()
+      .put("hrid", "1")
+      .put("id", INSTANCE_ID)
+      .put("title", INSTANCE_TITLE);
+    JsonObject record = new JsonObject();
+    record.put("instance", instanceRecord);
+    when(errorLogDao.save(any(ErrorLog.class), anyString())).thenReturn(succeededFuture(errorLog));
+    // when
+    Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(
+      record,
+      format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), INSTANCE_ID),
+      ERROR_DUPLICATE_SRS_RECORD.getCode(), JOB_EXECUTION_ID, params);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
+      ErrorLog errorLog = errorLogCaptor.getValue();
+      Assert.assertEquals(ERROR, errorLog.getLogLevel());
+      Assert.assertEquals(ERROR_DUPLICATE_SRS_RECORD.getCode(), errorLog.getErrorMessageCode());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
     }));
