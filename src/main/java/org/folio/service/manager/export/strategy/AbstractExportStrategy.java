@@ -87,6 +87,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
             format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instanceId),
             ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
           exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
+          LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
+            exportPayload.getDuplicatedSrs());
         } else {
           instanceIds.add(instanceId);
         }
@@ -149,6 +151,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public void handleFailedRecords(ExportPayload exportPayload, List<String> identifiers) {
     var numFailedRecords = identifiers.size() - exportPayload.getExportedRecordsNumber();
+    LOGGER.debug("Number of failed records found: {]", numFailedRecords);
     exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
   }
 
