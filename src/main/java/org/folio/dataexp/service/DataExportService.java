@@ -11,7 +11,6 @@ import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.file.upload.FileUploadService;
 import org.folio.spring.FolioExecutionContext;
@@ -29,11 +28,10 @@ public class DataExportService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobProfileEntityRepository jobProfileEntityRepository;
-  private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final FileUploadService fileUploadService;
   private final InputFileProcessor inputFileProcessor;
   private final SlicerProcessor slicerProcessor;
-  private final SingleFileProcessor singleFileProcessor;
+  private final SingleFileProcessorAsync singleFileProcessorAsync;
   private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
 
@@ -87,7 +85,6 @@ public class DataExportService {
      } catch (Exception e) {
       throw new DataExportException(e.getMessage());
     }
-    var jobExecutionExportFilesEntities = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-    singleFileProcessor.exportBySingleFile(jobExecutionExportFilesEntities, exportRequest.getRecordType());
+    singleFileProcessorAsync.exportBySingleFile(jobExecution.getId(), exportRequest.getRecordType());
   }
 }
