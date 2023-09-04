@@ -83,8 +83,9 @@ public class DataExportTenantService extends TenantService {
         .id(jobProfile.getId())
         .creationDate(LocalDateTime.now())
         .jobProfile(jobProfile)
-        .createdBy(jobProfile.getMetadata().getCreatedByUserId()).build()
-        .withMappingProfileId(jobProfile.getMappingProfileId());
+        .name(jobProfile.getName())
+        .createdBy(jobProfile.getMetadata().getCreatedByUserId())
+        .mappingProfileId(jobProfile.getMappingProfileId()).build();
       jobProfileEntityRepository.save(jobProfileEntity);
     } catch (Exception e) {
       log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(path), e.getMessage());
