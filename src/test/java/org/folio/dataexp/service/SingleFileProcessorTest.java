@@ -36,7 +36,7 @@ public class SingleFileProcessorTest extends BaseTest {
     var s3Client = folioS3ClientFactory.getFolioS3Client();
 
     var jobExecutionId = UUID.randomUUID();
-    var fileLocation = String.format("mod-data-export/download/%s/download.mrc", jobExecutionId.toString());
+    var fileLocation = String.format("mod-data-export/download/%s/download.mrc", jobExecutionId);
 
    var exportEntity = JobExecutionExportFilesEntity.builder()
       .id(UUID.randomUUID())

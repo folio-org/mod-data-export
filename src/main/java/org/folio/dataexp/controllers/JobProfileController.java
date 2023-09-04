@@ -32,7 +32,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (jobProfileEntity.getJobProfile().getDefault())
+    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
       throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
     jobProfileEntityRepository.deleteById(jobProfileId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -69,7 +69,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (jobProfileEntity.getJobProfile().getDefault())
+    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     jobProfileEntity.setJobProfile(jobProfile);
     jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());

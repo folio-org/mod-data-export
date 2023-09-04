@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
-import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -33,7 +32,7 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<Void> deleteMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (mappingProfileEntity.getMappingProfile().getDefault())
+    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault()))
       throw new DefaultMappingProfileException("Deletion of default mapping profile is forbidden");
     mappingProfileEntityRepository.deleteById(mappingProfileId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -69,7 +68,7 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<Void> putMappingProfile(UUID mappingProfileId, MappingProfile mappingProfile) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (mappingProfileEntity.getMappingProfile().getDefault())
+    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault()))
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     mappingProfileEntity.setMappingProfile(mappingProfile);
     mappingProfileEntityRepository.save(mappingProfileEntity);

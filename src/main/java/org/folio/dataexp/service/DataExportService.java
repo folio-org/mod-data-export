@@ -42,6 +42,7 @@ public class DataExportService {
     fileDefinitionValidator.validate(fileDefinition);
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
+    jobExecution.setStatus(JobExecution.StatusEnum.NEW);
     jobExecutionEntityRepository.save(JobExecutionEntity.builder()
       .id(jobExecution.getId()).jobExecution(jobExecution).build());
     fileDefinition.setJobExecutionId(jobExecution.getId());
@@ -69,14 +70,16 @@ public class DataExportService {
   }
 
   public void postDataExport(ExportRequest exportRequest) {
-    log.info("Post data export for file definition {} and job profile {}", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId());
     var fileDefinition = fileDefinitionEntityRepository.
       getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
     var jobExecution = jobExecutionEntity.getJobExecution();
+    log.info("Post data export for file definition {} and job profile {} with job execution {}",
+      exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
+    jobExecution.setStatus(JobExecution.StatusEnum.IN_PROGRESS);
     jobExecutionEntityRepository.save(jobExecutionEntity);
     try {
       inputFileProcessor.readFile(fileDefinition);
