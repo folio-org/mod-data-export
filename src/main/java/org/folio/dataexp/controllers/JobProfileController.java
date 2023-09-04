@@ -60,8 +60,9 @@ public class JobProfileController implements JobProfilesApi {
       .id(jobProfile.getId())
       .creationDate(LocalDateTime.now())
       .jobProfile(jobProfile)
-      .createdBy(folioExecutionContext.getUserId().toString()).build()
-      .withMappingProfileId(jobProfile.getMappingProfileId());
+      .mappingProfileId(jobProfile.getMappingProfileId())
+      .name(jobProfile.getName())
+      .createdBy(folioExecutionContext.getUserId().toString()).build();
     var saved = jobProfileEntityRepository.save(jobProfileEntity);
     return new ResponseEntity<>(saved.getJobProfile(), HttpStatus.CREATED);
   }
@@ -72,6 +73,7 @@ public class JobProfileController implements JobProfilesApi {
     if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     jobProfileEntity.setJobProfile(jobProfile);
+    jobProfileEntity.setName(jobProfile.getName());
     jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
     jobProfileEntityRepository.save(jobProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);

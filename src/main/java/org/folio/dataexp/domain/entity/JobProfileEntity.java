@@ -36,5 +36,7 @@ public class JobProfileEntity {
 
   private String createdBy;
 
+  private String name;
+
   private UUID mappingProfileId;
 }

@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS job_profiles (
     creation_date TIMESTAMP,
     created_by TEXT,
     mapping_profile_id uuid,
+    name TEXT,
     constraint fk_job_profile_to_mapping_profile foreign key (mapping_profile_id)
         references mapping_profiles(id) ON DELETE CASCADE
 );
