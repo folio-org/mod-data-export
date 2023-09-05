@@ -31,6 +31,7 @@ public class SingleFileProcessor {
       var jobExecution = jobExecutionEntity.getJobExecution();
       jobExecution.setLastUpdatedDate(new Date());
       jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
+      jobExecutionEntityRepository.save(jobExecutionEntity);
       return;
     }
     var file = new File(exports.get(0).getFileLocation());
