@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FileUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -17,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.UUID;
 
 @Component
@@ -41,6 +43,8 @@ public class ExportExecutor {
       try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
         s3Client.write(exportFilesEntity.getFileLocation(), is);
         log.info("Create {} at remote storage", exportFilesEntity.getFileLocation());
+      } finally {
+        FileUtils.delete(file);
       }
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
@@ -69,6 +73,10 @@ public class ExportExecutor {
     if (exports.size() == exportsCompleted) jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
     else if (exports.size() == exportsFailed) jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
     else jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
+    var currentDate = new Date();
+    jobExecution.completedDate(currentDate);
+    jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
+    log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 }

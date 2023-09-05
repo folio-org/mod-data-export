@@ -64,13 +64,13 @@ CREATE TABLE IF NOT EXISTS job_execution_export_files (
 );
 
 CREATE OR REPLACE VIEW v_instance
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.instance;
+    AS SELECT * FROM diku_mod_inventory_storage.instance;
 
 CREATE OR REPLACE VIEW v_holdings_record
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.holdings_record;
+    AS SELECT * FROM diku_mod_inventory_storage.holdings_record;
 
 CREATE OR REPLACE VIEW v_item
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.item;
+    AS SELECT * FROM diku_mod_inventory_storage.item;
 
 CREATE OR REPLACE VIEW v_authority
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.authority;
+    AS SELECT * FROM diku_mod_inventory_storage.authority;

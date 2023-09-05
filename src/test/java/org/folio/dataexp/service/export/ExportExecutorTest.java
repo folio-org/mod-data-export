@@ -1,7 +1,6 @@
 package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
 import org.folio.dataexp.BaseTest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -16,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +34,7 @@ public class ExportExecutorTest extends BaseTest {
 
   @Test
   @SneakyThrows
-  void executeTest() {
+  void exportTest() {
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     var jobExecutionId = UUID.randomUUID();
     var jobExecution = new JobExecution();
@@ -57,16 +54,10 @@ public class ExportExecutorTest extends BaseTest {
 
     exportExecutor.export(exportEntity, ExportRequest.RecordTypeEnum.INSTANCE);
 
-    var expectedFile = new File(fileLocation);
-    var path = Paths.get(fileLocation);
-    assertTrue(Files.exists(path));
-
     long size = s3Client.getSize(fileLocation);
     assertTrue(size > 0);
 
     assertEquals(JobExecutionExportFilesStatus.COMPLETED, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-
-    FileUtils.delete(expectedFile);
   }
 }

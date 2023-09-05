@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.export.DataExportException;
@@ -18,6 +19,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -78,6 +80,12 @@ public class DataExportService {
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
     jobExecution.setStatus(JobExecution.StatusEnum.IN_PROGRESS);
+    var currentDate = new Date();
+    jobExecution.setStartedDate(currentDate);
+    jobExecution.setLastUpdatedDate(currentDate);
+    var runBy = new JobExecutionRunBy();
+    jobExecution.setRunBy(runBy);
+    jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
     jobExecutionEntityRepository.save(jobExecutionEntity);
     try {
       inputFileProcessor.readFile(fileDefinition);
