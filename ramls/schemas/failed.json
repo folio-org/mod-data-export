@@ -4,12 +4,12 @@
   "type": "object",
   "properties": {
     "duplicatedSrs": {
-      "description": "Counts number of duplicated SRS records",
+      "description": "Counts the number of duplicate SRS records",
       "type": "integer",
       "default": 0
     },
     "otherFailed": {
-      "description": "Counts number of failed records",
+      "description": "Counts the number of failed records",
       "type": "integer",
       "default": 0
     }
