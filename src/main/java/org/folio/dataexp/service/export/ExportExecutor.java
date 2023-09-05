@@ -76,6 +76,9 @@ public class ExportExecutor {
     var currentDate = new Date();
     jobExecution.completedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
+
+    jobExecutionEntity.setStatus(jobExecution.getStatus());
+    jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
     jobExecutionEntityRepository.save(jobExecutionEntity);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }

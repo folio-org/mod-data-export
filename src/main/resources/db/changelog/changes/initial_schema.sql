@@ -23,10 +23,15 @@ CREATE TABLE IF NOT EXISTS job_profiles (
         references mapping_profiles(id) ON DELETE CASCADE
 );
 
+CREATE TYPE ExecutionStatusType AS ENUM ('NEW', 'IN_PROGRESS', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED');
+CREATE CAST (character varying as ExecutionStatusType) WITH INOUT AS IMPLICIT;
+
 CREATE TABLE IF NOT EXISTS job_executions (
     id uuid PRIMARY KEY,
     jsonb jsonb,
     job_profile_id uuid,
+    status ExecutionStatusType,
+    completed_date TIMESTAMP,
     constraint fk_job_execution_to_job_profile foreign key (job_profile_id)
         references job_profiles(id) ON DELETE CASCADE
 );

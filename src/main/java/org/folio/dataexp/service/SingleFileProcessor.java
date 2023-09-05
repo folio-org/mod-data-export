@@ -29,8 +29,13 @@ public class SingleFileProcessor {
       log.warn("Nothing to export for job execution {}", jobExecutionId);
       var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
       var jobExecution = jobExecutionEntity.getJobExecution();
-      jobExecution.setLastUpdatedDate(new Date());
+      var currentDate = new Date();
+      jobExecution.setLastUpdatedDate(currentDate);
       jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
+      jobExecution.setCompletedDate(currentDate);
+
+      jobExecutionEntity.setStatus(jobExecution.getStatus());
+      jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
       jobExecutionEntityRepository.save(jobExecutionEntity);
       return;
     }

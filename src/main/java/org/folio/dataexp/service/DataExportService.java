@@ -6,11 +6,13 @@ import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.UploadFileException;
+import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
@@ -31,6 +33,7 @@ public class DataExportService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobProfileEntityRepository jobProfileEntityRepository;
+  private final ExportIdEntityRepository exportIdEntityRepository;
   private final FileUploadService fileUploadService;
   private final InputFileProcessor inputFileProcessor;
   private final SlicerProcessor slicerProcessor;
@@ -79,6 +82,12 @@ public class DataExportService {
     var jobExecution = jobExecutionEntity.getJobExecution();
     log.info("Post data export for file definition {} and job profile {} with job execution {}",
       exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
+    try {
+      inputFileProcessor.readFile(fileDefinition);
+      slicerProcessor.sliceInstancesIds(fileDefinition);
+     } catch (Exception e) {
+      throw new DataExportException(e.getMessage());
+    }
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
     jobExecution.setStatus(JobExecution.StatusEnum.IN_PROGRESS);
@@ -92,14 +101,17 @@ public class DataExportService {
     runBy.lastName(user.getPersonal().getLastName());
     jobExecution.setRunBy(runBy);
 
+    long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
+    var jobExecutionProgress = new JobExecutionProgress();
+    jobExecutionProgress.setFailed(0);
+    jobExecutionProgress.setExported(0);
+    jobExecutionProgress.setTotal((int) totalExportsIds);
+    jobExecution.setProgress(jobExecutionProgress);
+
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
+    jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
-    try {
-      inputFileProcessor.readFile(fileDefinition);
-      slicerProcessor.sliceInstancesIds(fileDefinition);
-     } catch (Exception e) {
-      throw new DataExportException(e.getMessage());
-    }
+
     singleFileProcessorAsync.exportBySingleFile(jobExecution.getId(), exportRequest.getRecordType());
   }
 }
