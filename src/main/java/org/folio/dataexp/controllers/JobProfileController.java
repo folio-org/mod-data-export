@@ -2,6 +2,7 @@ package org.folio.dataexp.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
@@ -46,6 +47,7 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfileCollection> getJobProfiles(String query, Integer offset, Integer limit) {
+    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
     var jobProfiles  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit))
       .map(JobProfileEntity::getJobProfile).stream().toList();
     var jobProfileCollection = new JobProfileCollection();

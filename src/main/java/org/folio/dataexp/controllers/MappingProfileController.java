@@ -2,6 +2,7 @@ package org.folio.dataexp.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
@@ -46,6 +47,7 @@ public class MappingProfileController implements MappingProfilesApi {
 
   @Override
   public ResponseEntity<MappingProfileCollection> getMappingProfiles(String query, Integer offset, Integer limit) {
+    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
     var mappingProfiles  = mappingProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit))
       .map(MappingProfileEntity::getMappingProfile).stream().toList();
     var mappingProfileCollection = new MappingProfileCollection();
