@@ -1,3 +1,5 @@
+CREATE SEQUENCE IF NOT EXISTS job_execution_hrId MINVALUE 1 NO MAXVALUE CACHE 1 NO CYCLE;
+
 CREATE TABLE IF NOT EXISTS file_definitions (
     id uuid PRIMARY KEY,
     jsonb jsonb,

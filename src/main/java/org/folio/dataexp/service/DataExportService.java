@@ -108,6 +108,9 @@ public class DataExportService {
     jobExecutionProgress.setTotal((int) totalExportsIds);
     jobExecution.setProgress(jobExecutionProgress);
 
+    int hrid = jobExecutionEntityRepository.getHrid();
+    jobExecution.setHrId(hrid);
+
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
