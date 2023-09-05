@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -36,6 +37,7 @@ public class DataExportService {
   private final SingleFileProcessorAsync singleFileProcessorAsync;
   private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
+  private final UserClient userClient;
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
     log.info("Post file definition by id {}", fileDefinition.getId());
@@ -83,8 +85,13 @@ public class DataExportService {
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
+
+    var user = userClient.getUserById(folioExecutionContext.getUserId().toString());
     var runBy = new JobExecutionRunBy();
+    runBy.firstName(user.getPersonal().getFirstName());
+    runBy.lastName(user.getPersonal().getLastName());
     jobExecution.setRunBy(runBy);
+
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
     jobExecutionEntityRepository.save(jobExecutionEntity);
     try {
