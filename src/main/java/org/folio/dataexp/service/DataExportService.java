@@ -10,6 +10,7 @@ import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
+import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.UploadFileException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
@@ -79,15 +80,20 @@ public class DataExportService {
       getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
-    var jobExecution = jobExecutionEntity.getJobExecution();
     log.info("Post data export for file definition {} and job profile {} with job execution {}",
-      exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
+      exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
     try {
       inputFileProcessor.readFile(fileDefinition);
       slicerProcessor.sliceInstancesIds(fileDefinition);
      } catch (Exception e) {
       throw new DataExportException(e.getMessage());
     }
+    updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity);
+    singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getRecordType());
+  }
+
+  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobProfileEntity jobProfileEntity) {
+    var jobExecution = jobExecutionEntity.getJobExecution();
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
     jobExecution.setStatus(JobExecution.StatusEnum.IN_PROGRESS);
@@ -114,7 +120,5 @@ public class DataExportService {
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
-
-    singleFileProcessorAsync.exportBySingleFile(jobExecution.getId(), exportRequest.getRecordType());
   }
 }

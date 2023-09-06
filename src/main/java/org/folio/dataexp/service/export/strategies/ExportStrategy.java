@@ -6,6 +6,6 @@ import java.io.File;
 
 public interface ExportStrategy {
 
-  void saveMarc(JobExecutionExportFilesEntity exportFilesEntity, File file);
+  ExportStrategyStatistic saveMarc(JobExecutionExportFilesEntity exportFilesEntity, File file);
 
 }
