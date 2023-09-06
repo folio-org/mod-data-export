@@ -4,27 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
-import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
-import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.export.DataExportException;
-import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
-import org.folio.dataexp.service.file.upload.FileUploadService;
 import org.folio.spring.FolioExecutionContext;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

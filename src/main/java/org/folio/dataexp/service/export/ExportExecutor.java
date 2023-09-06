@@ -3,6 +3,7 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
@@ -84,7 +85,7 @@ public class ExportExecutor {
 
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED)
-        .map(e -> new JobExecutionExportedFilesInner().fileId(UUID.randomUUID()).fileName(e.getFileLocation())).collect(Collectors.toSet());
+        .map(e -> new JobExecutionExportedFilesInner().fileId(e.getId()).fileName(FilenameUtils.getName(e.getFileLocation()))).collect(Collectors.toSet());
 
       jobExecution.setExportedFiles(filesForExport);
 
