@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DataExportServiceTest {
+public class FileDefinitionsServiceTest {
 
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
@@ -37,7 +37,7 @@ public class DataExportServiceTest {
   @Captor
   private ArgumentCaptor<JobExecutionEntity> jobExecutionEntityCaptor;
   @InjectMocks
-  private DataExportService dataExportService;
+  private FileDefinitionsService fileDefinitionsService;
 
   @Test
   void postFileDefinitionTest() {
@@ -50,7 +50,7 @@ public class DataExportServiceTest {
     when(fileDefinitionEntityRepository.save(isA(FileDefinitionEntity.class))).thenReturn(fileDefinitionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
-    var savedFileDefinition = dataExportService.postFileDefinition(fileDefinition);
+    var savedFileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     assertEquals(FileDefinition.StatusEnum.NEW, savedFileDefinition.getStatus());
     assertNotNull(savedFileDefinition.getJobExecutionId());
 

@@ -3,8 +3,8 @@ package org.folio.dataexp.service;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.exception.export.FileExtensionException;
-import org.folio.dataexp.exception.export.FileSizeException;
+import org.folio.dataexp.exception.file.definition.FileExtensionException;
+import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;

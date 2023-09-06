@@ -12,7 +12,7 @@ import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.export.DataExportException;
-import org.folio.dataexp.exception.export.UploadFileException;
+import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
@@ -35,45 +35,11 @@ public class DataExportService {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final ExportIdEntityRepository exportIdEntityRepository;
-  private final FileUploadService fileUploadService;
   private final InputFileProcessor inputFileProcessor;
   private final SlicerProcessor slicerProcessor;
   private final SingleFileProcessorAsync singleFileProcessorAsync;
-  private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
-
-  public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
-    log.info("Post file definition by id {}", fileDefinition.getId());
-    fileDefinitionValidator.validate(fileDefinition);
-    var jobExecution = new JobExecution();
-    jobExecution.setId(UUID.randomUUID());
-    jobExecution.setStatus(JobExecution.StatusEnum.NEW);
-    jobExecutionEntityRepository.save(JobExecutionEntity.builder()
-      .id(jobExecution.getId()).jobExecution(jobExecution).build());
-    fileDefinition.setJobExecutionId(jobExecution.getId());
-    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
-    var entity = FileDefinitionEntity.builder()
-      .id(fileDefinition.getId())
-      .creationDate(LocalDateTime.now())
-      .createdBy(folioExecutionContext.getUserId().toString())
-      .fileDefinition(fileDefinition).build();
-    var saved = fileDefinitionEntityRepository.save(entity);
-    return saved.getFileDefinition();
-  }
-
-  public FileDefinition getFileDefinitionById(UUID fileDefinitionId) {
-    return fileDefinitionEntityRepository.getReferenceById(fileDefinitionId).getFileDefinition();
-  }
-
-  public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) {
-    try {
-      return fileUploadService.uploadFile(fileDefinitionId, resource);
-    } catch (Exception e) {
-      fileUploadService.errorUploading(fileDefinitionId);
-      throw new UploadFileException(e.getMessage());
-    }
-  }
 
   public void postDataExport(ExportRequest exportRequest) {
     var fileDefinition = fileDefinitionEntityRepository.

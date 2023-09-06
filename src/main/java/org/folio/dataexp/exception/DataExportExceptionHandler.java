@@ -2,9 +2,11 @@ package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.folio.dataexp.exception.export.DataExportException;
-import org.folio.dataexp.exception.export.FileExtensionException;
-import org.folio.dataexp.exception.export.FileSizeException;
-import org.folio.dataexp.exception.export.UploadFileException;
+import org.folio.dataexp.exception.file.definition.FileExtensionException;
+import org.folio.dataexp.exception.file.definition.FileSizeException;
+import org.folio.dataexp.exception.file.definition.UploadFileException;
+import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
+import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -26,6 +28,16 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(UploadFileException.class)
   public ResponseEntity<String> handleUploadFileException(final UploadFileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(DefaultMappingProfileException.class)
+  public ResponseEntity<String> handleDefaultMappingProfileException(final DefaultMappingProfileException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+  }
+
+  @ExceptionHandler(DefaultJobProfileException.class)
+  public ResponseEntity<String> handleDefaultJobProfileException(final DefaultJobProfileException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)

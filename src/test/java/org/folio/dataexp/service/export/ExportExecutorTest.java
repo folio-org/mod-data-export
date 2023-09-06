@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.folio.dataexp.BaseTest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
@@ -38,6 +39,7 @@ public class ExportExecutorTest extends BaseTest {
     var s3Client = folioS3ClientFactory.getFolioS3Client();
     var jobExecutionId = UUID.randomUUID();
     var jobExecution = new JobExecution();
+    jobExecution.setProgress(new JobExecutionProgress());
     jobExecution.setId(jobExecutionId);
     var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).build();
 

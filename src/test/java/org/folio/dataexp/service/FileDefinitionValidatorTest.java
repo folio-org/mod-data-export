@@ -1,8 +1,8 @@
 package org.folio.dataexp.service;
 
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.exception.export.FileExtensionException;
-import org.folio.dataexp.exception.export.FileSizeException;
+import org.folio.dataexp.exception.file.definition.FileExtensionException;
+import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
