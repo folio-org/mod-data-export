@@ -3,7 +3,10 @@ package org.folio.dataexp.service;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseTest;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.junit.jupiter.api.Test;
@@ -12,10 +15,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,13 +33,15 @@ public class SingleFileProcessorTest extends BaseTest {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @MockBean
   private ExportExecutor exportExecutor;
+  @MockBean
+  private JobExecutionEntityRepository jobExecutionEntityRepository;
 
   @Autowired
   private SingleFileProcessor singleFileProcessor;
 
   @Test
   @SneakyThrows
-  void exportBySingleFile() {
+  void exportBySingleFileTest() {
     var jobExecutionId = UUID.randomUUID();
     var parent = String.format("mod-data-export/download/%s/", jobExecutionId);
     var fileLocation = parent + "download.mrc";
@@ -45,7 +55,23 @@ public class SingleFileProcessorTest extends BaseTest {
 
     var path = Paths.get(parent);
     assertTrue(Files.exists(path));
-
     verify(exportExecutor).export(exportEntity,  ExportRequest.RecordTypeEnum.INSTANCE);
+  }
+
+  @Test
+  @SneakyThrows
+  void exportBySingleFileIfExportEntitiesEmptyTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var jobExecution = new JobExecution().id(jobExecutionId);
+    var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).id(jobExecutionId).build();
+
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
+    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+
+    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
+
+    verify(exportExecutor, times(0)).export(any(), any());
+    verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
+    assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
   }
 }

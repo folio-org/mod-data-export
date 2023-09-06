@@ -27,11 +27,11 @@ import java.util.List;
 @Log4j2
 public class DataExportTenantService extends TenantService {
 
-  private static final String MAPPING_PROFILES_PATH ="/data/mapping-profiles/";
+  private static final String MAPPING_PROFILES_PATH = "/data/mapping-profiles/"; //NOSONAR
   private static final List<String> MAPPING_PROFILES = List.of("default_authority_mapping_profile.json",
     "default_holdings_mapping_profile.json", "default_instance_mapping_profile.json");
 
-  private static final String JOB_PROFILES_PATH = "/data/job-profiles/";
+  private static final String JOB_PROFILES_PATH = "/data/job-profiles/"; //NOSONAR
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
 
@@ -39,8 +39,6 @@ public class DataExportTenantService extends TenantService {
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Autowired
   private MappingProfileEntityRepository mappingProfileEntityRepository;
-
-  private final ObjectMapper mapper = new ObjectMapper();
 
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase) {
     super(jdbcTemplate, context, folioSpringLiquibase);
@@ -56,9 +54,10 @@ public class DataExportTenantService extends TenantService {
   private void loadMappingProfiles() {
     MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile(MAPPING_PROFILES_PATH + mappingProfile));
   }
-  private void loadMappingProfile(String path) {
+  private void loadMappingProfile(String mappingProfilePath) {
+    var mapper = new ObjectMapper();
     try (InputStream is =
-           DataExportTenantService.class.getResourceAsStream(path)) {
+           DataExportTenantService.class.getResourceAsStream(mappingProfilePath)) {
       var mappingProfile = mapper.readValue(is, MappingProfile.class);
       var mappingProfileEntity = MappingProfileEntity.builder()
         .id(mappingProfile.getId())
@@ -67,7 +66,7 @@ public class DataExportTenantService extends TenantService {
         .createdBy(mappingProfile.getMetadata().getCreatedByUserId()).build();
       mappingProfileEntityRepository.save(mappingProfileEntity);
     } catch (Exception e) {
-      log.error("Error loading mapping profile {} : {}", FilenameUtils.getBaseName(path), e.getMessage());
+      log.error("Error loading mapping profile {} : {}", FilenameUtils.getBaseName(mappingProfilePath), e.getMessage());
     }
   }
 
@@ -75,9 +74,10 @@ public class DataExportTenantService extends TenantService {
     JOB_PROFILES.forEach(jobProfile -> loadJobProfile(JOB_PROFILES_PATH + jobProfile));
   }
 
-  private void loadJobProfile(String path) {
+  private void loadJobProfile(String jobProfilePath) {
+    var mapper = new ObjectMapper();
     try (InputStream is =
-           DataExportTenantService.class.getResourceAsStream(path)) {
+           DataExportTenantService.class.getResourceAsStream(jobProfilePath)) {
       var jobProfile = mapper.readValue(is, JobProfile.class);
       var jobProfileEntity = JobProfileEntity.builder()
         .id(jobProfile.getId())
@@ -88,7 +88,7 @@ public class DataExportTenantService extends TenantService {
         .mappingProfileId(jobProfile.getMappingProfileId()).build();
       jobProfileEntityRepository.save(jobProfileEntity);
     } catch (Exception e) {
-      log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(path), e.getMessage());
+      log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(jobProfilePath), e.getMessage());
     }
   }
 }

@@ -41,12 +41,10 @@ public class DataExportService {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
     log.info("Post data export for file definition {} and job profile {} with job execution {}",
       exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
-    try {
-      inputFileProcessor.readFile(fileDefinition);
-      slicerProcessor.sliceInstancesIds(fileDefinition);
-     } catch (Exception e) {
-      throw new DataExportException(e.getMessage());
-    }
+
+    inputFileProcessor.readFile(fileDefinition);
+    slicerProcessor.sliceInstancesIds(fileDefinition);
+
     updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity);
     singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getRecordType());
   }
