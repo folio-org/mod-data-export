@@ -1,11 +1,9 @@
 package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.JobExecution;
-import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class JobExecutionsControllerTest extends BaseTest {
+public class JobExecutionsControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;

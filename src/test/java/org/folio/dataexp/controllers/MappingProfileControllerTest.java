@@ -1,7 +1,7 @@
 package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
  import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class MappingProfileControllerTest extends BaseTest {
+public class MappingProfileControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private MappingProfileEntityRepository mappingProfileEntityRepository;

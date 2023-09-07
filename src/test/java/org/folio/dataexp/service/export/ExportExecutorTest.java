@@ -1,7 +1,7 @@
 package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-public class ExportExecutorTest extends BaseTest {
+public class ExportExecutorTest extends BaseDataExportInitializer {
   @MockBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @MockBean

@@ -59,12 +59,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = BaseTest.Initializer.class)
+@ContextConfiguration(initializers = BaseDataExportInitializer.Initializer.class)
 @Testcontainers
 @AutoConfigureMockMvc
 @Log4j2
 @DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_CLASS)
-public class BaseTest {
+public class BaseDataExportInitializer {
 
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "diku";
@@ -111,7 +111,7 @@ public class BaseTest {
   }
 
   private static void runSqlScript(String path, JdbcTemplate jdbcTemplate) throws IOException {
-    try (var is = BaseTest.class.getResourceAsStream(path)) {
+    try (var is = BaseDataExportInitializer.class.getResourceAsStream(path)) {
       var sql = Files.read(is, StandardCharsets.UTF_8);
       jdbcTemplate.execute(sql);
     }

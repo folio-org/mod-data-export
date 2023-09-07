@@ -1,7 +1,7 @@
 package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.service.DataExportService;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class DataExportControllerTest extends BaseTest {
+public class DataExportControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private DataExportService dataExportService;

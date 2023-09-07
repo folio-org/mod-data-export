@@ -1,7 +1,7 @@
 package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class SingleFileProcessorTest extends BaseTest {
+public class SingleFileProcessorTest extends BaseDataExportInitializer {
 
   @MockBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;

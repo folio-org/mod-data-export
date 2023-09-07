@@ -1,7 +1,7 @@
 package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SlicerProcessorTest extends BaseTest {
+public class SlicerProcessorTest extends BaseDataExportInitializer {
 
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload_for_slicer.cql";
 

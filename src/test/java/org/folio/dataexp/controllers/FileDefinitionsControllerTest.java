@@ -1,7 +1,7 @@
 package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseTest;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
@@ -18,7 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class FileDefinitionsControllerTest extends BaseTest {
+public class FileDefinitionsControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
