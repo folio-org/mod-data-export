@@ -1,6 +1,5 @@
 HELP.md
 target/
-mod-data-export/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
