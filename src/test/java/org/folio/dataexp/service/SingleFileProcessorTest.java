@@ -13,14 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
@@ -53,8 +50,6 @@ public class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
 
-    var path = Paths.get(parent);
-    assertTrue(Files.exists(path));
     verify(exportExecutor).export(exportEntity,  ExportRequest.RecordTypeEnum.INSTANCE);
   }
 

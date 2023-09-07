@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,8 +47,6 @@ public class ExportExecutorTest extends BaseDataExportInitializer {
       .id(UUID.randomUUID())
       .jobExecutionId(jobExecutionId)
       .fileLocation(fileLocation).build();
-    var temp = new File("mod-data-export/download/" + jobExecutionId);
-    temp.mkdirs();
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));

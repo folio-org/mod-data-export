@@ -1,27 +1,32 @@
 package org.folio.dataexp.service.export.strategies;
 
-import org.apache.commons.io.FileUtils;
+import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
+import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-
 @Component
+@AllArgsConstructor
 public class InstancesExportStrategy implements ExportStrategy {
 
+  private final FolioS3ClientFactory folioS3ClientFactory;
+  private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+
   @Override
-  public ExportStrategyStatistic saveMarc(JobExecutionExportFilesEntity exportFilesEntity, File file) {
+  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var marc = "marc";
-    try {
-      FileUtils.writeStringToFile(file, marc, Charset.defaultCharset());
-      var exportStatistic = new ExportStrategyStatistic();
-      exportStatistic.setTotal(1);
-      exportStatistic.setExported(1);
-      return exportStatistic;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    var s3Client = folioS3ClientFactory.getFolioS3Client();
+    var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(),  8192, s3Client);
+    remoteStorageWriter.write(marc);
+    remoteStorageWriter.close();
+    var exportStatistic = new ExportStrategyStatistic();
+    exportStatistic.setTotal(1);
+    exportStatistic.setExported(1);
+    exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+    return exportStatistic;
   }
 }

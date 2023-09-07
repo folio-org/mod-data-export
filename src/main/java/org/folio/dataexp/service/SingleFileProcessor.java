@@ -10,7 +10,6 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -38,12 +37,6 @@ public class SingleFileProcessor {
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
       jobExecutionEntityRepository.save(jobExecutionEntity);
       return;
-    }
-    var file = new File(exports.get(0).getFileLocation());
-    var parent = file.getParentFile();
-    if (!parent.exists()) {
-      boolean isCreated = parent.mkdirs();
-      if (isCreated) log.info("Create local directories {} to store exports for {} ", parent.getAbsolutePath(), jobExecutionId);
     }
     exports.forEach(export -> executeExport(export, recordType));
   }
