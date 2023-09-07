@@ -29,6 +29,7 @@
     <sonar.exclusions>
       **/src/main/java/org/folio/dataexp/exception/**,
       **/src/main/java/org/folio/dataexp/domain/entity/**,
+      **/src/main/java/org/folio/dataexp/domain/dto/**,
       **/src/test/java/org/folio/dataexp/BaseTest.java
     </sonar.exclusions>
     <argLine />
