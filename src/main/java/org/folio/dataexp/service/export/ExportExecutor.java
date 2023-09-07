@@ -34,10 +34,12 @@ public class ExportExecutor {
   }
 
   public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.RecordTypeEnum recordType) {
+    log.info("Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStatistic = instanceExportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
     updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic);
+    log.info("Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
   }
 
   private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
