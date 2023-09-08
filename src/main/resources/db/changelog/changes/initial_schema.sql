@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS job_profiles (
         references mapping_profiles(id) ON DELETE CASCADE
 );
 
-CREATE TYPE ExecutionStatusType AS ENUM ('NEW', 'IN_PROGRESS', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED');
+CREATE TYPE ExecutionStatusType AS ENUM ('NEW', 'IN_PROGRESS', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAIL');
 CREATE CAST (character varying as ExecutionStatusType) WITH INOUT AS IMPLICIT;
 
 CREATE TABLE IF NOT EXISTS job_executions (
