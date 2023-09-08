@@ -2,7 +2,10 @@ package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
@@ -12,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +32,8 @@ public class JobProfileControllerTest extends BaseDataExportInitializer {
   private JobProfileEntityRepository jobProfileEntityRepository;
   @MockBean
   private JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
+  @MockBean
+  private UserClient userClient;
 
   @Test
   @SneakyThrows
@@ -114,9 +120,12 @@ public class JobProfileControllerTest extends BaseDataExportInitializer {
     jobProfile.setDefault(true);
     jobProfile.setName("jobProfile");
     jobProfile.setMappingProfileId(UUID.randomUUID());
+    var user = new User();
+    user.setPersonal(new User.Personal());
 
     var entity = JobProfileEntity.builder().id(jobProfile.getId()).jobProfile(jobProfile).build();
     when(jobProfileEntityRepository.save(isA(JobProfileEntity.class))).thenReturn(entity);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
     mockMvc.perform(MockMvcRequestBuilders
         .post("/data-export/job-profiles")
@@ -135,10 +144,14 @@ public class JobProfileControllerTest extends BaseDataExportInitializer {
     jobProfile.setDefault(false);
     jobProfile.setName("jobProfile");
     jobProfile.setMappingProfileId(UUID.randomUUID());
+    jobProfile.setMetadata(new Metadata().createdDate(new Date()));
+    var user = new User();
+    user.setPersonal(new User.Personal());
 
     var entity = JobProfileEntity.builder().id(jobProfile.getId()).jobProfile(jobProfile).build();
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(jobProfileEntityRepository.save(isA(JobProfileEntity.class))).thenReturn(entity);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
     mockMvc.perform(MockMvcRequestBuilders
       .put("/data-export/job-profiles/" + jobProfile.getId().toString())

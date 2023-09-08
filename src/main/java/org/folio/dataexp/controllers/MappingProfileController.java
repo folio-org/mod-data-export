@@ -3,8 +3,11 @@ package org.folio.dataexp.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +34,7 @@ public class MappingProfileController implements MappingProfilesApi {
   private final FolioExecutionContext folioExecutionContext;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
+  private final UserClient userClient;
 
   @Override
   public ResponseEntity<Void> deleteMappingProfileById(UUID mappingProfileId) {
@@ -60,6 +65,26 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<MappingProfile> postMappingProfile(MappingProfile mappingProfile) {
     var id = Objects.isNull(mappingProfile.getId()) ? UUID.randomUUID() : mappingProfile.getId();
+
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(user.getPersonal().getFirstName());
+    userInfo.setLastName(user.getPersonal().getLastName());
+    userInfo.setUserName(user.getUsername());
+    mappingProfile.setUserInfo(userInfo);
+
+    var metaData = new Metadata();
+    metaData.createdByUserId(userId);
+    metaData.updatedByUserId(userId);
+    var current = new Date();
+    metaData.createdDate(current);
+    metaData.updatedDate(current);
+
+    metaData.createdByUsername(user.getUsername());
+    metaData.updatedByUsername(user.getUsername());
+    mappingProfile.setMetadata(metaData);
+
     var mappingProfileEntity = MappingProfileEntity.builder()
       .id(id)
       .creationDate(LocalDateTime.now())
@@ -76,6 +101,22 @@ public class MappingProfileController implements MappingProfilesApi {
     if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault()))
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     mappingProfileEntity.setMappingProfile(mappingProfile);
+    mappingProfile.setName(mappingProfile.getName());
+
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(user.getPersonal().getFirstName());
+    userInfo.setLastName(user.getPersonal().getLastName());
+    userInfo.setUserName(user.getUsername());
+    mappingProfile.setUserInfo(userInfo);
+
+    var metadata = mappingProfile.getMetadata();
+    metadata.updatedDate(new Date());
+    metadata.updatedByUserId(userId);
+    metadata.updatedByUsername(user.getUsername());
+
     mappingProfileEntityRepository.save(mappingProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

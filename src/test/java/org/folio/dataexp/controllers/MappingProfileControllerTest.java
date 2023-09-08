@@ -2,7 +2,10 @@ package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
- import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.client.UserClient;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -12,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +31,8 @@ public class MappingProfileControllerTest extends BaseDataExportInitializer {
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   @MockBean
   private MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
+  @MockBean
+  private UserClient userClient;
 
   @Test
   @SneakyThrows
@@ -112,9 +118,12 @@ public class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
+    var user = new User();
+    user.setPersonal(new User.Personal());
 
     var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
     mockMvc.perform(MockMvcRequestBuilders
         .post("/data-export/mapping-profiles")
@@ -133,10 +142,14 @@ public class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(false);
     mappingProfile.setName("mappingProfile");
+    mappingProfile.setMetadata(new Metadata().createdDate(new Date()));
+    var user = new User();
+    user.setPersonal(new User.Personal());
 
     var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
     mockMvc.perform(MockMvcRequestBuilders
         .put("/data-export/mapping-profiles/" + mappingProfile.getId().toString())

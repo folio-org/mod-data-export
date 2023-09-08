@@ -3,8 +3,11 @@ package org.folio.dataexp.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -30,6 +34,7 @@ public class JobProfileController implements JobProfilesApi {
   private final FolioExecutionContext folioExecutionContext;
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
+  private final UserClient userClient;
 
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
@@ -60,6 +65,26 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
     var id = Objects.isNull(jobProfile.getId()) ? UUID.randomUUID() : jobProfile.getId();
+
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(user.getPersonal().getFirstName());
+    userInfo.setLastName(user.getPersonal().getLastName());
+    userInfo.setUserName(user.getUsername());
+    jobProfile.setUserInfo(userInfo);
+
+    var metaData = new Metadata();
+    metaData.createdByUserId(userId);
+    metaData.updatedByUserId(userId);
+    var current = new Date();
+    metaData.createdDate(current);
+    metaData.updatedDate(current);
+    metaData.createdByUsername(user.getUsername());
+    metaData.updatedByUsername(user.getUsername());
+    jobProfile.setMetadata(metaData);
+
     var jobProfileEntity = JobProfileEntity.builder()
       .id(id)
       .creationDate(LocalDateTime.now())
@@ -79,6 +104,21 @@ public class JobProfileController implements JobProfilesApi {
     jobProfileEntity.setJobProfile(jobProfile);
     jobProfileEntity.setName(jobProfile.getName());
     jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
+
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(user.getPersonal().getFirstName());
+    userInfo.setLastName(user.getPersonal().getLastName());
+    userInfo.setUserName(user.getUsername());
+    jobProfile.setUserInfo(userInfo);
+
+    var metadata = jobProfile.getMetadata();
+    metadata.updatedDate(new Date());
+    metadata.updatedByUserId(userId);
+    metadata.updatedByUsername(user.getUsername());
+
     jobProfileEntityRepository.save(jobProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
