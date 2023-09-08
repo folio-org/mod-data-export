@@ -85,8 +85,9 @@ public class JobProfileController implements JobProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
+    jobProfile.setId(id);
     var jobProfileEntity = JobProfileEntity.builder()
-      .id(id)
+      .id(jobProfile.getId())
       .creationDate(LocalDateTime.now())
       .jobProfile(jobProfile)
       .mappingProfileId(jobProfile.getMappingProfileId())

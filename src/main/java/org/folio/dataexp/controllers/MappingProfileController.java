@@ -85,8 +85,9 @@ public class MappingProfileController implements MappingProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
+    mappingProfile.setId(id);
     var mappingProfileEntity = MappingProfileEntity.builder()
-      .id(id)
+      .id(mappingProfile.getId())
       .creationDate(LocalDateTime.now())
       .mappingProfile(mappingProfile)
       .name(mappingProfile.getName())
