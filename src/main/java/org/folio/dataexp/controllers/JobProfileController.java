@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -58,8 +59,9 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
+    var id = Objects.isNull(jobProfile.getId()) ? UUID.randomUUID() : jobProfile.getId();
     var jobProfileEntity = JobProfileEntity.builder()
-      .id(jobProfile.getId())
+      .id(id)
       .creationDate(LocalDateTime.now())
       .jobProfile(jobProfile)
       .mappingProfileId(jobProfile.getMappingProfileId())

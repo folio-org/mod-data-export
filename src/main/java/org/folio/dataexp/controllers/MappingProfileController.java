@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -58,10 +59,12 @@ public class MappingProfileController implements MappingProfilesApi {
 
   @Override
   public ResponseEntity<MappingProfile> postMappingProfile(MappingProfile mappingProfile) {
+    var id = Objects.isNull(mappingProfile.getId()) ? UUID.randomUUID() : mappingProfile.getId();
     var mappingProfileEntity = MappingProfileEntity.builder()
-      .id(mappingProfile.getId())
+      .id(id)
       .creationDate(LocalDateTime.now())
       .mappingProfile(mappingProfile)
+      .name(mappingProfile.getName())
       .createdBy(folioExecutionContext.getUserId().toString()).build();
     var saved = mappingProfileEntityRepository.save(mappingProfileEntity);
     return new ResponseEntity<>(saved.getMappingProfile(), HttpStatus.CREATED);

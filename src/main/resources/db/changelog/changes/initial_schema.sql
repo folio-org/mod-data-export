@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS mapping_profiles (
     id uuid PRIMARY KEY,
     jsonb jsonb,
     creation_date TIMESTAMP,
-    created_by TEXT
+    created_by TEXT,
+    name TEXT
 );
 
 CREATE TABLE IF NOT EXISTS job_profiles (

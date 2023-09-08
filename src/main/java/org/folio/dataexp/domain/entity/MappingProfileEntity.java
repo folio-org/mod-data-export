@@ -35,4 +35,6 @@ public class MappingProfileEntity {
   private LocalDateTime creationDate;
 
   private String createdBy;
+
+  private String name;
 }
