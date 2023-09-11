@@ -32,12 +32,14 @@ public class DataExportService {
   private final SingleFileProcessorAsync singleFileProcessorAsync;
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
+  private final DataExportRequestValidator dataExportRequestValidator;
 
   public void postDataExport(ExportRequest exportRequest) {
     var fileDefinition = fileDefinitionEntityRepository.
       getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
+    dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
     log.info("Post data export for file definition {} and job profile {} with job execution {}",
       exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
