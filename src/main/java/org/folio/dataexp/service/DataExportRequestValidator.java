@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataExportRequestValidator {
 
-  public static final String DEFAULT_AUTHORITY_MAPPING_PROFILE_ID = "5d636597-a59d-4391-a270-4e79d5ba70e3";
+  public static final String DEFAULT_AUTHORITY_MAPPING_PROFILE_ID = "5d636597-a59d-4391-a270-4e79d5ba70e3"; //NOSONAR
 
   public void validate(ExportRequest exportRequest, FileDefinition fileDefinition, String mappingProfileId) {
     if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
