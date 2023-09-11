@@ -49,6 +49,8 @@ public class DataExportServiceTest {
   private FolioExecutionContext folioExecutionContext;
   @Mock
   private UserClient userClient;
+  @Mock
+  private DataExportRequestValidator dataExportRequestValidator;
 
   @InjectMocks
   private DataExportService dataExportService;
@@ -73,7 +75,8 @@ public class DataExportServiceTest {
     var fileDefinitionEntity = FileDefinitionEntity.builder()
       .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
-    var jobProfile = new JobProfile().id(exportRequest.getJobProfileId()).name("jobProfileName");
+    var jobProfile = new JobProfile().id(exportRequest.getJobProfileId())
+      .name("jobProfileName").mappingProfileId(UUID.randomUUID());
     var jobProfileEntity = JobProfileEntity.builder()
         .jobProfile(jobProfile).id(jobProfile.getId()).build();
 
