@@ -34,8 +34,8 @@ import io.vertx.core.json.JsonObject;
 public class ExportManagerImpl implements ExportManager {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final int POOL_SIZE = 2;
-  public static final int SRS_LOAD_PARTITION_SIZE = 50;
-  public static final int INVENTORY_LOAD_PARTITION_SIZE = 50;
+  public static final int SRS_LOAD_PARTITION_SIZE = 20;
+  public static final int INVENTORY_LOAD_PARTITION_SIZE = 20;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
