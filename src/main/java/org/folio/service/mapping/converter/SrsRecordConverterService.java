@@ -143,6 +143,7 @@ public class SrsRecordConverterService extends RecordConverter {
 
   private List<String> getRecordContent(List<JsonObject> records) {
     return records.parallelStream()
+      .filter(jo -> jo.getJsonObject("parsedRecord").containsKey("content"))
       .map(jo -> jo.getJsonObject("parsedRecord")
         .getJsonObject("content")
         .encode())
