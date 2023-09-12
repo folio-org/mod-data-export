@@ -59,7 +59,7 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String INPUT_DATA_LOCAL_MAP_KEY = "inputDataLocalMap";
   private static final String SHARED_WORKER_EXECUTOR_NAME = "input-data-manager-thread-worker";
   private static final String DELIMITER = "-";
-  private static final int BATCH_SIZE = 20;
+  private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
   @Autowired
