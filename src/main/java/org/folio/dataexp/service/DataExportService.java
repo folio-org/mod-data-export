@@ -9,6 +9,7 @@ import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
@@ -39,22 +40,28 @@ public class DataExportService {
       getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
-    dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
+    try {
+      dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
+    } catch (DataExportRequestValidationException e) {
+      updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity, JobExecution.StatusEnum.FAIL);
+      log.error(e.getMessage());
+      return;
+    }
     log.info("Post data export for file definition {} and job profile {} with job execution {}",
       exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
     inputFileProcessor.readFile(fileDefinition);
     slicerProcessor.sliceInstancesIds(fileDefinition);
 
-    updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity);
+    updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity, JobExecution.StatusEnum.IN_PROGRESS);
     singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getRecordType());
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobProfileEntity jobProfileEntity) {
+  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobProfileEntity jobProfileEntity, JobExecution.StatusEnum jobExecutionStatus) {
     var jobExecution = jobExecutionEntity.getJobExecution();
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
-    jobExecution.setStatus(JobExecution.StatusEnum.IN_PROGRESS);
+    jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
