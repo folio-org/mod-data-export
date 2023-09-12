@@ -112,7 +112,6 @@ public class ExportManagerImpl implements ExportManager {
   private ExportResult getExportResult(AsyncResult<Object> asyncResult, ExportPayload exportPayload) {
     if (asyncResult.failed()) {
       LOGGER.error("Export is failed, cause: {}", asyncResult.cause().getMessage());
-      asyncResult.cause().printStackTrace();
       if (asyncResult.cause() instanceof ServiceException) {
         ServiceException serviceException = (ServiceException) asyncResult.cause();
         errorLogService.saveGeneralError(serviceException.getErrorCode().getCode(), exportPayload.getJobExecutionId(), exportPayload.getOkapiConnectionParams().getTenantId());
