@@ -157,7 +157,8 @@ public class ExportManagerImpl implements ExportManager {
     String tenantId = exportPayload.getOkapiConnectionParams().getTenantId();
     int exported = exportPayload.getExportedRecordsNumber();
     int failed = exportPayload.getFailedRecordsNumber();
-    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, tenantId);
+    int duplicatedSrs = exportPayload.getDuplicatedSrs();
+    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, duplicatedSrs, tenantId);
   }
 
   private InputDataManager getInputDataManager() {

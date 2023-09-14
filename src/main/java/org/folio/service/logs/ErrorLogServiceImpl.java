@@ -31,6 +31,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
@@ -139,6 +140,31 @@ public class ErrorLogServiceImpl implements ErrorLogService {
     ErrorLog errorLog = new ErrorLog()
       .withErrorMessageCode(errorMessageCode)
       .withErrorMessageValues(Collections.singletonList(marcException.getMessage()))
+      .withLogLevel(ErrorLog.LogLevel.ERROR)
+      .withJobExecutionId(jobExecutionId)
+      .withAffectedRecord(affectedRecord)
+      .withCreatedDate(new Date());
+    return save(errorLog, params.getTenantId());
+  }
+
+  public Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessage, String errorMessageCode, String jobExecutionId, OkapiConnectionParams params) {
+    String instId = null;
+    var externalIdsHolder = instance.getJsonObject("externalIdsHolder");
+    if (nonNull(externalIdsHolder)) {
+      instId = externalIdsHolder.getString("instanceId");
+    }
+    if (instId == null) {
+      instId = "UUID cannot be determined because record is invalid: SRS contains more than 1 record for 1 instance";
+    }
+    AffectedRecord affectedRecord = new AffectedRecord()
+      .withId(instId)
+      .withHrid("HRID cannot be found if SRS contains more than 1 record for 1 instance")
+      .withTitle("Title cannot be found if SRS contains more than 1 record for 1 instance")
+      .withRecordType(AffectedRecord.RecordType.INSTANCE)
+      .withInventoryRecordLink(configurationsClient.getInventoryRecordLink(instId, jobExecutionId, params));
+    ErrorLog errorLog = new ErrorLog()
+      .withErrorMessageCode(errorMessageCode)
+      .withErrorMessageValues(Collections.singletonList(errorMessage))
       .withLogLevel(ErrorLog.LogLevel.ERROR)
       .withJobExecutionId(jobExecutionId)
       .withAffectedRecord(affectedRecord)

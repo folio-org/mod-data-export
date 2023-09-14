@@ -49,9 +49,9 @@
           "default": 0
         },
         "failed": {
-          "description": "Number of records that are failed on export",
-          "type": "integer",
-          "default": 0
+          "description": "Failed records including duplicates",
+          "type": "object",
+          "$ref": "../../ramls/schemas/failed.json"
         },
         "total": {
           "description": "Total number of records",

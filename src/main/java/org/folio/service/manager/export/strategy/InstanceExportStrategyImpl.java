@@ -38,7 +38,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     OkapiConnectionParams params = exportPayload.getOkapiConnectionParams();
 
     if (mappingProfile.getRecordTypes().contains(RecordType.SRS) || MappingProfileServiceImpl.isDefaultInstanceProfile(mappingProfile.getId())) {
-      SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params);
+      SrsLoadResult srsLoadResult = loadSrsMarcRecordsInPartitions(identifiers, exportPayload.getJobExecutionId(), params, exportPayload);
       LOGGER.info("Records that are not present in SRS: {}", srsLoadResult.getIdsWithoutSrs());
       Pair<List<String>, Integer> marcToExport = getSrsRecordService().transformSrsRecords(mappingProfile, srsLoadResult.getUnderlyingMarcRecords(),
         exportPayload.getJobExecutionId(), params, getEntityType());
@@ -58,7 +58,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
           });
       } else {
         exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-        exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+        handleFailedRecords(exportPayload, identifiers);
         if (exportPayload.isLast()) {
           getExportService().postExport(fileExportDefinition, params.getTenantId());
         }
@@ -87,7 +87,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
-    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+    handleFailedRecords(exportPayload, identifiers);
     if (exportPayload.isLast()) {
       postExport(exportPayload, fileExportDefinition, params);
     }

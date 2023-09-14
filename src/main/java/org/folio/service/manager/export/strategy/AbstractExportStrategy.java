@@ -1,8 +1,11 @@
 package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
@@ -26,6 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+
+import static java.lang.String.format;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
@@ -58,14 +64,35 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    * @param params      okapi connection parameters
    * @return @see SrsLoadResult
    */
-  protected SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId, OkapiConnectionParams params) {
+  protected SrsLoadResult loadSrsMarcRecordsInPartitions(List<String> identifiers, String jobExecutionId,
+                                                         OkapiConnectionParams params, ExportPayload exportPayload) {
     SrsLoadResult srsLoadResult = new SrsLoadResult();
     Lists.partition(identifiers, ExportManagerImpl.SRS_LOAD_PARTITION_SIZE).forEach(partition -> {
       SrsLoadResult partitionLoadResult = getRecordLoaderService().loadMarcRecordsBlocking(partition, getEntityType(), jobExecutionId, params);
       srsLoadResult.getUnderlyingMarcRecords().addAll(partitionLoadResult.getUnderlyingMarcRecords());
       srsLoadResult.getIdsWithoutSrs().addAll(partitionLoadResult.getIdsWithoutSrs());
+      checkDuplicates(partitionLoadResult.getUnderlyingMarcRecords(), jobExecutionId, params, exportPayload);
     });
     return srsLoadResult;
+  }
+
+  private void checkDuplicates(List<JsonObject> underlyingMarcRecords, String jobExecutionId, OkapiConnectionParams params,
+                               ExportPayload exportPayload) {
+    final Set<String> instanceIds = new HashSet<>();
+    underlyingMarcRecords.stream()
+      .forEach(rec -> {
+        var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
+        if (instanceIds.contains(instanceId)) {
+          getErrorLogService().saveWithAffectedRecord(rec,
+            format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instanceId),
+            ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
+          exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
+          LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
+            exportPayload.getDuplicatedSrs());
+        } else {
+          instanceIds.add(instanceId);
+        }
+      });
   }
 
   protected void postExport(ExportPayload exportPayload, FileDefinition fileExportDefinition, OkapiConnectionParams params) {
@@ -120,6 +147,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public InventoryRecordConverterService getInventoryRecordService() {
     return inventoryRecordService;
+  }
+
+  public void handleFailedRecords(ExportPayload exportPayload, List<String> identifiers) {
+    var numFailedRecords = identifiers.size() - exportPayload.getExportedRecordsNumber();
+    LOGGER.info("Number of failed records found: {}", numFailedRecords);
+    exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
   }
 
   public enum EntityType {
