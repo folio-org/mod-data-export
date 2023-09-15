@@ -45,6 +45,13 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       getExportService().exportSrsRecord(marcToExport, exportPayload);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getIdsWithoutSrs())) {
+
+
+        // FOLIO
+
+
+
+        // MARC
         getMappingProfileService().getDefaultInstanceMappingProfile(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
@@ -74,7 +81,12 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
+
+
     LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+
+
+
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
     int numberOfNotFoundRecords = instances.getNotFoundEntitiesUUIDs().size();
     LOGGER.info("Number of instances not found in Inventory Storage: {}", numberOfNotFoundRecords);

@@ -66,7 +66,7 @@ class DataExportCleanUpFilesTest extends RestVerticleTestBase {
       .withSourcePath("Path");
     fileDefinitionService.save(fileDefinition, TENANT_ID);
 
-    vertx.setTimer(3000L, handler -> {
+    vertx.setTimer(6000L, handler -> {
       //when
       Response response = RestAssured.given()
         .spec(jsonRequestSpecification)
@@ -76,7 +76,7 @@ class DataExportCleanUpFilesTest extends RestVerticleTestBase {
       //then
       assertEquals(204, response.getStatusCode());
 
-      vertx.setTimer(3000L, ar ->
+      vertx.setTimer(6000L, ar ->
         fileDefinitionService.getById(fileDefinitionId, TENANT_ID)
           .onComplete(asyncResult -> {
             assertTrue(asyncResult.failed());

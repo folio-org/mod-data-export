@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +51,8 @@ public class InventoryClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
-  private static final String QUERY_PATTERN_WITH_SOURCE = "id==%s and source==";
+  public static final String QUERY_PATTERN_WITH_SOURCE = "id==%s and source==";
+  public static final String QUERY_PATTERN_WITHOUT_SOURCE = "id==%s and source<>";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
@@ -57,8 +60,9 @@ public class InventoryClient {
   private static final int HOLDINGS_LIMIT = 1000;
   private static final String PRECEDING_TITLES = "precedingTitles";
   private static final String SUCCEEDING_TITLES = "succeedingTitles";
-  private static final String INSTANCES = "instances";
+  public static final String INSTANCES = "instances";
   private static final String ID = "id";
+  public static final int CHUNK_SIZE = 15;
 
   @Autowired
   private ErrorLogService errorLogService;
@@ -75,15 +79,19 @@ public class InventoryClient {
     }
   }
 
-  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, String source) {
-    try {
-      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size(),
-        "(" + QUERY_PATTERN_WITH_SOURCE + source + ")"));
-    } catch (HttpClientException exception) {
-      LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
-      return Optional.empty();
+  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
+    var partitions = ListUtils.partition(ids, CHUNK_SIZE);
+    JsonObject result = new JsonObject().put(INSTANCES, new JsonArray());
+    for (List<String> partition : partitions) {
+      try {
+        result.getJsonArray(INSTANCES).addAll(ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(INSTANCES));
+      } catch (HttpClientException exception) {
+        LOGGER.error(exception.getMessage(), exception.getCause());
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+      }
     }
+    result.put("totalRecords", result.getJsonArray(INSTANCES).size());
+    return Optional.of(result);
   }
 
   public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
@@ -249,5 +257,4 @@ public class InventoryClient {
       instanceStorageInstance.put(PRECEDING_TITLES, ((JsonObject)instance).getJsonArray(PRECEDING_TITLES));
     });
   }
-
 }

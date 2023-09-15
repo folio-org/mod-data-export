@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -14,6 +15,9 @@ import io.vertx.ext.web.handler.BodyHandler;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -21,13 +25,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.TestUtil;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.folio.clients.InventoryClient.INSTANCES;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.RestVerticleTestBase.CONSORTIA_TENANT_ID;
+import static org.folio.rest.impl.RestVerticleTestBase.FILES_FOR_UPLOAD_DIRECTORY;
+import static org.folio.service.loader.RecordLoaderServiceImpl.CONSORTIUM_MARC_INSTANCE_SOURCE;
 import static org.folio.util.ExternalPathResolver.*;
 import static org.junit.Assert.fail;
 
@@ -77,12 +90,15 @@ public class MockServer {
   private final int port;
   private final Vertx vertx;
 
+  private static List<String> QUERIES;
+
   public MockServer(int port) {
     this.port = port;
     this.vertx = Vertx.vertx();
   }
 
-  public void start() throws InterruptedException, ExecutionException, TimeoutException {
+  public void start() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    QUERIES = Files.readAllLines(TestUtil.getFileFromResources(FILES_FOR_UPLOAD_DIRECTORY + "mock_queries.txt").toPath());
     // Setup Mock Server...
     logger.info("Starting mock server on port: " + port);
     HttpServer server = vertx.createHttpServer();
@@ -188,7 +204,36 @@ public class MockServer {
     logger.info("handleGetInstanceRecord got: " + ctx.request()
       .path());
     String query = ctx.request().getParam("query");
-    if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+    if (isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+      serverResponse(ctx, 500, APPLICATION_JSON, null);
+    }
+
+    if (isNotEmpty(query) && QUERIES.contains(query)) {
+
+      Pattern pattern  = Pattern.compile("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
+      Matcher matcher = pattern.matcher(query);
+      var ids = matcher.results().toList().stream().map(MatchResult::group).toList();
+
+      JsonObject jsonObject = new JsonObject().put(INSTANCES, new JsonArray()).put("totalRecords", ids.size());
+      for (int i = 0; i < ids.size(); i++) {
+        if ("(id==7fbd5d84-62d1-44c6-9c45-6cb173998bbd)".equals(query)) {
+          try {
+            getMockResponseFromPathWith200Status(INSTANCE_RECORDS_MOCK_DATA_PATH, INSTANCE, ctx);
+            return;
+          } catch (IOException e) {
+            mockResponseWith500Status(ctx);
+          }
+          return;
+        } else {
+          jsonObject.getJsonArray(INSTANCES).add(i, new JsonObject().put("id", ids.get(i)).put("source", "MARC"));
+        }
+      }
+      jsonObject.put("totalRecords", jsonObject.getJsonArray(INSTANCES).size());
+      addServerRqRsData(HttpMethod.GET, INSTANCE, jsonObject);
+      serverResponse(ctx, 200, APPLICATION_JSON, jsonObject.encodePrettily());
+      return;
+    }
+    if (isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
       serverResponse(ctx, 500, APPLICATION_JSON, null);
     }
     try {
@@ -202,7 +247,7 @@ public class MockServer {
     logger.info("handleGetInventoryInstanceRecord got: " + ctx.request()
       .path());
     String query = ctx.request().getParam("query");
-    if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+    if (isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
       serverResponse(ctx, 500, APPLICATION_JSON, null);
     }
     try {
@@ -489,7 +534,7 @@ public class MockServer {
         mockResponseWith500Status(ctx);
       }
     } else {
-      serverResponse(ctx, 200, APPLICATION_JSON, StringUtils.EMPTY);
+      serverResponse(ctx, 200, APPLICATION_JSON, new JsonObject().put("userTenants", new JsonArray()).put("totalRecords", 0).encodePrettily());
     }
   }
 

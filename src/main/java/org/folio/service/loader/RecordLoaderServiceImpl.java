@@ -2,9 +2,10 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.folio.clients.ConsortiaClient;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
@@ -16,14 +17,17 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.ListUtils.union;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
 
 /**
  * Implementation of #RecordLoaderService that uses blocking http client.
@@ -45,13 +49,16 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     AbstractExportStrategy.EntityType.HOLDING, "holdingsId",
     AbstractExportStrategy.EntityType.AUTHORITY, "authorityId"
   );
+  public static final String CONSORTIUM_MARC = "CONSORTIUM-MARC";
 
   private final SourceRecordStorageClient srsClient;
   private final InventoryClient inventoryClient;
+  private final ConsortiaClient consortiaClient;
 
-  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient) {
+  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient, @Autowired ConsortiaClient consortiaClient) {
     this.srsClient = srsClient;
     this.inventoryClient = inventoryClient;
+    this.consortiaClient = consortiaClient;
   }
 
   @Override
@@ -73,11 +80,34 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   @Override
   public LoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
-    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
+
+    Optional<JsonObject> instances = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
+    Optional<JsonObject> centralRecords;
+
+    var centralTenantId = consortiaClient.getCentralTenantId(params);
+
+    if (StringUtils.isNotEmpty(centralTenantId)) {
+
+      var headers = new HashMap<String, String>();
+      headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
+      headers.put(OKAPI_HEADER_TENANT, centralTenantId);
+      headers.put(OKAPI_HEADER_TOKEN, params.getToken());
+      centralRecords = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, new OkapiConnectionParams(headers), partitionSize);
+
+
+      if (centralRecords.isPresent()) {
+        if (instances.isEmpty()) {
+          instances = Optional.of(new JsonObject().put(INSTANCES, new JsonArray()));
+        }
+        instances.get().getJsonArray(INSTANCES).addAll(centralRecords.get().getJsonArray(INSTANCES));
+        instances.get().put(TOTAL_RECORDS_FIELD, instances.get().getJsonArray(INSTANCES).size());
+      }
+    }
+
     LoadResult loadResult = new LoadResult();
     loadResult.setEntityType(AbstractExportStrategy.EntityType.INSTANCE);
-    if (optionalRecords.isPresent()) {
-      populateLoadResultFromInventory(instanceIds, optionalRecords.get(), loadResult);
+    if (instances.isPresent()) {
+      populateLoadResultFromInventory(instanceIds, instances.get(), loadResult);
     } else {
       loadResult.setNotFoundEntitiesUUIDs(instanceIds);
     }
@@ -99,40 +129,43 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
-    var centralTenantUUIDs = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
+    var instances
+      = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams)
       .map(entries -> entries.getJsonArray(INSTANCES).stream()
         .filter(JsonObject.class::isInstance)
         .map(JsonObject.class::cast)
-        .map(json -> json.getString(ID_FIELD))
         .toList())
-        .orElse(Collections.emptyList());
+      .orElse(Collections.emptyList());
 
-    Optional<JsonObject> localTenantRecords = Optional.empty();
+    var localInstanceLocalSrsUUIDs = instances.stream().filter(instance -> !CONSORTIUM_MARC_INSTANCE_SOURCE.equals(instance.getString("source"))).map(json -> json.getString(ID_FIELD)).toList();
 
-    var localTenantUUIDs = uuids.stream()
-      .filter(uuid -> !centralTenantUUIDs.contains(uuid))
-      .toList();
+    Optional<JsonObject> localSrsRecords = !localInstanceLocalSrsUUIDs.isEmpty()
+      ? srsClient.getRecordsByIdsFromLocalTenant(localInstanceLocalSrsUUIDs, idType, jobExecutionId, okapiConnectionParams)
+      : Optional.empty();
 
-    if (!localTenantUUIDs.isEmpty()) {
-      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, idType, jobExecutionId, okapiConnectionParams);
-    }
+    var localInstanceCentralSrsUUIDs = instances.stream().filter(instance -> CONSORTIUM_MARC_INSTANCE_SOURCE.equals(instance.getString("source"))).map(json -> json.getString(ID_FIELD)).toList();
 
-    if (!centralTenantUUIDs.isEmpty()) {
-      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, idType, jobExecutionId, okapiConnectionParams);
-      if (centralTenantRecords.isPresent()) {
-        if (localTenantRecords.isEmpty()) {
-          localTenantRecords = centralTenantRecords;
+    var centralInstanceCentralSrsUUIDs = uuids.stream().filter(uuid -> !localInstanceCentralSrsUUIDs.contains(uuid) && !localInstanceLocalSrsUUIDs.contains(uuid)).toList();
+    var centralSrsUUIDs =  union(localInstanceCentralSrsUUIDs, centralInstanceCentralSrsUUIDs);
+
+    if (!centralSrsUUIDs.isEmpty()) {
+      Optional<JsonObject> centralSrsRecords = srsClient.getRecordsByIdsFromCentralTenant(centralSrsUUIDs, idType, jobExecutionId, okapiConnectionParams);
+      if (centralSrsRecords.isPresent()) {
+        if (localSrsRecords.isEmpty()) {
+          localSrsRecords = centralSrsRecords;
         } else {
-          var centralTenantRecordsArray = centralTenantRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
-          var records = localTenantRecords.get();
+          var centralTenantRecordsArray = centralSrsRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
+          var records = localSrsRecords.get();
           records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(centralTenantRecordsArray);
           var totalSize = records.getInteger(TOTAL_RECORDS_FIELD);
           records.put(TOTAL_RECORDS_FIELD, totalSize);
         }
       }
     }
-    return localTenantRecords;
+    return localSrsRecords;
   }
+
+
 
   private void populateLoadResultFromInventory(Collection<String> entityIds, JsonObject entities, LoadResult loadResult) {
     List<JsonObject> inventoryRecords = new ArrayList<>();
@@ -140,10 +173,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     String jsonArrayKey = loadResult.getEntityType().equals(AbstractExportStrategy.EntityType.INSTANCE) ? INSTANCES : HOLDINGS_RECORDS;
     for (String entityId : entityIds) {
       for (Object entity : entities.getJsonArray(jsonArrayKey)) {
-        JsonObject record = (JsonObject) entity;
-        if (record.getValue(ID_FIELD).equals(entityId)) {
+        JsonObject e = (JsonObject) entity;
+        if (e.getValue(ID_FIELD).equals(entityId)) {
           entitiesIdentifiersSet.remove(entityId);
-          inventoryRecords.add(record);
+          inventoryRecords.add(e);
         }
       }
     }
@@ -155,10 +188,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     JsonArray records = underlyingRecords.getJsonArray(SOURCE_RECORDS_FIELD);
     List<JsonObject> marcRecords = new ArrayList<>();
     Set<String> singleRecordIdentifiersSet = new HashSet<>(uuids);
-    for (Object o : records) {
-      JsonObject record = (JsonObject) o;
-      marcRecords.add(record);
-      JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
+    for (Object object : records) {
+      JsonObject e = (JsonObject) object;
+      marcRecords.add(e);
+      JsonObject externalIdsHolder = e.getJsonObject("externalIdsHolder");
       if (externalIdsHolder != null) {
         String key = entityIdMap.get(entityType);
         String id = externalIdsHolder.getString(key);
