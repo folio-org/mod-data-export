@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -74,19 +76,27 @@ class InstanceExportStrategyUnitTest {
   private ErrorLogService errorLogService;
   @Mock
   private MappingProfileService mappingProfileService;
+  @Mock
+  private ConsortiaClient consortiaClient;
   @InjectMocks
-  private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl(new ConsortiaClient()));
+  private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl());
 
   @Captor
   private ArgumentCaptor<MappingProfile> mappingProfileCaptor;
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
   @Order(1)
-  void exportBlocking_shouldPassExportFor_1000_UnderlyingSrsRecords() {
+  void exportBlocking_shouldPassExportFor_1000_UnderlyingSrsRecords(boolean isCentralTenant) {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
     LoadResult loadResult = Mockito.mock(LoadResult.class);
+    if (isCentralTenant) {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("central");
+    } else {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("");
+    }
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(loadResult.getNotFoundEntitiesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
@@ -107,7 +117,7 @@ class InstanceExportStrategyUnitTest {
     instanceExportManager.export(exportPayload, Promise.promise());
     // then
     Mockito.verify(recordLoaderService, Mockito.times(20)).loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class));
-    Mockito.verify(recordLoaderService, Mockito.times(1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(isCentralTenant ? 2 : 1)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(exportService, Mockito.times(1)).exportSrsRecord(any(Pair.class), any(ExportPayload.class));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
@@ -145,12 +155,18 @@ class InstanceExportStrategyUnitTest {
     Mockito.verify(errorLogService).saveGeneralError(eq(ErrorCode.DEFAULT_MAPPING_PROFILE_NOT_FOUND.getCode()), anyString(), anyString());
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
   @Order(3)
-  void exportBlocking_shouldPassExportFor_generatedRecordsOnTheFlyOnly() {
+  void exportBlocking_shouldPassExportFor_generatedRecordsOnTheFlyOnly(boolean isCentralTenant) {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     LoadResult loadResult = Mockito.mock(LoadResult.class);
+    if (isCentralTenant) {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("central");
+    } else {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("");
+    }
     Mockito.when(loadResult.getNotFoundEntitiesUUIDs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadInventoryInstancesBlocking(anyCollection(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT))).thenReturn(loadResult);
     Mockito.when(inventoryRecordService.transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class))).thenReturn(
@@ -166,18 +182,24 @@ class InstanceExportStrategyUnitTest {
     ExportPayload exportPayload = new ExportPayload(identifiers, isLast, fileExportDefinition, okapiConnectionParams, "jobExecutionId", mappingProfile);
     instanceExportManager.export(exportPayload, Promise.promise());
     // then
-    Mockito.verify(recordLoaderService, Mockito.times(20)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
+    Mockito.verify(recordLoaderService, Mockito.times(isCentralTenant ? 40 : 20)).loadInventoryInstancesBlocking(anyList(), anyString(), any(OkapiConnectionParams.class), eq(LIMIT));
     Mockito.verify(inventoryRecordService, Mockito.times(1)).transformInstanceRecords(anyList(), anyString(), any(MappingProfile.class), any(OkapiConnectionParams.class));
     Mockito.verify(exportService, Mockito.times(1)).postExport(any(FileDefinition.class), anyString());
     Mockito.verify(errorLogService).populateUUIDsNotFoundErrorLog(anyString(), anyList(), anyString());
   }
 
-  @Test
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
   @Order(4)
-  void exportBlocking_shouldGenerateRecordOnTheFlyByDefaultRules_andHoldingsAndItemTransformations_whenUnderlyingSrsRecordsMissing() {
+  void exportBlocking_shouldGenerateRecordOnTheFlyByDefaultRules_andHoldingsAndItemTransformations_whenUnderlyingSrsRecordsMissing(boolean isCentralTenant) {
     // given
     List<String> identifiers = Stream.generate(String::new).limit(1000).collect(Collectors.toList());
     SrsLoadResult marcLoadResult = Mockito.mock(SrsLoadResult.class);
+    if (isCentralTenant) {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("central");
+    } else {
+      Mockito.when(consortiaClient.getCentralTenantId(any())).thenReturn("");
+    }
     Mockito.when(marcLoadResult.getIdsWithoutSrs()).thenReturn(Collections.singletonList(UUID.randomUUID().toString()));
     Mockito.when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), any(OkapiConnectionParams.class))).thenReturn(marcLoadResult);
     LoadResult loadResult = Mockito.mock(LoadResult.class);

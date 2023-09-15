@@ -38,11 +38,12 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  private final ConsortiaClient consortiaClient;
+  @Autowired
+  private ConsortiaClient consortiaClient;
 
-  public InstanceExportStrategyImpl(@Autowired ConsortiaClient consortiaClient) {
-    this.consortiaClient = consortiaClient;
-  }
+//  public InstanceExportStrategyImpl(@Autowired ConsortiaClient consortiaClient) {
+//    this.consortiaClient = consortiaClient;
+//  }
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
@@ -105,6 +106,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
       var foundEntitiesUUIDs = instances.getEntities().stream().map(e -> e.getString("id")).toList();
 
+      instances.getNotFoundEntitiesUUIDs().clear();
       instances.getNotFoundEntitiesUUIDs().addAll(identifiers.stream().filter(id -> !foundEntitiesUUIDs.contains(id)).toList());
     }
 
