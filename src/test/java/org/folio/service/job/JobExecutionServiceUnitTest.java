@@ -67,6 +67,8 @@ class JobExecutionServiceUnitTest {
   private static final String FIRST_NAME_VALUE = "firstName";
   private static final String LAST_NAME_KEY = "lastName";
   private static final String LAST_NAME_VALUE = "lastName";
+  private static final String ID_KEY = "id";
+  private static final String ID_VALUE = UUID.randomUUID().toString();
   private static final int TOTAL_COUNT = 2;
 
   @Spy
@@ -256,7 +258,8 @@ class JobExecutionServiceUnitTest {
     JsonObject user = new JsonObject()
       .put(PERSONAL_KEY, new JsonObject()
         .put(FIRST_NAME_KEY, FIRST_NAME_VALUE)
-        .put(LAST_NAME_KEY, LAST_NAME_VALUE));
+        .put(LAST_NAME_KEY, LAST_NAME_VALUE))
+        .put(ID_KEY, ID_VALUE);
     JobProfile jobProfile = new JobProfile()
       .withId(JOB_PROFILE_ID)
       .withName(JOB_PROFILE_NAME);
@@ -278,6 +281,8 @@ class JobExecutionServiceUnitTest {
           .getFirstName());
         assertEquals(LAST_NAME_VALUE, updatedJobExecution.getRunBy()
           .getLastName());
+        assertEquals(ID_VALUE, updatedJobExecution.getRunBy()
+            .getUserId());
         assertEquals(TOTAL_COUNT, updatedJobExecution.getProgress()
           .getTotal().intValue());
         assertEquals(JOB_PROFILE_NAME, jobExecution.getJobProfileName());
