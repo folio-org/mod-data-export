@@ -27,12 +27,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.apache.commons.collections4.CollectionUtils.union;
-import static org.apache.logging.log4j.util.Strings.EMPTY;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.folio.TestUtil.readFileContentFromResources;
-import static org.folio.clients.InventoryClient.QUERY_PATTERN_WITHOUT_SOURCE;
-import static org.folio.clients.InventoryClient.QUERY_PATTERN_WITH_SOURCE;
-import static org.folio.service.loader.RecordLoaderServiceImpl.CONSORTIUM_MARC_INSTANCE_SOURCE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
@@ -62,8 +58,7 @@ class RecordLoaderServiceUnitTest{
   SourceRecordStorageClient srsClient;
   @Mock
   InventoryClient inventoryClient;
-  @Mock
-  ConsortiaClient consortiaClient;
+
   @Spy
   @InjectMocks
   RecordLoaderServiceImpl recordLoaderService;
@@ -211,7 +206,6 @@ class RecordLoaderServiceUnitTest{
   void loadInstanceRecords_shouldReturnEmptyList_whenOptionalResponseIsNotPresent() {
     // given
     when(inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(anyList(), anyString(), eq(okapiConnectionParams), eq(LIMIT))).thenReturn(Optional.empty());
-    when(consortiaClient.getCentralTenantId(any())).thenReturn(EMPTY);
     List<String> uuids = Collections.singletonList(UUID.randomUUID().toString());
     // when
     LoadResult inventoryResponse = recordLoaderService.loadInventoryInstancesBlocking(uuids, JOB_EXECUTION_ID, okapiConnectionParams, LIMIT);

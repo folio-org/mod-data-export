@@ -2,11 +2,15 @@ package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
+import org.folio.clients.ConsortiaClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -18,17 +22,27 @@ import org.folio.service.manager.export.ExportPayload;
 import org.folio.service.profiles.mappingprofile.MappingProfileServiceImpl;
 import org.folio.util.ErrorCode;
 import org.folio.util.OkapiConnectionParams;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
+import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
 
 @Service
 public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+
+  private final ConsortiaClient consortiaClient;
+
+  public InstanceExportStrategyImpl(@Autowired ConsortiaClient consortiaClient) {
+    this.consortiaClient = consortiaClient;
+  }
 
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
@@ -45,13 +59,6 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       getExportService().exportSrsRecord(marcToExport, exportPayload);
       LOGGER.info("Number of instances not found in SRS: {}", srsLoadResult.getIdsWithoutSrs().size());
       if (isNotEmpty(srsLoadResult.getIdsWithoutSrs())) {
-
-
-        // FOLIO
-
-
-
-        // MARC
         getMappingProfileService().getDefaultInstanceMappingProfile(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
@@ -82,10 +89,24 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
   private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
 
-
     LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
 
+    var centralTenantId = consortiaClient.getCentralTenantId(params);
+    if (StringUtils.isNotEmpty(centralTenantId)) {
 
+      var headers = new HashMap<String, String>();
+      headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
+      headers.put(OKAPI_HEADER_TENANT, centralTenantId);
+      headers.put(OKAPI_HEADER_TOKEN, params.getToken());
+
+      LoadResult instancesFromCentralTenant = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
+
+      instances.getEntities().addAll(instancesFromCentralTenant.getEntities());
+
+      var foundEntitiesUUIDs = instances.getEntities().stream().map(e -> e.getString("id")).toList();
+
+      instances.getNotFoundEntitiesUUIDs().addAll(identifiers.stream().filter(id -> !foundEntitiesUUIDs.contains(id)).toList());
+    }
 
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
     int numberOfNotFoundRecords = instances.getNotFoundEntitiesUUIDs().size();

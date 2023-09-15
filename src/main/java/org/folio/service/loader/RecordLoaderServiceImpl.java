@@ -2,10 +2,8 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.folio.clients.ConsortiaClient;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
@@ -17,7 +15,6 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.collections4.ListUtils.union;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
 
 /**
  * Implementation of #RecordLoaderService that uses blocking http client.
@@ -49,16 +43,13 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     AbstractExportStrategy.EntityType.HOLDING, "holdingsId",
     AbstractExportStrategy.EntityType.AUTHORITY, "authorityId"
   );
-  public static final String CONSORTIUM_MARC = "CONSORTIUM-MARC";
 
   private final SourceRecordStorageClient srsClient;
   private final InventoryClient inventoryClient;
-  private final ConsortiaClient consortiaClient;
 
-  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient, @Autowired ConsortiaClient consortiaClient) {
+  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient) {
     this.srsClient = srsClient;
     this.inventoryClient = inventoryClient;
-    this.consortiaClient = consortiaClient;
   }
 
   @Override
@@ -80,34 +71,11 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   @Override
   public LoadResult loadInventoryInstancesBlocking(Collection<String> instanceIds, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
-
-    Optional<JsonObject> instances = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
-    Optional<JsonObject> centralRecords;
-
-    var centralTenantId = consortiaClient.getCentralTenantId(params);
-
-    if (StringUtils.isNotEmpty(centralTenantId)) {
-
-      var headers = new HashMap<String, String>();
-      headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
-      headers.put(OKAPI_HEADER_TENANT, centralTenantId);
-      headers.put(OKAPI_HEADER_TOKEN, params.getToken());
-      centralRecords = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, new OkapiConnectionParams(headers), partitionSize);
-
-
-      if (centralRecords.isPresent()) {
-        if (instances.isEmpty()) {
-          instances = Optional.of(new JsonObject().put(INSTANCES, new JsonArray()));
-        }
-        instances.get().getJsonArray(INSTANCES).addAll(centralRecords.get().getJsonArray(INSTANCES));
-        instances.get().put(TOTAL_RECORDS_FIELD, instances.get().getJsonArray(INSTANCES).size());
-      }
-    }
-
+    Optional<JsonObject> optionalRecords = inventoryClient.getInstancesWithPrecedingSucceedingTitlesByIds(new ArrayList<>(instanceIds), jobExecutionId, params, partitionSize);
     LoadResult loadResult = new LoadResult();
     loadResult.setEntityType(AbstractExportStrategy.EntityType.INSTANCE);
-    if (instances.isPresent()) {
-      populateLoadResultFromInventory(instanceIds, instances.get(), loadResult);
+    if (optionalRecords.isPresent()) {
+      populateLoadResultFromInventory(instanceIds, optionalRecords.get(), loadResult);
     } else {
       loadResult.setNotFoundEntitiesUUIDs(instanceIds);
     }

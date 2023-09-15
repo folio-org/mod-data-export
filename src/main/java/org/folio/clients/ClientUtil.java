@@ -94,13 +94,6 @@ public final class ClientUtil {
     }
   }
 
-  @NotNull
-  private static URI prepareFullUri(List<String> ids, OkapiConnectionParams params, String endpoint) {
-    String query = String.join(" or ", ids);
-    String uri = format(endpoint, params.getOkapiUrl(), URLEncoder.encode(query, StandardCharsets.UTF_8));
-    return URI.create(uri);
-  }
-
   public static JsonObject getResponseEntity(CloseableHttpResponse response) throws IOException {
     HttpEntity entity = response.getEntity();
     if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK && entity != null) {

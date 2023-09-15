@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.clients.ConsortiaClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -74,7 +75,7 @@ class InstanceExportStrategyUnitTest {
   @Mock
   private MappingProfileService mappingProfileService;
   @InjectMocks
-  private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl());
+  private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl(new ConsortiaClient()));
 
   @Captor
   private ArgumentCaptor<MappingProfile> mappingProfileCaptor;
