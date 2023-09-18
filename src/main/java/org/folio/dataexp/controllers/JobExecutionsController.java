@@ -24,11 +24,11 @@ public class JobExecutionsController implements JobExecutionsApi {
   @Override
   public ResponseEntity<JobExecutionCollection> getJobExecutionsByQuery(String query, Integer offset, Integer limit) {
     if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
-    var jobExecutions  = jobExecutionEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit))
-      .map(JobExecutionEntity::getJobExecution).stream().toList();
+    var jobExecutionsEntityPage  = jobExecutionEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
+    var jobExecutions = jobExecutionsEntityPage.toList().stream().map(JobExecutionEntity::getJobExecution).toList();
     var jobExecutionCollection = new JobExecutionCollection();
     jobExecutionCollection.setJobExecutions(jobExecutions);
-    jobExecutionCollection.setTotalRecords(jobExecutions.size());
+    jobExecutionCollection.setTotalRecords((int) jobExecutionsEntityPage.getTotalElements());
     return new ResponseEntity<>(jobExecutionCollection, HttpStatus.OK);
   }
 }

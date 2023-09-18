@@ -54,11 +54,11 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<JobProfileCollection> getJobProfiles(String query, Integer offset, Integer limit) {
     if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
-    var jobProfiles  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit))
-      .map(JobProfileEntity::getJobProfile).stream().toList();
+    var jobProfilesPage  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
+    var jobProfiles =  jobProfilesPage.toList().stream().map(JobProfileEntity::getJobProfile).toList();
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
-    jobProfileCollection.setTotalRecords(jobProfiles.size());
+    jobProfileCollection.setTotalRecords((int) jobProfilesPage.getTotalElements());
     return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
   }
 
