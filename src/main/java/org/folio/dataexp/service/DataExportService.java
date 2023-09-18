@@ -66,10 +66,12 @@ public class DataExportService {
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
 
-    var user = userClient.getUserById(folioExecutionContext.getUserId().toString());
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
     var runBy = new JobExecutionRunBy();
     runBy.firstName(user.getPersonal().getFirstName());
     runBy.lastName(user.getPersonal().getLastName());
+    runBy.setUserId(userId);
     jobExecution.setRunBy(runBy);
 
     long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
