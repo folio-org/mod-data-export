@@ -55,7 +55,7 @@ public class MappingProfileController implements MappingProfilesApi {
   public ResponseEntity<MappingProfileCollection> getMappingProfiles(String query, Integer offset, Integer limit) {
     if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
     var mappingProfilesPage  = mappingProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
-    var mappingProfiles = mappingProfilesPage.toList().stream().map(MappingProfileEntity::getMappingProfile).toList();
+    var mappingProfiles = mappingProfilesPage.stream().map(MappingProfileEntity::getMappingProfile).toList();
     var mappingProfileCollection = new MappingProfileCollection();
     mappingProfileCollection.setMappingProfiles(mappingProfiles);
     mappingProfileCollection.setTotalRecords((int) mappingProfilesPage.getTotalElements());
