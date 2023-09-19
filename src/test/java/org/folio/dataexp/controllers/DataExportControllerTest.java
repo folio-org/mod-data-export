@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class DataExportControllerTest extends BaseDataExportInitializer {
+class DataExportControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private DataExportService dataExportService;

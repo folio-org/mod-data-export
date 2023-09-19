@@ -17,7 +17,7 @@ import java.util.UUID;
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class InputFileProcessorTest extends BaseDataExportInitializer {
+class InputFileProcessorTest extends BaseDataExportInitializer {
 
   private static final String UPLOADED_FILE_PATH_CSV = "src/test/resources/upload.csv";
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";

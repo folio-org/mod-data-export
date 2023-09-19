@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class JobProfileControllerTest extends BaseDataExportInitializer {
+class JobProfileControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private JobProfileEntityRepository jobProfileEntityRepository;

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DataExportTenantServiceTest extends BaseDataExportInitializer {
+class DataExportTenantServiceTest extends BaseDataExportInitializer {
 
   @Autowired
   private DataExportTenantService dataExportTenantService;

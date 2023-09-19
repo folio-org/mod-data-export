@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-public class ExportExecutorTest extends BaseDataExportInitializer {
+class ExportExecutorTest extends BaseDataExportInitializer {
   @MockBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @MockBean

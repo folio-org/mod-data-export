@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class FolioS3ClientFactoryTest extends BaseDataExportInitializer {
+class FolioS3ClientFactoryTest extends BaseDataExportInitializer {
 
   @Autowired
   private FolioS3ClientFactory folioS3ClientFactory;

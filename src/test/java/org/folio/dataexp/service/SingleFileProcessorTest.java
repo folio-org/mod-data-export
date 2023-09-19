@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class SingleFileProcessorTest extends BaseDataExportInitializer {
+class SingleFileProcessorTest extends BaseDataExportInitializer {
 
   @MockBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;

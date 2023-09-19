@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileUploadServiceTest {
+class FileUploadServiceTest {
 
   private static final String UPLOADED_FILE_PATH = "src/test/resources/upload.csv";
 

@@ -10,7 +10,7 @@ import java.util.UUID;
 import static org.folio.dataexp.service.DataExportRequestValidator.DEFAULT_AUTHORITY_MAPPING_PROFILE_ID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DataExportRequestValidatorTest {
+class DataExportRequestValidatorTest {
 
   @Test
   void validateHoldingExportRequestTest() {

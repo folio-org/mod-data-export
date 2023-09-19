@@ -18,7 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class FileDefinitionsControllerTest extends BaseDataExportInitializer {
+class FileDefinitionsControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;

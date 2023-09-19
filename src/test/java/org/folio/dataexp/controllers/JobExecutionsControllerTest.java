@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class JobExecutionsControllerTest extends BaseDataExportInitializer {
+class JobExecutionsControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;

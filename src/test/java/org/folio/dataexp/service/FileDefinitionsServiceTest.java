@@ -29,7 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class FileDefinitionsServiceTest {
+class FileDefinitionsServiceTest {
 
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;

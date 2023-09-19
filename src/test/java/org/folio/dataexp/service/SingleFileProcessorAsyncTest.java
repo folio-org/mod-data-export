@@ -15,7 +15,7 @@ import java.util.UUID;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class SingleFileProcessorAsyncTest {
+class SingleFileProcessorAsyncTest {
 
   @Mock
   private ExportExecutor exportExecutor;
