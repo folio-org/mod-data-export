@@ -41,10 +41,6 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
   @Autowired
   private ConsortiaClient consortiaClient;
 
-//  public InstanceExportStrategyImpl(@Autowired ConsortiaClient consortiaClient) {
-//    this.consortiaClient = consortiaClient;
-//  }
-
   @Override
   public void export(ExportPayload exportPayload, Promise<Object> blockingPromise) {
     List<String> identifiers = exportPayload.getIdentifiers();
@@ -100,7 +96,11 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       headers.put(OKAPI_HEADER_TENANT, centralTenantId);
       headers.put(OKAPI_HEADER_TOKEN, params.getToken());
 
-      LoadResult instancesFromCentralTenant = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
+      var idsFromLocalTenant = instances.getEntities().stream().map(json -> json.getString("id")).toList();
+
+      var idsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
+
+      LoadResult instancesFromCentralTenant = loadInventoryInstancesInPartitions(idsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
 
       instances.getEntities().addAll(instancesFromCentralTenant.getEntities());
 
