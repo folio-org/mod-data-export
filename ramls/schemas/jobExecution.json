@@ -86,6 +86,10 @@
         "lastName": {
           "description": "Last name",
           "type": "string"
+        },
+        "userId": {
+          "description": "User ID",
+          "$ref": "../../ramls/raml-util/schemas/uuid.schema"
         }
       }
     },
