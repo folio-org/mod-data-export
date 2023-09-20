@@ -98,13 +98,11 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
       var idsFromLocalTenant = instances.getEntities().stream().map(json -> json.getString("id")).toList();
       var idsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
+
       LoadResult instancesFromCentralTenant = loadInventoryInstancesInPartitions(idsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
       instances.getEntities().addAll(instancesFromCentralTenant.getEntities());
+      instances.getNotFoundEntitiesUUIDs().addAll(instancesFromCentralTenant.getNotFoundEntitiesUUIDs());
     }
-
-    var foundEntitiesUUIDs = instances.getEntities().stream().map(e -> e.getString("id")).toList();
-    instances.getNotFoundEntitiesUUIDs().clear();
-    instances.getNotFoundEntitiesUUIDs().addAll(identifiers.stream().filter(id -> !foundEntitiesUUIDs.contains(id)).toList());
 
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
     int numberOfNotFoundRecords = instances.getNotFoundEntitiesUUIDs().size();
