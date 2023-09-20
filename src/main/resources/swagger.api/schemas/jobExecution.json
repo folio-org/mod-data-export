@@ -88,6 +88,10 @@
         "lastName": {
           "description": "Last name",
           "type": "string"
+        },
+        "userId": {
+          "description": "User id",
+          "type": "string"
         }
       }
     },

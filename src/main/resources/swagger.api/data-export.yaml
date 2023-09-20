@@ -9,7 +9,7 @@ paths:
   /export:
     post:
       description: Starts the export process
-      operationId: postDataExportExport
+      operationId: postDataExport
       requestBody:
         required: true
         content:
@@ -340,6 +340,14 @@ paths:
     put:
       description: Update specific mapping profile
       operationId: putMappingProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/mappingProfile'
+            example:
+              $ref: 'examples/profiles/mappingProfile.json'
       parameters:
         - name: mappingProfileId
           in: path
@@ -523,6 +531,14 @@ paths:
     put:
       description: Update specific job profile
       operationId: putJobProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/jobProfile'
+            example:
+              $ref: 'examples/profiles/jobProfile.json'
       parameters:
         - name: jobProfileId
           in: path

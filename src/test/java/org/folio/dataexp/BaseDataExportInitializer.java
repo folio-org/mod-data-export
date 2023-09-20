@@ -10,7 +10,8 @@ import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesRepository;
+import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -58,12 +59,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = BaseTest.Initializer.class)
+@ContextConfiguration(initializers = BaseDataExportInitializer.Initializer.class)
 @Testcontainers
 @AutoConfigureMockMvc
 @Log4j2
 @DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_CLASS)
-public class BaseTest {
+public class BaseDataExportInitializer {
 
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "diku";
@@ -110,7 +111,7 @@ public class BaseTest {
   }
 
   private static void runSqlScript(String path, JdbcTemplate jdbcTemplate) throws IOException {
-    try (var is = BaseTest.class.getResourceAsStream(path)) {
+    try (var is = BaseDataExportInitializer.class.getResourceAsStream(path)) {
       var sql = Files.read(is, StandardCharsets.UTF_8);
       jdbcTemplate.execute(sql);
     }
@@ -132,7 +133,9 @@ public class BaseTest {
   @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
   @Autowired
-  private JobExecutionExportFilesRepository jobExecutionExportFilesRepository;
+  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  @Autowired
+  private FolioS3ClientFactory folioS3ClientFactory;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -173,13 +176,15 @@ public class BaseTest {
         .collect(Collectors.toMap(Map.Entry::getKey, e -> (Collection<String>) List.of(String.valueOf(e.getValue()))));
 
     folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, localHeaders);
+    var s3Client = folioS3ClientFactory.getFolioS3Client();
+    s3Client.createBucketIfNotExists();
   }
 
   @AfterEach
   void eachTearDown() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       exportIdEntityRepository.deleteAll();
-      jobExecutionExportFilesRepository.deleteAll();
+      jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
     }
   }

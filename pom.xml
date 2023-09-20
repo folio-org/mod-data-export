@@ -28,7 +28,9 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <sonar.exclusions>
       **/src/main/java/org/folio/dataexp/exception/**,
-      **/src/main/java/org/folio/dataexp/domain/entity/**
+      **/src/main/java/org/folio/dataexp/domain/entity/**,
+      **/src/main/java/org/folio/dataexp/domain/dto/**,
+      **/src/**/test/**/*
     </sonar.exclusions>
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>

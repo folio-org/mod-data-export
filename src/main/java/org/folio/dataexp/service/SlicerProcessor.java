@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.exception.export.DataExportException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 @Log4j2
 public class SlicerProcessor {
+
   private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?, ?)";
   private static final String SLICED_FILE_LOCATION_PATH = "mod-data-export/download/%s/";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
@@ -23,11 +25,11 @@ public class SlicerProcessor {
 
   private final JdbcTemplate jdbcTemplate;
 
-  public void sliceInstancesIds(FileDefinition fileDefinition) throws SQLException {
+  public void sliceInstancesIds(FileDefinition fileDefinition) {
     sliceInstancesIds(fileDefinition, DEFAULT_SLICE_SIZE);
   }
 
-  public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize) throws SQLException {
+  public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize) {
     var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName());
     var pathLocation = String.format(SLICED_FILE_LOCATION_PATH, fileDefinition.getJobExecutionId()) + fileName;
     try (Connection connection = jdbcTemplate.getDataSource().getConnection();
@@ -39,7 +41,7 @@ public class SlicerProcessor {
     } catch (SQLException sqlException) {
       log.error("Exception for slice_instances_ids procedure call for fileDefinitionId {} with message {}",
         fileDefinition.getId(), sqlException.getMessage());
-      throw sqlException;
+      throw new DataExportException(sqlException.getMessage());
     }
   }
 

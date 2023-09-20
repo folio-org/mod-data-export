@@ -1,3 +1,5 @@
+CREATE SEQUENCE IF NOT EXISTS job_execution_hrId MINVALUE 1 NO MAXVALUE CACHE 1 NO CYCLE;
+
 CREATE TABLE IF NOT EXISTS file_definitions (
     id uuid PRIMARY KEY,
     jsonb jsonb,
@@ -9,7 +11,8 @@ CREATE TABLE IF NOT EXISTS mapping_profiles (
     id uuid PRIMARY KEY,
     jsonb jsonb,
     creation_date TIMESTAMP,
-    created_by TEXT
+    created_by TEXT,
+    name TEXT
 );
 
 CREATE TABLE IF NOT EXISTS job_profiles (
@@ -18,14 +21,20 @@ CREATE TABLE IF NOT EXISTS job_profiles (
     creation_date TIMESTAMP,
     created_by TEXT,
     mapping_profile_id uuid,
+    name TEXT,
     constraint fk_job_profile_to_mapping_profile foreign key (mapping_profile_id)
         references mapping_profiles(id) ON DELETE CASCADE
 );
+
+CREATE TYPE ExecutionStatusType AS ENUM ('NEW', 'IN_PROGRESS', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAIL');
+CREATE CAST (character varying as ExecutionStatusType) WITH INOUT AS IMPLICIT;
 
 CREATE TABLE IF NOT EXISTS job_executions (
     id uuid PRIMARY KEY,
     jsonb jsonb,
     job_profile_id uuid,
+    status ExecutionStatusType,
+    completed_date TIMESTAMP,
     constraint fk_job_execution_to_job_profile foreign key (job_profile_id)
         references job_profiles(id) ON DELETE CASCADE
 );
