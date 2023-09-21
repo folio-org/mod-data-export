@@ -96,7 +96,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     LoadResult instancesFromCentralTenant = null;
 
     var centralTenantId = consortiaClient.getCentralTenantId(params);
-    if (StringUtils.isNotEmpty(centralTenantId)) {
+    if (StringUtils.isNotEmpty(centralTenantId) && !Objects.equals(params.getTenantId(), centralTenantId)) {
 
       var headers = new HashMap<String, String>();
       headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
