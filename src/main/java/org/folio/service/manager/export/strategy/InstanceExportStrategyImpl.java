@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 
+import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.collections4.ListUtils.union;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
@@ -92,24 +93,20 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     var idsFromLocalTenant = instances.getEntities().stream().map(json -> json.getString(ID)).toList();
 
-    List<String> idsFromCentralTenant = new ArrayList<>();
-    LoadResult instancesFromCentralTenant = null;
-
     var centralTenantId = consortiaClient.getCentralTenantId(params);
     if (StringUtils.isNotEmpty(centralTenantId) && !Objects.equals(params.getTenantId(), centralTenantId)) {
-
       var headers = new HashMap<String, String>();
       headers.put(OKAPI_HEADER_URL, params.getOkapiUrl());
       headers.put(OKAPI_HEADER_TENANT, centralTenantId);
       headers.put(OKAPI_HEADER_TOKEN, params.getToken());
 
-      idsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
-      instancesFromCentralTenant = loadInventoryInstancesInPartitions(idsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
-    }
+      var expectedIdsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
+      var instancesFromCentralTenant = loadInventoryInstancesInPartitions(expectedIdsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
 
-    if (Objects.nonNull(instancesFromCentralTenant)) {
       instances.getEntities().addAll(instancesFromCentralTenant.getEntities());
-      var ids = union(idsFromLocalTenant, idsFromCentralTenant);
+      var ids = instances.getEntities().stream().map(json -> json.getString(ID)).toList();
+
+      instances.getNotFoundEntitiesUUIDs().clear();
       instances.getNotFoundEntitiesUUIDs().addAll(srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !ids.contains(id)).toList());
     }
 
