@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,6 +30,7 @@ import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.collections4.ListUtils.union;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
@@ -37,6 +39,7 @@ import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
 public class InstanceExportStrategyImpl extends AbstractExportStrategy {
 
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+  public static final String ID = "id";
 
   @Autowired
   private ConsortiaClient consortiaClient;
@@ -87,6 +90,10 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
 
     LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
+    var idsFromLocalTenant = instances.getEntities().stream().map(json -> json.getString(ID)).toList();
+
+    List<String> idsFromCentralTenant = new ArrayList<>();
+    LoadResult instancesFromCentralTenant = null;
 
     var centralTenantId = consortiaClient.getCentralTenantId(params);
     if (StringUtils.isNotEmpty(centralTenantId)) {
@@ -96,12 +103,14 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
       headers.put(OKAPI_HEADER_TENANT, centralTenantId);
       headers.put(OKAPI_HEADER_TOKEN, params.getToken());
 
-      var idsFromLocalTenant = instances.getEntities().stream().map(json -> json.getString("id")).toList();
-      var idsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
+     idsFromCentralTenant = srsLoadResult.getIdsWithoutSrs().stream().filter(id -> !idsFromLocalTenant.contains(id)).toList();
+     instancesFromCentralTenant = loadInventoryInstancesInPartitions(idsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
+    }
 
-      LoadResult instancesFromCentralTenant = loadInventoryInstancesInPartitions(idsFromCentralTenant, exportPayload.getJobExecutionId(), new OkapiConnectionParams(headers));
+    if (Objects.nonNull(instancesFromCentralTenant)) {
       instances.getEntities().addAll(instancesFromCentralTenant.getEntities());
-      instances.getNotFoundEntitiesUUIDs().addAll(instancesFromCentralTenant.getNotFoundEntitiesUUIDs());
+      var ids = union(idsFromLocalTenant, idsFromCentralTenant);
+      instances.getNotFoundEntitiesUUIDs().addAll(identifiers.stream().filter(id -> !ids.contains(id)).toList());
     }
 
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
