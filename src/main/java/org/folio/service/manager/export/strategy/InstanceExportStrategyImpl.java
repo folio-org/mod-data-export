@@ -86,7 +86,8 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     List<String> mappedMarcRecords = mappedPairResult.getKey();
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
-    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
+    exportPayload.setExportedRecordsNumber(
+        identifiers.size() - (numberOfNotFoundRecords + exportPayload.getDuplicatedSrs() + failedRecordsCount + failedSrsRecords));
     handleFailedRecords(exportPayload, identifiers);
     if (exportPayload.isLast()) {
       postExport(exportPayload, fileExportDefinition, params);
