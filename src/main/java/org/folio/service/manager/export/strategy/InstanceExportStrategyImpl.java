@@ -58,7 +58,11 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
           });
       } else {
         exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-        exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
+        var numFailedRecords = identifiers.size() - exportPayload.getExportedRecordsNumber();
+        if (numFailedRecords < 0) {
+          numFailedRecords += exportPayload.getDuplicatedSrs();
+        }
+        exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
         if (exportPayload.isLast()) {
           getExportService().postExport(fileExportDefinition, params.getTenantId());
         }
