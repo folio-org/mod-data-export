@@ -58,7 +58,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
           });
       } else {
         exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-        handleFailedRecords(exportPayload, identifiers);
+        exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
         if (exportPayload.isLast()) {
           getExportService().postExport(fileExportDefinition, params.getTenantId());
         }
@@ -86,9 +86,8 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     List<String> mappedMarcRecords = mappedPairResult.getKey();
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
-    exportPayload.setExportedRecordsNumber(
-        identifiers.size() - (numberOfNotFoundRecords + exportPayload.getDuplicatedSrs() + failedRecordsCount + failedSrsRecords));
-    handleFailedRecords(exportPayload, identifiers);
+    exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
+    handleFailedRecords(exportPayload, failedSrsRecords, failedRecordsCount, numberOfNotFoundRecords);
     if (exportPayload.isLast()) {
       postExport(exportPayload, fileExportDefinition, params);
     }
