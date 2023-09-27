@@ -48,7 +48,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
         getMappingProfileService().getDefaultInstanceMappingProfile(params)
           .onSuccess(defaultMappingProfile -> {
             defaultMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
-            generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, defaultMappingProfile, params, srsLoadResult, marcToExport.getValue());
+            generateRecordsOnTheFly(exportPayload, fileExportDefinition, defaultMappingProfile, params, srsLoadResult, marcToExport.getValue());
             blockingPromise.complete();
           })
           .onFailure(ar -> {
@@ -67,12 +67,12 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     } else {
       SrsLoadResult srsLoadResult = new SrsLoadResult();
       srsLoadResult.setIdsWithoutSrs(identifiers);
-      generateRecordsOnTheFly(exportPayload, identifiers, fileExportDefinition, mappingProfile, params, srsLoadResult, 0);
+      generateRecordsOnTheFly(exportPayload, fileExportDefinition, mappingProfile, params, srsLoadResult, 0);
       blockingPromise.complete();
     }
   }
 
-  private void generateRecordsOnTheFly(ExportPayload exportPayload, List<String> identifiers, FileDefinition fileExportDefinition,
+  private void generateRecordsOnTheFly(ExportPayload exportPayload, FileDefinition fileExportDefinition,
                                        MappingProfile mappingProfile, OkapiConnectionParams params, SrsLoadResult srsLoadResult, int failedSrsRecords) {
     LoadResult instances = loadInventoryInstancesInPartitions(srsLoadResult.getIdsWithoutSrs(), exportPayload.getJobExecutionId(), params);
     LOGGER.info("Number of instances, that returned from inventory storage: {}", instances.getEntities().size());
@@ -87,7 +87,9 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
-    handleFailedRecords(exportPayload, failedSrsRecords, failedRecordsCount, numberOfNotFoundRecords);
+    var numFailedRecords = failedSrsRecords + failedRecordsCount + numberOfNotFoundRecords;
+    LOGGER.info("Number of failed records found: {}", numFailedRecords);
+    exportPayload.setFailedRecordsNumber(numFailedRecords);
     if (exportPayload.isLast()) {
       postExport(exportPayload, fileExportDefinition, params);
     }

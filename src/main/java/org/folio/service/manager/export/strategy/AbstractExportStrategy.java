@@ -150,13 +150,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return inventoryRecordService;
   }
 
-  public void handleFailedRecords(ExportPayload exportPayload, int failedSrsRecords,
-      int failedRecordsCount, int numberOfNotFoundRecords) {
-    var numFailedRecords = failedSrsRecords + failedRecordsCount + numberOfNotFoundRecords;
-    LOGGER.info("Number of failed records found: {}", numFailedRecords);
-    exportPayload.setFailedRecordsNumber(numFailedRecords);
-  }
-
   public enum EntityType {
     HOLDING, INSTANCE, AUTHORITY
   }
