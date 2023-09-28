@@ -44,7 +44,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
       blockingPromise.complete();
     } else {
       exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-      handleFailedRecords(exportPayload, identifiers);
+      exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
       if (exportPayload.isLast()) {
         if (isNull(fileExportDefinition.getSourcePath())) {
           throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
@@ -70,7 +70,7 @@ public class HoldingExportStrategyImpl extends AbstractExportStrategy {
     int failedRecordsCount = mappedPairResult.getValue();
     getExportService().exportInventoryRecords(mappedMarcRecords, fileExportDefinition, params.getTenantId());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - failedSrsRecords + mappedMarcRecords.size() - failedRecordsCount);
-    handleFailedRecords(exportPayload, identifiers);
+    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       if (isNull(fileExportDefinition.getSourcePath())) {
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);
