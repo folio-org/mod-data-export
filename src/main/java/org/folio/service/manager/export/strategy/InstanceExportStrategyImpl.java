@@ -62,6 +62,7 @@ public class InstanceExportStrategyImpl extends AbstractExportStrategy {
         if (numFailedRecords < 0) {
           numFailedRecords += exportPayload.getDuplicatedSrs();
         }
+        LOGGER.info("Number of failed records found: {}, duplicated SRS: {}", numFailedRecords, exportPayload.getDuplicatedSrs());
         exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
         if (exportPayload.isLast()) {
           getExportService().postExport(fileExportDefinition, params.getTenantId());
