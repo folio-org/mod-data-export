@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,18 +85,47 @@ public class InventoryClient {
 
   public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
     var partitions = ListUtils.partition(ids, CHUNK_SIZE);
-    JsonObject result = new JsonObject().put(INSTANCES, new JsonArray());
-    for (List<String> partition : partitions) {
-      try {
-        result.getJsonArray(INSTANCES).addAll(ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(INSTANCES));
-      } catch (HttpClientException exception) {
-        LOGGER.error(exception.getMessage(), exception.getCause());
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+    var semaphore = new Semaphore(2);
+    var lock = new ReentrantLock();
+    var executor = Executors.newFixedThreadPool(2);
+    var result = new JsonObject().put(INSTANCES, new JsonArray());
+
+    try {
+
+      for (List<String> partition : partitions) {
+
+        executor.execute(() -> {
+          try {
+            semaphore.acquire();
+            try {
+              var instances = ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(INSTANCES);
+              lock.lock();
+              result.getJsonArray(INSTANCES).addAll(instances);
+            } catch (HttpClientException exception) {
+              LOGGER.error(exception.getMessage(), exception.getCause());
+              errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+            } finally {
+              lock.unlock();
+            }
+            semaphore.release();
+          } catch (InterruptedException exception) {
+            LOGGER.error(exception.getMessage(), exception.getCause());
+            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+          }
+        });
       }
+      executor.shutdown();
+      executor.awaitTermination(60, TimeUnit.HOURS);
+    } catch (InterruptedException e) {
+      LOGGER.error(e.getMessage(), e.getCause());
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(e.getMessage()), jobExecutionId, params.getTenantId());
+
     }
+
     result.put("totalRecords", result.getJsonArray(INSTANCES).size());
     return Optional.of(result);
   }
+
 
   public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
