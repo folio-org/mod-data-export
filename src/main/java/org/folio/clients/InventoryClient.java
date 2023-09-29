@@ -55,8 +55,6 @@ public class InventoryClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
-  public static final String QUERY_PATTERN_WITH_SOURCE = "id==%s and source==";
-  public static final String QUERY_PATTERN_WITHOUT_SOURCE = "id==%s and source<>";
   private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
@@ -111,6 +109,7 @@ public class InventoryClient {
           } catch (InterruptedException exception) {
             LOGGER.error(exception.getMessage(), exception.getCause());
             errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
+            Thread.currentThread().interrupt();
           }
         });
       }
@@ -119,7 +118,7 @@ public class InventoryClient {
     } catch (InterruptedException e) {
       LOGGER.error(e.getMessage(), e.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(e.getMessage()), jobExecutionId, params.getTenantId());
-
+      Thread.currentThread().interrupt();
     }
 
     result.put("totalRecords", result.getJsonArray(INSTANCES).size());

@@ -29,9 +29,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import io.vertx.core.Promise;
 
-import static java.util.stream.Collectors.joining;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
-import static org.apache.commons.collections4.ListUtils.union;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
 import static org.folio.util.OkapiConnectionParams.OKAPI_HEADER_URL;
