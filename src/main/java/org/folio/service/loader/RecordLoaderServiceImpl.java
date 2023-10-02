@@ -2,9 +2,9 @@ package org.folio.service.loader;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.folio.clients.AuthorityClient;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Implementation of #RecordLoaderService that uses blocking http client.
@@ -38,6 +35,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   private static final String SOURCE_RECORDS_FIELD = "sourceRecords";
   private static final String TOTAL_RECORDS_FIELD = "totalRecords";
   private static final String INSTANCES = "instances";
+  private static final String AUTHORITIES = "authorities";
   private static final String HOLDINGS_RECORDS = "holdingsRecords";
 
   private static final Map<AbstractExportStrategy.EntityType, String> entityIdMap = Map.of(
@@ -48,17 +46,21 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private final SourceRecordStorageClient srsClient;
   private final InventoryClient inventoryClient;
+  private final AuthorityClient authorityClient;
 
-  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient) {
+  public RecordLoaderServiceImpl(@Autowired SourceRecordStorageClient srsClient, @Autowired InventoryClient inventoryClient, @Autowired AuthorityClient authorityClient) {
     this.srsClient = srsClient;
     this.inventoryClient = inventoryClient;
+    this.authorityClient = authorityClient;
   }
 
   @Override
   public SrsLoadResult loadMarcRecordsBlocking(List<String> uuids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
     Optional<JsonObject> optionalRecords;
-    if (AbstractExportStrategy.EntityType.INSTANCE == idType || AbstractExportStrategy.EntityType.AUTHORITY == idType) {
-      optionalRecords = getMarcRecordsForInstancesByIds(uuids, idType, jobExecutionId, okapiConnectionParams);
+    if (AbstractExportStrategy.EntityType.INSTANCE == idType ) {
+      optionalRecords = getMarcRecordsForInstancesByIds(uuids, jobExecutionId, okapiConnectionParams);
+    } else if (AbstractExportStrategy.EntityType.AUTHORITY == idType) {
+      optionalRecords = getMarcRecordsForAuthoritiesByIds(uuids, jobExecutionId, okapiConnectionParams);
     } else {
       optionalRecords = srsClient.getRecordsByIdsFromLocalTenant(uuids, idType, jobExecutionId, okapiConnectionParams);
     }
@@ -97,7 +99,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     return holdingsLoadResult;
   }
 
-  private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
+  private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
     var centralTenantUUIDs = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
       .map(entries -> entries.getJsonArray(INSTANCES).stream()
@@ -114,11 +116,48 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
       .toList();
 
     if (!localTenantUUIDs.isEmpty()) {
-      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, idType, jobExecutionId, okapiConnectionParams);
+      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
     }
 
     if (!centralTenantUUIDs.isEmpty()) {
-      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, idType, jobExecutionId, okapiConnectionParams);
+      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
+      if (centralTenantRecords.isPresent()) {
+        if (localTenantRecords.isEmpty()) {
+          localTenantRecords = centralTenantRecords;
+        } else {
+          var centralTenantRecordsArray = centralTenantRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
+          var records = localTenantRecords.get();
+          records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(centralTenantRecordsArray);
+          var totalSize = records.getInteger(TOTAL_RECORDS_FIELD);
+          records.put(TOTAL_RECORDS_FIELD, totalSize);
+        }
+      }
+    }
+    return localTenantRecords;
+  }
+
+  private Optional<JsonObject> getMarcRecordsForAuthoritiesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
+
+    var centralTenantUUIDs = authorityClient.getAuthoritiesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
+      .map(entries -> entries.getJsonArray(AUTHORITIES).stream()
+        .filter(JsonObject.class::isInstance)
+        .map(JsonObject.class::cast)
+        .map(json -> json.getString(ID_FIELD))
+        .toList())
+      .orElse(Collections.emptyList());
+
+    Optional<JsonObject> localTenantRecords = Optional.empty();
+
+    var localTenantUUIDs = uuids.stream()
+      .filter(uuid -> !centralTenantUUIDs.contains(uuid))
+      .toList();
+
+    if (!localTenantUUIDs.isEmpty()) {
+      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
+    }
+
+    if (!centralTenantUUIDs.isEmpty()) {
+      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
       if (centralTenantRecords.isPresent()) {
         if (localTenantRecords.isEmpty()) {
           localTenantRecords = centralTenantRecords;
