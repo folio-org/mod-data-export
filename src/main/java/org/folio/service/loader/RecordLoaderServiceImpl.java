@@ -109,31 +109,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
         .toList())
         .orElse(Collections.emptyList());
 
-    Optional<JsonObject> localTenantRecords = Optional.empty();
-
-    var localTenantUUIDs = uuids.stream()
-      .filter(uuid -> !centralTenantUUIDs.contains(uuid))
-      .toList();
-
-    if (!localTenantUUIDs.isEmpty()) {
-      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
-    }
-
-    if (!centralTenantUUIDs.isEmpty()) {
-      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
-      if (centralTenantRecords.isPresent()) {
-        if (localTenantRecords.isEmpty()) {
-          localTenantRecords = centralTenantRecords;
-        } else {
-          var centralTenantRecordsArray = centralTenantRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
-          var records = localTenantRecords.get();
-          records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(centralTenantRecordsArray);
-          var totalSize = records.getInteger(TOTAL_RECORDS_FIELD);
-          records.put(TOTAL_RECORDS_FIELD, totalSize);
-        }
-      }
-    }
-    return localTenantRecords;
+    return getSrsRecords(uuids, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams, centralTenantUUIDs);
   }
 
   private Optional<JsonObject> getMarcRecordsForAuthoritiesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
@@ -146,6 +122,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
         .toList())
       .orElse(Collections.emptyList());
 
+    return getSrsRecords(uuids, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams, centralTenantUUIDs);
+  }
+
+  private Optional<JsonObject> getSrsRecords(List<String> uuids, AbstractExportStrategy.EntityType type, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, List<String> centralTenantUUIDs) {
     Optional<JsonObject> localTenantRecords = Optional.empty();
 
     var localTenantUUIDs = uuids.stream()
@@ -153,11 +133,11 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
       .toList();
 
     if (!localTenantUUIDs.isEmpty()) {
-      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
+      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, type, jobExecutionId, okapiConnectionParams);
     }
 
     if (!centralTenantUUIDs.isEmpty()) {
-      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
+      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, type, jobExecutionId, okapiConnectionParams);
       if (centralTenantRecords.isPresent()) {
         if (localTenantRecords.isEmpty()) {
           localTenantRecords = centralTenantRecords;
