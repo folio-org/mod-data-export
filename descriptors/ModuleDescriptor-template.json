@@ -90,7 +90,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "5.0",
+      "version": "5.1",
       "handlers": [
         {
           "methods": [

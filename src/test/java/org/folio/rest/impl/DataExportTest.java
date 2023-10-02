@@ -601,6 +601,7 @@ class DataExportTest extends RestVerticleTestBase {
               assertEquals(FAIL, jobExecution.getStatus());
               assertNotNull(jobExecution.getCompletedDate());
               assertNotNull(jobExecution.getRunBy());
+              assertNotNull(jobExecution.getRunBy().getUserId());
               assertEquals(1, errorLogs.getErrorLogs().size());
               ErrorLog errorLog = errorLogs.getErrorLogs().get(0);
               assertEquals(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(), errorLog.getErrorMessageCode());
@@ -834,6 +835,7 @@ class DataExportTest extends RestVerticleTestBase {
     assertEquals(numberOfExportedRecords, jobExecution.getProgress().getExported());
     assertNotNull(jobExecution.getExportedFiles().iterator().next().getFileName());
     assertNotNull(jobExecution.getRunBy());
+    assertNotNull(jobExecution.getRunBy().getUserId());
     assertNotNull(jobExecution.getJobProfileName());
   }
 

@@ -31,6 +31,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
@@ -82,7 +83,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     underlyingMarcRecords.stream()
       .forEach(rec -> {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
-        if (instanceIds.contains(instanceId)) {
+        if (nonNull(instanceId) && instanceIds.contains(instanceId)) {
           getErrorLogService().saveWithAffectedRecord(rec,
             format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instanceId),
             ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
@@ -147,12 +148,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public InventoryRecordConverterService getInventoryRecordService() {
     return inventoryRecordService;
-  }
-
-  public void handleFailedRecords(ExportPayload exportPayload, List<String> identifiers) {
-    var numFailedRecords = identifiers.size() - exportPayload.getExportedRecordsNumber();
-    LOGGER.info("Number of failed records found: {}", numFailedRecords);
-    exportPayload.setFailedRecordsNumber(Math.abs(numFailedRecords));
   }
 
   public enum EntityType {

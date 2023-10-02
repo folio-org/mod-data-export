@@ -30,7 +30,7 @@ public class AuthorityExportStrategyImpl extends AbstractExportStrategy {
     getExportService().exportSrsRecord(marcToExport, exportPayload);
     LOGGER.info("Number of authority without srs record: {}", srsLoadResult.getIdsWithoutSrs());
     exportPayload.setExportedRecordsNumber(srsLoadResult.getUnderlyingMarcRecords().size() - marcToExport.getValue());
-    handleFailedRecords(exportPayload, identifiers);
+    exportPayload.setFailedRecordsNumber(identifiers.size() - exportPayload.getExportedRecordsNumber());
     if (exportPayload.isLast()) {
       if (isNull(fileExportDefinition.getSourcePath())) {
         throw new ServiceException(HttpStatus.HTTP_NOT_FOUND, ErrorCode.NO_FILE_GENERATED);

@@ -143,7 +143,8 @@ public class JobExecutionServiceImpl implements JobExecutionService {
     JsonObject personal = user.getJsonObject("personal");
     jobExecution.setRunBy(new RunBy()
       .withFirstName(personal.getString("firstName"))
-      .withLastName(personal.getString("lastName")));
+      .withLastName(personal.getString("lastName"))
+      .withUserId(user.getString("id")));
     if (withProgress) {
       jobExecution.setProgress(new Progress().withTotal(totalCount));
     }
