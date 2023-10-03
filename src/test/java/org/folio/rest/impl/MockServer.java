@@ -50,6 +50,7 @@ public class MockServer {
   // Mock data paths
   public static final String BASE_MOCK_DATA_PATH = "mockData/";
   private static final String INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_response_in000005.json";
+  private static final String AUTHORITY_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "authority/authority.json";
   private static final String INVENTORY_INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_inventory_instance_response_in000005.json";
   private static final String HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in000005.json";
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";
@@ -137,6 +138,7 @@ public class MockServer {
       .handler(BodyHandler.create());
 
     router.get(resourcesPath(INSTANCE)).handler(ctx -> handleGetInstanceRecord(ctx));
+    router.get(resourcesPath(AUTHORITY)).handler(ctx -> handleGetAuthorityRecord(ctx));
     router.get(resourcesPath(INVENTORY_INSTANCE)).handler(ctx -> handleGetInventoryInstanceRecord(ctx));
     router.post(resourcesPath(SRS)).handler(ctx -> handleGetSRSRecord(ctx));
     router.get(resourcesPath(CONTENT_TERMS)).handler(ctx -> handleGetContentTermsRecord(ctx));
@@ -238,6 +240,20 @@ public class MockServer {
     }
     try {
       getMockResponseFromPathWith200Status(INSTANCE_RECORDS_MOCK_DATA_PATH, INSTANCE, ctx);
+    } catch (IOException e) {
+      mockResponseWith500Status(ctx);
+    }
+  }
+
+  private void handleGetAuthorityRecord(RoutingContext ctx) {
+    logger.info("handleGetInstanceRecord got: " + ctx.request()
+      .path());
+    String query = ctx.request().getParam("query");
+    if (StringUtils.isNotEmpty(query) && query.contains("7c29e100-095f-11eb-adc1-0242ac120002")) {
+      serverResponse(ctx, 500, APPLICATION_JSON, null);
+    }
+    try {
+      getMockResponseFromPathWith200Status(AUTHORITY_RECORDS_MOCK_DATA_PATH, AUTHORITY, ctx);
     } catch (IOException e) {
       mockResponseWith500Status(ctx);
     }
