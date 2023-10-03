@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
+import org.folio.clients.AuthorityClient;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
@@ -32,6 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,6 +46,7 @@ class RecordLoaderServiceUnitTest{
   private static final int LIMIT = 20;
   protected static final String INVENTORY_RESPONSE_JSON = "clients/inventory/get_instances_response.json";
   protected static final String INVENTORY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON = "clients/inventory/get_instances_response_with_consortium_marc_source.json";
+  protected static final String AUTHORITY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON = "clients/authority/authorities.json";
   protected static final String EMPTY_RESPONSE_JSON = "clients/inventory/get_empty_response.json";
   protected static final String SRS_RESPONSE_JSON = "mockData/srs/get_marc_bib_records_response.json";
   protected static final String SRS_SINGLE_MARC_RECORD_RESPONSE_JSON = "mockData/srs/single_marc_record_response.json";
@@ -56,6 +59,8 @@ class RecordLoaderServiceUnitTest{
   SourceRecordStorageClient srsClient;
   @Mock
   InventoryClient inventoryClient;
+  @Mock
+  AuthorityClient authorityClient;
   @Spy
   @InjectMocks
   RecordLoaderServiceImpl recordLoaderService;
@@ -65,6 +70,7 @@ class RecordLoaderServiceUnitTest{
   static JsonObject dataSingleMarcRecordFromSRS;
   static JsonObject dataFromInventory;
   static JsonObject dataWithConsortiumMarcSourceFromInventory;
+  static JsonObject dataWithConsortiumMarcSourceFromAuthority;
   static JsonObject dataFromInventoryHoldings;
 
   RecordLoaderServiceUnitTest() {
@@ -75,7 +81,9 @@ class RecordLoaderServiceUnitTest{
     String instancesJson = readFileContentFromResources(INVENTORY_RESPONSE_JSON);
     dataFromInventory = new JsonObject(instancesJson);
     String instancesWithConsortiumMarcSourceJson = readFileContentFromResources(INVENTORY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON);
+    String authorityWithConsortiumMarcSourceJson = readFileContentFromResources(AUTHORITY_RESPONSE_WITH_CONSORTIUM_MARC_SOURCE_JSON);
     dataWithConsortiumMarcSourceFromInventory = new JsonObject(instancesWithConsortiumMarcSourceJson);
+    dataWithConsortiumMarcSourceFromAuthority = new JsonObject(authorityWithConsortiumMarcSourceJson);
     String holdingssJson = readFileContentFromResources(HOLDINGS_RESPONSE_JSON);
     dataFromInventoryHoldings = new JsonObject(holdingssJson);
   }
@@ -97,7 +105,13 @@ class RecordLoaderServiceUnitTest{
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+    if (type == AbstractExportStrategy.EntityType.INSTANCE) {
+      when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+    } else if (type == AbstractExportStrategy.EntityType.AUTHORITY) {
+      when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromAuthority));
+    } else {
+      fail("Unsupported entity type");
+    }
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
@@ -114,8 +128,13 @@ class RecordLoaderServiceUnitTest{
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
-
+    if (type == AbstractExportStrategy.EntityType.INSTANCE) {
+      when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+    } else if (type == AbstractExportStrategy.EntityType.AUTHORITY) {
+      when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromAuthority));
+    } else {
+      fail("Unsupported entity type");
+    }
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     // when
@@ -131,8 +150,13 @@ class RecordLoaderServiceUnitTest{
     var uuids = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae", "3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
-
+    if (type == AbstractExportStrategy.EntityType.INSTANCE) {
+      when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromInventory));
+    } else if (type == AbstractExportStrategy.EntityType.AUTHORITY) {
+      when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(dataWithConsortiumMarcSourceFromAuthority));
+    } else {
+      fail("Unsupported entity type");
+    }
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(type), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     // when

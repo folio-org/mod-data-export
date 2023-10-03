@@ -12,6 +12,7 @@ public class ExternalPathResolver {
 
   public static final String SRS = "srs";
   public static final String INSTANCE = "instance";
+  public static final String AUTHORITY = "authority";
   public static final String INVENTORY_INSTANCE = "inventoryInstance";
   public static final String CONTENT_TERMS = "natureOfContentTerms";
   public static final String IDENTIFIER_TYPES = "identifierTypes";
@@ -48,6 +49,7 @@ public class ExternalPathResolver {
     Map<String, String> apis = new HashMap<>();
     apis.put(SRS, "/source-storage/source-records");
     apis.put(INSTANCE, "/instance-storage/instances");
+    apis.put(AUTHORITY, "/authority-storage/authorities");
     apis.put(INVENTORY_INSTANCE, "/inventory/instances");
     apis.put(HOLDING, "/holdings-storage/holdings");
     apis.put(ITEM, "/item-storage/items");
