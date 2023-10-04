@@ -1,17 +1,7 @@
 package org.folio.clients;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.collections4.ListUtils;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,8 +11,12 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
@@ -40,6 +34,7 @@ import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
+import static org.folio.util.ExternalPathResolver.INVENTORY_INSTANCE;
 import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
@@ -47,15 +42,13 @@ import static org.folio.util.ExternalPathResolver.LIBRARIES;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.INVENTORY_INSTANCE;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 @Component
-public class InventoryClient {
+public class InventoryClient extends BaseConcurrentClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
-  private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 1000;
@@ -64,7 +57,7 @@ public class InventoryClient {
   private static final String SUCCEEDING_TITLES = "succeedingTitles";
   public static final String INSTANCES = "instances";
   private static final String ID = "id";
-  public static final int CHUNK_SIZE = 15;
+
 
   @Autowired
   private ErrorLogService errorLogService;
@@ -80,51 +73,6 @@ public class InventoryClient {
       return Optional.empty();
     }
   }
-
-  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params) {
-    var partitions = ListUtils.partition(ids, CHUNK_SIZE);
-    var semaphore = new Semaphore(2);
-    var lock = new ReentrantLock();
-    var executor = Executors.newFixedThreadPool(2);
-    var result = new JsonObject().put(INSTANCES, new JsonArray());
-
-    try {
-
-      for (List<String> partition : partitions) {
-
-        executor.execute(() -> {
-          try {
-            semaphore.acquire();
-            try {
-              var instances = ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(INSTANCES);
-              lock.lock();
-              result.getJsonArray(INSTANCES).addAll(instances);
-            } catch (HttpClientException exception) {
-              LOGGER.error(exception.getMessage(), exception.getCause());
-              errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
-            } finally {
-              lock.unlock();
-            }
-            semaphore.release();
-          } catch (InterruptedException exception) {
-            LOGGER.error(exception.getMessage(), exception.getCause());
-            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
-            Thread.currentThread().interrupt();
-          }
-        });
-      }
-      executor.shutdown();
-      executor.awaitTermination(60, TimeUnit.HOURS);
-    } catch (InterruptedException e) {
-      LOGGER.error(e.getMessage(), e.getCause());
-      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(e.getMessage()), jobExecutionId, params.getTenantId());
-      Thread.currentThread().interrupt();
-    }
-
-    result.put("totalRecords", result.getJsonArray(INSTANCES).size());
-    return Optional.of(result);
-  }
-
 
   public Optional<JsonObject> getHoldingsByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, int partitionSize) {
     try {
@@ -288,5 +236,10 @@ public class InventoryClient {
       instanceStorageInstance.put(SUCCEEDING_TITLES, ((JsonObject)instance).getJsonArray(SUCCEEDING_TITLES));
       instanceStorageInstance.put(PRECEDING_TITLES, ((JsonObject)instance).getJsonArray(PRECEDING_TITLES));
     });
+  }
+
+  @Override
+  public String getEntitiesCollectionName() {
+    return INSTANCES;
   }
 }

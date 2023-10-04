@@ -50,7 +50,7 @@ public class MockServer {
   // Mock data paths
   public static final String BASE_MOCK_DATA_PATH = "mockData/";
   private static final String INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_instance_response_in000005.json";
-  private static final String AUTHORITY_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "authority/authority.json";
+  private static final String AUTHORITY_RECORDS_MOCK_DATA_PATH = "clients/authority/authorities.json";
   private static final String INVENTORY_INSTANCE_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/get_inventory_instance_response_in000005.json";
   private static final String HOLDING_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/holdings_in000005.json";
   private static final String ITEM_RECORDS_MOCK_DATA_PATH = BASE_MOCK_DATA_PATH + "inventory/items_in000005.json";

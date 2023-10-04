@@ -104,7 +104,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
   private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
     var instances
-      = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams)
+      = inventoryClient.getByIds(uuids, jobExecutionId, okapiConnectionParams)
       .map(entries -> entries.getJsonArray(INSTANCES).stream()
         .filter(JsonObject.class::isInstance)
         .map(JsonObject.class::cast)
@@ -141,7 +141,7 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private Optional<JsonObject> getMarcRecordsForAuthoritiesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
-    var centralTenantUUIDs = authorityClient.getAuthoritiesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
+    var centralTenantUUIDs = authorityClient.getByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
       .map(entries -> entries.getJsonArray(AUTHORITIES).stream()
         .filter(JsonObject.class::isInstance)
         .map(JsonObject.class::cast)

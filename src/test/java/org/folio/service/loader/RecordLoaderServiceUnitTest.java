@@ -84,7 +84,7 @@ class RecordLoaderServiceUnitTest{
   @Test
   void shouldReturnExistingMarcRecords() {
     // given
-    when(inventoryClient.getInstancesByIds(eq(List.of("uuid")), any(), any())).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", "uuid")))));
+    when(inventoryClient.getByIds(eq(List.of("uuid")), any(), any())).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", "uuid")))));
     when(srsClient.getRecordsByIdsFromLocalTenant(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataFromSRS));
     // when
     SrsLoadResult srsLoadResult = recordLoaderService.loadMarcRecordsBlocking(List.of("uuid"), AbstractExportStrategy.EntityType.INSTANCE, JOB_EXECUTION_ID, okapiConnectionParams);
@@ -101,7 +101,7 @@ class RecordLoaderServiceUnitTest{
 
     List<String> uuids = new ArrayList<>(union(union(localInstanceCentralSrs, localInstanceLocalSrs), centralInstanceCentralSrs));
 
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(inventoryClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(localInstanceLocalSrs), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("sourceRecords", new JsonArray().add(new JsonObject()))));
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(new ArrayList<>(union(centralInstanceCentralSrs, localInstanceCentralSrs))), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("sourceRecords", new JsonArray().add(new JsonObject()).add(new JsonObject()))));
@@ -118,7 +118,7 @@ class RecordLoaderServiceUnitTest{
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
 
-    when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(authorityClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
@@ -138,7 +138,7 @@ class RecordLoaderServiceUnitTest{
 
     List<String> uuids = new ArrayList<>(union(centralInstanceCentralSrs, union(localInstanceCentralSrs, localInstanceLocalSrs)));
 
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(inventoryClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(new ArrayList<>(union(localInstanceCentralSrs, centralInstanceCentralSrs))), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("sourceRecords", new JsonArray().add(new JsonObject()))));
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(localInstanceLocalSrs), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
@@ -155,7 +155,7 @@ class RecordLoaderServiceUnitTest{
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
 
-    when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(authorityClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
@@ -174,7 +174,7 @@ class RecordLoaderServiceUnitTest{
 
     List<String> uuids = new ArrayList<>(union(centralInstanceCentralSrs, union(localInstanceCentralSrs, localInstanceLocalSrs)));
 
-    when(inventoryClient.getInstancesByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(inventoryClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("instances", new JsonArray().add(new JsonObject().put("id", localInstanceLocalSrs.get(0)).put("source", "MARC")).add(new JsonObject().put("id", localInstanceCentralSrs.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(new ArrayList<>(union(centralInstanceCentralSrs, localInstanceCentralSrs))), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(localInstanceLocalSrs), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(new JsonObject().put("sourceRecords", new JsonArray().add(new JsonObject()))));
@@ -191,7 +191,7 @@ class RecordLoaderServiceUnitTest{
     var uuidInConsortium = List.of("f31a36de-fcf8-44f9-87ef-a55d06ad21ae");
     var uuidNotInConsortium = List.of("3c4ae3f3-b460-4a89-a2f9-78ce3145e4fc");
 
-    when(authorityClient.getAuthoritiesByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
+    when(authorityClient.getByIds(eq(uuids), anyString(), eq(okapiConnectionParams), eq(CONSORTIUM_MARC_INSTANCE_SOURCE))).thenReturn(Optional.of(new JsonObject().put("authorities", new JsonArray().add(new JsonObject().put("id", uuidInConsortium.get(0)).put("source", "CONSORTIUM-MARC")))));
 
     when(srsClient.getRecordsByIdsFromCentralTenant(eq(uuidInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.empty());
     when(srsClient.getRecordsByIdsFromLocalTenant(eq(uuidNotInConsortium), eq(AbstractExportStrategy.EntityType.AUTHORITY), anyString(), eq(okapiConnectionParams))).thenReturn(Optional.of(dataSingleMarcRecordFromSRS));
