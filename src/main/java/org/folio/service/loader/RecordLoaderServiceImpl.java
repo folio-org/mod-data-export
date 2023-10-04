@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.apache.commons.collections4.ListUtils.union;
+
 /**
  * Implementation of #RecordLoaderService that uses blocking http client.
  */
@@ -101,20 +103,45 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
 
   private Optional<JsonObject> getMarcRecordsForInstancesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
-    var centralTenantUUIDs = inventoryClient.getInstancesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
+    var instances
+      = inventoryClient.getByIds(uuids, jobExecutionId, okapiConnectionParams)
       .map(entries -> entries.getJsonArray(INSTANCES).stream()
         .filter(JsonObject.class::isInstance)
         .map(JsonObject.class::cast)
-        .map(json -> json.getString(ID_FIELD))
         .toList())
-        .orElse(Collections.emptyList());
+      .orElse(Collections.emptyList());
 
-    return getSrsRecords(uuids, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams, centralTenantUUIDs);
+    var localInstanceLocalSrsUUIDs = instances.stream().filter(instance -> !CONSORTIUM_MARC_INSTANCE_SOURCE.equals(instance.getString("source"))).map(json -> json.getString(ID_FIELD)).toList();
+
+    Optional<JsonObject> localSrsRecords = !localInstanceLocalSrsUUIDs.isEmpty()
+      ? srsClient.getRecordsByIdsFromLocalTenant(localInstanceLocalSrsUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams)
+      : Optional.empty();
+
+    var localInstanceCentralSrsUUIDs = instances.stream().filter(instance -> CONSORTIUM_MARC_INSTANCE_SOURCE.equals(instance.getString("source"))).map(json -> json.getString(ID_FIELD)).toList();
+
+    var centralInstanceCentralSrsUUIDs = uuids.stream().filter(uuid -> !localInstanceCentralSrsUUIDs.contains(uuid) && !localInstanceLocalSrsUUIDs.contains(uuid)).toList();
+    var centralSrsUUIDs =  union(localInstanceCentralSrsUUIDs, centralInstanceCentralSrsUUIDs);
+
+    if (!centralSrsUUIDs.isEmpty()) {
+      Optional<JsonObject> centralSrsRecords = srsClient.getRecordsByIdsFromCentralTenant(centralSrsUUIDs, AbstractExportStrategy.EntityType.INSTANCE, jobExecutionId, okapiConnectionParams);
+      if (centralSrsRecords.isPresent()) {
+        if (localSrsRecords.isEmpty()) {
+          localSrsRecords = centralSrsRecords;
+        } else {
+          var centralTenantRecordsArray = centralSrsRecords.get().getJsonArray(SOURCE_RECORDS_FIELD);
+          var records = localSrsRecords.get();
+          records.getJsonArray(SOURCE_RECORDS_FIELD).addAll(centralTenantRecordsArray);
+          var totalSize = records.getInteger(TOTAL_RECORDS_FIELD);
+          records.put(TOTAL_RECORDS_FIELD, totalSize);
+        }
+      }
+    }
+    return localSrsRecords;
   }
 
   private Optional<JsonObject> getMarcRecordsForAuthoritiesByIds(List<String> uuids, String jobExecutionId, OkapiConnectionParams okapiConnectionParams) {
 
-    var centralTenantUUIDs = authorityClient.getAuthoritiesByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
+    var centralTenantUUIDs = authorityClient.getByIds(uuids, jobExecutionId, okapiConnectionParams, CONSORTIUM_MARC_INSTANCE_SOURCE)
       .map(entries -> entries.getJsonArray(AUTHORITIES).stream()
         .filter(JsonObject.class::isInstance)
         .map(JsonObject.class::cast)
@@ -122,10 +149,6 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
         .toList())
       .orElse(Collections.emptyList());
 
-    return getSrsRecords(uuids, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams, centralTenantUUIDs);
-  }
-
-  private Optional<JsonObject> getSrsRecords(List<String> uuids, AbstractExportStrategy.EntityType type, String jobExecutionId, OkapiConnectionParams okapiConnectionParams, List<String> centralTenantUUIDs) {
     Optional<JsonObject> localTenantRecords = Optional.empty();
 
     var localTenantUUIDs = uuids.stream()
@@ -133,11 +156,11 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
       .toList();
 
     if (!localTenantUUIDs.isEmpty()) {
-      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, type, jobExecutionId, okapiConnectionParams);
+      localTenantRecords = srsClient.getRecordsByIdsFromLocalTenant(localTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
     }
 
     if (!centralTenantUUIDs.isEmpty()) {
-      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, type, jobExecutionId, okapiConnectionParams);
+      Optional<JsonObject> centralTenantRecords = srsClient.getRecordsByIdsFromCentralTenant(centralTenantUUIDs, AbstractExportStrategy.EntityType.AUTHORITY, jobExecutionId, okapiConnectionParams);
       if (centralTenantRecords.isPresent()) {
         if (localTenantRecords.isEmpty()) {
           localTenantRecords = centralTenantRecords;
@@ -159,10 +182,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     String jsonArrayKey = loadResult.getEntityType().equals(AbstractExportStrategy.EntityType.INSTANCE) ? INSTANCES : HOLDINGS_RECORDS;
     for (String entityId : entityIds) {
       for (Object entity : entities.getJsonArray(jsonArrayKey)) {
-        JsonObject record = (JsonObject) entity;
-        if (record.getValue(ID_FIELD).equals(entityId)) {
+        JsonObject e = (JsonObject) entity;
+        if (e.getValue(ID_FIELD).equals(entityId)) {
           entitiesIdentifiersSet.remove(entityId);
-          inventoryRecords.add(record);
+          inventoryRecords.add(e);
         }
       }
     }
@@ -174,10 +197,10 @@ public class RecordLoaderServiceImpl implements RecordLoaderService {
     JsonArray records = underlyingRecords.getJsonArray(SOURCE_RECORDS_FIELD);
     List<JsonObject> marcRecords = new ArrayList<>();
     Set<String> singleRecordIdentifiersSet = new HashSet<>(uuids);
-    for (Object o : records) {
-      JsonObject record = (JsonObject) o;
-      marcRecords.add(record);
-      JsonObject externalIdsHolder = record.getJsonObject("externalIdsHolder");
+    for (Object object : records) {
+      JsonObject e = (JsonObject) object;
+      marcRecords.add(e);
+      JsonObject externalIdsHolder = e.getJsonObject("externalIdsHolder");
       if (externalIdsHolder != null) {
         String key = entityIdMap.get(entityType);
         String id = externalIdsHolder.getString(key);

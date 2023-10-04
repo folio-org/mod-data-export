@@ -278,8 +278,8 @@ class DataExportTest extends RestVerticleTestBase {
           context.verify(() -> {
             assertJobExecution(jobExecution, COMPLETED_WITH_ERRORS, EXPORTED_RECORDS_NUMBER_3);
 
-            // 5 for GET cause there are additional requests to /inventory/instances to enrich by preceding/succeeding titles and check consortium source
-            validateExternalCallsForSrsAndInventoryGet(5);
+            // 9 for GET cause there are additional requests to /inventory/instances (using parallel chunks) to enrich by preceding/succeeding titles and check consortium source
+            validateExternalCallsForSrsAndInventoryGet(9);
             validateExternalCallsForSrsAndInventoryPost(2);
             context.completeNow();
           });

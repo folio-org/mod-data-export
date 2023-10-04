@@ -16,7 +16,6 @@ import org.folio.util.OkapiConnectionParams;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -25,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
@@ -59,10 +59,9 @@ public class SourceRecordStorageClient {
 
   public Optional<JsonObject> getRecordsByIdsFromCentralTenant(List<String> ids, AbstractExportStrategy.EntityType idType, String jobExecutionId, OkapiConnectionParams params) {
 
-    // TODO - should be cachable
-    var centralTenantId = getCentralTenantId(params);
+    var centralTenantId = consortiaClient.getCentralTenantId(params);
 
-    if (StringUtils.isEmpty(centralTenantId)) {
+    if (StringUtils.isEmpty(centralTenantId) && !Objects.equals(params.getTenantId(), centralTenantId)) {
       return Optional.empty();
     }
 
@@ -90,17 +89,5 @@ public class SourceRecordStorageClient {
     }
   }
 
-  @Cacheable
-  private String getCentralTenantId(OkapiConnectionParams params) {
-    var centralTenantIds = consortiaClient.getUserTenants(params);
-    if (!centralTenantIds.isEmpty()) {
-      var centralTenantId = centralTenantIds.getJsonObject(0).getString("centralTenantId");
-      if (centralTenantId.equals(params.getTenantId())) {
-        LOGGER.error("Current tenant is central");
-      }
-      return centralTenantId;
-    }
-    LOGGER.info("No central tenant found");
-    return StringUtils.EMPTY;
-  }
+
 }

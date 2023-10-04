@@ -2,6 +2,7 @@ package org.folio.clients;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.util.OkapiConnectionParams;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.core.MediaType;
@@ -42,6 +44,20 @@ public class ConsortiaClient {
     return new JsonArray();
   }
 
+  @Cacheable
+  public String getCentralTenantId(OkapiConnectionParams params) {
+    var centralTenantIds = getUserTenants(params);
+    if (!centralTenantIds.isEmpty()) {
+      var centralTenantId = centralTenantIds.getJsonObject(0).getString("centralTenantId");
+      if (centralTenantId.equals(params.getTenantId())) {
+        logger.error("Current tenant is central");
+      }
+      return centralTenantId;
+    }
+    logger.info("No central tenant found");
+    return StringUtils.EMPTY;
+  }
+
   private HttpGet httpGet(OkapiConnectionParams okapiConnectionParams, String endpoint) {
     HttpGet httpGet = new HttpGet();
     httpGet.setHeader(OKAPI_HEADER_TOKEN, okapiConnectionParams.getToken());
@@ -60,7 +76,7 @@ public class ConsortiaClient {
         var body = EntityUtils.toString(entity);
         logger.debug("Response body: {}", body);
         return new JsonObject(body);
-      } catch (IOException e) {
+      } catch (Exception e) {
         logger.error("Exception while building response entity", e);
       }
     }

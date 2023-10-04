@@ -29,6 +29,8 @@ import org.folio.util.OkapiConnectionParams;
 
 public final class ClientUtil {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
+  public static final String EXCEPTION_WHILE_CALLING_MESSAGE_LOG = "Exception while calling {}";
+  public static final String EXCEPTION_WHILE_CALLING_S_MESSAGE_RESPONSE = "Exception while calling %s, message: %s";
 
   private ClientUtil() {
   }
@@ -42,8 +44,22 @@ public final class ClientUtil {
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return getResponseEntity(response);
     } catch (IOException exception) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
-      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
+      LOGGER.error(EXCEPTION_WHILE_CALLING_MESSAGE_LOG, httpGet.getURI(), exception);
+      throw new HttpClientException(format(EXCEPTION_WHILE_CALLING_S_MESSAGE_RESPONSE, httpGet.getURI(), exception.getMessage()));
+    }
+  }
+
+  public static JsonObject getByIds(List<String> ids, OkapiConnectionParams params, String endpoint) throws HttpClientException {
+    HttpGet httpGet = new HttpGet();
+    setCommonHeaders(httpGet, params);
+    URI uri = prepareFullUriWithQuery(ids, params, endpoint, "id==%s");
+    httpGet.setURI(uri);
+    LOGGER.info("Calling GET By IDs {}", uri);
+    try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
+      return getResponseEntity(response);
+    } catch (IOException exception) {
+      LOGGER.error(EXCEPTION_WHILE_CALLING_MESSAGE_LOG, httpGet.getURI(), exception);
+      throw new HttpClientException(format(EXCEPTION_WHILE_CALLING_S_MESSAGE_RESPONSE, httpGet.getURI(), exception.getMessage()));
     }
   }
 
@@ -55,8 +71,8 @@ public final class ClientUtil {
     try (CloseableHttpResponse response = HttpClients.createDefault().execute(httpGet)) {
       return getResponseEntity(response);
     } catch (IOException exception) {
-      LOGGER.error("Exception while calling {}", httpGet.getURI(), exception);
-      throw new HttpClientException(format("Exception while calling %s, message: %s", httpGet.getURI(), exception.getMessage()));
+      LOGGER.error(EXCEPTION_WHILE_CALLING_MESSAGE_LOG, httpGet.getURI(), exception);
+      throw new HttpClientException(format(EXCEPTION_WHILE_CALLING_S_MESSAGE_RESPONSE, httpGet.getURI(), exception.getMessage()));
     }
   }
 

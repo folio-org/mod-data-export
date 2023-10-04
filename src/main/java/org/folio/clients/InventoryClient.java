@@ -1,11 +1,7 @@
 package org.folio.clients;
 
-import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,8 +11,12 @@ import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.folio.clients.ClientUtil.buildQueryEndpoint;
@@ -34,6 +34,7 @@ import static org.folio.util.ExternalPathResolver.INSTANCE;
 import static org.folio.util.ExternalPathResolver.INSTANCE_FORMATS;
 import static org.folio.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.util.ExternalPathResolver.INSTITUTIONS;
+import static org.folio.util.ExternalPathResolver.INVENTORY_INSTANCE;
 import static org.folio.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.util.ExternalPathResolver.ITEM;
 import static org.folio.util.ExternalPathResolver.ITEM_NOTE_TYPES;
@@ -41,24 +42,22 @@ import static org.folio.util.ExternalPathResolver.LIBRARIES;
 import static org.folio.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.util.ExternalPathResolver.MATERIAL_TYPES;
-import static org.folio.util.ExternalPathResolver.INVENTORY_INSTANCE;
 import static org.folio.util.ExternalPathResolver.resourcesPathWithPrefix;
 
 @Component
-public class InventoryClient {
+public class InventoryClient extends BaseConcurrentClient {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
   private static final String LIMIT_PARAMETER = "?limit=";
   private static final String QUERY_PATTERN_INVENTORY = "id==%s";
-  private static final String QUERY_PATTERN_WITH_SOURCE = "id==%s and source==";
-  private static final String QUERY_LIMIT_PATTERN = "?query=(%s)&limit=";
   private static final String QUERY_PATTERN_HOLDING = "instanceId==%s";
   private static final String QUERY_PATTERN_ITEM = "holdingsRecordId==%s";
   private static final int REFERENCE_DATA_LIMIT = 1000;
   private static final int HOLDINGS_LIMIT = 1000;
   private static final String PRECEDING_TITLES = "precedingTitles";
   private static final String SUCCEEDING_TITLES = "succeedingTitles";
-  private static final String INSTANCES = "instances";
+  public static final String INSTANCES = "instances";
   private static final String ID = "id";
+
 
   @Autowired
   private ErrorLogService errorLogService;
@@ -68,17 +67,6 @@ public class InventoryClient {
       Optional<JsonObject> instanceStorageInstancesOpt = Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + partitionSize,
         QUERY_PATTERN_INVENTORY));
       return enrichInstancesByPrecedingSucceedingTitles(instanceStorageInstancesOpt, ids, params, partitionSize);
-    } catch (HttpClientException exception) {
-      LOGGER.error(exception.getMessage(), exception.getCause());
-      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
-      return Optional.empty();
-    }
-  }
-
-  public Optional<JsonObject> getInstancesByIds(List<String> ids, String jobExecutionId, OkapiConnectionParams params, String source) {
-    try {
-      return Optional.of(ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size(),
-        "(" + QUERY_PATTERN_WITH_SOURCE + source + ")"));
     } catch (HttpClientException exception) {
       LOGGER.error(exception.getMessage(), exception.getCause());
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_INSTANCES_BY_IDS.getCode(), Arrays.asList(exception.getMessage()), jobExecutionId, params.getTenantId());
@@ -250,4 +238,8 @@ public class InventoryClient {
     });
   }
 
+  @Override
+  public String getEntitiesCollectionName() {
+    return INSTANCES;
+  }
 }
