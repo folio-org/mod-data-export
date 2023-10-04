@@ -56,10 +56,7 @@ public abstract class BaseConcurrentClient {
           try {
             semaphore.acquire();
             try {
-              var entities = StringUtils.isNotEmpty(source) ?
-                ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(AUTHORITY) + QUERY_LIMIT_PATTERN + ids.size(),
-                  "(" + QUERY_PATTERN_WITH_SOURCE + source + ")").getJsonArray(getEntitiesCollectionName())
-                : ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(getEntitiesCollectionName());
+              var entities = getEntitiesByQuery(ids, params, source, partition);
               lock.lock();
               result.getJsonArray(getEntitiesCollectionName()).addAll(entities);
             } catch (HttpClientException exception) {
@@ -86,5 +83,12 @@ public abstract class BaseConcurrentClient {
 
     result.put("totalRecords", result.getJsonArray(getEntitiesCollectionName()).size());
     return Optional.of(result);
+  }
+
+  private JsonArray getEntitiesByQuery(List<String> ids, OkapiConnectionParams params, String source, List<String> partition) throws HttpClientException {
+    return StringUtils.isNotEmpty(source) ?
+      ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(AUTHORITY) + QUERY_LIMIT_PATTERN + ids.size(),
+        "(" + QUERY_PATTERN_WITH_SOURCE + source + ")").getJsonArray(getEntitiesCollectionName())
+      : ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(getEntitiesCollectionName());
   }
 }
