@@ -56,7 +56,7 @@ public abstract class BaseConcurrentClient {
           try {
             semaphore.acquire();
             try {
-              var entities = getEntitiesByQuery(ids, params, source, partition);
+              var entities = getEntitiesByQuery(partition, params, source);
               lock.lock();
               result.getJsonArray(getEntitiesCollectionName()).addAll(entities);
             } catch (HttpClientException exception) {
@@ -85,10 +85,10 @@ public abstract class BaseConcurrentClient {
     return Optional.of(result);
   }
 
-  private JsonArray getEntitiesByQuery(List<String> ids, OkapiConnectionParams params, String source, List<String> partition) throws HttpClientException {
+  private JsonArray getEntitiesByQuery(List<String> ids, OkapiConnectionParams params, String source) throws HttpClientException {
     return StringUtils.isNotEmpty(source) ?
       ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(AUTHORITY) + QUERY_LIMIT_PATTERN + ids.size(),
         "(" + QUERY_PATTERN_WITH_SOURCE + source + ")").getJsonArray(getEntitiesCollectionName())
-      : ClientUtil.getByIds(partition, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(getEntitiesCollectionName());
+      : ClientUtil.getByIds(ids, params, resourcesPathWithPrefix(INSTANCE) + QUERY_LIMIT_PATTERN + ids.size()).getJsonArray(getEntitiesCollectionName());
   }
 }
