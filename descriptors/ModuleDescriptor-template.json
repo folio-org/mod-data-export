@@ -122,6 +122,9 @@
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get",
+            "inventory-storage.alternative-title-types.collection.get",
+            "inventory-storage.modes-of-issuance.collection.get",
+            "inventory.instances.collection.get",
             "user-tenants.collection.get"
           ]
         },
@@ -155,6 +158,9 @@
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get",
+            "inventory-storage.alternative-title-types.collection.get",
+            "inventory-storage.modes-of-issuance.collection.get",
+            "inventory.instances.collection.get",
             "user-tenants.collection.get"
           ]
         },
