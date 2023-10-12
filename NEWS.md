@@ -1,4 +1,37 @@
-## v4.8.0 Unreleased
+## v4.9.0 Unreleased
+
+## 10/12/2023 v4.8.0 Released
+This release includes export of shared instances, authorities, updates for job execution schema, bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.7.1...v4.8.0)
+
+### Technical tasks
+* [MDEXP-636](https://issues.folio.org/browse/MDEXP-636) Add missing electronic access relationship values to default mapping rules
+* [MDEXP-617](https://issues.folio.org/browse/MDEXP-617) Update to Java 17 mod-data-export
+* [MDEXP-614](https://issues.folio.org/browse/MDEXP-614) SRS-client with "shared" MARC records support
+
+### Stories
+* [MDEXP-643](https://issues.folio.org/browse/MDEXP-643) Migration scripts for adding user id to jobExecution schema
+* [MDEXP-639](https://issues.folio.org/browse/MDEXP-639) Add "userId" field to "runBy" schema
+* [MDEXP-637](https://issues.folio.org/browse/MDEXP-637) Export shared MARC authorities
+* [MDEXP-625](https://issues.folio.org/browse/MDEXP-625) Report affected instance when export contains negative number of failed records
+* [MDEXP-602](https://issues.folio.org/browse/MDEXP-602) Export shared MARC instances
+* [MDEXP-592](https://issues.folio.org/browse/MDEXP-592) Update usage of jobExecution entity for quick export
+
+### Bug Fixes
+* [MDEXP-633](https://issues.folio.org/browse/MDEXP-633) Inconsistent Data export results by Admin and User with data export permissions
+* [MDEXP-605](https://issues.folio.org/browse/MDEXP-605) Empty files are not sorted by “Job profile” on the "View all" page
+* [MDEXP-598](https://issues.folio.org/browse/MDEXP-598) Wrong CQL syntax in .cql fails export job without error message shown in the UI
+* [MDEXP-596](https://issues.folio.org/browse/MDEXP-596) json-path 2.8.0
+* [MDEXP-588](https://issues.folio.org/browse/MDEXP-588) Quick export: Job FAIL when all records was exported
+
+## 03/10/2023 v4.7.1 Released
+This release includes bug fix for custom mapping profile
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.7.0...v4.7.1)
+
+### Bug Fixes
+* [MDEXP-584](https://issues.folio.org/browse/MDEXP-584) Holdings cannot be exported with custom mapping profile
 
 ## 02/22/2023 v4.7.0 Released
 This release includes export and logging improvements
