@@ -6,7 +6,7 @@ This release includes fix for migration scripts.
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.0...v4.8.1)
 
 ### Stories
-* [MDEXP-625](https://issues.folio.org/browse/MDEXP-625) Fix migration scripts
+* [MDEXP-625](https://issues.folio.org/browse/MDEXP-625) Swap migration scripts
 
 ## 10/12/2023 v4.8.0 Released
 This release includes export of shared instances, authorities, updates for job execution schema, bug fixes.
