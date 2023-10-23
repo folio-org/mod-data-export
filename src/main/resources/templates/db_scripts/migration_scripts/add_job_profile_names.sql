@@ -4,3 +4,4 @@ SET jsonb = jsonb_set(jsonb, '{jobProfileName}', (
       WHERE profiles.id::text = executions.jsonb->>'jobProfileId'
   ))
 WHERE executions.jsonb -> 'jobProfileId' IS NOT NULL AND executions.jsonb -> 'jobProfileName' IS NULL;
+
