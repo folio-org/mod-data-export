@@ -63,15 +63,15 @@ class InputDataManagerImpl implements InputDataManager {
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
   @Autowired
-  private JobExecutionService jobExecutionService;
+  private JobExecutionService jobExecutionService; //NOSONAR
   @Autowired
-  private FileDefinitionService fileDefinitionService;
+  private FileDefinitionService fileDefinitionService; //NOSONAR
   @Autowired
-  private Vertx vertx;
+  private Vertx vertx; //NOSONAR
   @Autowired
-  private UsersClient usersClient;
+  private UsersClient usersClient; //NOSONAR
   @Autowired
-  private ErrorLogService errorLogService;
+  private ErrorLogService errorLogService; //NOSONAR
 
   private WorkerExecutor executor; //NOSONAR
   private LocalMap<String, InputDataContext> inputDataLocalMap; //NOSONAR

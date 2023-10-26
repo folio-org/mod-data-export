@@ -50,13 +50,13 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Autowired
-  private JobExecutionDao jobExecutionDao;
+  private JobExecutionDao jobExecutionDao; //NOSONAR
   @Autowired
-  private JobProfileService jobProfileService;
+  private JobProfileService jobProfileService; //NOSONAR
   @Autowired
-  private ExportStorageService exportStorageService;
+  private ExportStorageService exportStorageService; //NOSONAR
   @Autowired
-  private ErrorLogService errorLogService;
+  private ErrorLogService errorLogService; //NOSONAR
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {

@@ -40,24 +40,24 @@ public class ExportManagerImpl implements ExportManager {
   private WorkerExecutor executor;
 
   @Autowired
-  private JobExecutionService jobExecutionService;
+  private JobExecutionService jobExecutionService; //NOSONAR
   @Autowired
-  private InventoryRecordConverterService inventoryRecordService;
+  private InventoryRecordConverterService inventoryRecordService; //NOSONAR
   @Autowired
-  private Vertx vertx;
+  private Vertx vertx; //NOSONAR
   @Autowired
-  private FileStorage fileStorage;
+  private FileStorage fileStorage; //NOSONAR
   @Autowired
-  private ErrorLogService errorLogService;
+  private ErrorLogService errorLogService; //NOSONAR
   @Autowired
   @Qualifier("instanceExportStrategyImpl")
-  private ExportStrategy instanceExportManager;
+  private ExportStrategy instanceExportManager; //NOSONAR
   @Autowired
   @Qualifier("holdingExportStrategyImpl")
-  private ExportStrategy holdingExportManager;
+  private ExportStrategy holdingExportManager; //NOSONAR
   @Autowired
   @Qualifier("authorityExportStrategyImpl")
-  private ExportStrategy authorityExportManager;
+  private ExportStrategy authorityExportManager; //NOSONAR
 
   public ExportManagerImpl() {
   }
