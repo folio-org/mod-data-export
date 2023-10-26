@@ -27,7 +27,7 @@ class LocalStorageCsvSourceReaderUnitTest {
   private static final String INVENTORY_INVALID_FILE_CONTENT = "src/test/resources/files/InventoryInvalidFileContent.csv";
   private static final String UUID_PATTERN = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$";
   private static final long TOTAL_COUNT_5 = 5L;
-  private static final long TOTAL_COUNT_3 = 3L;
+  private static final long TOTAL_COUNT_6 = 6L;
   private static final long TOTAL_COUNT_0 = 0L;
 
   private static LocalStorageCsvSourceReader reader;
@@ -75,7 +75,7 @@ class LocalStorageCsvSourceReaderUnitTest {
   }
 
   @Test
-  void shouldReturnTotalCountThree_whenReaderInitialized_AndSkipInvalidFields() {
+  void shouldReturnTotalCountSix_whenReaderInitialized_AndIncludeInvalidFields() {
     //given
     FileDefinition fileDefinition = new FileDefinition()
       .withSourcePath(INVENTORY_UUIDS_WITH_WRONG_FORMATS);
@@ -91,7 +91,7 @@ class LocalStorageCsvSourceReaderUnitTest {
       assertFalse(uuid.contains(","));
       assertFalse(uuid.contains("\""));
     }
-    assertEquals(TOTAL_COUNT_3, actualTotalCount);
+    assertEquals(TOTAL_COUNT_6, actualTotalCount);
     Mockito.verify(errorLogService).saveGeneralErrorWithMessageValues(anyString(), anyList(),anyString(), anyString());
   }
 
