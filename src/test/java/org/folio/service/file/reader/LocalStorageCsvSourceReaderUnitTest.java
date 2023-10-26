@@ -46,7 +46,7 @@ class LocalStorageCsvSourceReaderUnitTest {
   @Test
   void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
     //when
-    long actualTotalCount = reader.totalCount(new ExportPayload());
+    long actualTotalCount = new LocalStorageCsvSourceReader().totalCount(new ExportPayload());
     //then
     assertEquals(TOTAL_COUNT_0, actualTotalCount);
   }
