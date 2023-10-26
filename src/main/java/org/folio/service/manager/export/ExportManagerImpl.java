@@ -39,25 +39,25 @@ public class ExportManagerImpl implements ExportManager {
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
 
-  @Autowired
-  private JobExecutionService jobExecutionService; //NOSONAR
-  @Autowired
-  private InventoryRecordConverterService inventoryRecordService; //NOSONAR
-  @Autowired
-  private Vertx vertx; //NOSONAR
-  @Autowired
-  private FileStorage fileStorage; //NOSONAR
-  @Autowired
-  private ErrorLogService errorLogService; //NOSONAR
-  @Autowired
+  @Autowired //NOSONAR
+  private JobExecutionService jobExecutionService;
+  @Autowired //NOSONAR
+  private InventoryRecordConverterService inventoryRecordService;
+  @Autowired //NOSONAR
+  private Vertx vertx;
+  @Autowired //NOSONAR
+  private FileStorage fileStorage;
+  @Autowired //NOSONAR
+  private ErrorLogService errorLogService;
+  @Autowired //NOSONAR
   @Qualifier("instanceExportStrategyImpl")
-  private ExportStrategy instanceExportManager; //NOSONAR
-  @Autowired
+  private ExportStrategy instanceExportManager;
+  @Autowired //NOSONAR
   @Qualifier("holdingExportStrategyImpl")
-  private ExportStrategy holdingExportManager; //NOSONAR
-  @Autowired
+  private ExportStrategy holdingExportManager;
+  @Autowired //NOSONAR
   @Qualifier("authorityExportStrategyImpl")
-  private ExportStrategy authorityExportManager; //NOSONAR
+  private ExportStrategy authorityExportManager;
 
   public ExportManagerImpl() {
   }

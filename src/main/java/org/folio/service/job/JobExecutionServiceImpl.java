@@ -49,14 +49,14 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Autowired
-  private JobExecutionDao jobExecutionDao; //NOSONAR
-  @Autowired
-  private JobProfileService jobProfileService; //NOSONAR
-  @Autowired
-  private ExportStorageService exportStorageService; //NOSONAR
-  @Autowired
-  private ErrorLogService errorLogService; //NOSONAR
+  @Autowired //NOSONAR
+  private JobExecutionDao jobExecutionDao;
+  @Autowired //NOSONAR
+  private JobProfileService jobProfileService;
+  @Autowired //NOSONAR
+  private ExportStorageService exportStorageService;
+  @Autowired //NOSONAR
+  private ErrorLogService errorLogService;
 
   @Override
   public Future<JobExecutionCollection> get(String query, int offset, int limit, String tenantId) {
