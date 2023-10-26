@@ -2,7 +2,7 @@ package org.folio.service.file.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
-import org.junit.Assert;
+import org.folio.service.manager.export.ExportPayload;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class LocalStorageCsvSourceReaderUnitTest {
   @Test
   void shouldReturnTotalCountZero_whenReaderIsNotInitialized() {
     //when
-    long actualTotalCount = reader.totalCount();
+    long actualTotalCount = reader.totalCount(new ExportPayload());
     //then
     assertEquals(TOTAL_COUNT_0, actualTotalCount);
   }
@@ -57,7 +57,7 @@ class LocalStorageCsvSourceReaderUnitTest {
       .withSourcePath(NONEXISTING_FILE_NAME);
     //when
     reader.init(fileDefinition, errorLogService, jobExecutionId, tenantId, BATCH_SIZE);
-    long actualTotalCount = reader.totalCount();
+    long actualTotalCount = reader.totalCount(new ExportPayload());
     //then
     assertEquals(TOTAL_COUNT_0, actualTotalCount);
   }
@@ -69,7 +69,7 @@ class LocalStorageCsvSourceReaderUnitTest {
       .withSourcePath(INVENTORY_UUIDS_FILE_NAME);
     //when
     reader.init(fileDefinition, errorLogService, jobExecutionId, tenantId, BATCH_SIZE);
-    long actualTotalCount = reader.totalCount();
+    long actualTotalCount = reader.totalCount(new ExportPayload());
     //then
     assertEquals(TOTAL_COUNT_5, actualTotalCount);
   }
@@ -83,7 +83,7 @@ class LocalStorageCsvSourceReaderUnitTest {
     //when
     reader.init(fileDefinition, errorLogService, jobExecutionId, tenantId, 50);
     List<String> uuidList = reader.readNext();
-    long actualTotalCount = reader.totalCount();
+    long actualTotalCount = reader.totalCount(new ExportPayload());
     //then
     for (String uuid : uuidList) {
       Assertions.assertFalse(uuid.isEmpty());

@@ -158,7 +158,7 @@ public class ExportManagerImpl implements ExportManager {
     int exported = exportPayload.getExportedRecordsNumber();
     int failed = exportPayload.getFailedRecordsNumber();
     int duplicatedSrs = exportPayload.getDuplicatedSrs();
-    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, duplicatedSrs, tenantId);
+    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, duplicatedSrs, exportPayload.getInvalidUUIDs(), tenantId);
   }
 
   private InputDataManager getInputDataManager() {
