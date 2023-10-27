@@ -62,15 +62,15 @@ class InputDataManagerImpl implements InputDataManager {
   private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
-  @Autowired //NOSONAR
+  @Autowired
   private JobExecutionService jobExecutionService;
-  @Autowired //NOSONAR
+  @Autowired
   private FileDefinitionService fileDefinitionService;
-  @Autowired //NOSONAR
+  @Autowired
   private Vertx vertx;
-  @Autowired //NOSONAR
+  @Autowired
   private UsersClient usersClient;
-  @Autowired //NOSONAR
+  @Autowired
   private ErrorLogService errorLogService;
 
   private WorkerExecutor executor; //NOSONAR

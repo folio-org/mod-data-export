@@ -49,13 +49,13 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Autowired //NOSONAR
+  @Autowired
   private JobExecutionDao jobExecutionDao;
-  @Autowired //NOSONAR
+  @Autowired
   private JobProfileService jobProfileService;
-  @Autowired //NOSONAR
+  @Autowired
   private ExportStorageService exportStorageService;
-  @Autowired //NOSONAR
+  @Autowired
   private ErrorLogService errorLogService;
 
   @Override
