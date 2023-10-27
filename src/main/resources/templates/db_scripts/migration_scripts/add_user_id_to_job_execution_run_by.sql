@@ -1,3 +1,5 @@
+
+
 CREATE SCHEMA IF NOT EXISTS ${myuniversity}_mod_users;
 CREATE TABLE IF NOT EXISTS ${myuniversity}_mod_users.users(id uuid, jsonb JSONB);
 
