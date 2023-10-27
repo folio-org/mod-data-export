@@ -38,29 +38,27 @@ public class ExportManagerImpl implements ExportManager {
   public static final int INVENTORY_LOAD_PARTITION_SIZE = 50;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
+  @Autowired //NOSONAR
   private JobExecutionService jobExecutionService;
+  @Autowired //NOSONAR
   private InventoryRecordConverterService inventoryRecordService;
+  @Autowired //NOSONAR
   private Vertx vertx;
+  @Autowired //NOSONAR
   private FileStorage fileStorage;
+  @Autowired //NOSONAR
   private ErrorLogService errorLogService;
+  @Autowired //NOSONAR
+  @Qualifier("instanceExportStrategyImpl")
   private ExportStrategy instanceExportManager;
+  @Autowired //NOSONAR
+  @Qualifier("holdingExportStrategyImpl")
   private ExportStrategy holdingExportManager;
+  @Autowired //NOSONAR
+  @Qualifier("authorityExportStrategyImpl")
   private ExportStrategy authorityExportManager;
 
-  @Autowired
-  public ExportManagerImpl(JobExecutionService jobExecutionService, InventoryRecordConverterService inventoryRecordService,
-      Vertx vertx, FileStorage fileStorage, ErrorLogService errorLogService,
-      @Qualifier("instanceExportStrategyImpl") ExportStrategy instanceExportManager,
-      @Qualifier("holdingExportStrategyImpl") ExportStrategy holdingExportManager,
-      @Qualifier("authorityExportStrategyImpl") ExportStrategy authorityExportManager) {
-    this.jobExecutionService = jobExecutionService;
-    this.inventoryRecordService = inventoryRecordService;
-    this.vertx = vertx;
-    this.fileStorage = fileStorage;
-    this.errorLogService = errorLogService;
-    this.instanceExportManager = instanceExportManager;
-    this.holdingExportManager = holdingExportManager;
-    this.authorityExportManager = authorityExportManager;
+  public ExportManagerImpl() {
   }
 
   public ExportManagerImpl(Context context) {

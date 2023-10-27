@@ -62,23 +62,21 @@ class InputDataManagerImpl implements InputDataManager {
   private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
+  @Autowired //NOSONAR
   private JobExecutionService jobExecutionService;
+  @Autowired //NOSONAR
   private FileDefinitionService fileDefinitionService;
+  @Autowired //NOSONAR
   private Vertx vertx;
+  @Autowired //NOSONAR
   private UsersClient usersClient;
+  @Autowired //NOSONAR
   private ErrorLogService errorLogService;
 
   private WorkerExecutor executor; //NOSONAR
   private LocalMap<String, InputDataContext> inputDataLocalMap; //NOSONAR
 
-  @Autowired
-  public InputDataManagerImpl(JobExecutionService jobExecutionService, FileDefinitionService fileDefinitionService, Vertx vertx,
-      UsersClient usersClient, ErrorLogService errorLogService) {
-    this.jobExecutionService = jobExecutionService;
-    this.fileDefinitionService = fileDefinitionService;
-    this.vertx = vertx;
-    this.usersClient = usersClient;
-    this.errorLogService = errorLogService;
+  public InputDataManagerImpl() {
   }
 
   public InputDataManagerImpl(Context context) {
