@@ -23,6 +23,7 @@ public class ExportPayload {
   private int exportedRecordsNumber;
   private int failedRecordsNumber;
   private int duplicatedSrs;
+  private int invalidUUIDs;
 
   public ExportPayload() {
   }
@@ -114,5 +115,13 @@ public class ExportPayload {
 
   public void setDuplicatedSrs(int duplicatedSrs) {
     this.duplicatedSrs = duplicatedSrs;
+  }
+
+  public int getInvalidUUIDs() {
+    return invalidUUIDs;
+  }
+
+  public void setInvalidUUIDs(int invalidUUIDs) {
+    this.invalidUUIDs = invalidUUIDs;
   }
 }
