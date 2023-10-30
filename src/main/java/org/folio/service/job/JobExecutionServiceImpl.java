@@ -49,13 +49,13 @@ import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 public class JobExecutionServiceImpl implements JobExecutionService {
   private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Autowired
+  @Autowired //NOSONAR
   private JobExecutionDao jobExecutionDao;
-  @Autowired
+  @Autowired //NOSONAR
   private JobProfileService jobProfileService;
-  @Autowired
+  @Autowired //NOSONAR
   private ExportStorageService exportStorageService;
-  @Autowired
+  @Autowired //NOSONAR
   private ErrorLogService errorLogService;
 
   @Override
@@ -151,7 +151,7 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   }
 
   @Override
-  public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, int duplicatedSrs, String tenantId) {
+  public Future<JobExecution> incrementCurrentProgress(String jobExecutionId, int exported, int failed, int duplicatedSrs, int invalidUUIDs, String tenantId) {
     return jobExecutionDao.getById(jobExecutionId, tenantId)
       .compose(jobExecutionOptional -> {
         if (jobExecutionOptional.isPresent()) {
@@ -160,10 +160,12 @@ public class JobExecutionServiceImpl implements JobExecutionService {
           if (nonNull(progress)) {
             progress.setExported(progress.getExported() + exported);
             Failed failedRecords = progress.getFailed();
+            int failedUpdated = failed;
             if (isNull(failedRecords)) {
               progress.setFailed(new Failed());
+              failedUpdated += invalidUUIDs;
             }
-            progress.getFailed().withOtherFailed(progress.getFailed().getOtherFailed() + failed)
+            progress.getFailed().withOtherFailed(progress.getFailed().getOtherFailed() + failedUpdated)
               .withDuplicatedSrs(duplicatedSrs);
             jobExecution.setLastUpdatedDate(new Date());
             return jobExecutionDao.update(jobExecution, tenantId);

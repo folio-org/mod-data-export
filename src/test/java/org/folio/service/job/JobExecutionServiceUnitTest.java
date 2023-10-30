@@ -195,7 +195,7 @@ class JobExecutionServiceUnitTest {
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(job)));
     when(jobExecutionDao.update(job, TENANT_ID)).thenReturn(Future.succeededFuture(job));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 5, 1, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 5, 1, 0, 0, TENANT_ID);
     //then
     future.onComplete(ar -> {
       context.verify(() -> {
@@ -214,7 +214,7 @@ class JobExecutionServiceUnitTest {
     JobExecution jobExecution = new JobExecution();
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.of(jobExecution)));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, 0, 0, TENANT_ID);
     //then
     future.onComplete(ar -> {
 
@@ -234,7 +234,7 @@ class JobExecutionServiceUnitTest {
     String errorMessage = String.format("Job execution with id %s doesn't exist", JOB_EXECUTION_ID);
     when(jobExecutionDao.getById(JOB_EXECUTION_ID, TENANT_ID)).thenReturn(Future.succeededFuture(Optional.empty()));
     //when
-    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, 0, TENANT_ID);
+    Future<JobExecution> future = jobExecutionService.incrementCurrentProgress(JOB_EXECUTION_ID, 0, 0, 0, 0, TENANT_ID);
     //then
     future.onComplete(ar -> {
       context.verify(() -> {
