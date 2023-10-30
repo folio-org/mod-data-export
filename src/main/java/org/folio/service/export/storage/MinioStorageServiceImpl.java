@@ -97,7 +97,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .map(Paths::get)
         .filter(Files::isRegularFile)
         .forEach(filePath -> {
-          try (var is =  new BufferedInputStream(Files.newInputStream(filePath))) {
+          try (var fis = Files.newInputStream(filePath); var is =  new BufferedInputStream(fis)) {
             var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
             client.write(path, is);
           } catch (Exception e) {
