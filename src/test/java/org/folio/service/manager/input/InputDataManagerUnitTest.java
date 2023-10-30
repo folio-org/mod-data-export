@@ -206,7 +206,7 @@ class InputDataManagerUnitTest {
   void shouldInitInputDataContextBeforeExportData_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true);
-    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    when(sourceReader.totalCount(new ExportPayload())).thenReturn(TOTAL_COUNT_2);
     when(jobExecutionService.prepareJobForExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString()))
       .thenReturn(Future.succeededFuture(jobExecution));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
@@ -224,7 +224,7 @@ class InputDataManagerUnitTest {
   void shouldCreate_andSaveFileExportDefinitionBeforeExport_whenSourceStreamNotEmpty() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
-    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    when(sourceReader.totalCount(new ExportPayload())).thenReturn(TOTAL_COUNT_2);
     when(jobExecutionService.prepareJobForExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString()))
       .thenReturn(Future.succeededFuture(jobExecution));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
@@ -243,7 +243,7 @@ class InputDataManagerUnitTest {
   void shouldInit_andExportData_whenSourceStreamHasOneChunk() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, false);
-    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_2);
+    when(sourceReader.totalCount(new ExportPayload())).thenReturn(TOTAL_COUNT_2);
     when(jobExecutionService.prepareJobForExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString()))
       .thenReturn(Future.succeededFuture(jobExecution));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));
@@ -268,7 +268,7 @@ class InputDataManagerUnitTest {
   void shouldInit_andExportData_whenSourceStreamHasTwoChunks() {
     //given
     when(sourceReader.hasNext()).thenReturn(true, true);
-    when(sourceReader.totalCount()).thenReturn(TOTAL_COUNT_4);
+    when(sourceReader.totalCount(new ExportPayload())).thenReturn(TOTAL_COUNT_4);
     when(jobExecutionService.prepareJobForExport(any(JobExecution.class), any(FileDefinition.class), any(JsonObject.class), anyInt(), anyBoolean(), anyString()))
       .thenReturn(Future.succeededFuture(jobExecution));
     when(fileDefinitionService.save(fileExportDefinitionCaptor.capture(), eq(TENANT_ID))).thenReturn(Future.succeededFuture(fileExportDefinition));

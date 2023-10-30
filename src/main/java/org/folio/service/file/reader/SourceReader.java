@@ -2,6 +2,7 @@ package org.folio.service.file.reader;
 
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
+import org.folio.service.manager.export.ExportPayload;
 
 import java.util.List;
 
@@ -43,9 +44,11 @@ public interface SourceReader {
   /**
    * Returns the total count of all elements in source
    *
+   * @param exportPayload export payload to set failed (invalid UUIDs)
+   *
    * @return the total count of all elements in source
    */
-  int totalCount();
+  int totalCount(ExportPayload exportPayload);
 
 
 }

@@ -7,6 +7,7 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.service.logs.ErrorLogService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.service.manager.export.ExportPayload;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -89,10 +90,10 @@ public class LocalStorageCsvSourceReader implements SourceReader {
   }
 
   @Override
-  public int totalCount() {
+  public int totalCount(ExportPayload exportPayload) {
     if (nonNull(fileDefinition) && !CQL.equals(fileDefinition.getUploadFormat())) {
       try (Stream<String> fileLines = Files.lines(Paths.get(fileDefinition.getSourcePath()))) {
-        return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines);
+        return getValidUUIDsCountAndSaveErrorIfInvalidFound(fileLines, exportPayload);
         // handle unchecked java.nio.charset exception
       } catch (Exception e) {
         LOGGER.error(e.getMessage(), e);
@@ -101,7 +102,7 @@ public class LocalStorageCsvSourceReader implements SourceReader {
     return 0;
   }
 
-  private int getValidUUIDsCountAndSaveErrorIfInvalidFound(Stream<String> fileLines) {
+  private int getValidUUIDsCountAndSaveErrorIfInvalidFound(Stream<String> fileLines, ExportPayload exportPayload) {
     List<String> invalidUUIDs = new ArrayList<>();
     long count = fileLines
       .filter(s -> {
@@ -114,8 +115,9 @@ public class LocalStorageCsvSourceReader implements SourceReader {
       }).count();
     if (CollectionUtils.isNotEmpty(invalidUUIDs)) {
       errorLogService.saveGeneralErrorWithMessageValues(INVALID_UUID_FORMAT.getCode(), Arrays.asList(String.join(COMMA, invalidUUIDs)), jobExecutionId, tenantId);
+      exportPayload.setInvalidUUIDs(invalidUUIDs.size());
     }
-    return (int) count;
+    return (int) count + invalidUUIDs.size();
   }
 
 
