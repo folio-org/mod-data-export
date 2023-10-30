@@ -27,7 +27,7 @@
     <marc4j.version>2.9.2</marc4j.version>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <generate-marc-utils-version>1.6.0</generate-marc-utils-version>
-    <folio-s3-client.version>1.1.0</folio-s3-client.version>
+    <folio-s3-client.version>1.2.0-SNAPSHOT</folio-s3-client.version>
     <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
     <sonar.exclusions>
       **/OkapiConnectionParams.java,
