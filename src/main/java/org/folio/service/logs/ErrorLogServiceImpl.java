@@ -148,18 +148,23 @@ public class ErrorLogServiceImpl implements ErrorLogService {
   }
 
   public Future<ErrorLog> saveWithAffectedRecord(JsonObject instance, String errorMessage, String errorMessageCode, String jobExecutionId, OkapiConnectionParams params) {
-    String instId = null;
-    var externalIdsHolder = instance.getJsonObject("externalIdsHolder");
-    if (nonNull(externalIdsHolder)) {
-      instId = externalIdsHolder.getString("instanceId");
-    }
+    String instId = instance.getString("id");
+    String hrId = instance.getString("hrid");
+    String title = instance.getString("title");
+    String generalEndOfErrorMsg = " cannot be determined because instance record is not found or invalid, but still contains more than 1 SRS record";
     if (instId == null) {
-      instId = "UUID cannot be determined because record is invalid: SRS contains more than 1 record for 1 instance";
+      instId = "UUID" + generalEndOfErrorMsg;
+    }
+    if (hrId == null) {
+      hrId = "HRID" + generalEndOfErrorMsg;
+    }
+    if (title == null) {
+      title = "Title" + generalEndOfErrorMsg;
     }
     AffectedRecord affectedRecord = new AffectedRecord()
       .withId(instId)
-      .withHrid("HRID cannot be found if SRS contains more than 1 record for 1 instance")
-      .withTitle("Title cannot be found if SRS contains more than 1 record for 1 instance")
+      .withHrid(hrId)
+      .withTitle(title)
       .withRecordType(AffectedRecord.RecordType.INSTANCE)
       .withInventoryRecordLink(configurationsClient.getInventoryRecordLink(instId, jobExecutionId, params));
     ErrorLog errorLog = new ErrorLog()

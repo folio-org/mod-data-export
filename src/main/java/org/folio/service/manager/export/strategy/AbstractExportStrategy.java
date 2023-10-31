@@ -1,14 +1,18 @@
 package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
+import org.folio.clients.InventoryClient;
 import org.folio.clients.UsersClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -31,8 +35,10 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Objects.nonNull;
 import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
@@ -54,6 +60,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private UsersClient usersClient;
   @Autowired
   private InventoryRecordConverterService inventoryRecordService;
+
+  @Autowired
+  private InventoryClient inventoryClient;
 
   @Override
   abstract public void export(ExportPayload exportPayload, Promise<Object> blockingPromise);
@@ -80,13 +89,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void checkDuplicates(List<JsonObject> underlyingMarcRecords, String jobExecutionId, OkapiConnectionParams params,
                                ExportPayload exportPayload) {
     final Set<String> instanceIds = new HashSet<>();
+    final Map<JsonObject, List<String>> instanceSRSIDs = new HashMap<>();
     underlyingMarcRecords.stream()
       .forEach(rec -> {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
         if (nonNull(instanceId) && instanceIds.contains(instanceId)) {
-          getErrorLogService().saveWithAffectedRecord(rec,
-            format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instanceId),
-            ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
+          var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
+          instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
           exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
           LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
             exportPayload.getDuplicatedSrs());
@@ -94,6 +103,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           instanceIds.add(instanceId);
         }
       });
+    instanceSRSIDs.forEach((instance, srsAssociated) -> {
+      getErrorLogService().saveGeneralError(
+          format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
+              join(",", srsAssociated)), jobExecutionId, params.getTenantId());
+      getErrorLogService().saveWithAffectedRecord(
+          instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("id")),
+          ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
+    });
   }
 
   protected void postExport(ExportPayload exportPayload, FileDefinition fileExportDefinition, OkapiConnectionParams params) {
