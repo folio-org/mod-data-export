@@ -31,7 +31,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.util.ErrorCode.SOME_UUIDS_NOT_FOUND;

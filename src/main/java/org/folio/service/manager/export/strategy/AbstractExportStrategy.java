@@ -37,7 +37,6 @@ import io.vertx.core.json.JsonObject;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Objects.nonNull;
-import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
@@ -104,12 +103,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         }
       });
     instanceSRSIDs.forEach((instance, srsAssociated) -> {
-      getErrorLogService().saveGeneralError(
-          format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
-              join(",", srsAssociated)), jobExecutionId, params.getTenantId());
       getErrorLogService().saveWithAffectedRecord(
-          instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("id")),
-          ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
+          instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
+              join(",", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params);
     });
   }
 

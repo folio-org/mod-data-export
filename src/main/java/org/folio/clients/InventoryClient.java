@@ -174,11 +174,7 @@ public class InventoryClient extends BaseConcurrentClient {
     String endpoint = resourcesPathWithPrefix(INSTANCE) + "/" + instanceId;
     String queryEndpoint = ClientUtil.buildQueryEndpoint(endpoint, params.getOkapiUrl());
     try {
-      var res = Optional.of(ClientUtil.getRequest(params, queryEndpoint));
-      if (res.isPresent()) {
-        return res.get();
-      }
-      return null;
+      return Optional.of(ClientUtil.getRequest(params, queryEndpoint)).get();
     } catch (HttpClientException e) {
       errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_REFERENCE_DATA.getCode(), Arrays.asList(endpoint), jobExecutionId, params.getTenantId());
       return null;
