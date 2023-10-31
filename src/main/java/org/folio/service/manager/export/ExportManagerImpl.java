@@ -38,24 +38,23 @@ public class ExportManagerImpl implements ExportManager {
   public static final int INVENTORY_LOAD_PARTITION_SIZE = 50;
   /* WorkerExecutor provides a worker pool for export process */
   private WorkerExecutor executor;
-
-  @Autowired
+  @Autowired //NOSONAR
   private JobExecutionService jobExecutionService;
-  @Autowired
+  @Autowired //NOSONAR
   private InventoryRecordConverterService inventoryRecordService;
-  @Autowired
+  @Autowired //NOSONAR
   private Vertx vertx;
-  @Autowired
+  @Autowired //NOSONAR
   private FileStorage fileStorage;
-  @Autowired
+  @Autowired //NOSONAR
   private ErrorLogService errorLogService;
-  @Autowired
+  @Autowired //NOSONAR
   @Qualifier("instanceExportStrategyImpl")
   private ExportStrategy instanceExportManager;
-  @Autowired
+  @Autowired //NOSONAR
   @Qualifier("holdingExportStrategyImpl")
   private ExportStrategy holdingExportManager;
-  @Autowired
+  @Autowired //NOSONAR
   @Qualifier("authorityExportStrategyImpl")
   private ExportStrategy authorityExportManager;
 
@@ -158,7 +157,7 @@ public class ExportManagerImpl implements ExportManager {
     int exported = exportPayload.getExportedRecordsNumber();
     int failed = exportPayload.getFailedRecordsNumber();
     int duplicatedSrs = exportPayload.getDuplicatedSrs();
-    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, duplicatedSrs, tenantId);
+    return jobExecutionService.incrementCurrentProgress(exportPayload.getJobExecutionId(), exported, failed, duplicatedSrs, exportPayload.getInvalidUUIDs(), tenantId);
   }
 
   private InputDataManager getInputDataManager() {

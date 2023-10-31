@@ -92,7 +92,7 @@ public interface JobExecutionService {
    * @param tenantId       tenant id
    * @return future
    */
-  Future<JobExecution> incrementCurrentProgress(String jobExecutionId, final int exported, final int failed, final int duplicatedSrs, String tenantId);
+  Future<JobExecution> incrementCurrentProgress(String jobExecutionId, final int exported, final int failed, final int duplicatedSrs, final int invalidUUIDs, String tenantId);
 
   /**
    * Update status of expired job executions to fail

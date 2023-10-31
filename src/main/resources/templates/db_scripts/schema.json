@@ -137,17 +137,17 @@
     },
     {
       "run": "after",
+      "snippetPath": "migration_scripts/add_job_profile_names.sql",
+      "fromModuleVersion": "mod-data-export-4.8.0"
+    },
+    {
+      "run": "after",
       "snippetPath": "migration_scripts/update_failed.sql",
       "fromModuleVersion": "mod-data-export-4.8.0"
     },
     {
       "run": "after",
       "snippetPath": "migration_scripts/add_user_id_to_job_execution_run_by.sql",
-      "fromModuleVersion": "mod-data-export-4.8.0"
-    },
-    {
-      "run": "after",
-      "snippetPath": "migration_scripts/add_job_profile_names.sql",
       "fromModuleVersion": "mod-data-export-4.8.0"
     }
   ]

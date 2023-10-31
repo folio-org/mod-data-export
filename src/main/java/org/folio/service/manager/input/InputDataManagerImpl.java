@@ -62,15 +62,15 @@ class InputDataManagerImpl implements InputDataManager {
   private static final int BATCH_SIZE = 50;
   private static final String MARC_FILE_EXTENSION = ".mrc";
 
-  @Autowired
+  @Autowired //NOSONAR
   private JobExecutionService jobExecutionService;
-  @Autowired
+  @Autowired //NOSONAR
   private FileDefinitionService fileDefinitionService;
-  @Autowired
+  @Autowired //NOSONAR
   private Vertx vertx;
-  @Autowired
+  @Autowired //NOSONAR
   private UsersClient usersClient;
-  @Autowired
+  @Autowired //NOSONAR
   private ErrorLogService errorLogService;
 
   private WorkerExecutor executor; //NOSONAR
@@ -147,7 +147,7 @@ class InputDataManagerImpl implements InputDataManager {
         LOGGER.debug("Trying to fetch created User name for user ID {}", exportRequest.getMetadata().getCreatedByUserId());
         if (optionalUser.isPresent()) {
           JsonObject user = optionalUser.get();
-          jobExecutionService.prepareJobForExport(jobExecution, fileExportDefinition, user, sourceReader.totalCount(), isNotCQL(requestFileDefinition), tenantId)
+          jobExecutionService.prepareJobForExport(jobExecution, fileExportDefinition, user, sourceReader.totalCount(exportPayload), isNotCQL(requestFileDefinition), tenantId)
           .onSuccess(jobExec -> exportNextChunk(exportPayload, sourceReader))
           .onFailure(ar -> {
             jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileExportDefinition, optionalUser.get(), 0, true, tenantId);
