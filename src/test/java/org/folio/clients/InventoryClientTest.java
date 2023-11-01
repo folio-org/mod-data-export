@@ -2,8 +2,6 @@ package org.folio.clients;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.junit5.VertxExtension;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.service.ApplicationTestConfig;
@@ -11,9 +9,6 @@ import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -23,9 +18,6 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-@RunWith(VertxUnitRunner.class)
-@ExtendWith(MockitoExtension.class)
-@ExtendWith(VertxExtension.class)
 class InventoryClientTest extends RestVerticleTestBase {
 
   private static OkapiConnectionParams okapiConnectionParams;
