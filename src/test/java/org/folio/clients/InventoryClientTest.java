@@ -5,10 +5,14 @@ import io.vertx.core.Vertx;
 import org.apache.commons.collections4.map.HashedMap;
 import org.folio.rest.impl.RestVerticleTestBase;
 import org.folio.service.ApplicationTestConfig;
+import org.folio.service.logs.ErrorLogService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -18,12 +22,16 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@ExtendWith(MockitoExtension.class)
 class InventoryClientTest extends RestVerticleTestBase {
 
   private static OkapiConnectionParams okapiConnectionParams;
 
   @Autowired
   private InventoryClient inventoryClient;
+
+  @Mock
+  private ErrorLogService errorLogService;
 
   public InventoryClientTest() {
     Context vertxContext = Vertx.vertx().getOrCreateContext();
@@ -43,6 +51,8 @@ class InventoryClientTest extends RestVerticleTestBase {
   void testGetInstanceByIdNotFound() {
     var instanceId = UUID.randomUUID().toString();
     var jobExecutionId = UUID.randomUUID().toString();
+//    when(errorLogService.saveGeneralErrorWithMessageValues(any(String.class), any(List.class),
+//        any(String.class), any(String.class))).thenReturn(Future.succeededFuture(new ErrorLog()));
     var actual = inventoryClient.getInstanceById(jobExecutionId, instanceId, okapiConnectionParams);
     assertNull(actual);
   }
