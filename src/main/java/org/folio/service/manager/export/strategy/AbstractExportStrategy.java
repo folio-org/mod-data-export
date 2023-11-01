@@ -59,8 +59,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private UsersClient usersClient;
   @Autowired
   private InventoryRecordConverterService inventoryRecordService;
-
-  @Autowired
   private InventoryClient inventoryClient;
 
   @Override
@@ -102,11 +100,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           instanceIds.add(instanceId);
         }
       });
-    instanceSRSIDs.forEach((instance, srsAssociated) -> {
-      getErrorLogService().saveWithAffectedRecord(
-          instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
-              join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params);
-    });
+    instanceSRSIDs.forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
+        instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
+            join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params));
   }
 
   protected void postExport(ExportPayload exportPayload, FileDefinition fileExportDefinition, OkapiConnectionParams params) {
@@ -165,6 +161,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public enum EntityType {
     HOLDING, INSTANCE, AUTHORITY
+  }
+
+  @Autowired
+  public void setInventoryClient(InventoryClient inventoryClient) {
+    this.inventoryClient = inventoryClient;
   }
 
 }
