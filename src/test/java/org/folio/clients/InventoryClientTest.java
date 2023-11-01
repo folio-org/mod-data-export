@@ -11,7 +11,9 @@ import org.folio.util.OkapiConnectionParams;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,26 +25,27 @@ import static org.folio.rest.impl.StorageTestSuite.mockPort;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
-class InventoryClientTest extends RestVerticleTestBase {
+class InventoryClientTest {
 
   private static OkapiConnectionParams okapiConnectionParams;
 
-  @Autowired
+  @InjectMocks
+  @Spy
   private InventoryClient inventoryClient;
 
   @Mock
   private ErrorLogService errorLogService;
 
-  public InventoryClientTest() {
-    Context vertxContext = Vertx.vertx().getOrCreateContext();
-    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
-    SpringContextUtil.autowireDependencies(this, vertxContext);
-  }
+//  public InventoryClientTest() {
+//    Context vertxContext = Vertx.vertx().getOrCreateContext();
+//    SpringContextUtil.init(vertxContext.owner(), vertxContext, ApplicationTestConfig.class);
+//    SpringContextUtil.autowireDependencies(this, vertxContext);
+//  }
 
   @BeforeAll
   public static void beforeClass() {
     Map<String, String> headers = new HashedMap<>();
-    headers.put(OKAPI_HEADER_TENANT, TENANT_ID);
+    headers.put(OKAPI_HEADER_TENANT, "TENANT_ID");
     headers.put("x-okapi-url", "http://localhost:" + mockPort);
     okapiConnectionParams = new OkapiConnectionParams(headers);
   }
@@ -51,8 +54,6 @@ class InventoryClientTest extends RestVerticleTestBase {
   void testGetInstanceByIdNotFound() {
     var instanceId = UUID.randomUUID().toString();
     var jobExecutionId = UUID.randomUUID().toString();
-//    when(errorLogService.saveGeneralErrorWithMessageValues(any(String.class), any(List.class),
-//        any(String.class), any(String.class))).thenReturn(Future.succeededFuture(new ErrorLog()));
     var actual = inventoryClient.getInstanceById(jobExecutionId, instanceId, okapiConnectionParams);
     assertNull(actual);
   }
