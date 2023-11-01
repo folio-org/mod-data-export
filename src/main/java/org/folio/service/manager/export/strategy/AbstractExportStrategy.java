@@ -105,7 +105,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     instanceSRSIDs.forEach((instance, srsAssociated) -> {
       getErrorLogService().saveWithAffectedRecord(
           instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
-              join(",", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params);
+              join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params);
     });
   }
 
