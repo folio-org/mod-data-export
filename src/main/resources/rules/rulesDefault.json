@@ -141,7 +141,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "append_identifier",
           "parameters": {
             "type": "ISBN"
           }
@@ -151,9 +151,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISBN",
             "type": "Invalid ISBN"
           }
         }
@@ -190,7 +189,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "append_identifier",
           "parameters": {
             "type": "ISSN"
           }
@@ -198,11 +197,10 @@
       },
       {
         "from": "$.instance.identifiers[*].value",
-        "subfield": "i",
+        "subfield": "l",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISSN",
             "type": "Linking ISSN"
           }
         }
@@ -211,9 +209,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "ISSN",
             "type": "Invalid ISSN"
           }
         }
@@ -1044,7 +1041,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "set_identifier",
+          "function": "append_identifier",
           "parameters": {
             "type": "GPO item number"
           }
@@ -1054,9 +1051,8 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "set_related_identifier",
+          "function": "append_identifier",
           "parameters": {
-            "relatedIdentifierTypes": "GPO item number",
             "type": "Cancelled GPO item number"
           }
         }
