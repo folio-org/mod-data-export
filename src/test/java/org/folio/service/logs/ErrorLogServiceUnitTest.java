@@ -291,7 +291,7 @@ class ErrorLogServiceUnitTest {
     // when
     Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(
       record,
-      format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), INSTANCE_ID),
+      format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), "1", UUID.randomUUID()),
       ERROR_DUPLICATE_SRS_RECORD.getCode(), JOB_EXECUTION_ID, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
