@@ -257,6 +257,7 @@ class InstanceExportStrategyUnitTest {
   @Test
   @Order(5)
   void exportBlocking_shouldSaveAllDuplicateSRS() {
+    // given
     Map<String, String> headers = new HashMap<>();
     headers.put(OKAPI_HEADER_TENANT, "TENANT_ID");
     headers.put("x-okapi-url", "http://localhost:" + mockPort);
@@ -282,10 +283,11 @@ class InstanceExportStrategyUnitTest {
       any(OkapiConnectionParams.class))).thenReturn(srsLoadResult);
     when(inventoryClient.getInstanceById(jobExecutionId, instanceId, okapiConnectionParams))
       .thenReturn(instance);
-//    when(errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_REFERENCE_DATA.getCode(), null, jobExecutionId, okapiConnectionParams.getTenantId()))
-//      .thenReturn(Future.succeededFuture(new ErrorLog()));
+
+    // when
     instanceExportManager.export(exportPayload, Promise.promise());
 
+    // then
     verify(errorLogService).saveWithAffectedRecord(instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
       join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, okapiConnectionParams);
   }
