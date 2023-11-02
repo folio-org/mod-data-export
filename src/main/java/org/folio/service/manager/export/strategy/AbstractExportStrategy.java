@@ -93,14 +93,20 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
         if (nonNull(instanceId)) {
           var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
-          instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
-          if (instanceIds.contains(instanceId)) {
-            exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
-            LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
-              exportPayload.getDuplicatedSrs());
+          if (nonNull(instance)) {
+            instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
+            if (instanceIds.contains(instanceId)) {
+              exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
+              LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
+                exportPayload.getDuplicatedSrs());
+            } else {
+              instanceIds.add(instanceId);
+            }
           } else {
-            instanceIds.add(instanceId);
+            LOGGER.error("Instance with id {} cannot be found", instanceId);
           }
+        } else {
+          LOGGER.error("externalIdsHolder of {} does not contain instanceId", rec.encodePrettily());
         }
       });
     instanceSRSIDs.forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
