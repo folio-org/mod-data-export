@@ -4,7 +4,7 @@ import static java.lang.String.format;
 import static java.lang.String.join;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.mockPort;
-import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.clients.ConsortiaClient;
 import org.folio.clients.InventoryClient;
@@ -258,7 +257,7 @@ class InstanceExportStrategyUnitTest {
   @Test
   @Order(5)
   void exportBlocking_shouldSaveAllDuplicateSRS() {
-    Map<String, String> headers = new HashedMap<>();
+    Map<String, String> headers = new HashMap<>();
     headers.put(OKAPI_HEADER_TENANT, "TENANT_ID");
     headers.put("x-okapi-url", "http://localhost:" + mockPort);
     var okapiConnectionParams = new OkapiConnectionParams(headers);
@@ -287,8 +286,8 @@ class InstanceExportStrategyUnitTest {
 //      .thenReturn(Future.succeededFuture(new ErrorLog()));
     instanceExportManager.export(exportPayload, Promise.promise());
 
-    verify(errorLogService).saveWithAffectedRecord(instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
-      join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, okapiConnectionParams);
+    verify(errorLogService).saveWithAffectedRecord(instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
+      join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, okapiConnectionParams);
   }
 
 }

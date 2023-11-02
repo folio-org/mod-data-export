@@ -37,7 +37,7 @@ import io.vertx.core.json.JsonObject;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Objects.nonNull;
-import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
@@ -59,6 +59,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private UsersClient usersClient;
   @Autowired
   private InventoryRecordConverterService inventoryRecordService;
+  @Autowired
   private InventoryClient inventoryClient;
 
   @Override
@@ -92,19 +93,25 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
         if (nonNull(instanceId)) {
           var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
-          instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
-          if (instanceIds.contains(instanceId)) {
-            exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
-            LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
-              exportPayload.getDuplicatedSrs());
+          if (nonNull(instance)) {
+            instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
+            if (instanceIds.contains(instanceId)) {
+              exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
+              LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
+                exportPayload.getDuplicatedSrs());
+            } else {
+              instanceIds.add(instanceId);
+            }
           } else {
-            instanceIds.add(instanceId);
+            LOGGER.error("Instance with id {} cannot be found", instanceId);
           }
+        } else {
+          LOGGER.error("externalIdsHolder of {} does not contain instanceId", rec.encodePrettily());
         }
       });
     instanceSRSIDs.forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
-        instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
-            join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), jobExecutionId, params));
+        instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
+            join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params));
   }
 
   protected void postExport(ExportPayload exportPayload, FileDefinition fileExportDefinition, OkapiConnectionParams params) {
@@ -163,11 +170,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public enum EntityType {
     HOLDING, INSTANCE, AUTHORITY
-  }
-
-  @Autowired
-  public void setInventoryClient(InventoryClient inventoryClient) {
-    this.inventoryClient = inventoryClient;
   }
 
 }

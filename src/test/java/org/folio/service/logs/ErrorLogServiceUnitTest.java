@@ -45,7 +45,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.jaxrs.model.ErrorLog.LogLevel.ERROR;
-import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 import static org.folio.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -291,15 +291,15 @@ class ErrorLogServiceUnitTest {
     // when
     Future<ErrorLog> future = errorLogService.saveWithAffectedRecord(
       record,
-      format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), "1", UUID.randomUUID()),
-      ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), JOB_EXECUTION_ID, params);
+      format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), "1", UUID.randomUUID()),
+      ERROR_DUPLICATE_SRS_RECORD.getCode(), JOB_EXECUTION_ID, params);
     // then
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(errorLogDao).save(errorLogCaptor.capture(), eq(TENANT_ID));
       ErrorLog errorLog = errorLogCaptor.getValue();
       Assert.assertEquals(ERROR, errorLog.getLogLevel());
-      Assert.assertEquals(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode(), errorLog.getErrorMessageCode());
+      Assert.assertEquals(ERROR_DUPLICATE_SRS_RECORD.getCode(), errorLog.getErrorMessageCode());
       Assert.assertEquals(JOB_EXECUTION_ID, errorLog.getJobExecutionId());
       context.completeNow();
     }));

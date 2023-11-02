@@ -50,7 +50,7 @@ public enum ErrorCode {
   ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting authority records only the default authority job profile is supported"),
   ERROR_JOB_IS_EXPIRED("error.messagePlaceholder", "Job was expired: no updates for more than 1 hour"),
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
-  ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED("error.duplicateSRS", "Instance with HRID: %s has following SRS records associated: %s");
+  ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", "Instance with HRID: %s has following SRS records associated: %s");
 
   private final String code;
   private final String description;
@@ -87,7 +87,7 @@ public enum ErrorCode {
     errorCodesForUUIDs.add(ERROR_FIELDS_MAPPING_SRS.getCode());
     errorCodesForUUIDs.add(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode());
     errorCodesForUUIDs.add(UNDEFINED.getCode());
-    errorCodesForUUIDs.add(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getCode());
+    errorCodesForUUIDs.add(ERROR_DUPLICATE_SRS_RECORD.getCode());
     return errorCodesForUUIDs;
   }
 }
