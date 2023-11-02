@@ -90,15 +90,15 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     underlyingMarcRecords.stream()
       .forEach(rec -> {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
+        var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
         if (nonNull(instanceId) && instanceIds.contains(instanceId)) {
-          var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
-          instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
           exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
           LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
             exportPayload.getDuplicatedSrs());
         } else {
           instanceIds.add(instanceId);
         }
+        instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
       });
     instanceSRSIDs.forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
         instance, format(ERROR_DUPLICATE_SRS_RECORDS_ASSOCIATED.getDescription(), instance.getString("hrid"),
