@@ -170,6 +170,17 @@ public class InventoryClient extends BaseConcurrentClient {
     return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTRIBUTOR_NAME_TYPES);
   }
 
+  public JsonObject getInstanceById(String jobExecutionId, String instanceId, OkapiConnectionParams params) {
+    String endpoint = resourcesPathWithPrefix(INSTANCE) + "/" + instanceId;
+    String queryEndpoint = ClientUtil.buildQueryEndpoint(endpoint, params.getOkapiUrl());
+    try {
+      return Optional.of(ClientUtil.getRequest(params, queryEndpoint)).get();
+    } catch (HttpClientException e) {
+      errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_REFERENCE_DATA.getCode(), Arrays.asList(endpoint), jobExecutionId, params.getTenantId());
+      return null;
+    }
+  }
+
   private Map<String, JsonObject> getReferenceDataByUrl(String url, String jobExecutionId, OkapiConnectionParams params, String field) {
     String queryEndpoint = ClientUtil.buildQueryEndpoint(url, params.getOkapiUrl());
     Optional<JsonObject> responseBody;
