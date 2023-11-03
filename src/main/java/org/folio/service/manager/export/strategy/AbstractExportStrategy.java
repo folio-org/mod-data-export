@@ -1,14 +1,19 @@
 package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
+import org.folio.clients.InventoryClient;
 import org.folio.clients.UsersClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
@@ -31,6 +36,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Objects.nonNull;
 import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 
@@ -54,6 +60,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private UsersClient usersClient;
   @Autowired
   private InventoryRecordConverterService inventoryRecordService;
+  private InventoryClient inventoryClient;
 
   @Override
   abstract public void export(ExportPayload exportPayload, Promise<Object> blockingPromise);
@@ -80,20 +87,33 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void checkDuplicates(List<JsonObject> underlyingMarcRecords, String jobExecutionId, OkapiConnectionParams params,
                                ExportPayload exportPayload) {
     final Set<String> instanceIds = new HashSet<>();
+    final Map<JsonObject, List<String>> instanceSRSIDs = new HashMap<>();
     underlyingMarcRecords.stream()
       .forEach(rec -> {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
-        if (nonNull(instanceId) && instanceIds.contains(instanceId)) {
-          getErrorLogService().saveWithAffectedRecord(rec,
-            format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instanceId),
-            ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params);
-          exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
-          LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
-            exportPayload.getDuplicatedSrs());
+        if (nonNull(instanceId)) {
+          var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
+          if (nonNull(instance)) {
+            instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
+            if (instanceIds.contains(instanceId)) {
+              exportPayload.setDuplicatedSrs(exportPayload.getDuplicatedSrs() + 1);
+              LOGGER.info("Duplicate SRS record found of instance ID {}, total duplicated SRS {}", instanceId,
+                exportPayload.getDuplicatedSrs());
+            } else {
+              instanceIds.add(instanceId);
+            }
+          } else {
+            LOGGER.error("Instance with id {} cannot be found", instanceId);
+          }
         } else {
-          instanceIds.add(instanceId);
+          LOGGER.error("externalIdsHolder of {} does not contain instanceId", rec.encodePrettily());
         }
       });
+    instanceSRSIDs.entrySet().stream().filter(entry -> entry.getValue().size() > 1)
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+      .forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
+        instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
+            join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params));
   }
 
   protected void postExport(ExportPayload exportPayload, FileDefinition fileExportDefinition, OkapiConnectionParams params) {
@@ -152,6 +172,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   public enum EntityType {
     HOLDING, INSTANCE, AUTHORITY
+  }
+
+  @Autowired
+  public void setInventoryClient(InventoryClient inventoryClient) {
+    this.inventoryClient = inventoryClient;
   }
 
 }
