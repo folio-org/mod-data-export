@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,7 +109,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           LOGGER.error("externalIdsHolder of {} does not contain instanceId", rec.encodePrettily());
         }
       });
-    instanceSRSIDs.forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
+    instanceSRSIDs.entrySet().stream().filter(entry -> entry.getValue().size() > 1)
+      .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()))
+      .forEach((instance, srsAssociated) -> getErrorLogService().saveWithAffectedRecord(
         instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
             join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, params));
   }
