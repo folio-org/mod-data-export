@@ -3,7 +3,7 @@
 ## 11/06/2023 v4.8.2 Released
 This release includes only bug fixes.
 
-[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.0...v4.8.1)
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.1...v4.8.2)
 
 ### Bug Fixes
 * [MDEXP-659](https://issues.folio.org/browse/MDEXP-659) Invalid values in export logs for some Failed exports
