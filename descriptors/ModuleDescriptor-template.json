@@ -85,6 +85,26 @@
     {
       "id": "search",
       "version": "0.6 1.0"
+    },
+    {
+      "id": "alternative-title-types",
+      "version": "1.0"
+    },
+    {
+      "id": "inventory",
+      "version": "13.0"
+    },
+    {
+      "id": "authority-storage",
+      "version": "2.0"
+    },
+    {
+      "id": "loan-types",
+      "version": "2.3"
+    },
+    {
+      "id": "user-tenants",
+      "version": "1.0"
     }
   ],
   "provides": [
