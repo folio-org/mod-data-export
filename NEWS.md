@@ -1,5 +1,17 @@
 ## v4.9.0 Unreleased
 
+## 11/06/2023 v4.8.2 Released
+This release includes only bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.1...v4.8.2)
+
+### Bug Fixes
+* [MDEXP-659](https://issues.folio.org/browse/MDEXP-659) Invalid values in export logs for some Failed exports
+* [MDEXP-658](https://issues.folio.org/browse/MDEXP-658) Data Export fails/stops triggered by  a  large file (> 196K)
+* [MDEXP-653](https://issues.folio.org/browse/MDEXP-653) "Failed" column is populated differently depending on the place in the file of record with duplicates
+* [MDEXP-557](https://issues.folio.org/browse/MDEXP-557) "Failed" column is not populated on the "Logs" pane of Data Export
+
+
 ## 10/18/2023 v4.8.1 Released
 This release includes fix for migration scripts.
 
