@@ -1,0 +1,412 @@
+{
+  "holdings": [
+    {
+      "id": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "hrid": "holdingHrid00001",
+      "instanceId": "c8b50e3f-0446-429c-960e-03774b88223f",
+      "callNumber": "6056.I4588 B749 ",
+      "permanentLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+      "temporaryLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+      "callNumberPrefix": "PR",
+      "callNumberSuffix": "2016",
+      "electronicAccess": [
+        {
+          "uri": "http://www.gbv.de/dms/zbw/101073931X.pdf",
+          "linkText": "Electronic resource (DOCX)",
+          "publicNote": "test public note 1"
+        },
+        {
+          "uri": "https://external.dandelon.com/download/attachments/dandelon/ids/DE0069AE502CCFE91E537C1258123001D0DCA.pdf",
+          "linkText": "Electronic resource (XSLT)",
+          "publicNote": "test public note 2"
+        }
+      ],
+      "items": [
+        {
+          "id": "0b96a642-5e7f-452d-9cae-9cee66c9a892",
+          "hrid": "itemHrid000000000001",
+          "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+          "barcode": "101010",
+          "effectiveCallNumberComponents": {
+            "callNumber": "6066.I0119 C760 ",
+            "prefix": "testPrefix1",
+            "suffix": "testSuffix1",
+            "typeId": "828ae637-dfa3-4265-a1af-5279c436edff"
+          },
+          "electronicAccess": [
+            {
+              "linkText": "Electronic resource (RTF)",
+              "uri": "http://d-nb.info/1150176652/04",
+              "materialsSpecification": "Table of contents",
+              "publicNote": "Table of contents only",
+              "relationshipId": "f50c90c9-bae0-4add-9cd0-db9092dbc9dd"
+            },
+            {
+              "uri": "http://www.folio.org/",
+              "linkText": "Electronic resource (audio streaming)",
+              "materialsSpecification": "Novel",
+              "publicNote": "Access to audio file"
+            }
+          ],
+          "volume": "test volume 1",
+          "enumeration": "v.73:no.1-6",
+          "chronology": "1987:Jan.-June",
+          "yearCaption": [
+            "1944"
+          ],
+          "notes": [
+            {
+              "itemNoteTypeId": "87c450be-2033-41fb-80ba-dd2409883681",
+              "note": "Signed by the author",
+              "staffOnly": false
+            },
+            {
+              "itemNoteTypeId": "acb3a58f-1d72-461d-97c3-0e7119e8d544",
+              "note": "Signed by the author",
+              "staffOnly": true
+            }
+          ],
+          "status": {
+            "name": "Available"
+          },
+          "copyNumber": "Copy 1",
+          "numberOfPieces": "1",
+          "source": "test source 1",
+          "descriptionOfPieces": "test description of pieces 1",
+          "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+          "permanentLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+          "permanentLoanTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210a4",
+          "effectiveLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+          "metadata": {
+            "createdDate": "2020-09-03T10:53:54.103+0000",
+            "createdByUserId": "e85d73af-ea83-5cc6-946a-4d14a790f087",
+            "updatedDate": "2020-09-03T12:43:25.233+0000",
+            "updatedByUserId": "e85d73af-ea83-5cc6-946a-4d14a790f087"
+          }
+        },
+        {
+          "id": "5b31ec8c-95a7-4b91-95cc-b551a74b91ca",
+          "holdingsRecordId": "65cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+          "barcode": "202020",
+          "effectiveCallNumberComponents": {
+            "callNumber": "6076.I4588 B749 "
+          },
+          "electronicAccess": [
+            {
+              "uri": "http://www.gbv.de/dms/zbw/880159367.pdf",
+              "linkText": "Electronic resource (FCF)",
+              "publicNote": "test public note 3"
+            },
+            {
+              "uri": "http://d-nb.info/1150175923/04",
+              "linkText": "Electronic resource (OTT)",
+              "publicNote": "test public note 4"
+            }
+          ],
+          "volume": "test volume 2",
+          "materialTypeId": "5ee11d91-f7e8-481d-b079-65d708582ccc"
+        }
+      ]
+    },
+    {
+      "id": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+      "hrid": "holdingHrid00002",
+      "instanceId": "c8b50e3f-0446-429c-960e-03774b88223f",
+      "callNumber": "8099.I4589",
+      "permanentLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+      "temporaryLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+      "callNumberPrefix": "PR",
+      "callNumberSuffix": "2010",
+      "electronicAccess": [
+        {
+          "uri": "http://d-nb.info/1150175923/04",
+          "linkText": "Electronic resource (PDF)",
+          "publicNote": "Address for accessing the table of content. PDF file"
+        }
+      ],
+      "items": [
+        {
+          "id": "23992e08-b55a-4ed8-a570-0172c5bcdd76",
+          "holdingsRecordId": "15cb2bf0-d4c2-4886-8ad0-b76f1ba75d61",
+          "hrid": "itemHrid000000000003",
+          "barcode": "303030",
+          "effectiveCallNumberComponents": {
+            "callNumber": "9901.I4981",
+            "prefix": "testPrefix2",
+            "suffix": "testSuffix2",
+            "typeId": "0b4bbf35-e398-47f9-8634-f23526cdb958"
+          },
+          "electronicAccess": [
+            {
+              "linkText": "Electronic resource (XML)",
+              "uri": "http://d-nb.info/1150175923/01",
+              "publicNote": "Table of contents only"
+            }
+          ],
+          "volume": "test volume 3",
+          "enumeration": "v.81:no.1-6",
+          "chronology": "1979:Jan.-June",
+          "yearCaption": [
+            "1940"
+          ],
+          "notes": [
+            {
+              "note": "All compositions written by Omar Sosa and Seckou Keita, except tracks 6, 8 and 10 written by Omar Sosa.",
+              "staffOnly": false
+            }
+          ],
+          "status": {
+            "name": "Available"
+          },
+          "copyNumber": "Copy 2",
+          "numberOfPieces": "2",
+          "source": "test source 3",
+          "descriptionOfPieces": "test description of pieces 2",
+          "materialTypeId": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+          "permanentLocationId": "97ee6cd9-17ef-47f8-acbb-ec16fb2cb98d",
+          "permanentLoanTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210a4",
+          "effectiveLocationId": "d9cd0bed-1b49-4b5e-a7bd-064b8d177231",
+          "metadata": {
+            "createdDate": "2020-08-02T11:03:04.103+0000",
+            "createdByUserId": "f72758e1-659c-4c31-94d0-5c700e53cf4c",
+            "updatedDate": "2019-08-04T13:03:15.233+0000",
+            "updatedByUserId": "f72758e1-659c-4c31-94d0-5c700e53cf4c"
+          }
+        }
+      ]
+    }
+  ],
+  "instance": {
+    "id": "c8b50e3f-0446-429c-960e-03774b88223f",
+    "hrid": "instance00001",
+    "title": "The Journal of ecclesiastical history",
+    "series": [
+      {
+        "value" : "Cooperative information systems",
+        "authorityId": "c9b50e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "The lateral history",
+        "authorityId": "c1b50e3f-0446-429c-960e-03774b88223f"
+      }
+    ],
+    "physicalDescriptions": [
+      "xx, 238 p. : ill. ; 24 cm.",
+      "xxix, 224 Seiten Illustrationen"
+    ],
+    "natureOfContentTermIds": [
+      "44cd89f3-2e76-469f-a955-cc57cb9e0395",
+      "ebbbdef1-00e1-428b-bc11-314dc0705074",
+      "none-existing-id"
+    ],
+    "precedingTitles": [
+      {
+        "id": "6fd8979f-0752-4397-a0d6-5cac3aba5613",
+        "title": "ABA Journal",
+        "hrid": "inst000000000001",
+        "precedingInstanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+        "identifiers": []
+      }
+    ],
+    "succeedingTitles": [
+      {
+        "id": "537a1403-d05b-400a-a8b6-d85413d1fe50",
+        "title": "American Bar Association journal.",
+        "hrid": "inst000000000002",
+        "succeedingInstanceId": "00f10ab9-d845-4334-92d2-ff55862bf4f9",
+        "identifiers": []
+      }
+    ],
+    "publication": [
+      {
+        "publisher": "Alfred A. Knopf",
+        "place": "New York",
+        "dateOfPublication": "2016",
+        "role": null
+      },
+      {
+        "publisher": "Birlinn",
+        "place": "Edinburgh",
+        "dateOfPublication": "2015",
+        "role": "Publication"
+      }
+    ],
+    "identifiers": [
+      {
+        "value": "1447294130",
+        "identifierTypeId": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+      },
+      {
+        "value": "9781447294130",
+        "identifierTypeId": "8261054f-be78-422d-bd51-4ed9f33c3422"
+      },
+
+      {
+        "value": "9780262012102",
+        "identifierTypeId": "439bfbae-75bc-4f74-9fc7-b2a2d47ce3ef"
+      },
+      {
+        "value": "2003065165",
+        "identifierTypeId": "7e591197-f335-4afb-bc6d-a6d76ca3bace"
+      },
+      {
+        "value": "435093457348",
+        "identifierTypeId": "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5"
+      },
+      {
+        "value": "34234877520",
+        "identifierTypeId": "b5d8cdc4-9441-487c-90cf-0c7ec97728eb"
+      },
+      {
+        "value": "91584334056356",
+        "identifierTypeId": "2c12660a-7393-4876-9a67-62ef5372512f"
+      },
+      {
+        "value": "91584334056359",
+        "identifierTypeId": "351ebc1c-3aae-4825-8765-c6d50dbf011f"
+      },
+      {
+        "value": "2003065166",
+        "identifierTypeId": "5a8c36c0-7765-4863-87be-7146abe8f5f7"
+      },
+      {
+        "value": "34234877521",
+        "identifierTypeId": "c77e947d-ee93-4185-8c3e-06104bdda923"
+      },
+      {
+        "value": "435093457349",
+        "identifierTypeId": "846e7bb9-f06c-4ec9-8523-2527314fec9e"
+      },
+      {
+        "value": "91584334056357",
+        "identifierTypeId": "d70f3282-489e-40cd-b144-64e68a3b0514"
+      },
+      {
+        "value": "codec",
+        "identifierTypeId": "593b78cb-32f3-44d1-ba8c-63fd5e6989e6"
+      },
+      {
+        "value": "report number",
+        "identifierTypeId": "37b65e79-0392-450d-adc6-e2a1f47de452"
+      },
+      {
+        "value": "ismn",
+        "identifierTypeId": "ebfd00b6-61d3-4d87-a6d8-810c941176d5"
+      },
+      {
+        "value": "invalid ismn",
+        "identifierTypeId": "4f07ea37-6c7f-4836-add2-14249e628ed1"
+      },
+      {
+        "value": "upc",
+        "identifierTypeId": "1795ea23-6856-48a5-a772-f356e16a8a6c"
+      },
+      {
+        "value": "invalid upc",
+        "identifierTypeId": "1795ea23-6856-48a5-a772-f356e16a8a6c"
+      }
+    ],
+    "notes": [
+      {
+        "note": "Previous edition: 2011",
+        "staffOnly": false,
+        "instanceNoteTypeId": "5b15c7bf-3f86-4e1a-9b05-6895467147c9"
+      },
+      {
+        "note": "Includes bibliographical references and index",
+        "staffOnly": true,
+        "instanceNoteTypeId": "1e4c2471-4604-4249-8f22-efa1715f9ea6"
+      }
+    ],
+    "editions": [ "first edition", "second edition" ],
+    "publicationFrequency": [ "vol.1 (June 2020)", "vol.2 (May 2021)" ],
+    "publicationRange": [ "2020", "2021" ],
+    "contributors": [
+      {
+        "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+        "name": "Fielding, Helen",
+        "contributorTypeId": null,
+        "contributorTypeText": null,
+        "primary": true
+      },
+      {
+        "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+        "name": "Draper, Don",
+        "contributorTypeId": null,
+        "contributorTypeText": null
+      },
+      {
+        "contributorNameTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+        "name": "Sterling, Roger",
+        "contributorTypeId": null,
+        "contributorTypeText": null
+      }
+    ],
+    "subjects": [
+      {
+        "value" : "Politicians--Scotland--Biography",
+        "authorityId": "c9b51e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Scotland--Politics and government--21st century",
+        "authorityId": "c9b52e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Politics and government",
+        "authorityId": "c9b53e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Politicians",
+        "authorityId": "c9b54e3f-0446-429c-960e-03774b88223f"
+      },
+      {
+        "value" : "Scotland",
+        "authorityId": "c9b56e3f-0446-429c-960e-03774b88223f"
+      }
+    ],
+    "languages": [
+      "eng",
+      "lat"
+    ],
+    "instanceTypeId": "6312d172-f0cf-40f6-b27d-9fa8feaf332f",
+    "instanceFormatIds": [
+      "7fde4e21-00b5-4de4-a90a-08a84a601aeb",
+      "f5e8210f-7640-459b-a71f-552567f92369",
+      "485e3e1d-9f46-42b6-8c65-6bb7bd4b37f8"
+    ],
+    "electronicAccess": [
+      {
+        "uri": "/uri1",
+        "linkText": "linkText1",
+        "materialsSpecification": "materialsSpecification1",
+        "publicNote": "publicNote1",
+        "relationshipId": "f50c90c9-bae0-4add-9cd0-db9092dbc9dd"
+      },
+      {
+        "uri": "/uri2",
+        "linkText": "linkText2",
+        "materialsSpecification": "materialsSpecification2",
+        "publicNote": "publicNote2",
+        "relationshipId": "f5d0068e-6272-458e-8a81-b85e7b9a14aa"
+      },
+      {
+        "uri": "/uri3",
+        "linkText": "linkText3",
+        "materialsSpecification": "materialsSpecification3",
+        "publicNote": "publicNote3",
+        "relationshipId": "3b430592-2e09-4b48-9a0c-0636d66b9fb3"
+      },
+      {
+        "uri": "/uri4",
+        "linkText": "linkText4",
+        "materialsSpecification": "materialsSpecification4",
+        "publicNote": "publicNote4",
+        "relationshipId": "5bfe1b7b-f151-4501-8cfa-23b321d5cd1e"
+      }
+    ],
+    "metadata": {
+      "createdDate": "2019-08-07T03:12:01.011+0000",
+      "updatedDate": "2020-05-22T01:46:42.915+0000"
+    }
+  }
+}
