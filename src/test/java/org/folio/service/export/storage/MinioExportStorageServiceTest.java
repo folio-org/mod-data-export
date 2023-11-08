@@ -31,7 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.minio.errors.*;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -104,8 +103,7 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void storeFile_shouldPass() throws ServerException, InsufficientDataException, ErrorResponseException, IOException,
-    NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
+  void storeFile_shouldPass() {
     // given
     String jobId = UUID.randomUUID()
       .toString();
@@ -140,8 +138,7 @@ class MinioExportStorageServiceTest {
   }
 
   @Test
-  void storeFile_shouldFailOnUploadDirectory() throws ServerException, InsufficientDataException, ErrorResponseException,
-    IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidResponseException, XmlParserException, InternalException, NoSuchFieldException {
+  void storeFile_shouldFailOnUploadDirectory() {
     // given
     FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
     var client = Mockito.mock(FolioS3Client.class);
