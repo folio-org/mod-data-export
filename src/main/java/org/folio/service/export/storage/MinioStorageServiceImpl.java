@@ -99,7 +99,7 @@ public class MinioStorageServiceImpl implements ExportStorageService {
         .forEach(filePath -> {
           try (var is =  new BufferedInputStream(Files.newInputStream(filePath))) {
             var path = folderToSave + "/" + filePath.getName(filePath.getNameCount() - 1);
-            client.write(path, is);
+            client.write(path, is, is.available());
           } catch (Exception e) {
             LOGGER.warn("storeFile:: Error during storing file for jobExecution {} with message {} ",  fileDefinition.getJobExecutionId(), e.getMessage());
             throw new ServiceException(HttpStatus.HTTP_INTERNAL_SERVER_ERROR, e.getMessage());

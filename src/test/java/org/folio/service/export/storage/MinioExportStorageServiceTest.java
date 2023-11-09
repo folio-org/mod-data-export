@@ -1,6 +1,7 @@
 package org.folio.service.export.storage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -122,7 +123,7 @@ class MinioExportStorageServiceTest {
 
     // then
     Mockito.verify(client, Mockito.times(2))
-      .write(any(), any());
+      .write(any(), any(), anyLong());
 
   }
 
@@ -146,7 +147,7 @@ class MinioExportStorageServiceTest {
     FileDefinition exportFileDefinition = new FileDefinition().withSourcePath(TMP_DIR + "/" + TMP_FILE_1);
     var client = Mockito.mock(FolioS3Client.class);
     when(folioS3ClientFactory.getFolioS3Client()).thenReturn(client);
-    Mockito.when(client.write(any(), any()))
+    Mockito.when(client.write(any(), any(), anyLong()))
       .thenThrow(new RuntimeException());
 
     // when
