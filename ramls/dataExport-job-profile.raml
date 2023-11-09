@@ -43,6 +43,12 @@ traits:
       is: [validate]
     get:
       is: [ pageable, searchable: { description: "with valid searchable fields", example: "status=SUCCESS"}, validate ]
+      queryParameters:
+            used:
+              description: true if need already used profiles
+              type: boolean
+              required: false
+              default: false
     /{id}:
       uriParameters:
         id:

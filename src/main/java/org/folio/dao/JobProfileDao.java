@@ -3,6 +3,8 @@ package org.folio.dao;
 import io.vertx.core.Future;
 
 import java.util.Optional;
+
+import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobProfile;
 import org.folio.rest.jaxrs.model.JobProfileCollection;
 
@@ -56,4 +58,14 @@ public interface JobProfileDao {
    * @return future with true is succeeded
    */
   Future<Boolean> deleteById(String id, String tenantId);
+
+  /**
+   * Gets only used job profiles.
+   *
+   * @param offset starting index in a list of records
+   * @param limit maximum number of records to return
+   * @param tenantId tenant id
+   * @return future with {@link JobProfileCollection}
+   */
+  Future<JobProfileCollection> getUsed(int offset, int limit, String tenantId);
 }

@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.JobProfileDao;
@@ -20,7 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.ws.rs.NotFoundException;
 
-
+import static java.lang.String.format;
 
 @Repository
 public class JobProfileDaoImpl implements JobProfileDao {
@@ -28,6 +30,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
 
 
   private static final String TABLE = "job_profiles";
+  private static final String JOB_EXECUTIONS_TABLE = "job_executions";
 
   private PostgresClientFactory pgClientFactory;
 
@@ -64,7 +67,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
           LOGGER.error("Could not update jobProfile with id {}, cause: {}", jobProfile.getId(), updateResult.cause().getMessage());
           promise.fail(updateResult.cause());
         } else if (updateResult.result().rowCount() != 1) {
-          String errorMessage = String.format("JobProfile with id '%s' was not found", jobProfile.getId());
+          String errorMessage = format("JobProfile with id '%s' was not found", jobProfile.getId());
           LOGGER.error(errorMessage);
           promise.fail(new NotFoundException(errorMessage));
         } else {
@@ -102,6 +105,20 @@ public class JobProfileDaoImpl implements JobProfileDao {
       .withJobProfiles(results.getResults())
       .withTotalRecords(results.getResultInfo().getTotalRecords()));
 
+  }
+
+  @Override
+  public Future<JobProfileCollection> getUsed(int offset, int limit, String tenantId) {
+    return pgClientFactory.getInstance(tenantId)
+        .execute(format("SELECT DISTINCT jobProfileId, jsonb ->> 'jobProfileName' FROM %s_mod_data_export.%s OFFSET %s LIMIT %s;",
+            tenantId, JOB_EXECUTIONS_TABLE, offset, limit))
+        .map(results -> {
+          List<JobProfile> list = new ArrayList<>();
+          for (var row: results) {
+            list.add(new JobProfile().withName(row.getString(1)).withId(row.getUUID(0).toString()));
+          }
+          return new JobProfileCollection().withJobProfiles(list);
+        });
   }
 
 }

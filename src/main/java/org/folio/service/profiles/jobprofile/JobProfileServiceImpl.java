@@ -117,4 +117,9 @@ public class JobProfileServiceImpl implements JobProfileService {
     return jobProfileDao.deleteById(id, tenantId);
   }
 
+  @Override
+  public Future<JobProfileCollection> getUsed(int offset, int limit, String tenantId) {
+    return jobProfileDao.getUsed(offset, limit, tenantId);
+  }
+
 }
