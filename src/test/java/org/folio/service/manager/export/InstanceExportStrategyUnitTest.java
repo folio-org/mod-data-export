@@ -1,5 +1,10 @@
 package org.folio.service.manager.export;
 
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.StorageTestSuite.mockPort;
+import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -8,11 +13,15 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.clients.ConsortiaClient;
+import org.folio.clients.InventoryClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;
@@ -80,6 +89,8 @@ class InstanceExportStrategyUnitTest {
   private ConsortiaClient consortiaClient;
   @InjectMocks
   private InstanceExportStrategyImpl instanceExportManager = Mockito.spy(new InstanceExportStrategyImpl());
+  @Mock
+  private InventoryClient inventoryClient;
 
   @Captor
   private ArgumentCaptor<MappingProfile> mappingProfileCaptor;
@@ -241,6 +252,44 @@ class InstanceExportStrategyUnitTest {
     assertEquals(DEFAULT_INSTANCE_MAPPING_PROFILE_ID, actualMappingProfile.getId());
     assertThat(actualMappingProfile.getRecordTypes(), hasItems(RecordType.HOLDINGS, RecordType.ITEM));
     assertThat(actualMappingProfile.getTransformations(), hasItems(holdingsTransformations, itemTransformations));
+  }
+
+  @Test
+  @Order(5)
+  void exportBlocking_shouldSaveAllDuplicateSRS() {
+    // given
+    Map<String, String> headers = new HashMap<>();
+    headers.put(OKAPI_HEADER_TENANT, "TENANT_ID");
+    headers.put("x-okapi-url", "http://localhost:" + mockPort);
+    var okapiConnectionParams = new OkapiConnectionParams(headers);
+    var instanceId = UUID.randomUUID().toString();
+    var jobExecutionId = UUID.randomUUID().toString();
+    var instance = new JsonObject().put("id", instanceId).put("hrid", "0111").put("title", "Test Title");
+    var srsAssociated = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    MappingProfile mappingProfile = new MappingProfile().withRecordTypes(Collections.singletonList(RecordType.SRS));
+    List<String> identifiers = List.of(instanceId);
+    FileDefinition fileExportDefinition = new FileDefinition()
+      .withSourcePath("files/mockData/generatedBinaryFile.mrc");
+    ExportPayload exportPayload = new ExportPayload(identifiers, true, fileExportDefinition, okapiConnectionParams,
+      jobExecutionId, mappingProfile);
+    SrsLoadResult srsLoadResult = new SrsLoadResult();
+    srsLoadResult.setIdsWithoutSrs(List.of());
+    srsLoadResult.setUnderlyingMarcRecords(List.of(
+      new JsonObject().put("recordId", srsAssociated.get(0)).put("externalIdsHolder", new JsonObject().put("instanceId", instanceId)),
+      new JsonObject().put("recordId", srsAssociated.get(1)).put("externalIdsHolder", new JsonObject().put("instanceId", instanceId))));
+    when(srsRecordService.transformSrsRecords(any(MappingProfile.class), anyList(), anyString(), any(OkapiConnectionParams.class),
+      any(AbstractExportStrategy.EntityType.class))).thenReturn(Pair.of(Collections.emptyList(), 0));
+    when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(),
+      any(OkapiConnectionParams.class))).thenReturn(srsLoadResult);
+    when(inventoryClient.getInstanceById(jobExecutionId, instanceId, okapiConnectionParams))
+      .thenReturn(instance);
+
+    // when
+    instanceExportManager.export(exportPayload, Promise.promise());
+
+    // then
+    verify(errorLogService).saveWithAffectedRecord(instance, format(ERROR_DUPLICATE_SRS_RECORD.getDescription(), instance.getString("hrid"),
+      join(", ", srsAssociated)), ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, okapiConnectionParams);
   }
 
 }
