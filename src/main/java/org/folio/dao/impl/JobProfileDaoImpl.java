@@ -117,7 +117,7 @@ public class JobProfileDaoImpl implements JobProfileDao {
         rows.forEach(row -> jobProfileList.add(new JobProfile().withName(row.getString(1)).withId(row.getUUID(0).toString())));
         return jobProfileList;
       })
-      .map(jobProfileList -> new JobProfileCollection().withJobProfiles(jobProfileList));
+      .map(jobProfileList -> new JobProfileCollection().withJobProfiles(jobProfileList).withTotalRecords(jobProfileList.size()));
   }
 
 }

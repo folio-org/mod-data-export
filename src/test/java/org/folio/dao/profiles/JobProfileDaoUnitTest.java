@@ -6,13 +6,17 @@ import io.vertx.core.Handler;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.pgclient.impl.RowImpl;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.impl.JobProfileDaoImpl;
 import org.folio.dao.impl.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.helpers.LocalRowDesc;
+import org.folio.rest.persist.helpers.LocalRowSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +25,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -95,6 +101,31 @@ class JobProfileDaoUnitTest {
         assertTrue(ar.failed());
         verify(postgresClient).update(eq(TABLE), eq(jobProfile), anyString(), any(Handler.class));
         assertTrue(ar.cause() instanceof RuntimeException);
+        context.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void shouldSucceedToGetUsedJobProfiles(VertxTestContext context) {
+    // given
+    when(postgresClientFactory.getInstance(TENANT_ID)).thenReturn(postgresClient);
+    Row row = new RowImpl(new LocalRowDesc(List.of()));
+    row.addValue(UUID.randomUUID().toString());
+    row.addValue("test");
+    when(postgresClient.execute(anyString()))
+      .thenReturn(Future.succeededFuture(new LocalRowSet(1).withRows(List.of(row))));
+
+    // when
+    Future<JobProfileCollection> future = jobProfileDao.getUsed(0, 10, TENANT_ID);
+
+    // then
+    future.onComplete(ar -> {
+      context.verify(() -> {
+        assertTrue(ar.succeeded());
+        assertEquals(1, ar.result().getJobProfiles().size());
+        assertEquals(1, ar.result().getTotalRecords());
+        assertEquals("test", ar.result().getJobProfiles().get(0).getName());
         context.completeNow();
       });
     });
