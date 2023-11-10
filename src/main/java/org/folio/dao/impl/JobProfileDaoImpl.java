@@ -110,15 +110,14 @@ public class JobProfileDaoImpl implements JobProfileDao {
   @Override
   public Future<JobProfileCollection> getUsed(int offset, int limit, String tenantId) {
     return pgClientFactory.getInstance(tenantId)
-        .execute(format("SELECT DISTINCT jobProfileId, jsonb ->> 'jobProfileName' FROM %s_mod_data_export.%s OFFSET %s LIMIT %s;",
-            tenantId, JOB_EXECUTIONS_TABLE, offset, limit))
-        .map(results -> {
-          List<JobProfile> list = new ArrayList<>();
-          for (var row: results) {
-            list.add(new JobProfile().withName(row.getString(1)).withId(row.getUUID(0).toString()));
-          }
-          return new JobProfileCollection().withJobProfiles(list);
-        });
+      .execute(format("SELECT DISTINCT jobProfileId, jsonb ->> 'jobProfileName' FROM %s_mod_data_export.%s OFFSET %s LIMIT %s;",
+        tenantId, JOB_EXECUTIONS_TABLE, offset, limit))
+      .map(rows -> {
+        List<JobProfile> jobProfileList = new ArrayList<>();
+        rows.forEach(row -> jobProfileList.add(new JobProfile().withName(row.getString(1)).withId(row.getUUID(0).toString())));
+        return jobProfileList;
+      })
+      .map(jobProfileList -> new JobProfileCollection().withJobProfiles(jobProfileList));
   }
 
 }
