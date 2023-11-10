@@ -1,5 +1,13 @@
 ## v4.9.0 Unreleased
 
+## 11/10/2023 v4.8.4 Released
+This release includes bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.3...v4.8.4)
+
+### Bug Fixes
+* [MDEXP-658](https://issues.folio.org/browse/MDEXP-658) bump up folio-s3-client
+
 ## 11/10/2023 v4.8.3 Released
 This release includes bug fixes.
 
