@@ -1,5 +1,14 @@
 ## v4.9.0 Unreleased
 
+## 11/10/2023 v4.8.3 Released
+This release includes bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.1...v4.8.2)
+
+### Bug Fixes
+* [MDEXP-660](https://issues.folio.org/browse/MDEXP-660) Specify missing interface dependencies
+* [MDEXP-654](https://issues.folio.org/browse/MDEXP-654) Missed details for user friendly error in data export log when multiple SRS records are linked to one instance
+
 ## 11/06/2023 v4.8.2 Released
 This release includes only bug fixes.
 
