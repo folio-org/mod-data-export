@@ -61,4 +61,13 @@ public interface JobProfileService {
    */
   Future<Boolean> deleteById(String id, String tenantId);
 
+  /**
+   * Searches for only used {@link JobProfile}
+   *
+   * @param offset starting index in a list of records
+   * @param limit maximum number of records to return
+   * @param tenantId tenant id
+   * @return future with {@link JobProfileCollection}
+   */
+  Future<JobProfileCollection> getUsed(int offset, int limit, String tenantId);
 }

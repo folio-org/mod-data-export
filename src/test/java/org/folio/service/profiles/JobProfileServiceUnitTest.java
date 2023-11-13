@@ -26,6 +26,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.ws.rs.NotFoundException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +34,7 @@ import java.util.UUID;
 import static io.vertx.core.Future.succeededFuture;
 import static java.util.Collections.singletonList;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -190,6 +192,24 @@ class JobProfileServiceUnitTest {
     future.onComplete(ar -> context.verify(() -> {
       assertTrue(ar.succeeded());
       verify(jobProfileDao).get(eq(query), eq(0), eq(10), eq(TENANT_ID));
+      context.completeNow();
+    }));
+  }
+
+  @Test
+  void getUsed_shouldReturnUsedJobProfiles(VertxTestContext context) {
+    // given
+    when(jobProfileDao.getUsed(0, 10, TENANT_ID)).thenReturn(Future.succeededFuture(new JobProfileCollection()
+      .withJobProfiles(List.of(new JobProfile().withName("test").withId(UUID.randomUUID().toString())))
+      .withTotalRecords(1)));
+    // when
+    Future<JobProfileCollection> future = jobProfileService.getUsed(0, 10, TENANT_ID);
+    // then
+    future.onComplete(ar -> context.verify(() -> {
+      assertTrue(ar.succeeded());
+      assertEquals(1, ar.result().getJobProfiles().size());
+      assertEquals(1, ar.result().getTotalRecords());
+      assertEquals("test", ar.result().getJobProfiles().get(0).getName());
       context.completeNow();
     }));
   }

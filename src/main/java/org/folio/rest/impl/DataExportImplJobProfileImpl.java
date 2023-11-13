@@ -5,11 +5,13 @@ import static java.lang.String.format;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 import org.folio.rest.jaxrs.model.JobProfile;
+import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.resource.DataExportJobProfiles;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.service.profiles.jobprofile.JobProfileService;
@@ -79,13 +81,19 @@ public class DataExportImplJobProfileImpl implements DataExportJobProfiles {
   }
 
   @Override
-  public void getDataExportJobProfiles(int offset, int limit, String query, String lang, Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    succeededFuture().compose(ar -> jobProfileService.get(query, offset, limit, tenantId))
-      .map(GetDataExportJobProfilesResponse::respond200WithApplicationJson)
-      .map(Response.class::cast)
-      .otherwise(ExceptionToResponseMapper::map)
-      .onComplete(asyncResultHandler);
+  public void getDataExportJobProfiles(boolean used, int offset, int limit, String query, String lang,
+      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    succeededFuture().compose(ar -> get(used, offset, limit, query))
+        .map(GetDataExportJobProfilesResponse::respond200WithApplicationJson)
+        .map(Response.class::cast)
+        .otherwise(ExceptionToResponseMapper::map)
+        .onComplete(asyncResultHandler);
+  }
 
+  private Future<JobProfileCollection> get(boolean used, int offset, int limit, String query) {
+    if (used) {
+      return jobProfileService.getUsed(offset, limit, tenantId);
+    }
+    return jobProfileService.get(query, offset, limit, tenantId);
   }
 }
