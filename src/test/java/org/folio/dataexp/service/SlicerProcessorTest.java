@@ -64,9 +64,9 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(2, exportFiles.size());
 
       var joExecutionExportFilesEntity = exportFiles.get(0);
-      var expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-222d-4d1d-957d-0abcdd0e9acd_011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
-      var expectedFromUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
-      var expectedToUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+      var expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-0abcdd0e9acd_011e1aea-111d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
+      var expectedFromUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      var expectedToUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
       var expectedStatus = JobExecutionExportFilesStatus.SCHEDULED;
 
       assertEquals(fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
@@ -76,9 +76,9 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
       joExecutionExportFilesEntity = exportFiles.get(1);
-      expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-0abcdd0e9acd_011e1aea-111d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
-      expectedFromUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
-      expectedToUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-222d-4d1d-957d-0abcdd0e9acd_011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
+      expectedFromUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+      expectedToUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
       expectedStatus = JobExecutionExportFilesStatus.SCHEDULED;
 
       assertEquals(fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
@@ -96,9 +96,9 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(1, exportFiles.size());
 
       joExecutionExportFilesEntity = exportFiles.get(0);
-      expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-222d-4d1d-957d-0abcdd0e9acd_011e1aea-111d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
-      expectedFromUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
-      expectedToUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      expectedFileLocation = String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-0abcdd0e9acd_011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
+      expectedFromUUID = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      expectedToUUID = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
       expectedStatus = JobExecutionExportFilesStatus.SCHEDULED;
 
       assertEquals(fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
@@ -107,7 +107,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(expectedToUUID, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
-      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(),  expectedFromUUID, expectedToUUID).size());
+      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(), expectedFromUUID, expectedToUUID).size());
      }
   }
 }
