@@ -5,6 +5,7 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
+import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
@@ -28,6 +29,8 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
   private InputFileProcessor inputFileProcessor;
   @Autowired
   private SlicerProcessor slicerProcessor;
+  @Autowired
+  private ExportIdEntityRepository exportIdEntityRepository;
 
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
@@ -103,6 +106,8 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(expectedFromUUID, joExecutionExportFilesEntity.getFromId());
       assertEquals(expectedToUUID, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
-    }
+
+      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(),  expectedFromUUID, expectedToUUID).size());
+     }
   }
 }
