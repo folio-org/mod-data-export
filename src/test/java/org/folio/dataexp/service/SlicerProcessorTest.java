@@ -13,6 +13,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.PathResource;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.UUID;
 
@@ -107,7 +108,8 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(expectedToUUID, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
-      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(), expectedFromUUID, expectedToUUID).size());
+      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(), expectedFromUUID, expectedToUUID, PageRequest.of(0, 10))
+        .getContent().size());
      }
   }
 }

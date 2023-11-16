@@ -24,9 +24,9 @@ import java.util.stream.Collectors;
 @Log4j2
 public class ExportExecutor {
 
-  private final ExportStrategy instanceExportStrategy;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final ExportStrategyFactory exportStrategyFactory;
 
   @Async("singleExportFileTaskExecutor")
   public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.RecordTypeEnum recordType) {
@@ -37,7 +37,8 @@ public class ExportExecutor {
     log.info("Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
-    var exportStatistic = instanceExportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
+    var exportStrategy = exportStrategyFactory.getExportStrategy(recordType);
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
     updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic);
     log.info("Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
   }
