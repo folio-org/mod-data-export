@@ -84,5 +84,5 @@ CREATE OR REPLACE VIEW v_authority
     AS SELECT * FROM ${myuniversity}_mod_inventory_storage.authority;
 
 CREATE OR REPLACE VIEW v_marc_records_lb
-    AS SELECT * FROM ${myuniversity}_mod_source_record_storage.records_lb rec_lb
-    JOIN ${myuniversity}_mod_source_record_storage.marc_records_lb marc_rec_lb using(id);
+    AS SELECT id, content FROM ${myuniversity}_mod_source_record_storage.records_lb
+    JOIN ${myuniversity}_mod_source_record_storage.marc_records_lb using(id);
