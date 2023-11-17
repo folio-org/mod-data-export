@@ -51,7 +51,7 @@ class ExportExecutorTest extends BaseDataExportInitializer {
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    exportExecutor.export(exportEntity, ExportRequest.RecordTypeEnum.INSTANCE);
+    exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE);
 
     long size = s3Client.getSize(fileLocation);
     assertTrue(size > 0);

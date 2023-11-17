@@ -4,9 +4,7 @@ import lombok.Data;
 
 @Data
 public class ExportStrategyStatistic {
-
   private int exported;
   private int failed;
-  private int total;
-
+  private int duplicatedSrs;
 }

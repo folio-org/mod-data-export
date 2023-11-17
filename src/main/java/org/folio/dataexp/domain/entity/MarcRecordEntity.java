@@ -15,6 +15,7 @@ public class MarcRecordEntity {
 
   @Id
   private UUID id;
+  private UUID externalId;
   @Column(name = "content", columnDefinition = "jsonb")
   private String content;
 }

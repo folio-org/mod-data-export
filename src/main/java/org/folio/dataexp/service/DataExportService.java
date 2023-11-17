@@ -54,7 +54,7 @@ public class DataExportService {
     slicerProcessor.sliceInstancesIds(fileDefinition);
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, jobProfileEntity, JobExecution.StatusEnum.IN_PROGRESS);
-    singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getRecordType());
+    singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getIdType());
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobProfileEntity jobProfileEntity, JobExecution.StatusEnum jobExecutionStatus) {

@@ -48,9 +48,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
+    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE);
 
-    verify(exportExecutor).export(exportEntity,  ExportRequest.RecordTypeEnum.INSTANCE);
+    verify(exportExecutor).export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE);
   }
 
   @Test
@@ -63,7 +63,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
+    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE);
 
     verify(exportExecutor, times(0)).export(any(), any());
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));

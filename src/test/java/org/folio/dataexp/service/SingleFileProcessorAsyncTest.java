@@ -29,8 +29,8 @@ class SingleFileProcessorAsyncTest {
       .id(UUID.randomUUID())
       .fileLocation(fileLocation).build();
 
-    singleFileProcessorAsync.executeExport(exportEntity, ExportRequest.RecordTypeEnum.INSTANCE);
+    singleFileProcessorAsync.executeExport(exportEntity, ExportRequest.IdTypeEnum.INSTANCE);
 
-    verify(exportExecutor).exportAsynch(exportEntity, ExportRequest.RecordTypeEnum.INSTANCE);
+    verify(exportExecutor).exportAsynch(exportEntity, ExportRequest.IdTypeEnum.INSTANCE);
   }
 }

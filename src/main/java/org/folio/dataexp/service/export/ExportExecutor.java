@@ -29,15 +29,15 @@ public class ExportExecutor {
   private final ExportStrategyFactory exportStrategyFactory;
 
   @Async("singleExportFileTaskExecutor")
-  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.RecordTypeEnum recordType) {
-    export(exportFilesEntity, recordType);
+  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idTypeEnum) {
+    export(exportFilesEntity, idTypeEnum);
   }
 
-  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.RecordTypeEnum recordType) {
+  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idType) {
     log.info("Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
-    var exportStrategy = exportStrategyFactory.getExportStrategy(recordType);
+    var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
     var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
     updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic);
     log.info("Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
@@ -49,18 +49,19 @@ public class ExportExecutor {
     var progress = jobExecution.getProgress();
     progress.setExported(progress.getExported() + exportStatistic.getExported());
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
-
+    progress.setDuplicatedSrs(progress.getDuplicatedSrs() + progress.getDuplicatedSrs());
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     long exportsCompleted = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED).count();
     long exportsFailed = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.FAILED).count();
+    long exportsCompletedWithErrors = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).count();
     var currentDate = new Date();
-    if (exportsCompleted + exportsFailed == exports.size()) {
+    if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       if (exports.size() == exportsCompleted) jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
       else if (exports.size() == exportsFailed) jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       else jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
 
       var filesForExport = exports.stream()
-        .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED)
+        .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
         .map(e -> new JobExecutionExportedFilesInner().fileId(e.getId()).fileName(FilenameUtils.getName(e.getFileLocation()))).collect(Collectors.toSet());
 
       jobExecution.setExportedFiles(filesForExport);

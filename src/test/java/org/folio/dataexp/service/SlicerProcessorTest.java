@@ -108,7 +108,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       assertEquals(expectedToUUID, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
-      assertEquals(2, exportIdEntityRepository.findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(fileDefinition.getJobExecutionId(), expectedFromUUID, expectedToUUID, PageRequest.of(0, 10))
+      assertEquals(2, exportIdEntityRepository.getExportIds(fileDefinition.getJobExecutionId(), expectedFromUUID, expectedToUUID, PageRequest.of(0, 10))
         .getContent().size());
      }
   }

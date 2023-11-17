@@ -97,7 +97,7 @@ class DataExportServiceTest {
     verify(inputFileProcessor).readFile(fileDefinition);
     verify(slicerProcessor).sliceInstancesIds(fileDefinition);
 
-    verify(singleFileProcessorAsync).exportBySingleFile(jobExecution.getId(), ExportRequest.RecordTypeEnum.INSTANCE);
+    verify(singleFileProcessorAsync).exportBySingleFile(jobExecution.getId(), ExportRequest.IdTypeEnum.INSTANCE);
     verify(exportIdEntityRepository).countByJobExecutionId(jobExecution.getId());
     verify(jobExecutionEntityRepository).getHrid();
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));

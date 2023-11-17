@@ -23,7 +23,6 @@ public class InstancesExportStrategy implements ExportStrategy {
     remoteStorageWriter.write(marc);
     remoteStorageWriter.close();
     var exportStatistic = new ExportStrategyStatistic();
-    exportStatistic.setTotal(1);
     exportStatistic.setExported(1);
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);

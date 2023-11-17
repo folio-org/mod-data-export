@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS job_executions_export_ids (
          references job_executions(id) ON DELETE CASCADE
 );
 
-CREATE TYPE StatusType AS ENUM ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'FAILED');
+CREATE TYPE StatusType AS ENUM ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED');
 CREATE CAST (character varying as StatusType) WITH INOUT AS IMPLICIT;
 
 CREATE TABLE IF NOT EXISTS job_execution_export_files (
@@ -84,5 +84,5 @@ CREATE OR REPLACE VIEW v_authority
     AS SELECT * FROM ${myuniversity}_mod_inventory_storage.authority;
 
 CREATE OR REPLACE VIEW v_marc_records_lb
-    AS SELECT id, content FROM ${myuniversity}_mod_source_record_storage.records_lb
+    AS SELECT id, content, external_id FROM ${myuniversity}_mod_source_record_storage.records_lb
     JOIN ${myuniversity}_mod_source_record_storage.marc_records_lb using(id);

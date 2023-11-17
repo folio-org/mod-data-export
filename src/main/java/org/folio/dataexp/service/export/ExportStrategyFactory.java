@@ -14,8 +14,8 @@ public class ExportStrategyFactory {
   private final HoldingsExportStrategy holdingsExportStrategy;
   private final InstancesExportStrategy instancesExportStrategy;
 
-  public ExportStrategy getExportStrategy(ExportRequest.RecordTypeEnum recordType) {
-    if (recordType == ExportRequest.RecordTypeEnum.HOLDINGS) return holdingsExportStrategy;
+  public ExportStrategy getExportStrategy(ExportRequest.IdTypeEnum idType) {
+    if (idType == ExportRequest.IdTypeEnum.HOLDING) return holdingsExportStrategy;
     return instancesExportStrategy;
   }
 
