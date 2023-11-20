@@ -35,6 +35,7 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
   private static final String TABLE = "job_executions";
   private static final String HR_ID_QUERY = "SELECT nextval('job_execution_hrId')";
   private static final String LAST_UPDATED_DATE_FIELD = "'lastUpdatedDate'";
+  private static final String COMPLETED_DATE_FIELD = "'completedDate'";
   private static final String STATUS_FIELD = "'status'";
   private static final SimpleDateFormat DATE_TIME_FORMAT_FOR_POSTGRES = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -133,6 +134,19 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
 
   }
 
+  @Override
+  public Future<List<JobExecution>> getFailedEntriesWithoutCompletedDate(String tenantId) {
+    Promise<Results<JobExecution>> promise = Promise.promise();
+    try {
+      var criterion = constructFailEntriesWithoutCompletedDateCriterion();
+      pgClientFactory.getInstance(tenantId).get(TABLE, JobExecution.class, criterion, false, promise);
+    } catch (Exception e) {
+      LOGGER.error("Error during getting failed jobExecution entries without completed date", e);
+      promise.fail(e);
+    }
+    return promise.future().map(Results::getResults);
+  }
+
   private Criterion constructExpiredEntriesCriterion(Date expirationDate) {
     Criterion criterion = new Criterion();
     Criteria lastUpdateDateCriteria = new Criteria();
@@ -146,6 +160,19 @@ public class JobExecutionDaoImpl implements JobExecutionDao {
     criterion.addCriterion(lastUpdateDateCriteria);
     criterion.addCriterion(statusIsProgressCriteria);
     return criterion;
+  }
+
+  private Criterion constructFailEntriesWithoutCompletedDateCriterion() {
+    var statusIsFailedCriteria = new Criteria()
+      .addField(STATUS_FIELD)
+      .setOperation("=")
+      .setVal(String.valueOf(JobExecution.Status.FAIL));
+    var noCompletedDateCriteria = new Criteria()
+      .addField(COMPLETED_DATE_FIELD)
+      .setOperation("IS NULL");
+    return new Criterion()
+      .addCriterion(statusIsFailedCriteria)
+      .addCriterion(noCompletedDateCriteria);
   }
 
 }
