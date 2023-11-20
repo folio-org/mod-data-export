@@ -321,9 +321,9 @@ class JobExecutionServiceUnitTest {
         assertTrue(ar.succeeded());
         assertNotNull(jobExecution.getCompletedDate());
         assertNotNull(secondJobExecution.getCompletedDate());
-        verify(jobExecutionDao).update(jobExecution.withStatus(FAIL), eq(TENANT_ID));
-        verify(jobExecutionDao).update(secondJobExecution.withStatus(FAIL), eq(TENANT_ID));
-        verify(jobExecutionDao).update(failedJobExecution.withCompletedDate(failedJobExecutionLastUpdatedDate), eq(TENANT_ID));
+        verify(jobExecutionDao).update(jobExecution.withStatus(FAIL), TENANT_ID);
+        verify(jobExecutionDao).update(secondJobExecution.withStatus(FAIL), TENANT_ID);
+        verify(jobExecutionDao).update(failedJobExecution.withCompletedDate(failedJobExecutionLastUpdatedDate), TENANT_ID);
         context.completeNow();
       })
     );
