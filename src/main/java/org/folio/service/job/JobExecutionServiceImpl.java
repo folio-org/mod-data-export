@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
@@ -179,30 +180,50 @@ public class JobExecutionServiceImpl implements JobExecutionService {
   @Override
   public Future<Void> expireJobExecutions(String tenantId) {
     Promise<Void> jobExecutionPromise = Promise.promise();
-    //expire entries that have last updated date greater then 1 hr
-    jobExecutionDao.getExpiredEntries(new Date(new Date().getTime() - 3600_000), tenantId)
+    setCompletedDateForFailedExecutionsIfRequired(tenantId)
+      //expire entries that have last updated date greater than 1 hr
+      .compose(v -> jobExecutionDao.getExpiredEntries(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(1)), tenantId))
+        .onComplete(asyncResult -> {
+          if (asyncResult.succeeded()) {
+            List<JobExecution> jobExecutionList = asyncResult.result();
+            jobExecutionList.forEach(jobExe -> {
+              jobExe.setStatus(FAIL);
+              //reset progress to skip already exported/failed records
+              if (jobExe.getProgress() != null) {
+                jobExe.getProgress().withExported(0).withTotal(0).withFailed(new Failed());
+              }
+              jobExe.setCompletedDate(new Date());
+              updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);
+              jobExecutionDao.update(jobExe, tenantId);
+            });
+            jobExecutionPromise.complete();
+          } else {
+            String errorMessage = String.format("Fail to fetch expired job executions, cause %s", asyncResult.cause());
+            LOGGER.error(errorMessage);
+            jobExecutionPromise.fail(errorMessage);
+          }
+        });
+    return jobExecutionPromise.future();
+  }
+
+  private Future<Void> setCompletedDateForFailedExecutionsIfRequired(String tenantId) {
+    Promise<Void> promise = Promise.promise();
+    jobExecutionDao.getFailedEntriesWithoutCompletedDate(tenantId)
       .onComplete(asyncResult -> {
         if (asyncResult.succeeded()) {
-          List<JobExecution> jobExecutionList = asyncResult.result();
-          jobExecutionList.forEach(jobExe -> {
-            jobExe.setStatus(FAIL);
-            //reset progress to skip already exported/failed records
-            if (jobExe.getProgress() != null) {
-              jobExe.getProgress().withExported(0).withTotal(0).withFailed(new Failed());
-            }
-            jobExe.setCompletedDate(new Date());
-            updateErrorLogIfJobIsExpired(jobExe.getId(), tenantId);
-            jobExecutionDao.update(jobExe, tenantId);
+          asyncResult.result().forEach(jobExecution -> {
+            jobExecution.setCompletedDate(nonNull(jobExecution.getLastUpdatedDate()) ?
+              jobExecution.getLastUpdatedDate() : new Date());
+            jobExecutionDao.update(jobExecution, tenantId);
           });
-          jobExecutionPromise.complete();
+          promise.complete();
         } else {
-          String errorMessage = String.format("Fail to fetch expired job executions, cause %s", asyncResult.cause());
+          String errorMessage = String.format("Fail to fetch failed job executions without completed date, cause %s", asyncResult.cause());
           LOGGER.error(errorMessage);
-          jobExecutionPromise.fail(errorMessage);
+          promise.fail(errorMessage);
         }
-
       });
-    return jobExecutionPromise.future();
+    return promise.future();
   }
 
   private void updateErrorLogIfJobIsExpired(String jobExecutionId, String tenantId) {
