@@ -17,7 +17,6 @@ import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;
 import org.folio.rest.jaxrs.model.JobExecutionCollection;
 import org.folio.rest.jaxrs.model.JobProfile;
-import org.folio.rest.jaxrs.model.JobProfileCollection;
 import org.folio.rest.jaxrs.model.Progress;
 import org.folio.service.export.storage.ExportStorageService;
 import org.folio.service.logs.ErrorLogService;
@@ -31,12 +30,12 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.FAIL;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.IN_PROGRESS;
 import static org.folio.rest.jaxrs.model.JobExecution.Status.NEW;
@@ -305,7 +304,14 @@ class JobExecutionServiceUnitTest {
       .withExportedFiles(Sets.newHashSet())
       .withJobProfileId(JOB_PROFILE_ID)
       .withStatus(NEW);
+    var failedJobExecutionId = UUID.randomUUID().toString();
+    var failedJobExecutionLastUpdatedDate = new Date();
+    JobExecution failedJobExecution = new JobExecution()
+      .withId(failedJobExecutionId)
+      .withLastUpdatedDate(failedJobExecutionLastUpdatedDate)
+      .withStatus(FAIL);
     when(jobExecutionDao.getExpiredEntries(any(Date.class), eq(TENANT_ID))).thenReturn(Future.succeededFuture(asList(jobExecution, secondJobExecution)));
+    when(jobExecutionDao.getFailedEntriesWithoutCompletedDate(TENANT_ID)).thenReturn(Future.succeededFuture(Collections.singletonList(failedJobExecution)));
 
     // when
     Future<Void> future = jobExecutionService.expireJobExecutions(TENANT_ID);
@@ -315,8 +321,9 @@ class JobExecutionServiceUnitTest {
         assertTrue(ar.succeeded());
         assertNotNull(jobExecution.getCompletedDate());
         assertNotNull(secondJobExecution.getCompletedDate());
-        verify(jobExecutionDao).update(eq(jobExecution.withStatus(FAIL)), eq(TENANT_ID));
-        verify(jobExecutionDao).update(eq(secondJobExecution.withStatus(FAIL)), eq(TENANT_ID));
+        verify(jobExecutionDao).update(jobExecution.withStatus(FAIL), TENANT_ID);
+        verify(jobExecutionDao).update(secondJobExecution.withStatus(FAIL), TENANT_ID);
+        verify(jobExecutionDao).update(failedJobExecution.withCompletedDate(failedJobExecutionLastUpdatedDate), TENANT_ID);
         context.completeNow();
       })
     );

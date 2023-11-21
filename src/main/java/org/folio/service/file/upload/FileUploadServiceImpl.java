@@ -1,6 +1,7 @@
 package org.folio.service.file.upload;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.folio.HttpStatus;
@@ -189,7 +190,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         jobExecutionService.prepareAndSaveJobForFailedExport(jobExecution, fileDefinition, optionalUser.get(), 0, true, params.getTenantId());
       } else {
         errorLogService.saveGeneralError(ErrorCode.USER_NOT_FOUND.getDescription() + " with id: " + request.getMetadata().getCreatedByUserId(), jobExecution.getId(), params.getTenantId());
-        jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL), params.getTenantId());
+        jobExecutionService.update(jobExecution.withStatus(JobExecution.Status.FAIL).withCompletedDate(new Date()), params.getTenantId());
       }
     }
     failFileDefinition(promise, fileDefinition, params.getTenantId(), cause);
