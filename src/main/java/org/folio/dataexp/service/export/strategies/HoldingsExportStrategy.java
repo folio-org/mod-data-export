@@ -59,7 +59,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       var holdingJsonOpt = getAsJsonObject(holding.getJsonb());
       if (holdingJsonOpt.isEmpty()) {
         log.error("getGeneratedMarc:: Error converting to json holding by id {}", holding.getId());
-        exportStatistic.setFailed(exportStatistic.getFailed() + 1);
+        exportStatistic.incrementFailed();
         continue;
       }
       var holdingJson = holdingJsonOpt.get();

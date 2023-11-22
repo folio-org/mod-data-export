@@ -140,22 +140,23 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent());
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
-        exportStatistic.setFailed(exportStatistic.getFailed() + 1);
+        exportStatistic.incrementFailed();
         continue;
       }
       remoteStorageWriter.write(marc);
       if (externalIdsWithMarcRecord.contains(marcRecordEntity.getExternalId())) {
-        exportStatistic.setDuplicatedSrs(exportStatistic.getDuplicatedSrs() + 1);
+        exportStatistic.incrementDuplicatedSrs();
       } else {
         externalIdsWithMarcRecord.add(marcRecordEntity.getExternalId());
       }
-      exportStatistic.setExported(exportStatistic.getExported() + 1);
+      exportStatistic.incrementExported();
     }
+    marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
     var generatedMarc = getGeneratedMarc(externalIds, exportStatistic, mappingProfile);
     generatedMarc.forEach(marc -> {
       remoteStorageWriter.write(marc);
-      exportStatistic.setExported(exportStatistic.getExported() + 1);
+      exportStatistic.incrementExported();
       }
     );
   }
