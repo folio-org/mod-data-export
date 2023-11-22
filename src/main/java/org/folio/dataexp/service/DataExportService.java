@@ -65,6 +65,7 @@ public class DataExportService {
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
+    if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) jobExecution.setCompletedDate(currentDate);
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
