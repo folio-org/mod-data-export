@@ -35,9 +35,7 @@ public class DataExportTenantService extends TenantService {
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
 
-  @Autowired
   private JobProfileEntityRepository jobProfileEntityRepository;
-  @Autowired
   private MappingProfileEntityRepository mappingProfileEntityRepository;
 
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase) {
@@ -49,6 +47,16 @@ public class DataExportTenantService extends TenantService {
     log.info("Start to load reference data");
     loadMappingProfiles();
     loadJobProfiles();
+  }
+
+  @Autowired
+  private void setJobProfileEntityRepository(JobProfileEntityRepository jobProfileEntityRepository) {
+    this.jobProfileEntityRepository = jobProfileEntityRepository;
+  }
+
+  @Autowired
+  private void setMappingProfileEntityRepository(MappingProfileEntityRepository mappingProfileEntityRepository) {
+    this.mappingProfileEntityRepository = mappingProfileEntityRepository;
   }
 
   private void loadMappingProfiles() {

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @Log4j2
@@ -18,7 +19,7 @@ public class HoldingsRulesProvider {
 
   private static final String DEFAULT_HOLDINGS_RULES_PATH = "/rules/holdingsRulesDefault.json";
 
-  private List<Rule> defaultRules;
+  private List<Rule> defaultRules = new ArrayList<>();
 
   @PostConstruct
   private void setDefaultRules() {

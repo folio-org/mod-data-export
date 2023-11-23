@@ -56,18 +56,17 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public List<String> getGeneratedMarc(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, exportStatistic, mappingProfile);
     var rules = holdingsRulesProvider.getDefaultRules();
-    return holdingsWithInstanceAndItems.stream().map(h -> mapToSrs(h, rules, exportStatistic)).toList();
+    return holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, rules, exportStatistic)).toList();
   }
 
-  private String mapToSrs(JSONObject jsonObject, List<Rule> rules, ExportStrategyStatistic exportStatistic) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ExportStrategyStatistic exportStatistic) {
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = null;
-    var record = ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+    return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       log.error("mapToSrs:: exception: {} for holding : {}", translationException.getCause(), jsonObject.get(ID_KEY));
       exportStatistic.incrementFailed();
     }));
-    return record;
   }
 
   private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
@@ -91,12 +90,12 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
           var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
           if (instanceJsonOpt.isEmpty()) {
             log.error("getGeneratedMarc:: Error converting to json instance by id {}", instance.getId());
+          } else {
+            var instanceJson = instanceJsonOpt.get();
+            holdingWithInstanceAndItems.appendField(INSTANCE_KEY, instanceJson);
+            holdingJson.put(INSTANCE_HRID_KEY, instanceJson.getAsString(HRID_KEY));
             break;
           }
-          var instanceJson = instanceJsonOpt.get();
-          holdingWithInstanceAndItems.appendField(INSTANCE_KEY, instanceJson);
-          holdingJson.put(INSTANCE_HRID_KEY, instanceJson.getAsString(HRID_KEY));
-          break;
         }
       }
       if (mappingProfile.getRecordTypes().contains(RecordTypes.ITEM)) {

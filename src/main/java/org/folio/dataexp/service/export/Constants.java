@@ -2,6 +2,8 @@ package org.folio.dataexp.service.export;
 
 public class Constants {
 
+  private Constants() {}
+
   public static final int OUTPUT_BUFFER_SIZE = 8192;
   public static final String ID_KEY = "id";
   public static final String INSTANCE_KEY = "instance";

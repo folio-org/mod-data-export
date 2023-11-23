@@ -22,12 +22,7 @@ public class JsonToMarcConverter {
       var marcJsonReader = new MarcJsonReader(byteArrayInputStream);
       var marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
       try {
-        while (marcJsonReader.hasNext()) {
-          var record = marcJsonReader.next();
-          marcStreamWriter.write(record);
-        }
-        // Handle unchecked json parse exception when parser encounters with control character or
-        // any other unexpected data.
+        writeMarc(marcJsonReader, marcStreamWriter);
       } catch (Exception e) {
         log.error(e.getMessage());
         throw new MarcException(e.getMessage());
@@ -36,6 +31,13 @@ public class JsonToMarcConverter {
     } catch (IOException e) {
       log.error(e.getMessage());
       throw e;
+    }
+  }
+
+  private void writeMarc(MarcJsonReader marcJsonReader, MarcStreamWriter marcStreamWriter) {
+    while (marcJsonReader.hasNext()) {
+      var marc = marcJsonReader.next();
+      marcStreamWriter.write(marc);
     }
   }
 }
