@@ -14,20 +14,19 @@ import java.util.List;
 
 @Log4j2
 @Component
-@Getter
 public class HoldingsRulesProvider {
 
-  private static final String DEFAULT_HOLDINGS_RULES_PATH = "/rules/holdingsRulesDefault.json";
+  private List<Rule> defaultRules;
 
-  private List<Rule> defaultRules = new ArrayList<>();
-
-  @PostConstruct
-  private void setDefaultRules() {
+  public List<Rule> getDefaultRules() {
+    if (this.defaultRules != null) return this.defaultRules;
     var mapper = new ObjectMapper();
-    try (InputStream is = HoldingsRulesProvider.class.getResourceAsStream(DEFAULT_HOLDINGS_RULES_PATH)) {
+    try (InputStream is = HoldingsRulesProvider.class.getResourceAsStream("/rules/holdingsRulesDefault.json")) {
       this.defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
+      return this.defaultRules;
     } catch (IOException e) {
       log.error("Failed to fetch default holdings rules for export");
     }
+    return new ArrayList<>();
   }
 }
