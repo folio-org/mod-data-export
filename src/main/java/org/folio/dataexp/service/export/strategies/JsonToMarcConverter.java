@@ -21,12 +21,7 @@ public class JsonToMarcConverter {
     try (byteArrayInputStream; byteArrayOutputStream) {
       var marcJsonReader = new MarcJsonReader(byteArrayInputStream);
       var marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
-      try {
-        writeMarc(marcJsonReader, marcStreamWriter);
-      } catch (Exception e) {
-        log.error(e.getMessage());
-        throw new MarcException(e.getMessage());
-      }
+      writeMarc(marcJsonReader, marcStreamWriter);
       return byteArrayOutputStream.toString();
     } catch (IOException e) {
       log.error(e.getMessage());
@@ -35,9 +30,14 @@ public class JsonToMarcConverter {
   }
 
   private void writeMarc(MarcJsonReader marcJsonReader, MarcStreamWriter marcStreamWriter) {
-    while (marcJsonReader.hasNext()) {
-      var marc = marcJsonReader.next();
-      marcStreamWriter.write(marc);
+    try {
+      while (marcJsonReader.hasNext()) {
+        var marc = marcJsonReader.next();
+        marcStreamWriter.write(marc);
+      }
+    } catch (Exception e) {
+      log.error(e.getMessage());
+      throw new MarcException(e.getMessage());
     }
   }
 }
