@@ -12,6 +12,13 @@ import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.processor.RuleProcessor;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.rule.Rule;
+import org.folio.reader.EntityReader;
+import org.folio.reader.JPathSyntaxEntityReader;
+import org.folio.writer.RecordWriter;
+import org.folio.writer.impl.MarcRecordWriter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,6 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
@@ -36,6 +44,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final InstanceEntityRepository instanceEntityRepository;
   private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
+  private final HoldingsRulesProvider holdingsRulesProvider;
+  private final RuleProcessor ruleProcessor;
 
   @Override
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds) {
@@ -45,7 +55,19 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   @Override
   public List<String> getGeneratedMarc(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, exportStatistic, mappingProfile);
-    return new ArrayList<>();
+    var rules = holdingsRulesProvider.getDefaultRules();
+    return holdingsWithInstanceAndItems.stream().map(h -> mapToSrs(h, rules, exportStatistic)).toList();
+  }
+
+  private String mapToSrs(JSONObject jsonObject, List<Rule> rules, ExportStrategyStatistic exportStatistic) {
+    EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
+    RecordWriter recordWriter = new MarcRecordWriter();
+    ReferenceDataWrapper referenceDataWrapper = null;
+    var record = ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+      log.error("mapToSrs:: exception: {} for holding : {}", translationException.getCause(), jsonObject.get(ID_KEY));
+      exportStatistic.incrementFailed();
+    }));
+    return record;
   }
 
   private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
