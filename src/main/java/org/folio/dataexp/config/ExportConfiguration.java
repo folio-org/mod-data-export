@@ -1,6 +1,7 @@
 package org.folio.dataexp.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import lombok.extern.log4j.Log4j2;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.rule.Rule;
@@ -26,7 +27,7 @@ public class ExportConfiguration {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/holdingsRulesDefault.json")) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
-      return defaultRules;
+      return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default holdings rules for export");
       throw e;
