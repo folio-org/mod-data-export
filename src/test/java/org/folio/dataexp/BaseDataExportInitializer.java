@@ -11,7 +11,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -136,7 +136,7 @@ public class BaseDataExportInitializer {
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
-  private FolioS3ClientFactory folioS3ClientFactory;
+  private FolioS3Client s3Client;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -177,7 +177,6 @@ public class BaseDataExportInitializer {
         .collect(Collectors.toMap(Map.Entry::getKey, e -> (Collection<String>) List.of(String.valueOf(e.getValue()))));
 
     folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, localHeaders);
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     s3Client.createBucketIfNotExists();
   }
 

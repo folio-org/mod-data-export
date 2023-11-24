@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +12,12 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class InstancesExportStrategy implements ExportStrategy {
 
-  private final FolioS3ClientFactory folioS3ClientFactory;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  private final FolioS3Client s3Client;
 
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var marc = "marc";
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(),  8192, s3Client);
     remoteStorageWriter.write(marc);
     remoteStorageWriter.close();

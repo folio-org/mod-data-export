@@ -12,7 +12,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -38,8 +38,8 @@ public class InputFileProcessor {
   private static final String CALL_SAVE_INSTANCES_IDS_PROCEDURE = "call save_instances_ids(?, ?)";
 
   private final ExportIdEntityRepository exportIdEntityRepository;
-  private final FolioS3ClientFactory folioS3ClientFactory;
   private final JdbcTemplate jdbcTemplate;
+  private final FolioS3Client s3Client;
 
   public void readFile(FileDefinition fileDefinition) {
     try {
@@ -55,7 +55,6 @@ public class InputFileProcessor {
 
   private void readCsvFile(FileDefinition fileDefinition) throws IOException {
     var pathToRead = getPathToRead(fileDefinition);
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
         reader.lines().forEach(id -> {
         var instanceId = id.replace("\"", StringUtils.EMPTY);
@@ -68,7 +67,6 @@ public class InputFileProcessor {
 
   private void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
     var pathToRead = getPathToRead(fileDefinition);
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     String cql;
     try (InputStream is = s3Client.read(pathToRead)) {
       cql = IOUtils.toString(is, StandardCharsets.UTF_8);

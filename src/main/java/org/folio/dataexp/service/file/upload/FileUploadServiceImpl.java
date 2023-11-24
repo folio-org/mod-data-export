@@ -7,7 +7,7 @@ import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
@@ -24,13 +24,12 @@ public class FileUploadServiceImpl implements FileUploadService{
   private static final String ERROR_MESSAGE = "File already uploaded for file definition with id : ";
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  private final FolioS3ClientFactory folioS3ClientFactory;
+  private final FolioS3Client s3Client;
 
   @Override
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     s3Client.write(String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName()), resource.getInputStream());
     completeUploading(fileDefinitionEntity);
     log.info("Complete upload file for file definition {}", fileDefinitionId);

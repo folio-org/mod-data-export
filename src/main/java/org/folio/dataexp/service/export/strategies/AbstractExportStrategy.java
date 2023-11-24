@@ -14,7 +14,7 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,7 @@ import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   private int exportIdsBatch;
-  private FolioS3ClientFactory folioS3ClientFactory;
+  private FolioS3Client s3Client;
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private ExportIdEntityRepository exportIdEntityRepository;
 
@@ -46,11 +46,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   private void setExportIdsBatch(int exportIdsBatch) {
     this.exportIdsBatch = exportIdsBatch;
-  }
-
-  @Autowired
-  private void setFolioS3ClientFactory(FolioS3ClientFactory folioS3ClientFactory) {
-    this.folioS3ClientFactory = folioS3ClientFactory;
   }
 
   @Autowired
@@ -83,11 +78,15 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.jobExecutionEntityRepository = jobExecutionEntityRepository;
   }
 
+  @Autowired
+  public void setS3Client(FolioS3Client s3Client) {
+    this.s3Client = s3Client;
+  }
+
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
     var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
       exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));

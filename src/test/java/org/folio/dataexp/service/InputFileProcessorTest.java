@@ -6,7 +6,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";
 
   @Autowired
-  private FolioS3ClientFactory folioS3ClientFactory;
+  private FolioS3Client s3Client;
   @Autowired
   private InputFileProcessor inputFileProcessor;
   @Autowired
@@ -40,7 +40,6 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
     fileDefinition.setJobExecutionId(UUID.randomUUID());
 
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     s3Client.createBucketIfNotExists();
 
     var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
@@ -65,7 +64,6 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
     fileDefinition.setJobExecutionId(UUID.randomUUID());
 
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     s3Client.createBucketIfNotExists();
 
     var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());

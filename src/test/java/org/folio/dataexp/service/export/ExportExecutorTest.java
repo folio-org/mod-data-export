@@ -10,7 +10,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,14 +28,13 @@ class ExportExecutorTest extends BaseDataExportInitializer {
   @MockBean
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
-  private FolioS3ClientFactory folioS3ClientFactory;
+  private FolioS3Client s3Client;
   @Autowired
   private ExportExecutor exportExecutor;
 
   @Test
   @SneakyThrows
   void exportTest() {
-    var s3Client = folioS3ClientFactory.getFolioS3Client();
     var jobExecutionId = UUID.randomUUID();
     var jobExecution = new JobExecution();
     jobExecution.setProgress(new JobExecutionProgress());
