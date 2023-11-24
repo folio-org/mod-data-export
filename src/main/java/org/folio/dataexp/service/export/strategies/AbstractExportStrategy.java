@@ -118,7 +118,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds);
 
-  abstract List<String> getGeneratedMarc(Set<UUID> ids, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile);
+  abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
 
   protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
     try {
@@ -153,12 +153,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     }
     marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
-    var generatedMarc = getGeneratedMarc(externalIds, exportStatistic, mappingProfile);
-    generatedMarc.forEach(marc -> {
+    var result = getGeneratedMarc(externalIds, mappingProfile);
+    result.getMarcRecords().forEach(marc -> {
       remoteStorageWriter.write(marc);
       exportStatistic.incrementExported();
       }
     );
+    exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

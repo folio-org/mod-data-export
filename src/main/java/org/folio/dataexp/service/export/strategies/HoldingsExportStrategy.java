@@ -48,28 +48,32 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
 
   @Override
-  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds) {
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds) {
     return marcRecordEntityRepository.findByExternalIdIn(externalIds);
   }
 
   @Override
-  public List<String> getGeneratedMarc(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, exportStatistic, mappingProfile);
+  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile) {
+    var result = new GeneratedMarcResult();
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
     var rules = holdingsRulesProvider.getRules(mappingProfile);
-    return holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, rules, exportStatistic)).toList();
+    var marcRecords = holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, rules)).toList();
+    result.setMarcRecords(marcRecords);
+    return result;
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ExportStrategyStatistic exportStatistic) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = null;
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
-      log.error("mapToSrs:: exception: {} for holding : {}", translationException.getCause(), jsonObject.get(ID_KEY));
-      exportStatistic.incrementFailed();
+      var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+      var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
     }));
   }
 
-  private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
+  private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
@@ -79,8 +83,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       existHoldingsIds.add(holding.getId());
       var holdingJsonOpt = getAsJsonObject(holding.getJsonb());
       if (holdingJsonOpt.isEmpty()) {
-        log.error("getGeneratedMarc:: Error converting to json holding by id {}", holding.getId());
-        exportStatistic.incrementFailed();
+        log.error("getHoldingsWithInstanceAndItems:: Error converting to json holding by id {}", holding.getId());
+        result.addIdToFailed(holding.getId());
         continue;
       }
       var holdingJson = holdingJsonOpt.get();
@@ -89,7 +93,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         if (instance.getId().equals(holding.getInstanceId())) {
           var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
           if (instanceJsonOpt.isEmpty()) {
-            log.error("getGeneratedMarc:: Error converting to json instance by id {}", instance.getId());
+            log.error("getHoldingsWithInstanceAndItems:: Error converting to json instance by id {}", instance.getId());
           } else {
             var instanceJson = instanceJsonOpt.get();
             holdingWithInstanceAndItems.appendField(INSTANCE_KEY, instanceJson);
@@ -107,8 +111,11 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       holdingsWithInstanceAndItems.add(holdingWithInstanceAndItems);
     }
     holdingsIds.removeAll(existHoldingsIds);
-    exportStatistic.setFailed(exportStatistic.getFailed() + holdingsIds.size());
-    holdingsIds.forEach(holdingsId -> log.error("Holding by id {} does not exist", holdingsId));
+    holdingsIds.forEach(
+      holdingsId -> {
+        log.error("getHoldingsWithInstanceAndItems:: holding by id {} does not exist", holdingsId);
+        result.addIdToFailed(holdingsId);
+      });
     return holdingsWithInstanceAndItems;
   }
 
