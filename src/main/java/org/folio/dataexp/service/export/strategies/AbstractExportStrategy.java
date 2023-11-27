@@ -123,7 +123,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
   }
 
-  protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
+  protected static Optional<JSONObject> getAsJsonObject(String jsonAsString) {
     try {
       var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
       return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
