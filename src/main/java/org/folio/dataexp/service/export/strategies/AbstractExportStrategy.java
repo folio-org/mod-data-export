@@ -44,7 +44,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JsonToMarcConverter jsonToMarcConverter;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
-  private void setExportIdsBatch(int exportIdsBatch) {
+  protected void setExportIdsBatch(int exportIdsBatch) {
     this.exportIdsBatch = exportIdsBatch;
   }
 
@@ -87,7 +87,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
-    var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
+    var remoteStorageWriter = createRemoteStorageWrite(exportFilesEntity);
     var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
       exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
     var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
@@ -118,6 +118,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds);
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
+
+  protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
+    return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
+  }
 
   protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
     try {

@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class ExportStrategyFactoryTest {
+class ExportStrategyFactoryTest {
 
   @Mock
   private HoldingsExportStrategy holdingsExportStrategy;

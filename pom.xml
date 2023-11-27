@@ -30,6 +30,7 @@
       **/src/main/java/org/folio/dataexp/exception/**,
       **/src/main/java/org/folio/dataexp/domain/entity/**,
       **/src/main/java/org/folio/dataexp/domain/dto/**,
+      **/src/main/java/org/folio/dataexp/repository**,
       **/src/**/test/**/*
     </sonar.exclusions>
     <argLine />
