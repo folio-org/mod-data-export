@@ -53,6 +53,7 @@
     <testcontainer.version>1.17.6</testcontainer.version>
     <wiremock.version>2.35.0</wiremock.version>
     <awaitility.version>4.2.0</awaitility.version>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
 
     <!-- Plugins versions -->
     <maven-openapi-generator-plugin.version>6.2.1</maven-openapi-generator-plugin.version>
@@ -249,6 +250,13 @@
       <groupId>com.github.tomakehurst</groupId>
       <artifactId>wiremock-jre8-standalone</artifactId>
       <version>${wiremock.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>${mockito-inline.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

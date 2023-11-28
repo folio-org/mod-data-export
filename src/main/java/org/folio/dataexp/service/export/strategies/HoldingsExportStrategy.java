@@ -62,18 +62,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return result;
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
-    EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
-    RecordWriter recordWriter = new MarcRecordWriter();
-    ReferenceDataWrapper referenceDataWrapper = null;
-    return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
-      var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
-      var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
-    }));
-  }
-
-  private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {
+  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
@@ -117,6 +106,17 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         result.addIdToFailed(holdingsId);
       });
     return holdingsWithInstanceAndItems;
+  }
+
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
+    EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
+    RecordWriter recordWriter = new MarcRecordWriter();
+    ReferenceDataWrapper referenceDataWrapper = null;
+    return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+      var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+      var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
+    }));
   }
 
   private void addItemsToHolding(JSONObject holdingJson, UUID holdingId) {

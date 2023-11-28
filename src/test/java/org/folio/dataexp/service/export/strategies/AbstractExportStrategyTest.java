@@ -62,11 +62,10 @@ class AbstractExportStrategyTest {
   private JsonToMarcConverter jsonToMarcConverter;
 
   @InjectMocks
-  private AbstractExportStrategy exportStrategy = new TestExportStrategy();
+  private AbstractExportStrategy exportStrategy = new TestExportStrategy(1);
 
   @BeforeEach
   void clear(){
-    exportStrategy.setExportIdsBatch(1);
     ((TestExportStrategy)exportStrategy).setMarcRecords(new ArrayList<>());
     ((TestExportStrategy)exportStrategy).setGeneratedMarcResult(new GeneratedMarcResult());
   }
@@ -162,7 +161,7 @@ class AbstractExportStrategyTest {
   @Test
   void getAsJsonObjectTest() {
     var jsonAsString = "{'id':'123'}";
-    var opt = AbstractExportStrategy.getAsJsonObject(jsonAsString);
+    var opt = exportStrategy.getAsJsonObject(jsonAsString);
 
     assertTrue(opt.isPresent());
 
@@ -171,6 +170,10 @@ class AbstractExportStrategyTest {
   }
 
   class TestExportStrategy extends AbstractExportStrategy {
+
+    TestExportStrategy(int exportBatch) {
+      super.setExportIdsBatch(exportBatch);
+    }
 
     @Setter
     private List<MarcRecordEntity> marcRecords = new ArrayList<>();

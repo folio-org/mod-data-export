@@ -79,7 +79,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  public void setS3Client(FolioS3Client s3Client) {
+  private void setS3Client(FolioS3Client s3Client) {
     this.s3Client = s3Client;
   }
 
@@ -123,7 +123,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
   }
 
-  protected static Optional<JSONObject> getAsJsonObject(String jsonAsString) {
+  protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
     try {
       var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
       return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
