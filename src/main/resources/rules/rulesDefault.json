@@ -141,7 +141,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "ISBN"
           }
@@ -151,7 +151,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "Invalid ISBN"
           }
@@ -189,7 +189,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "ISSN"
           }
@@ -199,7 +199,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "l",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "Linking ISSN"
           }
@@ -209,7 +209,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "Invalid ISSN"
           }
@@ -1041,7 +1041,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "a",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "GPO item number"
           }
@@ -1051,7 +1051,7 @@
         "from": "$.instance.identifiers[*].value",
         "subfield": "z",
         "translation": {
-          "function": "append_identifier",
+          "function": "set_or_append_identifier",
           "parameters": {
             "type": "Cancelled GPO item number"
           }
