@@ -23,6 +23,18 @@ public class ExportConfiguration {
   }
 
   @Bean
+  public List<Rule> defaultRules() throws IOException {
+    var mapper = new ObjectMapper();
+    try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/rulesDefault.json")) {
+      List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
+      return ImmutableList.copyOf(defaultRules);
+    } catch (IOException e) {
+      log.error("Failed to fetch default rules for export");
+      throw e;
+    }
+  }
+
+  @Bean
   public List<Rule> holdingsDefaultRules() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/holdingsRulesDefault.json")) {

@@ -48,9 +48,9 @@ class HoldingsExportStrategyTest {
   @Mock
   private RuleProcessor ruleProcessor;
   @Mock
-  private HoldingsRulesProvider holdingsRulesProvider;
-  @Mock
   private ItemEntityRepository itemEntityRepository;
+  @Mock
+  private RuleFactory ruleFactory;
 
   @InjectMocks
   private HoldingsExportStrategy holdingsExportStrategy;
@@ -71,7 +71,7 @@ class HoldingsExportStrategyTest {
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
 
-    verify(holdingsRulesProvider).getRules(isA(MappingProfile.class));
+    verify(ruleFactory).getRules(isA(MappingProfile.class), any());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
   }
 

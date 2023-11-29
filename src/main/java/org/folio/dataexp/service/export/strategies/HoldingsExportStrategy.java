@@ -44,7 +44,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final InstanceEntityRepository instanceEntityRepository;
   private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
-  private final HoldingsRulesProvider holdingsRulesProvider;
+  private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
 
   @Override
@@ -57,7 +57,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
-    var rules = holdingsRulesProvider.getRules(mappingProfile);
+    var rules = ruleFactory.getRules(mappingProfile, null);
     var marcRecords = holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, rules)).toList();
     result.setMarcRecords(marcRecords);
     return result;
