@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,7 +37,7 @@ import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTER
 public class InputFileProcessor {
 
   private static final String CALL_SAVE_INSTANCES_IDS_PROCEDURE = "call save_instances_ids(?, ?)";
-
+  private static final int BATCH_SIZE_TO_SAVE = 1000;
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final JdbcTemplate jdbcTemplate;
   private final FolioS3Client s3Client;
@@ -55,14 +56,20 @@ public class InputFileProcessor {
 
   private void readCsvFile(FileDefinition fileDefinition) throws IOException {
     var pathToRead = getPathToRead(fileDefinition);
+    var batch = new ArrayList<ExportIdEntity>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-        reader.lines().forEach(id -> {
+      reader.lines().forEach(id -> {
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
           .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
-        exportIdEntityRepository.save(entity);
+        batch.add(entity);
+        if (batch.size() == BATCH_SIZE_TO_SAVE) {
+          exportIdEntityRepository.saveAll(batch);
+          batch.clear();
+        }
       });
     }
+    exportIdEntityRepository.saveAll(batch);
   }
 
   private void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
