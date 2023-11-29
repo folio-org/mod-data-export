@@ -68,4 +68,12 @@ public interface JobExecutionDao {
    */
   Future<List<JobExecution>> getExpiredEntries(Date lastUpdateDate, String tenantId);
 
+  /**
+   * Fetch list of failed {@link JobExecution} without completed date from database
+   *
+   * @param tenantId       tenant id
+   * @return future with list of expire {@link JobExecution}
+   */
+  Future<List<JobExecution>> getFailedEntriesWithoutCompletedDate(String tenantId);
+
 }

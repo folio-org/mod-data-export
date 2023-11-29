@@ -1,5 +1,13 @@
 ## v4.9.0 Unreleased
 
+## 11/29/2023 v4.8.6 Released
+This release includes bug fix for failed jobs position in job executions view
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.5...v4.8.6)
+
+### Bug Fixes
+* [MDEXP-668](https://issues.folio.org/browse/MDEXP-668) Regression: Failed jobs listed always on top of the queue when completeDate is missing
+
 ## 11/10/2023 v4.8.4 Released
 This release includes bug fixes.
 
