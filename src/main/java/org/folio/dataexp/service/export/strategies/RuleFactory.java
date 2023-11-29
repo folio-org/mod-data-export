@@ -46,11 +46,11 @@ public class RuleFactory {
 
   @Autowired
   @Qualifier("defaultRules")
-  private List<Rule> defaultRules;
+  private List<Rule> defaultRulesFromConfigFile;
 
   @Autowired
   @Qualifier("holdingsDefaultRules")
-  private List<Rule> defaultHoldingsRules;
+  private List<Rule> defaultHoldingsRulesFromConfigFile;
 
   public List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId) {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
@@ -70,7 +70,7 @@ public class RuleFactory {
 
   public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules, boolean appendDefaultHoldingsRules) {
     if (appendDefaultHoldingsRules && mappingProfile != null && mappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS)) {
-      defaultRules.addAll(defaultHoldingsRules);
+      defaultRules.addAll(defaultHoldingsRulesFromConfigFile);
     }
     if (mappingProfile == null || CollectionUtils.isEmpty(mappingProfile.getTransformations())) {
       log.info("No Mapping rules specified, using default mapping rules");
@@ -160,10 +160,10 @@ public class RuleFactory {
   private List<Rule> createRulesDependsOnRecordType(MappingProfile mappingProfile) {
     List<Rule> combinedDefaultRules = new ArrayList<>();
     if (mappingProfile == null || mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
-      combinedDefaultRules.addAll(defaultRules);
+      combinedDefaultRules.addAll(defaultRulesFromConfigFile);
     }
     if (mappingProfile != null && (mappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS))) {
-      combinedDefaultRules.addAll(defaultHoldingsRules);
+      combinedDefaultRules.addAll(defaultHoldingsRulesFromConfigFile);
     }
     return create(mappingProfile, combinedDefaultRules, false);
   }
