@@ -48,8 +48,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
 
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds) {
-    return marcRecordEntityRepository.findByExternalIdIn(externalIds);
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
+    if (mappingProfile.getDefault()) return marcRecordEntityRepository.findByExternalIdIn(externalIds);
+    return new ArrayList<>();
   }
 
   @Override

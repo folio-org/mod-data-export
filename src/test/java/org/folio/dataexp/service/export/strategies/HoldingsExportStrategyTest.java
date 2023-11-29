@@ -57,7 +57,9 @@ class HoldingsExportStrategyTest {
 
   @Test
   void getMarcRecordsTest() {
-    holdingsExportStrategy.getMarcRecords(new HashSet<>());
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(true);
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
     verify(marcRecordEntityRepository).findByExternalIdIn(anySet());
   }
 

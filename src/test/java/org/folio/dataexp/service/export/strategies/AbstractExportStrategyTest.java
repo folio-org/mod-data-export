@@ -181,7 +181,7 @@ class AbstractExportStrategyTest {
     private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult();
 
     @Override
-    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds) {
+    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
       return marcRecords;
     }
 

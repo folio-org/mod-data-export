@@ -115,7 +115,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return exportStatistic;
   }
 
-  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds);
+  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile);
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
 
@@ -135,7 +135,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter,
                                  ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
-    var marcRecords = getMarcRecords(externalIds);
+    var marcRecords = getMarcRecords(externalIds, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;

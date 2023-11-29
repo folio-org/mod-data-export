@@ -19,6 +19,7 @@ public class HoldingsRulesProvider {
   private List<Rule> defaultRules;
 
   public List<Rule> getRules(MappingProfile mappingProfile) {
+    if (mappingProfile.getDefault()) return defaultRules;
     List<Rule> newRules = new ArrayList<>(defaultRules);
     return newRules;
   }
