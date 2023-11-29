@@ -11,6 +11,7 @@ import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
@@ -51,6 +53,8 @@ class HoldingsExportStrategyTest {
   private ItemEntityRepository itemEntityRepository;
   @Mock
   private RuleFactory ruleFactory;
+  @Spy
+  private RuleHandler ruleHandler;
 
   @InjectMocks
   private HoldingsExportStrategy holdingsExportStrategy;
@@ -73,6 +77,7 @@ class HoldingsExportStrategyTest {
 
     verify(ruleFactory).getRules(isA(MappingProfile.class), any());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
   }
 
   @Test
