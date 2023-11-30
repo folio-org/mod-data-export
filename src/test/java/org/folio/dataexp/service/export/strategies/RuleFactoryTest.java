@@ -6,7 +6,6 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
-import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -735,9 +734,6 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   @Test
   void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields() {
     // given
-    List<Rule> defaultRules = setUpElectorincAccesDefaultRuleWithIdicators();
-    //ToDO
-    //doReturn(defaultRules).when(ruleFactory).getDefaultRulesFromFile();
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
     transformation.setFieldId("instance.electronic.access.linktext.related.resource");
@@ -858,24 +854,5 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(METADATA_CREATED_DATE_VALUE, rules.get(0).getMetadata().getData().get(METADATA_CREATED_DATE).getFrom());
 
     assertTrue(rules.containsAll(defaultRulesFromConfigFile));
-  }
-
-  private List<Rule> setUpElectorincAccesDefaultRuleWithIdicators() {
-    DataSource linkTextDataSource = new DataSource();
-    linkTextDataSource.setFrom("$.instance.electronicAccess[*].linkText");
-    linkTextDataSource.setSubfield("y");
-    DataSource uriDataSource = new DataSource();
-    uriDataSource.setFrom("$.instance.electronicAccess[*].uri");
-    uriDataSource.setSubfield("u");
-    DataSource indicator1DataSource = new DataSource();
-    indicator1DataSource.setIndicator("1");
-    DataSource indicator2DataSource = new DataSource();
-    indicator2DataSource.setIndicator("2");
-    Rule defaultRule = new Rule();
-    defaultRule.setId("instance.electronic.access");
-    defaultRule.setField("856");
-    defaultRule.setDescription("Electronic access");
-    defaultRule.setDataSources(Lists.newArrayList(linkTextDataSource, indicator1DataSource, indicator2DataSource));
-    return Lists.newArrayList(defaultRule);
   }
 }
