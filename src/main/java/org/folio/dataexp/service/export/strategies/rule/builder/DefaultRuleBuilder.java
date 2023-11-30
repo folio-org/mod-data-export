@@ -14,7 +14,6 @@ import static java.util.Objects.nonNull;
 
 @Log4j2
 public class DefaultRuleBuilder implements RuleBuilder {
-  private static final Logger LOGGER = LogManager.getLogger(MethodHandles.lookup().lookupClass());
 
   @Override
   public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {

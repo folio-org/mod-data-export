@@ -32,6 +32,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 public class RuleFactory {
 
   private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+
   private static final String TEMPORARY_LOCATION_FIELD_ID = "holdings.temporarylocation.name";
   private static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
   private static final String DEFAULT_BUILDER_KEY = "default.builder";

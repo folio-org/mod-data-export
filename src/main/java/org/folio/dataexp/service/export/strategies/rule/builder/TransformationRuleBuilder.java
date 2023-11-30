@@ -18,12 +18,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.service.export.strategies.transformation.fields.TransformationFieldsConfig;
 import org.folio.dataexp.service.export.strategies.translation.builder.DefaultTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.TranslationBuilder;
-import org.folio.processor.error.RecordType;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.Translation;
@@ -98,8 +98,8 @@ public class TransformationRuleBuilder implements RuleBuilder {
       rule = existingRule.get();
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
 
-      if (!existingRule.get().isItemTypeRule() && mappingTransformation.getRecordType().equals(RecordType.ITEM)) {
-        rule.setItemTypeRule(RecordType.ITEM.equals(mappingTransformation.getRecordType()));
+      if (!existingRule.get().isItemTypeRule() && mappingTransformation.getRecordType() == RecordTypes.ITEM) {
+        rule.setItemTypeRule(RecordTypes.ITEM == mappingTransformation.getRecordType());
       }
 
     } else {
@@ -107,7 +107,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
       rule.setField(field);
       rule.setIndicators(indicators);
       setDataSources(rule, mappingTransformation);
-      rule.setItemTypeRule(RecordType.ITEM.equals(mappingTransformation.getRecordType()));
+      rule.setItemTypeRule(RecordTypes.ITEM == mappingTransformation.getRecordType());
     }
     if (MapUtils.isNotEmpty(mappingTransformation.getMetadataParameters())) {
       Map<String, String> metadata = new HashMap<>();
