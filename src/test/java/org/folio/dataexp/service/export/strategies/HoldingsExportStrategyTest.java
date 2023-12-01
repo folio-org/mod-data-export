@@ -75,7 +75,7 @@ class HoldingsExportStrategyTest {
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
 
-    verify(ruleFactory).getRules(isA(MappingProfile.class), any());
+    verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
   }

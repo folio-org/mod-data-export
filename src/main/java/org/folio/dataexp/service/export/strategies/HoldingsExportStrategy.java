@@ -59,7 +59,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
-    var rules = ruleFactory.getRules(mappingProfile, null);
+    var rules = ruleFactory.getRules(mappingProfile);
     var marcRecords = holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
     result.setMarcRecords(marcRecords);
     return result;

@@ -825,8 +825,12 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    var defaultRulesAmount = defaultRulesFromConfigFile.size() + defaultHoldingsRulesFromConfigFile.size();
-    assertEquals(defaultRulesAmount + transformationRulesAmount, rules.size());
+    assertEquals(defaultRulesFromConfigFile.size() + transformationRulesAmount, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(1).getDataSources().get(0).getFrom());
+    assertTrue(rules.containsAll(defaultRulesFromConfigFile));
   }
 
   @Test
@@ -843,7 +847,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
     mappingProfile.setTransformations(ImmutableList.of(itemTransformation));
-    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.INSTANCE));
+    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.ITEM));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);

@@ -27,8 +27,8 @@ import java.util.UUID;
 import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
-@Component
 @Log4j2
+@Component
 public class RuleFactory {
 
   private static final String DEFAULT_INSTANCE_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
@@ -45,22 +45,29 @@ public class RuleFactory {
     .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
     .build();
 
+  private List<Rule> defaultRulesFromConfigFile;
+  private List<Rule> defaultHoldingsRulesFromConfigFile;
+
   @Autowired
   @Qualifier("defaultRules")
-  private List<Rule> defaultRulesFromConfigFile;
+  private void setDefaultRulesFromConfigFile(List<Rule> defaultRulesFromConfigFile) {
+    this.defaultRulesFromConfigFile = defaultRulesFromConfigFile;
+  }
 
   @Autowired
   @Qualifier("holdingsDefaultRules")
-  private List<Rule> defaultHoldingsRulesFromConfigFile;
+  private void setDefaultHoldingsRulesFromConfigFile(List<Rule> defaultHoldingsRulesFromConfigFile) {
+    this.defaultHoldingsRulesFromConfigFile = defaultHoldingsRulesFromConfigFile;
+  }
 
-  public List<Rule> getRules(MappingProfile mappingProfile, String jobExecutionId) {
+  public List<Rule> getRules(MappingProfile mappingProfile) {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       return create(mappingProfile);
     }
-    // ToDo configurationsClient.getRulesFromConfiguration(jobExecutionId, params)
+    // ToDo MDEXP-673
     List<Rule> rulesFromConfig = new ArrayList<>();
     if (mappingProfile != null && isNotEmpty(rulesFromConfig)) {
-      log.debug("Using overridden rules from mod-configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
+      log.info("Using overridden rules configuration with transformations from the mapping profile with id {}", mappingProfile.getId());
     }
     return CollectionUtils.isEmpty(rulesFromConfig) ? create(mappingProfile) : create(mappingProfile, rulesFromConfig, true);
   }
@@ -79,7 +86,7 @@ public class RuleFactory {
     }
     List<Rule> rules = new ArrayList<>(createByTransformations(mappingProfile.getTransformations(), defaultRules));
     if (isDefaultInstanceProfile(mappingProfile.getId()) && isNotEmpty(mappingProfile.getTransformations())) {
-      rules.addAll(defaultRules);
+      rules.addAll(defaultRulesFromConfigFile);
     }
     return rules;
   }
