@@ -9,7 +9,6 @@ import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.processor.rule.Rule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,11 +88,9 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   private RuleFactory ruleFactory;
 
   @Autowired
-  @Qualifier("defaultRules")
   private List<Rule> defaultRulesFromConfigFile;
 
   @Autowired
-  @Qualifier("holdingsDefaultRules")
   private List<Rule> defaultHoldingsRulesFromConfigFile;
 
   @Test

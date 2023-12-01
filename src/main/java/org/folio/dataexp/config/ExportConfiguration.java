@@ -23,7 +23,7 @@ public class ExportConfiguration {
   }
 
   @Bean
-  public List<Rule> defaultRules() throws IOException {
+  public List<Rule> defaultRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/rulesDefault.json")) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
@@ -35,7 +35,7 @@ public class ExportConfiguration {
   }
 
   @Bean
-  public List<Rule> holdingsDefaultRules() throws IOException {
+  public List<Rule> defaultHoldingsRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/holdingsRulesDefault.json")) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));

@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +14,6 @@ import org.folio.dataexp.service.export.strategies.rule.builder.RuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.TransformationRuleBuilder;
 import org.folio.processor.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Log4j2
+@AllArgsConstructor
 @Component
 public class RuleFactory {
 
@@ -45,20 +46,10 @@ public class RuleFactory {
     .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
     .build();
 
-  private List<Rule> defaultRulesFromConfigFile;
-  private List<Rule> defaultHoldingsRulesFromConfigFile;
-
   @Autowired
-  @Qualifier("defaultRules")
-  private void setDefaultRulesFromConfigFile(List<Rule> defaultRulesFromConfigFile) {
-    this.defaultRulesFromConfigFile = defaultRulesFromConfigFile;
-  }
-
+  private final List<Rule> defaultRulesFromConfigFile;
   @Autowired
-  @Qualifier("holdingsDefaultRules")
-  private void setDefaultHoldingsRulesFromConfigFile(List<Rule> defaultHoldingsRulesFromConfigFile) {
-    this.defaultHoldingsRulesFromConfigFile = defaultHoldingsRulesFromConfigFile;
-  }
+  private final List<Rule> defaultHoldingsRulesFromConfigFile;
 
   public List<Rule> getRules(MappingProfile mappingProfile) {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
