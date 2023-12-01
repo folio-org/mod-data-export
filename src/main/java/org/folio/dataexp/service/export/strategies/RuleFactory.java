@@ -1,7 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
 import com.google.common.collect.ImmutableMap;
-import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +27,6 @@ import static java.lang.Boolean.TRUE;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Log4j2
-@AllArgsConstructor
 @Component
 public class RuleFactory {
 
@@ -46,10 +44,15 @@ public class RuleFactory {
     .put(DEFAULT_BUILDER_KEY, new DefaultRuleBuilder())
     .build();
 
-  @Autowired
   private final List<Rule> defaultRulesFromConfigFile;
-  @Autowired
   private final List<Rule> defaultHoldingsRulesFromConfigFile;
+
+  @Autowired
+  public RuleFactory(List<Rule> defaultRulesFromConfigFile, List<Rule> defaultHoldingsRulesFromConfigFile) {
+    this.defaultRulesFromConfigFile = defaultRulesFromConfigFile;
+    this.defaultHoldingsRulesFromConfigFile = defaultHoldingsRulesFromConfigFile;
+  }
+
 
   public List<Rule> getRules(MappingProfile mappingProfile) {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
