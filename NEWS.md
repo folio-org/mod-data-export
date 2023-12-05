@@ -1,5 +1,10 @@
 ## v4.9.0 Unreleased
 
+## 12/05/2023 v4.8.7 Released
+This release includes only folio-s3-client upgrade
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.6...v4.8.7)
+
 ## 11/29/2023 v4.8.6 Released
 This release includes bug fix for failed jobs position in job executions view
 
