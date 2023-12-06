@@ -10,6 +10,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.service.CommonExportFails;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +47,12 @@ class ExportExecutorTest extends BaseDataExportInitializer {
       .id(UUID.randomUUID())
       .jobExecutionId(jobExecutionId)
       .fileLocation(fileLocation).build();
+    var commonFails = new CommonExportFails();
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE);
+    exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
 
     long size = s3Client.getSize(fileLocation);
     assertTrue(size > 0);

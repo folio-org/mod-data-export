@@ -12,6 +12,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -26,8 +27,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 
@@ -42,34 +48,56 @@ public class InputFileProcessor {
   private final JdbcTemplate jdbcTemplate;
   private final FolioS3Client s3Client;
 
-  public void readFile(FileDefinition fileDefinition) {
+  public void readFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) {
     try {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
         readCqlFile(fileDefinition);
       } else {
-        readCsvFile(fileDefinition);
+        readCsvFile(fileDefinition, commonExportFails);
       }
     } catch (Exception e) {
       throw new DataExportException(e.getMessage());
     }
   }
 
-  private void readCsvFile(FileDefinition fileDefinition) throws IOException {
+  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) throws IOException {
     var pathToRead = getPathToRead(fileDefinition);
     var batch = new ArrayList<ExportIdEntity>();
+    var duplicatedIds = new HashSet<UUID>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
         var instanceId = id.replace("\"", StringUtils.EMPTY);
-        var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
-          .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
-        batch.add(entity);
+        try {
+          var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
+            .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
+          if (!duplicatedIds.contains(entity.getInstanceId())) {
+            batch.add(entity);
+            duplicatedIds.add(entity.getInstanceId());
+          } else {
+            commonExportFails.incrementDuplicatedUUID();
+          }
+        } catch (Exception e) {
+          log.error("Error converting {} to uuid", id);
+          commonExportFails.addToInvalidUUIDFormat(id);
+        }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
+          var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toList())), fileDefinition.getJobExecutionId());
+          commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
+          batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
           exportIdEntityRepository.saveAll(batch);
           batch.clear();
+          duplicatedIds.clear();
         }
       });
     }
+    var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toList())), fileDefinition.getJobExecutionId());
+    commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
+    batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
     exportIdEntityRepository.saveAll(batch);
+  }
+
+  private List<UUID> findDuplicatedUUIDFromDb(Set<UUID> ids, UUID jobExecutionId) {
+    return exportIdEntityRepository.findByInstanceIdInAndJobExecutionIdIs(ids, jobExecutionId).stream().map(ExportIdEntity::getInstanceId).toList();
   }
 
   private void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {

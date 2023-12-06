@@ -106,6 +106,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     holdingsIds.forEach(
       holdingsId -> {
         log.error("getHoldingsWithInstanceAndItems:: holding by id {} does not exist", holdingsId);
+        result.addIdToNotExist(holdingsId);
         result.addIdToFailed(holdingsId);
       });
     return holdingsWithInstanceAndItems;

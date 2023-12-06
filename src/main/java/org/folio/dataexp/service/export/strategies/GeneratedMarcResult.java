@@ -10,6 +10,7 @@ import java.util.UUID;
 public class GeneratedMarcResult {
   private List<String> marcRecords = new ArrayList<>();
   private final List<UUID> failedIds = new ArrayList<>();
+  private final List<UUID> notExistIds = new ArrayList<>();
 
   public void setMarcRecords(List<String> marcRecords) {
     this.marcRecords = marcRecords;
@@ -17,5 +18,9 @@ public class GeneratedMarcResult {
 
   public void addIdToFailed(UUID id) {
     failedIds.add(id);
+  }
+
+  public void addIdToNotExist(UUID id) {
+    notExistIds.add(id);
   }
 }

@@ -163,6 +163,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       }
     );
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
+    exportStatistic.addNotExistIdsAll(result.getNotExistIds());
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

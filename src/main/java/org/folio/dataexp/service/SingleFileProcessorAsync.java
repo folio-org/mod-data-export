@@ -18,7 +18,7 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest.IdTypeEnum idType) {
-    exportExecutor.exportAsynch(export, idType);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
+    exportExecutor.exportAsynch(export, idType, commonExportFails);
   }
 }

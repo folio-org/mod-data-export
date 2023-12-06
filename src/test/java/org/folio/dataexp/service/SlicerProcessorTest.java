@@ -56,7 +56,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition);
+      inputFileProcessor.readFile(fileDefinition, new CommonExportFails());
 
       slicerProcessor.sliceInstancesIds(fileDefinition, 1);
       var exportFiles = jobExecutionExportFilesEntityRepository.findAll();
