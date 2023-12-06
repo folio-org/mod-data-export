@@ -119,6 +119,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
 
+  abstract Optional<String> getHridMessage(UUID id);
+
   protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
   }
@@ -137,6 +139,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
                                  ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
+    var duplicatedSrsMessage = new HashSet<String>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;
       try {
@@ -149,6 +152,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       remoteStorageWriter.write(marc);
       if (externalIdsWithMarcRecord.contains(marcRecordEntity.getExternalId())) {
         exportStatistic.incrementDuplicatedSrs();
+        duplicatedSrsMessage.add(getDuplicatedSRSErrorMessage(marcRecordEntity.getExternalId(), marcRecords));
       } else {
         externalIdsWithMarcRecord.add(marcRecordEntity.getExternalId());
       }
@@ -164,6 +168,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     );
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());
+    duplicatedSrsMessage.forEach(log::warn);
+  }
+
+  private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords) {
+    var hridMessage = getHridMessage(externalId);
+    var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
+      .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
+    return hridMessage.map(hrid -> hrid + " has following SRS records associated: " + marcRecordIds).orElse(StringUtils.EMPTY);
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

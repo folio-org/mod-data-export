@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -63,6 +64,18 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var marcRecords = holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
     result.setMarcRecords(marcRecords);
     return result;
+  }
+
+  @Override
+  public Optional<String> getHridMessage(UUID id) {
+    var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
+    if (holdings.isEmpty()) return Optional.empty();
+    var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
+    if (jsonObject.isPresent()) {
+      var hrid = jsonObject.get().getAsString(HRID_KEY);
+      return Optional.of("Holding with hrid : " + hrid);
+    }
+    return Optional.empty();
   }
 
   protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {

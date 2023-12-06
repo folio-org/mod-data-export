@@ -12,7 +12,6 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;

@@ -30,6 +30,7 @@ import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -188,6 +189,11 @@ class AbstractExportStrategyTest {
     @Override
     GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
       return generatedMarcResult;
+    }
+
+    @Override
+    Optional<String> getHridMessage(UUID id) {
+      return Optional.of("hrid123");
     }
 
     @Override
