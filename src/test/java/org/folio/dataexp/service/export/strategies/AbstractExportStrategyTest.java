@@ -192,7 +192,7 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    Optional<String> getHridMessage(UUID id) {
+    Optional<String> getIdentifierMessage(UUID id) {
       return Optional.of("hrid123");
     }
 

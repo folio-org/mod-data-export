@@ -80,7 +80,7 @@ public class InputFileProcessor {
           commonExportFails.addToInvalidUUIDFormat(id);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
-          var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toList())), fileDefinition.getJobExecutionId());
+          var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
           commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
           batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
           exportIdEntityRepository.saveAll(batch);
@@ -89,7 +89,7 @@ public class InputFileProcessor {
         }
       });
     }
-    var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toList())), fileDefinition.getJobExecutionId());
+    var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
     commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
     batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
     exportIdEntityRepository.saveAll(batch);

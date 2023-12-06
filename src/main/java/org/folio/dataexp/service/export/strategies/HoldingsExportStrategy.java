@@ -67,7 +67,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Optional<String> getHridMessage(UUID id) {
+  public Optional<String> getIdentifierMessage(UUID id) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
     if (holdings.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());

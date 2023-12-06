@@ -119,7 +119,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
 
-  abstract Optional<String> getHridMessage(UUID id);
+  abstract Optional<String> getIdentifierMessage(UUID id);
 
   protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
@@ -172,7 +172,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords) {
-    var hridMessage = getHridMessage(externalId);
+    var hridMessage = getIdentifierMessage(externalId);
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
       .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
     return hridMessage.map(hrid -> hrid + " has following SRS records associated: " + marcRecordIds).orElse(StringUtils.EMPTY);
