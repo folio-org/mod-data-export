@@ -218,9 +218,6 @@ paths:
     get:
       description: API for getting transformation fields
       operationId: getTransformationFields
-      parameters:
-        - $ref: '#/components/parameters/trait_pageable_offset'
-        - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
         '200':
           description: Transformation fields collection
@@ -735,12 +732,92 @@ components:
       $ref: 'schemas/profiles/mappingProfile.json'
     mappingProfileCollection:
       $ref: 'schemas/profiles/mappingProfileCollection.json'
+    affectedRecord:
+      $ref: 'schemas/affectedRecord.json'
+    errorLog:
+      $ref: 'schemas/logs/errorLog.json'
     errorLogCollection:
       $ref: 'schemas/logs/errorLogCollection.json'
     jobProfile:
       $ref: 'schemas/profiles/jobProfile.json'
     jobProfileCollection:
       $ref: 'schemas/profiles/jobProfileCollection.json'
+    alternativeDataType:
+      $ref: 'schemas/referencedata/alternativetitletype.json'
+    alternativeDataTypes:
+      $ref: 'schemas/referencedata/alternativetitletypes.json'
+    callNumberType:
+      $ref: 'schemas/referencedata/callnumbertype.json'
+    callNumberTypes:
+      $ref: 'schemas/referencedata/callnumbertypes.json'
+    contributorNameType:
+      $ref: 'schemas/referencedata/contributornametype.json'
+    contributorNameTypes:
+      $ref: 'schemas/referencedata/contributornametypes.json'
+    electronicAccessRelationship:
+      $ref: 'schemas/referencedata/electronicaccessrelationship.json'
+    electronicAccessRelationships:
+      $ref: 'schemas/referencedata/electronicaccessrelationships.json'
+    holdingsNoteType:
+      $ref: 'schemas/referencedata/holdingsnotetype.json'
+    holdingsNoteTypes:
+      $ref: 'schemas/referencedata/holdingsnotetypes.json'
+    identifierType:
+      $ref: 'schemas/referencedata/identifiertype.json'
+    identifierTypes:
+      $ref: 'schemas/referencedata/identifiertypes.json'
+    instanceFormat:
+      $ref: 'schemas/referencedata/instanceformat.json'
+    instanceFormats:
+      $ref: 'schemas/referencedata/instanceformats.json'
+    instanceNoteType:
+      $ref: 'schemas/referencedata/instancenotetype.json'
+    instanceNoteTypes:
+      $ref: 'schemas/referencedata/instancenotetypes.json'
+    instanceType:
+      $ref: 'schemas/referencedata/instancetype.json'
+    instanceTypes:
+      $ref: 'schemas/referencedata/instancetypes.json'
+    modeOfIssuance:
+      $ref: 'schemas/referencedata/modeofissuance.json'
+    issuanceModes:
+      $ref: 'schemas/referencedata/issuancemodes.json'
+    itemNoteType:
+      $ref: 'schemas/referencedata/itemnotetype.json'
+    itemNoteTypes:
+      $ref: 'schemas/referencedata/itemnotetypes.json'
+    loanType:
+      $ref: 'schemas/referencedata/loantype.json'
+    loanTypes:
+      $ref: 'schemas/referencedata/loantypes.json'
+    location:
+      $ref: 'schemas/referencedata/location.json'
+    locations:
+      $ref: 'schemas/referencedata/locations.json'
+    campus:
+      $ref: 'schemas/referencedata/campus.json'
+    campuses:
+      $ref: 'schemas/referencedata/campuses.json'
+    institution:
+      $ref: 'schemas/referencedata/institution.json'
+    institutions:
+      $ref: 'schemas/referencedata/institutions.json'
+    library:
+      $ref: 'schemas/referencedata/library.json'
+    libraries:
+      $ref: 'schemas/referencedata/libraries.json'
+    materialType:
+      $ref: 'schemas/referencedata/materialtype.json'
+    materialTypes:
+      $ref: 'schemas/referencedata/materialtypes.json'
+    natureOfContentTerm:
+      $ref: 'schemas/referencedata/natureofcontentterm.json'
+    natureOfContentTerms:
+      $ref: 'schemas/referencedata/natureofcontentterms.json'
+    servicePoint:
+      $ref: 'schemas/referencedata/servicepoint.json'
+    servicePoints:
+      $ref: 'schemas/referencedata/servicepoints.json'
   parameters:
     trait_queryable:
       name: query

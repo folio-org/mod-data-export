@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "A collection of second-level location units",
+  "type": "object",
+  "properties": {
+    "campuses": {
+      "description": "List of second-level location units",
+      "id": "campuses",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "campus.json"
+      }
+    },
+    "totalRecords": {
+      "description": "Estimated or exact total number of records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "loccamps",
+    "totalRecords"
+  ]
+}
