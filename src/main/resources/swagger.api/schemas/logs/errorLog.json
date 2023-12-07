@@ -43,7 +43,7 @@
     "affectedRecord": {
       "type": "object",
       "description": "Affected record log",
-      "$ref": "recordLog.json"
+      "$ref": "../affectedRecord.json"
     },
     "metadata": {
       "description": "Metadata provided by the server",

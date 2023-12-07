@@ -27,7 +27,9 @@
       "metadataParameters": {
         "description": "Additional parameters used for mapping",
         "type": "object",
-        "javaType": "java.util.Map<String, String>"
+        "additionalProperties": {
+          "type": "string"
+        }
       }
   },
   "required": [

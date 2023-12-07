@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "A collection of third-level location units",
+  "type": "object",
+  "properties": {
+    "libraries": {
+      "description": "List of third-level location units",
+      "id": "libraries",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "library.json"
+      }
+    },
+    "totalRecords": {
+      "description": "Estimated or exact total number of records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "loclibs",
+    "totalRecords"
+  ]
+}

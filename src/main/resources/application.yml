@@ -73,3 +73,4 @@ application:
     awsSdk: ${S3_IS_AWS:false}
   file-uploading:
     max-retry-count: ${MAX_UPLOADING_RETRIES:5000}
+  inventory-record-link: ${INVENTORY_RECORD_LINK:}
