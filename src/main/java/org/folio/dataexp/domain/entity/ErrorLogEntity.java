@@ -36,5 +36,5 @@ public class ErrorLogEntity {
 
   private String createdBy;
 
-  private UUID jobExecutionId;
+  private UUID jobProfileId;
 }
