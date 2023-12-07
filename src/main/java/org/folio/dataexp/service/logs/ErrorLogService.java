@@ -16,7 +16,6 @@ import org.folio.dataexp.domain.dto.ErrorLogCollection;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
-import org.folio.dataexp.repository.ErrorLogEntityRepository;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.marc4j.MarcException;
@@ -42,7 +41,6 @@ public class ErrorLogService {
   private String inventoryRecordLink;
 
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
-  private final ErrorLogEntityRepository errorLogEntityRepository;
   private final FolioExecutionContext folioExecutionContext;
 
   public ErrorLogCollection getErrorLogsByQuery(String query, int offset, int limit) {
@@ -152,7 +150,7 @@ public class ErrorLogService {
   }
 
   public void populateUUIDsNotFoundErrorLog(UUID jobExecutionId, Collection<String> notFoundUUIDs) {
-    var errorLogs = errorLogEntityRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    var errorLogs = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
     var newUUIDs = Collections.singletonList(String.join(COMMA_SEPARATOR, notFoundUUIDs).replace("[", EMPTY).replace("]", EMPTY));
     if (errorLogs.isEmpty()) {
       saveGeneralErrorWithMessageValues(SOME_UUIDS_NOT_FOUND.getCode(), newUUIDs, jobExecutionId);
@@ -165,7 +163,7 @@ public class ErrorLogService {
   }
 
   public void populateUUIDsNotFoundNumberErrorLog(UUID jobExecutionId, int numberOfNotFoundUUIDs) {
-    var errorLogs = errorLogEntityRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    var errorLogs = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
     if (errorLogs.isEmpty()) {
       saveGeneralErrorWithMessageValues(SOME_RECORDS_FAILED.getCode(), Collections.singletonList(String.valueOf(numberOfNotFoundUUIDs)), jobExecutionId);
     } else {
@@ -182,7 +180,7 @@ public class ErrorLogService {
     var errorCodesString = errorCodes.size() > 1 ?
       "%(" + String.join("|", errorCodes) + ")%" :
       "%" + errorCodes.get(0) + "%";
-    return isNotEmpty(errorLogEntityRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, errorCodesString));
+    return isNotEmpty(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, errorCodesString));
   }
 
   private ErrorLog getGeneralErrorLog(String errorMessageCode, UUID jobExecutionId) {
