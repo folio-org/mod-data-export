@@ -5,6 +5,8 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.domain.dto.ErrorLog;
+import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -14,12 +16,17 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +49,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
+  private ErrorLogService errorLogService;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -83,6 +91,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.s3Client = s3Client;
   }
 
+  @Autowired
+  private void setErrorLogService(ErrorLogService errorLogService) {
+    this.errorLogService = errorLogService;
+  }
+
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var exportStatistic = new ExportStrategyStatistic();
@@ -91,12 +104,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
       exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
     var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile);
+    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
     while (slice.hasNext()) {
       slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId(), slice.nextPageable());
       exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile);
+      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
     }
     try {
       remoteStorageWriter.close();
@@ -136,7 +149,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter,
-                                 ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile) {
+                                 ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     var duplicatedSrsMessage = new HashSet<String>();
@@ -169,13 +182,27 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());
     duplicatedSrsMessage.forEach(log::warn);
+    if (!duplicatedSrsMessage.isEmpty()) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      errorLog.setErrorMessageValues(new ArrayList<>(duplicatedSrsMessage));
+      errorLog.setErrorMessageCode(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode());
+      errorLogService.save(errorLog);
+    }
   }
 
   private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords) {
     var hridMessage = getIdentifierMessage(externalId);
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
       .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
-    return hridMessage.map(hrid -> hrid + " has following SRS records associated: " + marcRecordIds).orElse(StringUtils.EMPTY);
+    return hridMessage.map(hrid -> String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), hrid, marcRecordIds)).orElse(StringUtils.EMPTY);
+  }
+
+  private JobProfile getJobProfile(UUID jobExecutionId) {
+    var jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
+    return jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId()).getJobProfile();
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

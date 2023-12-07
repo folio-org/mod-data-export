@@ -9,14 +9,16 @@ import java.util.Set;
 import java.util.UUID;
 
 public class CommonExportFails {
-  private final Set<UUID> notExistUUID = Collections.synchronizedSet(new LinkedHashSet<>());
+  @Getter
+  private final Set<String> notExistUUID = Collections.synchronizedSet(new LinkedHashSet<>());
   @Getter
   private final Set<String> invalidUUIDFormat = new LinkedHashSet<>();
   @Getter
   private int duplicatedUUIDAmount;
 
   public void addToNotExistUUIDAll(List<UUID> ids) {
-    notExistUUID.addAll(ids);
+    var idsToString = ids.stream().map(UUID::toString).toList();
+    notExistUUID.addAll(idsToString);
   }
 
   public void addToInvalidUUIDFormat(String id) {
@@ -30,4 +32,6 @@ public class CommonExportFails {
   public void incrementDuplicatedUUID() {
     this.duplicatedUUIDAmount = this.duplicatedUUIDAmount + 1;
   }
+
+
 }

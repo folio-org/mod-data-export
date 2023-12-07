@@ -3,6 +3,7 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
@@ -12,10 +13,14 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
+import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,6 +32,7 @@ public class ExportExecutor {
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ExportStrategyFactory exportStrategyFactory;
+  private final ErrorLogService errorLogService;
 
   @Async("singleExportFileTaskExecutor")
   public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idTypeEnum, CommonExportFails commonExportFails) {
@@ -75,6 +81,40 @@ public class ExportExecutor {
     }
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
+    saveErrors(commonExportFails, progress.getFailed(), jobExecutionId);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
+  }
+
+  private void saveErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
+    if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+
+      errorLog.setErrorMessageValues(new ArrayList<>(commonExportFails.getInvalidUUIDFormat()));
+      errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.name());
+      errorLogService.save(errorLog);
+    }
+
+    if (!commonExportFails.getNotExistUUID().isEmpty()) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      errorLog.setErrorMessageValues(new ArrayList<>(commonExportFails.getNotExistUUID()));
+      errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.name());
+      errorLogService.save(errorLog);
+    }
+
+    if (totalErrors > 0) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      errorLog.setErrorMessageValues(List.of(String.valueOf(totalErrors)));
+      errorLog.setErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.name());
+      errorLogService.save(errorLog);
+    }
   }
 }
