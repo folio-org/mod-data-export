@@ -51,6 +51,7 @@ public enum ErrorCode {
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
   ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s");
 
+
   private final String code;
   private final String description;
 

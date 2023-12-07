@@ -67,8 +67,7 @@ public class ErrorLogService {
         .errorLog(errorLog)
         .creationDate(errorLog.getCreatedDate())
         .createdBy(folioExecutionContext.getUserId().toString())
-        .jobExecutionId(errorLog.getJobExecutionId())
-        .build())
+        .jobExecutionId(errorLog.getJobExecutionId()).build())
       .getErrorLog();
   }
 
