@@ -91,8 +91,8 @@ public class ExportExecutor {
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-
-      errorLog.setErrorMessageValues(new ArrayList<>(commonExportFails.getInvalidUUIDFormat()));
+      var message = String.join(", ", commonExportFails.getInvalidUUIDFormat());
+      errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
       errorLogService.save(errorLog);
     }
@@ -102,7 +102,8 @@ public class ExportExecutor {
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-      errorLog.setErrorMessageValues(new ArrayList<>(commonExportFails.getNotExistUUID()));
+      var message = String.join(", ", commonExportFails.getNotExistUUID());
+      errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.getCode());
       errorLogService.save(errorLog);
     }

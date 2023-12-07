@@ -6,7 +6,6 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ErrorLog;
-import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -22,10 +21,8 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -187,7 +184,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-      errorLog.setErrorMessageValues(new ArrayList<>(duplicatedSrsMessage));
+      var message = String.join("; ", duplicatedSrsMessage);
+      errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode());
       errorLogService.save(errorLog);
     }
@@ -198,11 +196,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
       .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
     return hridMessage.map(hrid -> String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), hrid, marcRecordIds)).orElse(StringUtils.EMPTY);
-  }
-
-  private JobProfile getJobProfile(UUID jobExecutionId) {
-    var jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-    return jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId()).getJobProfile();
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
