@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS error_logs (
     jsonb jsonb,
     creation_date TIMESTAMP,
     created_by TEXT,
+    job_execution_id uuid,
     job_profile_id uuid,
     constraint fk_error_log_to_job_profile foreign key (job_profile_id)
         references job_profiles(id) ON DELETE CASCADE
