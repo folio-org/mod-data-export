@@ -13,6 +13,7 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -49,6 +50,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
   private final RuleHandler ruleHandler;
+  private final ReferenceDataProvider referenceDataProvider;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
@@ -129,7 +131,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    ReferenceDataWrapper referenceDataWrapper = null;
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
       var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
