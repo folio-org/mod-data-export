@@ -14,6 +14,7 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
 import org.folio.s3.exception.S3ClientException;
@@ -59,6 +60,8 @@ class AbstractExportStrategyTest {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Mock
   private RemoteStorageWriter remoteStorageWriter;
+  @Mock
+  private ErrorLogService errorLogService;
   @Spy
   private JsonToMarcConverter jsonToMarcConverter;
 

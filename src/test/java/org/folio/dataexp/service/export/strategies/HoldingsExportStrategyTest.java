@@ -12,6 +12,7 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
@@ -53,6 +54,8 @@ class HoldingsExportStrategyTest {
   private ItemEntityRepository itemEntityRepository;
   @Mock
   private RuleFactory ruleFactory;
+  @Mock
+  private ReferenceDataProvider referenceDataProvider;
   @Spy
   private RuleHandler ruleHandler;
 
