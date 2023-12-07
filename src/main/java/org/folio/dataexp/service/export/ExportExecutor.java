@@ -9,6 +9,7 @@ import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
@@ -18,7 +19,6 @@ import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -33,6 +33,7 @@ public class ExportExecutor {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ExportStrategyFactory exportStrategyFactory;
   private final ErrorLogService errorLogService;
+  private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @Async("singleExportFileTaskExecutor")
   public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idTypeEnum, CommonExportFails commonExportFails) {
@@ -64,8 +65,11 @@ public class ExportExecutor {
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
+      saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
 
-      if (exports.size() == exportsCompleted && progress.getFailed() == 0) jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
+      var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
+
+      if (exports.size() == exportsCompleted && errorCount == 0) jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
       else if (exports.size() == exportsFailed) jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       else jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
 
@@ -81,11 +85,10 @@ public class ExportExecutor {
     }
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
-    saveErrors(commonExportFails, progress.getFailed(), jobExecutionId);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 
-  private void saveErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
+  private void saveCommonExportFailsErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
     if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
       var errorLog = new ErrorLog();
       errorLog.setId(UUID.randomUUID());
