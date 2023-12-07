@@ -49,4 +49,9 @@ public class DataExportExceptionHandler {
   public ResponseEntity<String> handleDataExportException(final DataExportException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
+  @ExceptionHandler(TransformationValidationException.class)
+  public ResponseEntity<String> handleTransformationValidationException(final TransformationValidationException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
 }

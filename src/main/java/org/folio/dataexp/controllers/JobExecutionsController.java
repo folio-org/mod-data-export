@@ -1,5 +1,7 @@
 package org.folio.dataexp.controllers;
 
+import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +25,7 @@ public class JobExecutionsController implements JobExecutionsApi {
 
   @Override
   public ResponseEntity<JobExecutionCollection> getJobExecutionsByQuery(String query, Integer offset, Integer limit) {
-    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
+    if (StringUtils.isEmpty(query)) query = QUERY_CQL_ALL_RECORDS;
     var jobExecutionsEntityPage  = jobExecutionEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
     var jobExecutions = jobExecutionsEntityPage.stream().map(JobExecutionEntity::getJobExecution).toList();
     var jobExecutionCollection = new JobExecutionCollection();
