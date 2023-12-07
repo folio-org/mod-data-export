@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
@@ -28,6 +29,8 @@ class ExportExecutorTest extends BaseDataExportInitializer {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @MockBean
   private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @MockBean
+  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   @Autowired
   private FolioS3Client s3Client;
   @Autowired

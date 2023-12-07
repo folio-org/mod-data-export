@@ -32,6 +32,7 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -68,6 +69,19 @@ class HoldingsExportStrategyTest {
     mappingProfile.setDefault(true);
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
     verify(marcRecordEntityRepository).findByExternalIdIn(anySet());
+  }
+
+  @Test
+  void getIdentifierMessageTest() {
+    var holding = "{'hrid' : '123'}";
+    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
+
+    when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
+
+    var opt = holdingsExportStrategy.getIdentifierMessage(UUID.randomUUID());
+
+    assertTrue(opt.isPresent());
+    assertEquals("Holding with hrid : 123", opt.get());
   }
 
   @Test
