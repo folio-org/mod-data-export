@@ -5,10 +5,12 @@
   "properties": {
     "id": {
       "description": "Unique identifier",
+      "type": "string",
       "format": "uuid"
     },
     "jobExecutionId": {
       "description": "UUID of the related job execution",
+      "type": "string",
       "format": "uuid"
     },
     "createdDate": {

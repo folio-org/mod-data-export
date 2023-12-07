@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -30,5 +32,11 @@ public class JobExecutionsController implements JobExecutionsApi {
     jobExecutionCollection.setJobExecutions(jobExecutions);
     jobExecutionCollection.setTotalRecords((int) jobExecutionsEntityPage.getTotalElements());
     return new ResponseEntity<>(jobExecutionCollection, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteJobExecutionById(UUID jobExecutionId) {
+    jobExecutionEntityCqlRepository.deleteById(jobExecutionId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
