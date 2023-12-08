@@ -18,10 +18,6 @@ import java.util.List;
 public class RuleHandler {
   private static final String HOLDINGS_KEY = "holdings";
 
-  /* Private constructor to hide the implicit public one */
-  private RuleHandler() {
-  }
-
   /**
    * The method adds new rules to the incoming original rules.
    * This method turns rules for items from the starred version "$.holdings[*]..."

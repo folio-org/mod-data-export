@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -12,6 +13,7 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ExportExecutorTest extends BaseDataExportInitializer {
@@ -31,6 +36,8 @@ class ExportExecutorTest extends BaseDataExportInitializer {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @MockBean
   private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @MockBean
+  private ErrorLogService errorLogService;
   @Autowired
   private FolioS3Client s3Client;
   @Autowired
@@ -62,5 +69,37 @@ class ExportExecutorTest extends BaseDataExportInitializer {
 
     assertEquals(JobExecutionExportFilesStatus.COMPLETED, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+  }
+
+  @Test
+  void exportIfCommonFailsExistTest() {
+    var notExistUUID = UUID.randomUUID();
+    var jobExecutionId = UUID.randomUUID();
+    var jobExecution = new JobExecution();
+    jobExecution.setProgress(new JobExecutionProgress());
+    jobExecution.setId(jobExecutionId);
+    var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).build();
+
+    var fileLocation = String.format("mod-data-export/download/%s/download.mrc", jobExecutionId);
+    var exportEntity = JobExecutionExportFilesEntity.builder()
+      .id(UUID.randomUUID())
+      .jobExecutionId(jobExecutionId)
+      .fileLocation(fileLocation).build();
+    var commonFails = new CommonExportFails();
+    commonFails.incrementDuplicatedUUID();
+    commonFails.addToInvalidUUIDFormat("abs");
+    commonFails.addToNotExistUUIDAll(List.of(notExistUUID));
+
+    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
+
+    when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(3l);
+        exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+
+    long size = s3Client.getSize(fileLocation);
+    assertTrue(size > 0);
+
+    assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
+    verify(errorLogService, times(3)).save(isA(ErrorLog.class));
   }
 }
