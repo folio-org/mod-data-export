@@ -31,7 +31,7 @@
       **/src/main/java/org/folio/dataexp/domain/entity/**,
       **/src/main/java/org/folio/dataexp/domain/dto/**,
       **/src/main/java/org/folio/dataexp/repository**,
-      **/src/main/java/org.folio.dataexp.util/ExternalPathResolver.java,
+      **/src/main/java/org/folio/dataexp/util/ExternalPathResolver.java,
       **/src/**/test/**/*
     </sonar.exclusions>
     <argLine />
