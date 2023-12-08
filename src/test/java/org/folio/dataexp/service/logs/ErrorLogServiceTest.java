@@ -4,14 +4,19 @@ import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 
+import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +30,43 @@ class ErrorLogServiceTest {
   private FolioExecutionContext folioExecutionContext;
   @InjectMocks
   private ErrorLogService errorLogService;
+
+  @Test
+  void getErrorLogsByQueryTest() {
+    var errorId = UUID.randomUUID();
+    var errorLogEntity = new ErrorLogEntity();
+    var errorLog = new ErrorLog();
+    errorLog.setId(errorId);
+    errorLogEntity.setErrorLog(errorLog);
+    var page = new PageImpl<>(List.of(errorLogEntity));
+    var query = "query";
+
+    when(errorLogEntityCqlRepository.findByCQL(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+
+    var collection = errorLogService.getErrorLogsByQuery(query, 0, 1);
+
+    assertEquals(1, collection.getTotalRecords());
+    var errorLogs = collection.getErrorLogs();
+
+    assertEquals(errorLog.getId(), errorLogs.get(0).getId());
+  }
+
+  @Test
+  void getByQueryTest() {
+    var errorId = UUID.randomUUID();
+    var errorLogEntity = new ErrorLogEntity();
+    var errorLog = new ErrorLog();
+    errorLog.setId(errorId);
+    errorLogEntity.setErrorLog(errorLog);
+    var page = new PageImpl<>(List.of(errorLogEntity));
+    var query = "query";
+
+    when(errorLogEntityCqlRepository.findByCQL(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+
+    var errors = errorLogService.getByQuery(query);
+
+    assertEquals(errorLog.getId(), errors.get(0).getId());
+  }
 
   @Test
   void saveTest() {
