@@ -38,8 +38,14 @@ public class JobExecutionExportFilesEntity {
   private JobExecutionExportFilesStatus status;
 
   public void setStatusBaseExportStatistic(ExportStrategyStatistic exportStatistic) {
-    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) this.status = JobExecutionExportFilesStatus.COMPLETED;
-    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) this.status = JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS;
-    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) this.status = JobExecutionExportFilesStatus.FAILED;
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
+      this.status = JobExecutionExportFilesStatus.COMPLETED;
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      this.status = JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS;
+    }
+    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
+      this.status = JobExecutionExportFilesStatus.FAILED;
+    }
   }
 }

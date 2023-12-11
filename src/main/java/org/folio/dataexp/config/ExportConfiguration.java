@@ -16,6 +16,8 @@ import java.util.List;
 @Configuration
 @Log4j2
 public class ExportConfiguration {
+  private static final String DEFAULT_RULES = "/rules/rulesDefault.json";
+  private static final String DEFAULT_HOLDINGS_RULES = "/rules/rulesDefault.json";
 
   @Bean
   public RuleProcessor ruleProcessor() {
@@ -25,7 +27,7 @@ public class ExportConfiguration {
   @Bean
   public List<Rule> defaultRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
-    try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/rulesDefault.json")) {
+    try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_RULES)) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
@@ -37,7 +39,7 @@ public class ExportConfiguration {
   @Bean
   public List<Rule> defaultHoldingsRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
-    try (InputStream is = ExportConfiguration.class.getResourceAsStream("/rules/holdingsRulesDefault.json")) {
+    try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_HOLDINGS_RULES)) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
