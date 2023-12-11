@@ -71,11 +71,9 @@ public class ExportExecutor {
 
       if (exports.size() == exportsCompleted && errorCount == 0) {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
-      }
-      else if (exports.size() == exportsFailed) {
+      } else if (exports.size() == exportsFailed) {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
-      }
-      else {
+      } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
       }
 
