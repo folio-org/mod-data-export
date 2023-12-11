@@ -69,9 +69,15 @@ public class ExportExecutor {
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
 
-      if (exports.size() == exportsCompleted && errorCount == 0) jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
-      else if (exports.size() == exportsFailed) jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
-      else jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
+      if (exports.size() == exportsCompleted && errorCount == 0) {
+        jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED);
+      }
+      else if (exports.size() == exportsFailed) {
+        jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
+      }
+      else {
+        jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
+      }
 
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
