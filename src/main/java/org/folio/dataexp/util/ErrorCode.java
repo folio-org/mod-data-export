@@ -4,6 +4,9 @@ import org.folio.dataexp.domain.dto.Error;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.folio.dataexp.util.Constants.ERROR_MESSAGE_PLACEHOLDER_CODE;
+import static org.folio.dataexp.util.Constants.INVALID_EXTENSION_ERROR_CODE;
+
 public enum ErrorCode {
 
   GENERIC_ERROR_CODE("error.genericError", "Generic error"),
@@ -11,9 +14,9 @@ public enum ErrorCode {
   S3_BUCKET_NAME_NOT_FOUND("error.s3.bucketNameNotFound", "S3 bucket name is not found in System Properties"),
   NO_FILE_GENERATED("error.binaryFile.notGenerated", "Nothing to export: no binary file generated"),
   USER_NOT_FOUND("error.user.notFound", "User not found"),
-  INVALID_UPLOADED_FILE_EXTENSION("error.uploadedFile.invalidExtension", "File name extension does not corresponds csv format"),
-  INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE("error.uploadedFile.invalidExtension", "Only csv format is supported for holdings export"),
-  INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE("error.uploadedFile.invalidExtension", "Only csv format is supported for authority export"),
+  INVALID_UPLOADED_FILE_EXTENSION(INVALID_EXTENSION_ERROR_CODE, "File name extension does not corresponds csv format"),
+  INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE(INVALID_EXTENSION_ERROR_CODE, "Only csv format is supported for holdings export"),
+  INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE(INVALID_EXTENSION_ERROR_CODE, "Only csv format is supported for authority export"),
   FILE_ALREADY_UPLOADED("error.fileDefinition.fileAlreadyUploaded", "File already uploaded for this FileDefinition"),
   NOTHING_TO_EXPORT("error.nothingToExport", "No exported records, nothing to export"),
   FAIL_TO_UPDATE_JOB("error.jobExecution.failToUpdateJob", "Fail to prepare job execution for export"),
@@ -21,7 +24,7 @@ public enum ErrorCode {
   ERROR_QUERY_CONFIGURATIONS("error.configurations.queryConfigs", "Error while query the configs from mod configuration by query: %s, %s"),
   ERROR_QUERY_HOST("error.configurations.queryHost", "No configuration for host found in mod-config. There will be no links to the failed records for this job"),
   ERROR_GETTING_INSTANCES_BY_IDS("error.inventory.gettingInstancesByIds", "Error while getting instances by ids. %s"),
-  ERROR_GETTING_HOLDINGS_BY_IDS("error.messagePlaceholder", "Error while getting holdings by ids. %s"),
+  ERROR_GETTING_HOLDINGS_BY_IDS(ERROR_MESSAGE_PLACEHOLDER_CODE, "Error while getting holdings by ids. %s"),
   ERROR_GETTING_REFERENCE_DATA("error.inventory.gettingReferenceData  ", "Error while getting reference data from inventory during the export process by calling %s"),
   ERROR_GETTING_HOLDINGS_BY_INSTANCE_ID("error.inventory.gettingHoldingsByInstanceId", "Error while getting holdings by instance id: %s, message: %s"),
   ERROR_GETTING_ITEM_BY_HOLDINGS_ID("error.inventory.gettingItemsByHoldingsId", "Error while getting items by holding ids %s"),
@@ -42,12 +45,12 @@ public enum ErrorCode {
   ERROR_FIELDS_MAPPING_INVENTORY("error.mapping.fieldsMappingInventory", "An error occurred during fields mapping for inventory record"),
   ERROR_FIELDS_MAPPING_INVENTORY_WITH_REASON("error.mapping.fieldsMappingInventoryWithReason", "An error occurred during fields mapping for inventory record, affected field: fieldName - %s, fieldValue - $s"),
   ERROR_FIELDS_MAPPING_SRS("error.mapping.fieldsMappingSrs", "An error occurred during fields mapping for srs record with id: %s, reason: %s, cause: %s"),
-  ERROR_MESSAGE_PLACEHOLDER("error.messagePlaceholder", "%s"),
-  ERROR_MARC_RECORD_CANNOT_BE_CONVERTED("error.messagePlaceholder", "Json record cannot be converted to marc format, cause: %s"),
+  ERROR_MESSAGE_PLACEHOLDER(ERROR_MESSAGE_PLACEHOLDER_CODE, "%s"),
+  ERROR_MARC_RECORD_CANNOT_BE_CONVERTED(ERROR_MESSAGE_PLACEHOLDER_CODE, "Json record cannot be converted to marc format, cause: %s"),
   INVALID_SRS_MAPPING_PROFILE_RECORD_TYPE("error.mappingProfile.invalidSrsRecordTypeCombination", "SRS record type cannot be combined together with INSTANCE record type"),
-  ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting holding records only the default holding job profile is supported"),
-  ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED("error.messagePlaceholder", "For exporting authority records only the default authority job profile is supported"),
-  ERROR_JOB_IS_EXPIRED("error.messagePlaceholder", "Job was expired: no updates for more than 1 hour"),
+  ERROR_ONLY_DEFAULT_HOLDING_JOB_PROFILE_IS_SUPPORTED(ERROR_MESSAGE_PLACEHOLDER_CODE, "For exporting holding records only the default holding job profile is supported"),
+  ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED(ERROR_MESSAGE_PLACEHOLDER_CODE, "For exporting authority records only the default authority job profile is supported"),
+  ERROR_JOB_IS_EXPIRED(ERROR_MESSAGE_PLACEHOLDER_CODE, "Job was expired: no updates for more than 1 hour"),
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
   ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s");
 

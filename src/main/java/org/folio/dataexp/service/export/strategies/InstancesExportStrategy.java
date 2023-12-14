@@ -18,9 +18,9 @@ public class InstancesExportStrategy implements ExportStrategy {
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var marc = "marc";
-    var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(),  8192, s3Client);
-    remoteStorageWriter.write(marc);
-    remoteStorageWriter.close();
+    try (var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(),  8192, s3Client)) {
+      remoteStorageWriter.write(marc);
+    }
     var exportStatistic = new ExportStrategyStatistic();
     exportStatistic.setExported(1);
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
