@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface MarcRecordEntityRepository extends Repository<MarcRecordEntity, UUID> {
 
-  List<MarcRecordEntity> findByExternalIdIn(Set<UUID> ids);
+  List<MarcRecordEntity> findByExternalIdInAndRecordTypeIs(Set<UUID> ids, String recordType);
 }

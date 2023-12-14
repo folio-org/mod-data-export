@@ -95,7 +95,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type");
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     marcRecords.add(marcRecordEntity);
@@ -139,7 +139,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type");
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);

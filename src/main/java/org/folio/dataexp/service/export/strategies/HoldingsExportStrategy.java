@@ -42,6 +42,7 @@ import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 @Component
 @AllArgsConstructor
 public class HoldingsExportStrategy extends AbstractExportStrategy {
+  private static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;
@@ -54,7 +55,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
-    if (Boolean.TRUE.equals(mappingProfile.getDefault())) return marcRecordEntityRepository.findByExternalIdIn(externalIds);
+    if (Boolean.TRUE.equals(mappingProfile.getDefault())) return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, HOLDING_MARC_TYPE);
     return new ArrayList<>();
   }
 

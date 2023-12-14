@@ -68,7 +68,7 @@ class HoldingsExportStrategyTest {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
-    verify(marcRecordEntityRepository).findByExternalIdIn(anySet());
+    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
   }
 
   @Test
