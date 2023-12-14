@@ -48,8 +48,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
               centralTenantId, externalIds);
         }
       }
-      //TODO change to debug
-      log.info("Final authority records: {}", marcAuthorities);
+      log.debug("Final authority records: {}", marcAuthorities);
       return marcAuthorities;
     }
     return new ArrayList<>();

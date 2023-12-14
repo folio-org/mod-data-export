@@ -38,7 +38,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isEqualTo(1);
+    assertThat(marcRecords).hasSize(1);
     assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
   }
 
@@ -52,7 +52,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isEqualTo(1);
+    assertThat(marcRecords).hasSize(1);
     assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
   }
 
@@ -67,7 +67,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isEqualTo(2);
+    assertThat(marcRecords).hasSize(2);
     assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
     assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(1).getId());
   }
@@ -83,7 +83,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isEqualTo(0);
+    assertThat(marcRecords.size()).isZero();
   }
 
   @Test
@@ -98,7 +98,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isEqualTo(1);
+    assertThat(marcRecords).hasSize(1);
     assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
   }
 
