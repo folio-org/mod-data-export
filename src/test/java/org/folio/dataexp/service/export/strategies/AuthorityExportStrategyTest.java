@@ -83,7 +83,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords.size()).isZero();
+    assertThat(marcRecords).isEmpty();
   }
 
   @Test
