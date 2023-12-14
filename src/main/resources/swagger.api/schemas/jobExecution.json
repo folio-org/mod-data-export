@@ -55,6 +55,11 @@
           "type": "integer",
           "default": 0
         },
+        "duplicatedSrs" : {
+          "description": "Number of srs records that are duplicated",
+          "type": "integer",
+          "default": 0
+        },
         "total": {
           "description": "Total number of records",
           "type": "integer",

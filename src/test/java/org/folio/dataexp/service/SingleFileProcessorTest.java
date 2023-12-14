@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,9 +49,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
+    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE, new CommonExportFails());
 
-    verify(exportExecutor).export(exportEntity,  ExportRequest.RecordTypeEnum.INSTANCE);
+    verify(exportExecutor).export(eq(exportEntity), eq(ExportRequest.IdTypeEnum.INSTANCE), isA(CommonExportFails.class));
   }
 
   @Test
@@ -63,9 +64,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.RecordTypeEnum.INSTANCE);
+    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE, new CommonExportFails());
 
-    verify(exportExecutor, times(0)).export(any(), any());
+    verify(exportExecutor, times(0)).export(any(), any(), any());
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
     assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
   }
