@@ -87,4 +87,4 @@ CREATE OR REPLACE VIEW v_authority
 CREATE OR REPLACE VIEW v_marc_records_lb
     AS SELECT id, content, external_id, record_type::text FROM ${myuniversity}_mod_source_record_storage.records_lb records_lb
     JOIN ${myuniversity}_mod_source_record_storage.marc_records_lb using(id)
-    WHERE records_lb.state = 'ACTUAL' AND records_lb.leader_record_status != 'd';;
+    WHERE records_lb.state = 'ACTUAL' AND records_lb.leader_record_status != 'd';
