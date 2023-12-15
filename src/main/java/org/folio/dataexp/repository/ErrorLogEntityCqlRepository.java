@@ -18,4 +18,7 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
 
   @Query(value = "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1", nativeQuery = true)
   List<ErrorLogEntity> getAllByJobExecutionId(UUID jobExecutionId);
+
+  long countByJobExecutionId(UUID jobExecutionId);
+
 }

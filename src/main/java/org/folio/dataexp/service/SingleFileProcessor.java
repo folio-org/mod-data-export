@@ -22,7 +22,7 @@ public class SingleFileProcessor {
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
 
-  public void exportBySingleFile(UUID jobExecutionId, ExportRequest.RecordTypeEnum recordType) {
+  public void exportBySingleFile(UUID jobExecutionId, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.warn("Nothing to export for job execution {}", jobExecutionId);
@@ -38,10 +38,10 @@ public class SingleFileProcessor {
       jobExecutionEntityRepository.save(jobExecutionEntity);
       return;
     }
-    exports.forEach(export -> executeExport(export, recordType));
+    exports.forEach(export -> executeExport(export, idType, commonExportFails));
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export,  ExportRequest.RecordTypeEnum recordType) {
-    exportExecutor.export(export, recordType);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
+    exportExecutor.export(export, idType, commonExportFails);
   }
 }

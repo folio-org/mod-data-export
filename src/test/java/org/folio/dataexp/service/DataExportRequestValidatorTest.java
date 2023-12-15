@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 
-import static org.folio.dataexp.service.DataExportRequestValidator.DEFAULT_AUTHORITY_MAPPING_PROFILE_ID;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DataExportRequestValidatorTest {
@@ -42,6 +41,7 @@ class DataExportRequestValidatorTest {
 
     fileDefinition.fileName("upload.cql");
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
-    assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, DEFAULT_AUTHORITY_MAPPING_PROFILE_ID));
+    var defaultAuthorityMappingProfile = "5d636597-a59d-4391-a270-4e79d5ba70e3";
+    assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, defaultAuthorityMappingProfile));
   }
 }

@@ -6,7 +6,7 @@ import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTER
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,12 +16,11 @@ import java.util.Date;
 @Slf4j
 public class StorageCleanUpService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  private final FolioS3ClientFactory folioS3ClientFactory;
+  private final FolioS3Client storageClient;
 
   public void cleanExpiredFilesAndFileDefinitions() {
     var expirationDate = new Date(new Date().getTime() - HOURS.toMillis(1));
     var expiredFileDefinitions = fileDefinitionEntityRepository.getExpiredEntities(expirationDate);
-    var storageClient = folioS3ClientFactory.getFolioS3Client();
     log.info("Removing files and file definitions, number of file definitions to clean up: {}", expiredFileDefinitions.size());
     expiredFileDefinitions.forEach(fileDefinitionEntity -> {
       var fileDefinition = fileDefinitionEntity.getFileDefinition();

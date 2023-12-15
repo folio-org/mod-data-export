@@ -8,7 +8,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
+import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ class StorageCleanUpServiceTest extends BaseDataExportInitializer {
   @Autowired
   private StorageCleanUpService storageCleanUpService;
   @Autowired
-  private FolioS3ClientFactory clientFactory;
+  private FolioS3Client s3Client;
   @Autowired
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
@@ -43,14 +43,13 @@ class StorageCleanUpServiceTest extends BaseDataExportInitializer {
             .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(2)))))
         .build());
 
-      var client = clientFactory.getFolioS3Client();
-      client.write(path, new ByteArrayInputStream("content".getBytes()));
-      assertThat(client.read(path)).hasBinaryContent("content".getBytes());
+      s3Client.write(path, new ByteArrayInputStream("content".getBytes()));
+      assertThat(s3Client.read(path)).hasBinaryContent("content".getBytes());
 
       storageCleanUpService.cleanExpiredFilesAndFileDefinitions();
 
       assertThat(fileDefinitionEntityRepository.findById(fileDefinitionId)).isEmpty();
-      assertThat(client.list(path)).isEmpty();
+      assertThat(s3Client.list(path)).isEmpty();
     }
   }
 }

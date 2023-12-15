@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,10 +95,10 @@ class DataExportServiceTest {
 
     dataExportService.postDataExport(exportRequest);
 
-    verify(inputFileProcessor).readFile(fileDefinition);
+    verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
     verify(slicerProcessor).sliceInstancesIds(fileDefinition);
 
-    verify(singleFileProcessorAsync).exportBySingleFile(jobExecution.getId(), ExportRequest.RecordTypeEnum.INSTANCE);
+    verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(ExportRequest.IdTypeEnum.INSTANCE), isA(CommonExportFails.class));
     verify(exportIdEntityRepository).countByJobExecutionId(jobExecution.getId());
     verify(jobExecutionEntityRepository).getHrid();
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));

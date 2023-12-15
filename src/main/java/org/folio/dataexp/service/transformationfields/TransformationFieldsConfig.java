@@ -2,6 +2,8 @@ package org.folio.dataexp.service.transformationfields;
 
 
 
+import static org.folio.dataexp.service.transformationfields.Constants.HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH;
+import static org.folio.dataexp.service.transformationfields.Constants.HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH;
 import static org.folio.dataexp.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.ELECTRONIC_ACCESS_RELATIONSHIPS;
@@ -106,22 +108,22 @@ public enum TransformationFieldsConfig {
   ITEM_CALL_NUMBER_TYPE("callNumberType", "$.holdings[*].items[*].effectiveCallNumberComponents.typeId"),
   ITEM_NOTE_TYPE("itemNoteTypeId", "$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='{id}' && (!(@.staffOnly) || @.staffOnly == false))].note", ITEM_NOTE_TYPES),
   ITEM_NOTE_TYPE_STAFF_ONLY("itemNoteTypeId.staffOnly", "$.holdings[*].items[*].notes[?(@.itemNoteTypeId=='{id}' && ((@.staffOnly) && @.staffOnly == true))].note", ITEM_NOTE_TYPES),
-  ITEM_PERMANENT_LOCATION_NAME("permanentLocation.name", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_CODE("permanentLocation.code", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", "$.holdings[*].items[*].permanentLocationId"),
-  ITEM_EFFECTIVE_LOCATION_NAME("effectiveLocation.name", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_CODE("effectiveLocation.code", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_LIBRARY_NAME("effectiveLocation.library.name", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_LIBRARY_CODE("effectiveLocation.library.code", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_CAMPUS_NAME("effectiveLocation.campus.name", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_CAMPUS_CODE("effectiveLocation.campus.code", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_INSTITUTION_NAME("effectiveLocation.institution.name", "$.holdings[*].items[*].effectiveLocationId"),
-  ITEM_EFFECTIVE_LOCATION_INSTITUTION_CODE("effectiveLocation.institution.code", "$.holdings[*].items[*].effectiveLocationId");
+  ITEM_PERMANENT_LOCATION_NAME("permanentLocation.name", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_CODE("permanentLocation.code", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_LIBRARY_NAME("permanentLocation.library.name", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_LIBRARY_CODE("permanentLocation.library.code", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_CAMPUS_NAME("permanentLocation.campus.name", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_CAMPUS_CODE("permanentLocation.campus.code", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_INSTITUTION_NAME("permanentLocation.institution.name", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_PERMANENT_LOCATION_INSTITUTION_CODE("permanentLocation.institution.code", HOLDINGS_ITEMS_PERMANENT_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_NAME("effectiveLocation.name", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_CODE("effectiveLocation.code", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_LIBRARY_NAME("effectiveLocation.library.name", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_LIBRARY_CODE("effectiveLocation.library.code", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_CAMPUS_NAME("effectiveLocation.campus.name", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_CAMPUS_CODE("effectiveLocation.campus.code", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_INSTITUTION_NAME("effectiveLocation.institution.name", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH),
+  ITEM_EFFECTIVE_LOCATION_INSTITUTION_CODE("effectiveLocation.institution.code", HOLDINGS_ITEMS_EFFECTIVE_LOCATION_ID_PATH);
 
   private final String fieldId;
   private final String path;

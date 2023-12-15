@@ -4,13 +4,11 @@ import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.service.export.storage.FolioS3ClientFactory;
-import org.folio.s3.client.MinioS3Client;
+import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
 
@@ -31,7 +29,7 @@ class FileUploadServiceTest {
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Mock
-  private FolioS3ClientFactory folioS3ClientFactory;
+  private FolioS3Client s3Client;
 
   @InjectMocks
   private FileUploadServiceImpl fileUploadService;
@@ -49,17 +47,14 @@ class FileUploadServiceTest {
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     var resource = new PathResource(UPLOADED_FILE_PATH);
 
-    var mockS3 = Mockito.mock(MinioS3Client.class);
-
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId)).thenReturn(fileDefinitionEntity);
-    when(folioS3ClientFactory.getFolioS3Client()).thenReturn(mockS3);
 
     fileUploadService.uploadFile(fileDefinitionId, resource);
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository, times(2)).save(isA(FileDefinitionEntity.class));
-    verify(mockS3).write(isA(String.class), isA(InputStream.class));
+    verify(s3Client).write(isA(String.class), isA(InputStream.class));
   }
 
   @Test

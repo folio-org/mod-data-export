@@ -1,14 +1,14 @@
-package org.folio.dataexp.service.export.storage;
+package org.folio.dataexp.config;
 
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.S3ClientFactory;
 import org.folio.s3.client.S3ClientProperties;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-public class FolioS3ClientFactory {
-
+@Configuration
+public class FolioS3Configuration {
   @Value("${application.remote-files-storage.endpoint}")
   private String endpoint;
 
@@ -27,17 +27,8 @@ public class FolioS3ClientFactory {
   @Value("#{ T(Boolean).parseBoolean('${application.remote-files-storage.awsSdk}')}")
   private boolean awsSdk;
 
-  private FolioS3Client folioS3Client; //NOSONAR
-
-  public FolioS3Client getFolioS3Client() {
-    if (folioS3Client != null) {
-      return folioS3Client;
-    }
-    folioS3Client = createFolioS3Client();
-    return folioS3Client;
-  }
-
-  private FolioS3Client createFolioS3Client() {
+  @Bean
+  public FolioS3Client folioS3Client() {
     return S3ClientFactory.getS3Client(S3ClientProperties.builder()
       .endpoint(endpoint)
       .secretKey(secretKey)

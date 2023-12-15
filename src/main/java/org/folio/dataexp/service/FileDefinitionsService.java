@@ -54,6 +54,7 @@ public class FileDefinitionsService {
     try {
       return fileUploadService.uploadFile(fileDefinitionId, resource);
     } catch (Exception e) {
+      log.error("Error uploading file for file definition id {} {}", fileDefinitionId, e);
       fileUploadService.errorUploading(fileDefinitionId);
       throw new UploadFileException(e.getMessage());
     }

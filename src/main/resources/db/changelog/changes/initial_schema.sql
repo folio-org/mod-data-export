@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS job_executions_export_ids (
          references job_executions(id) ON DELETE CASCADE
 );
 
-CREATE TYPE StatusType AS ENUM ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'FAILED');
+CREATE TYPE StatusType AS ENUM ('SCHEDULED', 'ACTIVE', 'COMPLETED', 'COMPLETED_WITH_ERRORS', 'FAILED');
 CREATE CAST (character varying as StatusType) WITH INOUT AS IMPLICIT;
 
 CREATE TABLE IF NOT EXISTS job_execution_export_files (
@@ -73,13 +73,17 @@ CREATE TABLE IF NOT EXISTS job_execution_export_files (
 );
 
 CREATE OR REPLACE VIEW v_instance
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.instance;
+    AS SELECT id, jsonb FROM ${myuniversity}_mod_inventory_storage.instance;
 
 CREATE OR REPLACE VIEW v_holdings_record
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.holdings_record;
+    AS SELECT id, jsonb, instanceid as instance_id FROM ${myuniversity}_mod_inventory_storage.holdings_record;
 
 CREATE OR REPLACE VIEW v_item
-    AS SELECT * FROM ${myuniversity}_mod_inventory_storage.item;
+    AS SELECT id, jsonb, holdingsrecordid as holdings_record_id FROM ${myuniversity}_mod_inventory_storage.item;
 
 CREATE OR REPLACE VIEW v_authority
     AS SELECT * FROM ${myuniversity}_mod_inventory_storage.authority;
+
+CREATE OR REPLACE VIEW v_marc_records_lb
+    AS SELECT id, content, external_id, record_type::text FROM ${myuniversity}_mod_source_record_storage.records_lb
+    JOIN ${myuniversity}_mod_source_record_storage.marc_records_lb using(id);

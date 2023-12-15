@@ -27,21 +27,22 @@ import java.util.List;
 @Log4j2
 public class DataExportTenantService extends TenantService {
 
-  private static final String MAPPING_PROFILES_PATH = "/data/mapping-profiles/"; //NOSONAR
   private static final List<String> MAPPING_PROFILES = List.of("default_authority_mapping_profile.json",
     "default_holdings_mapping_profile.json", "default_instance_mapping_profile.json");
 
-  private static final String JOB_PROFILES_PATH = "/data/job-profiles/"; //NOSONAR
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
 
-  @Autowired
   private JobProfileEntityRepository jobProfileEntityRepository;
-  @Autowired
   private MappingProfileEntityRepository mappingProfileEntityRepository;
 
-  public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase) {
+  @Autowired
+  public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
+                                 JobProfileEntityRepository jobProfileEntityRepository,
+                                 MappingProfileEntityRepository mappingProfileEntityRepository) {
     super(jdbcTemplate, context, folioSpringLiquibase);
+    this.jobProfileEntityRepository = jobProfileEntityRepository;
+    this.mappingProfileEntityRepository = mappingProfileEntityRepository;
   }
 
   @Override
@@ -52,7 +53,7 @@ public class DataExportTenantService extends TenantService {
   }
 
   private void loadMappingProfiles() {
-    MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile(MAPPING_PROFILES_PATH + mappingProfile));
+    MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile("/data/mapping-profiles/" + mappingProfile));
   }
   private void loadMappingProfile(String mappingProfilePath) {
     var mapper = new ObjectMapper();
@@ -71,7 +72,7 @@ public class DataExportTenantService extends TenantService {
   }
 
   private void loadJobProfiles() {
-    JOB_PROFILES.forEach(jobProfile -> loadJobProfile(JOB_PROFILES_PATH + jobProfile));
+    JOB_PROFILES.forEach(jobProfile -> loadJobProfile("/data/job-profiles/" + jobProfile));
   }
 
   private void loadJobProfile(String jobProfilePath) {
