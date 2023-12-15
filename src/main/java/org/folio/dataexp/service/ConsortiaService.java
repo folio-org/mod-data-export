@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.ConsortiaClient;
-import org.springframework.beans.factory.annotation.Value;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class ConsortiaService {
 
-  @Value("${myuniversity}")
-  private String tenantId;
+  private final FolioExecutionContext context;
 
   private final ConsortiaClient consortiaClient;
 
@@ -25,7 +24,7 @@ public class ConsortiaService {
     if (!userTenants.isEmpty()) {
       log.info("userTenants: {}", userTenants);
       var centralTenantId = userTenants.get(0).getCentralTenantId();
-      if (centralTenantId.equals(tenantId)) {
+      if (centralTenantId.equals(context.getTenantId())) {
         log.error("Current tenant is central");
       }
       return centralTenantId;

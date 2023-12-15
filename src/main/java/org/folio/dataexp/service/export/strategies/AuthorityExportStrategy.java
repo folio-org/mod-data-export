@@ -7,7 +7,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
-import org.springframework.beans.factory.annotation.Value;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,14 +25,12 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private final RuleFactory ruleFactory;
   private final ConsortiaService consortiaService;
   private final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
-
-  @Value("${myuniversity}")
-  private String tenantId;
+  private final FolioExecutionContext context;
 
   @Override
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      var marcAuthorities = marcAuthorityRecordRepository.findByExternalIdIn(tenantId, externalIds);
+      var marcAuthorities = marcAuthorityRecordRepository.findByExternalIdIn(context.getTenantId(), externalIds);
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       log.info("Number of authority records found from local tenant: {}, not found: {}", foundIds.size(), externalIds.size());

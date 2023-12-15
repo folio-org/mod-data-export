@@ -5,6 +5,7 @@ import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,74 +33,84 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
 
   @Test
   void shouldReturnOneLocalRecord() {
-    var localAuthorityIds = new HashSet<UUID>();
-    localAuthorityIds.add(LOCAL_AUTHORITY_UUID);
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setDefault(true);
-    var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile);
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var localAuthorityIds = new HashSet<UUID>();
+      localAuthorityIds.add(LOCAL_AUTHORITY_UUID);
+      var mappingProfile = new MappingProfile();
+      mappingProfile.setDefault(true);
+      var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords).hasSize(1);
-    assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+      assertThat(marcRecords).hasSize(1);
+      assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+    }
   }
 
   @Test
   void shouldReturnOneSharedRecord() {
-    handleCentralTenant();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      handleCentralTenant();
 
-    var centralAuthorityIds = new HashSet<UUID>();
-    centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setDefault(true);
-    var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var centralAuthorityIds = new HashSet<UUID>();
+      centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
+      var mappingProfile = new MappingProfile();
+      mappingProfile.setDefault(true);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords).hasSize(1);
-    assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+      assertThat(marcRecords).hasSize(1);
+      assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+    }
   }
 
   @Test
   void shouldReturnOneSharedAndOneLocalRecord() {
-    handleCentralTenant();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      handleCentralTenant();
 
-    var centralAuthorityIds = new HashSet<UUID>();
-    centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
-    centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setDefault(true);
-    var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var centralAuthorityIds = new HashSet<UUID>();
+      centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
+      centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
+      var mappingProfile = new MappingProfile();
+      mappingProfile.setDefault(true);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords).hasSize(2);
-    assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
-    assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(1).getId());
+      assertThat(marcRecords).hasSize(2);
+      assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+      assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(1).getId());
+    }
   }
 
   @Test
   void shouldReturnEmptyList_ifIdNotFound() {
-    handleCentralTenant();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      handleCentralTenant();
 
-    var notFoundUUID = UUID.randomUUID();
-    var centralAuthorityIds = new HashSet<UUID>();
-    centralAuthorityIds.add(notFoundUUID);
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setDefault(true);
-    var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var notFoundUUID = UUID.randomUUID();
+      var centralAuthorityIds = new HashSet<UUID>();
+      centralAuthorityIds.add(notFoundUUID);
+      var mappingProfile = new MappingProfile();
+      mappingProfile.setDefault(true);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords).isEmpty();
+      assertThat(marcRecords).isEmpty();
+    }
   }
 
   @Test
   void shouldReturnOneRecordFromLocalAndOneNotFound_ifOneIdNotFound() {
-    handleCentralTenant();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      handleCentralTenant();
 
-    var notFoundUUID = UUID.randomUUID();
-    var centralAuthorityIds = new HashSet<UUID>();
-    centralAuthorityIds.add(notFoundUUID);
-    centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setDefault(true);
-    var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var notFoundUUID = UUID.randomUUID();
+      var centralAuthorityIds = new HashSet<UUID>();
+      centralAuthorityIds.add(notFoundUUID);
+      centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
+      var mappingProfile = new MappingProfile();
+      mappingProfile.setDefault(true);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
 
-    assertThat(marcRecords).hasSize(1);
-    assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+      assertThat(marcRecords).hasSize(1);
+      assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
+    }
   }
 
   private void handleCentralTenant() {

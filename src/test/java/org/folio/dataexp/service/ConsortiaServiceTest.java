@@ -3,6 +3,7 @@ package org.folio.dataexp.service;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,9 @@ class ConsortiaServiceTest {
 
   @Mock
   private ConsortiaClient consortiaClient;
+
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
 
   @InjectMocks
   private ConsortiaService consortiaService;
@@ -42,6 +46,7 @@ class ConsortiaServiceTest {
     otherUserTenant.setCentralTenantId("college");
     userTenantCollection.setUserTenants(List.of(centralTenant, otherUserTenant));
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn("college");
 
     assertThat(consortiaService.getCentralTenantId()).isEqualTo("consortium");
   }
