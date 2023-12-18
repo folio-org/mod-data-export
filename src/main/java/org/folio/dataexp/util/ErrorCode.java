@@ -1,6 +1,7 @@
 package org.folio.dataexp.util;
 
 import org.folio.dataexp.domain.dto.Error;
+
 import java.util.ArrayList;
 import java.util.List;
 
