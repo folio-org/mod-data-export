@@ -40,4 +40,13 @@ class JobExecutionsControllerTest extends BaseDataExportInitializer {
         .headers(defaultHeaders()))
       .andExpect(status().isOk());
   }
+
+  @Test
+  @SneakyThrows
+  void deleteJobExecutionByIdTest() {
+    mockMvc.perform(MockMvcRequestBuilders
+        .delete("/data-export/job-executions/" + UUID.randomUUID())
+        .headers(defaultHeaders()))
+      .andExpect(status().isNoContent());
+  }
 }
