@@ -16,6 +16,8 @@ import org.folio.dataexp.domain.dto.ErrorLogCollection;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
+import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.marc4j.MarcException;
@@ -88,6 +90,40 @@ public class ErrorLogService {
     var errorLog = getGeneralErrorLog(errorMessageCode, jobExecutionId)
       .errorMessageValues(errorMessageValues);
     return save(errorLog);
+  }
+
+  public void saveCommonExportFailsErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
+    if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      var message = String.join(", ", commonExportFails.getInvalidUUIDFormat());
+      errorLog.setErrorMessageValues(List.of(message));
+      errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
+      this.save(errorLog);
+    }
+
+    if (!commonExportFails.getNotExistUUID().isEmpty()) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      var message = String.join(", ", commonExportFails.getNotExistUUID());
+      errorLog.setErrorMessageValues(List.of(message));
+      errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.getCode());
+      this.save(errorLog);
+    }
+
+    if (totalErrors > 0) {
+      var errorLog = new ErrorLog();
+      errorLog.setId(UUID.randomUUID());
+      errorLog.createdDate(new Date());
+      errorLog.setJobExecutionId(jobExecutionId);
+      errorLog.setErrorMessageValues(List.of(String.valueOf(totalErrors)));
+      errorLog.setErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.getCode());
+      this.save(errorLog);
+    }
   }
 
   public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessageCode, UUID jobExecutionId, MarcException marcException) {

@@ -100,6 +100,6 @@ class ExportExecutorTest extends BaseDataExportInitializer {
     assertTrue(size > 0);
 
     assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
-    verify(errorLogService, times(3)).save(isA(ErrorLog.class));
+    verify(errorLogService).saveCommonExportFailsErrors(commonFails, 2, jobExecutionId);
   }
 }

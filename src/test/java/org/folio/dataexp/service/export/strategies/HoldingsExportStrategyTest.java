@@ -64,9 +64,18 @@ class HoldingsExportStrategyTest {
   private HoldingsExportStrategy holdingsExportStrategy;
 
   @Test
-  void getMarcRecordsTest() {
+  void getMarcRecordsTestIfDefaultMappingProfile() {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
+    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
+  }
+
+  @Test
+  void getMarcRecordsTestIfRecordTypesSrs() {
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
     verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
   }

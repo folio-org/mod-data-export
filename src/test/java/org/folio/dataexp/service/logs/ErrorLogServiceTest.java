@@ -1,8 +1,13 @@
 package org.folio.dataexp.service.logs;
 
 import org.folio.dataexp.domain.dto.ErrorLog;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
+import org.folio.dataexp.service.CommonExportFails;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
@@ -18,6 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +104,6 @@ class ErrorLogServiceTest {
 
   @Test
   void saveGeneralErrorTest() {
-    var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
@@ -106,4 +111,21 @@ class ErrorLogServiceTest {
 
     verify(errorLogEntityCqlRepository).save(isA(ErrorLogEntity.class));
   }
+
+  @Test
+  void saveCommonExportFailsErrorsTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var commonFails = new CommonExportFails();
+    var notExistUUID = UUID.randomUUID();
+    commonFails.incrementDuplicatedUUID();
+    commonFails.addToInvalidUUIDFormat("abs");
+    commonFails.addToNotExistUUIDAll(List.of(notExistUUID));
+
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+
+    errorLogService.saveCommonExportFailsErrors(commonFails, 3, jobExecutionId);
+    verify(errorLogEntityCqlRepository, times(3)).save(isA(ErrorLogEntity.class));
+  }
+
 }

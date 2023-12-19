@@ -65,7 +65,7 @@ public class ExportExecutor {
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
-      saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
+      errorLogService.saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
 
@@ -90,39 +90,5 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
-  }
-
-  private void saveCommonExportFailsErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
-    if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getInvalidUUIDFormat());
-      errorLog.setErrorMessageValues(List.of(message));
-      errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
-      errorLogService.save(errorLog);
-    }
-
-    if (!commonExportFails.getNotExistUUID().isEmpty()) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getNotExistUUID());
-      errorLog.setErrorMessageValues(List.of(message));
-      errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.getCode());
-      errorLogService.save(errorLog);
-    }
-
-    if (totalErrors > 0) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      errorLog.setErrorMessageValues(List.of(String.valueOf(totalErrors)));
-      errorLog.setErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.getCode());
-      errorLogService.save(errorLog);
-    }
   }
 }
