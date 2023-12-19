@@ -37,9 +37,12 @@ public class SingleFileProcessor {
 
       jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
+      var totalFailed = commonExportFails.getInvalidUUIDFormat().size();
+      var progress = jobExecution.getProgress();
+      progress.setFailed(totalFailed);
+      progress.setExported(0);
       jobExecutionEntityRepository.save(jobExecutionEntity);
-      var total = commonExportFails.getInvalidUUIDFormat().size();
-      errorLogService.saveCommonExportFailsErrors(commonExportFails, total, jobExecutionId);
+      errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
       return;
 
     }
