@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
@@ -58,7 +59,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
   @SneakyThrows
   void exportBySingleFileIfExportEntitiesEmptyTest() {
     var jobExecutionId = UUID.randomUUID();
-    var jobExecution = new JobExecution().id(jobExecutionId);
+    var progress = new JobExecutionProgress();
+    var jobExecution = new JobExecution().id(jobExecutionId).progress(progress);
+
     var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).id(jobExecutionId).build();
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
