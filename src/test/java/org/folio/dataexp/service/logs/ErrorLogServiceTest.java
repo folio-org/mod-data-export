@@ -1,17 +1,15 @@
 package org.folio.dataexp.service.logs;
 
 import org.folio.dataexp.domain.dto.ErrorLog;
-import org.folio.dataexp.domain.dto.JobExecution;
-import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -128,4 +126,19 @@ class ErrorLogServiceTest {
     verify(errorLogEntityCqlRepository, times(3)).save(isA(ErrorLogEntity.class));
   }
 
+  @Test
+  void saveFailedToReadInputFileErrorTest() {
+    var jobExecutionId = UUID.randomUUID();
+    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
+
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+
+    errorLogService.saveFailedToReadInputFileError(jobExecutionId);
+    verify(errorLogEntityCqlRepository).save(captor.capture());
+
+    var errorLogEntity = captor.getValue();
+    var errorLog = errorLogEntity.getErrorLog();
+    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), errorLog.getErrorMessageCode());
+  }
 }

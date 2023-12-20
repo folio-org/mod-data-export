@@ -42,9 +42,12 @@ public class SingleFileProcessor {
       progress.setFailed(totalFailed);
       progress.setExported(0);
       jobExecutionEntityRepository.save(jobExecutionEntity);
-      errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
+      if (commonExportFails.isFailedToReadInputFile()) {
+        errorLogService.saveFailedToReadInputFileError(jobExecutionId);
+      } else {
+        errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
+      }
       return;
-
     }
     exports.forEach(export -> executeExport(export, idType, commonExportFails));
   }

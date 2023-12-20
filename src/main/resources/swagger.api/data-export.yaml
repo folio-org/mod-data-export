@@ -675,7 +675,7 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
       requestBody:
-        required: true
+        required: false
         content:
           application/octet-stream:
             schema:

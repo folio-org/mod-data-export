@@ -24,6 +24,7 @@ import org.marc4j.MarcException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -124,6 +125,16 @@ public class ErrorLogService {
       errorLog.setErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.getCode());
       this.save(errorLog);
     }
+  }
+
+  public void saveFailedToReadInputFileError(UUID jobExecutionId) {
+    var errorLog = new ErrorLog();
+    errorLog.setId(UUID.randomUUID());
+    errorLog.createdDate(new Date());
+    errorLog.setJobExecutionId(jobExecutionId);
+    errorLog.setErrorMessageValues(new ArrayList<>());
+    errorLog.setErrorMessageCode(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode());
+    this.save(errorLog);
   }
 
   public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessageCode, UUID jobExecutionId, MarcException marcException) {

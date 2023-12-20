@@ -26,13 +26,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 
@@ -59,12 +57,13 @@ public class InputFileProcessor {
     }
   }
 
-  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) throws IOException {
+  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails)  {
     var pathToRead = getPathToRead(fileDefinition);
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
+        commonExportFails.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
@@ -88,6 +87,9 @@ public class InputFileProcessor {
           duplicatedIds.clear();
         }
       });
+    } catch (Exception e) {
+      commonExportFails.setFailedToReadInputFile(true);
+      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
     var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
     commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
