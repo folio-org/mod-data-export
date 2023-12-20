@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,7 +78,7 @@ class HoldingsExportStrategyTest {
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
-    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
+    verify(marcRecordEntityRepository, times(0)).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
   }
 
   @Test
