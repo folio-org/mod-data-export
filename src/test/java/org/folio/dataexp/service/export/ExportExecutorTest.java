@@ -2,7 +2,6 @@ package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
-import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -25,7 +24,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +58,7 @@ class ExportExecutorTest extends BaseDataExportInitializer {
     var commonFails = new CommonExportFails();
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
     exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
@@ -92,7 +91,7 @@ class ExportExecutorTest extends BaseDataExportInitializer {
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
-
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(3l);
         exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
 
