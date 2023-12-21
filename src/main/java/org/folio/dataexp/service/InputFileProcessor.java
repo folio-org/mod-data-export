@@ -12,6 +12,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -26,15 +27,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 
 @Component
 @RequiredArgsConstructor
@@ -60,7 +57,7 @@ public class InputFileProcessor {
   }
 
   private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) throws IOException {
-    var pathToRead = getPathToRead(fileDefinition);
+    var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -100,7 +97,7 @@ public class InputFileProcessor {
   }
 
   private void readCqlFile(FileDefinition fileDefinition) throws IOException, ServerChoiceIndexesException, FieldException, QueryValidationException, SQLException {
-    var pathToRead = getPathToRead(fileDefinition);
+    var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     String cql;
     try (InputStream is = s3Client.read(pathToRead)) {
       cql = IOUtils.toString(is, StandardCharsets.UTF_8);
@@ -121,9 +118,5 @@ public class InputFileProcessor {
           throw sqlException;
       }
     }
-  }
-
-  private String getPathToRead(FileDefinition fileDefinition) {
-    return String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
   }
 }

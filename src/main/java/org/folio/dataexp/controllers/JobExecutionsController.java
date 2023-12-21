@@ -1,14 +1,14 @@
 package org.folio.dataexp.controllers;
 
-import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.domain.dto.FileDownload;
 import org.folio.dataexp.domain.dto.JobExecutionCollection;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.dataexp.rest.resource.JobExecutionsApi;
+import org.folio.dataexp.service.file.download.FileDownloadService;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class JobExecutionsController implements JobExecutionsApi {
 
   private final JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  private final FileDownloadService filesDownloadService;
 
   @Override
   public ResponseEntity<JobExecutionCollection> getJobExecutionsByQuery(String query, Integer offset, Integer limit) {
@@ -40,5 +43,11 @@ public class JobExecutionsController implements JobExecutionsApi {
   public ResponseEntity<Void> deleteJobExecutionById(UUID jobExecutionId) {
     jobExecutionEntityCqlRepository.deleteById(jobExecutionId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  @Override
+  public ResponseEntity<FileDownload> getLinkToDownloadFiles(UUID jobExecutionId, UUID exportFileId) {
+    var fileDownload = filesDownloadService.getFileDownload(jobExecutionId, exportFileId);
+    return new ResponseEntity<>(fileDownload, HttpStatus.OK);
   }
 }

@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.UUID;
 
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToUploadedFiles;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class FileUploadServiceImpl implements FileUploadService{
+public class FilesUploadServiceImpl implements FilesUploadService {
 
-  public static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
+
   private static final String ERROR_MESSAGE = "File already uploaded for file definition with id : ";
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
@@ -30,7 +32,8 @@ public class FileUploadServiceImpl implements FileUploadService{
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
-    s3Client.write(String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName()), resource.getInputStream());
+    var fileName = fileDefinitionEntity.getFileDefinition().getFileName();
+    s3Client.write(getPathToUploadedFiles(fileDefinitionId, fileName), resource.getInputStream());
     completeUploading(fileDefinitionEntity);
     log.info("Complete upload file for file definition {}", fileDefinitionId);
     return fileDefinitionEntity.getFileDefinition();
