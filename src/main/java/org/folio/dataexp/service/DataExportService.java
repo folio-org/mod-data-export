@@ -8,7 +8,6 @@ import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
@@ -30,7 +29,7 @@ public class DataExportService {
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final InputFileProcessor inputFileProcessor;
   private final SlicerProcessor slicerProcessor;
-  private final SingleFileProcessorAsync singleFileProcessorAsync;
+  private final SingleFileProcessor singleFileProcessor;
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
@@ -58,7 +57,7 @@ public class DataExportService {
     slicerProcessor.sliceInstancesIds(fileDefinition);
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
-    singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getIdType(), commonExportFails);
+    singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getIdType(), commonExportFails);
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
