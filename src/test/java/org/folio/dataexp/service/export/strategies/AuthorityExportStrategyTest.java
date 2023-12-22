@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -111,6 +112,14 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
     }
+  }
+
+  @Test
+  void shouldReturnErrorResultForGetGeneratedMarc_IfMarcsDoNotExist() {
+    var notExistUUID = UUID.randomUUID();
+    var marcRecords = authorityExportStrategy.getGeneratedMarc(Set.of(notExistUUID), new MappingProfile());
+    assertEquals(1, marcRecords.getNotExistIds().size());
+    assertEquals(1, marcRecords.getFailedIds().size());
   }
 
   private void handleCentralTenant() {

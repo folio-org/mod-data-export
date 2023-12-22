@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -21,11 +22,12 @@ public class SingleFileProcessor {
   protected final ExportExecutor exportExecutor;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final ErrorLogService errorLogService;
 
   public void exportBySingleFile(UUID jobExecutionId, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
-      log.warn("Nothing to export for job execution {}", jobExecutionId);
+      log.error("Nothing to export for job execution {}", jobExecutionId);
       var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
       var jobExecution = jobExecutionEntity.getJobExecution();
       var currentDate = new Date();
@@ -35,7 +37,16 @@ public class SingleFileProcessor {
 
       jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
+      var totalFailed = commonExportFails.getInvalidUUIDFormat().size();
+      var progress = jobExecution.getProgress();
+      progress.setFailed(totalFailed);
+      progress.setExported(0);
       jobExecutionEntityRepository.save(jobExecutionEntity);
+      if (commonExportFails.isFailedToReadInputFile()) {
+        errorLogService.saveFailedToReadInputFileError(jobExecutionId);
+      } else {
+        errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
+      }
       return;
     }
     exports.forEach(export -> executeExport(export, idType, commonExportFails));

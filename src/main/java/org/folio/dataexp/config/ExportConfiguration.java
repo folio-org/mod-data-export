@@ -17,7 +17,7 @@ import java.util.List;
 @Log4j2
 public class ExportConfiguration {
   private static final String DEFAULT_RULES = "/rules/rulesDefault.json";
-  private static final String DEFAULT_HOLDINGS_RULES = "/rules/rulesDefault.json";
+  private static final String DEFAULT_HOLDINGS_RULES = "/rules/holdingsRulesDefault.json";
 
   @Bean
   public RuleProcessor ruleProcessor() {

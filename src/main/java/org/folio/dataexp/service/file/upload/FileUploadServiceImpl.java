@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -30,7 +31,9 @@ public class FileUploadServiceImpl implements FileUploadService{
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
-    s3Client.write(String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName()), resource.getInputStream());
+    try (var inputStream = resource != null ? resource.getInputStream() : InputStream.nullInputStream()) {
+      s3Client.write(String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName()), inputStream);
+    }
     completeUploading(fileDefinitionEntity);
     log.info("Complete upload file for file definition {}", fileDefinitionId);
     return fileDefinitionEntity.getFileDefinition();
