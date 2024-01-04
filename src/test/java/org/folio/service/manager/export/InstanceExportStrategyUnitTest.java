@@ -281,7 +281,7 @@ class InstanceExportStrategyUnitTest {
       any(AbstractExportStrategy.EntityType.class))).thenReturn(Pair.of(Collections.emptyList(), 0));
     when(recordLoaderService.loadMarcRecordsBlocking(anyList(), eq(AbstractExportStrategy.EntityType.INSTANCE), anyString(),
       any(OkapiConnectionParams.class))).thenReturn(srsLoadResult);
-    when(inventoryClient.getInstanceById(jobExecutionId, instanceId, okapiConnectionParams))
+    when(inventoryClient.getInstanceById(instanceId, okapiConnectionParams))
       .thenReturn(instance);
 
     // when

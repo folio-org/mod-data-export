@@ -170,7 +170,7 @@ public class InventoryClient extends BaseConcurrentClient {
     return getReferenceDataByUrl(endpoint, jobExecutionId, params, CONTRIBUTOR_NAME_TYPES);
   }
 
-  public JsonObject getInstanceById(String jobExecutionId, String instanceId, OkapiConnectionParams params) {
+  public JsonObject getInstanceById(String instanceId, OkapiConnectionParams params) {
     LOGGER.info("Tenant id: {}, token: {}", params.getTenantId(), params.getToken());
     String endpoint = resourcesPathWithPrefix(INSTANCE) + "/" + instanceId;
     String queryEndpoint = ClientUtil.buildQueryEndpoint(endpoint, params.getOkapiUrl());

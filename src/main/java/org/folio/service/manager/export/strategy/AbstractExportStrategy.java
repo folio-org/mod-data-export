@@ -2,7 +2,6 @@ package org.folio.service.manager.export.strategy;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.HttpStatus;
-import org.folio.clients.ConsortiaClient;
 import org.folio.clients.InventoryClient;
 import org.folio.clients.UsersClient;
 import org.folio.rest.exceptions.ServiceException;
@@ -39,9 +37,7 @@ import io.vertx.core.json.JsonObject;
 
 import static java.lang.String.format;
 import static java.lang.String.join;
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.util.ErrorCode.ERROR_DUPLICATE_SRS_RECORD;
 
 public abstract class AbstractExportStrategy implements ExportStrategy {
@@ -65,7 +61,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private InventoryRecordConverterService inventoryRecordService;
   private InventoryClient inventoryClient;
-  private ConsortiaClient consortiaClient;
 
   @Override
   abstract public void export(ExportPayload exportPayload, Promise<Object> blockingPromise);
@@ -97,18 +92,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       .forEach(rec -> {
         var instanceId = rec.getJsonObject("externalIdsHolder").getString("instanceId");
         if (nonNull(instanceId)) {
-          var instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, params);
-          if (isNull(instance)) {
-            var centralTenantId = consortiaClient.getCentralTenantId(params);
-            if (nonNull(centralTenantId)) {
-              var headersWithCentralTenant = new HashMap<>(params.getHeaders());
-              headersWithCentralTenant.put(OKAPI_HEADER_TENANT, centralTenantId);
-              var connectionParamsWithCentralTenant = new OkapiConnectionParams(headersWithCentralTenant);
-              instance = inventoryClient.getInstanceById(jobExecutionId, instanceId, connectionParamsWithCentralTenant);
-            } else {
-              LOGGER.info("Central tenant id cannot be found");
-            }
-          }
+          var instance = inventoryClient.getInstanceById(instanceId, params);
           if (nonNull(instance)) {
             instanceSRSIDs.computeIfAbsent(instance, list -> new ArrayList<>()).add(rec.getString("recordId"));
             if (instanceIds.contains(instanceId)) {
@@ -119,8 +103,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
               instanceIds.add(instanceId);
             }
           } else {
-            LOGGER.error("Instance with id {} cannot be found", instanceId);
-            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_GETTING_REFERENCE_DATA.getCode(), Arrays.asList(instanceId), jobExecutionId, params.getTenantId());
+            LOGGER.error("Instance with id {} cannot be found in schema {}", instanceId, params.getTenantId());
           }
         } else {
           LOGGER.error("externalIdsHolder of {} does not contain instanceId", rec.encodePrettily());
@@ -196,8 +179,4 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.inventoryClient = inventoryClient;
   }
 
-  @Autowired
-  public void setConsortiaClient(ConsortiaClient consortiaClient) {
-    this.consortiaClient = consortiaClient;
-  }
 }
