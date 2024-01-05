@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -50,6 +51,7 @@ public class FileUploadServiceImpl implements FileUploadService{
       throw new UploadFileException(errorMessage);
     }
     fileDefinition.setStatus(FileDefinition.StatusEnum.IN_PROGRESS);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinitionEntity;
   }
@@ -57,6 +59,7 @@ public class FileUploadServiceImpl implements FileUploadService{
   private FileDefinition completeUploading(FileDefinitionEntity fileDefinitionEntity) {
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     fileDefinition.setStatus(FileDefinition.StatusEnum.COMPLETED);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinition;
   }
@@ -66,6 +69,7 @@ public class FileUploadServiceImpl implements FileUploadService{
     var fileDefinitionEntity = fileDefinitionEntityRepository.getReferenceById(fileDefinitionId);
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     fileDefinition.setStatus(FileDefinition.StatusEnum.ERROR);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinition;
   }
