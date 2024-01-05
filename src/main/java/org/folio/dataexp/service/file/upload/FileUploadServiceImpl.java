@@ -31,9 +31,11 @@ public class FileUploadServiceImpl implements FileUploadService{
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
+    var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName());
     try (var inputStream = resource != null ? resource.getInputStream() : InputStream.nullInputStream()) {
-      s3Client.write(String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName()), inputStream);
+      s3Client.write(path, inputStream);
     }
+    fileDefinitionEntity.setFileDefinition(fileDefinitionEntity.getFileDefinition().sourcePath(path));
     completeUploading(fileDefinitionEntity);
     log.info("Complete upload file for file definition {}", fileDefinitionId);
     return fileDefinitionEntity.getFileDefinition();
