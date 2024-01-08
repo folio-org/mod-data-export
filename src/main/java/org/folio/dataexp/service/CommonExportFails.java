@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -9,6 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public class CommonExportFails {
+  @Getter
+  @Setter
+  private boolean isFailedToReadInputFile = true;
   @Getter
   private final Set<String> notExistUUID = Collections.synchronizedSet(new LinkedHashSet<>());
   @Getter
@@ -32,6 +36,4 @@ public class CommonExportFails {
   public void incrementDuplicatedUUID() {
     this.duplicatedUUIDAmount = this.duplicatedUUIDAmount + 1;
   }
-
-
 }

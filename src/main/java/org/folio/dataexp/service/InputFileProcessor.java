@@ -62,6 +62,7 @@ public class InputFileProcessor {
     var duplicatedIds = new HashSet<UUID>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
+        commonExportFails.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
@@ -85,6 +86,9 @@ public class InputFileProcessor {
           duplicatedIds.clear();
         }
       });
+    } catch (Exception e) {
+      commonExportFails.setFailedToReadInputFile(true);
+      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
     var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
     commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());

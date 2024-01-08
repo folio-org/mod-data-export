@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
@@ -15,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -37,6 +39,8 @@ public class FileDefinitionsService {
       .id(jobExecution.getId()).jobExecution(jobExecution).build());
     fileDefinition.setJobExecutionId(jobExecution.getId());
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    var now = new Date();
+    fileDefinition.setMetadata(new Metadata().createdDate(now).updatedDate(now));
     var entity = FileDefinitionEntity.builder()
       .id(fileDefinition.getId())
       .creationDate(LocalDateTime.now())

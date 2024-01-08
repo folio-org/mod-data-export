@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
 import java.util.UUID;
 
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToUploadedFiles;
@@ -33,7 +35,11 @@ public class FilesUploadServiceImpl implements FilesUploadService {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
     var fileName = fileDefinitionEntity.getFileDefinition().getFileName();
-    s3Client.write(getPathToUploadedFiles(fileDefinitionId, fileName), resource.getInputStream());
+    var path = getPathToUploadedFiles(fileDefinitionId, fileName);
+    try (var inputStream = resource != null ? resource.getInputStream() : InputStream.nullInputStream()) {
+      s3Client.write(path, inputStream);
+    }
+    fileDefinitionEntity.setFileDefinition(fileDefinitionEntity.getFileDefinition().sourcePath(path));
     completeUploading(fileDefinitionEntity);
     log.info("Complete upload file for file definition {}", fileDefinitionId);
     return fileDefinitionEntity.getFileDefinition();
@@ -48,6 +54,7 @@ public class FilesUploadServiceImpl implements FilesUploadService {
       throw new UploadFileException(errorMessage);
     }
     fileDefinition.setStatus(FileDefinition.StatusEnum.IN_PROGRESS);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinitionEntity;
   }
@@ -55,6 +62,7 @@ public class FilesUploadServiceImpl implements FilesUploadService {
   private FileDefinition completeUploading(FileDefinitionEntity fileDefinitionEntity) {
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     fileDefinition.setStatus(FileDefinition.StatusEnum.COMPLETED);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinition;
   }
@@ -64,6 +72,7 @@ public class FilesUploadServiceImpl implements FilesUploadService {
     var fileDefinitionEntity = fileDefinitionEntityRepository.getReferenceById(fileDefinitionId);
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     fileDefinition.setStatus(FileDefinition.StatusEnum.ERROR);
+    fileDefinition.setMetadata(fileDefinition.getMetadata().updatedDate(new Date()));
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinition;
   }

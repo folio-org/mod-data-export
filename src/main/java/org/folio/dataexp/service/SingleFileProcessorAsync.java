@@ -5,6 +5,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +14,8 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
 
   @Autowired
-  public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository, JobExecutionEntityRepository jobExecutionEntityRepository) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository);
+  public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository, JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
+    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
   }
 
   @Override

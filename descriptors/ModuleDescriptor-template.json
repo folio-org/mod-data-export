@@ -121,7 +121,8 @@
             "inventory-storage.electronic-access-relationships.collection.get",
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
-            "inventory-storage.call-number-types.collection.get"
+            "inventory-storage.call-number-types.collection.get",
+            "user-tenants.collection.get"
           ]
         },
         {

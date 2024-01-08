@@ -3,7 +3,6 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
-import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
@@ -15,12 +14,10 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,6 +39,7 @@ public class ExportExecutor {
 
   public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
     log.info("export:: Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+    exportFilesEntity = jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
@@ -65,7 +63,7 @@ public class ExportExecutor {
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
-      saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
+      errorLogService.saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
 
@@ -90,39 +88,5 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
-  }
-
-  private void saveCommonExportFailsErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
-    if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getInvalidUUIDFormat());
-      errorLog.setErrorMessageValues(List.of(message));
-      errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
-      errorLogService.save(errorLog);
-    }
-
-    if (!commonExportFails.getNotExistUUID().isEmpty()) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getNotExistUUID());
-      errorLog.setErrorMessageValues(List.of(message));
-      errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.getCode());
-      errorLogService.save(errorLog);
-    }
-
-    if (totalErrors > 0) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      errorLog.setErrorMessageValues(List.of(String.valueOf(totalErrors)));
-      errorLog.setErrorMessageCode(ErrorCode.SOME_RECORDS_FAILED.getCode());
-      errorLogService.save(errorLog);
-    }
   }
 }
