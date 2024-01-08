@@ -12,13 +12,14 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
+
 @Component
 @RequiredArgsConstructor
 @Log4j2
 public class SlicerProcessor {
 
   private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?, ?)";
-  private static final String SLICED_FILE_LOCATION_PATH = "mod-data-export/download/%s/";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
   private static final String MARC_EXTENSION = ".mrc";
   private static final int DEFAULT_SLICE_SIZE = 100000;
@@ -31,7 +32,7 @@ public class SlicerProcessor {
 
   public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize) {
     var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName());
-    var pathLocation = String.format(SLICED_FILE_LOCATION_PATH, fileDefinition.getJobExecutionId()) + fileName;
+    var pathLocation = getPathToStoredFiles(fileDefinition.getJobExecutionId().toString(), fileName);
     try (Connection connection = jdbcTemplate.getDataSource().getConnection();
          CallableStatement callableStatement = connection.prepareCall(CALL_SLICE_INSTANCES_IDS_PROCEDURE)) {
       callableStatement.setString(1, fileDefinition.getJobExecutionId().toString());

@@ -10,7 +10,7 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.service.file.upload.FileUploadService;
+import org.folio.dataexp.service.file.upload.FilesUploadService;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.UUID;
 public class FileDefinitionsService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
-  private final FileUploadService fileUploadService;
+  private final FilesUploadService filesUploadService;
   private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
 
@@ -56,10 +56,10 @@ public class FileDefinitionsService {
 
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) {
     try {
-      return fileUploadService.uploadFile(fileDefinitionId, resource);
+      return filesUploadService.uploadFile(fileDefinitionId, resource);
     } catch (Exception e) {
       log.error("Error uploading file for file definition id {} {}", fileDefinitionId, e);
-      fileUploadService.errorUploading(fileDefinitionId);
+      filesUploadService.errorUploading(fileDefinitionId);
       throw new UploadFileException(e.getMessage());
     }
   }
