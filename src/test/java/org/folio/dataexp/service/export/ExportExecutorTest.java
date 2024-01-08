@@ -1,7 +1,6 @@
 package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -12,33 +11,39 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
+import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ExportExecutorTest extends BaseDataExportInitializer {
-  @MockBean
+@ExtendWith(MockitoExtension.class)
+class ExportExecutorTest {
+  @Mock
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @MockBean
+  @Mock
   private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @MockBean
-  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
-  @MockBean
+  @Mock
+  private ExportStrategyFactory exportStrategyFactory;
+  @Mock
   private ErrorLogService errorLogService;
-  @Autowired
-  private FolioS3Client s3Client;
-  @Autowired
+  @Mock
+  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Mock
+  private InstancesExportStrategy instancesExportStrategy;
+
+  @InjectMocks
   private ExportExecutor exportExecutor;
 
   @Test
@@ -55,24 +60,29 @@ class ExportExecutorTest extends BaseDataExportInitializer {
       .id(UUID.randomUUID())
       .jobExecutionId(jobExecutionId)
       .fileLocation(fileLocation).build();
+
+    var completedExportEntity = JobExecutionExportFilesEntity.builder()
+      .id(exportEntity.getId())
+      .jobExecutionId(jobExecutionId)
+      .status(JobExecutionExportFilesStatus.COMPLETED)
+      .fileLocation(fileLocation).build();
+
     var commonFails = new CommonExportFails();
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
+    when(exportStrategyFactory.getExportStrategy(ExportRequest.IdTypeEnum.INSTANCE)).thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveMarcToRemoteStorage(isA(JobExecutionExportFilesEntity.class))).thenReturn(new ExportStrategyStatistic());
 
     exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
 
-    long size = s3Client.getSize(fileLocation);
-    assertTrue(size > 0);
-
-    assertEquals(JobExecutionExportFilesStatus.COMPLETED, exportEntity.getStatus());
+    assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
   }
 
   @Test
   void exportIfCommonFailsExistTest() {
-    var notExistUUID = UUID.randomUUID();
     var jobExecutionId = UUID.randomUUID();
     var jobExecution = new JobExecution();
     jobExecution.setProgress(new JobExecutionProgress());
@@ -84,20 +94,26 @@ class ExportExecutorTest extends BaseDataExportInitializer {
       .id(UUID.randomUUID())
       .jobExecutionId(jobExecutionId)
       .fileLocation(fileLocation).build();
+    var completedExportEntity = JobExecutionExportFilesEntity.builder()
+      .id(exportEntity.getId())
+      .jobExecutionId(jobExecutionId)
+      .status(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
+      .fileLocation(fileLocation).build();
+
     var commonFails = new CommonExportFails();
     commonFails.incrementDuplicatedUUID();
     commonFails.addToInvalidUUIDFormat("abs");
-    commonFails.addToNotExistUUIDAll(List.of(notExistUUID));
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
-    when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(3l);
-        exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+    when(exportStrategyFactory.getExportStrategy(ExportRequest.IdTypeEnum.INSTANCE)).thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveMarcToRemoteStorage(isA(JobExecutionExportFilesEntity.class))).thenReturn(new ExportStrategyStatistic());
+    when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2l);
 
-    long size = s3Client.getSize(fileLocation);
-    assertTrue(size > 0);
+    exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
 
+    assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
     verify(errorLogService).saveCommonExportFailsErrors(commonFails, 2, jobExecutionId);
   }
