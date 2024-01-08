@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.UUID;
 
-import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SlicerProcessorTest extends BaseDataExportInitializer {
@@ -49,7 +49,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {

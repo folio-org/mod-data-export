@@ -41,7 +41,7 @@ class FileDefinitionsServiceTest {
   @Mock
   private FileDefinitionValidator fileDefinitionValidator;
   @Mock
-  private FileUploadService fileUploadService;
+  private FilesUploadService filesUploadService;
   @Captor
   private ArgumentCaptor<JobExecutionEntity> jobExecutionEntityCaptor;
   @InjectMocks
@@ -91,7 +91,7 @@ class FileDefinitionsServiceTest {
     var resource = new PathResource("src/test/resources/upload.csv");
 
     fileDefinitionsService.uploadFile(fileDefinitionId, resource);
-    verify(fileUploadService).uploadFile(fileDefinitionId, resource);
+    verify(filesUploadService).uploadFile(fileDefinitionId, resource);
   }
 
   @Test
@@ -100,7 +100,7 @@ class FileDefinitionsServiceTest {
     var fileDefinitionId = UUID.randomUUID();
     var resource = new PathResource("src/test/resources/upload.csv");
 
-    when(fileUploadService.uploadFile(fileDefinitionId, resource)).thenThrow(new RuntimeException("error"));
+    when(filesUploadService.uploadFile(fileDefinitionId, resource)).thenThrow(new RuntimeException("error"));
 
     assertThrows(UploadFileException.class, () -> fileDefinitionsService.uploadFile(fileDefinitionId, resource));
   }

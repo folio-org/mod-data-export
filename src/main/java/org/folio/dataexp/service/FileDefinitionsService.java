@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
@@ -16,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -24,7 +26,7 @@ import java.util.UUID;
 public class FileDefinitionsService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
-  private final FileUploadService fileUploadService;
+  private final FilesUploadService filesUploadService;
   private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
 
@@ -38,6 +40,8 @@ public class FileDefinitionsService {
       .id(jobExecution.getId()).jobExecution(jobExecution).build());
     fileDefinition.setJobExecutionId(jobExecution.getId());
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    var now = new Date();
+    fileDefinition.setMetadata(new Metadata().createdDate(now).updatedDate(now));
     var entity = FileDefinitionEntity.builder()
       .id(fileDefinition.getId())
       .creationDate(LocalDateTime.now())
@@ -53,10 +57,10 @@ public class FileDefinitionsService {
 
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) {
     try {
-      return fileUploadService.uploadFile(fileDefinitionId, resource);
+      return filesUploadService.uploadFile(fileDefinitionId, resource);
     } catch (Exception e) {
       log.error("Error uploading file for file definition id {} {}", fileDefinitionId, e);
-      fileUploadService.errorUploading(fileDefinitionId);
+      filesUploadService.errorUploading(fileDefinitionId);
       throw new UploadFileException(e.getMessage());
     }
   }

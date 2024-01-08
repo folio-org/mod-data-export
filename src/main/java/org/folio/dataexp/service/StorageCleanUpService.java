@@ -1,11 +1,11 @@
 package org.folio.dataexp.service;
 
 import static java.util.concurrent.TimeUnit.HOURS;
-import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,7 @@ public class StorageCleanUpService {
     log.info("Removing files and file definitions, number of file definitions to clean up: {}", expiredFileDefinitions.size());
     expiredFileDefinitions.forEach(fileDefinitionEntity -> {
       var fileDefinition = fileDefinitionEntity.getFileDefinition();
-      storageClient.remove(String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName()));
+      storageClient.remove(S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName()));
       fileDefinitionEntityRepository.delete(fileDefinitionEntity);
     });
   }

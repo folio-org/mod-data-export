@@ -1,13 +1,13 @@
 package org.folio.dataexp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class StorageCleanUpServiceTest extends BaseDataExportInitializer {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var fileDefinitionId = UUID.randomUUID();
       var fileName = "file.csv";
-      var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId, fileName);
+      var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinitionId, fileName);
 
       fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
         .id(fileDefinitionId)

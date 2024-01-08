@@ -2,6 +2,7 @@ package org.folio.dataexp.service.file.upload;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.s3.client.FolioS3Client;
@@ -22,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FileUploadServiceTest {
+class FilesUploadServiceTest {
 
   private static final String UPLOADED_FILE_PATH = "src/test/resources/upload.csv";
 
@@ -32,7 +33,7 @@ class FileUploadServiceTest {
   private FolioS3Client s3Client;
 
   @InjectMocks
-  private FileUploadServiceImpl fileUploadService;
+  private FilesUploadServiceImpl fileUploadService;
 
   @Test
   @SneakyThrows
@@ -43,6 +44,7 @@ class FileUploadServiceTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.fileName("upload.csv");
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    fileDefinition.setMetadata(new Metadata());
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     var resource = new PathResource(UPLOADED_FILE_PATH);
@@ -66,6 +68,7 @@ class FileUploadServiceTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.fileName("upload.csv");
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    fileDefinition.setMetadata(new Metadata());
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId)).thenReturn(fileDefinitionEntity);

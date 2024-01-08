@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * File upload service. Provides lifecycle methods for file uploading functionality.
  */
-public interface FileUploadService {
+public interface FilesUploadService {
 
   /**
    * Saves given file data to the storage
