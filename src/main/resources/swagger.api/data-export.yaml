@@ -37,6 +37,43 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /configuration:
+    post:
+      description: Adds configuration value
+      operationId: postDataExportConfiguration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/config'
+            example:
+              $ref: 'examples/configuration/config.json'
+      responses:
+        '201':
+          description: Data export started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/config'
+              example:
+                $ref: 'examples/configuration/config.json'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid slice size"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
   /quickExport:
     post:
       description: Starts quick export process
@@ -818,6 +855,8 @@ components:
       $ref: 'schemas/referencedata/servicepoint.json'
     servicePoints:
       $ref: 'schemas/referencedata/servicepoints.json'
+    config:
+      $ref: 'schemas/configuration/config.json'
   parameters:
     trait_queryable:
       name: query
