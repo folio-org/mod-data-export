@@ -5,10 +5,10 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 
 @Log4j2
 @Component
@@ -28,6 +30,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final ConsortiaService consortiaService;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final MarcRecordEntityRepository marcRecordEntityRepository;
+  private final InstanceEntityRepository instanceEntityRepository;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
@@ -57,6 +60,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
   @Override
   public Optional<String> getIdentifierMessage(UUID id) {
+    var instances = instanceEntityRepository.findByIdIn(Set.of(id));
+    if (instances.isEmpty()) return Optional.empty();
+    var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
+    if (jsonObject.isPresent()) {
+      var hrid = jsonObject.get().getAsString(HRID_KEY);
+      return Optional.of("Instance with hrid : " + hrid);
+    }
     return Optional.empty();
   }
 }
