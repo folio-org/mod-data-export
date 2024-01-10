@@ -1,4 +1,4 @@
-package org.folio.dataexp.service;
+package org.folio.dataexp.service.validators;
 
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.exception.file.definition.FileExtensionException;

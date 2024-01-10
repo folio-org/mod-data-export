@@ -11,6 +11,7 @@ import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.service.file.upload.FilesUploadService;
+import org.folio.dataexp.service.validators.FileDefinitionValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;

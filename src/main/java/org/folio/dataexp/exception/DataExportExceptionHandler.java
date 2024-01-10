@@ -1,6 +1,7 @@
 package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.file.definition.FileExtensionException;
 import org.folio.dataexp.exception.file.definition.FileSizeException;
@@ -53,5 +54,10 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(TransformationValidationException.class)
   public ResponseEntity<String> handleTransformationValidationException(final TransformationValidationException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(SliceSizeValidationException.class)
+  public ResponseEntity<String> handleConfigurationValidationException(final SliceSizeValidationException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }

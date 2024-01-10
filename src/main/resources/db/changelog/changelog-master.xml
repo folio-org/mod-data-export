@@ -6,4 +6,5 @@
 
     <include file="changes/initial_schema.xml" relativeToChangelogFile="true"/>
     <include file="changes/init_procedures.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_config.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

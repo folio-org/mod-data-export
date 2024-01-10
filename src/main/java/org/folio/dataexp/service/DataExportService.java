@@ -13,6 +13,7 @@ import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 

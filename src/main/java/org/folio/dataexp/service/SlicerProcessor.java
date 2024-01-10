@@ -22,12 +22,15 @@ public class SlicerProcessor {
   private static final String CALL_SLICE_INSTANCES_IDS_PROCEDURE = "call slice_instances_ids(?, ?, ?)";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
   private static final String MARC_EXTENSION = ".mrc";
-  private static final int DEFAULT_SLICE_SIZE = 100000;
+  public static final int DEFAULT_SLICE_SIZE = 100_000;
+  public static final String SLICE_SIZE_KEY = "slice_size";
 
   private final JdbcTemplate jdbcTemplate;
+  private final ConfigurationService configurationService;
 
   public void sliceInstancesIds(FileDefinition fileDefinition) {
-    sliceInstancesIds(fileDefinition, DEFAULT_SLICE_SIZE);
+    var sliceSize = configurationService.getValue(SLICE_SIZE_KEY);
+    sliceInstancesIds(fileDefinition, Integer.parseInt(sliceSize));
   }
 
   public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize) {
