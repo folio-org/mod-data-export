@@ -112,7 +112,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return Optional.empty();
   }
 
-  private List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile) {
+  protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile) {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     var existInstanceIds = new HashSet<UUID>();
@@ -127,7 +127,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-      addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(INSTANCE_HRID_KEY), mappingProfile);
+      addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     instancesIds.removeAll(existInstanceIds);
@@ -172,7 +172,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       if (holdingJsonOpt.isPresent()) {
         var holdingJson = holdingJsonOpt.get();
         holdingJson.put(ITEMS_KEY, itemJsonArray);
-        holdingJson.put(HRID_KEY, instanceHrid);
+        holdingJson.put(INSTANCE_HRID_KEY, instanceHrid);
         holdingsJsonArray.add(holdingJson);
       } else {
         log.error("addItemsToHolding:: error converting to json holding by id {}", holdingsEntity.getId());
