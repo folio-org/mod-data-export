@@ -7,10 +7,12 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
@@ -67,6 +70,8 @@ public class InstancesExportStrategyTest {
   private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   @Mock
   private ItemEntityRepository itemEntityRepository;
+  @Mock
+  private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -105,10 +110,16 @@ public class InstancesExportStrategyTest {
 
   @Test
   void getGeneratedMarcTest() {
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(true);
+    mappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var mappingProfileEntity = MappingProfileEntity.builder()
+      .mappingProfile(mappingProfile).id(mappingProfile.getId()).build();
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(mappingProfileEntity);
     instancesExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
