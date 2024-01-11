@@ -115,7 +115,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile) {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
+    var existInstanceIds = new HashSet<UUID>();
     for (var instance : instances) {
+      existInstanceIds.add(instance.getId());
       var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
       if (instanceJsonOpt.isEmpty()) {
         log.error("getInstancesWithHoldingsAndItems:: Error converting to json instance by id {}", instance.getId());
@@ -128,6 +130,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(INSTANCE_HRID_KEY), mappingProfile);
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
+    instancesIds.removeAll(existInstanceIds);
+    instancesIds.forEach(
+      instanceId -> {
+        log.error("getInstancesWithHoldingsAndItems:: instance by id {} does not exist", instanceId);
+        generatedMarcResult.addIdToNotExist(instanceId);
+        generatedMarcResult.addIdToFailed(instanceId);
+      });
     return instancesWithHoldingsAndItems;
   }
 
