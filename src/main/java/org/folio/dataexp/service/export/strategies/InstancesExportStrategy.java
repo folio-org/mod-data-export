@@ -67,7 +67,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
-    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
+    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, INSTANCE_MARC_TYPE);
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
