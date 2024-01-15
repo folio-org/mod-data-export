@@ -146,10 +146,10 @@ class InstancesExportStrategyTest {
 
     var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
     assertTrue(actualMappingProfile.getDefault());
-    assertEquals(actualMappingProfile.getRecordTypes().size(), 3);
+    assertEquals(3, actualMappingProfile.getRecordTypes().size());
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
-    assertEquals(actualMappingProfile.getTransformations().size(), 1);
+    assertEquals(1, actualMappingProfile.getTransformations().size());
   }
 
   @Test
@@ -165,7 +165,6 @@ class InstancesExportStrategyTest {
     var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
-
 
     var generatedMarcResult = new GeneratedMarcResult();
 
@@ -216,6 +215,6 @@ class InstancesExportStrategyTest {
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
 
-    assertEquals(actualMarcField.getHoldingItemsFields().get(0).toString(), "tag ab");
+    assertEquals("tag ab", actualMarcField.getHoldingItemsFields().get(0).toString());
   }
 }
