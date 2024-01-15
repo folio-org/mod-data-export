@@ -23,6 +23,7 @@ import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.marc4j.marc.impl.DataFieldImpl;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -39,6 +40,7 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -157,5 +159,34 @@ class InstancesExportStrategyTest {
 
     var itemJsonArray = (JSONArray)holdingJson.get(ITEMS_KEY);
     assertEquals(1, itemJsonArray.size());
+  }
+
+  @Test
+  void getAdditionalMarcFieldsByExternalIdTest() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
+    var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var record = MarcRecordEntity.builder().externalId(instanceId).build();
+    var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576', 'hrid' : 'instanceHrid'}";
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
+    var item = "{'barcode' : 'itemBarcode'}";
+    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
+    var variableField = new DataFieldImpl("tag", 'a', 'b');
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(ruleProcessor.processFields(any(), any(), any(), anyList(), any())).thenReturn(List.of(variableField));
+
+    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(record), mappingProfile);
+    assertNotNull(marcFieldsByExternalId);
+
+    var actualMarcField = marcFieldsByExternalId.get(instanceId);
+
+    assertEquals(actualMarcField.getHoldingItemsFields().get(0).toString(), "tag ab");
   }
 }
