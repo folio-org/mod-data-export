@@ -2,8 +2,9 @@ package org.folio.dataexp.service.export.strategies;
 
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.marc4j.marc.impl.DataFieldImpl;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -13,6 +14,7 @@ class JsonToMarcConverterTest {
   @Test
   @SneakyThrows
   void convertJsonRecordToMarcRecordTest() {
+    var variableField = new DataFieldImpl("tag", 'a', 'b');
     var json = """
       {
           "fields": [{
@@ -23,8 +25,8 @@ class JsonToMarcConverterTest {
       }""";
     var convertor = new JsonToMarcConverter();
 
-    var expected = "00052cy  a22000374  4500001001400000\u001Eho00000000009\u001E\u001D";
-    var actual = convertor.convertJsonRecordToMarcRecord(json, new ArrayList<>());
+    var expected = "00067cy  a22000494  4500001001400000tag000300014\u001Eho00000000009\u001Eab\u001E\u001D";
+    var actual = convertor.convertJsonRecordToMarcRecord(json, List.of(variableField));
     assertEquals(expected, actual);
   }
 

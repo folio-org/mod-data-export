@@ -91,16 +91,33 @@ class InstancesExportStrategyTest {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
 
-    var record = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
-    var ids = Set.of(record.getExternalId(), recordFromCentralTenant.getExternalId());
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(anySet(), anyString())).thenReturn(new ArrayList<>(List.of(record)));
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(anySet(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
     var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
     assertEquals(2, actualMarcRecords.size());
+
+    mappingProfile.setDefault(false);
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
+
+    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
+    assertEquals(2, actualMarcRecords.size());
+  }
+
+  @Test
+  void getMarcRecordsIfMappingProfileNotDefaultAndRecordsTypeNotSrsTest() {
+    var mappingProfile =  new MappingProfile();
+    var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
+
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
+    assertEquals(0, actualMarcRecords.size());
   }
 
   @Test
