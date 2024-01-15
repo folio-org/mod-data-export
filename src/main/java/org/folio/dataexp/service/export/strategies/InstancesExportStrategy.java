@@ -26,12 +26,15 @@ import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
+import org.marc4j.marc.VariableField;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -112,6 +115,48 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return Optional.empty();
   }
 
+  @Override
+  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+    var marcFieldsByExternalId = new HashMap<UUID, MarcFields>();
+    if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
+      return marcFieldsByExternalId;
+    }
+    var externalIds = marcRecords.stream()
+      .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    var instanceEntities = instanceEntityRepository.findByIdIn(externalIds);
+    for (var instanceEntity : instanceEntities) {
+      var instanceOpt = getAsJsonObject(instanceEntity.getJsonb());
+      if (instanceOpt.isPresent()) {
+        var instanceJson = instanceOpt.get();
+        String instanceHrId = instanceJson.getAsString(HRID_KEY);
+        var holdingsAndItems = new JSONObject();
+        addHoldingsAndItems(holdingsAndItems, instanceEntity.getId(), instanceHrId, mappingProfile);
+        var marcFields = mapFields(holdingsAndItems, mappingProfile);
+        marcFieldsByExternalId.put(instanceEntity.getId(), marcFields);
+      }
+    }
+    return marcFieldsByExternalId;
+  }
+
+  private MarcFields mapFields(JSONObject record, MappingProfile mappingProfile) {
+    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
+    var rules = ruleFactory.getRules(mappingProfile);
+    var finalRules = ruleHandler.preHandle(record, rules);
+    EntityReader entityReader = new JPathSyntaxEntityReader(record.toJSONString());
+    RecordWriter recordWriter = new MarcRecordWriter();
+    var marcHoldingsItemsFieldsResult  = new MarcFields();
+    List<VariableField> mappedRecord = ruleProcessor
+      .processFields(entityReader, recordWriter, referenceData, finalRules, (translationException -> {
+        List<String> errorMessageValues = Arrays
+          .asList(translationException.getRecordInfo().getId(), translationException.getErrorCode().getDescription(),
+            translationException.getMessage());
+        marcHoldingsItemsFieldsResult.setErrorMessages(errorMessageValues);
+      }));
+    marcHoldingsItemsFieldsResult.setHoldingItemsFields(mappedRecord);
+    return marcHoldingsItemsFieldsResult;
+  }
+
+
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile) {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
@@ -140,7 +185,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return instancesWithHoldingsAndItems;
   }
 
-  private void addHoldingsAndItems(JSONObject instanceWithHoldingsAndItems, UUID instanceId,
+  private void addHoldingsAndItems(JSONObject jsonToUpdateWithHoldingsAndItems, UUID instanceId,
                                      String instanceHrid, MappingProfile mappingProfile) {
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
@@ -178,7 +223,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         log.error("addItemsToHolding:: error converting to json holding by id {}", holdingsEntity.getId());
       }
     }
-    instanceWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
+    jsonToUpdateWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
   }
 
   private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {

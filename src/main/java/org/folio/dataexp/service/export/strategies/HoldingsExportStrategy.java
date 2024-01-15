@@ -24,8 +24,10 @@ import org.folio.writer.impl.MarcRecordWriter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -81,6 +83,11 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       return Optional.of("Holding with hrid : " + hrid);
     }
     return Optional.empty();
+  }
+
+  @Override
+  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+    return new HashMap<>();
   }
 
   protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {

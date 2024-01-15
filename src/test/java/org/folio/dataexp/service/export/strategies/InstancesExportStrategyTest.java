@@ -50,7 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class InstancesExportStrategyTest {
+class InstancesExportStrategyTest {
 
   @Mock
   private ConsortiaService consortiaService;

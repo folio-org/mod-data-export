@@ -19,6 +19,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 @Log4j2
 public abstract class AbstractExportStrategy implements ExportStrategy {
@@ -47,6 +50,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
+  private FolioExecutionContext context;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -93,6 +97,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.errorLogService = errorLogService;
   }
 
+  @Autowired
+  private void setFolioExecutionContext(FolioExecutionContext context) {
+    this.context = context;
+  }
+
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var exportStatistic = new ExportStrategyStatistic();
@@ -131,6 +140,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Optional<String> getIdentifierMessage(UUID id);
 
+  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile);
+
   protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
   }
@@ -148,12 +159,16 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter,
                                  ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile);
+    var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     var duplicatedSrsMessage = new HashSet<String>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;
       try {
-        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent());
+        var marcHoldingsItemsFields = additionalFieldsPerId.getOrDefault(marcRecordEntity.getExternalId(), new MarcFields());
+        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
+        errorLogService
+          .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
         exportStatistic.incrementFailed();
