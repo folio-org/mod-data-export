@@ -138,11 +138,11 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return marcFieldsByExternalId;
   }
 
-  private MarcFields mapFields(JSONObject record, MappingProfile mappingProfile) {
+  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) {
     ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
     var rules = ruleFactory.getRules(mappingProfile);
-    var finalRules = ruleHandler.preHandle(record, rules);
-    EntityReader entityReader = new JPathSyntaxEntityReader(record.toJSONString());
+    var finalRules = ruleHandler.preHandle(marcRecord, rules);
+    EntityReader entityReader = new JPathSyntaxEntityReader(marcRecord.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
     var marcHoldingsItemsFieldsResult  = new MarcFields();
     List<VariableField> mappedRecord = ruleProcessor

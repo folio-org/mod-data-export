@@ -154,6 +154,7 @@ class InstancesExportStrategyTest {
 
   @Test
   void getHoldingsWithInstanceAndItemsTest() {
+    var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
@@ -172,7 +173,7 @@ class InstancesExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
 
-    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId)), generatedMarcResult, mappingProfile);
+    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
     assertEquals(1, instancesWithHoldingsAndItems.size());
 
@@ -182,6 +183,11 @@ class InstancesExportStrategyTest {
 
     var itemJsonArray = (JSONArray)holdingJson.get(ITEMS_KEY);
     assertEquals(1, itemJsonArray.size());
+
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+    assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
+    assertEquals(1, generatedMarcResult.getNotExistIds().size());
+    assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
   }
 
   @Test
