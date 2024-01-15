@@ -4,6 +4,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
@@ -24,6 +25,8 @@ import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.marc4j.marc.impl.DataFieldImpl;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -77,6 +80,9 @@ class InstancesExportStrategyTest {
   @Spy
   private RuleHandler ruleHandler;
 
+  @Captor
+  private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
+
   @InjectMocks
   private InstancesExportStrategy instancesExportStrategy;
 
@@ -112,21 +118,38 @@ class InstancesExportStrategyTest {
 
   @Test
   void getGeneratedMarcTest() {
+    var transformation = new Transformations();
     var mappingProfile =  new MappingProfile();
-    mappingProfile.setDefault(true);
-    mappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
-    var mappingProfileEntity = MappingProfileEntity.builder()
-      .mappingProfile(mappingProfile).id(mappingProfile.getId()).build();
+    mappingProfile.setDefault(false);
+    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM, RecordTypes.HOLDINGS));
+
+    var defaultMappingProfile =  new MappingProfile();
+    defaultMappingProfile.setDefault(true);
+    defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var defaultMappingProfileEntity = MappingProfileEntity.builder()
+      .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
 
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(mappingProfileEntity);
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
+    when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
+    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile);
 
-    verify(ruleFactory).getRules(isA(MappingProfile.class));
+    verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
+
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+
+    var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
+    assertTrue(actualMappingProfile.getDefault());
+    assertEquals(actualMappingProfile.getRecordTypes().size(), 3);
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
+    assertEquals(actualMappingProfile.getTransformations().size(), 1);
   }
 
   @Test
