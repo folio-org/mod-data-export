@@ -50,7 +50,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
-  private FolioExecutionContext context;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -95,11 +94,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setErrorLogService(ErrorLogService errorLogService) {
     this.errorLogService = errorLogService;
-  }
-
-  @Autowired
-  private void setFolioExecutionContext(FolioExecutionContext context) {
-    this.context = context;
   }
 
   @Override

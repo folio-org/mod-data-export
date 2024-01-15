@@ -65,8 +65,6 @@ class AbstractExportStrategyTest {
   private RemoteStorageWriter remoteStorageWriter;
   @Mock
   private ErrorLogService errorLogService;
-  @Mock
-  private FolioExecutionContext context;
   @Spy
   private JsonToMarcConverter jsonToMarcConverter;
 
