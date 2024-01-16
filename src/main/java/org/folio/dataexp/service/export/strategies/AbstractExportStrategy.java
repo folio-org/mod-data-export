@@ -161,8 +161,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       try {
         var marcHoldingsItemsFields = additionalFieldsPerId.getOrDefault(marcRecordEntity.getExternalId(), new MarcFields());
         marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
-        errorLogService
-          .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
+        if (marcHoldingsItemsFields.getErrorMessages().size() > 0) {
+          errorLogService
+            .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
+        }
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
         exportStatistic.incrementFailed();

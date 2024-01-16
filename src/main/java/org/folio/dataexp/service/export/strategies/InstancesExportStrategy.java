@@ -12,6 +12,7 @@ import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
+import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -67,6 +68,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
   private final ReferenceDataProvider referenceDataProvider;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
+  private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
@@ -80,8 +82,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
         } else {
-          log.error("Central tenant id not found: {}, external ids that cannot be found: {}",
-            centralTenantId, externalIds);
+          log.info("Central tenant id does not exist");
         }
       }
       return marcInstances;
@@ -123,17 +124,12 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     }
     var externalIds = marcRecords.stream()
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    var instanceEntities = instanceEntityRepository.findByIdIn(externalIds);
-    for (var instanceEntity : instanceEntities) {
-      var instanceOpt = getAsJsonObject(instanceEntity.getJsonb());
-      if (instanceOpt.isPresent()) {
-        var instanceJson = instanceOpt.get();
-        String instanceHrId = instanceJson.getAsString(HRID_KEY);
-        var holdingsAndItems = new JSONObject();
-        addHoldingsAndItems(holdingsAndItems, instanceEntity.getId(), instanceHrId, mappingProfile);
-        var marcFields = mapFields(holdingsAndItems, mappingProfile);
-        marcFieldsByExternalId.put(instanceEntity.getId(), marcFields);
-      }
+    var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
+    for (var instanceHridEntity : instanceHridEntities) {
+      var holdingsAndItems = new JSONObject();
+      addHoldingsAndItems(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
+      var marcFields = mapFields(holdingsAndItems, mappingProfile);
+      marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
     }
     return marcFieldsByExternalId;
   }

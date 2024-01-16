@@ -7,11 +7,13 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
+import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
+import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -65,6 +67,8 @@ class InstancesExportStrategyTest {
   private MarcRecordEntityRepository marcRecordEntityRepository;
   @Mock
   private InstanceEntityRepository instanceEntityRepository;
+  @Mock
+  private InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   @Mock
   private RuleProcessor ruleProcessor;
   @Mock
@@ -211,9 +215,8 @@ class InstancesExportStrategyTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var record = MarcRecordEntity.builder().externalId(instanceId).build();
-    var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576', 'hrid' : 'instanceHrid'}";
-    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
@@ -221,13 +224,13 @@ class InstancesExportStrategyTest {
     var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var variableField = new DataFieldImpl("tag", 'a', 'b');
 
-    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
-    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
     when(ruleProcessor.processFields(any(), any(), any(), anyList(), any())).thenReturn(List.of(variableField));
 
-    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(record), mappingProfile);
+    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile);
     assertNotNull(marcFieldsByExternalId);
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
