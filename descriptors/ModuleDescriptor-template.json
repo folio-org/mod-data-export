@@ -388,6 +388,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/configuration",
+          "permissionsRequired": [
+            "data-export.configuration.post"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -549,6 +560,11 @@
       "description": "Entry point to start clean up process of file definitions and related files"
     },
     {
+      "permissionName": "data-export.configuration.post",
+      "displayName": "Data Export - add or update data export configuration",
+      "description": "Entry point to add or update configuration using key/value pair"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -574,7 +590,8 @@
         "data-export.expire-jobs.post",
         "data-export.logs.collection.get",
         "data-export.clean-up-files.post",
-        "data-export.quick.export.post"
+        "data-export.quick.export.post",
+        "data-export.configuration.post"
       ],
       "visible": false
     }

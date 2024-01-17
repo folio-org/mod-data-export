@@ -8,7 +8,8 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.service.file.upload.FileUploadService;
+import org.folio.dataexp.service.file.upload.FilesUploadService;
+import org.folio.dataexp.service.validators.FileDefinitionValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,7 @@ class FileDefinitionsServiceTest {
   @Mock
   private FileDefinitionValidator fileDefinitionValidator;
   @Mock
-  private FileUploadService fileUploadService;
+  private FilesUploadService filesUploadService;
   @Captor
   private ArgumentCaptor<JobExecutionEntity> jobExecutionEntityCaptor;
   @InjectMocks
@@ -90,7 +91,7 @@ class FileDefinitionsServiceTest {
     var resource = new PathResource("src/test/resources/upload.csv");
 
     fileDefinitionsService.uploadFile(fileDefinitionId, resource);
-    verify(fileUploadService).uploadFile(fileDefinitionId, resource);
+    verify(filesUploadService).uploadFile(fileDefinitionId, resource);
   }
 
   @Test
@@ -99,7 +100,7 @@ class FileDefinitionsServiceTest {
     var fileDefinitionId = UUID.randomUUID();
     var resource = new PathResource("src/test/resources/upload.csv");
 
-    when(fileUploadService.uploadFile(fileDefinitionId, resource)).thenThrow(new RuntimeException("error"));
+    when(filesUploadService.uploadFile(fileDefinitionId, resource)).thenThrow(new RuntimeException("error"));
 
     assertThrows(UploadFileException.class, () -> fileDefinitionsService.uploadFile(fileDefinitionId, resource));
   }

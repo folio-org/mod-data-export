@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FileUploadServiceTest {
+class FilesUploadServiceTest {
 
   private static final String UPLOADED_FILE_PATH = "src/test/resources/upload.csv";
 
@@ -33,7 +33,7 @@ class FileUploadServiceTest {
   private FolioS3Client s3Client;
 
   @InjectMocks
-  private FileUploadServiceImpl fileUploadService;
+  private FilesUploadServiceImpl fileUploadService;
 
   @Test
   @SneakyThrows

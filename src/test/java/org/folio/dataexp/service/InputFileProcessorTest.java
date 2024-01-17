@@ -6,6 +6,7 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,6 @@ import org.springframework.core.io.PathResource;
 
 import java.util.UUID;
 
-import static org.folio.dataexp.service.file.upload.FileUploadServiceImpl.PATTERN_TO_SAVE_FILE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class InputFileProcessorTest extends BaseDataExportInitializer {
@@ -42,7 +42,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -66,7 +66,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinition.getId(), fileDefinition.getFileName());
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {

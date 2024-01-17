@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Configuration key/value pairs",
+  "type": "object",
+  "properties": {
+    "key": {
+      "description": "Unique name of config data",
+      "type": "string"
+    },
+    "value": {
+      "description": "Value of config data",
+      "type": "string"
+    }
+  }
+}

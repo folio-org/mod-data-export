@@ -17,12 +17,14 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToUploadedFiles;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class FileUploadServiceImpl implements FileUploadService{
+public class FilesUploadServiceImpl implements FilesUploadService {
 
-  public static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
+
   private static final String ERROR_MESSAGE = "File already uploaded for file definition with id : ";
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
@@ -32,7 +34,8 @@ public class FileUploadServiceImpl implements FileUploadService{
   public FileDefinition uploadFile(UUID fileDefinitionId, Resource resource) throws IOException {
     log.info("Upload file for file definition {}", fileDefinitionId);
     var fileDefinitionEntity = startUploading(fileDefinitionId);
-    var path = String.format(PATTERN_TO_SAVE_FILE, fileDefinitionId.toString(), fileDefinitionEntity.getFileDefinition().getFileName());
+    var fileName = fileDefinitionEntity.getFileDefinition().getFileName();
+    var path = getPathToUploadedFiles(fileDefinitionId, fileName);
     try (var inputStream = resource != null ? resource.getInputStream() : InputStream.nullInputStream()) {
       s3Client.write(path, inputStream);
     }

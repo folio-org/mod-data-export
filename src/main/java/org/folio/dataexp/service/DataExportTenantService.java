@@ -3,6 +3,7 @@ package org.folio.dataexp.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.folio.dataexp.domain.dto.Config;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
@@ -35,14 +36,17 @@ public class DataExportTenantService extends TenantService {
 
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
+  private ConfigurationService configurationService;
 
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                                  JobProfileEntityRepository jobProfileEntityRepository,
-                                 MappingProfileEntityRepository mappingProfileEntityRepository) {
+                                 MappingProfileEntityRepository mappingProfileEntityRepository,
+                                 ConfigurationService configurationService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.jobProfileEntityRepository = jobProfileEntityRepository;
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
+    this.configurationService = configurationService;
   }
 
   @Override
@@ -50,6 +54,7 @@ public class DataExportTenantService extends TenantService {
     log.info("Start to load reference data");
     loadMappingProfiles();
     loadJobProfiles();
+    loadConfiguration();
   }
 
   private void loadMappingProfiles() {
@@ -91,5 +96,12 @@ public class DataExportTenantService extends TenantService {
     } catch (Exception e) {
       log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(jobProfilePath), e.getMessage());
     }
+  }
+
+  private void loadConfiguration() {
+    log.info("Loading default slice size value...");
+    var saved = configurationService.upsertConfiguration(
+      new Config().key(SlicerProcessor.SLICE_SIZE_KEY).value(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE)));
+    log.info("Loaded default slice size value: {}", saved.getValue());
   }
 }
