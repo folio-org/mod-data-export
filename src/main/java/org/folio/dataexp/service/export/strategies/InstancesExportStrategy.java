@@ -95,7 +95,16 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var generatedMarcResult = new GeneratedMarcResult();
 
     var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
-    var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, defaultMappingProfile);
+    var copyDefaultMappingProfile = new MappingProfile();
+    copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
+    copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
+    copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
+    copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
+    copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
+    copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
+
+    var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
+
     var rules = ruleFactory.getRules(updatedMappingProfile);
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile);
     var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
