@@ -99,8 +99,12 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
     copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
     copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
-    copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
-    copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
+    if (defaultMappingProfile.getRecordTypes() != null) {
+      copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
+    }
+    if (defaultMappingProfile.getTransformations() != null) {
+      copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
+    }
     copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
 
     var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
