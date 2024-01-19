@@ -93,26 +93,26 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   @Override
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile) {
     var generatedMarcResult = new GeneratedMarcResult();
-
-    var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
-    var copyDefaultMappingProfile = new MappingProfile();
-    copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
-    copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
-    copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
-    if (defaultMappingProfile.getRecordTypes() != null) {
+    List<Rule> rules;
+    if (mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+      var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
+      var copyDefaultMappingProfile = new MappingProfile();
+      copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
+      copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
+      copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
       copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
+      if (defaultMappingProfile.getTransformations() != null) {
+        copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
+      }
+      copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
+      var mappingProfileWithHoldingsAndItems = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
+      rules = ruleFactory.getRules(mappingProfileWithHoldingsAndItems);
+    } else {
+      rules = ruleFactory.getRules(mappingProfile);
     }
-    if (defaultMappingProfile.getTransformations() != null) {
-      copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
-    }
-    copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
-
-    var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
-
-    var rules = ruleFactory.getRules(updatedMappingProfile);
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
-
+    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), referenceDataWrapper)).toList();
     generatedMarcResult.setMarcRecords(marcRecords);
     return generatedMarcResult;
   }
@@ -132,23 +132,23 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   @Override
   public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
     var marcFieldsByExternalId = new HashMap<UUID, MarcFields>();
-    if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
+    if (!isNeedToAddAdditionalMarcFields(mappingProfile)) {
       return marcFieldsByExternalId;
     }
     var externalIds = marcRecords.stream()
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
+    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
       addHoldingsAndItems(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
-      var marcFields = mapFields(holdingsAndItems, mappingProfile);
+      var marcFields = mapFields(holdingsAndItems, mappingProfile, referenceData);
       marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
     }
     return marcFieldsByExternalId;
   }
 
-  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) {
-    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
+  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile, ReferenceDataWrapper referenceData) {
     var rules = ruleFactory.getRules(mappingProfile);
     var finalRules = ruleHandler.preHandle(marcRecord, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(marcRecord.toJSONString());
@@ -235,11 +235,10 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     jsonToUpdateWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
       log.warn("mapToSrs:: exception: {} for instance {}", translationException.getCause().getMessage(), instanceJson.getAsString(ID_KEY));
@@ -264,5 +263,10 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private boolean isNeedUpdateWithHoldingsOrItems(MappingProfile mappingProfile) {
     var recordTypes = mappingProfile.getRecordTypes();
     return recordTypes.contains(RecordTypes.HOLDINGS) || recordTypes.contains(RecordTypes.ITEM);
+  }
+
+  private boolean isNeedToAddAdditionalMarcFields(MappingProfile mappingProfile) {
+    var recordTypes = mappingProfile.getRecordTypes();
+    return recordTypes.contains(RecordTypes.SRS) && isNeedUpdateWithHoldingsOrItems(mappingProfile);
   }
 }

@@ -143,7 +143,7 @@ class InstancesExportStrategyTest {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setTransformations(List.of(transformation));
-    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM, RecordTypes.HOLDINGS));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
 
     var defaultMappingProfile =  new MappingProfile();
     defaultMappingProfile.setDefault(true);
@@ -213,7 +213,7 @@ class InstancesExportStrategyTest {
   @Test
   void getAdditionalMarcFieldsByExternalIdTest() {
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.HOLDINGS, RecordTypes.ITEM));
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
