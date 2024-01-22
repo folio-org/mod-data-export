@@ -51,7 +51,7 @@ paths:
               $ref: 'examples/configuration/config.json'
       responses:
         '201':
-          description: Data export started
+          description: Configuration added/updated
           content:
             application/json:
               schema:
@@ -737,6 +737,37 @@ paths:
           content:
             text/plain:
               example: "Mapping profile not found"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
+  /export-all:
+    post:
+      description: Export all records of the specific type
+      operationId: postExportAll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exportRequest'
+            example:
+              $ref: 'examples/exportRequest.json'
+      responses:
+        '204':
+          description: Data export all started
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid request parameters"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
         '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:

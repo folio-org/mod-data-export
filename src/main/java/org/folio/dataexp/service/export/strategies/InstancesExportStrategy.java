@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.AllArgsConstructor;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
@@ -16,7 +17,8 @@ public class InstancesExportStrategy implements ExportStrategy {
   private final FolioS3Client s3Client;
 
   @Override
-  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
+  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest,
+      boolean lastExport) {
     var marc = "marc";
     try (var remoteStorageWriter = new RemoteStorageWriter(exportFilesEntity.getFileLocation(),  8192, s3Client)) {
       remoteStorageWriter.write(marc);

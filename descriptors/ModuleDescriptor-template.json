@@ -399,6 +399,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-all",
+          "permissionsRequired": [
+            "data-export.export.all"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -565,6 +576,11 @@
       "description": "Entry point to add or update configuration using key/value pair"
     },
     {
+      "permissionName": "data-export.export.all",
+      "displayName": "Data Export - export all records",
+      "description": "Entry point to export all records of the specific type"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -591,7 +607,8 @@
         "data-export.logs.collection.get",
         "data-export.clean-up-files.post",
         "data-export.quick.export.post",
-        "data-export.configuration.post"
+        "data-export.configuration.post",
+        "data-export.export.all"
       ],
       "visible": false
     }

@@ -12,7 +12,8 @@
     "jobProfileId": {
       "description": "Related Job profile id",
       "type": "string",
-      "format": "uuid"
+      "format": "uuid",
+      "default": "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a"
     },
     "recordType": {
       "description": "Defines a type of records to search by criteria or UUIDs",
@@ -38,11 +39,24 @@
       "description": "Meta information ",
       "type": "object",
       "$ref": "metadata.json"
+    },
+    "all": {
+      "description": "True if all IDs of idType need to be exported, otherwise false",
+      "type": "boolean",
+      "default": false
+    },
+    "deletedRecords": {
+      "description": "True if need to include deleted records, otherwise false",
+      "type": "boolean",
+      "default": true
+    },
+    "suppressedFromDiscovery": {
+      "description": "True if need to include suppressed from discovery records, otherwise false",
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [
-    "fileDefinitionId",
-    "jobProfileId",
     "idType"
   ]
 }

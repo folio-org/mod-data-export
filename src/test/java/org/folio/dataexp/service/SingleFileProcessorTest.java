@@ -51,9 +51,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE, new CommonExportFails());
+    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportFails());
 
-    verify(exportExecutor).export(eq(exportEntity), eq(ExportRequest.IdTypeEnum.INSTANCE), isA(CommonExportFails.class));
+    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportFails.class), eq(true));
   }
 
   @Test
@@ -69,9 +69,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, ExportRequest.IdTypeEnum.INSTANCE, commonExportFails);
+    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), commonExportFails);
 
-    verify(exportExecutor, times(0)).export(any(), any(), any());
+    verify(exportExecutor, times(0)).export(any(), any(), any(), eq(false));
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
     assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
   }

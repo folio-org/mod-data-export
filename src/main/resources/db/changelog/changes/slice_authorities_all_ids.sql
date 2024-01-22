@@ -1,11 +1,11 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
-CREATE OR REPLACE PROCEDURE slice_instances_ids(jobExecutionId text, fileLocation text, sliceSize int)
+CREATE OR REPLACE PROCEDURE slice_authorities_all_ids(jobExecutionId text, fileLocation text, sliceSize int)
 LANGUAGE plpgsql
 AS $$
 BEGIN
 
- WITH RankedRows as (select instance_id id,(ROW_NUMBER() OVER (ORDER BY instance_id)) - 1 row_num
-    from job_executions_export_ids where job_execution_id = jobExecutionId::uuid order by id),
+ WITH RankedRows as (select rec.id id,(ROW_NUMBER() OVER (ORDER BY rec.id)) - 1 row_num
+    from ${myuniversity}_mod_entities_links.authority rec order by id),
  IndexedRows as (select id, (row_num / sliceSize) group_index, (row_num % sliceSize) local_index from RankedRows),
  GroupedRows as (select id,
 						group_index,

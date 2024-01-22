@@ -61,7 +61,7 @@ class ExportExecutorTest extends BaseDataExportInitializer {
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+    exportExecutor.export(exportEntity, new ExportRequest(), commonFails, false);
 
     long size = s3Client.getSize(fileLocation);
     assertTrue(size > 0);
@@ -93,7 +93,7 @@ class ExportExecutorTest extends BaseDataExportInitializer {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(3l);
-        exportExecutor.export(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+        exportExecutor.export(exportEntity, new ExportRequest(), commonFails, false);
 
     long size = s3Client.getSize(fileLocation);
     assertTrue(size > 0);

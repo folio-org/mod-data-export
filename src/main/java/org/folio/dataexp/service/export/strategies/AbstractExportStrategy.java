@@ -6,15 +6,20 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ErrorLog;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
+import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
@@ -22,7 +27,10 @@ import org.folio.s3.client.RemoteStorageWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +55,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
+  private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  private HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository;
+  private MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -93,20 +104,36 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.errorLogService = errorLogService;
   }
 
+  @Autowired
+  private void setHoldingsRecordEntityRepository(HoldingsRecordEntityRepository holdingsRecordEntityRepository) {
+    this.holdingsRecordEntityRepository = holdingsRecordEntityRepository;
+  }
+
+  @Autowired
+  private void setHoldingsRecordEntityDeletedRepository(HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository) {
+    this.holdingsRecordEntityDeletedRepository = holdingsRecordEntityDeletedRepository;
+  }
+
+  @Autowired
+  private void setMarcAuthorityRecordAllRepository(MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository) {
+    this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
+  }
+
   @Override
-  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
+  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest,
+      boolean lastExport) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var remoteStorageWriter = createRemoteStorageWrite(exportFilesEntity);
-    var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
-      exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
-    var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
-    while (slice.hasNext()) {
-      slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
-        exportFilesEntity.getFromId(), exportFilesEntity.getToId(), slice.nextPageable());
-      exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
+    if (exportRequest.getAll()) {
+      if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
+        processSlicesHoldingsAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
+      } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
+        processSlicesAuthoritiesAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
+      }
+      // TODO instances
+    } else {
+      processSlices(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
     }
     try {
       remoteStorageWriter.close();
@@ -125,9 +152,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return exportStatistic;
   }
 
-  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile);
+  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest);
 
-  abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
+  abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                                boolean lastSlice, boolean lastExport, UUID jobExecutionId, ExportStrategyStatistic exportStatistic);
 
   abstract Optional<String> getIdentifierMessage(UUID id);
 
@@ -145,9 +173,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return Optional.empty();
   }
 
-  private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter,
-                                 ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, UUID jobExecutionId) {
-    var marcRecords = getMarcRecords(externalIds, mappingProfile);
+  private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
+    var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest);
+    log.info("marcRecords size: {}", marcRecords.size());
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     var duplicatedSrsMessage = new HashSet<String>();
     for (var marcRecordEntity : marcRecords) {
@@ -170,7 +199,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     }
     marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
-    var result = getGeneratedMarc(externalIds, mappingProfile);
+    var result = getGeneratedMarc(externalIds, mappingProfile, exportRequest, lastSlice, lastExport, jobExecutionId, exportStatistic);
+    log.info("Generated marc size: {}", result.getMarcRecords().size());
     result.getMarcRecords().forEach(marc -> {
       remoteStorageWriter.write(marc);
       exportStatistic.incrementExported();
@@ -202,5 +232,77 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobProfile = jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId());
     return mappingProfileEntityRepository.getReferenceById(jobProfile.getMappingProfileId()).getMappingProfile();
+  }
+
+  private void processSlices(JobExecutionExportFilesEntity exportFilesEntity, RemoteStorageWriter remoteStorageWriter,
+      ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
+    var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
+        exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
+    log.info("Slice size: {}", slice.getSize());
+    var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
+    log.info("Size of exportIds: {}", exportIds.size());
+    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), exportRequest,
+        slice.isLast(), lastExport);
+    while (slice.hasNext()) {
+      slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
+          exportFilesEntity.getFromId(), exportFilesEntity.getToId(), slice.nextPageable());
+      exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
+      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, slice.isLast(), lastExport);
+    }
+  }
+
+  private void processSlicesHoldingsAll(JobExecutionExportFilesEntity exportFilesEntity, RemoteStorageWriter remoteStorageWriter,
+      ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
+    var slice = chooseSliceHoldings(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    log.info("Slice size: {}", slice.getSize());
+    var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
+    log.info("Size of exportIds: {}", exportIds.size());
+    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, slice.isLast(), lastExport);
+    while (slice.hasNext()) {
+      slice = chooseSliceHoldings(exportFilesEntity, exportRequest, slice.nextPageable());
+      exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
+      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, slice.isLast(), lastExport);
+    }
+  }
+
+  private void processSlicesAuthoritiesAll(JobExecutionExportFilesEntity exportFilesEntity, RemoteStorageWriter remoteStorageWriter,
+      ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
+    var slice = chooseSliceAuthorities(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    var exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, slice.isLast(), lastExport);
+    while (slice.hasNext()) {
+      slice = chooseSliceAuthorities(exportFilesEntity, exportRequest, slice.nextPageable());
+      exportIds = slice.getContent().stream().map(MarcRecordEntity::getId).collect(Collectors.toSet());
+      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, slice.isLast(), lastExport);
+    }
+  }
+
+  private Slice<HoldingsRecordEntity> chooseSliceHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (exportRequest.getSuppressedFromDiscovery()) {
+      return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(), pageble);
+    }
+    return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), pageble);
+  }
+
+  private Slice<MarcRecordEntity> chooseSliceAuthorities(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (exportRequest.getSuppressedFromDiscovery()) {
+      if (exportRequest.getDeletedRecords()) {
+        return marcAuthorityRecordAllRepository.findAllWithDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
+      }
+      return marcAuthorityRecordAllRepository.findAllWithoutDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
+    }
+    if (exportRequest.getDeletedRecords()) {
+      return marcAuthorityRecordAllRepository.findAllWithDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(), pageble);
+    }
+    return marcAuthorityRecordAllRepository.findAllWithoutDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), pageble);
   }
 }

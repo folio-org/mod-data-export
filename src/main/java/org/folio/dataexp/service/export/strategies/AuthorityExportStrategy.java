@@ -1,8 +1,11 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
@@ -27,10 +30,14 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
   private final FolioExecutionContext context;
 
+  @PersistenceContext
+  private EntityManager entityManager;
+
   @Override
-  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
+  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       var marcAuthorities = marcAuthorityRecordRepository.findByExternalIdIn(context.getTenantId(), externalIds);
+      entityManager.clear();
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       log.info("Number of authority records found from local tenant: {}, not found: {}", foundIds.size(), externalIds.size());
@@ -39,6 +46,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var authoritiesFromCentralTenant = marcAuthorityRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           log.info("Number of authority records found from central tenant: {}", authoritiesFromCentralTenant.size());
+          entityManager.clear();
           marcAuthorities.addAll(authoritiesFromCentralTenant);
           log.info("Total number of authority records found: {}", marcAuthorities.size());
         } else {
@@ -53,7 +61,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
+  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
+      boolean lastSlice, boolean lastExport, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
     ids.forEach(id -> {
       result.addIdToFailed(id);

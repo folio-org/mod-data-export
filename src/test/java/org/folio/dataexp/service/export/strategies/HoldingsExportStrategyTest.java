@@ -1,7 +1,9 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
@@ -37,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +61,8 @@ class HoldingsExportStrategyTest {
   private RuleFactory ruleFactory;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private EntityManager entityManager;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -68,8 +73,8 @@ class HoldingsExportStrategyTest {
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
-    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest());
+    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(anySet(), isA(String.class), isA(String.class), isA(Character.class));
   }
 
   @Test
@@ -77,8 +82,8 @@ class HoldingsExportStrategyTest {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile);
-    verify(marcRecordEntityRepository, times(0)).findByExternalIdInAndRecordTypeIs(anySet(), isA(String.class));
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest());
+    verify(marcRecordEntityRepository, times(0)).findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(anySet(), isA(String.class), isA(String.class), isA(Character.class));
   }
 
   @Test
@@ -100,7 +105,8 @@ class HoldingsExportStrategyTest {
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
-    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
+    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), new ExportRequest(), false,
+      false, UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
@@ -125,8 +131,9 @@ class HoldingsExportStrategyTest {
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
+    doNothing().when(entityManager).clear();
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile);
+    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, new ExportRequest(), false, false);
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 

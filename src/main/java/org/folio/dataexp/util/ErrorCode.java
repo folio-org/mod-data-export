@@ -53,7 +53,8 @@ public enum ErrorCode {
   ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED(ERROR_MESSAGE_PLACEHOLDER_CODE, "For exporting authority records only the default authority job profile is supported"),
   ERROR_JOB_IS_EXPIRED(ERROR_MESSAGE_PLACEHOLDER_CODE, "Job was expired: no updates for more than 1 hour"),
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
-  ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s");
+  ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s"),
+  ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC("error.recordIsTooLong", "Record is too long to be a valid MARC binary record, it's length would be %d which is more than 99999 bytes");
 
 
   private final String code;

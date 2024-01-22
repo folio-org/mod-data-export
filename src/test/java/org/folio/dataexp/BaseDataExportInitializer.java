@@ -106,6 +106,7 @@ public class BaseDataExportInitializer {
     System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, TENANT);
     var dataSource =  new SingleConnectionDataSource(postgresDBContainer.getJdbcUrl(),postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), true );
     var jdbcTemplate = new JdbcTemplate(dataSource);
+    runSqlScript("/init_public_schema.sql", jdbcTemplate);
     runSqlScript("/init_mod_inventory_storage.sql", jdbcTemplate);
     runSqlScript("/init_mod_source_record_storage.sql", jdbcTemplate);
     runSqlScript("/init_sql_functions.sql", jdbcTemplate);

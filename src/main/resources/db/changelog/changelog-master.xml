@@ -7,4 +7,6 @@
     <include file="changes/initial_schema.xml" relativeToChangelogFile="true"/>
     <include file="changes/init_procedures.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_config.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_export_all.xml" relativeToChangelogFile="true"/>
+    <include file="changes/slice_records_all_ids.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

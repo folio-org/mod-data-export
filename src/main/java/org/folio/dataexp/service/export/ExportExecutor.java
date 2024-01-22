@@ -33,17 +33,18 @@ public class ExportExecutor {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @Async("singleExportFileTaskExecutor")
-  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idTypeEnum, CommonExportFails commonExportFails) {
-    export(exportFilesEntity, idTypeEnum, commonExportFails);
+  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails,
+      boolean lastExport) {
+    export(exportFilesEntity, exportRequest, commonExportFails, lastExport);
   }
 
-  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
+  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails, boolean lastExport) {
     log.info("export:: Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
     exportFilesEntity = jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
-    var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
+    var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest.getIdType());
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, exportRequest, lastExport);
     commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
     updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails);
     log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());

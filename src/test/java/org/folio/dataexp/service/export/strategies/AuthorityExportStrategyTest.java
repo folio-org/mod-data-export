@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies;
 
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.ConsortiaClient;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
@@ -39,7 +40,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       localAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile);
+      var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile, new ExportRequest());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -55,7 +56,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -72,7 +73,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest());
 
       assertThat(marcRecords).hasSize(2);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -90,7 +91,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(notFoundUUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest());
 
       assertThat(marcRecords).isEmpty();
     }
@@ -107,7 +108,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile);
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -117,7 +118,8 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   @Test
   void shouldReturnErrorResultForGetGeneratedMarc_IfMarcsDoNotExist() {
     var notExistUUID = UUID.randomUUID();
-    var marcRecords = authorityExportStrategy.getGeneratedMarc(Set.of(notExistUUID), new MappingProfile());
+    var marcRecords = authorityExportStrategy.getGeneratedMarc(Set.of(notExistUUID), new MappingProfile(), new ExportRequest(),
+      false, false, UUID.randomUUID(), new ExportStrategyStatistic());
     assertEquals(1, marcRecords.getNotExistIds().size());
     assertEquals(1, marcRecords.getFailedIds().size());
   }

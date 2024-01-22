@@ -10,5 +10,8 @@
     "updatedDate": "2019-07-27T13:28:54Z",
     "updatedByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
     "updatedByUsername": ""
-  }
+  },
+  "all": false,
+  "deletedRecords": true,
+  "suppressedFromDiscovery": false
 }
