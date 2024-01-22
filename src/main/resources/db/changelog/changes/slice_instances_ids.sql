@@ -4,8 +4,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 
- WITH RankedRows as (select instance_id id,(ROW_NUMBER() OVER (ORDER BY instance_id)) - 1 row_num
-    from job_executions_export_ids where job_execution_id = jobExecutionId::uuid order by id),
+ WITH RankedRows as (select instance_id id,(ROW_NUMBER() OVER (ORDER BY instance_id)) - 1 row_num from job_executions_export_ids where job_execution_id = jobExecutionId::uuid order by id),
  IndexedRows as (select id, (row_num / sliceSize) group_index, (row_num % sliceSize) local_index from RankedRows),
  GroupedRows as (select id,
 						group_index,
@@ -21,10 +20,8 @@ BEGIN
             (ARRAY_AGG(id) FILTER (WHERE local_index = max_local_index))[1] AS max_id
           from GroupedRows group by group_index)
 
-insert into job_execution_export_files(id, job_execution_id, file_location, from_id, to_id, status)
-    select gen_random_uuid() as id,
-jobExecutionId::uuid as job_execution_id,format(fileLocation, min_id, max_id)
-    as file_location, min_id as from_id, max_id as to_id, 'SCHEDULED' as status from SlicedInstancesIds;
+insert into job_execution_export_files(id, job_execution_id, file_location, from_id, to_id, status) select gen_random_uuid() as id,
+jobExecutionId::uuid as job_execution_id,format(fileLocation, min_id, max_id) as file_location, min_id as from_id, max_id as to_id, 'SCHEDULED' as status from SlicedInstancesIds;
 
 END;
 $$;

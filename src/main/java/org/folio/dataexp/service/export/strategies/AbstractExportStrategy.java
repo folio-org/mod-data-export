@@ -10,11 +10,13 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
+import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
@@ -30,10 +32,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 @Log4j2
 public abstract class AbstractExportStrategy implements ExportStrategy {
@@ -58,6 +61,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository;
   private MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
+  private InstanceEntityRepository instanceEntityRepository;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -119,6 +123,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
   }
 
+  @Autowired
+  private void setInstanceEntityRepository(InstanceEntityRepository instanceEntityRepository) {
+    this.instanceEntityRepository = instanceEntityRepository;
+  }
+
   @Override
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest,
       boolean lastExport) {
@@ -130,8 +139,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         processSlicesHoldingsAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
       } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
         processSlicesAuthoritiesAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
+      } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.INSTANCE) {
+        processSlicesInstancesAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
+      } else {
+        throw new UnsupportedOperationException(exportRequest.getIdType() + " id type is not supported.");
       }
-      // TODO instances
     } else {
       processSlices(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
     }
@@ -159,6 +171,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Optional<String> getIdentifierMessage(UUID id);
 
+  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile);
+
   protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
   }
@@ -177,12 +191,18 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest);
     log.info("marcRecords size: {}", marcRecords.size());
+    var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     var duplicatedSrsMessage = new HashSet<String>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;
       try {
-        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent());
+        var marcHoldingsItemsFields = additionalFieldsPerId.getOrDefault(marcRecordEntity.getExternalId(), new MarcFields());
+        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
+        if (marcHoldingsItemsFields.getErrorMessages().size() > 0) {
+          errorLogService
+            .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
+        }
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
         exportStatistic.incrementFailed();
@@ -276,7 +296,21 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
       slice = chooseSliceAuthorities(exportFilesEntity, exportRequest, slice.nextPageable());
-      exportIds = slice.getContent().stream().map(MarcRecordEntity::getId).collect(Collectors.toSet());
+      exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, slice.isLast(), lastExport);
+    }
+  }
+
+  private void processSlicesInstancesAll(JobExecutionExportFilesEntity exportFilesEntity, RemoteStorageWriter remoteStorageWriter,
+      ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
+    var slice = chooseSliceInstances(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
+    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, slice.isLast(), lastExport);
+    while (slice.hasNext()) {
+      slice = chooseSliceInstances(exportFilesEntity, exportRequest, slice.nextPageable());
+      exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
       createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, slice.isLast(), lastExport);
     }
@@ -303,6 +337,15 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           exportFilesEntity.getToId(), pageble);
     }
     return marcAuthorityRecordAllRepository.findAllWithoutDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), pageble);
+  }
+
+  private Slice<InstanceEntity> chooseSliceInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (exportRequest.getSuppressedFromDiscovery()) {
+      return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(), pageble);
+    }
+    return instanceEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), pageble);
   }
 }

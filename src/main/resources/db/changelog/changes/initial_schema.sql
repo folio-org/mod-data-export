@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS job_execution_export_files (
 CREATE OR REPLACE VIEW v_instance
     AS SELECT id, jsonb FROM ${myuniversity}_mod_inventory_storage.instance;
 
+CREATE OR REPLACE VIEW v_instance_hrid
+    AS SELECT id, jsonb->>'hrid' as hrid FROM ${myuniversity}_mod_inventory_storage.instance;
+
 CREATE OR REPLACE VIEW v_holdings_record
     AS SELECT id, jsonb, instanceid as instance_id FROM ${myuniversity}_mod_inventory_storage.holdings_record;
 

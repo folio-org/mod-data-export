@@ -9,6 +9,12 @@ CREATE TABLE IF NOT EXISTS diku_mod_inventory_storage.audit_holdings_record
     jsonb jsonb NOT NULL,
     CONSTRAINT audit_holdings_record_pkey PRIMARY KEY (id)
 );
+CREATE TABLE IF NOT EXISTS diku_mod_inventory_storage.audit_instance
+(
+    id uuid NOT NULL,
+    jsonb jsonb NOT NULL,
+    CONSTRAINT audit_instance_pkey PRIMARY KEY (id)
+);
 
 INSERT INTO diku_mod_inventory_storage.instance (id, jsonb) VALUES ('011e1aea-222d-4d1d-957d-0abcdd0e9acd',
 '{
