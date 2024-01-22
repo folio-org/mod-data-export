@@ -55,7 +55,7 @@ public class ExportExecutor {
     var progress = jobExecution.getProgress();
     progress.setExported(progress.getExported() + exportStatistic.getExported());
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
-    progress.setDuplicatedSrs(progress.getDuplicatedSrs() + progress.getDuplicatedSrs());
+    progress.setDuplicatedSrs(progress.getDuplicatedSrs() + exportStatistic.getDuplicatedSrs());
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     long exportsCompleted = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED).count();
     long exportsFailed = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.FAILED).count();
