@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
@@ -54,8 +55,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
@@ -82,6 +82,8 @@ class InstancesExportStrategyTest {
   private ItemEntityRepository itemEntityRepository;
   @Mock
   private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock
+  private EntityManager entityManager;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -159,6 +161,7 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
+    doNothing().when(entityManager).clear();
     instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), true, true,
         UUID.randomUUID(), new ExportStrategyStatistic());
 
@@ -194,6 +197,7 @@ class InstancesExportStrategyTest {
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    doNothing().when(entityManager).clear();
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
         generatedMarcResult, mappingProfile, new ExportRequest(), true, true);
