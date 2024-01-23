@@ -68,6 +68,8 @@ public class BaseDataExportInitializer {
 
   protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNlcl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5MywidGVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "diku";
+  protected static final UUID DEFAULT_HOLDINGS_JOB_PROFILE = UUID.fromString("5e9835fc-0e51-44c8-8a47-f7b8fce35da7");
+  protected static final UUID DEFAULT_AUTHORITY_JOB_PROFILE = UUID.fromString("56944b1c-f3f9-475b-bed0-7387c33620ce");
   public static String VIEWS_VARIABLE_FOR_SQL_SCRIPT = "myuniversity";
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
   public static final String S3_ACCESS_KEY = "minio-access-key";

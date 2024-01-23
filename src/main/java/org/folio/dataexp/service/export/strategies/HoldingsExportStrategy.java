@@ -71,7 +71,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      if (exportRequest.getAll()) {
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
         if (exportRequest.getDeletedRecords()) {
           return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, HOLDING_MARC_TYPE,
               exportRequest.getSuppressedFromDiscovery());
@@ -121,7 +121,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (exportRequest.getAll() && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
+    if (Boolean.TRUE.equals(exportRequest.getAll()) && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
       List<HoldingsRecordDeletedEntity> holdingsDeleted;
       if (exportRequest.getSuppressedFromDiscovery()) {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
@@ -221,6 +221,6 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
             .withInstanceId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
                 .getAsString("record")).get()
                 .getAsString("instanceId"))))
-        .collect(Collectors.toList());
+        .toList();
   }
 }

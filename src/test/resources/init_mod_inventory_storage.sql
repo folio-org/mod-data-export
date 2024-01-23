@@ -35,3 +35,25 @@ INSERT INTO diku_mod_inventory_storage.instance (id, jsonb) VALUES ('011e1aea-11
  }
 '
 );
+
+INSERT INTO diku_mod_inventory_storage.holdings_record (id, jsonb) VALUES ('0c45bb50-7c9b-48b0-86eb-178a494e25fe',
+'{
+   "id": "0c45bb50-7c9b-48b0-86eb-178a494e25fe",
+   "hrid": "hold000000000002",
+   "callNumber": "K1 .M44",
+   "copyNumber": "1",
+   "instanceId": "011e1aea-111d-4d1d-957d-0abcdd0e9acd"
+ }
+'
+);
+
+INSERT INTO diku_mod_inventory_storage.holdings_record (id, jsonb) VALUES ('1f45bb50-7c9b-48b0-86eb-178a494e25fe',
+'{
+   "id": "1f45bb50-7c9b-48b0-86eb-178a494e25fe",
+   "hrid": "hold000000000003",
+   "callNumber": "K1 .M44",
+   "copyNumber": "1",
+   "instanceId": "011e1aea-111d-4d1d-957d-0abcdd0e9acd"
+ }
+'
+);

@@ -55,7 +55,7 @@ public class SingleFileProcessor {
       executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
       log.info("Export from {} to {} has been executed.", export.getFromId(), export.getToId());
     }
-    if (exportRequest.getAll()) {
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
       updateStatisticsForExportAll(jobExecutionId);
     }
   }

@@ -59,7 +59,7 @@ public class SlicerProcessor {
   }
 
   private String selectProcedure(ExportRequest exportRequest) {
-    if (exportRequest.getAll()) {
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.INSTANCE) {
         return CALL_SLICE_INSTANCES_ALL_IDS_PROCEDURE;
       } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {

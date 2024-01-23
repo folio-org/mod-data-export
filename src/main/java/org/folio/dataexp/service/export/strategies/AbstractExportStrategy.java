@@ -59,7 +59,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
   private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  private HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository;
   private MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   private InstanceEntityRepository instanceEntityRepository;
 
@@ -114,11 +113,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setHoldingsRecordEntityDeletedRepository(HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository) {
-    this.holdingsRecordEntityDeletedRepository = holdingsRecordEntityDeletedRepository;
-  }
-
-  @Autowired
   private void setMarcAuthorityRecordAllRepository(MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository) {
     this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
   }
@@ -134,7 +128,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var remoteStorageWriter = createRemoteStorageWrite(exportFilesEntity);
-    if (exportRequest.getAll()) {
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
         processSlicesHoldingsAll(exportFilesEntity, remoteStorageWriter, exportStatistic, mappingProfile, exportRequest, lastExport);
       } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
@@ -152,6 +146,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
+      e.printStackTrace();
       log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.setExported(0);

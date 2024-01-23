@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
-import org.folio.dataexp.domain.entity.HoldingsRecordDeletedEntity;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceDeletedEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
@@ -26,6 +25,7 @@ import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
@@ -34,6 +34,7 @@ import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
+import org.marc4j.MarcException;
 import org.marc4j.marc.VariableField;
 import org.springframework.stereotype.Component;
 
@@ -56,6 +57,7 @@ import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 
 @Log4j2
 @Component
@@ -77,6 +79,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   private final InstanceEntityDeletedRepository instanceEntityDeletedRepository;
+  private final ErrorLogService errorLogService;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -84,7 +87,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      if (exportRequest.getAll()) {
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
         return getMarcRecordsForExportAll(externalIds, exportRequest);
       }
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, INSTANCE_MARC_TYPE);
@@ -136,7 +139,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var rules = ruleFactory.getRules(updatedMappingProfile);
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile, exportRequest,
         lastSlice, lastExport);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
+    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
 
     generatedMarcResult.setMarcRecords(marcRecords);
     return generatedMarcResult;
@@ -196,7 +199,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     entityManager.clear();
-    if (exportRequest.getAll() && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
+    if (Boolean.TRUE.equals(exportRequest.getAll()) && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
       List<InstanceDeletedEntity> instanceDeleted;
       if (exportRequest.getSuppressedFromDiscovery()) {
         instanceDeleted = instanceEntityDeletedRepository.findAll();
@@ -272,15 +275,22 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     jsonToUpdateWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    try {
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
       log.warn("mapToSrs:: exception: {} for instance {}", translationException.getCause().getMessage(), instanceJson.getAsString(ID_KEY));
     }));
+    } catch (MarcException e) {
+      errorLogService.saveWithAffectedRecord(jsonObject, ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
+      log.error(e.getMessage());
+      exportStatistic.incrementFailed();
+      return "";
+    }
   }
 
   private MappingProfile appendHoldingsAndItemTransformations(MappingProfile mappingProfile, MappingProfile defaultMappingProfile) {
@@ -310,6 +320,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
                 .getAsString("id")))
             .withJsonb(getAsJsonObject(hold.getJsonb()).get()
                 .getAsString("record")))
-        .collect(Collectors.toList());
+        .toList();
   }
 }
