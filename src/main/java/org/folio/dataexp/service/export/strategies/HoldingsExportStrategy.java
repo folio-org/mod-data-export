@@ -74,13 +74,15 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Optional<String> getIdentifierMessage(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
     if (holdings.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
-      return Optional.of("Holding with hrid : " + hrid);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Holding with hrid : " + hrid);
+      return Optional.of(exportIdentifiers);
     }
     return Optional.empty();
   }

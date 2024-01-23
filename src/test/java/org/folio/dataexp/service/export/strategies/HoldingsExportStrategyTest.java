@@ -88,10 +88,10 @@ class HoldingsExportStrategyTest {
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
 
-    var opt = holdingsExportStrategy.getIdentifierMessage(UUID.randomUUID());
+    var opt = holdingsExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Holding with hrid : 123", opt.get());
+    assertEquals("Holding with hrid : 123", opt.get().getIdentifierHridMessage());
   }
 
   @Test

@@ -65,7 +65,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  Optional<String> getIdentifierMessage(UUID id) {
+  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     return Optional.empty();
   }
 

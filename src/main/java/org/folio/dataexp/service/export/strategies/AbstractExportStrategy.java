@@ -5,7 +5,6 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -19,13 +18,12 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.s3.client.RemoteStorageWriter;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -132,7 +130,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
 
-  abstract Optional<String> getIdentifierMessage(UUID id);
+  abstract Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id);
 
   abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile);
 
@@ -155,7 +153,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var marcRecords = getMarcRecords(externalIds, mappingProfile);
     var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
     var externalIdsWithMarcRecord = new HashSet<UUID>();
-    var duplicatedSrsMessage = new HashSet<String>();
+    var duplicatedUuidWithIdentifiers = new LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;
       try {
@@ -173,12 +171,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       remoteStorageWriter.write(marc);
       if (externalIdsWithMarcRecord.contains(marcRecordEntity.getExternalId())) {
         exportStatistic.incrementDuplicatedSrs();
-        duplicatedSrsMessage.add(getDuplicatedSRSErrorMessage(marcRecordEntity.getExternalId(), marcRecords));
+        var exportIdentifiers = getIdentifiers(marcRecordEntity.getExternalId());
+        duplicatedUuidWithIdentifiers.put(marcRecordEntity.getExternalId(), exportIdentifiers);
       } else {
         externalIdsWithMarcRecord.add(marcRecordEntity.getExternalId());
       }
       exportStatistic.incrementExported();
     }
+    saveDuplicateErrors(duplicatedUuidWithIdentifiers, marcRecords, jobExecutionId);
     marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
     var result = getGeneratedMarc(externalIds, mappingProfile);
@@ -189,24 +189,29 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     );
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());
-    duplicatedSrsMessage.forEach(log::warn);
-    if (!duplicatedSrsMessage.isEmpty()) {
-      var errorLog = new ErrorLog();
-      errorLog.setId(UUID.randomUUID());
-      errorLog.createdDate(new Date());
-      errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join("; ", duplicatedSrsMessage);
-      errorLog.setErrorMessageValues(List.of(message));
-      errorLog.setErrorMessageCode(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode());
-      errorLogService.save(errorLog);
+  }
+
+  private void saveDuplicateErrors(LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>> duplicatedUuidWithIdentifiers, List<MarcRecordEntity> marcRecords, UUID jobExecutionId) {
+    var externalIdsAsKeys = duplicatedUuidWithIdentifiers.keySet();
+    for (var externalId : externalIdsAsKeys) {
+      var exportIdentifiersOpt = duplicatedUuidWithIdentifiers.get(externalId);
+      if (exportIdentifiersOpt.isPresent()) {
+        var exportIdentifiers = exportIdentifiersOpt.get();
+        var errorMessage = getDuplicatedSRSErrorMessage(externalId, marcRecords, exportIdentifiers);
+        log.warn(errorMessage);
+        if (exportIdentifiers.getAssociatedJsonObject() != null) {
+          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
+        } else {
+          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
+        }
+      }
     }
   }
 
-  private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords) {
-    var hridMessage = getIdentifierMessage(externalId);
+  private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords, ExportIdentifiersForDuplicateErrors exportIdentifiers) {
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
       .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
-    return hridMessage.map(hrid -> String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), hrid, marcRecordIds)).orElse(StringUtils.EMPTY);
+    return String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), exportIdentifiers.getIdentifierHridMessage(), marcRecordIds);
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

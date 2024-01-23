@@ -126,15 +126,20 @@ class InstancesExportStrategyTest {
 
   @Test
   void getIdentifierMessageTest() {
-    var instance = "{'hrid' : '123'}";
+    var instance = "{'id' : 'uuid', 'title' : 'title', 'hrid' : '123'}";
     var instanceRecordEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceRecordEntity));
 
-    var opt = instancesExportStrategy.getIdentifierMessage(UUID.randomUUID());
+    var opt = instancesExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with hrid : 123", opt.get());
+    assertEquals("Instance with hrid : 123", opt.get().getIdentifierHridMessage());
+
+    assertEquals("uuid", opt.get().getAssociatedJsonObject().getAsString("id"));
+    assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
+    assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
+
   }
 
   @Test

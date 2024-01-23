@@ -19,6 +19,7 @@ import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
@@ -49,6 +50,7 @@ import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 @Log4j2
 @Component
@@ -118,13 +120,22 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Optional<String> getIdentifierMessage(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
     if (instances.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
-      return Optional.of("Instance with hrid : " + hrid);
+      var title = jsonObject.get().getAsString(TITLE_KEY);
+      var uuid = jsonObject.get().getAsString(ID_KEY);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Instance with hrid : " + hrid);
+      var instanceAssociatedJsonObject = new JSONObject();
+      instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
+      instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);
+      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, title);
+      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+      return Optional.of(exportIdentifiers);
     }
     return Optional.empty();
   }
