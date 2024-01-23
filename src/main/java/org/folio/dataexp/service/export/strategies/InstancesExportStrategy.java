@@ -1,5 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
@@ -75,6 +77,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   private final InstanceEntityDeletedRepository instanceEntityDeletedRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
@@ -190,6 +195,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
+    entityManager.clear();
     if (exportRequest.getAll() && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
       List<InstanceDeletedEntity> instanceDeleted;
       if (exportRequest.getSuppressedFromDiscovery()) {
