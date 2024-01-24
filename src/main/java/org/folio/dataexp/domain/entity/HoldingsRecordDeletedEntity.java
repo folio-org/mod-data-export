@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "v_holdings_all_deleted")
-public class HoldingsRecordDeletedEntity { // TODO try to extend
+public class HoldingsRecordDeletedEntity {
 
   @Id
   private UUID id;
