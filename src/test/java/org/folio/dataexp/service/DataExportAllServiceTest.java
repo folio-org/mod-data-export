@@ -106,13 +106,14 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   @Test
   void exportAllInstancesNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportRequest = new ExportRequest().all(true);
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty()).isTrue();
+      assertThat(errors).isEmpty();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
@@ -123,6 +124,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   @Test
   void exportAllHoldingsNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportRequest = new ExportRequest().all(true).idType(ExportRequest.IdTypeEnum.HOLDING)
@@ -130,7 +132,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty()).isTrue();
+      assertThat(errors).isEmpty();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
@@ -141,6 +143,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   @Test
   void exportAllAuthorityNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportRequest = new ExportRequest().all(true).idType(ExportRequest.IdTypeEnum.AUTHORITY)
@@ -148,7 +151,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty()).isTrue();
+      assertThat(errors).isEmpty();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
