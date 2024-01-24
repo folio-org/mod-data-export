@@ -13,4 +13,5 @@ public class Constants {
   public static final String HRID_KEY = "hrid";
   public static final String HOLDINGS_KEY = "holdings";
   public static final String ITEMS_KEY = "items";
+  public static final String DELETED_AUDIT_RECORD = "record";
 }

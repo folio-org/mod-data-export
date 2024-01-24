@@ -108,7 +108,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   private List<MarcRecordEntity> getMarcRecordsForExportAll(Set<UUID> externalIds, ExportRequest exportRequest) {
-    if (exportRequest.getDeletedRecords()) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, INSTANCE_MARC_TYPE,
           exportRequest.getSuppressedFromDiscovery());
     }
@@ -126,9 +126,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
     copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
     copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
-    if (defaultMappingProfile.getRecordTypes() != null) {
-      copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
-    }
+    copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
     if (defaultMappingProfile.getTransformations() != null) {
       copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
     }
@@ -199,9 +197,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     entityManager.clear();
-    if (Boolean.TRUE.equals(exportRequest.getAll()) && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
+    if (Boolean.TRUE.equals(exportRequest.getAll()) && Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && lastSlice && lastExport) {
       List<InstanceDeletedEntity> instanceDeleted;
-      if (exportRequest.getSuppressedFromDiscovery()) {
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         instanceDeleted = instanceEntityDeletedRepository.findAll();
       } else {
         instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();

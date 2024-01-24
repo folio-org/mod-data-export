@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.folio.dataexp.service.export.Constants.DELETED_AUDIT_RECORD;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
@@ -72,7 +73,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
-        if (exportRequest.getDeletedRecords()) {
+        if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
           return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, HOLDING_MARC_TYPE,
               exportRequest.getSuppressedFromDiscovery());
         }
@@ -121,9 +122,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getAll()) && exportRequest.getDeletedRecords() && lastSlice && lastExport) {
+    if (Boolean.TRUE.equals(exportRequest.getAll()) && Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && lastSlice && lastExport) {
       List<HoldingsRecordDeletedEntity> holdingsDeleted;
-      if (exportRequest.getSuppressedFromDiscovery()) {
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
       } else {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
@@ -214,12 +215,12 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private List<HoldingsRecordEntity> holdingsDeletedToHoldingsEntities(List<HoldingsRecordDeletedEntity> holdingsDeleted) {
     return holdingsDeleted.stream()
         .map(hold -> new HoldingsRecordEntity().withId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString("record")).get()
+                .getAsString(DELETED_AUDIT_RECORD)).get()
                 .getAsString("id")))
             .withJsonb(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString("record"))
+                .getAsString(DELETED_AUDIT_RECORD))
             .withInstanceId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString("record")).get()
+                .getAsString(DELETED_AUDIT_RECORD)).get()
                 .getAsString("instanceId"))))
         .toList();
   }

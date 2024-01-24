@@ -112,7 +112,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty());
+      assertThat(errors.isEmpty()).isTrue();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
@@ -130,7 +130,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty());
+      assertThat(errors.isEmpty()).isTrue();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
@@ -148,7 +148,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       dataExportAllService.postDataExportAll(exportRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors.isEmpty());
+      assertThat(errors.isEmpty()).isTrue();
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());

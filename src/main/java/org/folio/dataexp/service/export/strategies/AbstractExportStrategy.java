@@ -311,7 +311,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private Slice<HoldingsRecordEntity> chooseSliceHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (exportRequest.getSuppressedFromDiscovery()) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
           exportFilesEntity.getToId(), pageble);
     }
@@ -320,13 +320,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private Slice<MarcRecordEntity> chooseSliceAuthorities(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (exportRequest.getSuppressedFromDiscovery()) {
-      if (exportRequest.getDeletedRecords()) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
         return marcAuthorityRecordAllRepository.findAllWithDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
       }
       return marcAuthorityRecordAllRepository.findAllWithoutDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
     }
-    if (exportRequest.getDeletedRecords()) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
       return marcAuthorityRecordAllRepository.findAllWithDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
           exportFilesEntity.getToId(), pageble);
     }
@@ -335,7 +335,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private Slice<InstanceEntity> chooseSliceInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (exportRequest.getSuppressedFromDiscovery()) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
           exportFilesEntity.getToId(), pageble);
     }
