@@ -38,7 +38,12 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   @Override
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      var marcAuthorities = marcAuthorityRecordRepository.findByExternalIdIn(context.getTenantId(), externalIds);
+      List<MarcRecordEntity> marcAuthorities;
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
+        marcAuthorities = marcAuthorityRecordRepository.findAllByExternalIdIn(context.getTenantId(), externalIds);
+      } else {
+        marcAuthorities = marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
+      }
       entityManager.clear();
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
@@ -46,7 +51,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
       if (!externalIds.isEmpty()) {
         var centralTenantId = consortiaService.getCentralTenantId();
         if (StringUtils.isNotEmpty(centralTenantId)) {
-          var authoritiesFromCentralTenant = marcAuthorityRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
+          var authoritiesFromCentralTenant = marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(centralTenantId, externalIds);
           log.info("Number of authority records found from central tenant: {}", authoritiesFromCentralTenant.size());
           entityManager.clear();
           marcAuthorities.addAll(authoritiesFromCentralTenant);
