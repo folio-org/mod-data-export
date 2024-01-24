@@ -231,7 +231,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void processSlicesAuthoritiesAll(JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
     var slice = chooseSliceAuthorities(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    log.info("Slice size: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    log.info("Size of exportIds: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
@@ -245,7 +247,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void processSlicesInstancesAll(JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
     var slice = chooseSliceInstances(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    log.info("Slice size: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
+    log.info("Size of exportIds: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
