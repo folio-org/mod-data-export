@@ -146,7 +146,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
-      e.printStackTrace();
       log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.setExported(0);
