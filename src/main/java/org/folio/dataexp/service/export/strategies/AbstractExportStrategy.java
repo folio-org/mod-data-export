@@ -185,8 +185,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     result.getMarcRecords().forEach(marc -> {
       if (StringUtils.isNotEmpty(marc)) {
         remoteStorageWriter.write(marc);
-        exportStatistic.incrementExported();
       }
+      exportStatistic.incrementExported();
     });
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());
