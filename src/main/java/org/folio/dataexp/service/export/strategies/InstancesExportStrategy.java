@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
+import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
@@ -15,7 +16,7 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.repository.MarcInstanceRecordRepository;
+import org.folio.dataexp.repository.CentralEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -60,7 +61,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private static final String INSTANCE_MARC_TYPE = "MARC_BIB";
 
   private final ConsortiaService consortiaService;
-  private final MarcInstanceRecordRepository marcInstanceRecordRepository;
+  private final CentralEntityRepository centralEntityRepository;
   private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
@@ -81,7 +82,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       if (!externalIds.isEmpty()) {
         var centralTenantId = consortiaService.getCentralTenantId();
         if (StringUtils.isNotEmpty(centralTenantId)) {
-          var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
+          var marcInstancesFromCentralTenant = centralEntityRepository.findMarcRecordsByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
         } else {
           log.info("Central tenant id does not exist");
@@ -179,7 +180,23 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile) {
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
-    var instances = instanceEntityRepository.findByIdIn(instancesIds);
+    var instances = new ArrayList<>(instanceEntityRepository.findByIdIn(instancesIds));
+    var foundIds = instances.stream().map(InstanceEntity::getId).collect(Collectors.toSet());
+    var notFoundInLocalTenant = new HashSet<>(instancesIds);
+    notFoundInLocalTenant.removeIf(foundIds::contains);
+    var instancesIdsFromCentral = new HashSet<UUID>();
+    if (!notFoundInLocalTenant.isEmpty()) {
+      var centralTenantId = consortiaService.getCentralTenantId();
+      if (StringUtils.isNotEmpty(centralTenantId)) {
+        var instancesFromCentralTenant = centralEntityRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
+        instancesFromCentralTenant.forEach(instanceEntity -> {
+          instances.add(instanceEntity);
+          instancesIdsFromCentral.add(instanceEntity.getId());
+        });
+       } else {
+        log.info("Central tenant id does not exist");
+      }
+    }
     var existInstanceIds = new HashSet<UUID>();
     for (var instance : instances) {
       existInstanceIds.add(instance.getId());
@@ -192,7 +209,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-      addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
+      if (!instancesIdsFromCentral.contains(instance.getId())) {
+        addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
+      }
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     instancesIds.removeAll(existInstanceIds);
