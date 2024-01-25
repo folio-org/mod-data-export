@@ -215,9 +215,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void processSlicesHoldingsAll(JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
     var slice = chooseSliceHoldings(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    log.info("Slice size: {}", slice.getSize());
+    log.info("Slice size for export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-    log.info("Size of exportIds: {}", exportIds.size());
+    log.info("Size of exportIds for export all: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
@@ -231,9 +231,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void processSlicesAuthoritiesAll(JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
     var slice = chooseSliceAuthorities(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    log.info("Slice size: {}", slice.getSize());
+    log.info("Slice size for export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    log.info("Size of exportIds: {}", exportIds.size());
+    log.info("Size of exportIds for export all: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
@@ -247,9 +247,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void processSlicesInstancesAll(JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastExport) {
     var slice = chooseSliceInstances(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    log.info("Slice size: {}", slice.getSize());
+    log.info("Slice size for export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
-    log.info("Size of exportIds: {}", exportIds.size());
+    log.info("Size of exportIds for export all: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, slice.isLast(), lastExport);
     while (slice.hasNext()) {
@@ -269,19 +269,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         exportFilesEntity.getToId(), pageble);
   }
 
-  private Slice<MarcRecordEntity> chooseSliceAuthorities(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
-        return marcAuthorityRecordAllRepository.findAllWithDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
-      }
-      return marcAuthorityRecordAllRepository.findAllWithoutDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
-    }
+  private Slice<MarcRecordEntity> chooseSliceAuthorities(JobExecutionExportFilesEntity exportFilesEntity,
+      ExportRequest exportRequest, Pageable pageble) {
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
-      return marcAuthorityRecordAllRepository.findAllWithDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
-          exportFilesEntity.getToId(), pageble);
+      return marcAuthorityRecordAllRepository.findAllWithDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+          pageble);
     }
-    return marcAuthorityRecordAllRepository.findAllWithoutDeletedWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
-        exportFilesEntity.getToId(), pageble);
+    return marcAuthorityRecordAllRepository.findAllWithoutDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
   }
 
   private Slice<InstanceEntity> chooseSliceInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {

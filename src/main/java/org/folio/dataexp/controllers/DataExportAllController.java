@@ -2,7 +2,7 @@ package org.folio.dataexp.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.rest.resource.ExportAllApi;
 import org.folio.dataexp.service.DataExportAllService;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ public class DataExportAllController implements ExportAllApi {
   private final DataExportAllService dataExportAllService;
 
   @Override
-  public ResponseEntity<Void> postExportAll(ExportRequest exportRequest) {
-    dataExportAllService.postDataExportAll(exportRequest);
+  public ResponseEntity<Void> postExportAll(ExportAllRequest exportAllRequest) {
+    dataExportAllService.postDataExportAll(exportAllRequest);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

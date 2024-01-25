@@ -2,6 +2,7 @@ package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.service.DataExportAllService;
 import org.junit.jupiter.api.Test;
@@ -22,17 +23,16 @@ class DataExportAllControllerTest extends BaseDataExportInitializer {
   @Test
   @SneakyThrows
   void postDataExportTest() {
-    var exportRequest = new ExportRequest();
-    exportRequest.setIdType(ExportRequest.IdTypeEnum.INSTANCE);
-    exportRequest.setAll(true);
-    exportRequest.setJobProfileId(UUID.randomUUID());
+    var exportAllRequest = new ExportAllRequest();
+    exportAllRequest.setIdType(ExportAllRequest.IdTypeEnum.INSTANCE);
+    exportAllRequest.setJobProfileId(UUID.randomUUID());
 
     mockMvc.perform(MockMvcRequestBuilders
         .post("/data-export/export-all")
         .headers(defaultHeaders())
-        .content(asJsonString(exportRequest)))
+        .content(asJsonString(exportAllRequest)))
       .andExpect(status().isOk());
 
-    verify(dataExportAllService).postDataExportAll(isA(ExportRequest.class));
+    verify(dataExportAllService).postDataExportAll(isA(ExportAllRequest.class));
   }
 }

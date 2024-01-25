@@ -22,7 +22,7 @@ import org.folio.dataexp.domain.dto.CallNumberTypes;
 import org.folio.dataexp.domain.dto.Campuses;
 import org.folio.dataexp.domain.dto.ContributorNameTypes;
 import org.folio.dataexp.domain.dto.ElectronicAccessRelationships;
-import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.HoldingsNoteTypes;
 import org.folio.dataexp.domain.dto.IdentifierTypes;
 import org.folio.dataexp.domain.dto.InstanceFormats;
@@ -109,8 +109,8 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportRequest = new ExportRequest().all(true);
-      dataExportAllService.postDataExportAll(exportRequest);
+      var exportAllRequest = new ExportAllRequest();
+      dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();
@@ -127,9 +127,9 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportRequest = new ExportRequest().all(true).idType(ExportRequest.IdTypeEnum.HOLDING)
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
         .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE);
-      dataExportAllService.postDataExportAll(exportRequest);
+      dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();
@@ -146,9 +146,9 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportRequest = new ExportRequest().all(true).idType(ExportRequest.IdTypeEnum.AUTHORITY)
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
         .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE);
-      dataExportAllService.postDataExportAll(exportRequest);
+      dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();

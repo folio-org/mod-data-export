@@ -751,9 +751,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/exportRequest'
+              $ref: '#/components/schemas/exportAllRequest'
             example:
-              $ref: 'examples/exportRequest.json'
+              $ref: 'examples/exportAllRequest.json'
       responses:
         '204':
           description: Data export all started
@@ -888,6 +888,8 @@ components:
       $ref: 'schemas/referencedata/servicepoints.json'
     config:
       $ref: 'schemas/configuration/config.json'
+    exportAllRequest:
+      $ref: 'schemas/exportAllRequest.json'
   parameters:
     trait_queryable:
       name: query
