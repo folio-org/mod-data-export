@@ -14,7 +14,7 @@ import java.util.UUID;
 import static java.lang.String.format;
 
 @Repository
-public class CentralEntityRepository {
+public class InstanceCentralTenantRepository {
   @PersistenceContext
   private EntityManager entityManager;
 

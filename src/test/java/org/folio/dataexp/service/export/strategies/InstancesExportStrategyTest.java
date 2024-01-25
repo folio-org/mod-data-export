@@ -16,7 +16,7 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.repository.CentralEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -64,7 +64,7 @@ class InstancesExportStrategyTest {
   @Mock
   private ConsortiaService consortiaService;
   @Mock
-  private CentralEntityRepository centralEntityRepository;
+  private InstanceCentralTenantRepository instanceCentralTenantRepository;
   @Mock
   private MarcRecordEntityRepository marcRecordEntityRepository;
   @Mock
@@ -103,7 +103,7 @@ class InstancesExportStrategyTest {
 
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(anySet(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
-    when(centralEntityRepository.findMarcRecordsByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+    when(instanceCentralTenantRepository.findMarcRecordsByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
     var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
     assertEquals(2, actualMarcRecords.size());
@@ -239,7 +239,7 @@ class InstancesExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
-    when(centralEntityRepository.findInstancesByIdIn("central", Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
+    when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 

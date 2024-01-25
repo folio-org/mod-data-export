@@ -16,7 +16,7 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.repository.CentralEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -61,7 +61,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private static final String INSTANCE_MARC_TYPE = "MARC_BIB";
 
   private final ConsortiaService consortiaService;
-  private final CentralEntityRepository centralEntityRepository;
+  private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
@@ -82,7 +82,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       if (!externalIds.isEmpty()) {
         var centralTenantId = consortiaService.getCentralTenantId();
         if (StringUtils.isNotEmpty(centralTenantId)) {
-          var marcInstancesFromCentralTenant = centralEntityRepository.findMarcRecordsByExternalIdIn(centralTenantId, externalIds);
+          var marcInstancesFromCentralTenant = instanceCentralTenantRepository.findMarcRecordsByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
         } else {
           log.info("Central tenant id does not exist");
@@ -188,7 +188,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     if (!notFoundInLocalTenant.isEmpty()) {
       var centralTenantId = consortiaService.getCentralTenantId();
       if (StringUtils.isNotEmpty(centralTenantId)) {
-        var instancesFromCentralTenant = centralEntityRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
+        var instancesFromCentralTenant = instanceCentralTenantRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
         instancesFromCentralTenant.forEach(instanceEntity -> {
           instances.add(instanceEntity);
           instancesIdsFromCentral.add(instanceEntity.getId());
