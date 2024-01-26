@@ -43,7 +43,7 @@ public class ExportExecutor {
     exportFilesEntity = jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
-    var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest.getIdType());
+    var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
     var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, exportRequest, lastExport);
     commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
     updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails);

@@ -119,7 +119,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   void shouldReturnErrorResultForGetGeneratedMarc_IfMarcsDoNotExist() {
     var notExistUUID = UUID.randomUUID();
     var marcRecords = authorityExportStrategy.getGeneratedMarc(Set.of(notExistUUID), new MappingProfile(), new ExportRequest(),
-      false, false, UUID.randomUUID(), new ExportStrategyStatistic());
+      UUID.randomUUID(), new ExportStrategyStatistic());
     assertEquals(1, marcRecords.getNotExistIds().size());
     assertEquals(1, marcRecords.getFailedIds().size());
   }

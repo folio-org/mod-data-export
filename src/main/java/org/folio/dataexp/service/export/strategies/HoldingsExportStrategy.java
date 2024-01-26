@@ -3,13 +3,13 @@ package org.folio.dataexp.service.export.strategies;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
-import org.folio.dataexp.domain.entity.HoldingsRecordDeletedEntity;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
@@ -40,7 +40,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.folio.dataexp.service.export.Constants.DELETED_AUDIT_RECORD;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
@@ -53,12 +52,9 @@ import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONV
 @Component
 @AllArgsConstructor
 public class HoldingsExportStrategy extends AbstractExportStrategy {
-  private static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
+  protected static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 
-  private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  private final HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository;
   private final InstanceEntityRepository instanceEntityRepository;
-  private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
@@ -66,20 +62,15 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final ErrorLogService errorLogService;
 
+  protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  protected final MarcRecordEntityRepository marcRecordEntityRepository;
+
   @PersistenceContext
   private EntityManager entityManager;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      if (Boolean.TRUE.equals(exportRequest.getAll())) {
-        if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
-          return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, HOLDING_MARC_TYPE,
-              exportRequest.getSuppressedFromDiscovery());
-        }
-        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNotAndSuppressDiscoveryIs(
-            externalIds, HOLDING_MARC_TYPE, "ACTUAL", 'd', exportRequest.getSuppressedFromDiscovery());
-      }
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(externalIds,
           HOLDING_MARC_TYPE, "ACTUAL", 'd');
     }
@@ -88,10 +79,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   @Override
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
-      boolean lastSlice, boolean lastExport, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, exportRequest, lastSlice,
-        lastExport);
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, exportRequest);
     var rules = ruleFactory.getRules(mappingProfile);
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     var marcRecords = holdingsWithInstanceAndItems.stream()
@@ -119,21 +109,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result,
-      MappingProfile mappingProfile, ExportRequest exportRequest, boolean lastSlice, boolean lastExport) {
+                                                             MappingProfile mappingProfile, ExportRequest exportRequest) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getAll()) && Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && lastSlice && lastExport) {
-      List<HoldingsRecordDeletedEntity> holdingsDeleted;
-      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
-      } else {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-      }
-      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
-      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-      holdings.addAll(holdingsDeletedToHoldingsEntities);
-      instancesIds.addAll(instanceIdsDeleted);
-    }
+    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
+  }
+
+  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile,
+                                                             List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     entityManager.clear();
     List<JSONObject> holdingsWithInstanceAndItems = new ArrayList<>();
@@ -210,18 +193,5 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       }
     });
     holdingJson.put(ITEMS_KEY, itemJsonArray);
-  }
-
-  private List<HoldingsRecordEntity> holdingsDeletedToHoldingsEntities(List<HoldingsRecordDeletedEntity> holdingsDeleted) {
-    return holdingsDeleted.stream()
-        .map(hold -> new HoldingsRecordEntity().withId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString(DELETED_AUDIT_RECORD)).get()
-                .getAsString("id")))
-            .withJsonb(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString(DELETED_AUDIT_RECORD))
-            .withInstanceId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-                .getAsString(DELETED_AUDIT_RECORD)).get()
-                .getAsString("instanceId"))))
-        .toList();
   }
 }

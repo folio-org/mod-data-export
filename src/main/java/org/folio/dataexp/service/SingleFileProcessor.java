@@ -8,10 +8,14 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.export.tracker.CompletedState;
+import org.folio.dataexp.service.export.tracker.ExportContext;
+import org.folio.dataexp.service.export.tracker.RunningState;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.UUID;
 
 @Component
@@ -23,6 +27,9 @@ public class SingleFileProcessor {
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogService errorLogService;
+  private final ExportContext exportContext;
+  private final CompletedState completedState;
+  private final RunningState runningState;
 
   public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
@@ -52,6 +59,7 @@ public class SingleFileProcessor {
     var exportIterator = exports.iterator();
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
+      updateExportState(exportIterator);
       executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
       log.info("Export from {} to {} has been executed.", export.getFromId(), export.getToId());
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
@@ -71,5 +79,13 @@ public class SingleFileProcessor {
     var progress = jobExecution.getProgress();
     progress.setTotal(progress.getExported() + progress.getDuplicatedSrs() + progress.getFailed());
     jobExecutionEntityRepository.save(jobExecutionEntity);
+  }
+
+  private void updateExportState(Iterator<JobExecutionExportFilesEntity> exportIterator) {
+    if (exportIterator.hasNext()) {
+      runningState.trackExport(exportContext);
+    } else {
+      completedState.trackExport(exportContext);
+    }
   }
 }

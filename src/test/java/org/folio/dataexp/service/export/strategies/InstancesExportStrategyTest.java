@@ -55,7 +55,9 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
@@ -162,8 +164,7 @@ class InstancesExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
     doNothing().when(entityManager).clear();
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), true, true,
-        UUID.randomUUID(), new ExportStrategyStatistic());
+    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
@@ -200,7 +201,7 @@ class InstancesExportStrategyTest {
     doNothing().when(entityManager).clear();
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
-        generatedMarcResult, mappingProfile, new ExportRequest(), true, true);
+        generatedMarcResult, mappingProfile, new ExportRequest());
 
     assertEquals(1, instancesWithHoldingsAndItems.size());
 

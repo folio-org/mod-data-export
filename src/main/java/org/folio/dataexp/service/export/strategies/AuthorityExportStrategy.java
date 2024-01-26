@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthorityExportStrategy extends AbstractExportStrategy {
 
-  private final RuleFactory ruleFactory;
   private final ConsortiaService consortiaService;
-  private final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
-  private final FolioExecutionContext context;
+
+  protected final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
+  protected final FolioExecutionContext context;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -38,12 +38,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   @Override
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      List<MarcRecordEntity> marcAuthorities;
-      if (Boolean.TRUE.equals(exportRequest.getAll())) {
-        marcAuthorities = marcAuthorityRecordRepository.findAllByExternalIdIn(context.getTenantId(), externalIds);
-      } else {
-        marcAuthorities = marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
-      }
+      List<MarcRecordEntity> marcAuthorities = getMarcAuthorities(externalIds);
       entityManager.clear();
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
@@ -67,9 +62,13 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     return new ArrayList<>();
   }
 
+  protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
+    return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
+  }
+
   @Override
   GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
-      boolean lastSlice, boolean lastExport, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
     ids.forEach(id -> {
       result.addIdToFailed(id);

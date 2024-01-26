@@ -105,8 +105,7 @@ class HoldingsExportStrategyTest {
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
-    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), new ExportRequest(), false,
-      false, UUID.randomUUID(), new ExportStrategyStatistic());
+    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
@@ -133,7 +132,7 @@ class HoldingsExportStrategyTest {
     when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
     doNothing().when(entityManager).clear();
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, new ExportRequest(), false, false);
+    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, new ExportRequest());
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 

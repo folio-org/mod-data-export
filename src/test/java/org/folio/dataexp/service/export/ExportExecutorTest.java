@@ -72,7 +72,7 @@ class ExportExecutorTest {
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
-    when(exportStrategyFactory.getExportStrategy(ExportRequest.IdTypeEnum.INSTANCE)).thenReturn(instancesExportStrategy);
+    when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
     when(instancesExportStrategy.saveMarcToRemoteStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(Boolean.class))).thenReturn(new ExportStrategyStatistic());
 
     exportExecutor.export(exportEntity, new ExportRequest(), commonFails, false);
@@ -107,7 +107,7 @@ class ExportExecutorTest {
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
-    when(exportStrategyFactory.getExportStrategy(ExportRequest.IdTypeEnum.INSTANCE)).thenReturn(instancesExportStrategy);
+    when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
     when(instancesExportStrategy.saveMarcToRemoteStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(Boolean.class))).thenReturn(new ExportStrategyStatistic());
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2l);
 
