@@ -8,9 +8,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
-import org.folio.dataexp.service.export.tracker.CompletedState;
-import org.folio.dataexp.service.export.tracker.ExportContext;
-import org.folio.dataexp.service.export.tracker.RunningState;
+import org.folio.dataexp.service.export.ExportContext;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.stereotype.Component;
 
@@ -28,8 +26,6 @@ public class SingleFileProcessor {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogService errorLogService;
   private final ExportContext exportContext;
-  private final CompletedState completedState;
-  private final RunningState runningState;
 
   public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
@@ -82,10 +78,6 @@ public class SingleFileProcessor {
   }
 
   private void updateExportState(Iterator<JobExecutionExportFilesEntity> exportIterator) {
-    if (exportIterator.hasNext()) {
-      runningState.trackExport(exportContext);
-    } else {
-      completedState.trackExport(exportContext);
-    }
+    exportContext.setLastExport(!exportIterator.hasNext());
   }
 }

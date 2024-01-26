@@ -26,6 +26,7 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
     super(consortiaService, marcAuthorityRecordRepository, context);
   }
 
+  @Override
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findAllByExternalIdIn(context.getTenantId(), externalIds);
   }

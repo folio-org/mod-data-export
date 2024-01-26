@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.export.strategies;
 
-import lombok.experimental.SuperBuilder;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -18,9 +17,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
-import org.folio.dataexp.service.export.tracker.CompletedState;
-import org.folio.dataexp.service.export.tracker.ExportContext;
-import org.folio.dataexp.service.export.tracker.RunningState;
+import org.folio.dataexp.service.export.ExportContext;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
@@ -59,8 +56,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   private RemoteStorageWriter remoteStorageWriter;
   protected ExportContext exportContext;
-  protected CompletedState completedState;
-  protected RunningState runningState;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -199,11 +194,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   protected void updateSliceState(Slice<?> slice) {
-    if (slice.isLast()) {
-      completedState.trackSlice(exportContext);
-    } else {
-      runningState.trackSlice(exportContext);
-    }
+    exportContext.setLastSlice(slice.isLast());
   }
 
   @Autowired
@@ -254,15 +245,5 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setExportContext(ExportContext exportContext) {
     this.exportContext = exportContext;
-  }
-
-  @Autowired
-  private void setRunningState(RunningState runningState) {
-    this.runningState = runningState;
-  }
-
-  @Autowired
-  private void setCompletedState(CompletedState completedState) {
-    this.completedState = completedState;
   }
 }

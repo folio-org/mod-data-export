@@ -73,11 +73,13 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     }
   }
 
+  @Override
   protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result,
                                                              MappingProfile mappingProfile, ExportRequest exportRequest) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.getExportState().isCompleted(exportContext)) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.isExportCompleted()) {
+      exportContext.reset();
       List<HoldingsRecordDeletedEntity> holdingsDeleted;
       if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();

@@ -80,7 +80,8 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
                                                               MappingProfile mappingProfile, ExportRequest exportRequest) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.getExportState().isCompleted(exportContext)) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.isExportCompleted()) {
+      exportContext.reset();
       List<InstanceDeletedEntity> instanceDeleted;
       if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         instanceDeleted = instanceEntityDeletedRepository.findAll();
