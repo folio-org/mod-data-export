@@ -129,7 +129,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         var uuid = instanceJson.getAsString(ID_KEY);
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(jsonObject, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
-        log.error(" getGeneratedMarc:: exception: {} for instance {}", e.getMessage(), uuid);
+        log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);
