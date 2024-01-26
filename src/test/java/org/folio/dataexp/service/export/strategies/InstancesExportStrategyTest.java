@@ -213,6 +213,7 @@ class InstancesExportStrategyTest {
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
 
     var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
     assertTrue(actualMappingProfile.getDefault());
@@ -220,6 +221,7 @@ class InstancesExportStrategyTest {
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
     assertEquals(1, actualMappingProfile.getTransformations().size());
+
     assertEquals(1, generatedMarcResult.getFailedIds().size());
   }
 
