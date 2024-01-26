@@ -77,6 +77,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     }
   }
 
+  @Override
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
                                                               MappingProfile mappingProfile, ExportRequest exportRequest) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
