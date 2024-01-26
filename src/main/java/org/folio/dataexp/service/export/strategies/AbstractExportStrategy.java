@@ -128,7 +128,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile);
 
-  abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile);
+  abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID JobExecutionId);
 
   abstract Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id);
 
@@ -181,7 +181,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     saveDuplicateErrors(duplicatedUuidWithIdentifiers, marcRecords, jobExecutionId);
     marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
-    var result = getGeneratedMarc(externalIds, mappingProfile);
+    var result = getGeneratedMarc(externalIds, mappingProfile, jobExecutionId );
     result.getMarcRecords().forEach(marc -> {
       if (StringUtils.isNotEmpty(marc)) {
         remoteStorageWriter.write(marc);

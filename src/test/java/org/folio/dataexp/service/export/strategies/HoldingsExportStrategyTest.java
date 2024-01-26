@@ -12,12 +12,14 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.marc4j.MarcException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -37,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +61,8 @@ class HoldingsExportStrategyTest {
   private RuleFactory ruleFactory;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private ErrorLogService errorLogService;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -100,11 +105,27 @@ class HoldingsExportStrategyTest {
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
-    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile());
+    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), UUID.randomUUID());
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+  }
+
+  @Test
+  void getGeneratedMarcIfMarcExceptionTest() {
+    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
+
+    when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
+    doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), UUID.randomUUID());
+
+    verify(ruleFactory).getRules(isA(MappingProfile.class));
+    verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
+
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
   }
 
   @Test

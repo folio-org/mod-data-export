@@ -20,12 +20,14 @@ import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.marc4j.MarcException;
 import org.marc4j.marc.impl.DataFieldImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -55,6 +57,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,6 +86,8 @@ class InstancesExportStrategyTest {
   private ItemEntityRepository itemEntityRepository;
   @Mock
   private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock
+  private ErrorLogService errorLogService;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -165,7 +170,7 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile);
+    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, UUID.randomUUID());
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
@@ -178,6 +183,44 @@ class InstancesExportStrategyTest {
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
     assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
     assertEquals(1, actualMappingProfile.getTransformations().size());
+  }
+
+  @Test
+  void getGeneratedMarcIfMarcExceptionTest() {
+    var transformation = new Transformations();
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
+
+    var defaultMappingProfile =  new MappingProfile();
+    defaultMappingProfile.setDefault(true);
+    defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
+    var defaultMappingProfileEntity = MappingProfileEntity.builder()
+      .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+
+    var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
+
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
+    doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+
+    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, UUID.randomUUID());
+
+    verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
+    verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
+
+    var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
+    assertTrue(actualMappingProfile.getDefault());
+    assertEquals(3, actualMappingProfile.getRecordTypes().size());
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.ITEM));
+    assertTrue(actualMappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS));
+    assertEquals(1, actualMappingProfile.getTransformations().size());
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
   }
 
   @Test

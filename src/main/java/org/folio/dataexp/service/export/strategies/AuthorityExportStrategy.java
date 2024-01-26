@@ -55,7 +55,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
+  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID jobExecutionId) {
     var result = new GeneratedMarcResult();
     ids.forEach(id -> {
       result.addIdToFailed(id);

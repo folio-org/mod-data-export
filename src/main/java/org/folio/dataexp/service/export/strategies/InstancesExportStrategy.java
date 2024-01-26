@@ -22,6 +22,7 @@ import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -29,6 +30,7 @@ import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
+import org.marc4j.MarcException;
 import org.marc4j.marc.VariableField;
 import org.springframework.stereotype.Component;
 
@@ -72,6 +74,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
+  private final ErrorLogService errorLogService;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
@@ -94,7 +97,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile) {
+  public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile, UUID jobExecutionId) {
     var generatedMarcResult = new GeneratedMarcResult();
     List<Rule> rules;
     if (mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
@@ -115,7 +118,20 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     }
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), referenceDataWrapper)).toList();
+
+    var marcRecords = new ArrayList<String>();
+    for (var jsonObject :  instancesWithHoldingsAndItems) {
+      try {
+        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        marcRecords.add(marc);
+      } catch (MarcException e) {
+        var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+        var uuid = instanceJson.getAsString(ID_KEY);
+        generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
+        errorLogService.saveWithAffectedRecord(jsonObject, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
+        log.error(" getGeneratedMarc:: exception: {} for instance {}", e.getMessage(), uuid);
+      }
+    }
     generatedMarcResult.setMarcRecords(marcRecords);
     return generatedMarcResult;
   }

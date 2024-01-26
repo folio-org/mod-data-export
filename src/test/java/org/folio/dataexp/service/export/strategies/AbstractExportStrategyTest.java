@@ -192,7 +192,7 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
+    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID jobExecutionId) {
       return generatedMarcResult;
     }
 

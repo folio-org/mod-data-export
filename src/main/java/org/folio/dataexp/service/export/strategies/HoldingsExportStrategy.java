@@ -13,7 +13,9 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -21,6 +23,7 @@ import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
+import org.marc4j.MarcException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -54,6 +57,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
   private final RuleHandler ruleHandler;
   private final ReferenceDataProvider referenceDataProvider;
+  private final ErrorLogService errorLogService;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
@@ -64,11 +68,25 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile) {
+  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, UUID jobExecutionId) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
     var rules = ruleFactory.getRules(mappingProfile);
-    var marcRecords = holdingsWithInstanceAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules))).toList();
+    var marcRecords = new ArrayList<String>();
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    for (var jsonObject : holdingsWithInstanceAndItems) {
+      try {
+        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        marcRecords.add(marc);
+      } catch (MarcException e) {
+        var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+        var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+        var uuid = holdingsJsonObject.getAsString(ID_KEY);
+        result.addIdToFailed(UUID.fromString(uuid));
+        errorLogService.saveWithAffectedRecord(jsonObject, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
+        log.error(" getGeneratedMarc:: exception: {} for holding {}", e.getMessage(), uuid);
+      }
+    }
     result.setMarcRecords(marcRecords);
     return result;
   }
@@ -139,15 +157,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return holdingsWithInstanceAndItems;
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
       var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
+      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.getAsString(ID_KEY));
     }));
   }
 
