@@ -1,18 +1,16 @@
 package org.folio.dataexp.service.export;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
+@RequiredArgsConstructor
 public class ExportContext {
 
-  @Autowired
-  private AtomicBoolean lastSlice;
-
-  @Autowired
-  private AtomicBoolean lastExport;
+  private final AtomicBoolean lastSlice;
+  private final AtomicBoolean lastExport;
 
   public void setLastSlice(boolean lastSlice) {
     this.lastSlice.set(lastSlice);
