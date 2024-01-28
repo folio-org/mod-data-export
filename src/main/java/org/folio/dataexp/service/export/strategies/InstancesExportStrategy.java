@@ -213,6 +213,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       return;
     }
     var holdingsEntities = holdingsRecordEntityRepository.findByInstanceIdIs(instanceId);
+    entityManager.clear();
     if (holdingsEntities.isEmpty()) {
       return;
     }
@@ -222,6 +223,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       itemsByHoldingId  = itemEntityRepository.findByHoldingsRecordIdIn(ids)
         .stream().collect(Collectors.groupingBy(ItemEntity::getHoldingsRecordId,
           HashMap::new, Collectors.mapping(itemEntity -> itemEntity, Collectors.toList())));
+      entityManager.clear();
     }
     var holdingsJsonArray = new JSONArray();
     for (var holdingsEntity : holdingsEntities) {
@@ -253,6 +255,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    entityManager.clear();
     try {
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
