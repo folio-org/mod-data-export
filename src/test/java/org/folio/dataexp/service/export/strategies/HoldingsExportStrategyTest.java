@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -118,12 +119,13 @@ class HoldingsExportStrategyTest {
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
-    doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    doThrow(new MarcException("marc error")).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), UUID.randomUUID());
 
+    var actualErrorMessage = List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
+    verify(errorLogService).saveGeneralErrorWithMessageValues( isA(String.class), eq(actualErrorMessage), isA(UUID.class));
 
     assertEquals(1, generatedMarcResult.getFailedIds().size());
   }

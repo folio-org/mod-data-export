@@ -83,8 +83,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
         var uuid = holdingsJsonObject.getAsString(ID_KEY);
         result.addIdToFailed(UUID.fromString(uuid));
-        errorLogService.saveWithAffectedRecord(holdingsJsonObject, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
-        log.error(" getGeneratedMarc::  exception to convert in marc: {} for holding {}", e.getMessage(), uuid);
+        var errorMessage = String.format("%s for holding %s", e.getMessage(), uuid);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
+        log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
       }
     }
     result.setMarcRecords(marcRecords);
