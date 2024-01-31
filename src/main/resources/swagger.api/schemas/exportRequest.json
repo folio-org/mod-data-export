@@ -49,6 +49,16 @@
       "type": "boolean",
       "default": false
     },
+    "lastSlice": {
+      "description": "True if within the current export the current slice from ID to ID is the last one",
+      "type": "boolean",
+      "default": false
+    },
+    "lastExport": {
+      "description": "True the current export is the last one",
+      "type": "boolean",
+      "default": false
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",

@@ -58,7 +58,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest) {
     var slice = chooseSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    updateSliceState(slice);
+    updateSliceState(slice, exportRequest);
     log.info("Slice size for holdings export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
     log.info("Size of exportIds for holdings export all: {}", exportIds.size());
@@ -66,7 +66,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       exportRequest);
     while (slice.hasNext()) {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
-      updateSliceState(slice);
+      updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
@@ -78,8 +78,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
                                                              MappingProfile mappingProfile, ExportRequest exportRequest) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.isExportCompleted()) {
-      exportContext.reset();
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
       List<HoldingsRecordDeletedEntity> holdingsDeleted;
       if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();

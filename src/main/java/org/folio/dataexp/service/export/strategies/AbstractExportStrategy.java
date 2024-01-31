@@ -17,7 +17,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
-import org.folio.dataexp.service.export.ExportContext;
+import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
@@ -55,7 +55,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   private RemoteStorageWriter remoteStorageWriter;
-  protected ExportContext exportContext;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
@@ -193,8 +192,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     }
   }
 
-  protected void updateSliceState(Slice<?> slice) {
-    exportContext.setLastSlice(slice.isLast());
+  protected void updateSliceState(Slice<?> slice, ExportRequest exportRequest) {
+    exportRequest.setLastSlice(slice.isLast());
+  }
+
+  protected boolean isExportCompleted(ExportRequest exportRequest) {
+    return exportRequest.getLastSlice() && exportRequest.getLastExport();
   }
 
   @Autowired
@@ -240,10 +243,5 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setMarcAuthorityRecordAllRepository(MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository) {
     this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
-  }
-
-  @Autowired
-  private void setExportContext(ExportContext exportContext) {
-    this.exportContext = exportContext;
   }
 }

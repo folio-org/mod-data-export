@@ -62,7 +62,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest) {
     var slice = chooseSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    updateSliceState(slice);
+    updateSliceState(slice, exportRequest);
     log.info("Slice size for instances export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
     log.info("Size of exportIds for instances export all: {}", exportIds.size());
@@ -70,7 +70,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       exportRequest);
     while (slice.hasNext()) {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
-      updateSliceState(slice);
+      updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
@@ -81,8 +81,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
                                                               MappingProfile mappingProfile, ExportRequest exportRequest) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportContext.isExportCompleted()) {
-      exportContext.reset();
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
       List<InstanceDeletedEntity> instanceDeleted;
       if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
         instanceDeleted = instanceEntityDeletedRepository.findAll();
