@@ -35,9 +35,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class ErrorLogService {
-  private static final String ID = "id";
-  private static final String HRID = "hrid";
-  private static final String TITLE = "title";
+  public static final String ID = "id";
+  public static final String HRID = "hrid";
+  public static final String TITLE = "title";
   private static final String COMMA_SEPARATOR = ", ";
 
   @Value("${application.inventory-record-link}")
@@ -146,7 +146,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink);
+      .inventoryRecordLink(inventoryRecordLink + instId);
     if (instId == null) {
       affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
     }
@@ -185,7 +185,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink);
+      .inventoryRecordLink(inventoryRecordLink + instId);
     var errorLog = new ErrorLog()
       .errorMessageCode(errorMessageCode)
       .errorMessageValues(Collections.singletonList(errorMessage))

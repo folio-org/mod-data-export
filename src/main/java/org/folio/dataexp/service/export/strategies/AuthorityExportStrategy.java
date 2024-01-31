@@ -11,7 +11,9 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -53,7 +55,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
+  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID jobExecutionId) {
     var result = new GeneratedMarcResult();
     ids.forEach(id -> {
       result.addIdToFailed(id);
@@ -63,7 +65,12 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  Optional<String> getIdentifierMessage(UUID id) {
+  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     return Optional.empty();
+  }
+
+  @Override
+  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+    return new HashMap<>();
   }
 }

@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface HoldingsRecordEntityRepository extends Repository<HoldingsRecordEntity, UUID> {
 
   List<HoldingsRecordEntity> findByIdIn(Set<UUID> ids);
+
+  List<HoldingsRecordEntity> findByInstanceIdIs(UUID instanceId);
 }

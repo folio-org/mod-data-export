@@ -30,7 +30,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -190,13 +192,20 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile) {
+    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID jobExecutionId) {
       return generatedMarcResult;
     }
 
     @Override
-    Optional<String> getIdentifierMessage(UUID id) {
-      return Optional.of("hrid123");
+    Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+      var identifiers = new ExportIdentifiersForDuplicateErrors();
+      identifiers.setIdentifierHridMessage("hrid123");
+      return Optional.of(identifiers);
+    }
+
+    @Override
+    Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+      return new HashMap<>();
     }
 
     @Override
