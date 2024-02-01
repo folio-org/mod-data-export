@@ -102,6 +102,16 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var generatedMarcResult = new GeneratedMarcResult();
+
+    var rules = getRules(mappingProfile);
+    var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile, exportRequest);
+    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
+
+    generatedMarcResult.setMarcRecords(marcRecords);
+    return generatedMarcResult;
+  }
+
+  protected List<Rule> getRules(MappingProfile mappingProfile) {
     var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
     var copyDefaultMappingProfile = new MappingProfile();
     copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
@@ -115,12 +125,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
     var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
 
-    var rules = ruleFactory.getRules(updatedMappingProfile);
-    var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile, exportRequest);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
-
-    generatedMarcResult.setMarcRecords(marcRecords);
-    return generatedMarcResult;
+    return ruleFactory.getRules(updatedMappingProfile);
   }
 
   @Override
@@ -250,7 +255,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     jsonToUpdateWithHoldingsAndItems.put(Constants.HOLDINGS_KEY, holdingsJsonArray);
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+  protected String mapToMarc(JSONObject jsonObject, List<Rule> rules, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();

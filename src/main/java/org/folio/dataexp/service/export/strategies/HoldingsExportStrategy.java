@@ -82,11 +82,16 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, exportRequest);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, exportStatistic, result);
+  }
+
+  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic, GeneratedMarcResult result) {
     var rules = ruleFactory.getRules(mappingProfile);
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     var marcRecords = holdingsWithInstanceAndItems.stream()
-      .filter(h -> !h.isEmpty()).map(h -> mapToMarc(h, new ArrayList<>(rules), referenceDataWrapper, jobExecutionId,
-        exportStatistic)).toList();
+        .filter(h -> !h.isEmpty()).map(h -> mapToMarc(h, new ArrayList<>(rules), referenceDataWrapper, jobExecutionId,
+            exportStatistic)).toList();
     result.setMarcRecords(marcRecords);
     return result;
   }

@@ -17,7 +17,6 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
-import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
@@ -110,11 +109,18 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected void createAndSaveMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest) {
+    var duplicatedSrsMessage = new HashSet<String>();
+    var externalIdsWithMarcRecord = new HashSet<UUID>();
+    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, duplicatedSrsMessage, externalIdsWithMarcRecord);
+    var result = getGeneratedMarc(externalIds, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
+    saveMarc(result, exportStatistic, duplicatedSrsMessage, jobExecutionId);
+  }
+
+  protected void createMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      UUID jobExecutionId, ExportRequest exportRequest, Set<String> duplicatedSrsMessage, Set<UUID> externalIdsWithMarcRecord) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest);
     log.info("marcRecords size: {}", marcRecords.size());
     var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
-    var externalIdsWithMarcRecord = new HashSet<UUID>();
-    var duplicatedSrsMessage = new HashSet<String>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;
       try {
@@ -122,7 +128,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
         if (marcHoldingsItemsFields.getErrorMessages().size() > 0) {
           errorLogService
-            .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
+              .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
         }
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
@@ -140,12 +146,15 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     }
     marcRecords.clear();
     externalIds.removeAll(externalIdsWithMarcRecord);
-    var result = getGeneratedMarc(externalIds, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
+  }
+
+  protected void saveMarc(GeneratedMarcResult result, ExportStrategyStatistic exportStatistic, Set<String> duplicatedSrsMessage,
+      UUID jobExecutionId) {
     log.info("Generated marc size: {}", result.getMarcRecords().size());
     result.getMarcRecords().forEach(marc -> {
-      remoteStorageWriter.write(marc);
-      exportStatistic.incrementExported();
-      }
+          remoteStorageWriter.write(marc);
+          exportStatistic.incrementExported();
+        }
     );
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());

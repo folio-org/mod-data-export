@@ -24,6 +24,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -61,36 +62,18 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     updateSliceState(slice, exportRequest);
     log.info("Slice size for holdings export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
+    var holdings = slice.getContent().stream().collect(Collectors.toList());
     log.info("Size of exportIds for holdings export all: {}", exportIds.size());
-    createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+    createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
       exportRequest);
     while (slice.hasNext()) {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
       updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+      holdings = slice.getContent().stream().collect(Collectors.toList());
+      createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
     }
-  }
-
-  @Override
-  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result,
-                                                             MappingProfile mappingProfile, ExportRequest exportRequest) {
-    var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
-    var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
-      List<HoldingsRecordDeletedEntity> holdingsDeleted;
-      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
-      } else {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-      }
-      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
-      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-      holdings.addAll(holdingsDeletedToHoldingsEntities);
-      instancesIds.addAll(instanceIdsDeleted);
-    }
-    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
   }
 
   private Slice<HoldingsRecordEntity> chooseSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
@@ -113,5 +96,40 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
           .getAsString(DELETED_AUDIT_RECORD)).get()
           .getAsString("instanceId"))))
       .toList();
+  }
+
+  private void createAndSaveMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest) {
+    var duplicatedSrsMessage = new HashSet<String>();
+    var externalIdsWithMarcRecord = new HashSet<UUID>();
+    createMarc(holdingsIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, duplicatedSrsMessage, externalIdsWithMarcRecord);
+    holdings.removeIf(hold -> externalIdsWithMarcRecord.contains(hold.getId()));
+    var result = getGeneratedMarc(holdingsIds, holdings, mappingProfile, jobExecutionId, exportStatistic, exportRequest);
+    saveMarc(result, exportStatistic, duplicatedSrsMessage, jobExecutionId);
+  }
+
+  private GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic, ExportRequest exportRequest) {
+    var result = new GeneratedMarcResult();
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, holdings, result, mappingProfile, exportRequest);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, exportStatistic, result);
+  }
+
+  private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, GeneratedMarcResult result,
+      MappingProfile mappingProfile, ExportRequest exportRequest) {
+    var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
+      List<HoldingsRecordDeletedEntity> holdingsDeleted;
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
+      } else {
+        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
+      }
+      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
+      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
+      holdings.addAll(holdingsDeletedToHoldingsEntities);
+      instancesIds.addAll(instanceIdsDeleted);
+    }
+    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
   }
 }

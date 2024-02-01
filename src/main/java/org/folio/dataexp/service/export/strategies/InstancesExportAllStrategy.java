@@ -23,6 +23,7 @@ import org.folio.dataexp.service.export.Constants;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -65,33 +67,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     updateSliceState(slice, exportRequest);
     log.info("Slice size for instances export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
+    var instances = slice.getContent().stream().collect(Collectors.toList());
     log.info("Size of exportIds for instances export all: {}", exportIds.size());
-    createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+    createAndSaveMarc(exportIds, instances, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
       exportRequest);
     while (slice.hasNext()) {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
       updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+      instances = slice.getContent().stream().collect(Collectors.toList());
+      createAndSaveMarc(exportIds, instances, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
     }
-  }
-
-  @Override
-  protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
-                                                              MappingProfile mappingProfile, ExportRequest exportRequest) {
-    var instances = instanceEntityRepository.findByIdIn(instancesIds);
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
-      List<InstanceDeletedEntity> instanceDeleted;
-      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-        instanceDeleted = instanceEntityDeletedRepository.findAll();
-      } else {
-        instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-      }
-      var instanceDeletedToInstanceEntities = instanceDeletedToInstanceEntities(instanceDeleted);
-      instances.addAll(instanceDeletedToInstanceEntities);
-    }
-    return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);
   }
 
   private Slice<InstanceEntity> chooseSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
@@ -111,5 +98,40 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         .withJsonb(getAsJsonObject(hold.getJsonb()).get()
           .getAsString(Constants.DELETED_AUDIT_RECORD)))
       .toList();
+  }
+
+  private void createAndSaveMarc(Set<UUID> externalIds, List<InstanceEntity> instances, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest) {
+    var duplicatedSrsMessage = new HashSet<String>();
+    var externalIdsWithMarcRecord = new HashSet<UUID>();
+    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, duplicatedSrsMessage, externalIdsWithMarcRecord);
+    instances.removeIf(inst -> externalIdsWithMarcRecord.contains(inst.getId()));
+    var result = getGeneratedMarc(externalIds, instances, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
+    saveMarc(result, exportStatistic, duplicatedSrsMessage, jobExecutionId);
+  }
+
+  private GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, List<InstanceEntity> instances, MappingProfile mappingProfile, ExportRequest exportRequest,
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+    var generatedMarcResult = new GeneratedMarcResult();
+    var rules = getRules(mappingProfile);
+    var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, instances, generatedMarcResult, mappingProfile, exportRequest);
+    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
+    generatedMarcResult.setMarcRecords(marcRecords);
+    return generatedMarcResult;
+  }
+
+  private List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, List<InstanceEntity> instances, GeneratedMarcResult generatedMarcResult,
+      MappingProfile mappingProfile, ExportRequest exportRequest) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
+      List<InstanceDeletedEntity> instanceDeleted;
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+        instanceDeleted = instanceEntityDeletedRepository.findAll();
+      } else {
+        instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
+      }
+      var instanceDeletedToInstanceEntities = instanceDeletedToInstanceEntities(instanceDeleted);
+      instances.addAll(instanceDeletedToInstanceEntities);
+    }
+    return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);
   }
 }
