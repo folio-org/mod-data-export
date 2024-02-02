@@ -271,7 +271,7 @@ class InstancesExportStrategyTest {
     assertEquals(1, generatedMarcResult.getNotExistIds().size());
     assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
   }
-  
+
   @Test
   void getHoldingsWithInstanceAndItemsIfCentralTenantExistTest() {
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");

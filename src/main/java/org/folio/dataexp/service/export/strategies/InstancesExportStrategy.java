@@ -23,7 +23,6 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
-import org.folio.dataexp.service.export.Constants;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
@@ -52,9 +51,12 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
+import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 @Log4j2
@@ -298,14 +300,14 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var holdingJsonOpt = getAsJsonObject(holdingsEntity.getJsonb());
       if (holdingJsonOpt.isPresent()) {
         var holdingJson = holdingJsonOpt.get();
-        holdingJson.put(Constants.ITEMS_KEY, itemJsonArray);
-        holdingJson.put(Constants.INSTANCE_HRID_KEY, instanceHrid);
+        holdingJson.put(ITEMS_KEY, itemJsonArray);
+        holdingJson.put(INSTANCE_HRID_KEY, instanceHrid);
         holdingsJsonArray.add(holdingJson);
       } else {
         log.error("addItemsToHolding:: error converting to json holding by id {}", holdingsEntity.getId());
       }
     }
-    jsonToUpdateWithHoldingsAndItems.put(Constants.HOLDINGS_KEY, holdingsJsonArray);
+    jsonToUpdateWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
   }
 
   protected String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {

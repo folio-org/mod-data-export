@@ -43,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,9 +64,11 @@ class HoldingsExportStrategyTest {
   @Mock
   private RuleFactory ruleFactory;
   @Mock
+  private EntityManager entityManager;
+  @Mock
   private ReferenceDataProvider referenceDataProvider;
   @Mock
-  private EntityManager entityManager;
+  private ErrorLogService errorLogService;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -122,7 +125,7 @@ class HoldingsExportStrategyTest {
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     doThrow(new MarcException("marc error")).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
-    var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), UUID.randomUUID());
+    var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(), new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     var actualErrorMessage = List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
     verify(ruleFactory).getRules(isA(MappingProfile.class));
