@@ -75,3 +75,4 @@ application:
   file-uploading:
     max-retry-count: ${MAX_UPLOADING_RETRIES:5000}
   inventory-record-link: ${INVENTORY_RECORD_LINK:}
+  my-university: ${MY_UNIVERSITY_VALUE:diku}

@@ -3,6 +3,7 @@ package org.folio.dataexp.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.Config;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -13,7 +14,9 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -33,10 +36,14 @@ public class DataExportTenantService extends TenantService {
 
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
+  public static String VIEWS_VARIABLE_FOR_SQL_SCRIPT = "myuniversity";
 
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
+
+  @Value("${application.my-university}")
+  private String myUniversity;
 
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
@@ -57,6 +64,13 @@ public class DataExportTenantService extends TenantService {
     loadConfiguration();
   }
 
+  @Override
+  public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
+      var tenantId = super.context.getTenantId();
+      var tenant = StringUtils.isEmpty(tenantId) ? myUniversity : tenantId;
+      System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, tenant);
+      super.createOrUpdateTenant(tenantAttributes);
+  }
   private void loadMappingProfiles() {
     MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile("/data/mapping-profiles/" + mappingProfile));
   }
