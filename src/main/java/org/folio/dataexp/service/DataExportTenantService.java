@@ -36,7 +36,7 @@ public class DataExportTenantService extends TenantService {
 
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
-  public static String VIEWS_VARIABLE_FOR_SQL_SCRIPT = "myuniversity";
+  public static final String VIEWS_VARIABLE_FOR_SQL_SCRIPT = "myuniversity";
 
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
