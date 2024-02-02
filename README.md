@@ -159,6 +159,6 @@ This value should be `true` if AWS S3 is used.
 | S3_ACCESS_KEY_ID        | -                      | S3 access key                              |
 | S3_SECRET_ACCESS_KEY    | -                      | S3 secret key                              |
 | S3_IS_AWS               | false                  | Specify if AWS S3 is used as files storage |
-| MY_UNIVERSITY_VALUE     | -                      | The value of tenant definition             |
+| MY_UNIVERSITY_VALUE     | -                      | The tenant definition value                |
 
 
