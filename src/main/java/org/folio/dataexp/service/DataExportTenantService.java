@@ -41,9 +41,15 @@ public class DataExportTenantService extends TenantService {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
+  private String myUniversity;
 
   @Value("${application.my-university}")
-  private String myUniversity;
+  public void setMyUniversity(String myUniversity) {
+    if (StringUtils.isEmpty(myUniversity)){
+      log.warn("The default value of application.my-university wasn't provided");
+    }
+    this.myUniversity = myUniversity;
+  }
 
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
