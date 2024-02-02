@@ -211,7 +211,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return marcHoldingsItemsFieldsResult;
   }
 
-
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
       MappingProfile mappingProfile) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);

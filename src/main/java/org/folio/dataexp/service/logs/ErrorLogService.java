@@ -146,7 +146,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink);
+      .inventoryRecordLink(inventoryRecordLink + instId);
     if (instId == null) {
       affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
     }
@@ -185,7 +185,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink);
+      .inventoryRecordLink(inventoryRecordLink + instId);
     var errorLog = new ErrorLog()
       .errorMessageCode(errorMessageCode)
       .errorMessageValues(Collections.singletonList(errorMessage))

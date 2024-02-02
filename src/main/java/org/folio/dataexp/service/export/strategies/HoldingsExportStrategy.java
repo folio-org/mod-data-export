@@ -122,7 +122,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     result.setMarcRecords(marcRecords);
     return result;
   }
-
+  
   @Override
   public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
     return new HashMap<>();
@@ -188,7 +188,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
       var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
+      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.getAsString(ID_KEY));
     }));
   }
 
