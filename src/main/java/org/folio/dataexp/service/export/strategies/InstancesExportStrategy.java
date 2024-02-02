@@ -15,6 +15,7 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -26,6 +27,7 @@ import org.folio.dataexp.service.export.Constants;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -49,9 +51,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
+import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 @Log4j2
 @Component
@@ -61,6 +65,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   protected static final String INSTANCE_MARC_TYPE = "MARC_BIB";
 
   private final ConsortiaService consortiaService;
+  private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
@@ -102,42 +107,72 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var generatedMarcResult = new GeneratedMarcResult();
+    var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile);
+    return getGeneratedMarc(generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+  }
 
+  protected GeneratedMarcResult getGeneratedMarc(GeneratedMarcResult generatedMarcResult, List<JSONObject> instancesWithHoldingsAndItems,
+      MappingProfile mappingProfile, UUID jobExecutionId) {
+    var marcRecords = new ArrayList<String>();
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     var rules = getRules(mappingProfile);
-    var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile, exportRequest);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
-
+    for (var jsonObject :  instancesWithHoldingsAndItems) {
+      try {
+        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        marcRecords.add(marc);
+      } catch (MarcException e) {
+        var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+        var uuid = instanceJson.getAsString(ID_KEY);
+        generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
+        errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
+        log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
+      }
+    }
     generatedMarcResult.setMarcRecords(marcRecords);
     return generatedMarcResult;
   }
 
-  protected List<Rule> getRules(MappingProfile mappingProfile) {
-    var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
-    var copyDefaultMappingProfile = new MappingProfile();
-    copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
-    copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
-    copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
-    copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
-    if (defaultMappingProfile.getTransformations() != null) {
-      copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
-    }
-    copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
-
-    var updatedMappingProfile = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
-
-    return ruleFactory.getRules(updatedMappingProfile);
-  }
-
   @Override
-  public Optional<String> getIdentifierMessage(UUID id) {
+  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
     if (instances.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
     if (jsonObject.isPresent()) {
-      var hrid = jsonObject.get().getAsString(Constants.HRID_KEY);
-      return Optional.of("Instance with hrid : " + hrid);
+      var hrid = jsonObject.get().getAsString(HRID_KEY);
+      var title = jsonObject.get().getAsString(TITLE_KEY);
+      var uuid = jsonObject.get().getAsString(ID_KEY);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + hrid);
+      var instanceAssociatedJsonObject = new JSONObject();
+      instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
+      instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);
+      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, title);
+      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+      return Optional.of(exportIdentifiers);
     }
     return Optional.empty();
+  }
+
+  protected List<Rule> getRules(MappingProfile mappingProfile) {
+    List<Rule> rules;
+    if (mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+      var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
+      var copyDefaultMappingProfile = new MappingProfile();
+      copyDefaultMappingProfile.setId(defaultMappingProfile.getId());
+      copyDefaultMappingProfile.setDefault(defaultMappingProfile.getDefault());
+      copyDefaultMappingProfile.setName(defaultMappingProfile.getName());
+      copyDefaultMappingProfile.setRecordTypes(new ArrayList<>(defaultMappingProfile.getRecordTypes()));
+      if (defaultMappingProfile.getTransformations() != null) {
+        copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
+      }
+      copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
+      var mappingProfileWithHoldingsAndItems = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
+      rules = ruleFactory.getRules(mappingProfileWithHoldingsAndItems);
+    } else {
+      rules = ruleFactory.getRules(mappingProfile);
+    }
+
+    return rules;
   }
 
   @Override
@@ -178,7 +213,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
 
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
-      MappingProfile mappingProfile, ExportRequest exportRequest) {
+      MappingProfile mappingProfile) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);
   }
@@ -187,8 +222,25 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
                                                               MappingProfile mappingProfile, List<InstanceEntity> instances) {
     entityManager.clear();
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
+    var copyInstances = new ArrayList<>(instances);
+    var foundIds = copyInstances.stream().map(InstanceEntity::getId).collect(Collectors.toSet());
+    var notFoundInLocalTenant = new HashSet<>(instancesIds);
+    notFoundInLocalTenant.removeIf(foundIds::contains);
+    var instancesIdsFromCentral = new HashSet<UUID>();
+    if (!notFoundInLocalTenant.isEmpty()) {
+      var centralTenantId = consortiaService.getCentralTenantId();
+      if (StringUtils.isNotEmpty(centralTenantId)) {
+        var instancesFromCentralTenant = instanceCentralTenantRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
+        instancesFromCentralTenant.forEach(instanceEntity -> {
+          copyInstances.add(instanceEntity);
+          instancesIdsFromCentral.add(instanceEntity.getId());
+        });
+      } else {
+        log.info("Central tenant id does not exist");
+      }
+    }
     var existInstanceIds = new HashSet<UUID>();
-    for (var instance : instances) {
+    for (var instance : copyInstances) {
       existInstanceIds.add(instance.getId());
       var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
       if (instanceJsonOpt.isEmpty()) {
@@ -199,7 +251,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-      addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(Constants.HRID_KEY), mappingProfile);
+      if (!instancesIdsFromCentral.contains(instance.getId())) {
+        addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
+      }
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     instancesIds.removeAll(existInstanceIds);
@@ -255,23 +309,14 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     jsonToUpdateWithHoldingsAndItems.put(Constants.HOLDINGS_KEY, holdingsJsonArray);
   }
 
-  protected String mapToMarc(JSONObject jsonObject, List<Rule> rules, UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+  protected String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
-    entityManager.clear();
-    try {
     return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
       var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
       log.warn("mapToSrs:: exception: {} for instance {}", translationException.getCause().getMessage(), instanceJson.getAsString(ID_KEY));
     }));
-    } catch (MarcException e) {
-      errorLogService.saveWithAffectedRecord(jsonObject, ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
-      log.error(e.getMessage());
-      exportStatistic.incrementFailed();
-      return "";
-    }
   }
 
   private MappingProfile appendHoldingsAndItemTransformations(MappingProfile mappingProfile, MappingProfile defaultMappingProfile) {

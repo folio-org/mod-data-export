@@ -100,19 +100,18 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   private void createAndSaveMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest) {
-    var duplicatedSrsMessage = new HashSet<String>();
     var externalIdsWithMarcRecord = new HashSet<UUID>();
-    createMarc(holdingsIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, duplicatedSrsMessage, externalIdsWithMarcRecord);
+    createMarc(holdingsIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, externalIdsWithMarcRecord);
     holdings.removeIf(hold -> externalIdsWithMarcRecord.contains(hold.getId()));
-    var result = getGeneratedMarc(holdingsIds, holdings, mappingProfile, jobExecutionId, exportStatistic, exportRequest);
-    saveMarc(result, exportStatistic, duplicatedSrsMessage, jobExecutionId);
+    var result = getGeneratedMarc(holdingsIds, holdings, mappingProfile, jobExecutionId, exportRequest);
+    saveMarc(result, exportStatistic);
   }
 
   private GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
-      UUID jobExecutionId, ExportStrategyStatistic exportStatistic, ExportRequest exportRequest) {
+      UUID jobExecutionId, ExportRequest exportRequest) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, holdings, result, mappingProfile, exportRequest);
-    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, exportStatistic, result);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
 
   private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, GeneratedMarcResult result,

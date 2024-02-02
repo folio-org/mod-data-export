@@ -11,6 +11,7 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityDeletedRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
@@ -23,7 +24,6 @@ import org.folio.dataexp.service.export.Constants;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
-import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,8 +43,17 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private final InstanceEntityDeletedRepository instanceEntityDeletedRepository;
 
-  public InstancesExportAllStrategy(ConsortiaService consortiaService, MarcInstanceRecordRepository marcInstanceRecordRepository, HoldingsRecordEntityRepository holdingsRecordEntityRepository, ItemEntityRepository itemEntityRepository, RuleFactory ruleFactory, RuleHandler ruleHandler, RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider, MappingProfileEntityRepository mappingProfileEntityRepository, InstanceWithHridEntityRepository instanceWithHridEntityRepository, ErrorLogService errorLogService, MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository, EntityManager entityManager, InstanceEntityDeletedRepository instanceEntityDeletedRepository) {
-    super(consortiaService, marcInstanceRecordRepository, holdingsRecordEntityRepository, itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository, instanceWithHridEntityRepository, errorLogService, marcRecordEntityRepository, instanceEntityRepository, entityManager);
+  public InstancesExportAllStrategy(ConsortiaService consortiaService,
+      InstanceCentralTenantRepository instanceCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
+      HoldingsRecordEntityRepository holdingsRecordEntityRepository, ItemEntityRepository itemEntityRepository,
+      RuleFactory ruleFactory, RuleHandler ruleHandler, RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider,
+      MappingProfileEntityRepository mappingProfileEntityRepository,
+      InstanceWithHridEntityRepository instanceWithHridEntityRepository, ErrorLogService errorLogService,
+      MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
+      EntityManager entityManager, InstanceEntityDeletedRepository instanceEntityDeletedRepository) {
+    super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
+        itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
+        instanceWithHridEntityRepository, errorLogService, marcRecordEntityRepository, instanceEntityRepository, entityManager);
     this.instanceEntityDeletedRepository = instanceEntityDeletedRepository;
   }
 
@@ -102,22 +111,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private void createAndSaveMarc(Set<UUID> externalIds, List<InstanceEntity> instances, ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest) {
-    var duplicatedSrsMessage = new HashSet<String>();
     var externalIdsWithMarcRecord = new HashSet<UUID>();
-    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, duplicatedSrsMessage, externalIdsWithMarcRecord);
+    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, externalIdsWithMarcRecord);
     instances.removeIf(inst -> externalIdsWithMarcRecord.contains(inst.getId()));
-    var result = getGeneratedMarc(externalIds, instances, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
-    saveMarc(result, exportStatistic, duplicatedSrsMessage, jobExecutionId);
+    var result = getGeneratedMarc(externalIds, instances, mappingProfile, exportRequest, jobExecutionId);
+    saveMarc(result, exportStatistic);
   }
 
-  private GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, List<InstanceEntity> instances, MappingProfile mappingProfile, ExportRequest exportRequest,
-      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+  private GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, List<InstanceEntity> instances, MappingProfile mappingProfile,
+      ExportRequest exportRequest, UUID jobExecutionId) {
     var generatedMarcResult = new GeneratedMarcResult();
-    var rules = getRules(mappingProfile);
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, instances, generatedMarcResult, mappingProfile, exportRequest);
-    var marcRecords = instancesWithHoldingsAndItems.stream().map(h -> mapToMarc(h, new ArrayList<>(rules), jobExecutionId, exportStatistic)).toList();
-    generatedMarcResult.setMarcRecords(marcRecords);
-    return generatedMarcResult;
+    return getGeneratedMarc(generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
   }
 
   private List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, List<InstanceEntity> instances, GeneratedMarcResult generatedMarcResult,

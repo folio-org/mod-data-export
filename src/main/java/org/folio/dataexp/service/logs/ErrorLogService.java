@@ -35,9 +35,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class ErrorLogService {
-  private static final String ID = "id";
-  private static final String HRID = "hrid";
-  private static final String TITLE = "title";
+  public static final String ID = "id";
+  public static final String HRID = "hrid";
+  public static final String TITLE = "title";
   private static final String COMMA_SEPARATOR = ", ";
 
   @Value("${application.inventory-record-link}")

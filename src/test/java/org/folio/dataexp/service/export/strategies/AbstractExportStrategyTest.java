@@ -199,8 +199,10 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    Optional<String> getIdentifierMessage(UUID id) {
-      return Optional.of("hrid123");
+    Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+      var identifiers = new ExportIdentifiersForDuplicateErrors();
+      identifiers.setIdentifierHridMessage("hrid123");
+      return Optional.of(identifiers);
     }
 
     @Override

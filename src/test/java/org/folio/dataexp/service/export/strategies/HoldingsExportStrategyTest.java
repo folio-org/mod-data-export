@@ -93,10 +93,10 @@ class HoldingsExportStrategyTest {
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
 
-    var opt = holdingsExportStrategy.getIdentifierMessage(UUID.randomUUID());
+    var opt = holdingsExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Holding with hrid : 123", opt.get());
+    assertEquals("Holding with hrid : 123", opt.get().getIdentifierHridMessage());
   }
 
   @Test
@@ -132,7 +132,7 @@ class HoldingsExportStrategyTest {
     when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
     doNothing().when(entityManager).clear();
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, new ExportRequest());
+    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile);
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 

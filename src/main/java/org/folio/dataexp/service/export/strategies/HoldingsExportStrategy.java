@@ -20,6 +20,7 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -81,31 +82,45 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, exportRequest);
-    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, exportStatistic, result);
-  }
-
-  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
-      UUID jobExecutionId, ExportStrategyStatistic exportStatistic, GeneratedMarcResult result) {
-    var rules = ruleFactory.getRules(mappingProfile);
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
-    var marcRecords = holdingsWithInstanceAndItems.stream()
-        .filter(h -> !h.isEmpty()).map(h -> mapToMarc(h, new ArrayList<>(rules), referenceDataWrapper, jobExecutionId,
-            exportStatistic)).toList();
-    result.setMarcRecords(marcRecords);
-    return result;
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
 
   @Override
-  public Optional<String> getIdentifierMessage(UUID id) {
+  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
     if (holdings.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
-      return Optional.of("Holding with hrid : " + hrid);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Holding with hrid : " + hrid);
+      return Optional.of(exportIdentifiers);
     }
     return Optional.empty();
+  }
+
+  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId, GeneratedMarcResult result) {
+    var rules = ruleFactory.getRules(mappingProfile);
+    var marcRecords = new ArrayList<String>();
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    for (var jsonObject : holdingsWithInstanceAndItems) {
+      try {
+        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        marcRecords.add(marc);
+      } catch (MarcException e) {
+        var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+        var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+        var uuid = holdingsJsonObject.getAsString(ID_KEY);
+        result.addIdToFailed(UUID.fromString(uuid));
+        var errorMessage = String.format("%s for holding %s", e.getMessage(), uuid);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
+        log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
+      }
+    }
+    result.setMarcRecords(marcRecords);
+    return result;
   }
 
   @Override
@@ -113,8 +128,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return new HashMap<>();
   }
 
-  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result,
-                                                             MappingProfile mappingProfile, ExportRequest exportRequest) {
+  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
@@ -167,23 +181,15 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return holdingsWithInstanceAndItems;
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper,
-                           UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    try {
-      return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
-        var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
-        var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-        log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
-      }));
-    } catch (MarcException e) {
-      errorLogService.saveWithAffectedRecord(jsonObject, ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
-      log.error(e.getMessage());
-      exportStatistic.incrementFailed();
-      return "";
-    }
+    return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
+      var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+      var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.get(ID_KEY));
+    }));
   }
 
   private void addItemsToHolding(JSONObject holdingJson, UUID holdingId) {
