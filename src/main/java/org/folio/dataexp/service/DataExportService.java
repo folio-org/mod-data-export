@@ -51,14 +51,18 @@ public class DataExportService {
       log.error(e.getMessage());
       return;
     }
-    log.info("Post data export for file definition {} and job profile {} with job execution {}",
-      exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
+    log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
+        Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
-    inputFileProcessor.readFile(fileDefinition, commonExportFails);
-    slicerProcessor.sliceInstancesIds(fileDefinition);
+    if (!Boolean.TRUE.equals(exportRequest.getAll())) {
+      inputFileProcessor.readFile(fileDefinition, commonExportFails);
+      log.info("File has been read successfully.");
+    }
+    slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
+    log.info("Instance IDs have been sliced successfully.");
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
-    singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest.getIdType(), commonExportFails);
+    singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {

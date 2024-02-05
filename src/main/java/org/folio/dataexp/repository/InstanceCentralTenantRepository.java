@@ -19,9 +19,9 @@ public class InstanceCentralTenantRepository {
   private EntityManager entityManager;
 
   private final static String MARC_RECORD_QUERY = "SELECT id, content, external_id, record_type FROM %s_mod_source_record_storage.records_lb records_lb\n"
-    + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)\n"
-    + "    WHERE records_lb.state = 'ACTUAL' AND records_lb.leader_record_status != 'd' AND records_lb.record_type = 'MARC_BIB'"
-    + "    AND external_id in :ids";
+      + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)\n"
+      + "    WHERE records_lb.state = 'ACTUAL' AND records_lb.leader_record_status != 'd' AND records_lb.record_type = 'MARC_BIB'"
+      + "    AND external_id in :ids";
 
   private final static String INSTANCE_QUERY = "SELECT id, jsonb FROM %s_mod_inventory_storage.instance WHERE id in :ids";
 

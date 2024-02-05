@@ -1,7 +1,9 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
@@ -12,11 +14,12 @@ import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.repository.InstanceCentralTenantRepository;
+import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -57,6 +60,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,6 +72,8 @@ class InstancesExportStrategyTest {
   private ConsortiaService consortiaService;
   @Mock
   private InstanceCentralTenantRepository instanceCentralTenantRepository;
+  @Mock
+  private MarcInstanceRecordRepository marcInstanceRecordRepository;
   @Mock
   private MarcRecordEntityRepository marcRecordEntityRepository;
   @Mock
@@ -86,6 +92,8 @@ class InstancesExportStrategyTest {
   private ItemEntityRepository itemEntityRepository;
   @Mock
   private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock
+  private EntityManager entityManager;
   @Mock
   private ErrorLogService errorLogService;
   @Spy
@@ -108,15 +116,15 @@ class InstancesExportStrategyTest {
 
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(anySet(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
-    when(instanceCentralTenantRepository.findMarcRecordsByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+    when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
     assertEquals(2, actualMarcRecords.size());
 
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
 
-    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
+    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
     assertEquals(2, actualMarcRecords.size());
   }
 
@@ -127,7 +135,7 @@ class InstancesExportStrategyTest {
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile);
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
     assertEquals(0, actualMarcRecords.size());
   }
 
@@ -146,7 +154,6 @@ class InstancesExportStrategyTest {
     assertEquals("uuid", opt.get().getAssociatedJsonObject().getAsString("id"));
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
     assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
-
   }
 
   @Test
@@ -162,7 +169,7 @@ class InstancesExportStrategyTest {
     defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
     defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
     var defaultMappingProfileEntity = MappingProfileEntity.builder()
-      .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+        .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
 
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
@@ -170,7 +177,8 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, UUID.randomUUID());
+    doNothing().when(entityManager).clear();
+    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
@@ -198,7 +206,7 @@ class InstancesExportStrategyTest {
     defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
     defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
     var defaultMappingProfileEntity = MappingProfileEntity.builder()
-      .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+        .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
 
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
@@ -208,7 +216,7 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
     doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
 
-    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, UUID.randomUUID());
+    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
@@ -244,8 +252,10 @@ class InstancesExportStrategyTest {
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    doNothing().when(entityManager).clear();
 
-    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
+    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
+        generatedMarcResult, mappingProfile);
 
     assertEquals(1, instancesWithHoldingsAndItems.size());
 
@@ -309,7 +319,7 @@ class InstancesExportStrategyTest {
   @Test
   void getAdditionalMarcFieldsByExternalIdTest() {
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
