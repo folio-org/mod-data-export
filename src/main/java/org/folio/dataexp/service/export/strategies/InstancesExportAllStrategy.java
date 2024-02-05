@@ -76,7 +76,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     updateSliceState(slice, exportRequest);
     log.info("Slice size for instances export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
-    var instances = slice.getContent().stream().toList();
+    var instances = slice.getContent().stream().collect(Collectors.toList());
     log.info("Size of exportIds for instances export all: {}", exportIds.size());
     createAndSaveMarc(exportIds, instances, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
       exportRequest);
@@ -84,7 +84,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
       updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(InstanceEntity::getId).collect(Collectors.toSet());
-      instances = slice.getContent().stream().toList();
+      instances = slice.getContent().stream().collect(Collectors.toList());
       createAndSaveMarc(exportIds, instances, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
     }

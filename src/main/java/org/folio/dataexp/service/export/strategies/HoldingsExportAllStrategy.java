@@ -62,7 +62,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     updateSliceState(slice, exportRequest);
     log.info("Slice size for holdings export all: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-    var holdings = slice.getContent().stream().toList();
+    var holdings = slice.getContent().stream().collect(Collectors.toList());
     log.info("Size of exportIds for holdings export all: {}", exportIds.size());
     createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
       exportRequest);
@@ -70,7 +70,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
       updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-      holdings = slice.getContent().stream().toList();
+      holdings = slice.getContent().stream().collect(Collectors.toList());
       createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest);
     }
