@@ -1,5 +1,7 @@
 package org.folio.dataexp.repository;
 
+import static java.lang.String.format;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -9,8 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static java.lang.String.format;
 
 @Repository
 public class MarcInstanceRecordRepository {

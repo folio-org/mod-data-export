@@ -1,5 +1,8 @@
 package org.folio.dataexp.service;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
@@ -9,9 +12,6 @@ import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Log4j2
 @RequiredArgsConstructor
