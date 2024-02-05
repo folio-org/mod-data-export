@@ -12,4 +12,7 @@ public interface FileDefinitionEntityRepository extends JpaRepository<FileDefini
   @Query(value = "SELECT * FROM file_definitions WHERE jsonb ->> 'sourcePath' IS NOT NULL" +
     " AND to_timestamp(cast(jsonb -> 'metadata' ->> 'updatedDate' AS BIGINT) / 1000) <= ?1", nativeQuery = true)
   List<FileDefinitionEntity> getExpiredEntities(Date expirationDate);
+
+  @Query(value = "SELECT * FROM file_definitions WHERE jsonb ->> 'jobExecutionId' = ?1", nativeQuery = true)
+  List<FileDefinitionEntity> getFileDefinitionByJobExecutionId(String jobExecutionId);
 }

@@ -14,6 +14,7 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
@@ -98,23 +99,23 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
-    var remoteStorageWriter = createRemoteStorageWrite(exportFilesEntity);
+    var localStorageWrite = createLocalStorageWrite(exportFilesEntity);
     var slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
       exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
     var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-    createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
+    createAndSaveMarc(exportIds, localStorageWrite, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
     while (slice.hasNext()) {
       slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId(), slice.nextPageable());
       exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, remoteStorageWriter, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
+      createAndSaveMarc(exportIds, localStorageWrite, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId());
     }
     try {
-      remoteStorageWriter.close();
+      localStorageWrite.close();
       exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
-      log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      log.error("saveMarcToRemoteStorage:: Error while storing file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.setExported(0);
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
@@ -134,8 +135,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile);
 
-  protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
-    return new RemoteStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE, s3Client);
+  protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
+    return new LocalStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE);
   }
 
   protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
@@ -148,7 +149,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     return Optional.empty();
   }
 
-  private void createAndSaveMarc(Set<UUID> externalIds, RemoteStorageWriter remoteStorageWriter,
+  private void createAndSaveMarc(Set<UUID> externalIds, LocalStorageWriter localStorageWriter,
                                  ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = getMarcRecords(externalIds, mappingProfile);
     var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
@@ -168,7 +169,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         exportStatistic.incrementFailed();
         continue;
       }
-      remoteStorageWriter.write(marc);
+      localStorageWriter.write(marc);
       if (externalIdsWithMarcRecord.contains(marcRecordEntity.getExternalId())) {
         exportStatistic.incrementDuplicatedSrs();
         var exportIdentifiers = getIdentifiers(marcRecordEntity.getExternalId());
@@ -184,7 +185,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var result = getGeneratedMarc(externalIds, mappingProfile, jobExecutionId );
     result.getMarcRecords().forEach(marc -> {
       if (StringUtils.isNotEmpty(marc)) {
-        remoteStorageWriter.write(marc);
+        localStorageWriter.write(marc);
       }
       exportStatistic.incrementExported();
     });
