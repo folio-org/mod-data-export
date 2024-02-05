@@ -12,8 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class LocalStorageWriter extends StringWriter {
-
-
   private final File tmp;
   private final BufferedWriter writer;
 
