@@ -56,7 +56,6 @@ import static java.lang.String.format;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.folio.dataexp.service.DataExportTenantService.VIEWS_VARIABLE_FOR_SQL_SCRIPT;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -104,7 +103,6 @@ public class BaseDataExportInitializer {
   }
 
   private static void createDataAndTablesForViews() throws IOException{
-    System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, TENANT);
     var dataSource =  new SingleConnectionDataSource(postgresDBContainer.getJdbcUrl(),postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), true );
     var jdbcTemplate = new JdbcTemplate(dataSource);
     runSqlScript("/init_mod_inventory_storage.sql", jdbcTemplate);

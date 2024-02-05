@@ -3,7 +3,6 @@ package org.folio.dataexp.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.Config;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -16,7 +15,6 @@ import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -41,16 +39,6 @@ public class DataExportTenantService extends TenantService {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
-  private String myUniversity;
-
-  @Value("${application.my-university}")
-  public void setMyUniversity(String myUniversity) {
-    if (StringUtils.isEmpty(myUniversity)){
-      log.warn("The default value of application.my-university wasn't provided");
-    }
-    this.myUniversity = myUniversity;
-  }
-
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                                  JobProfileEntityRepository jobProfileEntityRepository,
@@ -72,8 +60,7 @@ public class DataExportTenantService extends TenantService {
 
   @Override
   public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
-      var tenantId = super.context.getTenantId();
-      var tenant = StringUtils.isEmpty(tenantId) ? myUniversity : tenantId;
+      var tenant = super.context.getTenantId();
       System.setProperty(VIEWS_VARIABLE_FOR_SQL_SCRIPT, tenant);
       super.createOrUpdateTenant(tenantAttributes);
   }
