@@ -47,11 +47,18 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+        if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+          return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, HOLDING_MARC_TYPE);
+        }
         return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, HOLDING_MARC_TYPE,
-          exportRequest.getSuppressedFromDiscovery());
+          false);
+      }
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot (externalIds,
+          HOLDING_MARC_TYPE, "ACTUAL", 'd');
       }
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNotAndSuppressDiscoveryIs(
-        externalIds, HOLDING_MARC_TYPE, "ACTUAL", 'd', exportRequest.getSuppressedFromDiscovery());
+        externalIds, HOLDING_MARC_TYPE, "ACTUAL", 'd', false);
     }
     return new ArrayList<>();
   }

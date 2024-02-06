@@ -61,11 +61,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+        if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+          return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, INSTANCE_MARC_TYPE);
+        }
         return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, INSTANCE_MARC_TYPE,
-          exportRequest.getSuppressedFromDiscovery());
+          false);
+      }
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot (externalIds,
+          INSTANCE_MARC_TYPE, "ACTUAL", 'd');
       }
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNotAndSuppressDiscoveryIs(
-        externalIds, INSTANCE_MARC_TYPE, "ACTUAL", 'd', exportRequest.getSuppressedFromDiscovery());
+        externalIds, INSTANCE_MARC_TYPE, "ACTUAL", 'd', false);
     }
     return new ArrayList<>();
   }
