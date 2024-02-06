@@ -1,13 +1,18 @@
 package org.folio.dataexp.service.export.strategies;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -42,16 +47,15 @@ import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 
 @Log4j2
 @Component
 @AllArgsConstructor
 public class HoldingsExportStrategy extends AbstractExportStrategy {
-  private static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
+  protected static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 
-  private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;
-  private final MarcRecordEntityRepository marcRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;
@@ -59,18 +63,45 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final ErrorLogService errorLogService;
 
+  protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  protected final MarcRecordEntityRepository marcRecordEntityRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
+
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIs(externalIds, HOLDING_MARC_TYPE);
+      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(externalIds,
+          HOLDING_MARC_TYPE, "ACTUAL", 'd');
     }
     return new ArrayList<>();
   }
 
   @Override
-  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, UUID jobExecutionId) {
+  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult();
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
+  }
+
+  @Override
+  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+    var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
+    if (holdings.isEmpty()) return Optional.empty();
+    var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
+    if (jsonObject.isPresent()) {
+      var hrid = jsonObject.get().getAsString(HRID_KEY);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Holding with hrid : " + hrid);
+      return Optional.of(exportIdentifiers);
+    }
+    return Optional.empty();
+  }
+
+  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId, GeneratedMarcResult result) {
     var rules = ruleFactory.getRules(mappingProfile);
     var marcRecords = new ArrayList<String>();
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
@@ -91,21 +122,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     result.setMarcRecords(marcRecords);
     return result;
   }
-
-  @Override
-  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
-    var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
-    if (holdings.isEmpty()) return Optional.empty();
-    var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
-    if (jsonObject.isPresent()) {
-      var hrid = jsonObject.get().getAsString(HRID_KEY);
-      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage("Holding with hrid : " + hrid);
-      return Optional.of(exportIdentifiers);
-    }
-    return Optional.empty();
-  }
-
+  
   @Override
   public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
     return new HashMap<>();
@@ -114,7 +131,13 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
+    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
+  }
+
+  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile,
+                                                             List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
+    entityManager.clear();
     List<JSONObject> holdingsWithInstanceAndItems = new ArrayList<>();
     var existHoldingsIds = new HashSet<UUID>();
     for (var holding : holdings) {

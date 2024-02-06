@@ -30,8 +30,8 @@ class SingleFileProcessorAsyncTest {
       .fileLocation(fileLocation).build();
     var commonFails = new CommonExportFails();
 
-    singleFileProcessorAsync.executeExport(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+    singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails, false);
 
-    verify(exportExecutor).exportAsynch(exportEntity, ExportRequest.IdTypeEnum.INSTANCE, commonFails);
+    verify(exportExecutor).exportAsynch(exportEntity, new ExportRequest(), commonFails, false);
   }
 }

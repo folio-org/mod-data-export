@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.Setter;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
@@ -97,7 +98,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type");
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     marcRecords.add(marcRecordEntity);
@@ -110,7 +111,7 @@ class AbstractExportStrategyTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
 
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest(), false);
     assertEquals(2, exportStatistic.getExported());
     assertEquals(1, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
@@ -141,7 +142,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type");
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);
@@ -155,7 +156,7 @@ class AbstractExportStrategyTest {
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
     doThrow(new S3ClientException("Can not write")).when(remoteStorageWriter).close();
 
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity);
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest(), false);
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
@@ -187,12 +188,13 @@ class AbstractExportStrategyTest {
     private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult();
 
     @Override
-    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile) {
+    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
       return marcRecords;
     }
 
     @Override
-    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, UUID jobExecutionId) {
+    GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
+        UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
       return generatedMarcResult;
     }
 

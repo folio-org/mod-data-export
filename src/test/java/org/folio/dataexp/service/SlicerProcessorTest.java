@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
@@ -58,7 +59,8 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       s3Client.write(path, resource.getInputStream());
       inputFileProcessor.readFile(fileDefinition, new CommonExportFails());
 
-      slicerProcessor.sliceInstancesIds(fileDefinition, 1);
+      var exportRequest = new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(false);
+      slicerProcessor.sliceInstancesIds(fileDefinition, 1, exportRequest);
       var exportFiles = jobExecutionExportFilesEntityRepository.findAll();
 
       assertEquals(2, exportFiles.size());
@@ -91,7 +93,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
       exportFiles = jobExecutionExportFilesEntityRepository.findAll();
       assertEquals(0, exportFiles.size());
 
-      slicerProcessor.sliceInstancesIds(fileDefinition, 2);
+      slicerProcessor.sliceInstancesIds(fileDefinition, 2, exportRequest);
       exportFiles = jobExecutionExportFilesEntityRepository.findAll();
       assertEquals(1, exportFiles.size());
 

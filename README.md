@@ -137,6 +137,13 @@ The average memory usage is ~200 MiB.
 For Custom mapping profile, the max usage of memory is 250 MiB during the process of export 1 million records.
 The average memory usage is ~190 MiB.
 
+#### MINIO storage memory settings for /data-export/export-all
+Depending on the total amount of records to be exported, the size of minio storage required for the successful export can be various.
+For example, 1 output mrc file with 100k records occupies 115Mb of minio storage and for 8180068 instances 
+it requires 82 files, so the total size of files will be 115 * 82 = 9.43Gb for only 1 export execution. 
+These results should be taken into account when setting up configuration for minio storage, especially for 
+larger data sets and parallel export.
+
 
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
