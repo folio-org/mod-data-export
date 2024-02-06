@@ -52,6 +52,7 @@ public class LocalStorageWriter extends StringWriter {
 
   private void deleteTmp(File tmp) {
     try {
+      close();
       Files.deleteIfExists(tmp.toPath());
     } catch (IOException ex) {
       throw new LocalStorageWriterException("Error in deleting file: " + ex.getMessage());
