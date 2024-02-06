@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,7 +92,7 @@ class ExportExecutorTest {
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-    verify(s3ExportsUploader).upload(eq(jobExecutionId), eq(List.of(completedExportEntity)), eq("file_name"));
+    verify(s3ExportsUploader).upload(jobExecutionId, List.of(completedExportEntity), "file_name");
   }
 
   @Test
@@ -138,6 +136,6 @@ class ExportExecutorTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
     verify(errorLogService).saveCommonExportFailsErrors(commonFails, 2, jobExecutionId);
-    verify(s3ExportsUploader).upload(eq(jobExecutionId), eq(List.of(completedExportEntity)), eq("file_name"));
+    verify(s3ExportsUploader).upload(jobExecutionId, List.of(completedExportEntity), "file_name");
   }
 }
