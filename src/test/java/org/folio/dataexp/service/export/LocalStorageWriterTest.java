@@ -36,7 +36,7 @@ class LocalStorageWriterTest {
   @Test
   @SneakyThrows
   void writeIfExceptionTest() {
-    String unvalidData = null;
+    String invalidData = null;
     var jobExecutionId = UUID.randomUUID();
     var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
     Files.createDirectories(Path.of(temDirLocation));
@@ -44,7 +44,7 @@ class LocalStorageWriterTest {
 
     var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
 
-    writer.write(unvalidData);
+    writer.write(invalidData);
     var file = new File(fileLocation);
 
     assertFalse(file.exists());

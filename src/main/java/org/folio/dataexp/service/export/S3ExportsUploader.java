@@ -3,6 +3,7 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
+import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.s3.client.FolioS3Client;
@@ -32,15 +33,15 @@ public class S3ExportsUploader {
 
   private final FolioS3Client s3Client;
 
-  public String upload(UUID jobExecutionId, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
+  public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
     try {
       String uploadedPath;
       if (exports.size() > 1) {
-        uploadedPath = uploadZip(jobExecutionId, exports, initialFileName);
+        uploadedPath = uploadZip(jobExecution, exports, initialFileName);
       } else {
-        uploadedPath =  uploadMarc(jobExecutionId, exports, initialFileName);
+        uploadedPath =  uploadMarc(jobExecution.getId(), exports, initialFileName);
       }
-      FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecutionId)));
+      FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecution.getId())));
       return uploadedPath;
     } catch (IOException e) {
       throw new S3ExportsUploadException(e.getMessage());
@@ -64,9 +65,9 @@ public class S3ExportsUploader {
     return s3path;
   }
 
-  private String uploadZip (UUID jobExecutionId, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
+  private String uploadZip (JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
     var zipFileName = fileName + ".zip";
-    var zipDirPath =  getTempDirForJobExecutionId(jobExecutionId) + "zip/";
+    var zipDirPath =  getTempDirForJobExecutionId(jobExecution.getId()) + "zip/";
     Files.createDirectories(Path.of(zipDirPath));
     var zipFilePath = zipDirPath + zipFileName;
     var zip = Files.createFile(Path.of(zipFilePath)).toFile();
@@ -80,7 +81,7 @@ public class S3ExportsUploader {
         }
         countExportsFiles++;
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(exportFile))) {
-          var zipEntryName = String.format("%s-%s-%s.mrc", fileName, jobExecutionId, countExportsFiles);
+          var zipEntryName = String.format("%s-%s-%s.mrc", fileName, jobExecution.getHrId(), countExportsFiles);
           log.info(export.getFileLocation() + " zipped as " + zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);
@@ -94,7 +95,7 @@ public class S3ExportsUploader {
         Files.delete(exportFile.toPath());
       }
     }
-    var s3ZipPath = getPathToStoredFiles(jobExecutionId, zipFileName);
+    var s3ZipPath = getPathToStoredFiles(jobExecution.getId(), zipFileName);
     if (isZipFileNotEmpty) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(zip))) {
         s3Client.write(s3ZipPath, inputStream);

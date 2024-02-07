@@ -88,7 +88,7 @@ public class ExportExecutor {
       var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
       var innerFileName =  initialFileName + ".mrc";
       try {
-        innerFileName = s3Uploader.upload(jobExecutionId, filesForExport, initialFileName);
+        innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
       } catch (S3ExportsUploadException e) {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
         var errorMessage= String.format(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription(), fileDefinition.getId());
