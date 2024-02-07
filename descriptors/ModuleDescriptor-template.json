@@ -355,7 +355,9 @@
             "inventory-storage.contributor-name-types.collection.get",
             "inventory-storage.electronic-access-relationships.collection.get",
             "inventory-storage.instance-types.collection.get",
-            "inventory-storage.modes-of-issuance.collection.get"
+            "inventory-storage.modes-of-issuance.collection.get",
+            "inventory-storage.holdings-note-types.collection.get",
+            "inventory-storage.item-note-types.collection.get"
           ]
         },
         {
