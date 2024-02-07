@@ -56,7 +56,7 @@ public class InputFileProcessor {
     }
   }
 
-  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) throws IOException {
+  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) {
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();

@@ -39,7 +39,7 @@ public class S3ExportsUploader {
       if (exports.size() > 1) {
         uploadedPath = uploadZip(jobExecution, exports, initialFileName);
       } else {
-        uploadedPath =  uploadMarc(jobExecution.getId(), exports, initialFileName);
+        uploadedPath = uploadMarc(jobExecution, exports, initialFileName);
       }
       FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecution.getId())));
       return uploadedPath;
@@ -48,9 +48,9 @@ public class S3ExportsUploader {
     }
   }
 
-  private String uploadMarc(UUID jobExecutionId, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
-    var s3Name =  String.format("%s-%s.mrc", fileName, jobExecutionId);
-    var s3path = getPathToStoredFiles(jobExecutionId, s3Name);
+  private String uploadMarc(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
+    var s3Name =  String.format("%s-%s.mrc", fileName, jobExecution.getHrId());
+    var s3path = getPathToStoredFiles(jobExecution.getId(), s3Name);
     var fileToUpload =  new File(exports.get(0).getFileLocation());
     if (fileToUpload.length() > 0) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
