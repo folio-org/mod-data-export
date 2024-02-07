@@ -109,6 +109,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     }
     if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
       var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedMarcRecords();
+      log.info("instance export all, deletedMarcIds: {}", deletedMarcIds);
       return instanceEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), deletedMarcIds, pageble);
     }
