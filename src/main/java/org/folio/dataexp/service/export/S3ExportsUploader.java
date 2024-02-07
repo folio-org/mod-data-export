@@ -32,57 +32,64 @@ import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 public class S3ExportsUploader {
 
   private final FolioS3Client s3Client;
+  private static final String EMPTY_FILE_FOR_EXPORT = "File for exports is empty";
 
   public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
+    if (exports.isEmpty()) {
+      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
+    }
     try {
       String uploadedPath;
       if (exports.size() > 1) {
-        uploadedPath = uploadZip(jobExecution, exports, initialFileName);
+        var filesToExport = exports.stream().map(e -> new File(e.getFileLocation()))
+          .filter(f -> f.length() > 0).toList();
+        if (filesToExport.size() > 1) {
+          uploadedPath = uploadZip(jobExecution, filesToExport, initialFileName);
+        } else if (filesToExport.size() == 1) {
+          uploadedPath = uploadMarc(jobExecution, filesToExport.get(0), initialFileName);
+        } else {
+          removeTempDirForJobExecution(jobExecution.getId());
+          throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
+        }
       } else {
-        uploadedPath = uploadMarc(jobExecution, exports, initialFileName);
+        var fileToExport = new File(exports.get(0).getFileLocation());
+        uploadedPath = uploadMarc(jobExecution, fileToExport, initialFileName);
       }
-      FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecution.getId())));
       return uploadedPath;
     } catch (IOException e) {
       throw new S3ExportsUploadException(e.getMessage());
     }
   }
 
-  private String uploadMarc(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
+  private String uploadMarc(JobExecution jobExecution, File fileToUpload, String fileName) throws IOException {
     var s3Name =  String.format("%s-%s.mrc", fileName, jobExecution.getHrId());
     var s3path = getPathToStoredFiles(jobExecution.getId(), s3Name);
-    var fileToUpload =  new File(exports.get(0).getFileLocation());
     if (fileToUpload.length() > 0) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
         s3Client.write(s3path, inputStream);
       }
-      log.info(exports.get(0).getFileLocation() + " uploaded as " + s3Name);
-      FileUtils.delete(fileToUpload);
+      log.info(fileToUpload.getPath() + " uploaded as " + s3Name);
+      removeTempDirForJobExecution(jobExecution.getId());
     } else {
-      FileUtils.delete(fileToUpload);
-      throw new S3ExportsUploadException("Marc file for exports is empty");
+      removeTempDirForJobExecution(jobExecution.getId());
+      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
     }
     return s3path;
   }
 
-  private String uploadZip (JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String fileName) throws IOException {
+  private String uploadZip (JobExecution jobExecution, List<File> exports, String fileName) throws IOException {
     var zipFileName = fileName + ".zip";
     var zipDirPath =  getTempDirForJobExecutionId(jobExecution.getId()) + "zip/";
     Files.createDirectories(Path.of(zipDirPath));
     var zipFilePath = zipDirPath + zipFileName;
     var zip = Files.createFile(Path.of(zipFilePath)).toFile();
-    boolean isZipFileNotEmpty = false;
     try (var fileOutputStream = new FileOutputStream(zip); var zipOutputStream = new ZipOutputStream(fileOutputStream)) {
       var countExportsFiles = 0;
-      for (var export : exports) {
-        var exportFile = new File(export.getFileLocation());
-        if (exportFile.length() == 0) {
-          continue;
-        }
+      for (var exportFile : exports) {
         countExportsFiles++;
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(exportFile))) {
           var zipEntryName = String.format("%s-%s-%s.mrc", fileName, jobExecution.getHrId(), countExportsFiles);
-          log.info(export.getFileLocation() + " zipped as " + zipEntryName);
+          log.info(exportFile.getPath() + " zipped as " + zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);
           byte[] bytes = new byte[1024];
@@ -91,20 +98,15 @@ public class S3ExportsUploader {
             zipOutputStream.write(bytes, 0, length);
           }
         }
-        isZipFileNotEmpty = true;
         Files.delete(exportFile.toPath());
       }
     }
     var s3ZipPath = getPathToStoredFiles(jobExecution.getId(), zipFileName);
-    if (isZipFileNotEmpty) {
-      try (var inputStream = new BufferedInputStream(new FileInputStream(zip))) {
+    try (var inputStream = new BufferedInputStream(new FileInputStream(zip))) {
         s3Client.write(s3ZipPath, inputStream);
-      }
-    } else {
-      FileUtils.delete(zip);
-      throw new S3ExportsUploadException("Zip file for exports is empty");
     }
     FileUtils.delete(zip);
+    removeTempDirForJobExecution(jobExecution.getId());
     return s3ZipPath;
   }
 
@@ -112,4 +114,7 @@ public class S3ExportsUploader {
     return String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
   }
 
+  private void removeTempDirForJobExecution(UUID jobExecutionId) throws IOException {
+    FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecutionId)));
+  }
 }
