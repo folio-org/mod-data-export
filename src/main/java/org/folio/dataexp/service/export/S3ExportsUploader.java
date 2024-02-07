@@ -32,11 +32,11 @@ import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 public class S3ExportsUploader {
 
   private final FolioS3Client s3Client;
-  private static final String EMPTY_FILE_FOR_EXPORT = "File for exports is empty";
+  public static final String EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE = "File for exports is empty";
 
   public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
     if (exports.isEmpty()) {
-      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
+      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
     }
     try {
       String uploadedPath;
@@ -49,7 +49,7 @@ public class S3ExportsUploader {
           uploadedPath = uploadMarc(jobExecution, filesToExport.get(0), initialFileName);
         } else {
           removeTempDirForJobExecution(jobExecution.getId());
-          throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
+          throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
         }
       } else {
         var fileToExport = new File(exports.get(0).getFileLocation());
@@ -72,7 +72,7 @@ public class S3ExportsUploader {
       removeTempDirForJobExecution(jobExecution.getId());
     } else {
       removeTempDirForJobExecution(jobExecution.getId());
-      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT);
+      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
     }
     return s3path;
   }

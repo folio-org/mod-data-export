@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.service.export.S3ExportsUploader.EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE;
 import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,7 +45,8 @@ class S3ExportsUploaderTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
 
-    assertThrows(S3ExportsUploadException.class, () -> s3ExportsUploader.upload(jobExecution, List.of(), initialFileName));
+    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () -> s3ExportsUploader.upload(jobExecution, List.of(), initialFileName));
+    assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
   }
 
   @Test
@@ -89,9 +91,8 @@ class S3ExportsUploaderTest {
     writer.close();
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
-    assertThrows(S3ExportsUploadException.class, () ->
-      s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName)
-    );
+    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () -> s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName));
+    assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
@@ -191,7 +192,9 @@ class S3ExportsUploaderTest {
     var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
     var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
 
-    assertThrows(S3ExportsUploadException.class, () -> s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName));
+    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () -> s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName));
+    assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
+
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
   }
