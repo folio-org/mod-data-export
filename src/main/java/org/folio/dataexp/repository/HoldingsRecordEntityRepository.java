@@ -16,8 +16,13 @@ public interface HoldingsRecordEntityRepository extends Repository<HoldingsRecor
 
   List<HoldingsRecordEntity> findByInstanceIdIs(UUID instanceId);
 
+  Slice<HoldingsRecordEntity> findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(UUID fromId, UUID toId, Set<UUID> deletedMarcIds, Pageable page);
+
   Slice<HoldingsRecordEntity> findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(UUID fromId, UUID toId, Pageable page);
 
   @Query(value = "SELECT * FROM v_holdings_all WHERE id BETWEEN ?1 AND ?2 AND (jsonb ->> 'discoverySuppress' is null OR jsonb ->> 'discoverySuppress' = 'false') ORDER BY id ASC", nativeQuery = true)
   Slice<HoldingsRecordEntity> findAllWhenSkipDiscoverySuppressed(UUID fromId, UUID toId, Pageable page);
+
+  @Query(value = "SELECT * FROM v_holdings_all WHERE id BETWEEN ?1 AND ?2 AND (jsonb ->> 'discoverySuppress' is null OR jsonb ->> 'discoverySuppress' = 'false') AND id NOT IN ?3 ORDER BY id ASC", nativeQuery = true)
+  Slice<HoldingsRecordEntity> findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(UUID fromId, UUID toId, Set<UUID> deletedMarcIds, Pageable page);
 }

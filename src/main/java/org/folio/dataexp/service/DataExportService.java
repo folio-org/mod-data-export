@@ -15,6 +15,9 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -34,6 +37,8 @@ public class DataExportService {
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
+
+  private CacheManager cacheManager;
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
@@ -63,6 +68,8 @@ public class DataExportService {
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
+
+    clearCacheForDeletedMarcRecordsAfterExportCompleted();
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
@@ -93,5 +100,17 @@ public class DataExportService {
 
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
+  }
+
+  private void clearCacheForDeletedMarcRecordsAfterExportCompleted() {
+    cacheManager.getCache("deleted-not-suppressed-marc-ids").clear();
+    cacheManager.getCache("deleted-marc-ids").clear();
+    cacheManager.getCache("deleted-not-suppressed-holdings-marc-ids").clear();
+    cacheManager.getCache("deleted-holdings-marc-ids").clear();
+  }
+
+  @Autowired
+  public void setCacheManagerPerExport(@Qualifier("cacheManagerPerExport") CacheManager cacheManager) {
+    this.cacheManager = cacheManager;
   }
 }

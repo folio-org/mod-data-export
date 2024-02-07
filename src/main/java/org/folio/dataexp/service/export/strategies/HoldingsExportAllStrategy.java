@@ -85,8 +85,19 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   private Slice<HoldingsRecordEntity> chooseSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
+        var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedHoldingsMarcRecords();
+        return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
+          exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+      }
       return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), pageble);
+    }
+    if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
+      var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedHoldingsMarcRecords();
+      return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), deletedMarcIds, pageble
+       );
     }
     return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
       exportFilesEntity.getToId(), pageble);

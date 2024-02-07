@@ -99,8 +99,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private Slice<InstanceEntity> chooseSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
+        var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedMarcRecords();
+        return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
+          exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+      }
       return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), pageble);
+    }
+    if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
+      var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedMarcRecords();
+      return instanceEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), deletedMarcIds, pageble);
     }
     return instanceEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
       exportFilesEntity.getToId(), pageble);
