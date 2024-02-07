@@ -95,9 +95,11 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     }
     if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
       var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedHoldingsMarcRecords();
-      return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
-        exportFilesEntity.getToId(), deletedMarcIds, pageble
-       );
+      log.info("holdings export all, deletedMarcIds: {}", deletedMarcIds);
+      if (!deletedMarcIds.isEmpty()) {
+        return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(), deletedMarcIds, pageble);
+      }
     }
     return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
       exportFilesEntity.getToId(), pageble);
