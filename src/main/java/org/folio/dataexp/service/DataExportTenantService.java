@@ -60,10 +60,16 @@ public class DataExportTenantService extends TenantService {
 
   @Override
   public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
-      var tenant = super.context.getTenantId();
-      System.setProperty(TENANT_FOR_VIEWS, tenant);
-      super.createOrUpdateTenant(tenantAttributes);
+    setupTenantForViews();
+    super.createOrUpdateTenant(tenantAttributes);
   }
+
+  private void setupTenantForViews() {
+    var tenant = super.context.getTenantId();
+    log.info("Tenant value for views is {}", tenant);
+    System.setProperty(TENANT_FOR_VIEWS, tenant);
+  }
+
   private void loadMappingProfiles() {
     MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile("/data/mapping-profiles/" + mappingProfile));
   }
@@ -106,9 +112,20 @@ public class DataExportTenantService extends TenantService {
   }
 
   private void loadConfiguration() {
+    setupDefaultSliceSizeValue();
+    setupConfigEntryFolioHost();
+  }
+
+  private void setupDefaultSliceSizeValue() {
     log.info("Loading default slice size value...");
     var saved = configurationService.upsertConfiguration(
       new Config().key(SlicerProcessor.SLICE_SIZE_KEY).value(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE)));
     log.info("Loaded default slice size value: {}", saved.getValue());
+  }
+  private void setupConfigEntryFolioHost() {
+    log.info("Loading Folio host value...");
+    var folioHostConfigFromRemote = configurationService.getFolioHostConfigFromRemote();
+    var saved = configurationService.upsertConfiguration(folioHostConfigFromRemote);
+    log.info("Loaded Folio host value: {}", saved.getValue());
   }
 }

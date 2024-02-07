@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "A holdings record",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "the unique ID of the configuration entry; UUID"
+    },
+    "module": {
+      "type": "string"
+    },
+    "configName": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "default": {
+      "type": "boolean"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "value": {
+      "type": "string"
+    },
+    "userId": {
+      "type": "string"
+    },
+    "metadata": {
+      "$ref": "../metadata.json",
+      "readonly": true
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "module",
+    "configName"
+  ]
+}
+

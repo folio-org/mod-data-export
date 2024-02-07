@@ -17,11 +17,11 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.ConfigurationService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.marc4j.MarcException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,12 +39,11 @@ public class ErrorLogService {
   public static final String HRID = "hrid";
   public static final String TITLE = "title";
   private static final String COMMA_SEPARATOR = ", ";
-
-  @Value("${application.inventory-record-link}")
-  private String inventoryRecordLink;
+  private static final String INVENTORY_RECORD_LINK_KEY = "folio_host";
 
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final FolioExecutionContext folioExecutionContext;
+  private final ConfigurationService configurationService;
 
   public ErrorLogCollection getErrorLogsByQuery(String query, int offset, int limit) {
     query = isEmpty(query) ? QUERY_CQL_ALL_RECORDS : query;
@@ -146,7 +145,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink + instId);
+      .inventoryRecordLink(getInventoryRecordLink() + instId);
     if (instId == null) {
       affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
     }
@@ -185,7 +184,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryRecordLink + instId);
+      .inventoryRecordLink(getInventoryRecordLink() + instId);
     var errorLog = new ErrorLog()
       .errorMessageCode(errorMessageCode)
       .errorMessageValues(Collections.singletonList(errorMessage))
@@ -237,4 +236,7 @@ public class ErrorLogService {
       .jobExecutionId(jobExecutionId);
   }
 
+  private String getInventoryRecordLink() {
+    return configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
+  }
 }

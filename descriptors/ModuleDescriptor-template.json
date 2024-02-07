@@ -124,7 +124,8 @@
             "inventory-storage.call-number-types.collection.get",
             "inventory-storage.alternative-title-types.collection.get",
             "inventory-storage.modes-of-issuance.collection.get",
-            "user-tenants.collection.get"
+            "user-tenants.collection.get",
+            "configuration.entries.collection.get"
           ]
         },
         {
@@ -426,7 +427,10 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/_/tenant"
+          "pathPattern": "/_/tenant",
+          "modulePermissions": [
+            "configuration.entries.collection.get"
+          ]
         },
         {
           "methods": [
