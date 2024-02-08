@@ -13,7 +13,6 @@ public interface MarcRecordEntityRepository extends Repository<MarcRecordEntity,
 
   List<MarcRecordEntity> findByExternalIdInAndRecordTypeIs(Set<UUID> ids, String recordType);
   List<MarcRecordEntity> findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(Set<UUID> ids, String recordType, String state, Character leaderRecordStatus);
-
   // To find non-deleted and non-suppressed
   List<MarcRecordEntity> findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNotAndSuppressDiscoveryIs(Set<UUID> ids,
       String recordType, String state, Character leaderRecordStatus, Boolean suppressDiscovery);
