@@ -1,8 +1,8 @@
 package org.folio.dataexp.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.domain.dto.*;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -22,12 +22,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,6 +58,8 @@ class DataExportServiceTest {
   private UserClient userClient;
   @Mock
   private DataExportRequestValidator dataExportRequestValidator;
+  @Mock
+  private CacheManager cacheManager;
 
   @InjectMocks
   private DataExportService dataExportService;
@@ -87,13 +93,12 @@ class DataExportServiceTest {
     var jobExecutionEntity = JobExecutionEntity.builder()
         .jobExecution(jobExecution).id(jobExecution.getId()).build();
 
-
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-
+    when(cacheManager.getCache(anyString())).thenReturn(new CaffeineCache("some name", mock(Cache.class)));
 
     dataExportService.postDataExport(exportRequest);
 

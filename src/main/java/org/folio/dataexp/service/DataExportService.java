@@ -15,7 +15,6 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -38,7 +37,8 @@ public class DataExportService {
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
 
-  private CacheManager cacheManager;
+  @Qualifier("cacheManagerPerExport")
+  private final CacheManager cacheManager;
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
@@ -107,10 +107,5 @@ public class DataExportService {
     cacheManager.getCache("deleted-marc-ids").clear();
     cacheManager.getCache("deleted-not-suppressed-holdings-marc-ids").clear();
     cacheManager.getCache("deleted-holdings-marc-ids").clear();
-  }
-
-  @Autowired
-  public void setCacheManagerPerExport(@Qualifier("cacheManagerPerExport") CacheManager cacheManager) {
-    this.cacheManager = cacheManager;
   }
 }
