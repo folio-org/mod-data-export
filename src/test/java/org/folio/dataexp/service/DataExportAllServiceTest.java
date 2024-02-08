@@ -124,7 +124,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
 
       var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
-      var expectedFileName = "instance-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      var expectedFileName = "instance-all.csv";
       assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }
@@ -147,7 +147,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
 
       var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
-      var expectedFileName = "holding-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      var expectedFileName = "holding-all.csv";
       assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }
@@ -170,7 +170,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
 
       var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
-      var expectedFileName = "authority-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      var expectedFileName = "authority-all.csv";
       assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }

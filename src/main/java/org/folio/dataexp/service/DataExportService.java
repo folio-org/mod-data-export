@@ -62,16 +62,11 @@ public class DataExportService {
     slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
     log.info("Instance IDs have been sliced successfully.");
 
-    var updatedJobExecution = updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
-    if (Boolean.TRUE.equals(exportRequest.getAll())) {
-      var fileName = exportRequest.getIdType() + "-all-" + updatedJobExecution.getHrId() + ".csv";
-      fileDefinition.setFileName(fileName);
-      fileDefinitionEntityRepository.save(fileDefinitionEntity);
-    }
+    updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
   }
 
-  private JobExecution updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
+  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
     var jobExecution = jobExecutionEntity.getJobExecution();
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
@@ -99,6 +94,5 @@ public class DataExportService {
 
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
-    return jobExecution;
   }
 }
