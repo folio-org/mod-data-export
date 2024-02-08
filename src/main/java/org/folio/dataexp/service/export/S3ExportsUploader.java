@@ -78,7 +78,7 @@ public class S3ExportsUploader {
   }
 
   private String uploadZip (JobExecution jobExecution, List<File> exports, String fileName) throws IOException {
-    var zipFileName = fileName + ".zip";
+    var zipFileName = String.format("%s-%s.zip", fileName, jobExecution.getHrId());
     var zipDirPath =  getTempDirForJobExecutionId(jobExecution.getId()) + "zip/";
     Files.createDirectories(Path.of(zipDirPath));
     var zipFilePath = zipDirPath + zipFileName;

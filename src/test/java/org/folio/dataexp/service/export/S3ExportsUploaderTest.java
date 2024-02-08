@@ -124,7 +124,7 @@ class S3ExportsUploaderTest {
     var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
     var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
 
-    var expectedS3Path = temDirLocation + "marc_export.zip";
+    var expectedS3Path = temDirLocation + "marc_export-200.zip";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
