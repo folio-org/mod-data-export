@@ -34,6 +34,31 @@
       ],
       "default": "instance"
     },
+    "all": {
+      "description": "True if all IDs of idType need to be exported, otherwise false",
+      "type": "boolean",
+      "default": false
+    },
+    "deletedRecords": {
+      "description": "True if need to include deleted records, otherwise false",
+      "type": "boolean",
+      "default": true
+    },
+    "suppressedFromDiscovery": {
+      "description": "True if need to include suppressed from discovery records, otherwise false",
+      "type": "boolean",
+      "default": false
+    },
+    "lastSlice": {
+      "description": "True if within the current export the current slice from ID to ID is the last one",
+      "type": "boolean",
+      "default": false
+    },
+    "lastExport": {
+      "description": "True the current export is the last one",
+      "type": "boolean",
+      "default": false
+    },
     "metadata": {
       "description": "Meta information ",
       "type": "object",

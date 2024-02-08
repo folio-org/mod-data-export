@@ -93,6 +93,7 @@ public enum ErrorCode {
     errorCodesForUUIDs.add(ERROR_MARC_RECORD_CANNOT_BE_CONVERTED.getCode());
     errorCodesForUUIDs.add(UNDEFINED.getCode());
     errorCodesForUUIDs.add(ERROR_DUPLICATE_SRS_RECORD.getCode());
+    errorCodesForUUIDs.add(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode());
     return errorCodesForUUIDs;
   }
 }

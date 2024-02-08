@@ -49,11 +49,11 @@ public class JsonToMarcConverter {
     }
   }
 
-  private Record appendAdditionalFields(Record record, List<VariableField> marcFields) {
+  private Record appendAdditionalFields(Record marcRecord, List<VariableField> marcFields) {
     SortedMarcFactoryImpl sortedMarcFactory = new SortedMarcFactoryImpl();
     var sortedRecord = sortedMarcFactory.newRecord();
-    sortedRecord.setLeader(record.getLeader());
-    for (VariableField recordField : record.getVariableFields()) {
+    sortedRecord.setLeader(marcRecord.getLeader());
+    for (VariableField recordField : marcRecord.getVariableFields()) {
       sortedRecord.addVariableField(recordField);
     }
     for (VariableField generatedField : marcFields) {

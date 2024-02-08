@@ -30,7 +30,7 @@ public class SingleFileProcessor {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogService errorLogService;
 
-  public void exportBySingleFile(UUID jobExecutionId, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
+  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.error("Nothing to export for job execution {}", jobExecutionId);
@@ -60,10 +60,28 @@ public class SingleFileProcessor {
     } catch (IOException e) {
       throw new DataExportException("Can not create temp directory for job execution " + jobExecutionId);
     }
-    exports.forEach(export -> executeExport(export, idType, commonExportFails));
+    var exportIterator = exports.iterator();
+    while (exportIterator.hasNext()) {
+      var export = exportIterator.next();
+      exportRequest.setLastExport(!exportIterator.hasNext());
+      executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
+      log.info("Export from {} to {} has been executed.", export.getFromId(), export.getToId());
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
+        updateStatisticsForExportAll(jobExecutionId);
+      }
+    }
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
-    exportExecutor.export(export, idType, commonExportFails);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails,
+      boolean lastExport) {
+    exportExecutor.export(export, exportRequest, commonExportFails, lastExport);
+  }
+
+  private void updateStatisticsForExportAll(UUID jobExecutionId) {
+    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
+    var jobExecution = jobExecutionEntity.getJobExecution();
+    var progress = jobExecution.getProgress();
+    progress.setTotal(progress.getExported() + progress.getDuplicatedSrs() + progress.getFailed());
+    jobExecutionEntityRepository.save(jobExecutionEntity);
   }
 }

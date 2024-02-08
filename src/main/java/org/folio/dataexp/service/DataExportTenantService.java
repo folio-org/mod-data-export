@@ -13,6 +13,7 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
+import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,11 +34,11 @@ public class DataExportTenantService extends TenantService {
 
   private static final List<String> JOB_PROFILES = List.of("default_authority_job_profile.json",
     "default_holdings_job_profile.json", "default_instance_job_profile.json");
+  public static final String TENANT_FOR_VIEWS = "myuniversity";
 
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
-
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                                  JobProfileEntityRepository jobProfileEntityRepository,
@@ -57,6 +58,12 @@ public class DataExportTenantService extends TenantService {
     loadConfiguration();
   }
 
+  @Override
+  public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
+      var tenant = super.context.getTenantId();
+      System.setProperty(TENANT_FOR_VIEWS, tenant);
+      super.createOrUpdateTenant(tenantAttributes);
+  }
   private void loadMappingProfiles() {
     MAPPING_PROFILES.forEach(mappingProfile -> loadMappingProfile("/data/mapping-profiles/" + mappingProfile));
   }

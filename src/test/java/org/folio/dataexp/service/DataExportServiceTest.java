@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.UserClient;
+import org.folio.dataexp.domain.dto.*;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -97,9 +98,9 @@ class DataExportServiceTest {
     dataExportService.postDataExport(exportRequest);
 
     verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
-    verify(slicerProcessor).sliceInstancesIds(fileDefinition);
+    verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
 
-    verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(ExportRequest.IdTypeEnum.INSTANCE), isA(CommonExportFails.class));
+    verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
     verify(exportIdEntityRepository).countByJobExecutionId(jobExecution.getId());
     verify(jobExecutionEntityRepository).getHrid();
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));

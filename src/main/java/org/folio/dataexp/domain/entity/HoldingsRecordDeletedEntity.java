@@ -18,16 +18,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "v_marc_records_lb")
-public class MarcRecordEntity {
+@Table(name = "v_holdings_all_deleted")
+public class HoldingsRecordDeletedEntity {
 
   @Id
   private UUID id;
-  private UUID externalId;
-  @Column(name = "content", columnDefinition = "jsonb")
-  private String content;
-  private String recordType;
-  private String state;
-  private Character leaderRecordStatus;
-  private Boolean suppressDiscovery;
+  @Column(name = "jsonb", columnDefinition = "jsonb")
+  private String jsonb;
 }

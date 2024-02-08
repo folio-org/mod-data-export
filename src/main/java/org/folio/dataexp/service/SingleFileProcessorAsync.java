@@ -14,12 +14,13 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
 
   @Autowired
-  public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository, JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
+  public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
+                                  JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
     super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest.IdTypeEnum idType, CommonExportFails commonExportFails) {
-    exportExecutor.exportAsynch(export, idType, commonExportFails);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails, boolean lastExport) {
+    exportExecutor.exportAsynch(export, exportRequest, commonExportFails, lastExport);
   }
 }
