@@ -62,6 +62,7 @@ public class DataExportTenantService extends TenantService {
   public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
     setupTenantForViews();
     super.createOrUpdateTenant(tenantAttributes);
+    setupConfigEntryFolioHost();
   }
 
   private void setupTenantForViews() {
@@ -113,7 +114,6 @@ public class DataExportTenantService extends TenantService {
 
   private void loadConfiguration() {
     setupDefaultSliceSizeValue();
-    setupConfigEntryFolioHost();
   }
 
   private void setupDefaultSliceSizeValue() {
