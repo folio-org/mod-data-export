@@ -237,6 +237,7 @@ public class ErrorLogService {
   }
 
   private String getInventoryRecordLink() {
-    return configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
+     var linkFromTheStorage = configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
+     return (linkFromTheStorage.endsWith("/") ? linkFromTheStorage : linkFromTheStorage.concat("/"));
   }
 }

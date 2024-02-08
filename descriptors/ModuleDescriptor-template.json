@@ -124,8 +124,7 @@
             "inventory-storage.call-number-types.collection.get",
             "inventory-storage.alternative-title-types.collection.get",
             "inventory-storage.modes-of-issuance.collection.get",
-            "user-tenants.collection.get",
-            "configuration.entries.collection.get"
+            "user-tenants.collection.get"
           ]
         },
         {
