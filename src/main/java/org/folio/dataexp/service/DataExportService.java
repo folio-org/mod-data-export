@@ -37,8 +37,9 @@ public class DataExportService {
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
-    var fileDefinition = fileDefinitionEntityRepository.
-      getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
+    var fileDefinitionEntity =  fileDefinitionEntityRepository.
+      getReferenceById(exportRequest.getFileDefinitionId());
+    var fileDefinition = fileDefinitionEntity.getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
     jobExecutionEntity.getJobExecution().setJobProfileId(jobProfileEntity.getJobProfile().getId());
@@ -61,11 +62,16 @@ public class DataExportService {
     slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
     log.info("Instance IDs have been sliced successfully.");
 
-    updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+    var updatedJobExecution = updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
+      var fileName = exportRequest.getIdType() + "-all-" + updatedJobExecution.getHrId() + ".csv";
+      fileDefinition.setFileName(fileName);
+      fileDefinitionEntityRepository.save(fileDefinitionEntity);
+    }
     singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
+  private JobExecution updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
     var jobExecution = jobExecutionEntity.getJobExecution();
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
@@ -93,5 +99,6 @@ public class DataExportService {
 
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
+    return jobExecution;
   }
 }

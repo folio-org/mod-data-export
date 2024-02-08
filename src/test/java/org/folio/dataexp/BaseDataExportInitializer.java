@@ -8,7 +8,9 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.github.jknack.handlebars.internal.Files;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.s3.client.FolioS3Client;
@@ -133,6 +135,8 @@ public class BaseDataExportInitializer {
   @Autowired
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
@@ -187,6 +191,7 @@ public class BaseDataExportInitializer {
       exportIdEntityRepository.deleteAll();
       jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
+      fileDefinitionEntityRepository.deleteAll();
     }
   }
 

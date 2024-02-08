@@ -37,6 +37,7 @@ import org.folio.dataexp.domain.dto.Locations;
 import org.folio.dataexp.domain.dto.MaterialTypes;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
+import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -69,6 +70,9 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
 
   @Autowired
   private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+
+  @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
   @MockBean
   private UserClient userClient;
@@ -118,6 +122,10 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "instance-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }
 
@@ -137,6 +145,10 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "holding-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }
 
@@ -156,6 +168,10 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "authority-all-" + jobExecution.getJobExecution().getHrId() + ".csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
     }
   }
 

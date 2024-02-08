@@ -42,7 +42,6 @@ import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
-  private FolioS3Client s3Client;
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private ExportIdEntityRepository exportIdEntityRepository;
 
@@ -243,11 +242,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setJobExecutionEntityRepository(JobExecutionEntityRepository jobExecutionEntityRepository) {
     this.jobExecutionEntityRepository = jobExecutionEntityRepository;
-  }
-
-  @Autowired
-  private void setS3Client(FolioS3Client s3Client) {
-    this.s3Client = s3Client;
   }
 
   @Autowired
