@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -103,9 +105,21 @@ public class DataExportService {
   }
 
   private void clearCacheForDeletedMarcRecordsAfterExportCompleted() {
-    cacheManager.getCache("deleted-not-suppressed-marc-ids").clear();
-    cacheManager.getCache("deleted-marc-ids").clear();
-    cacheManager.getCache("deleted-not-suppressed-holdings-marc-ids").clear();
-    cacheManager.getCache("deleted-holdings-marc-ids").clear();
+    var cache = cacheManager.getCache("deleted-not-suppressed-marc-ids");
+    if (nonNull(cache)) {
+      cache.clear();
+    }
+    cache = cacheManager.getCache("deleted-marc-ids");
+    if (nonNull(cache)) {
+      cache.clear();
+    }
+    cache = cacheManager.getCache("deleted-not-suppressed-holdings-marc-ids");
+    if (nonNull(cache)) {
+      cache.clear();
+    }
+    cache = cacheManager.getCache("deleted-holdings-marc-ids");
+    if (nonNull(cache)) {
+      cache.clear();
+    }
   }
 }
