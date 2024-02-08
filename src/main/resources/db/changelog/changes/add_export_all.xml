@@ -6,6 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="add_export_all" author="Firebird">
+        <validCheckSum>ANY</validCheckSum>
         <createProcedure path="changes/add_export_all.sql" relativeToChangelogFile="true" />
     </changeSet>
 
