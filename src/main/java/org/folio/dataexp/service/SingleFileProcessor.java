@@ -70,7 +70,7 @@ public class SingleFileProcessor {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobExecution = jobExecutionEntity.getJobExecution();
     var progress = jobExecution.getProgress();
-    progress.setTotal(progress.getExported() + progress.getDuplicatedSrs() + progress.getFailed());
+    progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
     jobExecutionEntityRepository.save(jobExecutionEntity);
   }
 }

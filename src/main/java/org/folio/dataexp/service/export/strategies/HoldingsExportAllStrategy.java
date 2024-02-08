@@ -87,15 +87,18 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
         var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedHoldingsMarcRecords();
-        return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
-          exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+        log.info("holdings export all, deletedMarcIds: {}", deletedMarcIds);
+        if (!deletedMarcIds.isEmpty()) {
+          return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
+            exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+        }
       }
       return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), pageble);
     }
     if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
       var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedHoldingsMarcRecords();
-      log.info("holdings export all, deletedMarcIds: {}", deletedMarcIds);
+      log.info("holdings export all, not suppressed deletedMarcIds: {}", deletedMarcIds);
       if (!deletedMarcIds.isEmpty()) {
         return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
           exportFilesEntity.getToId(), deletedMarcIds, pageble);

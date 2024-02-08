@@ -101,15 +101,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
         var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedMarcRecords();
-        return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
-          exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+        log.info("instance export all, deletedMarcIds: {}", deletedMarcIds);
+        if (!deletedMarcIds.isEmpty()) {
+          return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualAndIdNotInOrderByIdAsc(
+            exportFilesEntity.getFromId(), exportFilesEntity.getToId(), deletedMarcIds, pageble);
+        }
       }
       return instanceEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
         exportFilesEntity.getToId(), pageble);
     }
     if (Boolean.FALSE.equals(exportRequest.getDeletedRecords())) {
       var deletedMarcIds = marcRecordEntityRepository.getUUIDsOfDeletedAndNotSuppressedMarcRecords();
-      log.info("instance export all, deletedMarcIds: {}", deletedMarcIds);
+      log.info("instance export all, not suppressed deletedMarcIds: {}", deletedMarcIds);
       if (!deletedMarcIds.isEmpty()) {
         return instanceEntityRepository.findAllWhenSkipDiscoverySuppressedAndSkipDeletedMarc(exportFilesEntity.getFromId(),
           exportFilesEntity.getToId(), deletedMarcIds, pageble);
