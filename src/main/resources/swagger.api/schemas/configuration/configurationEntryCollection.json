@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "A collection of configuration entries",
+  "type": "object",
+  "properties": {
+    "configs": {
+      "description": "List of configuration entries",
+      "type": "array",
+      "items": {
+        "$ref": "configurationEntry.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    },
+    "resultInfo": {
+      "$ref": "../common/resultInfo.json#/ResultInfo"
+    }
+  }
+}

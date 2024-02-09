@@ -890,6 +890,19 @@ components:
       $ref: 'schemas/configuration/config.json'
     exportAllRequest:
       $ref: 'schemas/exportAllRequest.json'
+    diagnostic:
+      $ref: 'schemas/common/diagnostic.json'
+    facet:
+      $ref: 'schemas/common/facet.json'
+    facetValue:
+      $ref: 'schemas/common/facetValue.json'
+    resultInfo:
+      $ref: 'schemas/common/resultInfo.json'
+    configurationEntry:
+      $ref: 'schemas/configuration/configurationEntry.json'
+    configurationEntryCollection:
+      $ref: 'schemas/configuration/configurationEntryCollection.json'
+
   parameters:
     trait_queryable:
       name: query
