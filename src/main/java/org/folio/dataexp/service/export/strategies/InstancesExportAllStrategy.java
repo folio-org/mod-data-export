@@ -129,7 +129,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
           .getAsString("id")))
         .withJsonb(getAsJsonObject(hold.getJsonb()).get()
           .getAsString(Constants.DELETED_AUDIT_RECORD)))
-      .toList();
+      .collect(Collectors.toList());
   }
 
   private void createAndSaveMarc(Set<UUID> externalIds, List<InstanceEntity> instances, ExportStrategyStatistic exportStatistic,
@@ -157,9 +157,8 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       } else {
         instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
       }
-      var ids = instances.stream().map(inst -> inst.getId()).toList();
-      instanceDeleted.removeIf(del -> ids.contains(del.getId()));
       var instanceDeletedToInstanceEntities = instanceDeletedToInstanceEntities(instanceDeleted);
+      instanceDeletedToInstanceEntities.removeIf(del -> instancesIds.contains(del.getId()));
       instances.addAll(instanceDeletedToInstanceEntities);
     }
     return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);

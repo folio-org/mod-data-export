@@ -2,7 +2,7 @@ CREATE OR REPLACE VIEW ${myuniversity}_mod_data_export.v_instance_all
     AS SELECT inst.id, jsonb FROM ${myuniversity}_mod_data_export.v_instance inst
     UNION
     SELECT uuid(audit.jsonb -> 'record' ->> 'id'), audit.jsonb -> 'record'
-    FROM ${myuniversity}_mod_inventory_storage.audit_instance audit;;
+    FROM ${myuniversity}_mod_inventory_storage.audit_instance audit;
 
 CREATE OR REPLACE VIEW ${myuniversity}_mod_data_export.v_authority_all
     AS SELECT id, content, external_id, record_type, suppress_discovery, state, leader_record_status

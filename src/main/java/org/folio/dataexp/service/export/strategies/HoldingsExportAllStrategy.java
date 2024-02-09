@@ -118,7 +118,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
         .withInstanceId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
           .getAsString(DELETED_AUDIT_RECORD)).get()
           .getAsString("instanceId"))))
-      .toList();
+      .collect(Collectors.toList());
   }
 
   private void createAndSaveMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, ExportStrategyStatistic exportStatistic,
@@ -147,9 +147,8 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       } else {
         holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
       }
-      var ids = holdings.stream().map(inst -> inst.getId()).toList();
-      holdingsDeleted.removeIf(del -> ids.contains(del.getId()));
       var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
+      holdingsDeletedToHoldingsEntities.removeIf(del -> holdingsIds.contains(del.getId()));
       var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
       holdings.addAll(holdingsDeletedToHoldingsEntities);
       instancesIds.addAll(instanceIdsDeleted);
