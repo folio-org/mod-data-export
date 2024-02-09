@@ -140,18 +140,20 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, GeneratedMarcResult result,
       MappingProfile mappingProfile, ExportRequest exportRequest) {
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-//    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
-//      List<HoldingsRecordDeletedEntity> holdingsDeleted;
-//      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-//        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
-//      } else {
-//        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-//      }
-//      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
-//      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-//      holdings.addAll(holdingsDeletedToHoldingsEntities);
-//      instancesIds.addAll(instanceIdsDeleted);
-//    }
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
+      List<HoldingsRecordDeletedEntity> holdingsDeleted;
+      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
+      } else {
+        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
+      }
+      var ids = holdings.stream().map(inst -> inst.getId()).toList();
+      holdingsDeleted.removeIf(del -> ids.contains(del.getId()));
+      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
+      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
+      holdings.addAll(holdingsDeletedToHoldingsEntities);
+      instancesIds.addAll(instanceIdsDeleted);
+    }
     return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
   }
 }
