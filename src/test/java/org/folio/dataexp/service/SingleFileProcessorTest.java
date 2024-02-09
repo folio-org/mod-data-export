@@ -53,7 +53,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportFails());
 
-    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportFails.class), eq(true));
+    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportFails.class));
   }
 
   @Test
@@ -71,7 +71,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), commonExportFails);
 
-    verify(exportExecutor, times(0)).export(any(), any(), any(), eq(false));
+    verify(exportExecutor, times(0)).export(any(), any(), any());
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
     assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
   }

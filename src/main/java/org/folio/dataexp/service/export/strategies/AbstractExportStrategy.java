@@ -60,8 +60,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Override
-  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest,
-      boolean lastExport) {
+  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     this.remoteStorageWriter = createRemoteStorageWrite(exportFilesEntity);

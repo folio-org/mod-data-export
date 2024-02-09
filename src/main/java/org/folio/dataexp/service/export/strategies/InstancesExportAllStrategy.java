@@ -150,16 +150,16 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, List<InstanceEntity> instances, GeneratedMarcResult generatedMarcResult,
       MappingProfile mappingProfile, ExportRequest exportRequest) {
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
-      List<InstanceDeletedEntity> instanceDeleted;
-      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-        instanceDeleted = instanceEntityDeletedRepository.findAll();
-      } else {
-        instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-      }
-      var instanceDeletedToInstanceEntities = instanceDeletedToInstanceEntities(instanceDeleted);
-      instances.addAll(instanceDeletedToInstanceEntities);
-    }
+//    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
+//      List<InstanceDeletedEntity> instanceDeleted;
+//      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+//        instanceDeleted = instanceEntityDeletedRepository.findAll();
+//      } else {
+//        instanceDeleted = instanceEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
+//      }
+//      var instanceDeletedToInstanceEntities = instanceDeletedToInstanceEntities(instanceDeleted);
+//      instances.addAll(instanceDeletedToInstanceEntities);
+//    }
     return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);
   }
 }

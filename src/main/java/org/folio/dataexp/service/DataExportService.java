@@ -105,19 +105,14 @@ public class DataExportService {
   }
 
   private void clearCacheForDeletedMarcRecordsAfterExportCompleted() {
-    var cache = cacheManager.getCache("deleted-not-suppressed-marc-ids");
-    if (nonNull(cache)) {
-      cache.clear();
-    }
-    cache = cacheManager.getCache("deleted-marc-ids");
-    if (nonNull(cache)) {
-      cache.clear();
-    }
-    cache = cacheManager.getCache("deleted-not-suppressed-holdings-marc-ids");
-    if (nonNull(cache)) {
-      cache.clear();
-    }
-    cache = cacheManager.getCache("deleted-holdings-marc-ids");
+    clearCache("deleted-not-suppressed-marc-ids");
+    clearCache("deleted-marc-ids");
+    clearCache("deleted-not-suppressed-holdings-marc-ids");
+    clearCache("deleted-holdings-marc-ids");
+  }
+
+  private void clearCache(String cacheName) {
+    var cache = cacheManager.getCache(cacheName);
     if (nonNull(cache)) {
       cache.clear();
     }
