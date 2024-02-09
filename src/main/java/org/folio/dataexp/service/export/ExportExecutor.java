@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -84,10 +85,10 @@ public class ExportExecutor {
       }
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).collect(Collectors.toList());
-      var queryResult = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString());
-      var fileDefinition = queryResult.get(0).getFileDefinition();
-      var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
-      var innerFileName =  initialFileName + ".mrc";
+      var queryResult= fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString());
+      var fileDefinition= queryResult.get(0).getFileDefinition();
+      var initialFileName= FilenameUtils.getBaseName(fileDefinition.getFileName());
+      var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
       try {
         innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
       } catch (S3ExportsUploadException e) {
@@ -107,5 +108,10 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
+  }
+
+  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
+    var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
+    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 }
