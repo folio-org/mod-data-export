@@ -89,7 +89,7 @@ public class S3ExportsUploader {
         countExportsFiles++;
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(exportFile))) {
           var zipEntryName = String.format("%s-%s-%s.mrc", fileName, jobExecution.getHrId(), countExportsFiles);
-          log.info(exportFile.getPath() + " zipped as " + zipEntryName);
+          log.info(exportFile.getPath() + " add to zip as " + zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);
           byte[] bytes = new byte[1024];
