@@ -62,7 +62,7 @@ public class DataExportTenantService extends TenantService {
   public synchronized void createOrUpdateTenant(TenantAttributes tenantAttributes) {
     setupTenantForViews();
     super.createOrUpdateTenant(tenantAttributes);
-    setupConfigEntryFolioHost();
+    setupConfigEntryInventoryRecordLink();
   }
 
   private void setupTenantForViews() {
@@ -122,10 +122,10 @@ public class DataExportTenantService extends TenantService {
       new Config().key(SlicerProcessor.SLICE_SIZE_KEY).value(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE)));
     log.info("Loaded default slice size value: {}", saved.getValue());
   }
-  private void setupConfigEntryFolioHost() {
-    log.info("Loading Folio host value...");
-    var folioHostConfigFromRemote = configurationService.getFolioHostConfigFromRemote();
-    var saved = configurationService.upsertConfiguration(folioHostConfigFromRemote);
-    log.info("Loaded Folio host value: {}", saved.getValue());
+  private void setupConfigEntryInventoryRecordLink() {
+    log.info("Loading inventory record link value...");
+    var inventoryRecordLinkConfig = configurationService.produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote();
+    var saved = configurationService.upsertConfiguration(inventoryRecordLinkConfig);
+    log.info("Loaded inventory record link value: {}", saved.getValue());
   }
 }

@@ -2,6 +2,7 @@ package org.folio.dataexp.service.logs;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.folio.dataexp.service.ConfigurationService.INVENTORY_RECORD_LINK_KEY;
 import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
 import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
@@ -39,7 +40,6 @@ public class ErrorLogService {
   public static final String HRID = "hrid";
   public static final String TITLE = "title";
   private static final String COMMA_SEPARATOR = ", ";
-  private static final String INVENTORY_RECORD_LINK_KEY = "folio_host";
 
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final FolioExecutionContext folioExecutionContext;
@@ -237,9 +237,6 @@ public class ErrorLogService {
   }
 
   private String getInventoryRecordLink() {
-     var linkFromTheStorage = configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
-     var uri = (linkFromTheStorage.endsWith("/") ? linkFromTheStorage : linkFromTheStorage.concat("/"));
-
-    return String.join(uri, "inventory/view/");
+    return configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
   }
 }
