@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
+class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
 
   @Autowired
   private FolioInstanceAllRepository instanceAllRepository;
@@ -16,7 +16,7 @@ public class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findFolioInstanceAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = instanceAllRepository.findFolioInstanceAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(2);
+      assertThat(slice.getContent()).hasSize(2);
     }
   }
 
@@ -24,7 +24,7 @@ public class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findFolioInstanceAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = instanceAllRepository.findFolioInstanceAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(2);
+      assertThat(slice.getContent()).hasSize(2);
     }
   }
 
@@ -32,7 +32,7 @@ public class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findFolioInstanceAllDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findFolioInstanceAllDeleted();
-      assertThat(list.size()).isEqualTo(3);
+      assertThat(list).hasSize(3);
     }
   }
 
@@ -40,7 +40,7 @@ public class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findFolioInstanceAllDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
-      assertThat(list.size()).isEqualTo(2);
+      assertThat(list).hasSize(2);
     }
   }
 }

@@ -48,7 +48,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest) {
     processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportRequest.getLastExport()) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     }
   }
@@ -57,7 +57,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       ExportRequest exportRequest) {
     var deletedFolioHoldings = getFolioDeleted(exportRequest);
     entityManager.clear();
-    processFolioHoldingsDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, deletedFolioHoldings);
+    processFolioHoldingsDeleted(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioHoldings);
     var deletedMarcHoldings = getMarcDeleted(exportRequest);
     entityManager.clear();
     processMarcHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcHoldings);
@@ -103,7 +103,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   }
 
   private void processFolioHoldingsDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
-      MappingProfile mappingProfile, ExportRequest exportRequest, List<HoldingsRecordEntity> folioHoldings) {
+      MappingProfile mappingProfile, List<HoldingsRecordEntity> folioHoldings) {
     var result = getGeneratedMarc(folioHoldings, mappingProfile, exportFilesEntity.getJobExecutionId());
     saveMarc(result, exportStatistic);
   }

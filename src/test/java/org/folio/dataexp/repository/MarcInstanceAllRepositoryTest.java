@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
+class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
 
   @Autowired
   private MarcInstanceAllRepository marcInstanceAllRepository;
@@ -16,7 +16,7 @@ public class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(2);
+      assertThat(slice.getContent()).hasSize(2);
     }
   }
 
@@ -24,7 +24,7 @@ public class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(1);
+      assertThat(slice.getContent()).hasSize(1);
     }
   }
 
@@ -32,7 +32,7 @@ public class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcInstanceAllRepository.findMarcInstanceAllDeleted();
-      assertThat(list.size()).isEqualTo(15);
+      assertThat(list).hasSize(15);
     }
   }
 
@@ -40,7 +40,7 @@ public class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
-      assertThat(list.size()).isEqualTo(8);
+      assertThat(list).hasSize(8);
     }
   }
 }

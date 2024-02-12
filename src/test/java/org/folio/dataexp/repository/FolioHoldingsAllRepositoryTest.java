@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
+class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
 
   @Autowired
   private FolioHoldingsAllRepository folioHoldingsAllRepository;
@@ -16,7 +16,7 @@ public class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(3);
+      assertThat(slice.getContent()).hasSize(3);
     }
   }
 
@@ -24,7 +24,7 @@ public class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent().size()).isEqualTo(2);
+      assertThat(slice.getContent()).hasSize(2);
     }
   }
 
@@ -32,7 +32,7 @@ public class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = folioHoldingsAllRepository.findFolioHoldingsAllDeleted();
-      assertThat(list.size()).isEqualTo(3);
+      assertThat(list).hasSize(3);
     }
   }
 
@@ -40,7 +40,7 @@ public class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = folioHoldingsAllRepository.findFolioHoldingsAllDeletedNonSuppressed();
-      assertThat(list.size()).isEqualTo(2);
+      assertThat(list).hasSize(2);
     }
   }
 }

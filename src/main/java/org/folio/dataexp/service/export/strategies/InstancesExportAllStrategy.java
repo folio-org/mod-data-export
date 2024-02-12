@@ -60,7 +60,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       ExportRequest exportRequest) {
     processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && exportRequest.getLastExport()) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     }
   }
