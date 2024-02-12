@@ -16,6 +16,8 @@ class ConfigurationRepositoryTest extends BaseDataExportInitializer {
   @Test
   void saveConfigurationTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      configurationRepository.deleteAll();
+
       configurationRepository.save(ConfigurationEntity.builder()
         .key("config1").value("1").build());
       configurationRepository.save(ConfigurationEntity.builder()

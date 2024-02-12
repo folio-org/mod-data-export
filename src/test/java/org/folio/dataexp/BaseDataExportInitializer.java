@@ -8,9 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.github.jknack.handlebars.internal.Files;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.client.ConfigurationEntryClient;
+import org.folio.dataexp.domain.dto.ConfigurationEntry;
+import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.service.ConfigurationEntryService;
+import org.folio.dataexp.service.ConfigurationService;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
@@ -25,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -45,14 +51,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -138,6 +142,13 @@ public class BaseDataExportInitializer {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
   protected FolioS3Client s3Client;
+  @Autowired
+  private ConfigurationEntryService configurationEntryService;
+  @Autowired
+  private ConfigurationService configurationService;
+
+  @MockBean
+  private ConfigurationEntryClient configurationEntryClient;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -160,7 +171,8 @@ public class BaseDataExportInitializer {
   }
 
   @BeforeAll
-  static void beforeAll(@Autowired MockMvc mockMvc) {
+  static void beforeAll(@Autowired MockMvc mockMvc, @Autowired ConfigurationEntryClient configurationEntryClient) {
+    when(configurationEntryClient.getConfigurationEntryCollectionByQuery(any(String.class))).thenReturn(getConfigurationEntryCollection());
     setUpTenant(mockMvc);
   }
 
@@ -212,5 +224,18 @@ public class BaseDataExportInitializer {
   @SneakyThrows
   public static String asJsonString(Object value) {
     return OBJECT_MAPPER.writeValueAsString(value);
+  }
+
+  private static ConfigurationEntryCollection getConfigurationEntryCollection() {
+    ConfigurationEntry ce = ConfigurationEntry.builder()
+            .id(UUID.randomUUID().toString())
+            .module("TEST_1")
+            .configName("FOLIO host")
+            .code("FOLIO_HOST")
+            .description("test description")
+            .value("http://localhost:9130")
+            .build();
+
+    return ConfigurationEntryCollection.builder().totalRecords(1).configs(Collections.singletonList(ce)).build();
   }
 }
