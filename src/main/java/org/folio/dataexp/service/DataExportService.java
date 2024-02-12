@@ -15,8 +15,6 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -36,9 +34,6 @@ public class DataExportService {
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
-
-  @Qualifier("cacheManagerPerExport")
-  private final CacheManager cacheManager;
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();

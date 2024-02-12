@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class CacheConfig {
-
   @Bean
   public Caffeine caffeineConfig() { //NOSONAR
     return Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS);

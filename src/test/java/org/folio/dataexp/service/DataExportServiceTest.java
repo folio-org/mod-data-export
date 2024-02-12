@@ -59,8 +59,6 @@ class DataExportServiceTest {
   private UserClient userClient;
   @Mock
   private DataExportRequestValidator dataExportRequestValidator;
-  @Mock
-  private CacheManager cacheManager;
 
   @InjectMocks
   private DataExportService dataExportService;
@@ -99,7 +97,6 @@ class DataExportServiceTest {
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-    when(cacheManager.getCache(anyString())).thenReturn(new CaffeineCache("some name", mock(Cache.class)));
 
     dataExportService.postDataExport(exportRequest);
 
