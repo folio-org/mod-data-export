@@ -238,6 +238,8 @@ public class ErrorLogService {
 
   private String getInventoryRecordLink() {
      var linkFromTheStorage = configurationService.getValue(INVENTORY_RECORD_LINK_KEY);
-     return (linkFromTheStorage.endsWith("/") ? linkFromTheStorage : linkFromTheStorage.concat("/"));
+     var uri = (linkFromTheStorage.endsWith("/") ? linkFromTheStorage : linkFromTheStorage.concat("/"));
+
+    return String.join(uri, "inventory/view/");
   }
 }
