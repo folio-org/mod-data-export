@@ -897,6 +897,33 @@ INSERT INTO diku_mod_source_record_storage.marc_records_lb (id, content)
                                                        "leader": "03792dam a2200697 i 4500"
                                                      }'
                                                      );
+INSERT INTO diku_mod_source_record_storage.marc_records_lb (id, content)
+	VALUES ('111ed93e-f9e2-4cb2-a52b-e9155acfc119', '{
+                                                       "fields": [
+                                                         {
+                                                           "001": "in00000001098"
+                                                         },
+                                                         {
+                                                           "008": "210701t20222022nyua   c      001 0 eng d"
+                                                         },
+                                                         {
+                                                           "999": {
+                                                             "ind1": "f",
+                                                             "ind2": "f",
+                                                             "subfields": [
+                                                               {
+                                                                 "s": "111ed93e-f9e2-4cb2-a52b-e9155acfc119"
+                                                               },
+                                                               {
+                                                                 "i": "11190b0f-9da3-40f1-ab17-33d6a1e3abae"
+                                                               }
+                                                             ]
+                                                           }
+                                                         }
+                                                       ],
+                                                       "leader": "03792cam a2200697 i 4500"
+                                                     }'
+                                                     );
 INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type)
 	VALUES ('17eed93e-f9e2-4cb2-a52b-e9155acfc119', '4a090b0f-9da3-40f1-ab17-33d6a1e3abae', 'c', 'ACTUAL', 'MARC_AUTHORITY');
 INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type)
@@ -905,6 +932,8 @@ INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_r
 	VALUES ('34eed93e-f9e2-4cb2-a52b-e9155acfc119', '34090b0f-9da3-40f1-ab17-33d6a1e3abae', 'n', 'DELETED', 'MARC_AUTHORITY');
 INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type)
 	VALUES ('45eed93e-f9e2-4cb2-a52b-e9155acfc119', '45090b0f-9da3-40f1-ab17-33d6a1e3abae', 'd', 'DELETED', 'MARC_AUTHORITY');
+INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type)
+	VALUES ('111ed93e-f9e2-4cb2-a52b-e9155acfc119', '11190b0f-9da3-40f1-ab17-33d6a1e3abae', 'c', 'OLD', 'MARC_AUTHORITY');
 INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type, suppress_discovery)
 	VALUES ('7171713e-f9e2-4cb2-a52b-e9155acfc119', '71717177-f243-4e4a-bf1c-9e1e62b3171d', 'c', 'ACTUAL', 'MARC_BIB', true);
 INSERT INTO diku_mod_source_record_storage.records_lb (id, external_id, leader_record_status, state, record_type, suppress_discovery)
