@@ -344,6 +344,7 @@
                 <dateLibrary>java</dateLibrary>
                 <interfaceOnly>true</interfaceOnly>
                 <useSpringBoot3>true</useSpringBoot3>
+                <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
               </configOptions>
             </configuration>
           </execution>
