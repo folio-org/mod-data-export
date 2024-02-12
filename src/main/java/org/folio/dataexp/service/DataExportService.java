@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
-import static java.util.Objects.nonNull;
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -70,8 +68,6 @@ public class DataExportService {
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
-
-    clearCacheForDeletedMarcRecordsAfterExportCompleted();
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
@@ -102,19 +98,5 @@ public class DataExportService {
 
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
-  }
-
-  private void clearCacheForDeletedMarcRecordsAfterExportCompleted() {
-    clearCache("deleted-not-suppressed-marc-ids");
-    clearCache("deleted-marc-ids");
-    clearCache("deleted-not-suppressed-holdings-marc-ids");
-    clearCache("deleted-holdings-marc-ids");
-  }
-
-  private void clearCache(String cacheName) {
-    var cache = cacheManager.getCache(cacheName);
-    if (nonNull(cache)) {
-      cache.clear();
-    }
   }
 }

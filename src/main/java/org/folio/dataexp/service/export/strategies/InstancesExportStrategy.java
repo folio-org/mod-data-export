@@ -1,7 +1,5 @@
 package org.folio.dataexp.service.export.strategies;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
@@ -81,9 +79,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
   protected final InstanceEntityRepository instanceEntityRepository;
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
@@ -186,6 +181,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var externalIds = marcRecords.stream()
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
+    entityManager.clear();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
       addHoldingsAndItems(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
@@ -216,12 +212,12 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
       MappingProfile mappingProfile) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
+    entityManager.clear();
     return getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, instances);
   }
 
   protected List<JSONObject> getInstancesWithHoldingsAndItems(Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
                                                               MappingProfile mappingProfile, List<InstanceEntity> instances) {
-    entityManager.clear();
     List<JSONObject> instancesWithHoldingsAndItems = new ArrayList<>();
     var copyInstances = new ArrayList<>(instances);
     var foundIds = copyInstances.stream().map(InstanceEntity::getId).collect(Collectors.toSet());

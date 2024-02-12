@@ -1,5 +1,8 @@
 package org.folio.dataexp.service;
 
+import com.github.jknack.handlebars.internal.Files;
+import lombok.SneakyThrows;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
@@ -38,12 +41,17 @@ import org.folio.dataexp.domain.dto.MaterialTypes;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
+import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,6 +77,9 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
 
   @Autowired
   private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+
+  @Autowired
+  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
 
   @MockBean
   private UserClient userClient;
@@ -103,8 +114,9 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   @MockBean
   private IssuanceModesClient issuanceModesClient;
 
+  @SneakyThrows
   @Test
-  void exportAllInstancesNoErrorsTest() {
+  void exportAllInstancesNotSuppressedNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
@@ -117,18 +129,40 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-      assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("i1640f178-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i1880f178-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Check MARC
+      assertThat(outputMrcFile).containsOnlyOnce("s8888893e-f9e2-4cb2-a52b-e9155acfc119");
+      assertThat(outputMrcFile).containsOnlyOnce("s555d1aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s66661aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s77771aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s88881aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s10001aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s20002aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s30003aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(13);
     }
   }
 
+  @SneakyThrows
   @Test
-  void exportAllHoldingsNoErrorsTest() {
+  void exportAllInstancesNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
-        .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE);
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -136,18 +170,377 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-      assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      assertEquals(22, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1770f178-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted: (nothing)
+
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1640f178-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i1880f178-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+
+      // Check MARC
+      // Suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s40004aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s50005aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s60006aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s66661aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s77771aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s88881aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s7777793e-f9e2-4cb2-a52b-e9155acfc119");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s7171713e-f9e2-4cb2-a52b-e9155acfc119");
+
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s10001aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s20002aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s30003aea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s66661aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s77771aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s88881aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s555d1aea-222d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s8888893e-f9e2-4cb2-a52b-e9155acfc119");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(22);
     }
   }
 
+  @SneakyThrows
   @Test
-  void exportAllAuthorityNoErrorsTest() {
+  void exportAllInstancesNonDeletedNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Suppressed:
+      // Non-deleted: (nothing)
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+
+      // Check MARC
+      // Suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s7171713e-f9e2-4cb2-a52b-e9155acfc119");
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllInstancesNonSuppressedNonDeletedNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(3, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-111d-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
+
+      // Check MARC
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(3);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllHoldingsNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+        .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1033f777-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1033bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1089f777-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i1798f777-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s444444ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s777777ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s888888ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s15471150-7c9b-48b0-86eb-178a494e25fe");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s111111ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s555555ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s666666ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s912349ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s25472250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("s35473350-7c9b-48b0-86eb-178a494e25fe");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(18);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllHoldingsNonSuppressedNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1089f777-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i1798f777-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s555555ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s666666ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s912349ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s25472250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("s35473350-7c9b-48b0-86eb-178a494e25fe");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(11);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllHoldingsNonDeletedNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1033bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s111111ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(6);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllHoldingsNonSuppressedNonDeletedNoErrorsTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
+      assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
+    }
+  }
+
+  // Ignore suppressed - see comments in https://folio-org.atlassian.net/browse/MDEXP-621
+  @SneakyThrows
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void exportAllAuthorityNoErrorsIgnoreSuppressedTest(boolean suppressedFromDiscovery) {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
-        .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE);
+        .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE).suppressedFromDiscovery(suppressedFromDiscovery);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s28eed93e-f9e2-4cb2-a52b-e9155acfc119");
+      assertThat(outputMrcFile).containsOnlyOnce("s34eed93e-f9e2-4cb2-a52b-e9155acfc119");
+      assertThat(outputMrcFile).containsOnlyOnce("s45eed93e-f9e2-4cb2-a52b-e9155acfc119");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s17eed93e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
+    }
+  }
+
+  // Ignore suppressed - see comments in https://folio-org.atlassian.net/browse/MDEXP-621
+  @SneakyThrows
+  @ParameterizedTest
+  @ValueSource(booleans = {true, false})
+  void exportAllAuthorityNonDeletedNoErrorsTest(boolean suppressedFromDiscovery) {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
+          .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE).deletedRecords(false).suppressedFromDiscovery(suppressedFromDiscovery);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -156,6 +549,14 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("s17eed93e-f9e2-4cb2-a52b-e9155acfc119");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
     }
   }
 

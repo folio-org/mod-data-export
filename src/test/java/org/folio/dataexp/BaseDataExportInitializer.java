@@ -137,7 +137,7 @@ public class BaseDataExportInitializer {
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
-  private FolioS3Client s3Client;
+  protected FolioS3Client s3Client;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
