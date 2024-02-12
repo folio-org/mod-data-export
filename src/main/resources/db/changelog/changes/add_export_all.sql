@@ -8,7 +8,7 @@ CREATE OR REPLACE VIEW ${myuniversity}_mod_data_export.v_all_marc_non_deleted
 
 CREATE OR REPLACE VIEW ${myuniversity}_mod_data_export.v_authority_all
     AS SELECT * FROM ${myuniversity}_mod_data_export.v_marc_records_lb
-    WHERE record_type = 'MARC_AUTHORITY';
+    WHERE record_type = 'MARC_AUTHORITY' AND state != 'OLD';
 
 
 -- onlyNonDeleted, suppressedFromDiscovery = true
