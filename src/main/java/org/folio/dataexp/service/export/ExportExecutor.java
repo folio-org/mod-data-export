@@ -14,6 +14,8 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +35,11 @@ public class ExportExecutor {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @Async("singleExportFileTaskExecutor")
-  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails,
-      boolean lastExport) {
-    export(exportFilesEntity, exportRequest, commonExportFails, lastExport);
+  public void exportAsync(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails,
+                          boolean lastExport, FolioExecutionContext folioExecutionContext) {
+    try (var ctx = new FolioExecutionContextSetter(folioExecutionContext)) {
+      export(exportFilesEntity, exportRequest, commonExportFails, lastExport);
+    }
   }
 
   public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails, boolean lastExport) {
