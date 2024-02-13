@@ -88,18 +88,16 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     }
   }
 
-  private void processMarcSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      ExportRequest exportRequest) {
-    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      var marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+  private void processMarcSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, ExportRequest exportRequest) {
+    var marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    entityManager.clear();
+    processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
+    log.info("Slice size for instances export all marc: {}", marcSlice.getContent().size());
+    while (marcSlice.hasNext()) {
+      marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
       entityManager.clear();
       processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
-      log.info("Slice size for instances export all marc: {}", marcSlice.getContent().size());
-      while (marcSlice.hasNext()) {
-        marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
-        entityManager.clear();
-        processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
-      }
     }
   }
 
