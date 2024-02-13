@@ -59,7 +59,9 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       ExportRequest exportRequest) {
     processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
-    processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+      processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+    }
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     }
