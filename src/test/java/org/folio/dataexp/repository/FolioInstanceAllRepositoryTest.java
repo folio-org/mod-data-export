@@ -43,4 +43,36 @@ class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
       assertThat(list).hasSize(2);
     }
   }
+
+  @Test
+  void findMarcInstanceAllNonDeletedCustomInstanceProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice = instanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      assertThat(slice).hasSize(2);
+    }
+  }
+
+  @Test
+  void findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice = instanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      assertThat(slice).hasSize(1);
+    }
+  }
+
+  @Test
+  void findMarcInstanceAllDeletedForCustomInstanceProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var list = instanceAllRepository.findMarcInstanceAllDeletedForCustomInstanceProfile();
+      assertThat(list).hasSize(15);
+    }
+  }
+
+  @Test
+  void findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var list = instanceAllRepository.findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
+      assertThat(list).hasSize(8);
+    }
+  }
 }

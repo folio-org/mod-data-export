@@ -26,4 +26,20 @@ public interface FolioInstanceAllRepository extends Repository<InstanceEntity, U
   // onlyDeleted, suppressedFromDiscovery = false
   @Query(value = "SELECT * FROM v_instance_all_folio_deleted_not_suppressed ORDER BY id ASC", nativeQuery = true)
   List<InstanceEntity> findFolioInstanceAllDeletedNonSuppressed();
+
+  // v_marc_instance_all_non_deleted for instance custom profile
+  @Query(value = "SELECT * FROM v_marc_instance_all_non_deleted_custom_profile WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
+  Slice<InstanceEntity> findMarcInstanceAllNonDeletedCustomInstanceProfile(UUID fromId, UUID toId, Pageable page);
+
+  // v_marc_instance_all_non_deleted_non_suppressed
+  @Query(value = "SELECT * FROM v_marc_instance_all_non_deleted_non_suppressed_custom_instance_profile WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
+  Slice<InstanceEntity> findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(UUID fromId, UUID toId, Pageable page);
+
+  // v_instance_all_marc_deleted
+  @Query(value = "SELECT * FROM v_instance_all_marc_deleted_custom_instance_profile ORDER BY id ASC", nativeQuery = true)
+  List<InstanceEntity> findMarcInstanceAllDeletedForCustomInstanceProfile();
+
+  // v_instance_all_marc_deleted_not_suppressed
+  @Query(value = "SELECT * FROM v_instance_all_marc_deleted_not_suppressed_custom_instance_profile ORDER BY id ASC", nativeQuery = true)
+  List<InstanceEntity> findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
 }

@@ -43,4 +43,36 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
       assertThat(list).hasSize(2);
     }
   }
+
+  @Test
+  void findFolioHoldingsAllNonDeletedCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice = folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedCustomHoldingsProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      assertThat(slice.getContent()).hasSize(3);
+    }
+  }
+
+  @Test
+  void findFolioHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice = folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      assertThat(slice.getContent()).hasSize(2);
+    }
+  }
+
+  @Test
+  void findFolioHoldingsAllDeletedCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var list = folioHoldingsAllRepository.findMarcHoldingsAllDeletedCustomHoldingsProfile();
+      assertThat(list).hasSize(9);
+    }
+  }
+
+  @Test
+  void findFolioHoldingsAllDeletedNonSuppressedCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      var list = folioHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressedCustomHoldingsProfile();
+      assertThat(list).hasSize(5);
+    }
+  }
 }

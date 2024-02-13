@@ -61,6 +61,8 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+    } else {
+      processMarcInstanceSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     }
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
@@ -72,9 +74,15 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     var deletedFolioInstances = getFolioDeleted(exportRequest);
     entityManager.clear();
     processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioInstances);
-    var deletedMarcInstances = getMarcDeleted(exportRequest);
-    entityManager.clear();
-    processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcInstances);
+    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+      var deletedMarcRecords = getMarcDeleted(exportRequest);
+      entityManager.clear();
+      processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcRecords);
+    } else {
+      var deletedMarcInstances = getMarcInstanceDeleted(exportRequest);
+      entityManager.clear();
+      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcInstances);
+    }
   }
 
   private void processFolioSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
@@ -100,6 +108,19 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
       entityManager.clear();
       processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
+    }
+  }
+
+  private void processMarcInstanceSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, ExportRequest exportRequest) {
+    var marcInstanceSlice = nextMarcInstanceSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    entityManager.clear();
+    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent());
+    log.info("Slice size for marc instances export all marc: {}", marcInstanceSlice.getContent().size());
+    while (marcInstanceSlice.hasNext()) {
+      marcInstanceSlice = nextMarcInstanceSlice(exportFilesEntity, exportRequest, marcInstanceSlice.nextPageable());
+      entityManager.clear();
+      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent());
     }
   }
 
@@ -134,6 +155,15 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         pageble);
   }
 
+  private Slice<InstanceEntity> nextMarcInstanceSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioInstanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+          pageble);
+    }
+    return  folioInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
+  }
+
   private List<InstanceEntity> getFolioDeleted(ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return folioInstanceAllRepository.findFolioInstanceAllDeleted();
@@ -146,6 +176,13 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       return marcInstanceAllRepository.findMarcInstanceAllDeleted();
     }
     return marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
+  }
+
+  private List<InstanceEntity> getMarcInstanceDeleted(ExportRequest exportRequest) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioInstanceAllRepository.findMarcInstanceAllDeletedForCustomInstanceProfile();
+    }
+    return folioInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
   }
 
   private GeneratedMarcResult getGeneratedMarc(List<InstanceEntity> listFolioInstances, MappingProfile mappingProfile,
