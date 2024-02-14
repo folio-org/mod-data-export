@@ -58,7 +58,6 @@ public class SingleFileProcessor {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());
       executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
-      log.info("Export from {} to {} has been executed.", export.getFromId(), export.getToId());
     }
   }
 
