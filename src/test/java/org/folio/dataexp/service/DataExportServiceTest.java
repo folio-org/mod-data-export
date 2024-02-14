@@ -23,6 +23,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.UUID;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -91,17 +93,18 @@ class DataExportServiceTest extends BaseDataExportInitializer {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportService.postDataExport(exportRequest);
     }
+    await().atMost(2, SECONDS).untilAsserted(() -> {
+      verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
+      verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
 
-    verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
-    verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
+      verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
+      verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
+      verify(jobExecutionEntityRepository).getHrid();
+      verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
+      verify(userClient).getUserById(isA(String.class));
 
-    verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
-    verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
-    verify(jobExecutionEntityRepository).getHrid();
-    verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
-    verify(userClient).getUserById(isA(String.class));
-
-    assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
-    assertEquals(200, jobExecution.getHrId());
+      assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
+      assertEquals(200, jobExecution.getHrId());
+    });
   }
 }
