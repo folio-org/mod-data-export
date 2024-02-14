@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConfigurationService {
 
+  public static final String INVENTORY_RECORD_LINK_KEY = "inventory_record_link";
   private static final String QUERY_BY_FOLIO_HOST = "code=\"FOLIO_HOST\"";
 
   private final ConfigurationRepository configurationRepository;
@@ -31,15 +32,17 @@ public class ConfigurationService {
     return new Config().key(saved.getKey()).value(saved.getValue());
   }
 
-  public Config getFolioHostConfigFromRemote() {
-    log.info("Retrieving FOLIO host configuration.");
+  public Config produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote() {
+    log.info("Producing the inventory record link.");
     ConfigurationEntry entryFromRemote = configurationEntryService.retrieveSingleConfigurationEntryByQuery(QUERY_BY_FOLIO_HOST);
-      return Config.builder()
-      .key(entryFromRemote.getCode().toLowerCase())
-      .value(entryFromRemote.getValue())
+    var folioHostValueFromRemote = entryFromRemote.getValue();
+    var inventoryRecordLinkValue = String.join((folioHostValueFromRemote.endsWith("/") ? folioHostValueFromRemote : folioHostValueFromRemote.concat("/")), "inventory/view/");
+
+    return Config.builder()
+      .key(INVENTORY_RECORD_LINK_KEY)
+      .value(inventoryRecordLinkValue)
       .build();
   }
-
 
     public String getValue(String key) {
     return configurationRepository.getReferenceById(key).getValue();
