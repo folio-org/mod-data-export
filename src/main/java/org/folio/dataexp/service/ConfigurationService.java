@@ -36,7 +36,11 @@ public class ConfigurationService {
     log.info("Producing the inventory record link.");
     ConfigurationEntry entryFromRemote = configurationEntryService.retrieveSingleConfigurationEntryByQuery(QUERY_BY_FOLIO_HOST);
     var folioHostValueFromRemote = entryFromRemote.getValue();
-    var inventoryRecordLinkValue = String.join((folioHostValueFromRemote.endsWith("/") ? folioHostValueFromRemote : folioHostValueFromRemote.concat("/")), "inventory/view/");
+    var inventoryRecordLinkValue = String.join(
+      "",
+      (folioHostValueFromRemote.endsWith("/") ? folioHostValueFromRemote : folioHostValueFromRemote.concat("/")),
+      "inventory/view/"
+    );
 
     return Config.builder()
       .key(INVENTORY_RECORD_LINK_KEY)
