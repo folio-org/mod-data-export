@@ -48,7 +48,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest) {
     processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
-    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     } else {
       processMarcHoldingsSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
