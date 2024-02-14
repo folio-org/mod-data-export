@@ -1,5 +1,6 @@
 package org.folio.dataexp.service;
 
+import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
@@ -44,6 +45,8 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,6 +107,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   private IssuanceModesClient issuanceModesClient;
 
   @Test
+  @SneakyThrows
   void exportAllInstancesNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
@@ -111,6 +115,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest();
       dataExportAllService.postDataExportAll(exportAllRequest);
+      TimeUnit.SECONDS.sleep(1);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();
@@ -122,6 +127,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   }
 
   @Test
+  @SneakyThrows
   void exportAllHoldingsNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
@@ -130,6 +136,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
         .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE);
       dataExportAllService.postDataExportAll(exportAllRequest);
+      TimeUnit.SECONDS.sleep(1);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();
@@ -141,6 +148,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   }
 
   @Test
+  @SneakyThrows
   void exportAllAuthorityNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
@@ -149,6 +157,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
         .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE);
       dataExportAllService.postDataExportAll(exportAllRequest);
+      TimeUnit.SECONDS.sleep(1);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
       assertThat(errors).isEmpty();

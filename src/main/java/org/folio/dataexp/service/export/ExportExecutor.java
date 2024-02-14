@@ -50,11 +50,11 @@ public class ExportExecutor {
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
     var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, exportRequest, lastExport);
     commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
-    updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails);
+    updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails, exportRequest);
     log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
   }
 
-  private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails) {
+  private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails, ExportRequest exportRequest) {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobExecution = jobExecutionEntity.getJobExecution();
     var progress = jobExecution.getProgress();
@@ -67,6 +67,9 @@ public class ExportExecutor {
     long exportsCompletedWithErrors = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).count();
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
+        progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
+      }
       progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
       errorLogService.saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
 
