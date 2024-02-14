@@ -39,7 +39,7 @@ class SingleFileProcessorAsyncTest {
       .fileLocation(fileLocation).build();
     var commonFails = new CommonExportFails();
     var headers = new HashMap<String, Collection<String>>();
-    headers.put("key", List.of("1", "2"));
+    headers.put("key", List.of("value"));
 
     singleFileProcessorAsync.setFolioExecutionContext(folioExecutionContext);
 

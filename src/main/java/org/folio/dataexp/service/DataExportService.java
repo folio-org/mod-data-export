@@ -49,6 +49,12 @@ public class DataExportService {
     jobExecutionEntity.getJobExecution().setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecutionEntity.getJobExecution().setJobProfileName(jobProfileEntity.getJobProfile().getName());
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
+
+    int hrid = jobExecutionEntityRepository.getHrid();
+    var runBy = getRunBy();
+    jobExecutionEntity.getJobExecution().setHrId(hrid);
+    jobExecutionEntity.getJobExecution().setRunBy(runBy);
+
     try {
       dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
     } catch (DataExportRequestValidationException e) {
@@ -79,27 +85,26 @@ public class DataExportService {
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
-    if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) jobExecution.setCompletedDate(currentDate);
-
-    var userId = folioExecutionContext.getUserId().toString();
-    var user = userClient.getUserById(userId);
-    var runBy = new JobExecutionRunBy();
-    runBy.firstName(user.getPersonal().getFirstName());
-    runBy.lastName(user.getPersonal().getLastName());
-    runBy.setUserId(userId);
-    jobExecution.setRunBy(runBy);
-
+    if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
+      jobExecution.setCompletedDate(currentDate);
+    }
     long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
     var jobExecutionProgress = new JobExecutionProgress();
     jobExecutionProgress.setFailed(0);
     jobExecutionProgress.setExported(0);
     jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
     jobExecution.setProgress(jobExecutionProgress);
-
-    int hrid = jobExecutionEntityRepository.getHrid();
-    jobExecution.setHrId(hrid);
-
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
+  }
+
+  private JobExecutionRunBy getRunBy() {
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+    var runBy = new JobExecutionRunBy();
+    runBy.firstName(user.getPersonal().getFirstName());
+    runBy.lastName(user.getPersonal().getLastName());
+    runBy.setUserId(userId);
+    return runBy;
   }
 }
