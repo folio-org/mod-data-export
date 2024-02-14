@@ -51,7 +51,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     } else {
-      processMarcInstancesSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+      processMarcHoldingsSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
     }
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
@@ -102,18 +102,16 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     }
   }
 
-  private void processMarcInstancesSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      ExportRequest exportRequest) {
-    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      var marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+  private void processMarcHoldingsSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, ExportRequest exportRequest) {
+    var marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    entityManager.clear();
+    processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcHoldingsSlice.getContent());
+    log.info("Slice size for holdings export all marc: {}", marcHoldingsSlice.getContent().size());
+    while (marcHoldingsSlice.hasNext()) {
+      marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, marcHoldingsSlice.nextPageable());
       entityManager.clear();
       processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcHoldingsSlice.getContent());
-      log.info("Slice size for holdings export all marc: {}", marcHoldingsSlice.getContent().size());
-      while (marcHoldingsSlice.hasNext()) {
-        marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, marcHoldingsSlice.nextPageable());
-        entityManager.clear();
-        processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcHoldingsSlice.getContent());
-      }
     }
   }
 

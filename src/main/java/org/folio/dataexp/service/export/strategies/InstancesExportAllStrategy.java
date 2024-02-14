@@ -104,6 +104,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     entityManager.clear();
     processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
     log.info("Slice size for instances export all marc: {}", marcSlice.getContent().size());
+    log.info("Slice content: {}", marcSlice.getContent().stream().map(MarcRecordEntity::getExternalId).toList());
     while (marcSlice.hasNext()) {
       marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
       entityManager.clear();
@@ -127,6 +128,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   private void processMarcInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<MarcRecordEntity> marcRecords) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    log.info("processMarcInstances instances all externalIds: {}", externalIds);
     createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
         marcRecords);
   }

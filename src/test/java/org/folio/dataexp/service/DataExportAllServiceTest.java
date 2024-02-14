@@ -170,6 +170,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
+
       var mappingProfileId = UUID.randomUUID();
       var customInstanceMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Instance Mapping Profile")
           ._default(false).recordTypes(List.of(RecordTypes.INSTANCE));
@@ -181,6 +182,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customInstanceJobProfile)
           .withId(customInstanceJobProfile.getId()).withName(customInstanceJobProfile.getName())
           .withMappingProfileId(mappingProfileId));
+
       var exportAllRequest = new ExportAllRequest().jobProfileId(jobProfileId);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
@@ -290,7 +292,20 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true);
+
+      var mappingProfileId = UUID.randomUUID();
+      var customInstanceMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Instance Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.INSTANCE));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customInstanceMappingProfile)
+          .withId(customInstanceMappingProfile.getId()).withName(customInstanceMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customInstanceJobProfile = new JobProfile().id(jobProfileId).name("Custom Instance Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customInstanceJobProfile)
+          .withId(customInstanceJobProfile.getId()).withName(customInstanceJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).jobProfileId(jobProfileId);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -400,7 +415,21 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).deletedRecords(false);
+
+      var mappingProfileId = UUID.randomUUID();
+      var customInstanceMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Instance Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.INSTANCE));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customInstanceMappingProfile)
+          .withId(customInstanceMappingProfile.getId()).withName(customInstanceMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customInstanceJobProfile = new JobProfile().id(jobProfileId).name("Custom Instance Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customInstanceJobProfile)
+          .withId(customInstanceJobProfile.getId()).withName(customInstanceJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).deletedRecords(false)
+          .jobProfileId(jobProfileId);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -477,7 +506,21 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false).deletedRecords(false);
+
+      var mappingProfileId = UUID.randomUUID();
+      var customInstanceMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Instance Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.INSTANCE));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customInstanceMappingProfile)
+          .withId(customInstanceMappingProfile.getId()).withName(customInstanceMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customInstanceJobProfile = new JobProfile().id(jobProfileId).name("Custom Instance Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customInstanceJobProfile)
+          .withId(customInstanceJobProfile.getId()).withName(customInstanceJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false).deletedRecords(false)
+          .jobProfileId(jobProfileId);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -577,8 +620,21 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
+
+      var mappingProfileId = UUID.randomUUID();
+      var customHoldingsMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Holdings Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.HOLDINGS));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customHoldingsMappingProfile)
+          .withId(customHoldingsMappingProfile.getId()).withName(customHoldingsMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customHoldingsJobProfile = new JobProfile().id(jobProfileId).name("Custom Holdings Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customHoldingsJobProfile)
+          .withId(customHoldingsJobProfile.getId()).withName(customHoldingsJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
-          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true);
+          .jobProfileId(jobProfileId).suppressedFromDiscovery(true);
       dataExportAllService.postDataExportAll(exportAllRequest);
       var jobExecutions = jobExecutionEntityCqlRepository.findAll();
       var errors = errorLogEntityCqlRepository.findAll();
@@ -685,6 +741,67 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
 
   @SneakyThrows
   @Test
+  void exportAllHoldingsNonSuppressedNoErrorsCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+
+      var mappingProfileId = UUID.randomUUID();
+      var customHoldingsMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Holdings Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.HOLDINGS));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customHoldingsMappingProfile)
+          .withId(customHoldingsMappingProfile.getId()).withName(customHoldingsMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customHoldingsJobProfile = new JobProfile().id(jobProfileId).name("Custom Holdings Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customHoldingsJobProfile)
+          .withId(customHoldingsJobProfile.getId()).withName(customHoldingsJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(jobProfileId);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1089f777-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i1798f777-f243-4e4a-bf1c-9e1e62b3171d");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Not suppressed:
+      // Deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i55555577-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i66666677-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i91234977-f243-4e4a-bf1c-9e1e62b3171d");
+      assertThat(outputMrcFile).containsOnlyOnce("i25462250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i35463350-7c9b-48b0-86eb-178a494e25fe");
+
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i22222250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i33333350-7c9b-48b0-86eb-178a494e25fe");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(11);
+    }
+  }
+
+  @SneakyThrows
+  @Test
   void exportAllHoldingsNonDeletedNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
@@ -730,6 +847,64 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
 
   @SneakyThrows
   @Test
+  void exportAllHoldingsNonDeletedNoErrorsCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+
+      var mappingProfileId = UUID.randomUUID();
+      var customHoldingsMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Holdings Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.HOLDINGS));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customHoldingsMappingProfile)
+          .withId(customHoldingsMappingProfile.getId()).withName(customHoldingsMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customHoldingsJobProfile = new JobProfile().id(jobProfileId).name("Custom Holdings Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customHoldingsJobProfile)
+          .withId(customHoldingsJobProfile.getId()).withName(customHoldingsJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(jobProfileId).suppressedFromDiscovery(true).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i1033bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i11111150-7c9b-48b0-86eb-178a494e25fe");
+
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i22222250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i33333350-7c9b-48b0-86eb-178a494e25fe");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(6);
+    }
+  }
+
+  @SneakyThrows
+  @Test
   void exportAllHoldingsNonSuppressedNonDeletedNoErrorsTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
@@ -760,6 +935,56 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       // Non-deleted:
       assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
       assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
+
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
+    }
+  }
+
+  @SneakyThrows
+  @Test
+  void exportAllHoldingsNonSuppressedNonDeletedNoErrorsCustomHoldingsProfileTest() {
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
+      dataExportTenantService.loadReferenceData();
+      handleReferenceData();
+
+      var mappingProfileId = UUID.randomUUID();
+      var customHoldingsMappingProfile = new MappingProfile().id(mappingProfileId).name("Custom Holdings Mapping Profile")
+          ._default(false).recordTypes(List.of(RecordTypes.HOLDINGS));
+      mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customHoldingsMappingProfile)
+          .withId(customHoldingsMappingProfile.getId()).withName(customHoldingsMappingProfile.getName()));
+      var jobProfileId = UUID.randomUUID();
+      var customHoldingsJobProfile = new JobProfile().id(jobProfileId).name("Custom Holdings Job Profile")
+          ._default(false).mappingProfileId(mappingProfileId);
+      jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customHoldingsJobProfile)
+          .withId(customHoldingsJobProfile.getId()).withName(customHoldingsJobProfile.getName())
+          .withMappingProfileId(mappingProfileId));
+
+      var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
+          .jobProfileId(jobProfileId).deletedRecords(false);
+      dataExportAllService.postDataExportAll(exportAllRequest);
+      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+      var errors = errorLogEntityCqlRepository.findAll();
+      assertThat(errors).isEmpty();
+      assertEquals(1, jobExecutions.size());
+      var jobExecution = jobExecutions.get(0);
+      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
+      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
+      var fileLocation = exportFiles.get(0).getFileLocation();
+      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      // Check FOLIO
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i0c45bb50-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i1f45bb50-7c9b-48b0-86eb-178a494e25fe");
+
+      // Check MARC
+      // Not suppressed:
+      // Non-deleted:
+      assertThat(outputMrcFile).containsOnlyOnce("i22222250-7c9b-48b0-86eb-178a494e25fe");
+      assertThat(outputMrcFile).containsOnlyOnce("i33333350-7c9b-48b0-86eb-178a494e25fe");
 
       assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
     }
