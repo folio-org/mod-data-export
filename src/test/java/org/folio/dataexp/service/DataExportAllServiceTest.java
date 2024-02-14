@@ -46,9 +46,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.concurrent.TimeUnit;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -115,14 +115,15 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest();
       dataExportAllService.postDataExportAll(exportAllRequest);
-      TimeUnit.SECONDS.sleep(1);
-      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
-      var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors).isEmpty();
-      assertEquals(1, jobExecutions.size());
-      var jobExecution = jobExecutions.get(0);
-      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-      assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      await().atMost(2, SECONDS).untilAsserted(() -> {
+        var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+        var errors = errorLogEntityCqlRepository.findAll();
+        assertThat(errors).isEmpty();
+        assertEquals(1, jobExecutions.size());
+        var jobExecution = jobExecutions.get(0);
+        assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+        assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      });
     }
   }
 
@@ -136,14 +137,15 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
         .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE);
       dataExportAllService.postDataExportAll(exportAllRequest);
-      TimeUnit.SECONDS.sleep(1);
-      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
-      var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors).isEmpty();
-      assertEquals(1, jobExecutions.size());
-      var jobExecution = jobExecutions.get(0);
-      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-      assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      await().atMost(2, SECONDS).untilAsserted(() -> {
+        var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+        var errors = errorLogEntityCqlRepository.findAll();
+        assertThat(errors).isEmpty();
+        assertEquals(1, jobExecutions.size());
+        var jobExecution = jobExecutions.get(0);
+        assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+        assertEquals(2, jobExecution.getJobExecution().getProgress().getTotal());
+      });
     }
   }
 
@@ -157,14 +159,15 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
         .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE);
       dataExportAllService.postDataExportAll(exportAllRequest);
-      TimeUnit.SECONDS.sleep(1);
-      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
-      var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors).isEmpty();
-      assertEquals(1, jobExecutions.size());
-      var jobExecution = jobExecutions.get(0);
-      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-      assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
+      await().atMost(2, SECONDS).untilAsserted(() -> {
+        var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+        var errors = errorLogEntityCqlRepository.findAll();
+        assertThat(errors).isEmpty();
+        assertEquals(1, jobExecutions.size());
+        var jobExecution = jobExecutions.get(0);
+        assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+        assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
+      });
     }
   }
 
