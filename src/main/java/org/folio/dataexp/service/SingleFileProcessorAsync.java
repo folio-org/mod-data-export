@@ -20,23 +20,11 @@ import java.util.HashMap;
 @Component
 public class SingleFileProcessorAsync extends SingleFileProcessor {
 
-  private FolioExecutionContext folioExecutionContext;
-  private FolioModuleMetadata folioModuleMetadata;
-
   @Autowired
   public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
-                                  JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
-  }
-
-  @Autowired
-  protected void setFolioExecutionContext(FolioExecutionContext folioExecutionContext) {
-    this.folioExecutionContext = folioExecutionContext;
-  }
-
-  @Autowired
-  protected void setFolioModuleMetadata(FolioModuleMetadata folioModuleMetadata) {
-    this.folioModuleMetadata = folioModuleMetadata;
+                                  JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService,
+                                  FolioExecutionContext folioExecutionContext, FolioModuleMetadata folioModuleMetadata) {
+    super(exportExecutor, folioExecutionContext, folioModuleMetadata, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
   }
 
   @Override

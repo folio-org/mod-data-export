@@ -41,8 +41,6 @@ class SingleFileProcessorAsyncTest {
     var headers = new HashMap<String, Collection<String>>();
     headers.put("key", List.of("value"));
 
-    singleFileProcessorAsync.setFolioExecutionContext(folioExecutionContext);
-
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails, false);
 
