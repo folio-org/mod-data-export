@@ -111,7 +111,7 @@ class AbstractExportStrategyTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
 
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest(), false);
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest());
     assertEquals(2, exportStatistic.getExported());
     assertEquals(1, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
@@ -156,7 +156,7 @@ class AbstractExportStrategyTest {
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
     doThrow(new S3ClientException("Can not write")).when(remoteStorageWriter).close();
 
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest(), false);
+    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest());
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());

@@ -4,8 +4,8 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
 
- WITH RankedRows as (select rec.id id,(ROW_NUMBER() OVER (ORDER BY rec.id)) - 1 row_num
-    from ${myuniversity}_mod_entities_links.authority rec order by id),
+ WITH RankedRows as (select rec.external_id id,(ROW_NUMBER() OVER (ORDER BY rec.external_id)) - 1 row_num
+    from ${myuniversity}_mod_data_export.v_authority_all rec order by id),
  IndexedRows as (select id, (row_num / sliceSize) group_index, (row_num % sliceSize) local_index from RankedRows),
  GroupedRows as (select id,
 						group_index,
