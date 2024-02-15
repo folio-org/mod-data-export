@@ -33,9 +33,7 @@ public class QuickExportService {
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
-    log.info("Post quick export after");
     var jobExecution = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
-    log.info("Job execution after post quick: {}", jobExecution);
     return QuickExportResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId())
       .jobExecutionHrId(jobExecution.getJobExecution().getHrId()).build();
   }
