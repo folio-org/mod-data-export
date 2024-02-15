@@ -24,7 +24,7 @@ public class DataExportAllService {
   private final JobProfileEntityRepository jobProfileEntityRepository;
 
   public void postDataExportAll(ExportAllRequest exportAllRequest) {
-    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(buildFileName(exportAllRequest));
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(exportAllRequest.getIdType() + "-all.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post data export all for job profile {}", exportAllRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromExportAllRequest(exportAllRequest, fileDefinition));
@@ -53,16 +53,5 @@ public class DataExportAllService {
       return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(exportAllRequest.getIdType().getValue()).get(0);
     }
     return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(ExportRequest.IdTypeEnum.INSTANCE.getValue()).get(0);
-  }
-
-  private String buildFileName(ExportAllRequest exportAllRequest) {
-    String notDeleted = "", notSuppressed = "";
-    if (Boolean.FALSE.equals(exportAllRequest.getDeletedRecords())) {
-      notDeleted = "-not-deleted";
-    }
-    if (Boolean.FALSE.equals(exportAllRequest.getSuppressedFromDiscovery())) {
-      notSuppressed = "-not-suppressed";
-    }
-    return format(exportAllRequest.getIdType() + "-all%s%s.csv", notDeleted, notSuppressed);
   }
 }
