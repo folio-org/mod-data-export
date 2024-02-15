@@ -129,7 +129,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   private void processMarcInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    log.info("processMarcInstances instances all externalIds: {}", externalIds);
+    log.info("processMarcInstances instances all externalIds: {}", externalIds.size());
     createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
         marcRecords, localStorageWriter);
   }
