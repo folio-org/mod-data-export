@@ -11,11 +11,12 @@ import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -50,13 +51,18 @@ public class QuickExportService {
   }
 
   private void saveBatch(QuickExportRequest quickExportRequest, FileDefinition fileDefinition) {
-    var batch = new ArrayList<ExportIdEntity>();
-    quickExportRequest.getUuids().forEach(instanceId -> {
-      var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
-        .getJobExecutionId()).instanceId(instanceId).build();
-      batch.add(entity);
-    });
-    exportIdEntityRepository.saveAll(batch);
+    var uuids = quickExportRequest.getUuids();
+    if (nonNull(uuids)) {
+      var batch = new ArrayList<ExportIdEntity>();
+      uuids.forEach(instanceId -> {
+        var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
+          .getJobExecutionId()).instanceId(instanceId).build();
+        batch.add(entity);
+      });
+      exportIdEntityRepository.saveAll(batch);
+    } else {
+      log.error("Nothing to export: no uuids provided.");
+    }
   }
 
   private UUID getDefaultJobProfileId(QuickExportRequest quickExportRequest) {

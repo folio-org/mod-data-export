@@ -22,6 +22,7 @@ public class QuickExportController implements QuickExportApi {
   @Override
   public ResponseEntity<QuickExportResponse> postDataExportQuickExport(QuickExportRequest quickExportRequest) {
     var response = quickExportService.postQuickExport(quickExportRequest);
+    log.info("Quick export response: {}", response);
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

@@ -50,7 +50,6 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.scope.FolioExecutionContextSetter;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -72,7 +71,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   private DataExportAllService dataExportAllService;
 
   @Autowired
-  private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  protected JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
 
   @Autowired
   private JobProfileEntityRepository jobProfileEntityRepository;
@@ -81,13 +80,13 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
   private MappingProfileEntityRepository mappingProfileEntityRepository;
 
   @Autowired
-  private DataExportTenantService dataExportTenantService;
+  protected DataExportTenantService dataExportTenantService;
 
   @Autowired
-  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  protected ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @Autowired
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  protected JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
 
   @MockBean
   private UserClient userClient;
@@ -996,7 +995,7 @@ class DataExportAllServiceTest extends BaseDataExportInitializer {
     }
   }
 
-  private void handleReferenceData() {
+  protected void handleReferenceData() {
     var user = new User();
     var personal = new User.Personal();
     personal.setFirstName("testuser");
