@@ -63,7 +63,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     var deletedFolioHoldings = getFolioDeleted(exportRequest);
     entityManager.clear();
     processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioHoldings);
-    if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
+    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       var deletedMarcHoldings = getMarcDeleted(exportRequest);
       entityManager.clear();
       processMarcHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcHoldings);
