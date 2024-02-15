@@ -22,9 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
-
-import static java.util.Objects.isNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,7 +64,7 @@ public class MappingProfileController implements MappingProfilesApi {
 
   @Override
   public ResponseEntity<MappingProfile> postMappingProfile(MappingProfile mappingProfile) {
-    var id = isNull(mappingProfile.getId()) ? UUID.randomUUID() : mappingProfile.getId();
+    var id = Objects.isNull(mappingProfile.getId()) ? UUID.randomUUID() : mappingProfile.getId();
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -114,10 +113,20 @@ public class MappingProfileController implements MappingProfilesApi {
     userInfo.setUserName(user.getUsername());
     mappingProfile.setUserInfo(userInfo);
 
-    var metadata = isNull(mappingProfile.getMetadata()) ? new Metadata() : mappingProfile.getMetadata();
-    metadata.updatedDate(new Date());
-    metadata.updatedByUserId(userId);
-    metadata.updatedByUsername(user.getUsername());
+    if (mappingProfile.getMetadata() == null){
+      var metadata = Metadata.builder()
+        .createdByUserId(userId)
+        .createdByUsername(user.getUsername())
+        .createdDate(new Date())
+        .build();
+
+      mappingProfile.setMetadata(metadata);
+    } else {
+      var metadata = mappingProfile.getMetadata();
+      metadata.updatedDate(new Date());
+      metadata.updatedByUserId(userId);
+      metadata.updatedByUsername(user.getUsername());
+    }
 
     mappingProfileEntityRepository.save(mappingProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
