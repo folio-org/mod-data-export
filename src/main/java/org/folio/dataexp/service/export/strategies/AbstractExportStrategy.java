@@ -139,12 +139,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         exportStatistic.incrementFailed();
         continue;
       }
+      remoteStorageWriter.write(marc);
       if (externalIdsWithMarcRecord.contains(marcRecordEntity.getExternalId())) {
         exportStatistic.incrementDuplicatedSrs();
         var exportIdentifiers = getIdentifiers(marcRecordEntity.getExternalId());
         duplicatedUuidWithIdentifiers.put(marcRecordEntity.getExternalId(), exportIdentifiers);
       } else {
-        remoteStorageWriter.write(marc);
         externalIdsWithMarcRecord.add(marcRecordEntity.getExternalId());
       }
       exportStatistic.incrementExported();
