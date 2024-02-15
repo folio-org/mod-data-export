@@ -38,6 +38,7 @@ public class QuickExportService {
     exportRequest.setRecordType(ExportRequest.RecordTypeEnum.fromValue(quickExportRequest.getRecordType().getValue()));
     exportRequest.setFileDefinitionId(fileDefinition.getId());
     exportRequest.setQuick(true);
+    exportRequest.setIdType(ExportRequest.IdTypeEnum.fromValue(quickExportRequest.getRecordType().getValue().toLowerCase()));
     return exportRequest;
   }
 
