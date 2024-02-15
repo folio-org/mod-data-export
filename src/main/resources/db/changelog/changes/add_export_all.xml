@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="add_export_all" author="Firebird">
+    <changeSet id="add_export_all" author="Firebird" runAlways="true">
         <validCheckSum>ANY</validCheckSum>
         <createProcedure path="changes/add_export_all.sql" relativeToChangelogFile="true" />
     </changeSet>
