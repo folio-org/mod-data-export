@@ -102,6 +102,7 @@ public class MappingProfileController implements MappingProfilesApi {
     if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     }
+    mappingProfileEntity.setName(mappingProfile.getName());
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
