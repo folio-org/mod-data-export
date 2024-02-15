@@ -5,10 +5,13 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.QuickExportRequest;
+import org.folio.dataexp.domain.dto.QuickExportResponse;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,12 +26,18 @@ public class QuickExportService {
   private final DataExportService dataExportService;
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final ExportIdEntityRepository exportIdEntityRepository;
+  private final JobExecutionEntityRepository jobExecutionEntityRepository;
 
-  public void postQuickExport(QuickExportRequest quickExportRequest) {
+  public QuickExportResponse postQuickExport(QuickExportRequest quickExportRequest) {
     var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(quickExportRequest.getType() + "-quick.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
+    log.info("Post quick export after");
+    var jobExecution = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
+    log.info("Job execution after post quick: {}", jobExecution);
+    return QuickExportResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId())
+      .jobExecutionHrId(jobExecution.getJobExecution().getHrId()).build();
   }
 
   private ExportRequest getExportRequestFromQuickExportRequest(QuickExportRequest quickExportRequest, FileDefinition fileDefinition) {
