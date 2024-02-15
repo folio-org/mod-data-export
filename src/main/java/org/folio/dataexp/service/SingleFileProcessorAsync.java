@@ -20,7 +20,7 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails, boolean lastExport) {
-    exportExecutor.exportAsynch(export, exportRequest, commonExportFails, lastExport);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+    exportExecutor.exportAsynch(export, exportRequest, commonExportFails);
   }
 }

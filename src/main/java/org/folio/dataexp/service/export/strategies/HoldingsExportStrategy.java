@@ -1,9 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -12,7 +9,6 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
-import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -20,7 +16,6 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
-import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -65,9 +60,6 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
@@ -115,7 +107,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         var uuid = holdingsJsonObject.getAsString(ID_KEY);
         result.addIdToFailed(UUID.fromString(uuid));
         var errorMessage = String.format("%s for holding %s", e.getMessage(), uuid);
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
         log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
       }
     }

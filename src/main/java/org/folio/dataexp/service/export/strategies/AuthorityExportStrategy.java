@@ -1,7 +1,5 @@
 package org.folio.dataexp.service.export.strategies;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -31,9 +29,6 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
 
   protected final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
   protected final FolioExecutionContext context;
-
-  @PersistenceContext
-  private EntityManager entityManager;
 
   @Override
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {

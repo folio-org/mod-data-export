@@ -1,18 +1,16 @@
 package org.folio.dataexp.service.export.strategies;
 
-import jakarta.persistence.EntityManager;
 import lombok.extern.log4j.Log4j2;
-import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.entity.HoldingsRecordDeletedEntity;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
-import org.folio.dataexp.repository.HoldingsRecordEntityDeletedRepository;
+import org.folio.dataexp.repository.FolioHoldingsAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.MarcHoldingsAllRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -24,112 +22,167 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.folio.dataexp.service.export.Constants.DELETED_AUDIT_RECORD;
 
 @Log4j2
 @Component
 public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
-  private final HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository;
+  private final FolioHoldingsAllRepository folioHoldingsAllRepository;
+  private final MarcHoldingsAllRepository marcHoldingsAllRepository;
 
-  public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository, RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider, ErrorLogService errorLogService, HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository, EntityManager entityManager, HoldingsRecordEntityDeletedRepository holdingsRecordEntityDeletedRepository) {
-    super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider, errorLogService, holdingsRecordEntityRepository, marcRecordEntityRepository, entityManager);
-    this.holdingsRecordEntityDeletedRepository = holdingsRecordEntityDeletedRepository;
+  public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
+      RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
+      ErrorLogService errorLogService, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
+      MarcRecordEntityRepository marcRecordEntityRepository, FolioHoldingsAllRepository folioHoldingsAllRepository,
+      MarcHoldingsAllRepository marcHoldingsAllRepository) {
+    super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
+        errorLogService, holdingsRecordEntityRepository, marcRecordEntityRepository);
+    this.folioHoldingsAllRepository = folioHoldingsAllRepository;
+    this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }
 
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
+                               MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
-        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndSuppressDiscoveryIs(externalIds, HOLDING_MARC_TYPE,
-          exportRequest.getSuppressedFromDiscovery());
+      processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    } else {
+      processMarcHoldingsSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    }
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
+      handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    }
+  }
+
+  private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    var deletedFolioHoldings = getFolioDeleted(exportRequest);
+    entityManager.clear();
+    processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioHoldings, localStorageWriter);
+    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
+      var deletedMarcHoldings = getMarcDeleted(exportRequest);
+      entityManager.clear();
+      processMarcHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcHoldings, localStorageWriter);
+    } else {
+      var deletedFolioMarcHoldings = getMarcHoldingsDeleted(exportRequest);
+      entityManager.clear();
+      processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioMarcHoldings, localStorageWriter);
+    }
+  }
+
+  private void processFolioSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    var folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    entityManager.clear();
+    processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent(), localStorageWriter);
+    log.info("Slice size for holdings export all folio: {}", folioSlice.getContent().size());
+    while (folioSlice.hasNext()) {
+      folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, folioSlice.nextPageable());
+      entityManager.clear();
+      processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent(), localStorageWriter);
+    }
+  }
+
+  private void processMarcSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
+      var marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+      entityManager.clear();
+      processMarcHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent(), localStorageWriter);
+      log.info("Slice size for holdings export all marc: {}", marcSlice.getContent().size());
+      while (marcSlice.hasNext()) {
+        marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
+        entityManager.clear();
+        processMarcHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent(), localStorageWriter);
       }
-      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNotAndSuppressDiscoveryIs(
-        externalIds, HOLDING_MARC_TYPE, "ACTUAL", 'd', exportRequest.getSuppressedFromDiscovery());
-    }
-    return new ArrayList<>();
-  }
-
-  @Override
-  protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
-    var slice = chooseSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    updateSliceState(slice, exportRequest);
-    log.info("Slice size for holdings export all: {}", slice.getSize());
-    var exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-    var holdings = slice.getContent().stream().collect(Collectors.toList());
-    log.info("Size of exportIds for holdings export all: {}", exportIds.size());
-    createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-      exportRequest, localStorageWriter);
-    while (slice.hasNext()) {
-      slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
-      updateSliceState(slice, exportRequest);
-      exportIds = slice.getContent().stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-      holdings = slice.getContent().stream().collect(Collectors.toList());
-      createAndSaveMarc(exportIds, holdings, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-        exportRequest, localStorageWriter);
     }
   }
 
-  private Slice<HoldingsRecordEntity> chooseSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return holdingsRecordEntityRepository.findByIdGreaterThanEqualAndIdLessThanEqualOrderByIdAsc(exportFilesEntity.getFromId(),
-        exportFilesEntity.getToId(), pageble);
+  private void processMarcHoldingsSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    var marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
+    entityManager.clear();
+    processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcHoldingsSlice.getContent(), localStorageWriter);
+    log.info("Slice size for holdings export all marc: {}", marcHoldingsSlice.getContent().size());
+    while (marcHoldingsSlice.hasNext()) {
+      marcHoldingsSlice = nextMarcHoldingsSlice(exportFilesEntity, exportRequest, marcHoldingsSlice.nextPageable());
+      entityManager.clear();
+      processFolioHoldings(exportFilesEntity, exportStatistic, mappingProfile, marcHoldingsSlice.getContent(), localStorageWriter);
     }
-    return holdingsRecordEntityRepository.findAllWhenSkipDiscoverySuppressed(exportFilesEntity.getFromId(),
-      exportFilesEntity.getToId(), pageble);
   }
 
-  private List<HoldingsRecordEntity> holdingsDeletedToHoldingsEntities(List<HoldingsRecordDeletedEntity> holdingsDeleted) {
-    return holdingsDeleted.stream()
-      .map(hold -> new HoldingsRecordEntity().withId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-          .getAsString(DELETED_AUDIT_RECORD)).get()
-          .getAsString("id")))
-        .withJsonb(getAsJsonObject(hold.getJsonb()).get()
-          .getAsString(DELETED_AUDIT_RECORD))
-        .withInstanceId(UUID.fromString(getAsJsonObject(getAsJsonObject(hold.getJsonb()).get()
-          .getAsString(DELETED_AUDIT_RECORD)).get()
-          .getAsString("instanceId"))))
-      .toList();
+  private void processMarcHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
+    var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
+        marcRecords, localStorageWriter);
   }
 
-  private void createAndSaveMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, ExportStrategyStatistic exportStatistic,
-      MappingProfile mappingProfile, UUID jobExecutionId, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
-    var externalIdsWithMarcRecord = new HashSet<UUID>();
-    createMarc(holdingsIds, exportStatistic, mappingProfile, jobExecutionId, exportRequest, externalIdsWithMarcRecord, localStorageWriter);
-    holdings.removeIf(hold -> externalIdsWithMarcRecord.contains(hold.getId()));
-    var result = getGeneratedMarc(holdingsIds, holdings, mappingProfile, jobExecutionId, exportRequest);
+  private void processFolioHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+      List<HoldingsRecordEntity> folioHoldings, LocalStorageWriter localStorageWriter) {
+    var result = getGeneratedMarc(folioHoldings, mappingProfile, exportFilesEntity.getJobExecutionId());
     saveMarc(result, exportStatistic, localStorageWriter);
   }
 
-  private GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
-      UUID jobExecutionId, ExportRequest exportRequest) {
-    var result = new GeneratedMarcResult();
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, holdings, result, mappingProfile, exportRequest);
-    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
+  private Slice<HoldingsRecordEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioHoldingsAllRepository.findFolioHoldingsAllNonDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+          pageble);
+    }
+    return folioHoldingsAllRepository.findFolioHoldingsAllNonDeletedNonSuppressed(exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(), pageble);
   }
 
-  private List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, List<HoldingsRecordEntity> holdings, GeneratedMarcResult result,
-      MappingProfile mappingProfile, ExportRequest exportRequest) {
-    var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && isExportCompleted(exportRequest)) {
-      List<HoldingsRecordDeletedEntity> holdingsDeleted;
-      if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAll();
-      } else {
-        holdingsDeleted = holdingsRecordEntityDeletedRepository.findAllDeletedWhenSkipDiscoverySuppressed();
-      }
-      var holdingsDeletedToHoldingsEntities = holdingsDeletedToHoldingsEntities(holdingsDeleted);
-      var instanceIdsDeleted = holdingsDeletedToHoldingsEntities.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-      holdings.addAll(holdingsDeletedToHoldingsEntities);
-      instancesIds.addAll(instanceIdsDeleted);
+  private Slice<MarcRecordEntity> nextMarcSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return marcHoldingsAllRepository.findMarcHoldingsAllNonDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+          pageble);
     }
-    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
+    return marcHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressed(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
+  }
+
+  private Slice<HoldingsRecordEntity> nextMarcHoldingsSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedCustomHoldingsProfile(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+          pageble);
+    }
+    return folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfile(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
+  }
+
+  private List<HoldingsRecordEntity> getFolioDeleted(ExportRequest exportRequest) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioHoldingsAllRepository.findFolioHoldingsAllDeleted();
+    }
+    return folioHoldingsAllRepository.findFolioHoldingsAllDeletedNonSuppressed();
+  }
+
+  private List<MarcRecordEntity> getMarcDeleted(ExportRequest exportRequest) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return marcHoldingsAllRepository.findMarcHoldingsAllDeleted();
+    }
+    return marcHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressed();
+  }
+
+  private List<HoldingsRecordEntity> getMarcHoldingsDeleted(ExportRequest exportRequest) {
+    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+      return folioHoldingsAllRepository.findMarcHoldingsAllDeletedCustomHoldingsProfile();
+    }
+    return folioHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressedCustomHoldingsProfile();
+  }
+
+  private GeneratedMarcResult getGeneratedMarc(List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
+       UUID jobExecutionId) {
+    var result = new GeneratedMarcResult();
+    var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
+    var holdingsIds = holdings.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
+    return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
 }

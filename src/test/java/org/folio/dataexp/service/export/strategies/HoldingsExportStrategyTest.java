@@ -19,6 +19,7 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.marc4j.MarcException;
@@ -74,6 +75,11 @@ class HoldingsExportStrategyTest {
 
   @InjectMocks
   private HoldingsExportStrategy holdingsExportStrategy;
+
+  @BeforeEach
+  void setUp() {
+    holdingsExportStrategy.entityManager = entityManager;
+  }
 
   @Test
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
@@ -153,7 +159,7 @@ class HoldingsExportStrategyTest {
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
-    doNothing().when(entityManager).clear();
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
 
     var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile);
 

@@ -64,7 +64,7 @@ public class SingleFileProcessor {
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());
-      executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
+      executeExport(export, exportRequest, commonExportFails);
       log.info("Export from {} to {} has been executed.", export.getFromId(), export.getToId());
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         updateStatisticsForExportAll(jobExecutionId);
@@ -72,16 +72,15 @@ public class SingleFileProcessor {
     }
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails,
-      boolean lastExport) {
-    exportExecutor.export(export, exportRequest, commonExportFails, lastExport);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+    exportExecutor.export(export, exportRequest, commonExportFails);
   }
 
   private void updateStatisticsForExportAll(UUID jobExecutionId) {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobExecution = jobExecutionEntity.getJobExecution();
     var progress = jobExecution.getProgress();
-    progress.setTotal(progress.getExported() + progress.getDuplicatedSrs() + progress.getFailed());
+    progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
     jobExecutionEntityRepository.save(jobExecutionEntity);
   }
 }
