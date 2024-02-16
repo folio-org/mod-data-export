@@ -44,7 +44,7 @@ class QuickExportServiceTest extends DataExportAllServiceTest {
       var response = quickExportService.postQuickExport(quickExportRequest);
 
       assertNotNull(response);
-      assertThat(response.getJobExecutionHrId()).isGreaterThan(0);
+      assertThat(response.getJobExecutionHrId()).isPositive();
       assertThat(response.getJobExecutionId()).isInstanceOf(UUID.class);
 
       var errors = errorLogEntityCqlRepository.findAll();
