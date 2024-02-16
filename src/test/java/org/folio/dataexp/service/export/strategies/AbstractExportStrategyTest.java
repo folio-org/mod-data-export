@@ -15,9 +15,9 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.s3.client.FolioS3Client;
-import org.folio.s3.client.RemoteStorageWriter;
 import org.folio.s3.exception.S3ClientException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class AbstractExportStrategyTest {
   @Mock
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Mock
-  private RemoteStorageWriter remoteStorageWriter;
+  private LocalStorageWriter localStorageWriter;
   @Mock
   private ErrorLogService errorLogService;
   @Spy
@@ -118,7 +118,7 @@ class AbstractExportStrategyTest {
 
     assertEquals(JobExecutionExportFilesStatus.COMPLETED, exportFilesEntity.getStatus());
 
-    verify(remoteStorageWriter, times(2)).write(isA(String.class));
+    verify(localStorageWriter, times(2)).write(isA(String.class));
   }
 
   @Test
@@ -154,7 +154,7 @@ class AbstractExportStrategyTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
-    doThrow(new S3ClientException("Can not write")).when(remoteStorageWriter).close();
+    doThrow(new S3ClientException("Can not write")).when(localStorageWriter).close();
 
     var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, new ExportRequest());
     assertEquals(0, exportStatistic.getExported());
@@ -211,8 +211,8 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    protected RemoteStorageWriter createRemoteStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
-      return remoteStorageWriter;
+    protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
+      return localStorageWriter;
     }
   }
 }

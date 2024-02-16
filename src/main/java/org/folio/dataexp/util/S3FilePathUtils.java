@@ -2,9 +2,12 @@ package org.folio.dataexp.util;
 
 import java.util.UUID;
 
+import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
+
 public class S3FilePathUtils {
 
-  private static final String SLICED_FILE_LOCATION_PATH = "mod-data-export/download/%s/%s";
+
+  private static final String SLICED_FILE_LOCATION_PATH = TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID + "%s";
   public static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
 
   private S3FilePathUtils() {

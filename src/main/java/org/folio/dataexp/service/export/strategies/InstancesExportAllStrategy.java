@@ -18,6 +18,7 @@ import org.folio.dataexp.repository.MarcInstanceAllRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
@@ -57,86 +58,86 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      ExportRequest exportRequest) {
-    processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
+    processFolioSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+      processMarcSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     } else {
-      processMarcInstanceSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+      processMarcInstanceSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     }
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
-      handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest);
+      handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     }
   }
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      ExportRequest exportRequest) {
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var deletedFolioInstances = getFolioDeleted(exportRequest);
     entityManager.clear();
-    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioInstances);
+    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioInstances, localStorageWriter);
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var deletedMarcRecords = getMarcDeleted(exportRequest);
       entityManager.clear();
-      processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcRecords);
+      processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcRecords, localStorageWriter);
     } else {
       var deletedMarcInstances = getMarcInstanceDeleted(exportRequest);
       entityManager.clear();
-      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcInstances);
+      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcInstances, localStorageWriter);
     }
   }
 
   private void processFolioSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      ExportRequest exportRequest) {
+      ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
     entityManager.clear();
-    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent());
+    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent(), localStorageWriter);
     log.info("Slice size for instances export all folio: {}", folioSlice.getContent().size());
     while (folioSlice.hasNext()) {
       folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, folioSlice.nextPageable());
       entityManager.clear();
-      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent());
+      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent(), localStorageWriter);
     }
   }
 
   private void processMarcSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
-      MappingProfile mappingProfile, ExportRequest exportRequest) {
+      MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
     entityManager.clear();
-    processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
+    processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent(), localStorageWriter);
     log.info("Slice size for instances export all marc: {}", marcSlice.getContent().size());
     log.info("Slice content: {}", marcSlice.getContent().stream().map(MarcRecordEntity::getExternalId).toList());
     while (marcSlice.hasNext()) {
       marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
       entityManager.clear();
-      processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent());
+      processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent(), localStorageWriter);
     }
   }
 
   private void processMarcInstanceSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic,
-      MappingProfile mappingProfile, ExportRequest exportRequest) {
+      MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var marcInstanceSlice = nextMarcInstanceSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
     entityManager.clear();
-    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent());
+    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent(), localStorageWriter);
     log.info("Slice size for marc instances export all marc: {}", marcInstanceSlice.getContent().size());
     while (marcInstanceSlice.hasNext()) {
       marcInstanceSlice = nextMarcInstanceSlice(exportFilesEntity, exportRequest, marcInstanceSlice.nextPageable());
       entityManager.clear();
-      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent());
+      processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, marcInstanceSlice.getContent(), localStorageWriter);
     }
   }
 
   private void processMarcInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      List<MarcRecordEntity> marcRecords) {
+      List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    log.info("processMarcInstances instances all externalIds: {}", externalIds);
+    log.info("processMarcInstances instances all externalIds: {}", externalIds.size());
     createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
-        marcRecords);
+        marcRecords, localStorageWriter);
   }
 
   private void processFolioInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      List<InstanceEntity> folioInstances) {
+      List<InstanceEntity> folioInstances, LocalStorageWriter localStorageWriter) {
     var result = getGeneratedMarc(folioInstances, mappingProfile, exportFilesEntity.getJobExecutionId());
-    saveMarc(result, exportStatistic);
+    saveMarc(result, exportStatistic, localStorageWriter);
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
