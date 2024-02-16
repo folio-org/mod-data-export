@@ -11,7 +11,9 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
+
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.ConfigurationEntryService;
@@ -142,6 +144,8 @@ public class BaseDataExportInitializer {
   @Autowired
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
@@ -204,6 +208,7 @@ public class BaseDataExportInitializer {
       exportIdEntityRepository.deleteAll();
       jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
+      fileDefinitionEntityRepository.deleteAll();
     }
   }
 

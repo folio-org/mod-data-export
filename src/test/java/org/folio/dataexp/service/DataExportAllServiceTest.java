@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DataExportAllServiceTest extends ServiceInitializer {
@@ -32,6 +33,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
   private DataExportAllService dataExportAllService;
   @Autowired
   private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
@@ -57,10 +60,16 @@ class DataExportAllServiceTest extends ServiceInitializer {
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "instance-all.csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
+
       assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
@@ -101,10 +110,16 @@ class DataExportAllServiceTest extends ServiceInitializer {
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "instance-all.csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
+
       assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       assertThat(outputMrcFile).containsOnlyOnce("i011e1aea-222d-4d1d-957d-0abcdd0e9acd");
@@ -145,9 +160,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(22, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -216,9 +232,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(22, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -286,9 +303,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -332,9 +350,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -376,9 +395,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(3, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -415,9 +435,9 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(3, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+      var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -453,9 +473,9 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -521,9 +541,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -588,9 +609,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -639,9 +661,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -689,9 +712,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -737,9 +761,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Suppressed:
@@ -784,9 +809,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -824,9 +850,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Check FOLIO
       // Not suppressed:
@@ -865,9 +892,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "authority-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Deleted:
       assertThat(outputMrcFile).containsOnlyOnce("s28eed93e-f9e2-4cb2-a52b-e9155acfc119");
@@ -900,13 +928,17 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "authority-all.csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
+
+      var fileToExport  =  String.format("%s-%s.mrc", "authority-all", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       // Non-deleted:
       assertThat(outputMrcFile).containsOnlyOnce("s17eed93e-f9e2-4cb2-a52b-e9155acfc119");
-
       assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
     }
   }

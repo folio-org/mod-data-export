@@ -37,8 +37,9 @@ public class DataExportService {
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
-    var fileDefinition = fileDefinitionEntityRepository.
-      getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
+    var fileDefinitionEntity =  fileDefinitionEntityRepository.
+      getReferenceById(exportRequest.getFileDefinitionId());
+    var fileDefinition = fileDefinitionEntity.getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
     jobExecutionEntity.getJobExecution().setJobProfileId(jobProfileEntity.getJobProfile().getId());

@@ -99,10 +99,10 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<Void> putMappingProfile(UUID mappingProfileId, MappingProfile mappingProfile) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault()))
+    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
-    mappingProfileEntity.setMappingProfile(mappingProfile);
-    mappingProfile.setName(mappingProfile.getName());
+    }
+    mappingProfileEntity.setName(mappingProfile.getName());
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -113,11 +113,20 @@ public class MappingProfileController implements MappingProfilesApi {
     userInfo.setUserName(user.getUsername());
     mappingProfile.setUserInfo(userInfo);
 
-    var metadata = mappingProfile.getMetadata();
-    metadata.updatedDate(new Date());
-    metadata.updatedByUserId(userId);
-    metadata.updatedByUsername(user.getUsername());
+    var metadataOfExistingMappingProfile = mappingProfileEntity.getMappingProfile().getMetadata();
 
+    var metadata = Metadata.builder()
+        .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
+        .updatedDate(new Date())
+        .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
+        .updatedByUserId(userId)
+        .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
+        .updatedByUsername(user.getUsername())
+        .build();
+
+    mappingProfile.setMetadata(metadata);
+
+    mappingProfileEntity.setMappingProfile(mappingProfile);
     mappingProfileEntityRepository.save(mappingProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
