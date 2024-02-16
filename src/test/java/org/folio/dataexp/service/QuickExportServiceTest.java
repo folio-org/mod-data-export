@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,9 +32,14 @@ class QuickExportServiceTest extends ServiceInitializer {
   @MockBean
   private ConsortiaService consortiaService;
 
+  private static final String FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED = "011e1aea-222d-4d1d-957d-0abcdd0e9acd";
+  private static final String AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED = "4a090b0f-9da3-40f1-ab17-33d6a1e3abae";
+
   @SneakyThrows
   @ParameterizedTest
-  @CsvSource({"INSTANCE,011e1aea-222d-4d1d-957d-0abcdd0e9acd", "AUTHORITY,4a090b0f-9da3-40f1-ab17-33d6a1e3abae"})
+  @CsvSource({
+    "INSTANCE," + FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED,
+    "AUTHORITY," + AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED})
   void quickExportNoErrorsTest(String recordType, String expectedId) {
     when(consortiaService.getCentralTenantId()).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -55,9 +61,9 @@ class QuickExportServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
 
-      var exportFiles = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecution.getId());
-      var fileLocation = exportFiles.get(0).getFileLocation();
-      String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
+      var fileToExport  =  String.format("quick-export-%s.mrc", jobExecution.getJobExecution().getHrId());
+      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
       assertThat(outputMrcFile).containsOnlyOnce(expectedId);
       assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
@@ -72,7 +78,7 @@ class QuickExportServiceTest extends ServiceInitializer {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var quickExportRequest = new QuickExportRequest()
-        .uuids(List.of(UUID.fromString("4a090b0f-9da3-40f1-ab17-33d6a1e3abae")))
+        .uuids(List.of(UUID.fromString(FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED)))
         .recordType(QuickExportRequest.RecordTypeEnum.ITEM).type(QuickExportRequest.TypeEnum.UUID);
       assertThrows(DataExportRequestValidationException.class, () -> quickExportService.postQuickExport(quickExportRequest));
     }

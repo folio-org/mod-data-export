@@ -30,7 +30,7 @@ public class QuickExportService {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
 
   public QuickExportResponse postQuickExport(QuickExportRequest quickExportRequest) {
-    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0);
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName("quick-export.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));

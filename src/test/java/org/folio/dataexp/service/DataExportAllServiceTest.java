@@ -10,7 +10,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
-import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
+import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -34,11 +34,9 @@ class DataExportAllServiceTest extends ServiceInitializer {
   @Autowired
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Autowired
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Autowired
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @Autowired
   private JobProfileEntityRepository jobProfileEntityRepository;
+  @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
   private static final UUID CUSTOM_INSTANCE_MAPPING_PROFILE_ID = UUID.randomUUID();
   private static final UUID CUSTOM_HOLDINGS_MAPPING_PROFILE_ID = UUID.randomUUID();
@@ -110,10 +108,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
       assertEquals(1, jobExecutions.size());
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-
-      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
-      var expectedFileName = "instance-all.csv";
-      assertEquals(expectedFileName, fileDefinition.getFileName());
 
       assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
 
@@ -473,6 +467,11 @@ class DataExportAllServiceTest extends ServiceInitializer {
       var jobExecution = jobExecutions.get(0);
       assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
       assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
+
+      var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+      var expectedFileName = "holding-all.csv";
+      assertEquals(expectedFileName, fileDefinition.getFileName());
+
       var fileToExport  =  String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
       var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
       String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
