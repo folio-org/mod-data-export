@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import com.github.jknack.handlebars.internal.Files;
 import lombok.SneakyThrows;
+import org.codehaus.plexus.util.StringUtils;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-class QuickExportServiceTest extends DataExportAllServiceTest {
+class QuickExportServiceTest extends ServiceInitializer {
 
   @Autowired
   private QuickExportService quickExportService;
@@ -59,6 +60,7 @@ class QuickExportServiceTest extends DataExportAllServiceTest {
       String outputMrcFile = Files.read(s3Client.read(fileLocation), Charset.defaultCharset());
 
       assertThat(outputMrcFile).containsOnlyOnce(expectedId);
+      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
     }
   }
 
