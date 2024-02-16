@@ -30,7 +30,7 @@ public class QuickExportService {
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
 
   public QuickExportResponse postQuickExport(QuickExportRequest quickExportRequest) {
-    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(quickExportRequest.getType() + "-quick.csv");
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0);
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
@@ -61,7 +61,7 @@ public class QuickExportService {
       });
       exportIdEntityRepository.saveAll(batch);
     } else {
-      log.error("Nothing to export: no uuids provided.");
+      log.error("Nothing to export for fileDefinitionId {}: no uuids provided.", fileDefinition.getId());
     }
   }
 

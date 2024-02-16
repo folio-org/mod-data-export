@@ -32,9 +32,10 @@ public class FileDefinitionsService {
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
     log.info("Post file definition by id {}", fileDefinition.getId());
-    fileDefinitionValidator.validate(fileDefinition);
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
+    fileDefinition.setFileName("quick-export-" + jobExecution.getId() + ".csv");
+    fileDefinitionValidator.validate(fileDefinition);
     jobExecution.setStatus(JobExecution.StatusEnum.NEW);
     jobExecutionEntityRepository.save(JobExecutionEntity.builder()
       .id(jobExecution.getId()).jobExecution(jobExecution).build());
