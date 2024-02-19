@@ -1,20 +1,16 @@
 package org.folio.dataexp.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.domain.dto.*;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
@@ -23,16 +19,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,8 +33,6 @@ class DataExportServiceTest {
 
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Mock
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Mock
@@ -59,6 +49,8 @@ class DataExportServiceTest {
   private UserClient userClient;
   @Mock
   private DataExportRequestValidator dataExportRequestValidator;
+  @Mock
+  private JobExecutionService jobExecutionService;
 
   @InjectMocks
   private DataExportService dataExportService;
@@ -89,12 +81,10 @@ class DataExportServiceTest {
         .jobProfile(jobProfile).id(jobProfile.getId()).build();
 
     var jobExecution = new JobExecution().id(fileDefinition.getId());
-    var jobExecutionEntity = JobExecutionEntity.builder()
-        .jobExecution(jobExecution).id(jobExecution.getId()).build();
 
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
-    when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(isA(UUID.class))).thenReturn(jobExecution);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
 
@@ -105,8 +95,8 @@ class DataExportServiceTest {
 
     verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
     verify(exportIdEntityRepository).countByJobExecutionId(jobExecution.getId());
-    verify(jobExecutionEntityRepository).getHrid();
-    verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
+    verify(jobExecutionService).getNextHrid();
+    verify(jobExecutionService).save(isA(JobExecution.class));
 
     assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
   }

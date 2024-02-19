@@ -50,7 +50,7 @@ public class JobExecutionEntity {
   @Enumerated(EnumType.STRING)
   private JobExecution.StatusEnum status;
 
-  public static JobExecutionEntity from(JobExecution jobExecution) {
+  public static JobExecutionEntity fromJobExecution(JobExecution jobExecution) {
     if (isNull(jobExecution.getId())) {
       jobExecution.setId(UUID.randomUUID());
     }
@@ -58,15 +58,16 @@ public class JobExecutionEntity {
       .id(jobExecution.getId())
       .jobExecution(jobExecution)
       .hrid(jobExecution.getHrId())
-      .total(jobExecution.getProgress().getTotal())
-      .exported(jobExecution.getProgress().getExported())
-      .failed(jobExecution.getProgress().getFailed())
+      .total(isNull(jobExecution.getProgress()) ? null : jobExecution.getProgress().getTotal())
+      .exported(isNull(jobExecution.getProgress()) ? null : jobExecution.getProgress().getExported())
+      .failed(isNull(jobExecution.getProgress()) ? null : jobExecution.getProgress().getFailed())
       .jobProfileId(jobExecution.getJobProfileId())
       .jobProfileName(jobExecution.getJobProfileName())
       .startedDate(jobExecution.getStartedDate())
       .completedDate(jobExecution.getCompletedDate())
-      .runByFirstName(jobExecution.getRunBy().getFirstName())
-      .runByLastName(jobExecution.getRunBy().getLastName())
+      .runByFirstName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getFirstName())
+      .runByLastName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getLastName())
+      .status(jobExecution.getStatus())
       .build();
   }
 }

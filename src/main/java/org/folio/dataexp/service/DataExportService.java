@@ -7,11 +7,9 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
@@ -25,7 +23,7 @@ import java.util.Date;
 public class DataExportService {
 
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final InputFileProcessor inputFileProcessor;
@@ -41,33 +39,31 @@ public class DataExportService {
       getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
-    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
-    jobExecutionEntity.getJobExecution().setJobProfileId(jobProfileEntity.getJobProfile().getId());
-    jobExecutionEntity.getJobExecution().setJobProfileName(jobProfileEntity.getJobProfile().getName());
-    jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
+    var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
+    jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
+    jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
     try {
       dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
     } catch (DataExportRequestValidationException e) {
-      updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.FAIL, commonExportFails);
+      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.FAIL, commonExportFails);
       log.error(e.getMessage());
       return;
     }
     log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
-        Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
+        Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
 
-    if (!Boolean.TRUE.equals(exportRequest.getAll())) {
+    if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
       inputFileProcessor.readFile(fileDefinition, commonExportFails);
       log.info("File has been read successfully.");
     }
     slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
     log.info("Instance IDs have been sliced successfully.");
 
-    updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
-    singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
+    updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+    singleFileProcessor.exportBySingleFile(jobExecution.getId(), exportRequest, commonExportFails);
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
-    var jobExecution = jobExecutionEntity.getJobExecution();
+  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
@@ -89,10 +85,8 @@ public class DataExportService {
     jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
     jobExecution.setProgress(jobExecutionProgress);
 
-    int hrid = jobExecutionEntityRepository.getHrid();
-    jobExecution.setHrId(hrid);
+    jobExecution.setHrId(jobExecutionService.getNextHrid());
 
-    jobExecutionEntity.setStatus(jobExecution.getStatus());
-    jobExecutionEntityRepository.save(jobExecutionEntity);
+    jobExecutionService.save(jobExecution);
   }
 }

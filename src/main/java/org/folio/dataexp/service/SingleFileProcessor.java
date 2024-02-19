@@ -6,7 +6,6 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.DataExportException;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -27,27 +26,24 @@ public class SingleFileProcessor {
 
   protected final ExportExecutor exportExecutor;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final ErrorLogService errorLogService;
 
   public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.error("Nothing to export for job execution {}", jobExecutionId);
-      var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-      var jobExecution = jobExecutionEntity.getJobExecution();
+      var jobExecution = jobExecutionService.getById(jobExecutionId);
       var currentDate = new Date();
       jobExecution.setLastUpdatedDate(currentDate);
       jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       jobExecution.setCompletedDate(currentDate);
 
-      jobExecutionEntity.setStatus(jobExecution.getStatus());
-      jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
       var totalFailed = commonExportFails.getInvalidUUIDFormat().size();
       var progress = jobExecution.getProgress();
       progress.setFailed(totalFailed);
       progress.setExported(0);
-      jobExecutionEntityRepository.save(jobExecutionEntity);
+      jobExecutionService.save(jobExecution);
       if (commonExportFails.isFailedToReadInputFile()) {
         errorLogService.saveFailedToReadInputFileError(jobExecutionId);
       } else {
@@ -77,10 +73,9 @@ public class SingleFileProcessor {
   }
 
   private void updateStatisticsForExportAll(UUID jobExecutionId) {
-    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-    var jobExecution = jobExecutionEntity.getJobExecution();
+    var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
-    jobExecutionEntityRepository.save(jobExecutionEntity);
+    jobExecutionService.save(jobExecution);
   }
 }

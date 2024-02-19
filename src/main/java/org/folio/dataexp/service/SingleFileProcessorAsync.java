@@ -2,7 +2,6 @@ package org.folio.dataexp.service;
 
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -15,8 +14,8 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
   @Autowired
   public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
-                                  JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
+                                  JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
+    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionService, errorLogService);
   }
 
   @Override

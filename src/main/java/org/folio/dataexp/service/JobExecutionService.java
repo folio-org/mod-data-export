@@ -13,6 +13,7 @@ import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobExecutionService {
   private final JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   public JobExecution getById(UUID id) {
@@ -32,7 +34,11 @@ public class JobExecutionService {
     if (isNull(jobExecution.getId())) {
       jobExecution.setId(UUID.randomUUID());
     }
-    return jobExecutionEntityCqlRepository.save(JobExecutionEntity.from(jobExecution)).getJobExecution();
+    return jobExecutionEntityCqlRepository.save(JobExecutionEntity.fromJobExecution(jobExecution)).getJobExecution();
+  }
+
+  public int getNextHrid() {
+    return jobExecutionEntityRepository.getHrid();
   }
 
   public void expireJobExecutions() {

@@ -12,9 +12,9 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ExportExecutor {
 
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final ExportStrategyFactory exportStrategyFactory;
   private final ErrorLogService errorLogService;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
@@ -58,8 +58,7 @@ public class ExportExecutor {
   }
 
   private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails) {
-    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-    var jobExecution = jobExecutionEntity.getJobExecution();
+    var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setExported(progress.getExported() + exportStatistic.getExported());
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
@@ -100,12 +99,10 @@ public class ExportExecutor {
       var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
         .fileName(FilenameUtils.getName(innerFileName));
       jobExecution.setExportedFiles(Set.of(innerFile));
-      jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecution.completedDate(currentDate);
-      jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
     }
     jobExecution.setLastUpdatedDate(currentDate);
-    jobExecutionEntityRepository.save(jobExecutionEntity);
+    jobExecutionService.save(jobExecution);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 

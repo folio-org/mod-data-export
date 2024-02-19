@@ -6,10 +6,8 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.service.file.upload.FilesUploadService;
 import org.folio.dataexp.service.validators.FileDefinitionValidator;
 import org.folio.spring.FolioExecutionContext;
@@ -25,7 +23,7 @@ import java.util.UUID;
 @Log4j2
 public class FileDefinitionsService {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final FilesUploadService filesUploadService;
   private final FileDefinitionValidator fileDefinitionValidator;
   private final FolioExecutionContext folioExecutionContext;
@@ -33,11 +31,7 @@ public class FileDefinitionsService {
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
     log.info("Post file definition by id {}", fileDefinition.getId());
     fileDefinitionValidator.validate(fileDefinition);
-    var jobExecution = new JobExecution();
-    jobExecution.setId(UUID.randomUUID());
-    jobExecution.setStatus(JobExecution.StatusEnum.NEW);
-    jobExecutionEntityRepository.save(JobExecutionEntity.builder()
-      .id(jobExecution.getId()).jobExecution(jobExecution).build());
+    var jobExecution = jobExecutionService.save(new JobExecution().status(JobExecution.StatusEnum.NEW));
     fileDefinition.setJobExecutionId(jobExecution.getId());
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     var now = new Date();

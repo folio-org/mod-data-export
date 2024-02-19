@@ -74,7 +74,7 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
-  /quickExport:
+  /quick-export:
     post:
       description: Starts quick export process
       operationId: postDataExportQuickExport

@@ -5,12 +5,9 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -34,7 +31,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
   @MockBean
   private ExportExecutor exportExecutor;
   @MockBean
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
 
   @Autowired
   private SingleFileProcessor singleFileProcessor;
@@ -64,15 +61,14 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     var jobExecution = new JobExecution().id(jobExecutionId).progress(progress);
     var commonExportFails = new CommonExportFails();
     commonExportFails.setFailedToReadInputFile(false);
-    var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).id(jobExecutionId).build();
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
 
     singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), commonExportFails);
 
     verify(exportExecutor, times(0)).export(any(), any(), any());
-    verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
+    verify(jobExecutionService).save(isA(JobExecution.class));
     assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
   }
 }

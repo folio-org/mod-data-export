@@ -21,7 +21,7 @@ $$
              to_timestamp(cast(jsonb ->> 'startedDate' AS BIGINT) / 1000) as startedDate,
              jsonb -> 'runBy' ->> 'firstName' as firstName,
              jsonb -> 'runBy' ->> 'lastName' as lastName,
-             cast(jsonb ->> 'hrid' as int) as hrid
+             cast(jsonb ->> 'hrId' as int) as hrid
       from job_executions
       loop
         update job_executions
