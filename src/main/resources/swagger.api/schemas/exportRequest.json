@@ -39,6 +39,11 @@
       "type": "boolean",
       "default": false
     },
+    "quick": {
+      "description": "True if quick export, otherwise false",
+      "type": "boolean",
+      "default": false
+    },
     "deletedRecords": {
       "description": "True if need to include deleted records, otherwise false",
       "type": "boolean",

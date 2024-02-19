@@ -55,7 +55,7 @@ public class DataExportService {
     log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
         Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
-    if (!Boolean.TRUE.equals(exportRequest.getAll())) {
+    if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
       inputFileProcessor.readFile(fileDefinition, commonExportFails);
       log.info("File has been read successfully.");
     }
