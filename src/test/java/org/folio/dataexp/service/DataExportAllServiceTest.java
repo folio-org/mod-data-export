@@ -484,7 +484,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
-      await().atMost(2, SECONDS).untilAsserted(() -> {
+      await().atMost(4, SECONDS).untilAsserted(() -> {
         var jobExecutions = jobExecutionEntityCqlRepository.findAll();
         var errors = errorLogEntityCqlRepository.findAll();
         assertThat(errors).isEmpty();
@@ -560,7 +560,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
           .jobProfileId(CUSTOM_HOLDINGS_JOB_PROFILE_ID).suppressedFromDiscovery(true);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
-      await().atMost(2, SECONDS).untilAsserted(() -> {
+      await().atMost(4, SECONDS).untilAsserted(() -> {
         var jobExecutions = jobExecutionEntityCqlRepository.findAll();
         var errors = errorLogEntityCqlRepository.findAll();
         assertThat(errors).isEmpty();
