@@ -8,7 +8,9 @@ import static org.folio.dataexp.domain.dto.JobExecution.StatusEnum.FAIL;
 import static org.folio.dataexp.util.ErrorCode.ERROR_JOB_IS_EXPIRED;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,17 @@ import java.util.UUID;
 public class JobExecutionService {
   private final JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+
+  public JobExecution getById(UUID id) {
+    return jobExecutionEntityCqlRepository.getReferenceById(id).getJobExecution();
+  }
+
+  public JobExecution save(JobExecution jobExecution) {
+    if (isNull(jobExecution.getId())) {
+      jobExecution.setId(UUID.randomUUID());
+    }
+    return jobExecutionEntityCqlRepository.save(JobExecutionEntity.from(jobExecution)).getJobExecution();
+  }
 
   public void expireJobExecutions() {
     setCompletedDateForFailedExecutionsIfRequired();

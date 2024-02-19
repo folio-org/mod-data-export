@@ -1,5 +1,7 @@
 package org.folio.dataexp.domain.entity;
 
+import static java.util.Objects.isNull;
+
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +17,6 @@ import lombok.With;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.hibernate.annotations.Type;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,10 +36,37 @@ public class JobExecutionEntity {
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobExecution jobExecution;
 
+  private Integer hrid;
+  private Integer total;
+  private Integer exported;
+  private Integer failed;
   private UUID jobProfileId;
-
+  private String jobProfileName;
+  private Date startedDate;
   private Date completedDate;
+  private String runByFirstName;
+  private String runByLastName;
 
   @Enumerated(EnumType.STRING)
   private JobExecution.StatusEnum status;
+
+  public static JobExecutionEntity from(JobExecution jobExecution) {
+    if (isNull(jobExecution.getId())) {
+      jobExecution.setId(UUID.randomUUID());
+    }
+    return JobExecutionEntity.builder()
+      .id(jobExecution.getId())
+      .jobExecution(jobExecution)
+      .hrid(jobExecution.getHrId())
+      .total(jobExecution.getProgress().getTotal())
+      .exported(jobExecution.getProgress().getExported())
+      .failed(jobExecution.getProgress().getFailed())
+      .jobProfileId(jobExecution.getJobProfileId())
+      .jobProfileName(jobExecution.getJobProfileName())
+      .startedDate(jobExecution.getStartedDate())
+      .completedDate(jobExecution.getCompletedDate())
+      .runByFirstName(jobExecution.getRunBy().getFirstName())
+      .runByLastName(jobExecution.getRunBy().getLastName())
+      .build();
+  }
 }
