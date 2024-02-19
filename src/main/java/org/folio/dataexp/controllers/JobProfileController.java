@@ -100,9 +100,10 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
+    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
-    jobProfileEntity.setJobProfile(jobProfile);
+    }
+
     jobProfileEntity.setName(jobProfile.getName());
     jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
 
@@ -115,11 +116,20 @@ public class JobProfileController implements JobProfilesApi {
     userInfo.setUserName(user.getUsername());
     jobProfile.setUserInfo(userInfo);
 
-    var metadata = jobProfile.getMetadata();
-    metadata.updatedDate(new Date());
-    metadata.updatedByUserId(userId);
-    metadata.updatedByUsername(user.getUsername());
+    var metadataOfExistingJobProfile = jobProfileEntity.getJobProfile().getMetadata();
 
+    var metadata = Metadata.builder()
+      .createdDate(metadataOfExistingJobProfile.getCreatedDate())
+      .updatedDate(new Date())
+      .createdByUserId(metadataOfExistingJobProfile.getCreatedByUserId())
+      .updatedByUserId(userId)
+      .createdByUsername(metadataOfExistingJobProfile.getCreatedByUsername())
+      .updatedByUsername(user.getUsername())
+      .build();
+
+    jobProfile.setMetadata(metadata);
+
+    jobProfileEntity.setJobProfile(jobProfile);
     jobProfileEntityRepository.save(jobProfileEntity);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }

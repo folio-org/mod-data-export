@@ -1,5 +1,6 @@
 package org.folio.dataexp.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.UserClient;
@@ -96,7 +97,6 @@ class DataExportServiceTest extends BaseDataExportInitializer {
     await().atMost(2, SECONDS).untilAsserted(() -> {
       verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
       verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
-
       verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
       verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
       verify(jobExecutionEntityRepository).getHrid();

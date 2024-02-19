@@ -57,7 +57,7 @@ public class RuleFactory {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       return create(mappingProfile);
     }
-    // ToDo MDEXP-673
+    //ToDo MDEXP-673
     List<Rule> rulesFromConfig = new ArrayList<>();
     if (mappingProfile != null && isNotEmpty(rulesFromConfig)) {
       log.info("Using overridden rules configuration with transformations from the mapping profile with id {}", mappingProfile.getId());

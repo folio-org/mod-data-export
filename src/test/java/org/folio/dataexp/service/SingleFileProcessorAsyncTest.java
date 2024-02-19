@@ -42,8 +42,8 @@ class SingleFileProcessorAsyncTest {
     headers.put("key", List.of("value"));
 
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
-    singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails, false);
+    singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails);
 
-    verify(exportExecutor).exportAsync(eq(exportEntity), isA(ExportRequest.class), eq(commonFails), eq(false), isA(FolioExecutionContext.class));
+    verify(exportExecutor).exportAsynch(eq(exportEntity), isA(ExportRequest.class), eq(commonFails), isA(FolioExecutionContext.class));
   }
 }

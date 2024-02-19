@@ -7,12 +7,14 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,18 +34,16 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
   }
 
   @Override
-  protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var slice = chooseSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    updateSliceState(slice, exportRequest);
-    log.info("Slice size for authorities export all: {}", slice.getSize());
+    log.info("Slice size for authorities export all: {}", slice.getContent().size());
     var exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     log.info("Size of exportIds for authorities export all: {}", exportIds.size());
-    createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), exportRequest);
+    createAndSaveMarc(exportIds, slice.getContent(), exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), localStorageWriter);
     while (slice.hasNext()) {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
-      updateSliceState(slice, exportRequest);
       exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-      createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), exportRequest);
+      createAndSaveMarc(exportIds, slice.getContent(), exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), localStorageWriter);
     }
   }
 
@@ -52,5 +52,11 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
       return marcAuthorityRecordAllRepository.findAllWithDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
     }
     return marcAuthorityRecordAllRepository.findAllWithoutDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(), pageble);
+  }
+
+  protected void createAndSaveMarc(Set<UUID> externalIds, List<MarcRecordEntity> marcRecords, ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile, UUID jobExecutionId, LocalStorageWriter localStorageWriter) {
+    var externalIdsWithMarcRecord = new HashSet<UUID>();
+    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
   }
 }

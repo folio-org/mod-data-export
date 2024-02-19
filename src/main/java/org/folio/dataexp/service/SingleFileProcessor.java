@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
@@ -13,8 +14,13 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.UUID;
+
+import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -53,16 +59,20 @@ public class SingleFileProcessor {
       }
       return;
     }
+    try {
+      Files.createDirectories(Path.of(String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId)));
+    } catch (IOException e) {
+      throw new DataExportException("Can not create temp directory for job execution " + jobExecutionId);
+    }
     var exportIterator = exports.iterator();
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());
-      executeExport(export, exportRequest, commonExportFails, !exportIterator.hasNext());
+      executeExport(export, exportRequest, commonExportFails);
     }
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails,
-      boolean lastExport) {
-    exportExecutor.export(export, exportRequest, commonExportFails, lastExport);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+    exportExecutor.export(export, exportRequest, commonExportFails);
   }
 }

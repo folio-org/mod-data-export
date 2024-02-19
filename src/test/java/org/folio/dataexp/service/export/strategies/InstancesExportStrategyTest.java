@@ -28,6 +28,7 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.writer.RecordWriter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.marc4j.MarcException;
@@ -105,6 +106,11 @@ class InstancesExportStrategyTest {
   @InjectMocks
   private InstancesExportStrategy instancesExportStrategy;
 
+  @BeforeEach
+  void setUp() {
+    instancesExportStrategy.entityManager = entityManager;
+  }
+
   @Test
   void getMarcRecordsTest() {
     var mappingProfile =  new MappingProfile();
@@ -177,7 +183,7 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(defaultMappingProfileEntity);
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
-    doNothing().when(entityManager).clear();
+    doNothing().when(instancesExportStrategy.entityManager).clear();
     instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic());
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
@@ -252,7 +258,7 @@ class InstancesExportStrategyTest {
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
-    doNothing().when(entityManager).clear();
+    doNothing().when(instancesExportStrategy.entityManager).clear();
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
         generatedMarcResult, mappingProfile);

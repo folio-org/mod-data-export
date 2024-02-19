@@ -42,8 +42,9 @@ public class DataExportService {
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
-    var fileDefinition = fileDefinitionEntityRepository.
-      getReferenceById(exportRequest.getFileDefinitionId()).getFileDefinition();
+    var fileDefinitionEntity =  fileDefinitionEntityRepository.
+      getReferenceById(exportRequest.getFileDefinitionId());
+    var fileDefinition = fileDefinitionEntity.getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
     jobExecutionEntity.getJobExecution().setJobProfileId(jobProfileEntity.getJobProfile().getId());
@@ -67,7 +68,7 @@ public class DataExportService {
 
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
-      if (!Boolean.TRUE.equals(exportRequest.getAll())) {
+      if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
         inputFileProcessor.readFile(fileDefinition, commonExportFails);
         log.info("File has been read successfully.");
       }

@@ -28,9 +28,9 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails, boolean lastExport) {
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
     var folioContextCopy = createFolioContextCopy(folioExecutionContext, folioModuleMetadata);
-    exportExecutor.exportAsync(export, exportRequest, commonExportFails, lastExport, folioContextCopy);
+    exportExecutor.exportAsynch(export, exportRequest, commonExportFails, folioContextCopy);
   }
 
   private FolioExecutionContext createFolioContextCopy(FolioExecutionContext context, FolioModuleMetadata folioModuleMetadata) {

@@ -11,7 +11,9 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
+
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.ConfigurationEntryService;
@@ -51,7 +53,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -137,11 +144,13 @@ public class BaseDataExportInitializer {
   @Autowired
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
+  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
-  private FolioS3Client s3Client;
+  protected FolioS3Client s3Client;
   @Autowired
   private ConfigurationEntryService configurationEntryService;
   @Autowired
@@ -199,6 +208,7 @@ public class BaseDataExportInitializer {
       exportIdEntityRepository.deleteAll();
       jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
+      fileDefinitionEntityRepository.deleteAll();
     }
   }
 
