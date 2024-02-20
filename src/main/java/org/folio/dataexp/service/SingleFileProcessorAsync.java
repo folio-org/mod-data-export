@@ -29,15 +29,31 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
   @Override
   public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
-    var folioContextCopy = createFolioContextCopy(folioExecutionContext, folioModuleMetadata);
-    exportExecutor.exportAsynch(export, exportRequest, commonExportFails, folioContextCopy);
+    var folioContextCopy = getFolioContextCopy(folioExecutionContext, folioModuleMetadata);
+    var exportRequestCopy = getExportRequestCopy(exportRequest);
+    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportFails, folioContextCopy);
   }
 
-  private FolioExecutionContext createFolioContextCopy(FolioExecutionContext context, FolioModuleMetadata folioModuleMetadata) {
+  private FolioExecutionContext getFolioContextCopy(FolioExecutionContext context, FolioModuleMetadata folioModuleMetadata) {
     if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
       var headersCopy = SerializationUtils.clone((HashMap<String, Collection<String>>) context.getAllHeaders());
       return new DefaultFolioExecutionContext(folioModuleMetadata, headersCopy);
     }
     throw new IllegalStateException("Okapi headers not provided");
+  }
+
+  private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {
+    return ExportRequest.builder()
+      .fileDefinitionId(exportRequest.getFileDefinitionId())
+      .jobProfileId(exportRequest.getJobProfileId())
+      .recordType(exportRequest.getRecordType())
+      .idType(exportRequest.getIdType())
+      .all(exportRequest.getAll())
+      .quick(exportRequest.getQuick())
+      .deletedRecords(exportRequest.getDeletedRecords())
+      .suppressedFromDiscovery(exportRequest.getSuppressedFromDiscovery())
+      .lastSlice(exportRequest.getLastSlice())
+      .lastExport(exportRequest.getLastExport())
+      .metadata(exportRequest.getMetadata()).build();
   }
 }
