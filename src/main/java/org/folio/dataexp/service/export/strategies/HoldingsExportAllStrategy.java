@@ -5,6 +5,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.FolioHoldingsAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
@@ -56,6 +57,18 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     }
     if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    }
+  }
+
+  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
   }
 
