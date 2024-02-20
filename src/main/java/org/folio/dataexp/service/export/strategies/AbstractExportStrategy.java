@@ -73,7 +73,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
-      log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      log.error("saveMarcToRemoteStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.setExported(0);
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
