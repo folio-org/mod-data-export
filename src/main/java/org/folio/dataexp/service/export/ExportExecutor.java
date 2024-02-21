@@ -81,6 +81,8 @@ public class ExportExecutor {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
+        log.error("export size: {}, errorCount: {}, exportsCompleted: {}, exportsCompletedWithErrors: {}, jobExecutionEntity: {}",
+            exports.size(), errorCount, exportsCompleted, exportsCompletedWithErrors, jobExecutionEntity);
       }
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).collect(Collectors.toList());

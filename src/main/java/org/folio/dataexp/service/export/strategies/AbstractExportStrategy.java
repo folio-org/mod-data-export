@@ -11,6 +11,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
@@ -21,7 +22,6 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
-import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -70,7 +70,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     try {
       localStorageWriter.close();
-      exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
+      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
       log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
@@ -79,10 +79,22 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId());
       exportStatistic.setFailed((int) countFailed);
-      exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
+      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     }
     return exportStatistic;
+  }
+
+  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
+    }
+    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
+    }
   }
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest);
