@@ -97,7 +97,7 @@ class DataExportServiceTest {
 
     dataExportService.postDataExport(exportRequest);
 
-    verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
+    verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class), eq(exportRequest.getIdType()));
     verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
 
     verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));

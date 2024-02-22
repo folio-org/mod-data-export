@@ -70,7 +70,7 @@ public class DataExportService {
         Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
     if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
-      inputFileProcessor.readFile(fileDefinition, commonExportFails);
+      inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
       log.info("File has been read successfully.");
     }
     slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
