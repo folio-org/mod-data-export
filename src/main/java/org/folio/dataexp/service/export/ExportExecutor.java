@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
-import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -17,8 +16,6 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -43,10 +40,8 @@ public class ExportExecutor {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
   @Async("singleExportFileTaskExecutor")
-  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails, FolioExecutionContext folioExecutionContext) {
-      try (var ctx = new FolioExecutionContextSetter(folioExecutionContext)) {
-        export(exportFilesEntity, exportRequest, commonExportFails);
-      }
+  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+    export(exportFilesEntity, exportRequest, commonExportFails);
   }
 
   public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
@@ -55,13 +50,17 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, exportRequest);
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest);
     commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
-    updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails, exportRequest);
-    log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+    synchronized (this) {
+      exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
+      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+      log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails, exportRequest);
+    }
   }
 
-  private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails, ExportRequest exportRequest) {
+  private void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails, ExportRequest exportRequest) {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobExecution = jobExecutionEntity.getJobExecution();
     var progress = jobExecution.getProgress();

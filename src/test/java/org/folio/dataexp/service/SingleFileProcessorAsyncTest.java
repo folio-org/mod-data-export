@@ -38,12 +38,9 @@ class SingleFileProcessorAsyncTest {
       .id(UUID.randomUUID())
       .fileLocation(fileLocation).build();
     var commonFails = new CommonExportFails();
-    var headers = new HashMap<String, Collection<String>>();
-    headers.put("key", List.of("value"));
 
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails);
 
-    verify(exportExecutor).exportAsynch(eq(exportEntity), isA(ExportRequest.class), eq(commonFails), isA(FolioExecutionContext.class));
+    verify(exportExecutor).exportAsynch(eq(exportEntity), isA(ExportRequest.class), eq(commonFails));
   }
 }

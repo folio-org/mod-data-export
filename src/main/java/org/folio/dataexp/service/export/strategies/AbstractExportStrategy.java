@@ -63,15 +63,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Override
-  public ExportStrategyStatistic saveMarcToRemoteStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest) {
+  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest) {
     var exportStatistic = new ExportStrategyStatistic();
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWrite(exportFilesEntity);
     processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     try {
       localStorageWriter.close();
-      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
-      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
       log.error("saveMarcToRemoteStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
@@ -79,13 +77,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId());
       exportStatistic.setFailed((int) countFailed);
-      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
-      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     }
     return exportStatistic;
   }
 
-  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+  @Override
+  public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     }

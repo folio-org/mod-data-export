@@ -10,8 +10,6 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,8 +26,6 @@ import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECU
 public class SingleFileProcessor {
 
   protected final ExportExecutor exportExecutor;
-  protected final FolioExecutionContext folioExecutionContext;
-  protected final FolioModuleMetadata folioModuleMetadata;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogService errorLogService;
