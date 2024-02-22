@@ -1,12 +1,12 @@
 package org.folio.dataexp.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
@@ -29,6 +29,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -73,7 +74,8 @@ class DataExportServiceTest extends BaseDataExportInitializer {
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
-    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId()).jobExecutionId(UUID.randomUUID());
+    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId())
+      .jobExecutionId(UUID.randomUUID()).fileName("instance");
     var fileDefinitionEntity = FileDefinitionEntity.builder()
       .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
@@ -105,6 +107,9 @@ class DataExportServiceTest extends BaseDataExportInitializer {
 
       assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
       assertEquals(200, jobExecution.getHrId());
+      var exportedFiles = jobExecution.getExportedFiles();
+      JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
+      assertEquals("instance-200.mrc", inner.getFileName());
     });
   }
 }

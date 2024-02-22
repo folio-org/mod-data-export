@@ -45,6 +45,7 @@ class QuickExportServiceTest extends ServiceInitializer {
   void quickExportNoErrorsTest(String recordType, String expectedId) {
     when(consortiaService.getCentralTenantId()).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var quickExportRequest = new QuickExportRequest()

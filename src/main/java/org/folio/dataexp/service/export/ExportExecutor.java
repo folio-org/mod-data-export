@@ -96,9 +96,11 @@ public class ExportExecutor {
       var queryResult= fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString());
       var fileDefinition= queryResult.get(0).getFileDefinition();
       var initialFileName= FilenameUtils.getBaseName(fileDefinition.getFileName());
-      var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
       try {
-        innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
+        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
+        var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
+          .fileName(FilenameUtils.getName(innerFileName));
+        jobExecution.setExportedFiles(Set.of(innerFile));
       } catch (S3ExportsUploadException e) {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
         var errorMessage= String.format(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription(), fileDefinition.getId());
@@ -106,9 +108,6 @@ public class ExportExecutor {
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.NO_FILE_GENERATED.getCode(), List.of(ErrorCode.NO_FILE_GENERATED.getDescription()), jobExecutionId);
         log.error("updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} with exception {}", jobExecutionId, e.getMessage());
       }
-      var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
-        .fileName(FilenameUtils.getName(innerFileName));
-      jobExecution.setExportedFiles(Set.of(innerFile));
       jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecution.completedDate(currentDate);
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
@@ -118,8 +117,4 @@ public class ExportExecutor {
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 
-  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
-    var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
-    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
-  }
 }

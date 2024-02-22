@@ -2,9 +2,12 @@ package org.folio.dataexp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
@@ -22,6 +25,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +60,11 @@ public class DataExportService {
     var runBy = getRunBy();
     jobExecutionEntity.getJobExecution().setHrId(hrid);
     jobExecutionEntity.getJobExecution().setRunBy(runBy);
+
+    var innerFileName = getDefaultFileName(fileDefinition, jobExecutionEntity.getJobExecution());
+    var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
+      .fileName(FilenameUtils.getName(innerFileName));
+    jobExecutionEntity.getJobExecution().setExportedFiles(Set.of(innerFile));
 
     try {
       dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
@@ -95,6 +105,7 @@ public class DataExportService {
     jobExecutionProgress.setExported(0);
     jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
     jobExecution.setProgress(jobExecutionProgress);
+
     jobExecutionEntity.setStatus(jobExecution.getStatus());
     jobExecutionEntityRepository.save(jobExecutionEntity);
   }
@@ -107,5 +118,11 @@ public class DataExportService {
     runBy.lastName(user.getPersonal().getLastName());
     runBy.setUserId(userId);
     return runBy;
+  }
+
+  private String getDefaultFileName (FileDefinition fileDefinition, JobExecution jobExecution) {
+    var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
+    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
+
   }
 }

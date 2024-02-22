@@ -12,6 +12,7 @@ import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
 
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
@@ -155,6 +156,8 @@ public class BaseDataExportInitializer {
   private ConfigurationEntryService configurationEntryService;
   @Autowired
   private ConfigurationService configurationService;
+  @Autowired
+  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @MockBean
   private ConfigurationEntryClient configurationEntryClient;
@@ -209,6 +212,7 @@ public class BaseDataExportInitializer {
       jobExecutionExportFilesEntityRepository.deleteAll();
       jobExecutionEntityRepository.deleteAll();
       fileDefinitionEntityRepository.deleteAll();
+      errorLogEntityCqlRepository.deleteAll();
     }
   }
 
