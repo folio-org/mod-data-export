@@ -64,8 +64,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   @Override
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIsAndLeaderRecordStatusNot(externalIds,
-          HOLDING_MARC_TYPE, "ACTUAL", 'd');
+      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
+          HOLDING_MARC_TYPE, "ACTUAL");
     }
     return new ArrayList<>();
   }
@@ -114,7 +114,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     result.setMarcRecords(marcRecords);
     return result;
   }
-  
+
   @Override
   public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
     return new HashMap<>();
