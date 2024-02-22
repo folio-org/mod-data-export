@@ -1,12 +1,11 @@
 package org.folio.dataexp.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.domain.dto.*;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
@@ -23,16 +22,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.caffeine.CaffeineCache;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,7 +74,8 @@ class DataExportServiceTest {
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
-    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId()).jobExecutionId(UUID.randomUUID());
+    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId())
+      .jobExecutionId(UUID.randomUUID()).fileName("instance");
     var fileDefinitionEntity = FileDefinitionEntity.builder()
       .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
@@ -97,6 +93,7 @@ class DataExportServiceTest {
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(jobExecutionEntityRepository.getHrid()).thenReturn(200);
 
     dataExportService.postDataExport(exportRequest);
 
@@ -109,5 +106,9 @@ class DataExportServiceTest {
     verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
 
     assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
+
+    var exportedFiles = jobExecution.getExportedFiles();
+    JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
+    assertEquals("instance-200.mrc", inner.getFileName());
   }
 }
