@@ -5,6 +5,7 @@ import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
@@ -71,7 +72,8 @@ class DataExportServiceTest {
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
-    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId()).jobExecutionId(UUID.randomUUID());
+    var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId())
+      .jobExecutionId(UUID.randomUUID()).fileName("instance");
     var fileDefinitionEntity = FileDefinitionEntity.builder()
       .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
@@ -87,6 +89,7 @@ class DataExportServiceTest {
     when(jobExecutionService.getById(isA(UUID.class))).thenReturn(jobExecution);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(jobExecutionService.getNextHrid()).thenReturn(200);
 
     dataExportService.postDataExport(exportRequest);
 
@@ -99,5 +102,9 @@ class DataExportServiceTest {
     verify(jobExecutionService).save(isA(JobExecution.class));
 
     assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
+
+    var exportedFiles = jobExecution.getExportedFiles();
+    JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
+    assertEquals("instance-200.mrc", inner.getFileName());
   }
 }

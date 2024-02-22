@@ -2,9 +2,12 @@ package org.folio.dataexp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
@@ -16,6 +19,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +47,11 @@ public class DataExportService {
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
+    jobExecution.setHrId(jobExecutionService.getNextHrid());
+    var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
+    var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
+      .fileName(FilenameUtils.getName(innerFileName));
+    jobExecution.setExportedFiles(Set.of(innerFile));
     try {
       dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
     } catch (DataExportRequestValidationException e) {
@@ -85,8 +95,11 @@ public class DataExportService {
     jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
     jobExecution.setProgress(jobExecutionProgress);
 
-    jobExecution.setHrId(jobExecutionService.getNextHrid());
-
     jobExecutionService.save(jobExecution);
+  }
+
+  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
+    var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
+    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 }

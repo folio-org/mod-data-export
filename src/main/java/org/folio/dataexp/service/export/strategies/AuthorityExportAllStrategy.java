@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
@@ -44,6 +45,18 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
       slice = chooseSlice(exportFilesEntity, exportRequest, slice.nextPageable());
       exportIds = slice.getContent().stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       createAndSaveMarc(exportIds, slice.getContent(), exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), localStorageWriter);
+    }
+  }
+
+  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
   }
 

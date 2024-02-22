@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
-import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
@@ -80,15 +79,19 @@ public class ExportExecutor {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
+        log.error("export size: {}, errorCount: {}, exportsCompleted: {}, exportsCompletedWithErrors: {}, jobExecution: {}",
+            exports.size(), errorCount, exportsCompleted, exportsCompletedWithErrors, jobExecution);
       }
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).collect(Collectors.toList());
       var queryResult= fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString());
       var fileDefinition= queryResult.get(0).getFileDefinition();
       var initialFileName= FilenameUtils.getBaseName(fileDefinition.getFileName());
-      var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
       try {
-        innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
+        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
+        var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
+          .fileName(FilenameUtils.getName(innerFileName));
+        jobExecution.setExportedFiles(Set.of(innerFile));
       } catch (S3ExportsUploadException e) {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
         var errorMessage= String.format(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription(), fileDefinition.getId());
@@ -96,9 +99,6 @@ public class ExportExecutor {
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.NO_FILE_GENERATED.getCode(), List.of(ErrorCode.NO_FILE_GENERATED.getDescription()), jobExecutionId);
         log.error("updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} with exception {}", jobExecutionId, e.getMessage());
       }
-      var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
-        .fileName(FilenameUtils.getName(innerFileName));
-      jobExecution.setExportedFiles(Set.of(innerFile));
       jobExecution.completedDate(currentDate);
     }
     jobExecution.setLastUpdatedDate(currentDate);
@@ -106,8 +106,4 @@ public class ExportExecutor {
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 
-  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
-    var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
-    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
-  }
 }

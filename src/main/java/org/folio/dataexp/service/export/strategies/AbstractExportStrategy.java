@@ -15,6 +15,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
@@ -69,19 +70,31 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     try {
       localStorageWriter.close();
-      exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
+      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     } catch (Exception e) {
-      log.error("saveMarcToRemoteStorage:: Error while uploading file {} to remote storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      log.error("saveMarcToRemoteStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.setExported(0);
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId());
       exportStatistic.setFailed((int) countFailed);
-      exportFilesEntity.setStatusBaseExportStatistic(exportStatistic);
+      setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     }
     return exportStatistic;
+  }
+
+  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
+    }
+    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
+    }
   }
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest);

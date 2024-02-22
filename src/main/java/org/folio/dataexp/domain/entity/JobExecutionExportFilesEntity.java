@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
-import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 
 import java.util.UUID;
 
@@ -36,16 +35,4 @@ public class JobExecutionExportFilesEntity {
 
   @Enumerated(EnumType.STRING)
   private JobExecutionExportFilesStatus status;
-
-  public void setStatusBaseExportStatistic(ExportStrategyStatistic exportStatistic) {
-    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
-      this.status = JobExecutionExportFilesStatus.COMPLETED;
-    }
-    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
-      this.status = JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS;
-    }
-    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
-      this.status = JobExecutionExportFilesStatus.FAILED;
-    }
-  }
 }
