@@ -38,5 +38,6 @@ public class JobProfileEntity {
 
   private String name;
 
+  @Column(name = "mappingprofileid")
   private UUID mappingProfileId;
 }

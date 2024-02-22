@@ -38,5 +38,6 @@ public class ErrorLogEntity {
 
   private UUID jobExecutionId;
 
+  @Column(name = "jobprofileid")
   private UUID jobProfileId;
 }

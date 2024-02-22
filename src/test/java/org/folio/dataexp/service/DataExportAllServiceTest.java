@@ -967,12 +967,14 @@ class DataExportAllServiceTest extends ServiceInitializer {
   }
 
   private void removeCustomInstanceJobProfile() {
-    mappingProfileEntityRepository.deleteById(CUSTOM_INSTANCE_MAPPING_PROFILE_ID);
+    jobExecutionEntityCqlRepository.deleteAll();
     jobProfileEntityRepository.deleteById(CUSTOM_INSTANCE_JOB_PROFILE_ID);
+    mappingProfileEntityRepository.deleteById(CUSTOM_INSTANCE_MAPPING_PROFILE_ID);
   }
 
   private void removeCustomHoldingsJobProfile() {
-    mappingProfileEntityRepository.deleteById(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID);
+    jobExecutionEntityCqlRepository.deleteAll();
     jobProfileEntityRepository.deleteById(CUSTOM_HOLDINGS_JOB_PROFILE_ID);
+    mappingProfileEntityRepository.deleteById(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID);
   }
 }

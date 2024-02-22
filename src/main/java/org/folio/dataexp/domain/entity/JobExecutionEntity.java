@@ -40,7 +40,10 @@ public class JobExecutionEntity {
   private Integer total;
   private Integer exported;
   private Integer failed;
+
+  @Column(name = "jobprofileid")
   private UUID jobProfileId;
+
   private String jobProfileName;
   private Date startedDate;
   private Date completedDate;

@@ -5,8 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="enrich_job_executions" author="Firebird">
-        <createProcedure path="changes/enrich_job_executions.sql" relativeToChangelogFile="true" />
+    <changeSet id="enrich_tables" author="Firebird">
+        <createProcedure path="changes/enrich_tables.sql" relativeToChangelogFile="true" />
     </changeSet>
 
 </databaseChangeLog>
