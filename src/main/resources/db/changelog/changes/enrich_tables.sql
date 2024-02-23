@@ -1,10 +1,12 @@
 -- mapping profiles
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS name TEXT;
-ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS record_type TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS record_types TEXT;
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS format TEXT;
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS updated_date TIMESTAMP;
-ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS created_by_first_name TEXT;
-ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS created_by_last_name TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS updated_by_user_id TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS updated_by_first_name TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS updated_by_last_name TEXT;
 
 do
 $$
@@ -14,21 +16,25 @@ $$
     for rec in
       select cast(jsonb ->> 'id' as uuid) as id,
              jsonb ->> 'name' as name,
+             jsonb ->> 'description' as description,
              (select string_agg(trim(types::text, '"'), ',')
                from jsonb_array_elements(jsonb->'recordTypes') types) as recordTypes,
              jsonb ->> 'outputFormat' as format,
              cast(jsonb -> 'metadata' ->> 'updatedDate' as timestamp) as updatedDate,
+             jsonb -> 'metadata' ->> 'updatedByUserId' as userId,
              jsonb -> 'userInfo' ->> 'firstName' as firstName,
              jsonb -> 'userInfo' ->> 'lastName' as lastName
       from mapping_profiles
       loop
         update mapping_profiles
         set name = rec.name,
-            record_type = rec.recordTypes,
+            description = rec.description,
+            record_types = rec.recordTypes,
             format = rec.format,
             updated_date = rec.updatedDate,
-            created_by_first_name = rec.firstName,
-            created_by_last_name = rec.lastName
+            updated_by_user_id = rec.userId,
+            updated_by_first_name = rec.firstName,
+            updated_by_last_name = rec.lastName
         where id = rec.id;
       end loop;
   end;
@@ -36,6 +42,11 @@ $$;
 
 -- job_profiles
 ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS updated_date TIMESTAMP;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS updated_by_user_id TEXT;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS updated_by_first_name TEXT;
+ALTER TABLE job_profiles ADD COLUMN IF NOT EXISTS updated_by_last_name TEXT;
 
 do
 $$
@@ -44,11 +55,21 @@ $$
   begin
     for rec in
       select cast(jsonb ->> 'id' as uuid) as id,
-             jsonb ->> 'name' as name
+             jsonb ->> 'name' as name,
+             jsonb ->> 'description' as description,
+             cast(jsonb -> 'metadata' ->> 'updatedDate' as timestamp) as updatedDate,
+             jsonb -> 'metadata' ->> 'updatedByUserId' as userId,
+             jsonb -> 'userInfo' ->> 'firstName' as firstName,
+             jsonb -> 'userInfo' ->> 'lastName' as lastName
       from job_profiles
       loop
         update job_profiles
-        set name = rec.name
+        set name = rec.name,
+            description = rec.description,
+            updated_date = rec.updatedDate,
+            updated_by_user_id = rec.userId,
+            updated_by_first_name = rec.firstName,
+            updated_by_last_name = rec.lastName
         where id = rec.id;
       end loop;
   end;

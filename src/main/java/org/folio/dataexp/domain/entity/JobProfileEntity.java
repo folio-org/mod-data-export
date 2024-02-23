@@ -1,5 +1,8 @@
 package org.folio.dataexp.domain.entity;
 
+import static java.util.Objects.isNull;
+import static java.util.Optional.ofNullable;
+
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,9 +14,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -32,12 +37,38 @@ public class JobProfileEntity {
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobProfile jobProfile;
 
-  private LocalDateTime creationDate;
+  private Date creationDate;
 
   private String createdBy;
 
   private String name;
+  private String description;
+  private Date updatedDate;
+  private String updatedByUserId;
+  private String updatedByFirstName;
+  private String updatedByLastName;
 
   @Column(name = "mappingprofileid")
   private UUID mappingProfileId;
+
+  public static JobProfileEntity fromJobProfile(JobProfile jobProfile) {
+    if (isNull(jobProfile.getId())) {
+      jobProfile.setId(UUID.randomUUID());
+    }
+    var metadata = ofNullable(jobProfile.getMetadata()).orElse(new Metadata());
+    var userInfo = ofNullable(jobProfile.getUserInfo()).orElse(new UserInfo());
+    return JobProfileEntity.builder()
+      .id(jobProfile.getId())
+      .jobProfile(jobProfile)
+      .creationDate(metadata.getCreatedDate())
+      .createdBy(metadata.getCreatedByUserId())
+      .name(jobProfile.getName())
+      .description(jobProfile.getDescription())
+      .updatedDate(metadata.getUpdatedDate())
+      .updatedByUserId(metadata.getUpdatedByUserId())
+      .updatedByFirstName(userInfo.getFirstName())
+      .updatedByLastName(userInfo.getLastName())
+      .mappingProfileId(jobProfile.getMappingProfileId())
+      .build();
+  }
 }

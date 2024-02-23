@@ -20,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -64,8 +62,6 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
-    var id = Objects.isNull(jobProfile.getId()) ? UUID.randomUUID() : jobProfile.getId();
-
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
 
@@ -85,15 +81,7 @@ public class JobProfileController implements JobProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
-    jobProfile.setId(id);
-    var jobProfileEntity = JobProfileEntity.builder()
-      .id(jobProfile.getId())
-      .creationDate(LocalDateTime.now())
-      .jobProfile(jobProfile)
-      .mappingProfileId(jobProfile.getMappingProfileId())
-      .name(jobProfile.getName())
-      .createdBy(folioExecutionContext.getUserId().toString()).build();
-    var saved = jobProfileEntityRepository.save(jobProfileEntity);
+    var saved = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     return new ResponseEntity<>(saved.getJobProfile(), HttpStatus.CREATED);
   }
 
@@ -103,9 +91,6 @@ public class JobProfileController implements JobProfilesApi {
     if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     }
-
-    jobProfileEntity.setName(jobProfile.getName());
-    jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -129,8 +114,7 @@ public class JobProfileController implements JobProfilesApi {
 
     jobProfile.setMetadata(metadata);
 
-    jobProfileEntity.setJobProfile(jobProfile);
-    jobProfileEntityRepository.save(jobProfileEntity);
+    jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

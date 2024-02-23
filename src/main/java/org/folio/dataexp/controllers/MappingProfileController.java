@@ -20,9 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -64,8 +62,6 @@ public class MappingProfileController implements MappingProfilesApi {
 
   @Override
   public ResponseEntity<MappingProfile> postMappingProfile(MappingProfile mappingProfile) {
-    var id = Objects.isNull(mappingProfile.getId()) ? UUID.randomUUID() : mappingProfile.getId();
-
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
     var userInfo = new UserInfo();
@@ -85,14 +81,7 @@ public class MappingProfileController implements MappingProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
-    mappingProfile.setId(id);
-    var mappingProfileEntity = MappingProfileEntity.builder()
-      .id(mappingProfile.getId())
-      .creationDate(LocalDateTime.now())
-      .mappingProfile(mappingProfile)
-      .name(mappingProfile.getName())
-      .createdBy(folioExecutionContext.getUserId().toString()).build();
-    var saved = mappingProfileEntityRepository.save(mappingProfileEntity);
+    var saved = mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     return new ResponseEntity<>(saved.getMappingProfile(), HttpStatus.CREATED);
   }
 
@@ -102,7 +91,6 @@ public class MappingProfileController implements MappingProfilesApi {
     if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     }
-    mappingProfileEntity.setName(mappingProfile.getName());
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -126,8 +114,7 @@ public class MappingProfileController implements MappingProfilesApi {
 
     mappingProfile.setMetadata(metadata);
 
-    mappingProfileEntity.setMappingProfile(mappingProfile);
-    mappingProfileEntityRepository.save(mappingProfileEntity);
+    mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -31,9 +31,6 @@ public class JobExecutionService {
   }
 
   public JobExecution save(JobExecution jobExecution) {
-    if (isNull(jobExecution.getId())) {
-      jobExecution.setId(UUID.randomUUID());
-    }
     return jobExecutionEntityCqlRepository.save(JobExecutionEntity.fromJobExecution(jobExecution)).getJobExecution();
   }
 

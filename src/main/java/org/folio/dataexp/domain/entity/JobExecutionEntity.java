@@ -47,6 +47,7 @@ public class JobExecutionEntity {
   private String jobProfileName;
   private Date startedDate;
   private Date completedDate;
+  private UUID runById;
   private String runByFirstName;
   private String runByLastName;
 
