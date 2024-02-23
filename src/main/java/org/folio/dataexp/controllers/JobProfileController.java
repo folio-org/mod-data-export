@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -55,9 +54,10 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfileCollection> getJobProfiles(Boolean used, String query, Integer offset, Integer limit) {
-    var jobProfileCollection = used ? getUsedJobProfiles(offset, limit) : getListOfJobProfiles(query, offset, limit);
-
-    return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
+    if(used){
+      return new ResponseEntity<>(getUsedJobProfiles(offset, limit), HttpStatus.OK);
+    }
+    return new ResponseEntity<>(getListOfJobProfiles(query, offset, limit), HttpStatus.OK);
   }
 
   private JobProfileCollection getListOfJobProfiles(String query, Integer offset, Integer limit) {
@@ -80,10 +80,9 @@ public class JobProfileController implements JobProfilesApi {
     List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
 
     var jobProfiles = jobProfileData.stream()
-        .map(Arrays::asList)
         .map(i -> JobProfile.builder()
-          .id((UUID) i.get(0))
-          .name((String) i.get(1))
+          .id((UUID) i[0])
+          .name((String) i[1])
           .build())
         .toList();
 

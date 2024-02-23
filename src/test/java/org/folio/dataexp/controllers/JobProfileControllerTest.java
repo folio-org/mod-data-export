@@ -10,15 +10,18 @@ import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.spring.data.OffsetRequest;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -110,6 +113,35 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
         .get("/data-export/job-profiles?query=query")
         .headers(defaultHeaders()))
       .andExpect(status().isOk());
+  }
+
+  @Test
+  @SneakyThrows
+  void getListOfJobProfilesUsedInCompletedJobsTest() {
+    UUID id_1 = UUID.randomUUID();
+    UUID id_2 = UUID.randomUUID();
+
+    Object[] profileData_1 = new Object[2];
+    profileData_1[0] = id_1;
+    profileData_1[1] = "Default instances export job profile 1";
+
+    Object[] profileData_2 = new Object[2];
+    profileData_2[0] = id_2;
+    profileData_2[1] = "Default instances export job profile 2";
+
+    List<Object[]> jobProfileData = Arrays.asList(profileData_1, profileData_2);
+
+    when(jobProfileEntityCqlRepository.getUsedJobProfilesData(isA(Integer.class), isA(Integer.class))).thenReturn(jobProfileData);
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/data-export/job-profiles?used=true")
+        .headers(defaultHeaders()))
+      .andExpect(status().isOk())
+      .andExpect(result -> {
+        var usedJobProfilesResponse = new JSONObject(result.getResponse().getContentAsString());
+        assertThat(usedJobProfilesResponse.getInt("totalRecords") == 2);
+        assertThat(usedJobProfilesResponse.getJSONArray("jobProfiles").length() == 2);
+      });
   }
 
   @Test
