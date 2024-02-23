@@ -125,7 +125,8 @@
             "inventory-storage.alternative-title-types.collection.get",
             "inventory-storage.modes-of-issuance.collection.get",
             "user-tenants.collection.get",
-            "search.resources.ids.jobs.post"
+            "search.resources.ids.jobs.post",
+            "search.resources.ids.collection.get"
           ]
         },
         {
