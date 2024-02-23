@@ -21,6 +21,8 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
 
   long countByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqual(UUID jobExecutionId, UUID fromId, UUID toId);
 
+  void deleteByJobExecutionId(UUID jobExecutionId);
+
   default Slice<ExportIdEntity> getExportIds(UUID jobExecutionId, UUID fromId, UUID toId, Pageable page) {
     return findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(jobExecutionId, fromId, toId, page);
   }
