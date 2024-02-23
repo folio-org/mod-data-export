@@ -15,4 +15,9 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IdsJob {
   private UUID id;
+  private Status status;
+
+  public enum Status {
+    IN_PROGRESS, ERROR, COMPLETED, DEPRECATED
+  }
 }

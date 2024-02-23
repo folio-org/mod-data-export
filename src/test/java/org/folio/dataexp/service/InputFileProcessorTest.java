@@ -80,7 +80,8 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
-    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(new IdsJob().withId(fileDefinition.getJobExecutionId()));
+    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(new IdsJob().withId(fileDefinition.getJobExecutionId())
+      .withStatus(IdsJob.Status.COMPLETED));
     var resourceIds = new ResourceIds().withIds(List.of(
       new ResourceIds.Id().withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd")))).withTotalRecords(1);
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
