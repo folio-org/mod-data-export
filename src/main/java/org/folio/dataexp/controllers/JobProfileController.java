@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -52,14 +54,44 @@ public class JobProfileController implements JobProfilesApi {
   }
 
   @Override
-  public ResponseEntity<JobProfileCollection> getJobProfiles(String query, Integer offset, Integer limit) {
-    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
+  public ResponseEntity<JobProfileCollection> getJobProfiles(Boolean used, String query, Integer offset, Integer limit) {
+    var jobProfileCollection = used ? getUsedJobProfiles(offset, limit) : getListOfJobProfiles(query, offset, limit);
+
+    return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
+  }
+
+  private JobProfileCollection getListOfJobProfiles(String query, Integer offset, Integer limit) {
+    log.info("getListOfJobProfiles::");
+    if (StringUtils.isEmpty(query)){
+      query = "(cql.allRecords=1)";
+    }
     var jobProfilesPage  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
     var jobProfiles =  jobProfilesPage.stream().map(JobProfileEntity::getJobProfile).toList();
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
     jobProfileCollection.setTotalRecords((int) jobProfilesPage.getTotalElements());
-    return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
+
+    return jobProfileCollection;
+  }
+
+  private JobProfileCollection getUsedJobProfiles(Integer offset, Integer limit) {
+    log.info("getUsedJobProfiles::");
+
+    List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
+
+    var jobProfiles = jobProfileData.stream()
+        .map(Arrays::asList)
+        .map(i -> JobProfile.builder()
+          .id((UUID) i.get(0))
+          .name((String) i.get(1))
+          .build())
+        .toList();
+
+    var jobProfileCollection = new JobProfileCollection();
+    jobProfileCollection.setJobProfiles(jobProfiles);
+    jobProfileCollection.setTotalRecords(jobProfileData.size());
+
+    return jobProfileCollection;
   }
 
   @Override
