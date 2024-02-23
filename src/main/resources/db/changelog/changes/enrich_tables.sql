@@ -1,6 +1,10 @@
 -- mapping profiles
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS name TEXT;
-ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS created_by TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS record_type TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS format TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS updated_date TIMESTAMP;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS created_by_first_name TEXT;
+ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS created_by_last_name TEXT;
 
 do
 $$
@@ -10,12 +14,21 @@ $$
     for rec in
       select cast(jsonb ->> 'id' as uuid) as id,
              jsonb ->> 'name' as name,
-             trim(concat(jsonb -> 'userInfo' ->> 'firstName', ' ', jsonb -> 'userInfo' ->> 'lastName')) as createdBy
+             (select string_agg(trim(types::text, '"'), ',')
+               from jsonb_array_elements(jsonb->'recordTypes') types) as recordTypes,
+             jsonb ->> 'outputFormat' as format,
+             cast(jsonb -> 'metadata' ->> 'updatedDate' as timestamp) as updatedDate,
+             jsonb -> 'userInfo' ->> 'firstName' as firstName,
+             jsonb -> 'userInfo' ->> 'lastName' as lastName
       from mapping_profiles
       loop
         update mapping_profiles
         set name = rec.name,
-            created_by = rec.createdBy
+            record_type = rec.recordTypes,
+            format = rec.format,
+            updated_date = rec.updatedDate,
+            created_by_first_name = rec.firstName,
+            created_by_last_name = rec.lastName
         where id = rec.id;
       end loop;
   end;
@@ -48,9 +61,11 @@ CREATE CAST (character varying as ExecutionStatusType) WITH INOUT AS IMPLICIT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS total INT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS exported INT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS failed INT;
+ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS job_profile_id TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS job_profile_name TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS started_date TIMESTAMP;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS completed_date TIMESTAMP;
+ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS run_by_id uuid;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS run_by_first_name TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS run_by_last_name TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS hrid INT;
@@ -65,10 +80,12 @@ $$
       select cast(jsonb ->> 'id' as uuid) as id,
              cast(jsonb -> 'progress' ->> 'total' as int) as total,
              cast(jsonb -> 'progress' ->> 'exported' as int) as exported,
-             cast(jsonb -> 'progress' ->> 'failed' as int) as failed,
+             cast(jsonb -> 'progress' -> 'failed' ->> 'duplicatedSrs' as int) as duplicatedSrs,
+             cast(jsonb -> 'progress' -> 'failed' ->> 'otherFailed' as int) as failed,
              jsonb ->> 'jobProfileName' as jobProfileName,
-             to_timestamp(cast(jsonb ->> 'startedDate' AS BIGINT) / 1000) as startedDate,
-             to_timestamp(cast(jsonb ->> 'completedDate' AS BIGINT) / 1000) as completedDate,
+             cast(jsonb ->> 'startedDate' as timestamp) as startedDate,
+             cast(jsonb ->> 'completedDate' as timestamp) as completedDate,
+             cast(jsonb -> 'runBy' ->> 'userId' as uuid) as userId,
              jsonb -> 'runBy' ->> 'firstName' as firstName,
              jsonb -> 'runBy' ->> 'lastName' as lastName,
              cast(jsonb ->> 'hrId' as int) as hrid,
@@ -76,12 +93,14 @@ $$
       from job_executions
       loop
         update job_executions
-          set total = rec.total,
+          set jsonb = jsonb_set(jsonb, '{progress}', jsonb_build_object('total', rec.total, 'exported', rec.exported, 'duplicatedSrs', rec.duplicatedSrs, 'failed', rec.failed)),
+              total = rec.total,
               exported = rec.exported,
               failed = rec.failed,
               job_profile_name = rec.jobProfileName,
               started_date = rec.startedDate,
               completed_date = rec.completedDate,
+              run_by_id = rec.userId,
               run_by_first_name = rec.firstName,
               run_by_last_name = rec.lastName,
               hrid = rec.hrid,

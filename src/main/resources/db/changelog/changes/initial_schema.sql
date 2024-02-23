@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS file_definitions (
 CREATE TABLE IF NOT EXISTS mapping_profiles (
     id uuid PRIMARY KEY,
     jsonb jsonb,
-    creation_date TIMESTAMP
+    creation_date TIMESTAMP,
+    created_by TEXT
 );
 
 CREATE TABLE IF NOT EXISTS job_profiles (
