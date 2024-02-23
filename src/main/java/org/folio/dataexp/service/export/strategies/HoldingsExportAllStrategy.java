@@ -61,7 +61,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   }
 
   @Override
-  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+  public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     }

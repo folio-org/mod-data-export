@@ -20,7 +20,7 @@ public class MarcAuthorityRecordRepository {
   private final static String QUERY_NON_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery\n"
       + "    FROM %s_mod_source_record_storage.records_lb records_lb\n"
       + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)"
-      + "    WHERE state = 'ACTUAL' AND leader_record_status != 'd' AND record_type = 'MARC_AUTHORITY'"
+      + "    WHERE state = 'ACTUAL' AND record_type = 'MARC_AUTHORITY'"
       + "    AND external_id in :ids";
 
   private final static String QUERY_INCLUDING_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery\n"
