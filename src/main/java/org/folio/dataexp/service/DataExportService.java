@@ -78,7 +78,7 @@ public class DataExportService {
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
       if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
-        inputFileProcessor.readFile(fileDefinition, commonExportFails);
+        inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
         log.info("File has been read successfully.");
       }
       slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
