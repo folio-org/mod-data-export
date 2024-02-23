@@ -103,7 +103,7 @@ public class InputFileProcessor {
       var idsJobPayload = new IdsJobPayload().withEntityType(IdsJobPayload.EntityType.valueOf(idType.name())).withQuery(cql);
       var idsJob = searchClient.submitIdsJob(idsJobPayload);
       var resourceIds = searchClient.getResourceIds(idsJob.getId().toString());
-      log.info("CQL totalRecords: {}", resourceIds.getTotalRecords());
+      log.info("CQL totalRecords: {} for file definition id: {}", resourceIds.getTotalRecords(), fileDefinition.getId());
       List<ExportIdEntity> entities = resourceIds.getIds()
         .stream().map(id -> new ExportIdEntity()
           .withJobExecutionId(fileDefinition.getJobExecutionId())
