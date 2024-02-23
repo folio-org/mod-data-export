@@ -209,7 +209,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         exportFilesEntity.getFromId(), exportFilesEntity.getToId(), PageRequest.of(0, exportIdsBatch));
     log.info("Slice size: {}", slice.getSize());
     var exportIds = slice.getContent().stream().map(ExportIdEntity::getInstanceId).collect(Collectors.toSet());
-    log.info("Size of exportIds: {}", exportIds.size());
     createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), exportRequest, localStorageWriter);
     while (slice.hasNext()) {
       slice = exportIdEntityRepository.getExportIds(exportFilesEntity.getJobExecutionId(),
