@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -40,7 +42,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
+    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
       throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
     jobProfileEntityRepository.deleteById(jobProfileId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -54,7 +56,7 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfileCollection> getJobProfiles(Boolean used, String query, Integer offset, Integer limit) {
-    if(used){
+    if(TRUE.equals(used)){
       return new ResponseEntity<>(getUsedJobProfiles(offset, limit), HttpStatus.OK);
     }
     return new ResponseEntity<>(getListOfJobProfiles(query, offset, limit), HttpStatus.OK);
@@ -131,7 +133,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
+    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     }
 
