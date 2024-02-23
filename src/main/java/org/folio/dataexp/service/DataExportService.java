@@ -21,6 +21,10 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,10 +39,11 @@ public class DataExportService {
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final InputFileProcessor inputFileProcessor;
   private final SlicerProcessor slicerProcessor;
-  private final SingleFileProcessor singleFileProcessor;
+  private final SingleFileProcessorAsync singleFileProcessorAsync;
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
+  private final ExecutorService executor = Executors.newCachedThreadPool();
 
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportFails();
@@ -52,7 +57,9 @@ public class DataExportService {
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
 
     int hrid = jobExecutionEntityRepository.getHrid();
+    var runBy = getRunBy();
     jobExecutionEntity.getJobExecution().setHrId(hrid);
+    jobExecutionEntity.getJobExecution().setRunBy(runBy);
 
     var innerFileName = getDefaultFileName(fileDefinition, jobExecutionEntity.getJobExecution());
     var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
@@ -69,15 +76,18 @@ public class DataExportService {
     log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
         Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
 
-    if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
-      inputFileProcessor.readFile(fileDefinition, commonExportFails);
-      log.info("File has been read successfully.");
-    }
-    slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
-    log.info("Instance IDs have been sliced successfully.");
-
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
-    singleFileProcessor.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
+    executor.execute(getRunnableWithCurrentFolioContext(() -> {
+      if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
+        inputFileProcessor.readFile(fileDefinition, commonExportFails);
+        log.info("File has been read successfully.");
+      }
+      slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
+      log.info("Instance IDs have been sliced successfully.");
+
+      updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+      singleFileProcessorAsync.exportBySingleFile(jobExecutionEntity.getId(), exportRequest, commonExportFails);
+    }));
   }
 
   private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
@@ -86,16 +96,9 @@ public class DataExportService {
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
-    if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) jobExecution.setCompletedDate(currentDate);
-
-    var userId = folioExecutionContext.getUserId().toString();
-    var user = userClient.getUserById(userId);
-    var runBy = new JobExecutionRunBy();
-    runBy.firstName(user.getPersonal().getFirstName());
-    runBy.lastName(user.getPersonal().getLastName());
-    runBy.setUserId(userId);
-    jobExecution.setRunBy(runBy);
-
+    if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
+      jobExecution.setCompletedDate(currentDate);
+    }
     long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
     var jobExecutionProgress = new JobExecutionProgress();
     jobExecutionProgress.setFailed(0);
@@ -107,8 +110,19 @@ public class DataExportService {
     jobExecutionEntityRepository.save(jobExecutionEntity);
   }
 
-  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
+  private JobExecutionRunBy getRunBy() {
+    var userId = folioExecutionContext.getUserId().toString();
+    var user = userClient.getUserById(userId);
+    var runBy = new JobExecutionRunBy();
+    runBy.firstName(user.getPersonal().getFirstName());
+    runBy.lastName(user.getPersonal().getLastName());
+    runBy.setUserId(userId);
+    return runBy;
+  }
+
+  private String getDefaultFileName (FileDefinition fileDefinition, JobExecution jobExecution) {
     var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
+
   }
 }

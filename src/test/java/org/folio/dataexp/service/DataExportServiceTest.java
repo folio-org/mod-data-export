@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -16,46 +17,45 @@ import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
-import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.UUID;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class DataExportServiceTest {
+class DataExportServiceTest extends BaseDataExportInitializer {
 
-  @Mock
+  @MockBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Mock
+  @MockBean
   private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Mock
+  @MockBean
   private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock
+  @MockBean
   private ExportIdEntityRepository exportIdEntityRepository;
-  @Mock
+  @MockBean
   private InputFileProcessor inputFileProcessor;
-  @Mock
+  @MockBean
   private SlicerProcessor slicerProcessor;
-  @Mock
+  @MockBean
   private SingleFileProcessorAsync singleFileProcessorAsync;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
+  @MockBean
   private UserClient userClient;
-  @Mock
+  @MockBean
   private DataExportRequestValidator dataExportRequestValidator;
 
-  @InjectMocks
+  @Autowired
   private DataExportService dataExportService;
 
   @Test
@@ -91,24 +91,25 @@ class DataExportServiceTest {
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
-    when(folioExecutionContext.getUserId()).thenReturn(userId);
-    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
     when(jobExecutionEntityRepository.getHrid()).thenReturn(200);
+    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+      dataExportService.postDataExport(exportRequest);
+    }
+    await().atMost(2, SECONDS).untilAsserted(() -> {
+      verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
+      verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
+      verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
+      verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
+      verify(jobExecutionEntityRepository).getHrid();
+      verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
+      verify(userClient).getUserById(isA(String.class));
 
-    dataExportService.postDataExport(exportRequest);
-
-    verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportFails.class));
-    verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
-
-    verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
-    verify(exportIdEntityRepository).countByJobExecutionId(jobExecution.getId());
-    verify(jobExecutionEntityRepository).getHrid();
-    verify(jobExecutionEntityRepository).save(isA(JobExecutionEntity.class));
-
-    assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
-
-    var exportedFiles = jobExecution.getExportedFiles();
-    JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
-    assertEquals("instance-200.mrc", inner.getFileName());
+      assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
+      assertEquals(200, jobExecution.getHrId());
+      var exportedFiles = jobExecution.getExportedFiles();
+      JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
+      assertEquals("instance-200.mrc", inner.getFileName());
+    });
   }
 }
