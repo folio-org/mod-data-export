@@ -22,8 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static java.lang.Boolean.TRUE;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +42,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
+    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
       throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
     jobProfileEntityRepository.deleteById(jobProfileId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -52,14 +55,44 @@ public class JobProfileController implements JobProfilesApi {
   }
 
   @Override
-  public ResponseEntity<JobProfileCollection> getJobProfiles(String query, Integer offset, Integer limit) {
-    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
+  public ResponseEntity<JobProfileCollection> getJobProfiles(Boolean used, String query, Integer offset, Integer limit) {
+    if(TRUE.equals(used)){
+      return new ResponseEntity<>(getUsedJobProfiles(offset, limit), HttpStatus.OK);
+    }
+    return new ResponseEntity<>(getListOfJobProfiles(query, offset, limit), HttpStatus.OK);
+  }
+
+  private JobProfileCollection getListOfJobProfiles(String query, Integer offset, Integer limit) {
+    log.info("getListOfJobProfiles::");
+    if (StringUtils.isEmpty(query)){
+      query = "(cql.allRecords=1)";
+    }
     var jobProfilesPage  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
     var jobProfiles =  jobProfilesPage.stream().map(JobProfileEntity::getJobProfile).toList();
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
     jobProfileCollection.setTotalRecords((int) jobProfilesPage.getTotalElements());
-    return new ResponseEntity<>(jobProfileCollection, HttpStatus.OK);
+
+    return jobProfileCollection;
+  }
+
+  private JobProfileCollection getUsedJobProfiles(Integer offset, Integer limit) {
+    log.info("getUsedJobProfiles::");
+
+    List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
+
+    var jobProfiles = jobProfileData.stream()
+        .map(i -> JobProfile.builder()
+          .id((UUID) i[0])
+          .name((String) i[1])
+          .build())
+        .toList();
+
+    var jobProfileCollection = new JobProfileCollection();
+    jobProfileCollection.setJobProfiles(jobProfiles);
+    jobProfileCollection.setTotalRecords(jobProfileData.size());
+
+    return jobProfileCollection;
   }
 
   @Override
@@ -100,7 +133,7 @@ public class JobProfileController implements JobProfilesApi {
   @Override
   public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (Boolean.TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
+    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     }
 
