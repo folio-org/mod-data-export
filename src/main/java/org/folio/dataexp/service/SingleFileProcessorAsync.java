@@ -8,9 +8,9 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class SingleFileProcessorAsync extends SingleFileProcessor {
-
 
   @Autowired
   public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
@@ -20,6 +20,22 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
   @Override
   public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
-    exportExecutor.exportAsynch(export, exportRequest, commonExportFails);
+    var exportRequestCopy = getExportRequestCopy(exportRequest);
+    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportFails);
+  }
+
+  private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {
+    return ExportRequest.builder()
+      .fileDefinitionId(exportRequest.getFileDefinitionId())
+      .jobProfileId(exportRequest.getJobProfileId())
+      .recordType(exportRequest.getRecordType())
+      .idType(exportRequest.getIdType())
+      .all(exportRequest.getAll())
+      .quick(exportRequest.getQuick())
+      .deletedRecords(exportRequest.getDeletedRecords())
+      .suppressedFromDiscovery(exportRequest.getSuppressedFromDiscovery())
+      .lastSlice(exportRequest.getLastSlice())
+      .lastExport(exportRequest.getLastExport())
+      .metadata(exportRequest.getMetadata()).build();
   }
 }

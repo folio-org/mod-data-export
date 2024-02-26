@@ -48,7 +48,8 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
     }
   }
 
-  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+  @Override
+  public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     }

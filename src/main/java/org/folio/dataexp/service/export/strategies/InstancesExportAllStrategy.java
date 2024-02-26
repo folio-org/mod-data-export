@@ -72,7 +72,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   @Override
-  protected void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
+  public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     }
@@ -118,8 +118,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     var marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
     entityManager.clear();
     processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, marcSlice.getContent(), localStorageWriter);
-    log.info("Slice size for instances export all marc: {}", marcSlice.getContent().size());
-    log.info("Slice content: {}", marcSlice.getContent().stream().map(MarcRecordEntity::getExternalId).toList());
     while (marcSlice.hasNext()) {
       marcSlice = nextMarcSlice(exportFilesEntity, exportRequest, marcSlice.nextPageable());
       entityManager.clear();

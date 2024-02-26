@@ -50,13 +50,17 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToRemoteStorage(exportFilesEntity, exportRequest);
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest);
     commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
-    updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails);
-    log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+    synchronized (this) {
+      exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
+      jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
+      log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails, exportRequest);
+    }
   }
 
-  private synchronized void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails) {
+  private void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails, ExportRequest exportRequest) {
     var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setExported(progress.getExported() + exportStatistic.getExported());
@@ -68,6 +72,9 @@ public class ExportExecutor {
     long exportsCompletedWithErrors = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).count();
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
+      if (Boolean.TRUE.equals(exportRequest.getAll())) {
+        progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
+      }
       progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
       errorLogService.saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
 

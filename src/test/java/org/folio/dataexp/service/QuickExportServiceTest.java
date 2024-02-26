@@ -17,7 +17,9 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -55,19 +57,21 @@ class QuickExportServiceTest extends ServiceInitializer {
       assertThat(response.getJobExecutionHrId()).isPositive();
       assertThat(response.getJobExecutionId()).isInstanceOf(UUID.class);
 
-      var errors = errorLogEntityCqlRepository.findAll();
-      assertThat(errors).isEmpty();
-      var jobExecutions = jobExecutionEntityCqlRepository.findAll();
-      assertThat(jobExecutions).hasSize(1);
-      var jobExecution = jobExecutions.get(0);
-      assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+      await().atMost(4, SECONDS).untilAsserted(() -> {
+        var errors = errorLogEntityCqlRepository.findAll();
+        assertThat(errors).isEmpty();
+        var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+        assertThat(jobExecutions).hasSize(1);
+        var jobExecution = jobExecutions.get(0);
+        assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
 
-      var fileToExport  =  String.format("quick-export-%s.mrc", jobExecution.getJobExecution().getHrId());
-      var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
-      String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
+        var fileToExport = String.format("quick-export-%s.mrc", jobExecution.getJobExecution().getHrId());
+        var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+        String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
-      assertThat(outputMrcFile).containsOnlyOnce(expectedId);
-      assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
+        assertThat(outputMrcFile).containsOnlyOnce(expectedId);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
+      });
     }
   }
 
