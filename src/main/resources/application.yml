@@ -36,14 +36,13 @@ spring:
     openfeign:
       okhttp:
         enabled: true
+      client:
+        config:
+          SearchClient:
+            connectTimeout: 600000
+            readTimeout: 3600000
   mustache:
     check-template-location: false
-feign:
-  client:
-    config:
-      SearchClient:
-        connectTimeout: 600000
-        readTimeout: 3600000
 folio:
   tenant:
     validation:
