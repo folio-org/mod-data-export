@@ -22,4 +22,7 @@ public interface MarcAuthorityRecordAllRepository extends Repository<MarcRecordE
       + "WHERE external_id BETWEEN ?1 AND ?2 "
       + "ORDER BY id ASC", nativeQuery = true)
   Slice<MarcRecordEntity> findAllWithDeleted(UUID fromId, UUID toId, Pageable page);
+
+  @Query(value = "SELECT COUNT(id) FROM v_authority_all", nativeQuery = true)
+  long count();
 }
