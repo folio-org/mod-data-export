@@ -20,8 +20,7 @@ import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -64,13 +63,13 @@ public class MappingProfileEntity {
     return MappingProfileEntity.builder()
       .id(mappingProfile.getId())
       .mappingProfile(mappingProfile)
-      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .createdBy(metadata.getCreatedByUserId())
       .name(mappingProfile.getName())
       .description(mappingProfile.getDescription())
       .recordTypes(recordTypesToString(mappingProfile.getRecordTypes()))
       .format(isNull(mappingProfile.getOutputFormat()) ? null : mappingProfile.getOutputFormat().getValue())
-      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .updatedByUserId(metadata.getUpdatedByUserId())
       .updatedByFirstName(userInfo.getFirstName())
       .updatedByLastName(userInfo.getLastName())

@@ -18,8 +18,7 @@ import org.folio.dataexp.domain.dto.JobExecution;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Data
@@ -69,8 +68,8 @@ public class JobExecutionEntity {
       .failed(isNull(jobExecution.getProgress()) ? null : jobExecution.getProgress().getFailed())
       .jobProfileId(jobExecution.getJobProfileId())
       .jobProfileName(jobExecution.getJobProfileName())
-      .startedDate(isNull(jobExecution.getStartedDate()) ? null : jobExecution.getStartedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-      .completedDate(isNull(jobExecution.getCompletedDate()) ? null : jobExecution.getCompletedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .startedDate(isNull(jobExecution.getStartedDate()) ? null : jobExecution.getStartedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+      .completedDate(isNull(jobExecution.getCompletedDate()) ? null : jobExecution.getCompletedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .runByFirstName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getFirstName())
       .runByLastName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getLastName())
       .status(jobExecution.getStatus())

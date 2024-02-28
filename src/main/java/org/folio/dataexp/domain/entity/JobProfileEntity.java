@@ -19,8 +19,7 @@ import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 @Data
@@ -62,11 +61,11 @@ public class JobProfileEntity {
     return JobProfileEntity.builder()
       .id(jobProfile.getId())
       .jobProfile(jobProfile)
-      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .createdBy(metadata.getCreatedByUserId())
       .name(jobProfile.getName())
       .description(jobProfile.getDescription())
-      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .updatedByUserId(metadata.getUpdatedByUserId())
       .updatedByFirstName(userInfo.getFirstName())
       .updatedByLastName(userInfo.getLastName())
