@@ -75,11 +75,10 @@ public class DataExportService {
     }
     log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
         Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecutionEntity.getId());
-
     updateJobExecutionForPostDataExport(jobExecutionEntity, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
       if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
-        inputFileProcessor.readFile(fileDefinition, commonExportFails);
+        inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
         log.info("File has been read successfully.");
       }
       slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
