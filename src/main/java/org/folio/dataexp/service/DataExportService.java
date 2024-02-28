@@ -142,10 +142,8 @@ public class DataExportService {
           jobExecutionProgress.setTotal((int) instanceEntityRepository.count());
         } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
           jobExecutionProgress.setTotal((int) marcAuthorityRecordAllRepository.count());
-        } else {
-          log.error("Id type not supported: {}", exportRequest.getIdType());
-          throw new UnsupportedOperationException("Id type not supported: " + exportRequest.getIdType());
         }
+        log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
       }
     } else {
       jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
