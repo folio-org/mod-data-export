@@ -98,7 +98,7 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getInvalidUUIDFormat());
+      var message = String.join(",", commonExportFails.getInvalidUUIDFormat());
       errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
       this.save(errorLog);

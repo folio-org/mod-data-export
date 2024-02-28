@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -38,6 +39,9 @@ import java.util.UUID;
 public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
+  private static final Pattern PATTERN = Pattern.compile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[1-5][a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$");
+  private static final String SPECIAL_CHARACTERS_REGEX = "[^a-zA-Z0-9\\-]";
+
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
@@ -74,7 +78,9 @@ public class InputFileProcessor {
           }
         } catch (Exception e) {
           log.error("Error converting {} to uuid", id);
-          commonExportFails.addToInvalidUUIDFormat(id);
+          if (!StringUtils.isNotEmpty(id) && !PATTERN.matcher(id.replaceAll(SPECIAL_CHARACTERS_REGEX, StringUtils.EMPTY).trim()).matches()) {
+            commonExportFails.addToInvalidUUIDFormat(id);
+          }
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
