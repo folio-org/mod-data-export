@@ -18,6 +18,8 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
@@ -37,13 +39,13 @@ public class JobProfileEntity {
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobProfile jobProfile;
 
-  private Date creationDate;
+  private LocalDateTime creationDate;
 
   private String createdBy;
 
   private String name;
   private String description;
-  private Date updatedDate;
+  private LocalDateTime updatedDate;
   private String updatedByUserId;
   private String updatedByFirstName;
   private String updatedByLastName;
@@ -60,11 +62,11 @@ public class JobProfileEntity {
     return JobProfileEntity.builder()
       .id(jobProfile.getId())
       .jobProfile(jobProfile)
-      .creationDate(metadata.getCreatedDate())
+      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
       .createdBy(metadata.getCreatedByUserId())
       .name(jobProfile.getName())
       .description(jobProfile.getDescription())
-      .updatedDate(metadata.getUpdatedDate())
+      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
       .updatedByUserId(metadata.getUpdatedByUserId())
       .updatedByFirstName(userInfo.getFirstName())
       .updatedByLastName(userInfo.getLastName())

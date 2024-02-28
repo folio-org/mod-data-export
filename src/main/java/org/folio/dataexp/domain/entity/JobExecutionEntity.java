@@ -17,6 +17,8 @@ import lombok.With;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.hibernate.annotations.Type;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
@@ -45,8 +47,8 @@ public class JobExecutionEntity {
   private UUID jobProfileId;
 
   private String jobProfileName;
-  private Date startedDate;
-  private Date completedDate;
+  private LocalDateTime startedDate;
+  private LocalDateTime completedDate;
   private UUID runById;
   private String runByFirstName;
   private String runByLastName;
@@ -67,8 +69,8 @@ public class JobExecutionEntity {
       .failed(isNull(jobExecution.getProgress()) ? null : jobExecution.getProgress().getFailed())
       .jobProfileId(jobExecution.getJobProfileId())
       .jobProfileName(jobExecution.getJobProfileName())
-      .startedDate(jobExecution.getStartedDate())
-      .completedDate(jobExecution.getCompletedDate())
+      .startedDate(isNull(jobExecution.getStartedDate()) ? null : jobExecution.getStartedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+      .completedDate(isNull(jobExecution.getCompletedDate()) ? null : jobExecution.getCompletedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
       .runByFirstName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getFirstName())
       .runByLastName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getLastName())
       .status(jobExecution.getStatus())

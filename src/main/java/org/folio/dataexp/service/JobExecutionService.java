@@ -50,9 +50,7 @@ public class JobExecutionService {
         }
         jobExecution.setCompletedDate(new Date());
         updateErrorLogIfJobIsExpired(jobExecution.getId());
-        jobExecutionEntity.setStatus(FAIL);
-        jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
-        jobExecutionEntityCqlRepository.save(jobExecutionEntity);
+        save(jobExecution);
       });
   }
 
@@ -63,8 +61,7 @@ public class JobExecutionService {
         new Date() :
         jobExecution.getLastUpdatedDate();
       jobExecution.setCompletedDate(completedDate);
-      jobExecutionEntity.setCompletedDate(completedDate);
-      jobExecutionEntityCqlRepository.save(jobExecutionEntity);
+      save(jobExecution);
     });
   }
 

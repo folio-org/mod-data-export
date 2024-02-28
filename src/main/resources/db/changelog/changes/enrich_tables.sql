@@ -82,7 +82,6 @@ CREATE CAST (character varying as ExecutionStatusType) WITH INOUT AS IMPLICIT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS total INT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS exported INT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS failed INT;
-ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS job_profile_id TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS job_profile_name TEXT;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS started_date TIMESTAMP;
 ALTER TABLE job_executions ADD COLUMN IF NOT EXISTS completed_date TIMESTAMP;

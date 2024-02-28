@@ -19,6 +19,8 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +42,7 @@ public class MappingProfileEntity {
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private MappingProfile mappingProfile;
 
-  private Date creationDate;
+  private LocalDateTime creationDate;
 
   private String createdBy;
 
@@ -48,7 +50,7 @@ public class MappingProfileEntity {
   private String description;
   private String recordTypes;
   private String format;
-  private Date updatedDate;
+  private LocalDateTime updatedDate;
   private String updatedByUserId;
   private String updatedByFirstName;
   private String updatedByLastName;
@@ -62,13 +64,13 @@ public class MappingProfileEntity {
     return MappingProfileEntity.builder()
       .id(mappingProfile.getId())
       .mappingProfile(mappingProfile)
-      .creationDate(metadata.getCreatedDate())
+      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
       .createdBy(metadata.getCreatedByUserId())
       .name(mappingProfile.getName())
       .description(mappingProfile.getDescription())
       .recordTypes(recordTypesToString(mappingProfile.getRecordTypes()))
       .format(isNull(mappingProfile.getOutputFormat()) ? null : mappingProfile.getOutputFormat().getValue())
-      .updatedDate(metadata.getUpdatedDate())
+      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
       .updatedByUserId(metadata.getUpdatedByUserId())
       .updatedByFirstName(userInfo.getFirstName())
       .updatedByLastName(userInfo.getLastName())
