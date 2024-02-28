@@ -34,7 +34,10 @@ public class DataExportRequestValidator {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getCode(),
           Collections.singletonList(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getDescription()), fileDefinition.getJobExecutionId());
-        errorMsg = "Only csv format is supported for authority export";
+        if (!errorMsg.isEmpty()) {
+          errorMsg += "; ";
+        }
+        errorMsg += "Only csv format is supported for authority export";
       }
     }
     if (!errorMsg.isEmpty()) {
