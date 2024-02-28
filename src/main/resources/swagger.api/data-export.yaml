@@ -470,6 +470,7 @@ paths:
       description: API for getting job profiles
       operationId: getJobProfiles
       parameters:
+        - $ref: '#/components/parameters/trait_used_in_completed_jobs'
         - $ref: '#/components/parameters/trait_queryable'
         - $ref: '#/components/parameters/trait_pageable_offset'
         - $ref: '#/components/parameters/trait_pageable_limit'
@@ -928,3 +929,11 @@ components:
         minimum: 0
         maximum: 2147483647
         type: integer
+    trait_used_in_completed_jobs:
+      name: used
+      in: query
+      required: false
+      description: true if need already used profiles
+      schema:
+        default: false
+        type: boolean
