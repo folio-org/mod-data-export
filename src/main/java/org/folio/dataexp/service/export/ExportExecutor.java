@@ -14,6 +14,7 @@ import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.JobExecutionService;
+import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
@@ -38,6 +39,8 @@ public class ExportExecutor {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final S3ExportsUploader s3Uploader;
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  private final StorageCleanUpService storageCleanUpService;
+
 
   @Async("singleExportFileTaskExecutor")
   public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
@@ -107,6 +110,7 @@ public class ExportExecutor {
         log.error("updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} with exception {}", jobExecutionId, e.getMessage());
       }
       jobExecution.completedDate(currentDate);
+      storageCleanUpService.cleanExportIdEntities(jobExecutionId);
     }
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionService.save(jobExecution);

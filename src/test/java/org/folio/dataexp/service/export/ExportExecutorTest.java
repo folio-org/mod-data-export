@@ -13,6 +13,7 @@ import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
 import org.folio.dataexp.service.JobExecutionService;
+import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -48,6 +49,8 @@ class ExportExecutorTest {
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Mock
   private S3ExportsUploader s3ExportsUploader;
+  @Mock
+  private StorageCleanUpService storageCleanUpService;
 
   @InjectMocks
   private ExportExecutor exportExecutor;
@@ -91,6 +94,7 @@ class ExportExecutorTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
     verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity), "file_name");
+    verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }
 
   @Test
@@ -134,5 +138,6 @@ class ExportExecutorTest {
     assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
     verify(errorLogService).saveCommonExportFailsErrors(commonFails, 2, jobExecutionId);
     verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity), "file_name");
+    verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }
 }

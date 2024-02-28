@@ -36,6 +36,11 @@ spring:
     openfeign:
       okhttp:
         enabled: true
+      client:
+        config:
+          default:
+            connectTimeout: 600000
+            readTimeout: 3600000
   mustache:
     check-template-location: false
 folio:
