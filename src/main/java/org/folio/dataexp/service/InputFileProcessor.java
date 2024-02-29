@@ -76,9 +76,7 @@ public class InputFileProcessor {
           }
         } catch (Exception e) {
           log.error("Error converting {} to uuid", id);
-          if (!StringUtils.isNotEmpty(id) && !PATTERN.matcher(id.replaceAll(SPECIAL_CHARACTERS_REGEX, StringUtils.EMPTY).trim()).matches()) {
-            commonExportFails.addToInvalidUUIDFormat(id);
-          }
+          commonExportFails.addToInvalidUUIDFormat(id);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
