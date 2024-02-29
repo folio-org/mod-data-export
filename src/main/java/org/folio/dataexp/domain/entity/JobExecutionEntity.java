@@ -70,6 +70,7 @@ public class JobExecutionEntity {
       .jobProfileName(jobExecution.getJobProfileName())
       .startedDate(isNull(jobExecution.getStartedDate()) ? null : jobExecution.getStartedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
       .completedDate(isNull(jobExecution.getCompletedDate()) ? null : jobExecution.getCompletedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+      .runById(isNull(jobExecution.getRunBy()) ? null : UUID.fromString(jobExecution.getRunBy().getUserId()))
       .runByFirstName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getFirstName())
       .runByLastName(isNull(jobExecution.getRunBy()) ? null : jobExecution.getRunBy().getLastName())
       .status(jobExecution.getStatus())
