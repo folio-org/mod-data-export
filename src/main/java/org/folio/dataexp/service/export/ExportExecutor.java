@@ -10,15 +10,18 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
+import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -38,6 +41,8 @@ public class ExportExecutor {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final S3ExportsUploader s3Uploader;
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  private final StorageCleanUpService storageCleanUpService;
+
 
   @Async("singleExportFileTaskExecutor")
   public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
@@ -110,6 +115,8 @@ public class ExportExecutor {
       jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecution.completedDate(currentDate);
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
+
+      storageCleanUpService.cleanExportIdEntities(jobExecutionId);
     }
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionEntityRepository.save(jobExecutionEntity);
