@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS mapping_profiles (
     created_by TEXT
 );
 
+DROP TRIGGER IF EXISTS set_id_in_jsonb ON mapping_profiles;
+DROP TRIGGER IF EXISTS set_mapping_profiles_md_trigger ON mapping_profiles;
+DROP TRIGGER IF EXISTS set_mapping_profiles_md_json_trigger ON mapping_profiles;
+
 CREATE TABLE IF NOT EXISTS job_profiles (
     id uuid PRIMARY KEY,
     jsonb jsonb,
@@ -26,6 +30,11 @@ CREATE TABLE IF NOT EXISTS job_profiles (
       ON DELETE NO ACTION
 );
 
+DROP TRIGGER IF EXISTS set_id_in_jsonb ON job_profiles;
+DROP TRIGGER IF EXISTS update_job_profiles_references ON job_profiles;
+DROP TRIGGER IF EXISTS set_job_profiles_md_trigger ON job_profiles;
+DROP TRIGGER IF EXISTS set_job_profiles_md_json_trigger ON job_profiles;
+
 CREATE TABLE IF NOT EXISTS job_executions (
     id uuid PRIMARY KEY,
     jsonb jsonb,
@@ -35,6 +44,9 @@ CREATE TABLE IF NOT EXISTS job_executions (
       ON UPDATE NO ACTION
       ON DELETE NO ACTION
 );
+
+DROP TRIGGER IF EXISTS set_id_in_jsonb ON job_executions;
+DROP TRIGGER IF EXISTS update_job_executions_references ON job_executions;
 
 CREATE TABLE IF NOT EXISTS error_logs (
     id uuid PRIMARY KEY,
