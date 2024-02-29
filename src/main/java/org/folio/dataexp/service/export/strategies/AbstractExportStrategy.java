@@ -1,5 +1,9 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
+import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +19,6 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
@@ -36,17 +39,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
-import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
-import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
-
 @Log4j2
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private ExportIdEntityRepository exportIdEntityRepository;
 
+  private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
   private JobExecutionEntityRepository jobExecutionEntityRepository;
@@ -217,11 +215,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, localStorageWriter);
     }
-  }
-
-  @Autowired
-  private void setJobExecutionExportFilesEntityRepository(JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository) {
-    this.jobExecutionExportFilesEntityRepository = jobExecutionExportFilesEntityRepository;
   }
 
   @Autowired
