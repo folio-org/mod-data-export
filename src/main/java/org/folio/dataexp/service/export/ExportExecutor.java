@@ -10,18 +10,16 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
-import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -43,33 +41,31 @@ public class ExportExecutor {
   private final FileDefinitionEntityRepository fileDefinitionEntityRepository;
   private final StorageCleanUpService storageCleanUpService;
 
-
   @Async("singleExportFileTaskExecutor")
-  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
-    export(exportFilesEntity, exportRequest, commonExportFails);
+  public void exportAsynch(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
+    export(exportFilesEntity, exportRequest, commonExportStatistic);
   }
 
-  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+  public void export(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
     log.info("export:: Started export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
     exportFilesEntity = jobExecutionExportFilesEntityRepository.getReferenceById(exportFilesEntity.getId());
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest);
-    commonExportFails.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest, commonExportStatistic.getExportStrategyStatisticListener());
+    commonExportStatistic.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
     synchronized (this) {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
       log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
-      updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportFails, exportRequest);
+      updateJobExecutionStatusAndProgress(exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportStatistic, exportRequest);
     }
   }
 
-  private void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportFails commonExportFails, ExportRequest exportRequest) {
+  private void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportStatistic commonExportStatistic, ExportRequest exportRequest) {
     var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
     var jobExecution = jobExecutionEntity.getJobExecution();
     var progress = jobExecution.getProgress();
-    progress.setExported(progress.getExported() + exportStatistic.getExported());
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
     progress.setDuplicatedSrs(progress.getDuplicatedSrs() + exportStatistic.getDuplicatedSrs());
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
@@ -81,8 +77,9 @@ public class ExportExecutor {
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
       }
-      progress.setFailed(progress.getFailed() + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
-      errorLogService.saveCommonExportFailsErrors(commonExportFails, progress.getFailed(), jobExecutionId);
+      progress.setFailed(progress.getFailed() + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size());
+      progress.setExported(commonExportStatistic.getExportStrategyStatisticListener().getExportedCount().get());
+      errorLogService.saveCommonExportFailsErrors(commonExportStatistic, progress.getFailed(), jobExecutionId);
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
 
@@ -122,5 +119,4 @@ public class ExportExecutor {
     jobExecutionEntityRepository.save(jobExecutionEntity);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
-
 }

@@ -46,7 +46,7 @@ public class DataExportService {
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
   public void postDataExport(ExportRequest exportRequest) {
-    var commonExportFails = new CommonExportFails();
+    var commonExportFails = new CommonExportStatistic();
     var fileDefinitionEntity =  fileDefinitionEntityRepository.
       getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
@@ -89,7 +89,7 @@ public class DataExportService {
     }));
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
+  private void updateJobExecutionForPostDataExport(JobExecutionEntity jobExecutionEntity, JobExecution.StatusEnum jobExecutionStatus, CommonExportStatistic commonExportStatistic) {
     var jobExecution = jobExecutionEntity.getJobExecution();
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
@@ -102,7 +102,7 @@ public class DataExportService {
     var jobExecutionProgress = new JobExecutionProgress();
     jobExecutionProgress.setFailed(0);
     jobExecutionProgress.setExported(0);
-    jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
+    jobExecutionProgress.setTotal((int) totalExportsIds + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size());
     jobExecution.setProgress(jobExecutionProgress);
 
     jobExecutionEntity.setStatus(jobExecution.getStatus());

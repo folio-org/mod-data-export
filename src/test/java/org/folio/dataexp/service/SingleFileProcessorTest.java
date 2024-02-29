@@ -10,7 +10,6 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
-import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -51,9 +50,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportFails());
+    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportStatistic());
 
-    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportFails.class));
+    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportStatistic.class));
   }
 
   @Test
@@ -62,7 +61,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     var jobExecutionId = UUID.randomUUID();
     var progress = new JobExecutionProgress();
     var jobExecution = new JobExecution().id(jobExecutionId).progress(progress);
-    var commonExportFails = new CommonExportFails();
+    var commonExportFails = new CommonExportStatistic();
     commonExportFails.setFailedToReadInputFile(false);
     var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).id(jobExecutionId).build();
 

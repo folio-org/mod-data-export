@@ -11,15 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SingleFileProcessorAsyncTest {
@@ -37,7 +33,7 @@ class SingleFileProcessorAsyncTest {
     var exportEntity = JobExecutionExportFilesEntity.builder()
       .id(UUID.randomUUID())
       .fileLocation(fileLocation).build();
-    var commonFails = new CommonExportFails();
+    var commonFails = new CommonExportStatistic();
 
     singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails);
 

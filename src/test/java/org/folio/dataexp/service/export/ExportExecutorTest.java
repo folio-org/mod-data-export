@@ -13,7 +13,7 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
@@ -82,7 +82,7 @@ class ExportExecutorTest {
       .status(JobExecutionExportFilesStatus.COMPLETED)
       .fileLocation(fileLocation).build();
 
-    var commonFails = new CommonExportFails();
+    var commonFails = new CommonExportStatistic();
 
     when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
@@ -123,7 +123,7 @@ class ExportExecutorTest {
       .status(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
       .fileLocation(fileLocation).build();
 
-    var commonFails = new CommonExportFails();
+    var commonFails = new CommonExportStatistic();
     commonFails.incrementDuplicatedUUID();
     commonFails.addToInvalidUUIDFormat("abs");
 

@@ -3,7 +3,7 @@ package org.folio.dataexp.service.logs;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
-import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -113,7 +113,7 @@ class ErrorLogServiceTest {
   @Test
   void saveCommonExportFailsErrorsTest() {
     var jobExecutionId = UUID.randomUUID();
-    var commonFails = new CommonExportFails();
+    var commonFails = new CommonExportStatistic();
     var notExistUUID = UUID.randomUUID();
     commonFails.incrementDuplicatedUUID();
     commonFails.addToInvalidUUIDFormat("abs");

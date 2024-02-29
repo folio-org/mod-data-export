@@ -17,7 +17,7 @@ import org.folio.dataexp.domain.dto.ErrorLogCollection;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
-import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.ConfigurationService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
@@ -92,24 +92,24 @@ public class ErrorLogService {
     return save(errorLog);
   }
 
-  public void saveCommonExportFailsErrors(CommonExportFails commonExportFails, int totalErrors, UUID jobExecutionId) {
-    if (!commonExportFails.getInvalidUUIDFormat().isEmpty()) {
+  public void saveCommonExportFailsErrors(CommonExportStatistic commonExportStatistic, int totalErrors, UUID jobExecutionId) {
+    if (!commonExportStatistic.getInvalidUUIDFormat().isEmpty()) {
       var errorLog = new ErrorLog();
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(",", commonExportFails.getInvalidUUIDFormat());
+      var message = String.join(",", commonExportStatistic.getInvalidUUIDFormat());
       errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.INVALID_UUID_FORMAT.getCode());
       this.save(errorLog);
     }
 
-    if (!commonExportFails.getNotExistUUID().isEmpty()) {
+    if (!commonExportStatistic.getNotExistUUID().isEmpty()) {
       var errorLog = new ErrorLog();
       errorLog.setId(UUID.randomUUID());
       errorLog.createdDate(new Date());
       errorLog.setJobExecutionId(jobExecutionId);
-      var message = String.join(", ", commonExportFails.getNotExistUUID());
+      var message = String.join(", ", commonExportStatistic.getNotExistUUID());
       errorLog.setErrorMessageValues(List.of(message));
       errorLog.setErrorMessageCode(ErrorCode.SOME_UUIDS_NOT_FOUND.getCode());
       this.save(errorLog);

@@ -47,25 +47,25 @@ public class InputFileProcessor {
   private final SearchClient searchClient;
   private final ErrorLogService errorLogService;
 
-  public void readFile(FileDefinition fileDefinition, CommonExportFails commonExportFails, ExportRequest.IdTypeEnum idType) {
+  public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic, ExportRequest.IdTypeEnum idType) {
     try {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
         readCqlFile(fileDefinition, idType);
       } else {
-        readCsvFile(fileDefinition, commonExportFails);
+        readCsvFile(fileDefinition, commonExportStatistic);
       }
     } catch (Exception e) {
       throw new DataExportException(e.getMessage());
     }
   }
 
-  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) {
+  private void readCsvFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
-        commonExportFails.setFailedToReadInputFile(false);
+        commonExportStatistic.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
@@ -74,17 +74,17 @@ public class InputFileProcessor {
             batch.add(entity);
             duplicatedIds.add(entity.getInstanceId());
           } else {
-            commonExportFails.incrementDuplicatedUUID();
+            commonExportStatistic.incrementDuplicatedUUID();
           }
         } catch (Exception e) {
           log.error("Error converting {} to uuid", id);
           if (!StringUtils.isNotEmpty(id) && !PATTERN.matcher(id.replaceAll(SPECIAL_CHARACTERS_REGEX, StringUtils.EMPTY).trim()).matches()) {
-            commonExportFails.addToInvalidUUIDFormat(id);
+            commonExportStatistic.addToInvalidUUIDFormat(id);
           }
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-          commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
+          commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
           batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
           exportIdEntityRepository.saveAll(batch);
           batch.clear();
@@ -92,11 +92,11 @@ public class InputFileProcessor {
         }
       });
     } catch (Exception e) {
-      commonExportFails.setFailedToReadInputFile(true);
+      commonExportStatistic.setFailedToReadInputFile(true);
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
     var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-    commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
+    commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
     batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
     exportIdEntityRepository.saveAll(batch);
   }

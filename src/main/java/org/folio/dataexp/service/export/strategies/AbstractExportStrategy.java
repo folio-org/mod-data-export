@@ -63,8 +63,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Override
-  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest) {
-    var exportStatistic = new ExportStrategyStatistic();
+  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportStrategyStatisticListener exportStrategyStatisticListener) {
+    var exportStatistic = new ExportStrategyStatistic(exportStrategyStatisticListener);
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWrite(exportFilesEntity);
     processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);

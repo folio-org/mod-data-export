@@ -5,6 +5,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.export.strategies.ExportStrategyStatisticListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,9 +21,9 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
     var exportRequestCopy = getExportRequestCopy(exportRequest);
-    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportFails);
+    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportStatistic);
   }
 
   private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {

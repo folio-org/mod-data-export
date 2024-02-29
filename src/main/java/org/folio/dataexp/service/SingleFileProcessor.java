@@ -9,7 +9,9 @@ import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.export.strategies.ExportStrategyStatisticListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -27,10 +29,17 @@ public class SingleFileProcessor {
 
   protected final ExportExecutor exportExecutor;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  protected final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogService errorLogService;
+  protected int exportIdsBatch;
 
-  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+  @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
+  protected void setExportIdsBatch(int exportIdsBatch) {
+    this.exportIdsBatch = exportIdsBatch;
+  }
+
+
+  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.error("Nothing to export for job execution {}", jobExecutionId);
@@ -43,15 +52,15 @@ public class SingleFileProcessor {
 
       jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
-      var totalFailed = commonExportFails.getInvalidUUIDFormat().size();
+      var totalFailed = commonExportStatistic.getInvalidUUIDFormat().size();
       var progress = jobExecution.getProgress();
       progress.setFailed(totalFailed);
       progress.setExported(0);
       jobExecutionEntityRepository.save(jobExecutionEntity);
-      if (commonExportFails.isFailedToReadInputFile()) {
+      if (commonExportStatistic.isFailedToReadInputFile()) {
         errorLogService.saveFailedToReadInputFileError(jobExecutionId);
       } else {
-        errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
+        errorLogService.saveCommonExportFailsErrors(commonExportStatistic, totalFailed, jobExecutionId);
       }
       return;
     }
@@ -61,14 +70,17 @@ public class SingleFileProcessor {
       throw new DataExportException("Can not create temp directory for job execution " + jobExecutionId);
     }
     var exportIterator = exports.iterator();
+
+    var exportStrategyStatisticListener = new ExportStrategyStatisticListener(jobExecutionEntityRepository, exportIdsBatch, jobExecutionId);
+    commonExportStatistic.setExportStrategyStatisticListener(exportStrategyStatisticListener);
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());
-      executeExport(export, exportRequest, commonExportFails);
+      executeExport(export, exportRequest, commonExportStatistic);
     }
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
-    exportExecutor.export(export, exportRequest, commonExportFails);
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
+    exportExecutor.export(export, exportRequest, commonExportStatistic);
   }
 }

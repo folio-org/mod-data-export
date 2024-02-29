@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.folio.dataexp.service.export.strategies.ExportStrategyStatisticListener;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class CommonExportFails {
+public class CommonExportStatistic {
   @Getter
   @Setter
   private boolean isFailedToReadInputFile = true;
@@ -20,6 +21,9 @@ public class CommonExportFails {
   private final List<String> invalidUUIDFormat = new LinkedList<>();
   @Getter
   private int duplicatedUUIDAmount;
+  @Getter
+  @Setter
+  private ExportStrategyStatisticListener exportStrategyStatisticListener;
 
   public void addToNotExistUUIDAll(List<UUID> ids) {
     var idsToString = ids.stream().map(UUID::toString).toList();
