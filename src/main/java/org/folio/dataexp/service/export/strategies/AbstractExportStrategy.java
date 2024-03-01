@@ -18,9 +18,9 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -47,7 +47,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
@@ -196,7 +196,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
-    var jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
+    var jobExecution = jobExecutionService.getById(jobExecutionId);
     var jobProfile = jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId());
     return mappingProfileEntityRepository.getReferenceById(jobProfile.getMappingProfileId()).getMappingProfile();
   }
@@ -238,8 +238,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setJobExecutionEntityRepository(JobExecutionEntityRepository jobExecutionEntityRepository) {
-    this.jobExecutionEntityRepository = jobExecutionEntityRepository;
+  private void setJobExecutionService(JobExecutionService jobExecutionService) {
+    this.jobExecutionService = jobExecutionService;
   }
 
   @Autowired

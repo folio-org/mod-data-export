@@ -20,7 +20,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -55,7 +54,6 @@ public class DataExportTenantService extends TenantService {
     log.info("Start to load reference data");
     loadMappingProfiles();
     loadJobProfiles();
-    loadConfiguration();
   }
 
   @Override
@@ -63,6 +61,8 @@ public class DataExportTenantService extends TenantService {
     setupTenantForViews();
     super.createOrUpdateTenant(tenantAttributes);
     setupConfigEntryInventoryRecordLink();
+    log.info("Loading configuration");
+    loadConfiguration();
   }
 
   private void setupTenantForViews() {
@@ -79,12 +79,7 @@ public class DataExportTenantService extends TenantService {
     try (InputStream is =
            DataExportTenantService.class.getResourceAsStream(mappingProfilePath)) {
       var mappingProfile = mapper.readValue(is, MappingProfile.class);
-      var mappingProfileEntity = MappingProfileEntity.builder()
-        .id(mappingProfile.getId())
-        .creationDate(LocalDateTime.now())
-        .mappingProfile(mappingProfile)
-        .createdBy(mappingProfile.getMetadata().getCreatedByUserId()).build();
-      mappingProfileEntityRepository.save(mappingProfileEntity);
+      mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     } catch (Exception e) {
       log.error("Error loading mapping profile {} : {}", FilenameUtils.getBaseName(mappingProfilePath), e.getMessage());
     }
@@ -99,14 +94,7 @@ public class DataExportTenantService extends TenantService {
     try (InputStream is =
            DataExportTenantService.class.getResourceAsStream(jobProfilePath)) {
       var jobProfile = mapper.readValue(is, JobProfile.class);
-      var jobProfileEntity = JobProfileEntity.builder()
-        .id(jobProfile.getId())
-        .creationDate(LocalDateTime.now())
-        .jobProfile(jobProfile)
-        .name(jobProfile.getName())
-        .createdBy(jobProfile.getMetadata().getCreatedByUserId())
-        .mappingProfileId(jobProfile.getMappingProfileId()).build();
-      jobProfileEntityRepository.save(jobProfileEntity);
+      var entity = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     } catch (Exception e) {
       log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(jobProfilePath), e.getMessage());
     }

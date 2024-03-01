@@ -9,8 +9,7 @@ import java.util.UUID;
 
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ import lombok.SneakyThrows;
 class FilesDownloadServiceTest {
 
   @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
   @Mock
   private FolioS3Client s3Client;
 
@@ -40,11 +39,10 @@ class FilesDownloadServiceTest {
     var jobExecutionId = UUID.randomUUID();
     var exportFileId = UUID.randomUUID();
 
-    var job = new JobExecutionEntity()
-      .withJobExecution(new JobExecution().exportedFiles(Set.of(new JobExecutionExportedFilesInner().fileId(exportFileId)
-        .fileName("file.mrc"))));
+    var jobExecution = new JobExecution().exportedFiles(Set.of(new JobExecutionExportedFilesInner().fileId(exportFileId)
+        .fileName("file.mrc")));
 
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(job);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(s3Client.getPresignedUrl(any())).thenReturn(expectedPresignedUrl);
 
     var fileDownload = fileDownloadService.getFileDownload(jobExecutionId, exportFileId);

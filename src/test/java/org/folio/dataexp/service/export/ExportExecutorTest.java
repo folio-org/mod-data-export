@@ -6,14 +6,13 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
@@ -37,7 +36,7 @@ class ExportExecutorTest {
   @Mock
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
   @Mock
   private ExportStrategyFactory exportStrategyFactory;
   @Mock
@@ -63,7 +62,6 @@ class ExportExecutorTest {
     var jobExecution = new JobExecution();
     jobExecution.setProgress(new JobExecutionProgress());
     jobExecution.setId(jobExecutionId);
-    var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).build();
     var fileDefinition = new FileDefinition();
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setId(UUID.randomUUID());
@@ -84,7 +82,7 @@ class ExportExecutorTest {
 
     var commonFails = new CommonExportFails();
 
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
@@ -105,7 +103,6 @@ class ExportExecutorTest {
     var jobExecution = new JobExecution();
     jobExecution.setProgress(new JobExecutionProgress());
     jobExecution.setId(jobExecutionId);
-    var jobExecutionEntity = JobExecutionEntity.builder().jobExecution(jobExecution).build();
     var fileDefinition = new FileDefinition();
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setId(UUID.randomUUID());
@@ -127,7 +124,7 @@ class ExportExecutorTest {
     commonFails.incrementDuplicatedUUID();
     commonFails.addToInvalidUUIDFormat("abs");
 
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);

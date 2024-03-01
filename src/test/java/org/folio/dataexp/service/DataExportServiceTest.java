@@ -10,11 +10,9 @@ import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -39,8 +37,6 @@ class DataExportServiceTest extends BaseDataExportInitializer {
   @MockBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @MockBean
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @MockBean
   private JobProfileEntityRepository jobProfileEntityRepository;
   @MockBean
   private ExportIdEntityRepository exportIdEntityRepository;
@@ -54,6 +50,8 @@ class DataExportServiceTest extends BaseDataExportInitializer {
   private UserClient userClient;
   @MockBean
   private DataExportRequestValidator dataExportRequestValidator;
+  @MockBean
+  private JobExecutionService jobExecutionService;
 
   @Autowired
   private DataExportService dataExportService;
@@ -85,14 +83,12 @@ class DataExportServiceTest extends BaseDataExportInitializer {
         .jobProfile(jobProfile).id(jobProfile.getId()).build();
 
     var jobExecution = new JobExecution().id(fileDefinition.getId());
-    var jobExecutionEntity = JobExecutionEntity.builder()
-        .jobExecution(jobExecution).id(jobExecution.getId()).build();
 
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
-    when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(isA(UUID.class))).thenReturn(jobExecution);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
-    when(jobExecutionEntityRepository.getHrid()).thenReturn(200);
+    when(jobExecutionService.getNextHrid()).thenReturn(200);
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportService.postDataExport(exportRequest);
     }
@@ -101,8 +97,8 @@ class DataExportServiceTest extends BaseDataExportInitializer {
       verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
       verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportFails.class));
       verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
-      verify(jobExecutionEntityRepository).getHrid();
-      verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
+      verify(jobExecutionService).getNextHrid();
+      verify(jobExecutionService, times(2)).save(isA(JobExecution.class));
       verify(userClient).getUserById(isA(String.class));
 
       assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
