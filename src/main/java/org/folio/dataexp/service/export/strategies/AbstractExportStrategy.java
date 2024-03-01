@@ -18,7 +18,6 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
@@ -44,9 +43,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private ExportIdEntityRepository exportIdEntityRepository;
 
+  private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
   private JobExecutionService jobExecutionService;
@@ -217,11 +215,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, localStorageWriter);
     }
-  }
-
-  @Autowired
-  private void setJobExecutionExportFilesEntityRepository(JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository) {
-    this.jobExecutionExportFilesEntityRepository = jobExecutionExportFilesEntityRepository;
   }
 
   @Autowired

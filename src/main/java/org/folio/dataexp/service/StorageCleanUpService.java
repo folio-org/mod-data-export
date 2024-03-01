@@ -35,6 +35,6 @@ public class StorageCleanUpService {
 
   @Transactional
   public void cleanExportIdEntities(UUID jobExecutionId) {
-    exportIdEntityRepository.deleteByJobExecutionId(jobExecutionId);
+    exportIdEntityRepository.deleteWithJobExecutionId(jobExecutionId);
   }
 }

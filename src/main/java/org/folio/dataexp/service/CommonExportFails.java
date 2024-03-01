@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -16,7 +17,7 @@ public class CommonExportFails {
   @Getter
   private final Set<String> notExistUUID = Collections.synchronizedSet(new LinkedHashSet<>());
   @Getter
-  private final Set<String> invalidUUIDFormat = new LinkedHashSet<>();
+  private final List<String> invalidUUIDFormat = new LinkedList<>();
   @Getter
   private int duplicatedUUIDAmount;
 

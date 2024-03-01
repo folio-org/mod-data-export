@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ import java.util.UUID;
 public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
+
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;

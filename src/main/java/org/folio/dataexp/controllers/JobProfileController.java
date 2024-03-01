@@ -81,6 +81,7 @@ public class JobProfileController implements JobProfilesApi {
     List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
 
     var jobProfiles = jobProfileData.stream()
+        .filter(i -> Objects.nonNull(i[0]) && Objects.nonNull(i[1]))
         .map(i -> JobProfile.builder()
           .id((UUID) i[0])
           .name((String) i[1])

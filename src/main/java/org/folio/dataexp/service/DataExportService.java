@@ -15,7 +15,10 @@ import org.folio.dataexp.domain.dto.JobExecutionRunBy;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,9 @@ public class DataExportService {
   private final FolioExecutionContext folioExecutionContext;
   private final UserClient userClient;
   private final DataExportRequestValidator dataExportRequestValidator;
+  private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  private final InstanceEntityRepository instanceEntityRepository;
+  private final MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
   public void postDataExport(ExportRequest exportRequest) {
@@ -62,14 +68,14 @@ public class DataExportService {
     try {
       dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
     } catch (DataExportRequestValidationException e) {
-      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.FAIL, commonExportFails);
+      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.FAIL, commonExportFails, exportRequest);
       log.error(e.getMessage());
       return;
     }
     log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
         Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
 
-    updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+    updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails, exportRequest);
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
       if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
         inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
@@ -78,12 +84,12 @@ public class DataExportService {
       slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
       log.info("Instance IDs have been sliced successfully.");
 
-      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails);
+      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails, exportRequest);
       singleFileProcessorAsync.exportBySingleFile(jobExecution.getId(), exportRequest, commonExportFails);
     }));
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails) {
+  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails, ExportRequest exportRequest) {
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
@@ -95,7 +101,7 @@ public class DataExportService {
     var jobExecutionProgress = new JobExecutionProgress();
     jobExecutionProgress.setFailed(0);
     jobExecutionProgress.setExported(0);
-    jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
+    updateTotal(exportRequest, jobExecutionProgress, commonExportFails, totalExportsIds);
     jobExecution.setProgress(jobExecutionProgress);
 
     jobExecutionService.save(jobExecution);
@@ -114,5 +120,23 @@ public class DataExportService {
   private String getDefaultFileName (FileDefinition fileDefinition, JobExecution jobExecution) {
     var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
+  }
+
+  private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress,
+                           CommonExportFails commonExportFails, long totalExportsIds) {
+    if (exportRequest.getAll()) {
+      if (jobExecutionProgress.getTotal() == 0) {
+        if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
+          jobExecutionProgress.setTotal((int) holdingsRecordEntityRepository.count());
+        } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.INSTANCE) {
+          jobExecutionProgress.setTotal((int) instanceEntityRepository.count());
+        } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
+          jobExecutionProgress.setTotal((int) marcAuthorityRecordAllRepository.count());
+        }
+        log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
+      }
+    } else {
+      jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
+    }
   }
 }
