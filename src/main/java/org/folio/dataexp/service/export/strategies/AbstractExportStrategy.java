@@ -63,8 +63,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Override
-  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportStrategyStatisticListener exportStrategyStatisticListener) {
-    var exportStatistic = new ExportStrategyStatistic(exportStrategyStatisticListener);
+  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
+    var exportStatistic = new ExportStrategyStatistic(exportedMarcListener);
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWrite(exportFilesEntity);
     processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
@@ -73,7 +73,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     } catch (Exception e) {
       log.error("saveMarcToRemoteStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
-      exportStatistic.setExported(0);
+      exportStatistic.removeExported();
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
         exportFilesEntity.getFromId(), exportFilesEntity.getToId());
       exportStatistic.setFailed((int) countFailed);

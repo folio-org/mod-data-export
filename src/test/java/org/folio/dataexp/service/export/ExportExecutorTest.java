@@ -16,6 +16,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ class ExportExecutorTest {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class))).thenReturn(new ExportStrategyStatistic());
+    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener()));
 
     exportExecutor.export(exportEntity, new ExportRequest(), commonFails);
 
@@ -131,7 +132,7 @@ class ExportExecutorTest {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class))).thenReturn(new ExportStrategyStatistic());
+    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener()));
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2l);
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
 

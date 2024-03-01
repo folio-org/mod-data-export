@@ -6,7 +6,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 
 public interface ExportStrategy {
 
-  ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportStrategyStatisticListener exportStrategyStatisticListener);
+  ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener);
 
   void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic);
 }

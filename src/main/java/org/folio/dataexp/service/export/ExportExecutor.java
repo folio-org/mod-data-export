@@ -52,9 +52,9 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest, commonExportStatistic.getExportStrategyStatisticListener());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
     commonExportStatistic.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
-    synchronized (this) {
+    synchronized (commonExportStatistic) {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
       jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
       log.info("export:: Complete export {} for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
@@ -74,11 +74,11 @@ public class ExportExecutor {
     long exportsCompletedWithErrors = exports.stream().filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).count();
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
+      progress.setExported(commonExportStatistic.getExportedMarcListener().getExportedCount().get());
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
       }
       progress.setFailed(progress.getFailed() + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size());
-      progress.setExported(commonExportStatistic.getExportStrategyStatisticListener().getExportedCount().get());
       errorLogService.saveCommonExportFailsErrors(commonExportStatistic, progress.getFailed(), jobExecutionId);
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);

@@ -2,7 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.folio.dataexp.service.export.strategies.ExportStrategyStatisticListener;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -23,7 +23,7 @@ public class CommonExportStatistic {
   private int duplicatedUUIDAmount;
   @Getter
   @Setter
-  private ExportStrategyStatisticListener exportStrategyStatisticListener;
+  private ExportedMarcListener exportedMarcListener;
 
   public void addToNotExistUUIDAll(List<UUID> ids) {
     var idsToString = ids.stream().map(UUID::toString).toList();

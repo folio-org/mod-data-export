@@ -2,6 +2,8 @@ package org.folio.dataexp.service.export.strategies;
 
 import lombok.Setter;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
@@ -79,12 +81,15 @@ class AbstractExportStrategyTest {
 
   @Test
   void saveMarcToLocalStorageTest() {
+    var progress = new JobExecutionProgress();
     var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var jobExecutionEntity = new JobExecutionEntity();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecutionEntity.setId(UUID.randomUUID());
     jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
+    var jobExecution = JobExecution.builder().progress(progress).id(jobExecutionEntity.getId()).build();
+    jobExecutionEntity.setJobExecution(jobExecution);
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
 
@@ -111,13 +116,14 @@ class AbstractExportStrategyTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
     assertEquals(2, exportStatistic.getExported());
     assertEquals(1, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
 
+    verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(2)).write(isA(String.class));
   }
 
@@ -156,7 +162,7 @@ class AbstractExportStrategyTest {
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
     doThrow(new LocalStorageWriterException("Can not write")).when(localStorageWriter).close();
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener());
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
