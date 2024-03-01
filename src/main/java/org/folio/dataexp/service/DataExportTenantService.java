@@ -54,7 +54,6 @@ public class DataExportTenantService extends TenantService {
     log.info("Start to load reference data");
     loadMappingProfiles();
     loadJobProfiles();
-    loadConfiguration();
   }
 
   @Override
@@ -62,6 +61,8 @@ public class DataExportTenantService extends TenantService {
     setupTenantForViews();
     super.createOrUpdateTenant(tenantAttributes);
     setupConfigEntryInventoryRecordLink();
+    log.info("Loading configuration");
+    loadConfiguration();
   }
 
   private void setupTenantForViews() {

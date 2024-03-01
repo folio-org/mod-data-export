@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS file_definitions (
     created_by TEXT
 );
 
+DROP TRIGGER IF EXISTS set_id_in_jsonb ON file_definitions;
+DROP TRIGGER IF EXISTS set_file_definitions_md_trigger ON file_definitions;
+DROP TRIGGER IF EXISTS set_file_definitions_md_json_trigger ON file_definitions;
+
 CREATE TABLE IF NOT EXISTS mapping_profiles (
     id uuid PRIMARY KEY,
     jsonb jsonb,
