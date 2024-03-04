@@ -89,10 +89,10 @@ class AbstractExportStrategyTest {
     var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
-    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
-
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
 
@@ -118,6 +118,7 @@ class AbstractExportStrategyTest {
     when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
+    when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
 
     var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
     assertEquals(2, exportStatistic.getExported());
