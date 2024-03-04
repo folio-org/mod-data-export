@@ -134,7 +134,7 @@ class ExportExecutorTest {
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener()));
+    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2l);
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
 

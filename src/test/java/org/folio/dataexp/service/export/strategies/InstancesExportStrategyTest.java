@@ -184,7 +184,7 @@ class InstancesExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
     doNothing().when(instancesExportStrategy.entityManager).clear();
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(new ExportedMarcListener()));
+    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
@@ -222,7 +222,7 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId())).thenReturn(defaultMappingProfileEntity);
     doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
 
-    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(new ExportedMarcListener()));
+    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());

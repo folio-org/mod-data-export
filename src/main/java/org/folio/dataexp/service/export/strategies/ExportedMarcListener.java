@@ -14,8 +14,6 @@ public class ExportedMarcListener {
   private int progressExportedUpdateStep;
   private UUID jobExecutionId;
 
-  public ExportedMarcListener() {}
-
   public ExportedMarcListener(JobExecutionEntityRepository jobExecutionEntityRepository, int progressExportedUpdateStep, UUID jobExecutionId ) {
     this.jobExecutionEntityRepository = jobExecutionEntityRepository;
     this.progressExportedUpdateStep = progressExportedUpdateStep;
