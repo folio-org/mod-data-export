@@ -8,9 +8,12 @@ import static org.folio.dataexp.domain.dto.JobExecution.StatusEnum.FAIL;
 import static org.folio.dataexp.util.ErrorCode.ERROR_JOB_IS_EXPIRED;
 
 import lombok.RequiredArgsConstructor;
+import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,7 +23,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobExecutionService {
   private final JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  private final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+
+  public JobExecution getById(UUID id) {
+    return jobExecutionEntityCqlRepository.getReferenceById(id).getJobExecution();
+  }
+
+  public JobExecution save(JobExecution jobExecution) {
+    return jobExecutionEntityCqlRepository.save(JobExecutionEntity.fromJobExecution(jobExecution)).getJobExecution();
+  }
+
+  public int getNextHrid() {
+    return jobExecutionEntityRepository.getHrid();
+  }
 
   public void expireJobExecutions() {
     setCompletedDateForFailedExecutionsIfRequired();
@@ -34,9 +50,7 @@ public class JobExecutionService {
         }
         jobExecution.setCompletedDate(new Date());
         updateErrorLogIfJobIsExpired(jobExecution.getId());
-        jobExecutionEntity.setStatus(FAIL);
-        jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
-        jobExecutionEntityCqlRepository.save(jobExecutionEntity);
+        save(jobExecution);
       });
   }
 
@@ -47,8 +61,7 @@ public class JobExecutionService {
         new Date() :
         jobExecution.getLastUpdatedDate();
       jobExecution.setCompletedDate(completedDate);
-      jobExecutionEntity.setCompletedDate(completedDate);
-      jobExecutionEntityCqlRepository.save(jobExecutionEntity);
+      save(jobExecution);
     });
   }
 

@@ -4,10 +4,8 @@ import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
-import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.service.file.upload.FilesUploadService;
 import org.folio.dataexp.service.validators.FileDefinitionValidator;
 import org.folio.spring.FolioExecutionContext;
@@ -25,6 +23,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,7 +34,7 @@ class FileDefinitionsServiceTest {
   @Mock
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
   @Mock
   private FolioExecutionContext folioExecutionContext;
   @Mock
@@ -43,7 +42,7 @@ class FileDefinitionsServiceTest {
   @Mock
   private FilesUploadService filesUploadService;
   @Captor
-  private ArgumentCaptor<JobExecutionEntity> jobExecutionEntityCaptor;
+  private ArgumentCaptor<JobExecution> jobExecutionArgumentCaptor;
   @InjectMocks
   private FileDefinitionsService fileDefinitionsService;
 
@@ -55,6 +54,7 @@ class FileDefinitionsServiceTest {
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
 
+    when(jobExecutionService.save(any(JobExecution.class))).thenReturn(new JobExecution().id(UUID.randomUUID()));
     when(fileDefinitionEntityRepository.save(isA(FileDefinitionEntity.class))).thenReturn(fileDefinitionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
@@ -63,11 +63,11 @@ class FileDefinitionsServiceTest {
     assertNotNull(savedFileDefinition.getJobExecutionId());
 
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
-    verify(jobExecutionEntityRepository).save(jobExecutionEntityCaptor.capture());
+    verify(jobExecutionService).save(jobExecutionArgumentCaptor.capture());
 
-    var jobExecutionEntity = jobExecutionEntityCaptor.getValue();
+    var jobExecution = jobExecutionArgumentCaptor.getValue();
 
-    assertEquals(JobExecution.StatusEnum.NEW, jobExecutionEntity.getJobExecution().getStatus());
+    assertEquals(JobExecution.StatusEnum.NEW, jobExecution.getStatus());
   }
 
   @Test

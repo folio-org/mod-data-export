@@ -11,9 +11,9 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.CommonExportStatistic;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ExportExecutor {
 
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final ExportStrategyFactory exportStrategyFactory;
   private final ErrorLogService errorLogService;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
@@ -63,8 +63,7 @@ public class ExportExecutor {
   }
 
   private void updateJobExecutionStatusAndProgress(UUID jobExecutionId, ExportStrategyStatistic exportStatistic, CommonExportStatistic commonExportStatistic, ExportRequest exportRequest) {
-    var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-    var jobExecution = jobExecutionEntity.getJobExecution();
+    var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
     progress.setDuplicatedSrs(progress.getDuplicatedSrs() + exportStatistic.getDuplicatedSrs());
@@ -89,8 +88,8 @@ public class ExportExecutor {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       } else {
         jobExecution.setStatus(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS);
-        log.error("export size: {}, errorCount: {}, exportsCompleted: {}, exportsCompletedWithErrors: {}, jobExecutionEntity: {}",
-            exports.size(), errorCount, exportsCompleted, exportsCompletedWithErrors, jobExecutionEntity);
+        log.error("export size: {}, errorCount: {}, exportsCompleted: {}, exportsCompletedWithErrors: {}, jobExecution: {}",
+            exports.size(), errorCount, exportsCompleted, exportsCompletedWithErrors, jobExecution);
       }
       var filesForExport = exports.stream()
         .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS).collect(Collectors.toList());
@@ -109,14 +108,11 @@ public class ExportExecutor {
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.NO_FILE_GENERATED.getCode(), List.of(ErrorCode.NO_FILE_GENERATED.getDescription()), jobExecutionId);
         log.error("updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} with exception {}", jobExecutionId, e.getMessage());
       }
-      jobExecutionEntity.setStatus(jobExecution.getStatus());
       jobExecution.completedDate(currentDate);
-      jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
-
       storageCleanUpService.cleanExportIdEntities(jobExecutionId);
     }
     jobExecution.setLastUpdatedDate(currentDate);
-    jobExecutionEntityRepository.save(jobExecutionEntity);
+    jobExecutionService.save(jobExecution);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
   }
 }

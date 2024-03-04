@@ -1,5 +1,7 @@
 package org.folio.dataexp.controllers;
 
+import static java.lang.Boolean.TRUE;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -20,13 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-
-import static java.lang.Boolean.TRUE;
 
 @RestController
 @RequiredArgsConstructor
@@ -82,6 +81,7 @@ public class JobProfileController implements JobProfilesApi {
     List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
 
     var jobProfiles = jobProfileData.stream()
+        .filter(i -> Objects.nonNull(i[0]) && Objects.nonNull(i[1]))
         .map(i -> JobProfile.builder()
           .id((UUID) i[0])
           .name((String) i[1])
@@ -97,8 +97,6 @@ public class JobProfileController implements JobProfilesApi {
 
   @Override
   public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
-    var id = Objects.isNull(jobProfile.getId()) ? UUID.randomUUID() : jobProfile.getId();
-
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
 
@@ -118,15 +116,7 @@ public class JobProfileController implements JobProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
-    jobProfile.setId(id);
-    var jobProfileEntity = JobProfileEntity.builder()
-      .id(jobProfile.getId())
-      .creationDate(LocalDateTime.now())
-      .jobProfile(jobProfile)
-      .mappingProfileId(jobProfile.getMappingProfileId())
-      .name(jobProfile.getName())
-      .createdBy(folioExecutionContext.getUserId().toString()).build();
-    var saved = jobProfileEntityRepository.save(jobProfileEntity);
+    var saved = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     return new ResponseEntity<>(saved.getJobProfile(), HttpStatus.CREATED);
   }
 
@@ -136,9 +126,6 @@ public class JobProfileController implements JobProfilesApi {
     if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Editing of default job profile is forbidden");
     }
-
-    jobProfileEntity.setName(jobProfile.getName());
-    jobProfileEntity.setMappingProfileId(jobProfile.getMappingProfileId());
 
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -162,8 +149,7 @@ public class JobProfileController implements JobProfilesApi {
 
     jobProfile.setMetadata(metadata);
 
-    jobProfileEntity.setJobProfile(jobProfile);
-    jobProfileEntityRepository.save(jobProfileEntity);
+    jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

@@ -15,8 +15,8 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
   @Autowired
   public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
-                                  JobExecutionEntityRepository jobExecutionEntityRepository, ErrorLogService errorLogService) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, errorLogService);
+                                  JobExecutionEntityRepository jobExecutionEntityRepository, JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
+    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, jobExecutionService, errorLogService);
   }
 
   @Override

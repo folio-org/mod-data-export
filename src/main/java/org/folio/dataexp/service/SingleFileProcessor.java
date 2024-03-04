@@ -32,6 +32,7 @@ public class SingleFileProcessor {
   protected final ExportExecutor exportExecutor;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   protected final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
   private final ErrorLogService errorLogService;
   protected int exportIdsBatch;
 
@@ -44,20 +45,17 @@ public class SingleFileProcessor {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.error("Nothing to export for job execution {}", jobExecutionId);
-      var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
-      var jobExecution = jobExecutionEntity.getJobExecution();
+      var jobExecution = jobExecutionService.getById(jobExecutionId);
       var currentDate = new Date();
       jobExecution.setLastUpdatedDate(currentDate);
       jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       jobExecution.setCompletedDate(currentDate);
 
-      jobExecutionEntity.setStatus(jobExecution.getStatus());
-      jobExecutionEntity.setCompletedDate(jobExecution.getCompletedDate());
       var totalFailed = commonExportStatistic.getInvalidUUIDFormat().size();
       var progress = jobExecution.getProgress();
       progress.setFailed(totalFailed);
       progress.setExported(0);
-      jobExecutionEntityRepository.save(jobExecutionEntity);
+      jobExecutionService.save(jobExecution);
       if (commonExportStatistic.isFailedToReadInputFile()) {
         errorLogService.saveFailedToReadInputFileError(jobExecutionId);
       } else {

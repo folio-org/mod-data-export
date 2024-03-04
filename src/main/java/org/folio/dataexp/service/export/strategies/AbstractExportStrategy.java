@@ -1,5 +1,9 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
+import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.log4j.Log4j2;
@@ -14,10 +18,9 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
-import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -36,20 +39,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
-import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
-import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
-
 @Log4j2
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  private ExportIdEntityRepository exportIdEntityRepository;
 
+  private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  private JobExecutionService jobExecutionService;
   private JsonToMarcConverter jsonToMarcConverter;
   private ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
@@ -198,7 +196,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
-    var jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
+    var jobExecution = jobExecutionService.getById(jobExecutionId);
     var jobProfile = jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId());
     return mappingProfileEntityRepository.getReferenceById(jobProfile.getMappingProfileId()).getMappingProfile();
   }
@@ -217,11 +215,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, localStorageWriter);
     }
-  }
-
-  @Autowired
-  private void setJobExecutionExportFilesEntityRepository(JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository) {
-    this.jobExecutionExportFilesEntityRepository = jobExecutionExportFilesEntityRepository;
   }
 
   @Autowired
@@ -245,8 +238,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setJobExecutionEntityRepository(JobExecutionEntityRepository jobExecutionEntityRepository) {
-    this.jobExecutionEntityRepository = jobExecutionEntityRepository;
+  private void setJobExecutionService(JobExecutionService jobExecutionService) {
+    this.jobExecutionService = jobExecutionService;
   }
 
   @Autowired

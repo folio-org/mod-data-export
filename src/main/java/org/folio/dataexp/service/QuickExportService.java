@@ -9,7 +9,6 @@ import org.folio.dataexp.domain.dto.QuickExportResponse;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +26,16 @@ public class QuickExportService {
   private final DataExportService dataExportService;
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final ExportIdEntityRepository exportIdEntityRepository;
-  private final JobExecutionEntityRepository jobExecutionEntityRepository;
+  private final JobExecutionService jobExecutionService;
 
   public QuickExportResponse postQuickExport(QuickExportRequest quickExportRequest) {
     var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName("quick-export.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
     log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
-    var jobExecution = jobExecutionEntityRepository.getReferenceById(fileDefinition.getJobExecutionId());
+    var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     return QuickExportResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId())
-      .jobExecutionHrId(jobExecution.getJobExecution().getHrId()).build();
+      .jobExecutionHrId(jobExecution.getHrId()).build();
   }
 
   private ExportRequest getExportRequestFromQuickExportRequest(QuickExportRequest quickExportRequest, FileDefinition fileDefinition) {

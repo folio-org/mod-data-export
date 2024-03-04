@@ -18,6 +18,7 @@ import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.s3.client.FolioS3Client;
@@ -64,6 +65,8 @@ class AbstractExportStrategyTest {
   @Mock
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Mock
+  private JobExecutionService jobExecutionService;
+  @Mock
   private LocalStorageWriter localStorageWriter;
   @Mock
   private ErrorLogService errorLogService;
@@ -83,18 +86,18 @@ class AbstractExportStrategyTest {
   void saveMarcToLocalStorageTest() {
     var progress = new JobExecutionProgress();
     var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var jobExecutionEntity = new JobExecutionEntity();
+    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
-    jobExecutionEntity.setId(UUID.randomUUID());
-    jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
-    var jobExecution = JobExecution.builder().progress(progress).id(jobExecutionEntity.getId()).build();
-    jobExecutionEntity.setJobExecution(jobExecution);
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setJobProfileId(jobProfileEntity.getId());
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
-      .withFileLocation("/tmp/" + jobExecutionEntity.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecutionEntity.getId())
+      .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
       .withFromId(UUID.randomUUID()).withToId(UUID.randomUUID()).withStatus(JobExecutionExportFilesStatus.ACTIVE);
 
     var exportIdEntity = new ExportIdEntity().withJobExecutionId(exportFilesEntity.getJobExecutionId())
@@ -112,7 +115,7 @@ class AbstractExportStrategyTest {
     var slice = new SliceImpl<>(List.of(exportIdEntity), PageRequest.of(0, 1), false);
 
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class), isA(Pageable.class))).thenReturn(slice);
-    when(jobExecutionEntityRepository.getReferenceById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
 
@@ -130,16 +133,16 @@ class AbstractExportStrategyTest {
   @Test
   void saveMarcToLocalStorageWhenLocalStorageCanNotWriteTest() {
     var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var jobExecutionEntity = new JobExecutionEntity();
+    var jobExecution = new JobExecution();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
-    jobExecutionEntity.setId(UUID.randomUUID());
-    jobExecutionEntity.setJobProfileId(jobProfileEntity.getId());
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setJobProfileId(jobProfileEntity.getId());
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
-      .withFileLocation("/tmp/" + jobExecutionEntity.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecutionEntity.getId())
+      .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
       .withFromId(UUID.randomUUID()).withToId(UUID.randomUUID()).withStatus(JobExecutionExportFilesStatus.ACTIVE);
 
     var exportIdEntity = new ExportIdEntity().withJobExecutionId(exportFilesEntity.getJobExecutionId())
@@ -156,7 +159,7 @@ class AbstractExportStrategyTest {
     var slice = new SliceImpl<>(List.of(exportIdEntity), PageRequest.of(0, 1), false);
 
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class), isA(Pageable.class))).thenReturn(slice);
-    when(jobExecutionEntityRepository.getReferenceById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecutionEntity);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
