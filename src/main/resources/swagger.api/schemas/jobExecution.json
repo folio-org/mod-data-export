@@ -64,6 +64,16 @@
           "description": "Total number of records",
           "type": "integer",
           "default": 0
+        },
+        "totalIdsToExport": {
+          "description": "Total number of records ids to export",
+          "type": "integer",
+          "default": 0
+        },
+        "readIds": {
+          "description": "Number of ids populated in temp table for slicing",
+          "type": "integer",
+          "default": 0
         }
       }
     },

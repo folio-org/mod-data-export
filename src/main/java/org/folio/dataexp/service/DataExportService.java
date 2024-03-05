@@ -98,9 +98,11 @@ public class DataExportService {
       jobExecution.setCompletedDate(currentDate);
     }
     long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
-    var jobExecutionProgress = new JobExecutionProgress();
-    jobExecutionProgress.setFailed(0);
-    jobExecutionProgress.setExported(0);
+    var jobExecutionProgress = jobExecutionService.getById(jobExecution.getId()).getProgress();
+    if (jobExecutionProgress == null) {
+      jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+    }
     updateTotal(exportRequest, jobExecutionProgress, commonExportStatistic, totalExportsIds);
     jobExecution.setProgress(jobExecutionProgress);
 

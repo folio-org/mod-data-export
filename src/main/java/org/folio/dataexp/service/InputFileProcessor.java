@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -44,6 +44,7 @@ public class InputFileProcessor {
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
   private final ErrorLogService errorLogService;
+  private final JobExecutionService jobExecutionService;
 
   public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic, ExportRequest.IdTypeEnum idType) {
     try {
@@ -58,11 +59,23 @@ public class InputFileProcessor {
   }
 
   private void readCsvFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {
+    var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
+    var progress = jobExecution.getProgress();
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
+
+    try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      progress.setTotalIdsToExport((int)reader.lines().count());
+      jobExecutionService.save(jobExecution);
+    } catch (Exception e) {
+      commonExportStatistic.setFailedToReadInputFile(true);
+      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
+    }
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();
+    var countOfRead = new AtomicInteger();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
+        countOfRead.incrementAndGet();
         commonExportStatistic.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         try {
@@ -83,6 +96,8 @@ public class InputFileProcessor {
           commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
           batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
           exportIdEntityRepository.saveAll(batch);
+          progress.setReadIds(countOfRead.get());
+          jobExecutionService.save(jobExecution);
           batch.clear();
           duplicatedIds.clear();
         }
@@ -95,6 +110,8 @@ public class InputFileProcessor {
     commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
     batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
     exportIdEntityRepository.saveAll(batch);
+    progress.setReadIds(countOfRead.get());
+    jobExecutionService.save(jobExecution);
   }
 
   private List<UUID> findDuplicatedUUIDFromDb(Set<UUID> ids, UUID jobExecutionId) {
