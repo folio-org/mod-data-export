@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Related user who have ever started export",
+  "properties": {
+    "firstName": {
+      "description": "First name",
+      "type": "string"
+    },
+    "lastName": {
+      "description": "Last name",
+      "type": "string"
+    },
+    "userId": {
+      "description": "User id",
+      "type": "string"
+    }
+  }
+}

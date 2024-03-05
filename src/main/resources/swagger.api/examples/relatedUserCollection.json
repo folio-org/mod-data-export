@@ -1,0 +1,10 @@
+{
+  "relatedUsers":[
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "userId": "6b380aa8-4070-4497-a466-22345fde64c0"
+    }
+  ],
+  "totalRecords": 1
+}

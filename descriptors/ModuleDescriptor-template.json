@@ -417,6 +417,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/related-users",
+          "permissionsRequired": [
+            "data-export.related-users"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -591,6 +602,11 @@
       "description": "Entry point to export all records of the specific type"
     },
     {
+      "permissionName": "data-export.related-users",
+      "displayName": "Data Export - related users",
+      "description": "To return only users which executed export"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -618,7 +634,8 @@
         "data-export.clean-up-files.post",
         "data-export.quick.export.post",
         "data-export.configuration.post",
-        "data-export.export.all"
+        "data-export.export.all",
+        "data-export.related-users"
       ],
       "visible": false
     }
