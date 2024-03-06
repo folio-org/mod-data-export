@@ -103,7 +103,7 @@ public class DataExportService {
       jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);
     }
-    updateTotal(exportRequest, jobExecutionProgress);
+    updateTotal(exportRequest, jobExecution.getId(), jobExecutionProgress);
     jobExecution.setProgress(jobExecutionProgress);
 
     jobExecutionService.save(jobExecution);
@@ -124,7 +124,7 @@ public class DataExportService {
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 
-  private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress) {
+  private void updateTotal(ExportRequest exportRequest, UUID jobExecutionId,  JobExecutionProgress jobExecutionProgress) {
     if (exportRequest.getAll()) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
@@ -136,6 +136,9 @@ public class DataExportService {
         }
         log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
       }
+    } else if (exportRequest.getQuick()) {
+      long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecutionId);
+      jobExecutionProgress.setTotal((int) totalExportsIds);
     }
   }
 }
