@@ -7,6 +7,8 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.IdsJob;
 import org.folio.dataexp.domain.dto.IdsJobPayload;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
@@ -57,7 +59,10 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     var resource = new PathResource(UPLOADED_FILE_PATH_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
       inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
