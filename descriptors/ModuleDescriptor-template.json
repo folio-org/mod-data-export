@@ -424,7 +424,7 @@
           ],
           "pathPattern": "/data-export/related-users",
           "permissionsRequired": [
-            "data-export.related-users"
+            "data-export.related-users.collection.get"
           ],
           "modulePermissions": [
           ]
@@ -602,7 +602,7 @@
       "description": "Entry point to export all records of the specific type"
     },
     {
-      "permissionName": "data-export.related-users",
+      "permissionName": "data-export.related-users.collection.get",
       "displayName": "Data Export - related users",
       "description": "To return only users which executed export"
     },
@@ -635,7 +635,7 @@
         "data-export.quick.export.post",
         "data-export.configuration.post",
         "data-export.export.all",
-        "data-export.related-users"
+        "data-export.related-users.collection.get"
       ],
       "visible": false
     }
