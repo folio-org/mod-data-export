@@ -64,7 +64,7 @@ public class InputFileProcessor {
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
 
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      progress.setTotalIdsToRead((int) reader.lines().count());
+      progress.setTotal((int) reader.lines().count());
       jobExecutionService.save(jobExecution);
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);

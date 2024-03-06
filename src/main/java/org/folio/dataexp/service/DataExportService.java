@@ -97,13 +97,13 @@ public class DataExportService {
     if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
       jobExecution.setCompletedDate(currentDate);
     }
-    long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
+
     var jobExecutionProgress = jobExecutionService.getById(jobExecution.getId()).getProgress();
     if (jobExecutionProgress == null) {
       jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);
     }
-    updateTotal(exportRequest, jobExecutionProgress, commonExportStatistic, totalExportsIds);
+    updateTotal(exportRequest, jobExecutionProgress);
     jobExecution.setProgress(jobExecutionProgress);
 
     jobExecutionService.save(jobExecution);
@@ -124,8 +124,7 @@ public class DataExportService {
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 
-  private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress,
-                           CommonExportStatistic commonExportStatistic, long totalExportsIds) {
+  private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress) {
     if (exportRequest.getAll()) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
@@ -137,8 +136,6 @@ public class DataExportService {
         }
         log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
       }
-    } else {
-      jobExecutionProgress.setTotal((int) totalExportsIds + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size());
     }
   }
 }

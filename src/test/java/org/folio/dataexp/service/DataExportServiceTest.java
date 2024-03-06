@@ -96,7 +96,6 @@ class DataExportServiceTest extends BaseDataExportInitializer {
       verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportStatistic.class), isA(ExportRequest.IdTypeEnum.class));
       verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
       verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportStatistic.class));
-      verify(exportIdEntityRepository, times(2)).countByJobExecutionId(jobExecution.getId());
       verify(jobExecutionService).getNextHrid();
       verify(jobExecutionService, times(2)).save(isA(JobExecution.class));
       verify(userClient).getUserById(isA(String.class));
