@@ -1,5 +1,7 @@
 package org.folio.dataexp.controllers;
 
+import static java.util.Objects.nonNull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -16,8 +18,6 @@ import org.folio.dataexp.rest.resource.RelatedUsersApi;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
-
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -28,12 +28,14 @@ public class RelatedUsersController implements RelatedUsersApi {
 
   @Override
   public ResponseEntity<RelatedUserCollection> getRelatedUsers() {
+    log.info("GET related users");
     var relatedUsers = jobExecutionEntityCqlRepository.findAll().stream()
       .map(JobExecutionEntity::getJobExecution)
       .filter(job -> nonNull(job.getRunBy()))
       .map(JobExecution::getRunBy)
       .map(runBy -> new RelatedUser().userId(runBy.getUserId()).firstName(runBy.getFirstName()).lastName(runBy.getLastName()))
       .collect(Collectors.toSet());
+    log.info("Related users size: {}", relatedUsers.size());
     var relatedUserCollection = new RelatedUserCollection().relatedUsers(new ArrayList<>(relatedUsers))
       .totalRecords(relatedUsers.size());
     return new ResponseEntity<>(relatedUserCollection, HttpStatus.OK);
