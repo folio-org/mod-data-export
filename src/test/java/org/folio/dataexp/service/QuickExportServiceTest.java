@@ -21,6 +21,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,6 +64,8 @@ class QuickExportServiceTest extends ServiceInitializer {
         var jobExecutions = jobExecutionEntityCqlRepository.findAll();
         assertThat(jobExecutions).hasSize(1);
         var jobExecution = jobExecutions.get(0);
+
+        assertTrue(jobExecution.getJobExecution().getProgress().getTotal() > 0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
 
         var fileToExport = String.format("quick-export-%s.mrc", jobExecution.getJobExecution().getHrId());
