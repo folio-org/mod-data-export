@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,6 +44,7 @@ public class InputFileProcessor {
   private final SearchClient searchClient;
   private final ErrorLogService errorLogService;
   private final JobExecutionService jobExecutionService;
+  private final InsertExportIdService insertExportIdService;
 
   public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic, ExportRequest.IdTypeEnum idType) {
     try {
@@ -64,7 +64,7 @@ public class InputFileProcessor {
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
 
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      progress.setTotalIdsToExport((int)reader.lines().count());
+      progress.setTotalIdsToRead((int) reader.lines().count());
       jobExecutionService.save(jobExecution);
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);
@@ -92,10 +92,7 @@ public class InputFileProcessor {
           commonExportStatistic.addToInvalidUUIDFormat(id);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
-          var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-          commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
-          batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
-          exportIdEntityRepository.saveAll(batch);
+          insertExportIdService.saveBatch(batch);
           progress.setReadIds(countOfRead.get());
           jobExecutionService.save(jobExecution);
           batch.clear();
@@ -106,16 +103,13 @@ public class InputFileProcessor {
       commonExportStatistic.setFailedToReadInputFile(true);
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
-    var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-    commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb.size());
-    batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
-    exportIdEntityRepository.saveAll(batch);
+    insertExportIdService.saveBatch(batch);
     progress.setReadIds(countOfRead.get());
     jobExecutionService.save(jobExecution);
-  }
 
-  private List<UUID> findDuplicatedUUIDFromDb(Set<UUID> ids, UUID jobExecutionId) {
-    return exportIdEntityRepository.findByInstanceIdInAndJobExecutionIdIs(ids, jobExecutionId).stream().map(ExportIdEntity::getInstanceId).toList();
+    int totalExportsIds = (int) exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
+    int duplicatedFromDb = countOfRead.get() - totalExportsIds - commonExportStatistic.getDuplicatedUUIDAmount() - commonExportStatistic.getInvalidUUIDFormat().size();
+    commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb);
   }
 
   private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType) throws IOException {

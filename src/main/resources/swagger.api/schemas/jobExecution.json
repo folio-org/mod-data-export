@@ -65,8 +65,8 @@
           "type": "integer",
           "default": 0
         },
-        "totalIdsToExport": {
-          "description": "Total number of records ids to export",
+        "totalIdsToRead": {
+          "description": "Total number of records ids to read",
           "type": "integer",
           "default": 0
         },

@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS error_logs (
 CREATE TABLE IF NOT EXISTS job_executions_export_ids (
      id bigint GENERATED ALWAYS AS IDENTITY,
      job_execution_id uuid,
-     instance_id uuid,
+     instance_id uuid UNIQUE,
      constraint fk_export_id_to_job_execution foreign key (job_execution_id)
          references job_executions(id) ON DELETE CASCADE
 );
