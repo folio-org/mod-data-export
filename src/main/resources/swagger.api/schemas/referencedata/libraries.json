@@ -3,7 +3,7 @@
   "description": "A collection of third-level location units",
   "type": "object",
   "properties": {
-    "libraries": {
+    "loclibs": {
       "description": "List of third-level location units",
       "id": "libraries",
       "type": "array",

@@ -156,7 +156,7 @@ public class ReferenceDataService {
 
   @Cacheable(cacheNames = "campuses")
   public Map<String, JsonObjectWrapper> getCampuses() {
-    var list = locationUnitsClient.getCampuses(REFERENCE_DATA_LIMIT).getCampuses();
+    var list = locationUnitsClient.getCampuses(REFERENCE_DATA_LIMIT).getLoccamps();
     return ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Campus::getId, this::toJsonObjectWrapper));
@@ -164,7 +164,7 @@ public class ReferenceDataService {
 
   @Cacheable(cacheNames = "institutions")
   public Map<String, JsonObjectWrapper> getInstitutions() {
-    var list = locationUnitsClient.getInstitutions(REFERENCE_DATA_LIMIT).getInstitutions();
+    var list = locationUnitsClient.getInstitutions(REFERENCE_DATA_LIMIT).getLocinsts();
     return ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Institution::getId, this::toJsonObjectWrapper));
@@ -172,7 +172,7 @@ public class ReferenceDataService {
 
   @Cacheable(cacheNames = "libraries")
   public Map<String, JsonObjectWrapper> getLibraries() {
-    var list = locationUnitsClient.getLibraries(REFERENCE_DATA_LIMIT).getLibraries();
+    var list = locationUnitsClient.getLibraries(REFERENCE_DATA_LIMIT).getLoclibs();
     return ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Library::getId, this::toJsonObjectWrapper));
