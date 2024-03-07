@@ -33,7 +33,7 @@ class JobExecutionsControllerTest extends BaseDataExportInitializer {
     var entity = JobExecutionEntity.builder().id(jobExecution.getId()).jobExecution(jobExecution).build();
     PageImpl<JobExecutionEntity> page = new PageImpl<>(List.of(entity));
 
-    when(jobExecutionEntityCqlRepository.findByCQL(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(jobExecutionEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-executions?query=query")
