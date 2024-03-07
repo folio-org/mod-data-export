@@ -108,8 +108,8 @@ public class InputFileProcessor {
     jobExecutionService.save(jobExecution);
 
     int totalExportsIds = (int) exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
-    int duplicatedFromDb = countOfRead.get() - totalExportsIds - commonExportStatistic.getDuplicatedUUIDAmount() - commonExportStatistic.getInvalidUUIDFormat().size();
-    commonExportStatistic.incrementDuplicatedUUID(duplicatedFromDb);
+    int duplicated = countOfRead.get() - totalExportsIds - commonExportStatistic.getDuplicatedUUIDAmount() - commonExportStatistic.getInvalidUUIDFormat().size();
+    commonExportStatistic.incrementDuplicatedUUID(duplicated);
   }
 
   private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType) throws IOException {

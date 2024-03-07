@@ -66,7 +66,7 @@
           "default": 0
         },
         "readIds": {
-          "description": "Number of ids populated in temp table for slicing",
+          "description": "Number of readed ids for temp table for slicing",
           "type": "integer",
           "default": 0
         }
