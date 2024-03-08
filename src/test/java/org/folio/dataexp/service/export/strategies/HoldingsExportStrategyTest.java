@@ -9,6 +9,7 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -112,7 +113,7 @@ class HoldingsExportStrategyTest {
   }
 
   @Test
-  void getGeneratedMarcTest() {
+  void getGeneratedMarcTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
@@ -125,7 +126,7 @@ class HoldingsExportStrategyTest {
   }
 
   @Test
-  void getGeneratedMarcIfMarcExceptionTest() {
+  void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 

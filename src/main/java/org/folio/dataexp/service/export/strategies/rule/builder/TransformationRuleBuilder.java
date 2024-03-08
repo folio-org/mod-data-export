@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies.rule.builder;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.substring;
@@ -20,9 +21,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.service.export.strategies.translation.builder.DefaultTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.TranslationBuilder;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.TransformationFieldsConfig;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
@@ -84,15 +87,35 @@ public class TransformationRuleBuilder implements RuleBuilder {
     .build();
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) throws TransformationRuleException {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
     String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;
-    Optional<Rule> existingRule = rules.stream()
-      .filter(tagRule -> tagRule.getField()
-        .equals(field))
-      .filter(tagRule -> tagRule.getIndicators().equals(indicators))
-      .findFirst();
+    Optional<Rule> existingRule = Optional.empty();
+//    Optional<Rule> existingRule = rules.stream()
+//      .filter(tagRule -> tagRule.getField()
+//        .equals(field))
+//      .filter(tagRule -> {
+//        var tagRuleIndicators = tagRule.getIndicators();
+//        if (isNull(tagRuleIndicators)) {
+//          errorLogService.saveGeneralError("Tag rule " + tagRule + " doesn't have indicators", null);
+//        }
+//        return tagRuleIndicators.equals(indicators);
+//      })
+//      .findFirst();
+    for (Rule tagRule: rules) {
+      if (tagRule.getField().equals(field)) {
+        var tagRuleIndicators = tagRule.getIndicators();
+        if (nonNull(tagRuleIndicators)) {
+          if (tagRuleIndicators.equals(indicators)) {
+            existingRule = Optional.of(tagRule);
+            break;
+          }
+        } else {
+          throw new TransformationRuleException("Tag rule " + tagRule + " doesn't have indicators");
+        }
+      }
+    }
     //If there is already an existing rule, then just append the subfield, without indicators
     if (existingRule.isPresent()) {
       rule = existingRule.get();

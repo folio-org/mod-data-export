@@ -9,6 +9,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -94,7 +95,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
       UUID jobExecutionId, GeneratedMarcResult result) {
-    var rules = ruleFactory.getRules(mappingProfile);
+    List<Rule> rules;
+    try {
+      rules = ruleFactory.getRules(mappingProfile);
+    } catch (TransformationRuleException e) {
+      log.error(e);
+      errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
+      return result;
+    }
     var marcRecords = new ArrayList<String>();
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
     for (var jsonObject : holdingsWithInstanceAndItems) {

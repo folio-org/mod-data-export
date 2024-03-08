@@ -12,6 +12,7 @@ import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -112,7 +113,14 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = new ArrayList<String>();
     ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
-    var rules = getRules(mappingProfile);
+    List<Rule> rules;
+    try {
+      rules = getRules(mappingProfile);
+    } catch (TransformationRuleException e) {
+      log.error(e);
+      errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
+      return generatedMarcResult;
+    }
     for (var jsonObject :  instancesWithHoldingsAndItems) {
       try {
         var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
@@ -150,7 +158,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return Optional.empty();
   }
 
-  protected List<Rule> getRules(MappingProfile mappingProfile) {
+  protected List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
     List<Rule> rules;
     if (mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
@@ -173,7 +181,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException {
     var marcFieldsByExternalId = new HashMap<UUID, MarcFields>();
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return marcFieldsByExternalId;
@@ -191,7 +199,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return marcFieldsByExternalId;
   }
 
-  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) {
+  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) throws TransformationRuleException {
     ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
     var rules = ruleFactory.getRules(mappingProfile);
     var finalRules = ruleHandler.preHandle(marcRecord, rules);
