@@ -49,9 +49,9 @@ public class TimerService {
   private String validateValueForTimer(String value) {
     if (isNotEmpty(value)) {
       try {
-        Integer.parseInt(value);
+        Integer.parseUnsignedInt(value);
       } catch (NumberFormatException e) {
-        log.error("Invalid value for clean-up files timer property: {}", value);
+        log.error("Invalid value for clean-up files timer delay: {}", value);
         return EMPTY;
       }
     }
