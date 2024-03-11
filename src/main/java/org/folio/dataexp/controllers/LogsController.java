@@ -26,7 +26,7 @@ public class LogsController implements LogsApi {
   @Override
   public ResponseEntity<ErrorLogCollection> getErrorLogsByQuery(String query, Integer offset, Integer limit) {
     if (StringUtils.isEmpty(query)) query = QUERY_CQL_ALL_RECORDS;
-    var errorLogsPage  = errorLogEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
+    var errorLogsPage  = errorLogEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
     var errorLogs = errorLogsPage.stream().map(ErrorLogEntity::getErrorLog).toList();
     var errorLogCollection = new ErrorLogCollection()
       .errorLogs(errorLogs)

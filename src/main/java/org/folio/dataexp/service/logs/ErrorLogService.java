@@ -47,14 +47,14 @@ public class ErrorLogService {
 
   public ErrorLogCollection getErrorLogsByQuery(String query, int offset, int limit) {
     query = isEmpty(query) ? QUERY_CQL_ALL_RECORDS : query;
-    var errorLogEntityPage = errorLogEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
+    var errorLogEntityPage = errorLogEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
     return new ErrorLogCollection()
       .errorLogs(errorLogEntityPage.stream().map(ErrorLogEntity::getErrorLog).toList())
       .totalRecords((int) errorLogEntityPage.getTotalElements());
   }
 
   public List<ErrorLog> getByQuery(String query) {
-    return errorLogEntityCqlRepository.findByCQL(query, OffsetRequest.of(0, Integer.MAX_VALUE)).stream()
+    return errorLogEntityCqlRepository.findByCql(query, OffsetRequest.of(0, Integer.MAX_VALUE)).stream()
       .map(ErrorLogEntity::getErrorLog)
       .toList();
   }

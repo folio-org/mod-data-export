@@ -66,7 +66,7 @@ public class JobProfileController implements JobProfilesApi {
     if (StringUtils.isEmpty(query)){
       query = "(cql.allRecords=1)";
     }
-    var jobProfilesPage  = jobProfileEntityCqlRepository.findByCQL(query, OffsetRequest.of(offset, limit));
+    var jobProfilesPage  = jobProfileEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
     var jobProfiles =  jobProfilesPage.stream().map(JobProfileEntity::getJobProfile).toList();
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
