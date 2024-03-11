@@ -443,8 +443,7 @@
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "configuration.entries.collection.get",
-            "okapi.proxy.tenants.timers.list",
-            "okapi.proxy.tenants.timers.patch"
+            "okapi.proxy.self.timers.patch"
           ]
         },
         {
