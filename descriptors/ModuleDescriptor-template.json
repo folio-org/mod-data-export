@@ -442,7 +442,9 @@
           ],
           "pathPattern": "/_/tenant",
           "modulePermissions": [
-            "configuration.entries.collection.get"
+            "configuration.entries.collection.get",
+            "okapi.proxy.tenants.timers.list",
+            "okapi.proxy.tenants.timers.patch"
           ]
         },
         {
@@ -476,7 +478,7 @@
           "modulePermissions": [
           ],
           "unit": "hour",
-          "delay": "1"
+          "delay": "12"
         }
       ]
     }

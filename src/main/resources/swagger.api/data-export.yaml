@@ -928,6 +928,8 @@ components:
       $ref: 'schemas/configuration/configurationEntryCollection.json'
     relatedUserCollection:
       $ref: 'schemas/relatedUserCollection.json'
+    timerDescriptor:
+      $ref: 'schemas/okapi/TimerDescriptor.json'
 
   parameters:
     trait_queryable:
