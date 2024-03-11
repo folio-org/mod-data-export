@@ -477,7 +477,7 @@
           "modulePermissions": [
           ],
           "unit": "hour",
-          "delay": "12"
+          "delay": "24"
         }
       ]
     }
