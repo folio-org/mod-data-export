@@ -124,7 +124,7 @@ public class DataExportService {
 
   private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress,
                            CommonExportFails commonExportFails, long totalExportsIds) {
-    if (exportRequest.getAll()) {
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
           jobExecutionProgress.setTotal((int) holdingsRecordEntityRepository.count());

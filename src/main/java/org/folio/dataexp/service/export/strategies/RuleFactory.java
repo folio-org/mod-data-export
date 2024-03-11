@@ -48,6 +48,7 @@ public class RuleFactory {
   private final List<Rule> defaultRulesFromConfigFile;
   private final List<Rule> defaultHoldingsRulesFromConfigFile;
 
+  @Autowired
   private ErrorLogService errorLogService;
 
   @Autowired
@@ -171,15 +172,6 @@ public class RuleFactory {
       combinedDefaultRules.addAll(defaultHoldingsRulesFromConfigFile);
     }
     return create(mappingProfile, combinedDefaultRules, false);
-  }
-
-  private void validateRules() {
-
-  }
-
-  @Autowired
-  private void setErrorLogService(ErrorLogService errorLogService) {
-    this.errorLogService = errorLogService;
   }
 
 }

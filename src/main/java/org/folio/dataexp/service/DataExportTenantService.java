@@ -94,7 +94,7 @@ public class DataExportTenantService extends TenantService {
     try (InputStream is =
            DataExportTenantService.class.getResourceAsStream(jobProfilePath)) {
       var jobProfile = mapper.readValue(is, JobProfile.class);
-      var entity = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
+      jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     } catch (Exception e) {
       log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(jobProfilePath), e.getMessage());
     }
