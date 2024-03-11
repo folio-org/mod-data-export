@@ -130,6 +130,10 @@ public class InputFileProcessor {
               .withJobExecutionId(fileDefinition.getJobExecutionId())
               .withInstanceId(id.getId())).toList();
           exportIdEntityRepository.saveAll(entities);
+          var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
+          var progress = jobExecution.getProgress();
+          progress.setTotal(entities.size());
+          jobExecutionService.save(jobExecution);
         } else if (idsJob.getStatus() == IdsJob.Status.ERROR) {
           log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(fileDefinition.getFileName()),

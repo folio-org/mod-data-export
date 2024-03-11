@@ -92,16 +92,20 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      jobExecution.setProgress(new JobExecutionProgress());
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
       inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var exportIds = exportIdEntityRepository.findAll();
 
       assertEquals(1, exportIds.size());
-
       assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
       assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"), exportIds.get(0).getInstanceId());
+
+      jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId()).getJobExecution();
+      assertEquals(1, jobExecution.getProgress().getTotal());
     }
   }
 }
