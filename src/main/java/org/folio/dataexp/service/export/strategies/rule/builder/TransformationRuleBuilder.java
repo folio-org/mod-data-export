@@ -92,17 +92,6 @@ public class TransformationRuleBuilder implements RuleBuilder {
     String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;
     Optional<Rule> existingRule = Optional.empty();
-//    Optional<Rule> existingRule = rules.stream()
-//      .filter(tagRule -> tagRule.getField()
-//        .equals(field))
-//      .filter(tagRule -> {
-//        var tagRuleIndicators = tagRule.getIndicators();
-//        if (isNull(tagRuleIndicators)) {
-//          errorLogService.saveGeneralError("Tag rule " + tagRule + " doesn't have indicators", null);
-//        }
-//        return tagRuleIndicators.equals(indicators);
-//      })
-//      .findFirst();
     for (Rule tagRule: rules) {
       if (tagRule.getField().equals(field)) {
         var tagRuleIndicators = tagRule.getIndicators();
@@ -112,7 +101,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
             break;
           }
         } else {
-          throw new TransformationRuleException("Tag rule " + tagRule + " doesn't have indicators");
+          throw new TransformationRuleException("Tag rule " + tagRule.getField() + " doesn't have indicators");
         }
       }
     }
