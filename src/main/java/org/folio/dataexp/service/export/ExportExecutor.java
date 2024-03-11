@@ -6,6 +6,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
@@ -77,7 +78,7 @@ public class ExportExecutor {
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         progress.setTotal(progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
       }
-      progress.setFailed(progress.getFailed() + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size());
+      progress.setFailed(getFailedNumber(jobExecution.getProgress(), commonExportStatistic));
       errorLogService.saveCommonExportFailsErrors(commonExportStatistic, progress.getFailed(), jobExecutionId);
 
       var errorCount = errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId);
@@ -114,5 +115,9 @@ public class ExportExecutor {
     jobExecution.setLastUpdatedDate(currentDate);
     jobExecutionService.save(jobExecution);
     log.info("Job execution by id {} is updated with status {}", jobExecutionId, jobExecution.getStatus());
+  }
+
+  private int getFailedNumber(JobExecutionProgress progress, CommonExportStatistic commonExportStatistic) {
+    return progress.getFailed() + commonExportStatistic.getDuplicatedUUIDAmount() + commonExportStatistic.getInvalidUUIDFormat().size();
   }
 }

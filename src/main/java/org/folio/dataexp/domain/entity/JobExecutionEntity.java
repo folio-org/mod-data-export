@@ -60,8 +60,7 @@ public class JobExecutionEntity {
     if (isNull(jobExecution.getId())) {
       jobExecution.setId(UUID.randomUUID());
     }
-    var currentDate = new Date();
-    jobExecution.setLastUpdatedDate(currentDate);
+    jobExecution.setLastUpdatedDate(new Date());
     return JobExecutionEntity.builder()
       .id(jobExecution.getId())
       .jobExecution(jobExecution)
