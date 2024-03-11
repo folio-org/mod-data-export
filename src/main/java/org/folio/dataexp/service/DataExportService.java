@@ -125,7 +125,7 @@ public class DataExportService {
   }
 
   private void updateTotal(ExportRequest exportRequest, UUID jobExecutionId,  JobExecutionProgress jobExecutionProgress) {
-    if (exportRequest.getAll()) {
+    if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
           jobExecutionProgress.setTotal((int) holdingsRecordEntityRepository.count());
@@ -136,7 +136,7 @@ public class DataExportService {
         }
         log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
       }
-    } else if (exportRequest.getQuick()) {
+    } else if (Boolean.TRUE.equals(exportRequest.getQuick())) {
       long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecutionId);
       jobExecutionProgress.setTotal((int) totalExportsIds);
     }
