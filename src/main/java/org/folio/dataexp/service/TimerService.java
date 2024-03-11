@@ -36,7 +36,7 @@ public class TimerService {
         log.info("Updating clean-up files timer: existing value={}, new value={}", currentInterval, cleanUpFilesInterval);
         okapiClient.updateTimer(URI.create(OKAPI_URL), folioExecutionContext.getTenantId(), new TimerDescriptor()
           .id(timerDescriptor.getId())
-          .routingEntry(new RoutingEntry().delay(cleanUpFilesInterval)));
+          .routingEntry(new RoutingEntry().unit("hour").delay(cleanUpFilesInterval)));
       }
     });
   }
