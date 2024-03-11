@@ -103,7 +103,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
     PageImpl<MappingProfileEntity> page = new PageImpl<>(List.of(entity));
 
-    when(mappingProfileEntityCqlRepository.findByCQL(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/mapping-profiles?query=query")

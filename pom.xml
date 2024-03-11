@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.7</version>
+    <version>3.2.3</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -37,13 +37,14 @@
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
-    <folio-spring-base.version>6.1.0</folio-spring-base.version>
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-cql.version>8.1.0</folio-spring-cql.version>
     <generate-marc-utils-version>1.8.0-SNAPSHOT</generate-marc-utils-version>
     <apache-commons-io.version>2.11.0</apache-commons-io.version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
     <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
-    <hypersistence-utils-hibernate-60.version>3.5.0</hypersistence-utils-hibernate-60.version>
+    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <folio-s3-client.version>2.0.6</folio-s3-client.version>
     <marc4j.version>2.9.2</marc4j.version>
     <mapstruct.version>1.5.3.Final</mapstruct.version>
@@ -116,6 +117,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-cql</artifactId>
+      <version>${folio-spring-cql.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
@@ -169,8 +176,8 @@
 
     <dependency>
       <groupId>io.hypersistence</groupId>
-      <artifactId>hypersistence-utils-hibernate-60</artifactId>
-      <version>${hypersistence-utils-hibernate-60.version}</version>
+      <artifactId>hypersistence-utils-hibernate-63</artifactId>
+      <version>${hypersistence-utils-hibernate-63.version}</version>
     </dependency>
 
     <dependency>

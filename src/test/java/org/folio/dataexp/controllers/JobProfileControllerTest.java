@@ -107,7 +107,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
     var entity = JobProfileEntity.builder().id(jobProfile.getId()).jobProfile(jobProfile).build();
     PageImpl<JobProfileEntity> page = new PageImpl<>(List.of(entity));
 
-    when(jobProfileEntityCqlRepository.findByCQL(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(jobProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-profiles?query=query")

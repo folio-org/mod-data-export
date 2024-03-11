@@ -3,7 +3,7 @@
   "description": "A collection of second-level location units",
   "type": "object",
   "properties": {
-    "campuses": {
+    "loccamps": {
       "description": "List of second-level location units",
       "id": "campuses",
       "type": "array",
