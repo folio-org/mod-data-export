@@ -45,7 +45,7 @@ class ErrorLogServiceTest {
     var page = new PageImpl<>(List.of(errorLogEntity));
     var query = "query";
 
-    when(errorLogEntityCqlRepository.findByCQL(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class))).thenReturn(page);
 
     var collection = errorLogService.getErrorLogsByQuery(query, 0, 1);
 
@@ -65,7 +65,7 @@ class ErrorLogServiceTest {
     var page = new PageImpl<>(List.of(errorLogEntity));
     var query = "query";
 
-    when(errorLogEntityCqlRepository.findByCQL(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class))).thenReturn(page);
 
     var errors = errorLogService.getByQuery(query);
 

@@ -32,7 +32,7 @@ class LogsControllerTest extends BaseDataExportInitializer {
       .errorLog(new ErrorLog().id(UUID.randomUUID()))
       .build();
 
-    when(repository.findByCQL(anyString(), any(OffsetRequest.class)))
+    when(repository.findByCql(anyString(), any(OffsetRequest.class)))
       .thenReturn(new PageImpl<>(Collections.singletonList(entity)));
 
     mockMvc.perform(MockMvcRequestBuilders

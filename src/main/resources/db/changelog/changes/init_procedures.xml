@@ -6,6 +6,6 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
   <changeSet id="slice_instances_ids_procedure" author="Firebird">
-    <createProcedure path="changes/slice_instances_ids.sql" relativeToChangelogFile="true" />
+    <createProcedure path="slice_instances_ids.sql" relativeToChangelogFile="true" />
   </changeSet>
 </databaseChangeLog>

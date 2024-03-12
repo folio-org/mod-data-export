@@ -278,7 +278,7 @@ class ReferenceDataServiceTest {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getCampuses(Integer.MAX_VALUE))
       .thenReturn(new Campuses()
-        .campuses(Collections.singletonList(new Campus()
+        .loccamps(Collections.singletonList(new Campus()
           .id(id)
           .name("name")))
         .totalRecords(1));
@@ -294,7 +294,7 @@ class ReferenceDataServiceTest {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getInstitutions(Integer.MAX_VALUE))
       .thenReturn(new Institutions()
-        .institutions(Collections.singletonList(new Institution()
+        .locinsts(Collections.singletonList(new Institution()
           .id(id)
           .name("name")))
         .totalRecords(1));
@@ -310,7 +310,7 @@ class ReferenceDataServiceTest {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getLibraries(Integer.MAX_VALUE))
       .thenReturn(new Libraries()
-        .libraries(Collections.singletonList(new Library()
+        .loclibs(Collections.singletonList(new Library()
           .id(id)
           .name("name")))
         .totalRecords(1));
@@ -505,7 +505,7 @@ class ReferenceDataServiceTest {
   void testGetEmptyCampuses() {
     when(locationUnitsClient.getCampuses(Integer.MAX_VALUE))
       .thenReturn(new Campuses()
-        .campuses(Collections.emptyList())
+        .loccamps(Collections.emptyList())
         .totalRecords(0));
 
     var map = referenceDataService.getCampuses();
@@ -517,7 +517,7 @@ class ReferenceDataServiceTest {
   void testGetEmptyInstitutions() {
     when(locationUnitsClient.getInstitutions(Integer.MAX_VALUE))
       .thenReturn(new Institutions()
-        .institutions(Collections.emptyList())
+        .locinsts(Collections.emptyList())
         .totalRecords(0));
 
     var map = referenceDataService.getInstitutions();
@@ -529,7 +529,7 @@ class ReferenceDataServiceTest {
   void testGetEmptyLibraries() {
     when(locationUnitsClient.getLibraries(Integer.MAX_VALUE))
       .thenReturn(new Libraries()
-        .libraries(Collections.emptyList())
+        .loclibs(Collections.emptyList())
         .totalRecords(0));
 
     var map = referenceDataService.getLibraries();
