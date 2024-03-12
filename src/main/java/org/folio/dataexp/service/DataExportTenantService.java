@@ -38,15 +38,17 @@ public class DataExportTenantService extends TenantService {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
+  private TimerService timerService;
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                                  JobProfileEntityRepository jobProfileEntityRepository,
                                  MappingProfileEntityRepository mappingProfileEntityRepository,
-                                 ConfigurationService configurationService) {
+                                 ConfigurationService configurationService, TimerService timerService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.jobProfileEntityRepository = jobProfileEntityRepository;
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
     this.configurationService = configurationService;
+    this.timerService = timerService;
   }
 
   @Override
@@ -63,6 +65,7 @@ public class DataExportTenantService extends TenantService {
     setupConfigEntryInventoryRecordLink();
     log.info("Loading configuration");
     loadConfiguration();
+    timerService.updateCleanUpFilesTimerIfRequired();
   }
 
   private void setupTenantForViews() {

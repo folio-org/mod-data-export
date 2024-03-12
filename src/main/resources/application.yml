@@ -79,3 +79,4 @@ application:
     awsSdk: ${S3_IS_AWS:false}
   file-uploading:
     max-retry-count: ${MAX_UPLOADING_RETRIES:5000}
+  clean-up-files-delay: ${CLEAN_UP_FILES_DELAY:}
