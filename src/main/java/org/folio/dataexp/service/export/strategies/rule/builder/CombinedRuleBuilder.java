@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Metadata;
 import org.folio.processor.rule.Rule;
@@ -30,7 +31,7 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
   }
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) {
     Optional<Rule> defaultRuleOptional = super.build(rules, defaultFieldId);
     if (defaultRuleOptional.isPresent()) {
       Rule defaultRule = defaultRuleOptional.get();
