@@ -17,6 +17,7 @@ import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -99,7 +100,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id);
 
-  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile);
+  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException;
 
   protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new LocalStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE);
@@ -128,7 +129,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       UUID jobExecutionId, Set<UUID> externalIdsWithMarcRecord, List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     marcRecords = new ArrayList<>(marcRecords);
     log.info("marcRecords size: {}", marcRecords.size());
-    var additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
+    Map<UUID, MarcFields> additionalFieldsPerId = null;
+    try {
+      additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
+    } catch (TransformationRuleException e) {
+      log.error(e);
+      errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
+      return;
+    }
     var duplicatedUuidWithIdentifiers = new LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>>();
     for (var marcRecordEntity : marcRecords) {
       var marc = StringUtils.EMPTY;

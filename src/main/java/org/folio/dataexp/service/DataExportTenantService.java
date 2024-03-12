@@ -38,15 +38,17 @@ public class DataExportTenantService extends TenantService {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
+  private TimerService timerService;
   @Autowired
   public DataExportTenantService(JdbcTemplate jdbcTemplate, FolioExecutionContext context, FolioSpringLiquibase folioSpringLiquibase,
                                  JobProfileEntityRepository jobProfileEntityRepository,
                                  MappingProfileEntityRepository mappingProfileEntityRepository,
-                                 ConfigurationService configurationService) {
+                                 ConfigurationService configurationService, TimerService timerService) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.jobProfileEntityRepository = jobProfileEntityRepository;
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
     this.configurationService = configurationService;
+    this.timerService = timerService;
   }
 
   @Override
@@ -63,6 +65,7 @@ public class DataExportTenantService extends TenantService {
     setupConfigEntryInventoryRecordLink();
     log.info("Loading configuration");
     loadConfiguration();
+    timerService.updateCleanUpFilesTimerIfRequired();
   }
 
   private void setupTenantForViews() {
@@ -94,7 +97,7 @@ public class DataExportTenantService extends TenantService {
     try (InputStream is =
            DataExportTenantService.class.getResourceAsStream(jobProfilePath)) {
       var jobProfile = mapper.readValue(is, JobProfile.class);
-      var entity = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
+      jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     } catch (Exception e) {
       log.error("Error loading job profile {} : {}", FilenameUtils.getBaseName(jobProfilePath), e.getMessage());
     }

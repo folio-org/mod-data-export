@@ -6,6 +6,7 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.processor.rule.Rule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   private List<Rule> defaultHoldingsRulesFromConfigFile;
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileIsNull() {
+  void shouldReturnDefaultRules_whenMappingProfileIsNull() throws TransformationRuleException {
     // when
     List<Rule> rules = ruleFactory.create(null);
 
@@ -103,7 +104,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileIsDefault() {
+  void shouldReturnDefaultRules_whenMappingProfileIsDefault() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
@@ -117,7 +118,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty() {
+  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -131,7 +132,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingRecordType() {
+  void shouldReturnDefaultHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingRecordType() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -145,7 +146,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultInstanceAndHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingAndInstanceRecordTypes() {
+  void shouldReturnDefaultInstanceAndHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingAndInstanceRecordTypes() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -163,7 +164,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled() throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(false);
@@ -182,7 +183,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty() throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -202,7 +203,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty() {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty() throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -222,7 +223,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId() {
+  void shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId() throws TransformationRuleException {
     // given
     var existDefaultRuleId = "instance.metadata.updateddate";
     Transformations transformations = new Transformations();
@@ -249,7 +250,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
+  void shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield() throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -271,7 +272,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield() {
+  void shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield() throws TransformationRuleException {
     // given
     Transformations transformations1 = new Transformations();
     transformations1.setEnabled(true);
@@ -301,7 +302,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() {
+  void shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -330,7 +331,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnTransformationRulesetPermanentLocationTranslation() {
+  void shouldReturnTransformationRulesetPermanentLocationTranslation() throws TransformationRuleException {
     // given
     Transformations permanentLocationTransformations = new Transformations();
     permanentLocationTransformations.setEnabled(true);
@@ -353,7 +354,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldNotReturnTransformationRulesetPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation() {
+  void shouldNotReturnTransformationRulesetPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation() throws TransformationRuleException {
     // given
     Transformations permanentLocationTransformations = new Transformations();
     permanentLocationTransformations.setEnabled(true);
@@ -382,7 +383,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnTransformationRulesetTemporaryLocationTranslation() {
+  void shouldReturnTransformationRulesetTemporaryLocationTranslation() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -405,7 +406,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCodeField() {
+  void shouldReturnPermanentLocationRulesetTranslationForCodeField() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -429,7 +430,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForLibraryName() {
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryName() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -455,7 +456,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForLibraryCode() {
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryCode() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -482,7 +483,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
 
 
   @Test
-  void shouldReturnTransformationRulesetEffectiveLocationTranslation() {
+  void shouldReturnTransformationRulesetEffectiveLocationTranslation() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -505,7 +506,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCampusName() {
+  void shouldReturnPermanentLocationRulesetTranslationForCampusName() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -531,7 +532,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCampusCode() {
+  void shouldReturnPermanentLocationRulesetTranslationForCampusCode() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -557,7 +558,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForInstitutionName() {
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionName() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -583,7 +584,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForInstitutionCode() {
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionCode() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -609,7 +610,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesetDefaultTranslationWhenFieldIdContainsOneWord() {
+  void shouldReturnRulesetDefaultTranslationWhenFieldIdContainsOneWord() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -633,7 +634,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnTransformationRulesetMaterialTypeTranslation() {
+  void shouldReturnTransformationRulesetMaterialTypeTranslation() throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -656,7 +657,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldssetSameFieldId() {
+  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldssetSameFieldId() throws TransformationRuleException {
     // given
     Transformations transformation1 = new Transformations();
     transformation1.setEnabled(true);
@@ -691,7 +692,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDifferentRules_WhenTransformationHasMultipleSubFieldssetSameFieldIdButDifferentIndicators() {
+  void shouldReturnDifferentRules_WhenTransformationHasMultipleSubFieldssetSameFieldIdButDifferentIndicators() throws TransformationRuleException {
     // given
     Transformations transformation1 = new Transformations();
     transformation1.setEnabled(true);
@@ -729,7 +730,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields() {
+  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields() throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
@@ -756,7 +757,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField() {
+  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField() throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
@@ -777,7 +778,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId() {
+  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId() throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
@@ -798,7 +799,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations() {
+  void shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations() throws TransformationRuleException {
     int transformationRulesAmount = 2;
     // given
     Transformations holdingsTransformations = new Transformations();
@@ -831,7 +832,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata() {
+  void shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata() throws TransformationRuleException {
     int transformationRulesAmount = 1;
     // given
     Transformations itemTransformation = new Transformations();

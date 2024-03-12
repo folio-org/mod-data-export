@@ -13,6 +13,7 @@ import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -163,7 +164,7 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getGeneratedMarcTest() {
+  void getGeneratedMarcTest() throws TransformationRuleException {
     var transformation = new Transformations();
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(false);
@@ -200,7 +201,7 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getGeneratedMarcIfMarcExceptionTest() {
+  void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
     var transformation = new Transformations();
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(false);
@@ -323,7 +324,7 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getAdditionalMarcFieldsByExternalIdTest() {
+  void getAdditionalMarcFieldsByExternalIdTest() throws TransformationRuleException {
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");

@@ -7,10 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.service.export.strategies.rule.builder.CombinedRuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.DefaultRuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.RuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.TransformationRuleBuilder;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.processor.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,13 +49,16 @@ public class RuleFactory {
   private final List<Rule> defaultHoldingsRulesFromConfigFile;
 
   @Autowired
+  private ErrorLogService errorLogService;
+
+  @Autowired
   public RuleFactory(List<Rule> defaultRulesFromConfigFile, List<Rule> defaultHoldingsRulesFromConfigFile) {
     this.defaultRulesFromConfigFile = defaultRulesFromConfigFile;
     this.defaultHoldingsRulesFromConfigFile = defaultHoldingsRulesFromConfigFile;
   }
 
 
-  public List<Rule> getRules(MappingProfile mappingProfile) {
+  public List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       return create(mappingProfile);
     }
@@ -65,11 +70,11 @@ public class RuleFactory {
     return CollectionUtils.isEmpty(rulesFromConfig) ? create(mappingProfile) : create(mappingProfile, rulesFromConfig, true);
   }
 
-  public List<Rule> create(MappingProfile mappingProfile) {
+  public List<Rule> create(MappingProfile mappingProfile) throws TransformationRuleException {
     return createRulesDependsOnRecordType(mappingProfile);
   }
 
-  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules, boolean appendDefaultHoldingsRules) {
+  public List<Rule> create(MappingProfile mappingProfile, List<Rule> defaultRules, boolean appendDefaultHoldingsRules) throws TransformationRuleException {
     if (appendDefaultHoldingsRules && mappingProfile != null && mappingProfile.getRecordTypes().contains(RecordTypes.HOLDINGS)) {
       defaultRules.addAll(defaultHoldingsRulesFromConfigFile);
     }
@@ -84,14 +89,14 @@ public class RuleFactory {
     return rules;
   }
 
-  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) {
+  public Set<Rule> createByTransformations(List<Transformations> mappingTransformations, List<Rule> defaultRules) throws TransformationRuleException {
     Set<Rule> rules = new LinkedHashSet<>();
     String temporaryLocationTransformation = getTemporaryLocationTransformation(mappingTransformations);
     Optional<Rule> rule = Optional.empty();
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
-        rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation);
+        rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation, errorLogService);
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation) || isHoldingsTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
       } else if (RecordTypes.ITEM.equals(mappingTransformation.getRecordType())) {
@@ -105,16 +110,16 @@ public class RuleFactory {
     return rules;
   }
 
-  public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) {
+  public Optional<Rule> createDefaultByTransformations(Transformations mappingTransformation, List<Rule> defaultRules) throws TransformationRuleException {
     RecordTypes recordType = mappingTransformation.getRecordType();
     if (TRUE.equals(mappingTransformation.getEnabled()) && StringUtils.isNotBlank(mappingTransformation.getFieldId())
       && RecordTypes.INSTANCE.equals(recordType)) {
       for (Map.Entry<String, RuleBuilder> ruleBuilderEntry : ruleBuilders.entrySet()) {
         if (mappingTransformation.getFieldId().contains(ruleBuilderEntry.getKey())) {
-          return ruleBuilderEntry.getValue().build(defaultRules, mappingTransformation);
+          return ruleBuilderEntry.getValue().build(defaultRules, mappingTransformation, errorLogService);
         }
       }
-      return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation);
+      return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation, errorLogService);
     }
     return Optional.empty();
   }
@@ -158,7 +163,7 @@ public class RuleFactory {
     return Boolean.TRUE.equals(mappingTransformation.getEnabled()) && StringUtils.isNotBlank(mappingTransformation.getPath());
   }
 
-  private List<Rule> createRulesDependsOnRecordType(MappingProfile mappingProfile) {
+  private List<Rule> createRulesDependsOnRecordType(MappingProfile mappingProfile) throws TransformationRuleException {
     List<Rule> combinedDefaultRules = new ArrayList<>();
     if (mappingProfile == null || mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       combinedDefaultRules.addAll(defaultRulesFromConfigFile);
