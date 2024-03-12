@@ -3,8 +3,10 @@ package org.folio.dataexp.service.export.strategies;
 import lombok.Setter;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
+import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
@@ -12,6 +14,7 @@ import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -60,6 +63,8 @@ class AbstractExportStrategyTest {
   @Mock
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Mock
+  private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Mock
   private JobExecutionService jobExecutionService;
   @Mock
   private LocalStorageWriter localStorageWriter;
@@ -79,12 +84,15 @@ class AbstractExportStrategyTest {
 
   @Test
   void saveMarcToLocalStorageTest() {
+    var progress = new JobExecutionProgress();
     var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var jobExecution = new JobExecution();
+    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
 
@@ -110,14 +118,16 @@ class AbstractExportStrategyTest {
     when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
     when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
+    when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobExecutionEntity);
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
     assertEquals(2, exportStatistic.getExported());
     assertEquals(1, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
 
+    verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(2)).write(isA(String.class));
   }
 
@@ -156,7 +166,7 @@ class AbstractExportStrategyTest {
     when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class))).thenReturn(1L);
     doThrow(new LocalStorageWriterException("Can not write")).when(localStorageWriter).close();
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(null, 1000, null));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());

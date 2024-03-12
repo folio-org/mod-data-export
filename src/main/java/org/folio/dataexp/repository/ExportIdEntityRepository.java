@@ -27,6 +27,10 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
   @Query("DELETE ExportIdEntity e WHERE e.jobExecutionId = :jobExecutionId")
   int deleteWithJobExecutionId(@Param("jobExecutionId") UUID jobExecutionId);
 
+  @Modifying
+  @Query(value = "INSERT INTO job_executions_export_ids (job_execution_id, instance_id) VALUES (?1, ?2) ON CONFLICT DO NOTHING",  nativeQuery = true)
+  void insertExportId(UUID jobExecutionId, UUID instanceId);
+
   default Slice<ExportIdEntity> getExportIds(UUID jobExecutionId, UUID fromId, UUID toId, Pageable page) {
     return findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(jobExecutionId, fromId, toId, page);
   }

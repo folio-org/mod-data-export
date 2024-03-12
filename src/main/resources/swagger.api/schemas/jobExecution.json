@@ -64,6 +64,11 @@
           "description": "Total number of records",
           "type": "integer",
           "default": 0
+        },
+        "readIds": {
+          "description": "Number of readed ids for temp table for slicing",
+          "type": "integer",
+          "default": 0
         }
       }
     },

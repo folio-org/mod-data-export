@@ -6,9 +6,12 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,12 +27,21 @@ import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECU
 @Log4j2
 public class SingleFileProcessor {
 
+  private static final int MIN_PROGRESS_EXPORT_STEP = 500;
+  private static final int PROGRESS_EXPORT_ALL_STEP_INCREMENT = 10;
   protected final ExportExecutor exportExecutor;
   private final JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  protected final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobExecutionService jobExecutionService;
   private final ErrorLogService errorLogService;
+  protected int exportIdsBatch;
 
-  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+  @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
+  protected void setExportIdsBatch(int exportIdsBatch) {
+    this.exportIdsBatch = exportIdsBatch;
+  }
+
+  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
       log.error("Nothing to export for job execution {}", jobExecutionId);
@@ -39,15 +51,15 @@ public class SingleFileProcessor {
       jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
       jobExecution.setCompletedDate(currentDate);
 
-      var totalFailed = commonExportFails.getInvalidUUIDFormat().size();
+      var totalFailed = commonExportStatistic.getInvalidUUIDFormat().size();
       var progress = jobExecution.getProgress();
       progress.setFailed(totalFailed);
       progress.setExported(0);
       jobExecutionService.save(jobExecution);
-      if (commonExportFails.isFailedToReadInputFile()) {
+      if (commonExportStatistic.isFailedToReadInputFile()) {
         errorLogService.saveFailedToReadInputFileError(jobExecutionId);
       } else {
-        errorLogService.saveCommonExportFailsErrors(commonExportFails, totalFailed, jobExecutionId);
+        errorLogService.saveCommonExportFailsErrors(commonExportStatistic, totalFailed, jobExecutionId);
       }
       return;
     }
@@ -57,14 +69,24 @@ public class SingleFileProcessor {
       throw new DataExportException("Can not create temp directory for job execution " + jobExecutionId);
     }
     var exportIterator = exports.iterator();
+
+    var exportStrategyStatisticListener = new ExportedMarcListener(jobExecutionEntityRepository, getProgressExportUpdateStep(exportRequest), jobExecutionId);
+    commonExportStatistic.setExportedMarcListener(exportStrategyStatisticListener);
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());
-      executeExport(export, exportRequest, commonExportFails);
+      executeExport(export, exportRequest, commonExportStatistic);
     }
   }
 
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
-    exportExecutor.export(export, exportRequest, commonExportFails);
+  private int getProgressExportUpdateStep(ExportRequest exportRequest) {
+    if (exportRequest.getAll()) {
+      return Math.max(exportIdsBatch * PROGRESS_EXPORT_ALL_STEP_INCREMENT, MIN_PROGRESS_EXPORT_STEP);
+    }
+    return Math.max(exportIdsBatch, MIN_PROGRESS_EXPORT_STEP);
+  }
+
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
+    exportExecutor.export(export, exportRequest, commonExportStatistic);
   }
 }

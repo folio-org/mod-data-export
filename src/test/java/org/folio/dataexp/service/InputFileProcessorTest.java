@@ -7,6 +7,8 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.IdsJob;
 import org.folio.dataexp.domain.dto.IdsJobPayload;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
@@ -57,10 +59,13 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     var resource = new PathResource(UPLOADED_FILE_PATH_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportFails(), ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
     }
@@ -87,16 +92,20 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      jobExecution.setProgress(new JobExecutionProgress());
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportFails(), ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var exportIds = exportIdEntityRepository.findAll();
 
       assertEquals(1, exportIds.size());
-
       assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
       assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"), exportIds.get(0).getInstanceId());
+
+      jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId()).getJobExecution();
+      assertEquals(1, jobExecution.getProgress().getTotal());
     }
   }
 }

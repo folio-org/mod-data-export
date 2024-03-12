@@ -29,9 +29,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -44,26 +43,40 @@ public class InputFileProcessor {
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
   private final ErrorLogService errorLogService;
+  private final JobExecutionService jobExecutionService;
+  private final InsertExportIdService insertExportIdService;
 
-  public void readFile(FileDefinition fileDefinition, CommonExportFails commonExportFails, ExportRequest.IdTypeEnum idType) {
+  public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic, ExportRequest.IdTypeEnum idType) {
     try {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
         readCqlFile(fileDefinition, idType);
       } else {
-        readCsvFile(fileDefinition, commonExportFails);
+        readCsvFile(fileDefinition, commonExportStatistic);
       }
     } catch (Exception e) {
       throw new DataExportException(e.getMessage());
     }
   }
 
-  private void readCsvFile(FileDefinition fileDefinition, CommonExportFails commonExportFails) {
+  private void readCsvFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {
+    var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
+    var progress = jobExecution.getProgress();
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
+
+    try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      progress.setTotal((int) reader.lines().count());
+      jobExecutionService.save(jobExecution);
+    } catch (Exception e) {
+      commonExportStatistic.setFailedToReadInputFile(true);
+      log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
+    }
     var batch = new ArrayList<ExportIdEntity>();
     var duplicatedIds = new HashSet<UUID>();
+    var countOfRead = new AtomicInteger();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
-        commonExportFails.setFailedToReadInputFile(false);
+        countOfRead.incrementAndGet();
+        commonExportStatistic.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
@@ -72,33 +85,35 @@ public class InputFileProcessor {
             batch.add(entity);
             duplicatedIds.add(entity.getInstanceId());
           } else {
-            commonExportFails.incrementDuplicatedUUID();
+            commonExportStatistic.incrementDuplicatedUUID();
           }
         } catch (Exception e) {
           log.error("Error converting {} to uuid", id);
-          commonExportFails.addToInvalidUUIDFormat(id);
+          commonExportStatistic.addToInvalidUUIDFormat(id);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
-          var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-          commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
-          batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
-          exportIdEntityRepository.saveAll(batch);
+          insertExportIdService.saveBatch(batch);
+          progress.setReadIds(countOfRead.get());
+          jobExecutionService.save(jobExecution);
           batch.clear();
           duplicatedIds.clear();
         }
       });
     } catch (Exception e) {
-      commonExportFails.setFailedToReadInputFile(true);
+      commonExportStatistic.setFailedToReadInputFile(true);
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
-    var duplicatedFromDb = findDuplicatedUUIDFromDb(new HashSet<>(batch.stream().map(ExportIdEntity::getInstanceId).toList()), fileDefinition.getJobExecutionId());
-    commonExportFails.incrementDuplicatedUUID(duplicatedFromDb.size());
-    batch.removeIf(e -> duplicatedFromDb.contains(e.getInstanceId()));
-    exportIdEntityRepository.saveAll(batch);
+    insertExportIdService.saveBatch(batch);
+    progress.setReadIds(countOfRead.get());
+    jobExecutionService.save(jobExecution);
+
+    int totalExportsIds = (int) exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
+    int duplicated = getDuplicatedNumber(countOfRead.get(), totalExportsIds, commonExportStatistic);
+    commonExportStatistic.incrementDuplicatedUUID(duplicated);
   }
 
-  private List<UUID> findDuplicatedUUIDFromDb(Set<UUID> ids, UUID jobExecutionId) {
-    return exportIdEntityRepository.findByInstanceIdInAndJobExecutionIdIs(ids, jobExecutionId).stream().map(ExportIdEntity::getInstanceId).toList();
+  private int getDuplicatedNumber(int countOfRead, int totalExportsIds, CommonExportStatistic commonExportStatistic) {
+    return countOfRead - totalExportsIds - commonExportStatistic.getDuplicatedUUIDAmount() - commonExportStatistic.getInvalidUUIDFormat().size();
   }
 
   private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType) throws IOException {
@@ -119,6 +134,10 @@ public class InputFileProcessor {
               .withJobExecutionId(fileDefinition.getJobExecutionId())
               .withInstanceId(id.getId())).toList();
           exportIdEntityRepository.saveAll(entities);
+          var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
+          var progress = jobExecution.getProgress();
+          progress.setTotal(entities.size());
+          jobExecutionService.save(jobExecution);
         } else if (idsJob.getStatus() == IdsJob.Status.ERROR) {
           log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(fileDefinition.getFileName()),

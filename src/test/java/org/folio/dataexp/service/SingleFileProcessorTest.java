@@ -48,9 +48,9 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportFails());
+    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportStatistic());
 
-    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportFails.class));
+    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportStatistic.class));
   }
 
   @Test
@@ -59,7 +59,7 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     var jobExecutionId = UUID.randomUUID();
     var progress = new JobExecutionProgress();
     var jobExecution = new JobExecution().id(jobExecutionId).progress(progress);
-    var commonExportFails = new CommonExportFails();
+    var commonExportFails = new CommonExportStatistic();
     commonExportFails.setFailedToReadInputFile(false);
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);

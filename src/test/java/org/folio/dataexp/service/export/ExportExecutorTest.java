@@ -11,10 +11,11 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.CommonExportFails;
+import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.StorageCleanUpService;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.junit.jupiter.api.Test;
@@ -80,16 +81,17 @@ class ExportExecutorTest {
       .status(JobExecutionExportFilesStatus.COMPLETED)
       .fileLocation(fileLocation).build();
 
-    var commonFails = new CommonExportFails();
+    var commonExportStatistic = new CommonExportStatistic();
+    commonExportStatistic.setExportedMarcListener(new ExportedMarcListener(null, 1000, null));
 
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class))).thenReturn(new ExportStrategyStatistic());
+    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
 
-    exportExecutor.export(exportEntity, new ExportRequest(), commonFails);
+    exportExecutor.export(exportEntity, new ExportRequest(), commonExportStatistic);
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
@@ -120,23 +122,24 @@ class ExportExecutorTest {
       .status(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
       .fileLocation(fileLocation).build();
 
-    var commonFails = new CommonExportFails();
-    commonFails.incrementDuplicatedUUID();
-    commonFails.addToInvalidUUIDFormat("abs");
+    var commonExportStatistic = new CommonExportStatistic();
+    commonExportStatistic.incrementDuplicatedUUID();
+    commonExportStatistic.addToInvalidUUIDFormat("abs");
+    commonExportStatistic.setExportedMarcListener(new ExportedMarcListener(null, 1000, null));
 
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntity.getId())).thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE))).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class))).thenReturn(new ExportStrategyStatistic());
+    when(instancesExportStrategy.saveMarcToLocalStorage(isA(JobExecutionExportFilesEntity.class), isA(ExportRequest.class), isA(ExportedMarcListener.class))).thenReturn(new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2l);
     when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
 
-    exportExecutor.export(exportEntity, new ExportRequest(), commonFails);
+    exportExecutor.export(exportEntity, new ExportRequest(), commonExportStatistic) ;
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED_WITH_ERRORS, jobExecution.getStatus());
-    verify(errorLogService).saveCommonExportFailsErrors(commonFails, 2, jobExecutionId);
+    verify(errorLogService).saveCommonExportFailsErrors(commonExportStatistic, 2, jobExecutionId);
     verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity), "file_name");
     verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }

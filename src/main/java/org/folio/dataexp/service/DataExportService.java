@@ -50,7 +50,7 @@ public class DataExportService {
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
   public void postDataExport(ExportRequest exportRequest) {
-    var commonExportFails = new CommonExportFails();
+    var commonExportFails = new CommonExportStatistic();
     var fileDefinitionEntity =  fileDefinitionEntityRepository.
       getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
@@ -89,7 +89,7 @@ public class DataExportService {
     }));
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportFails commonExportFails, ExportRequest exportRequest) {
+  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportStatistic commonExportStatistic, ExportRequest exportRequest) {
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
     jobExecution.setStartedDate(currentDate);
@@ -97,11 +97,13 @@ public class DataExportService {
     if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
       jobExecution.setCompletedDate(currentDate);
     }
-    long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
-    var jobExecutionProgress = new JobExecutionProgress();
-    jobExecutionProgress.setFailed(0);
-    jobExecutionProgress.setExported(0);
-    updateTotal(exportRequest, jobExecutionProgress, commonExportFails, totalExportsIds);
+
+    var jobExecutionProgress = jobExecutionService.getById(jobExecution.getId()).getProgress();
+    if (jobExecutionProgress == null) {
+      jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+    }
+    updateTotal(exportRequest, jobExecution.getId(), jobExecutionProgress);
     jobExecution.setProgress(jobExecutionProgress);
 
     jobExecutionService.save(jobExecution);
@@ -122,8 +124,7 @@ public class DataExportService {
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 
-  private void updateTotal(ExportRequest exportRequest, JobExecutionProgress jobExecutionProgress,
-                           CommonExportFails commonExportFails, long totalExportsIds) {
+  private void updateTotal(ExportRequest exportRequest, UUID jobExecutionId,  JobExecutionProgress jobExecutionProgress) {
     if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
@@ -135,8 +136,9 @@ public class DataExportService {
         }
         log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
       }
-    } else {
-      jobExecutionProgress.setTotal((int) totalExportsIds + commonExportFails.getDuplicatedUUIDAmount() + commonExportFails.getInvalidUUIDFormat().size());
+    } else if (Boolean.TRUE.equals(exportRequest.getQuick())) {
+      long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecutionId);
+      jobExecutionProgress.setTotal((int) totalExportsIds);
     }
   }
 }

@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.logs.ErrorLogService;
@@ -14,14 +15,14 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
 
   @Autowired
   public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
-                                  JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionService, errorLogService);
+                                  JobExecutionEntityRepository jobExecutionEntityRepository, JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
+    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, jobExecutionService, errorLogService);
   }
 
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportFails commonExportFails) {
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
     var exportRequestCopy = getExportRequestCopy(exportRequest);
-    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportFails);
+    exportExecutor.exportAsynch(export, exportRequestCopy, commonExportStatistic);
   }
 
   private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {

@@ -19,6 +19,7 @@ import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.UUID;
 
 @Data
@@ -59,6 +60,7 @@ public class JobExecutionEntity {
     if (isNull(jobExecution.getId())) {
       jobExecution.setId(UUID.randomUUID());
     }
+    jobExecution.setLastUpdatedDate(new Date());
     return JobExecutionEntity.builder()
       .id(jobExecution.getId())
       .jobExecution(jobExecution)

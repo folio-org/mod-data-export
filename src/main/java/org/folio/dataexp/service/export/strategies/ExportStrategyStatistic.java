@@ -12,9 +12,20 @@ public class ExportStrategyStatistic {
   private int failed;
   private int duplicatedSrs;
   private final List<UUID> notExistIds = new ArrayList<>();
+  private ExportedMarcListener exportedMarcListener;
+
+  public ExportStrategyStatistic(ExportedMarcListener exportedMarcListener) {
+    this.exportedMarcListener = exportedMarcListener;
+  }
 
   public void incrementExported() {
     this.exported = this.exported + 1;
+    exportedMarcListener.incrementExported();
+  }
+
+  public void removeExported() {
+    this.exported = 0;
+    exportedMarcListener.removeExported(exported);
   }
 
   public void incrementFailed() {
