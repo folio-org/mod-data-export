@@ -1,0 +1,15 @@
+{
+  "jobProfileId": "2fd2bf30-9d03-4f7e-9393-df55eaef2c2f",
+  "criteria": "(source==\"MARC\" and discoverySuppress==\"true\")",
+  "uuids": [],
+  "type": "cql",
+  "recordType": "INSTANCE",
+  "metadata": {
+    "createdDate": "2019-07-22T11:22:07Z",
+    "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+    "createdByUsername": "janedoeuser",
+    "updatedDate": "2019-07-27T13:28:54Z",
+    "updatedByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b",
+    "updatedByUsername": ""
+  }
+}

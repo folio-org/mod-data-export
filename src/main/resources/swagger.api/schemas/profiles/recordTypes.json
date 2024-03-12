@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Enum of entity (record) types",
+  "type": "string",
+  "additionalProperties": false,
+  "enum": [
+    "INSTANCE",
+    "HOLDINGS",
+    "ITEM",
+    "AUTHORITY",
+    "SRS"
+  ]
+}

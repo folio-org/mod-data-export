@@ -1,0 +1,36 @@
+{
+  "mappingProfiles": [
+    {
+      "id": "3798f546-7afb-11ea-bc55-0242ac130003",
+      "name": "Example mapping profile",
+      "description": "Example mapping profile description",
+      "recordTypes": [
+        "INSTANCE"
+      ],
+      "outputFormat": "MARC",
+      "transformations": [
+        {
+          "fieldId": "electronicAccess.linkText",
+          "path": "Json path for electronicAccess[*].linkText",
+          "transformation": "001",
+          "enabled": true,
+          "recordType": "INSTANCE"
+        }
+      ],
+      "userInfo": {
+        "firstName": "User",
+        "lastName": "User",
+        "userName": "@username"
+      },
+      "metadata": {
+        "createdDate": "2020-04-10T12:41:22.000",
+        "createdByUserId": "",
+        "createdByUsername": "@username",
+        "updatedDate": "2020-04-10T12:41:22.000",
+        "updatedByUserId": "",
+        "updatedByUsername": "@username"
+      }
+    }
+  ],
+  "totalRecords": 1
+}

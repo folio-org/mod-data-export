@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Quick export response",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jobExecutionId": {
+      "description": "UUID of the job execution, that is used for quick export",
+      "type": "string",
+      "format": "uuid"
+    },
+    "jobExecutionHrId": {
+      "description": "HrId of the job execution, that is used for quick export",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "jobExecutionId",
+    "jobExecutionHrId"
+  ]
+}

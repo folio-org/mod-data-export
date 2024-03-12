@@ -1,4 +1,1 @@
-*
-!Dockerfile
-!docker
-!target/*.jar
+!prometheus-jmx-config.yaml

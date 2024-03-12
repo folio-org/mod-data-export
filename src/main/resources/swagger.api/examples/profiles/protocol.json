@@ -1,0 +1,7 @@
+{
+  "name": "FTP",
+  "host": "Gemini",
+  "port": "21",
+  "description": "The description of the protocol",
+  "authentication": "User ID"
+}
