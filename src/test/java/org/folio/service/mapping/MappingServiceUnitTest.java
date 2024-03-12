@@ -7,7 +7,6 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtil;
-import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.error.TranslationException;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.jaxrs.model.ErrorLog;

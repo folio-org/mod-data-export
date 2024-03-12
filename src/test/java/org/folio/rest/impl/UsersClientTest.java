@@ -6,7 +6,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.UserInfo;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;

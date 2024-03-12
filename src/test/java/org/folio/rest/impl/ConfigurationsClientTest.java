@@ -7,7 +7,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.ConfigurationsClient;
 import org.folio.processor.rule.Rule;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.service.ApplicationTestConfig;

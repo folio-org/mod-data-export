@@ -3,8 +3,6 @@ package org.folio.rest.impl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.ConsortiaClient;
-import org.folio.clients.SourceRecordStorageClient;
 import org.folio.service.manager.export.strategy.AbstractExportStrategy;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;

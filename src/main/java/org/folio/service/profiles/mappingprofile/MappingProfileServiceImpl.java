@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import org.folio.HttpStatus;
-import org.folio.clients.UsersClient;
 import org.folio.dao.MappingProfileDao;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;

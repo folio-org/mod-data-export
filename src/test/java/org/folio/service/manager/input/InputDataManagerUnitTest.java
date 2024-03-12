@@ -30,7 +30,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.util.Maps;
-import org.folio.clients.UsersClient;
 import org.folio.rest.jaxrs.model.ExportRequest;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.JobExecution;

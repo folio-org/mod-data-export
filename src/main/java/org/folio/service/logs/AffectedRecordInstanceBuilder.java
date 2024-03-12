@@ -2,7 +2,6 @@ package org.folio.service.logs;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.util.OkapiConnectionParams;
 import org.springframework.beans.factory.annotation.Autowired;

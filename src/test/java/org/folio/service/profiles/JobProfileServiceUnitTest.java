@@ -5,7 +5,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.UsersClient;
 import org.folio.dao.impl.JobProfileDaoImpl;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.JobProfile;

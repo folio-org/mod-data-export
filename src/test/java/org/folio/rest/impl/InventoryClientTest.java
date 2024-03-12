@@ -8,8 +8,6 @@ import io.vertx.junit5.VertxExtension;
 import java.util.UUID;
 
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.InventoryClient;
-import org.folio.config.ApplicationConfig;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.OkapiConnectionParams;
 import org.junit.Assert;

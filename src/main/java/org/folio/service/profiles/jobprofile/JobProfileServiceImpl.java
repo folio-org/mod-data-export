@@ -5,7 +5,6 @@ import io.vertx.core.Promise;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.HttpStatus;
-import org.folio.clients.UsersClient;
 import org.folio.dao.JobProfileDao;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.JobProfile;

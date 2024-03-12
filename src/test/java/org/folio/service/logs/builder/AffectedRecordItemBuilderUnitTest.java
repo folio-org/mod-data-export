@@ -5,7 +5,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.clients.ConfigurationsClient;
 import org.folio.rest.jaxrs.model.AffectedRecord;
 import org.folio.service.ApplicationTestConfig;
 import org.folio.service.logs.AffectedRecordHoldingBuilder;

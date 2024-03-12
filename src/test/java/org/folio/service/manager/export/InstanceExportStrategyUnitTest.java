@@ -20,8 +20,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.folio.clients.ConsortiaClient;
-import org.folio.clients.InventoryClient;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.FileDefinition;
 import org.folio.rest.jaxrs.model.MappingProfile;

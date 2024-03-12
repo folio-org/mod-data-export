@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.ws.rs.NotFoundException;
 import org.apache.commons.collections4.map.HashedMap;
-import org.folio.clients.UsersClient;
 import org.folio.dao.impl.MappingProfileDaoImpl;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.MappingProfile;

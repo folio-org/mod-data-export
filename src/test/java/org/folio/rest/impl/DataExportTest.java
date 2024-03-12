@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.folio.TestUtil;
-import org.folio.config.ApplicationConfig;
 import org.folio.dao.FileDefinitionDao;
 import org.folio.dao.JobExecutionDao;
 import org.folio.rest.jaxrs.model.ErrorLog;

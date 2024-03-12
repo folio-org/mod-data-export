@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.folio.config.ApplicationConfig;
 import org.folio.rest.exceptions.ServiceException;
 import org.folio.rest.jaxrs.model.ErrorLog;
 import org.folio.rest.jaxrs.model.ExportedFile;

@@ -9,7 +9,6 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.commons.collections4.map.HashedMap;
 import org.assertj.core.util.Lists;
-import org.folio.clients.ConfigurationsClient;
 import org.folio.dao.impl.ErrorLogDaoImpl;
 import org.folio.processor.error.RecordInfo;
 import org.folio.processor.error.RecordType;
