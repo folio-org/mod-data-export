@@ -17,8 +17,8 @@ name: api-doc
 # e.g. ''
 
 env:
-  API_TYPES: 'RAML'
-  API_DIRECTORIES: 'ramls'
+  API_TYPES: 'OAS'
+  API_DIRECTORIES: 'src/main/resources/swagger.api'
   API_EXCLUDES: ''
   OUTPUT_DIR: 'folio-api-docs'
   AWS_S3_BUCKET: 'foliodocs'
@@ -31,7 +31,7 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'ramls/**'
+      - 'src/main/resources/swagger.api/**'
     tags: '[vV][0-9]+.[0-9]+.[0-9]+*'
 
 jobs:

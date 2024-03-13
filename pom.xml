@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.3</version>
+    <relativePath /> <!-- lookup parent from repository -->
+  </parent>
+
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export</artifactId>
+  <name>mod-data-export</name>
   <version>4.9.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -17,173 +26,166 @@
     <java.version>17</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <argLine>-Dfile.encoding=UTF-8</argLine>
-
-    <raml-module-builder.version>35.0.1</raml-module-builder.version>
-    <vertx.version>4.3.4</vertx.version>
-    <folio-di-support.version>1.6.0</folio-di-support.version>
-    <junit.version>5.9.1</junit.version>
-    <rest-assured.version>5.2.0</rest-assured.version>
-    <marc4j.version>2.9.2</marc4j.version>
-    <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
-    <generate-marc-utils-version>1.8.0-SNAPSHOT</generate-marc-utils-version>
-    <folio-s3-client.version>2.1.0-SNAPSHOT</folio-s3-client.version>
-    <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
     <sonar.exclusions>
-      **/OkapiConnectionParams.java,
-      **/ModTenantAPI.java,
-      **/ExportPayload.java,
-      **/InputDataContext.java,
-      **/InitAPIImpl.java
+      **/src/main/java/org/folio/dataexp/exception/**,
+      **/src/main/java/org/folio/dataexp/domain/entity/**,
+      **/src/main/java/org/folio/dataexp/domain/dto/**,
+      **/src/main/java/org/folio/dataexp/repository**,
+      **/src/main/java/org/folio/dataexp/util/ExternalPathResolver.java,
+      **/src/**/test/**/*
     </sonar.exclusions>
+    <argLine />
+    <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
+
+    <folio-spring-base.version>8.1.0</folio-spring-base.version>
+    <folio-spring-cql.version>8.1.0</folio-spring-cql.version>
+    <generate-marc-utils-version>1.8.0-SNAPSHOT</generate-marc-utils-version>
+    <apache-commons-io.version>2.11.0</apache-commons-io.version>
+    <apache-commons-collections.version>4.4</apache-commons-collections.version>
+    <feign-jackson.version>12.1</feign-jackson.version>
+    <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
+    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
+    <folio-s3-client.version>2.0.6</folio-s3-client.version>
+    <marc4j.version>2.9.2</marc4j.version>
+    <mapstruct.version>1.5.3.Final</mapstruct.version>
+    <lombok.mapstruct-binding.version>0.2.0</lombok.mapstruct-binding.version>
+    <cql2pgjson.version>35.0.6</cql2pgjson.version>
+
+    <!-- Test dependencies versions -->
+    <testcontainer.version>1.17.6</testcontainer.version>
+    <wiremock.version>2.35.0</wiremock.version>
+    <awaitility.version>4.2.0</awaitility.version>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
+
+    <!-- Plugins versions -->
+    <maven-openapi-generator-plugin.version>6.2.1</maven-openapi-generator-plugin.version>
+    <maven-copy-rename-plugin.version>1.0.1</maven-copy-rename-plugin.version>
+    <maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
+    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
+    <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>${junit.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.logging.log4j</groupId>
-        <artifactId>log4j-bom</artifactId>
-        <version>2.19.0</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
-        <groupId>io.vertx</groupId>
-        <artifactId>vertx-stack-depchain</artifactId>
-        <version>${vertx.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
-    <!-- folio dependencies -->
     <dependency>
       <groupId>org.folio</groupId>
-      <artifactId>domain-models-runtime</artifactId>
-      <version>${raml-module-builder.version}</version>
+      <artifactId>folio-spring-base</artifactId>
+      <version>${folio-spring-base.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
-      <artifactId>folio-di-support</artifactId>
-      <version>${folio-di-support.version}</version>
-      <type>jar</type>
+      <artifactId>cql2pgjson</artifactId>
+      <version>${cql2pgjson.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-spring-cql</artifactId>
+      <version>${folio-spring-cql.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-smile</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${mapstruct.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <version>${mapstruct.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>${apache-commons-collections.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${apache-commons-io.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.openfeign</groupId>
+      <artifactId>feign-jackson</artifactId>
+      <version>${feign-jackson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>${aws-sdk-java.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.hypersistence</groupId>
+      <artifactId>hypersistence-utils-hibernate-63</artifactId>
+      <version>${hypersistence-utils-hibernate-63.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-s3-client</artifactId>
       <version>${folio-s3-client.version}</version>
     </dependency>
 
-
-    <!-- Vertx dependencies -->
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-service-proxy</artifactId>
-    </dependency>
-
-    <!-- other dependencies -->
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.marc4j</groupId>
-      <artifactId>marc4j</artifactId>
-      <version>${marc4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
-    </dependency>
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk</artifactId>
-      <version>1.12.321</version>
-    </dependency>
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
-      <version>2.8.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.ben-manes.caffeine</groupId>
-      <artifactId>caffeine</artifactId>
-      <version>3.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.javaparser</groupId>
-      <artifactId>javaparser-core</artifactId>
-      <version>3.24.4</version>
-    </dependency>
-
-    <!-- test dependencies -->
-    <dependency>
-      <groupId>io.rest-assured</groupId>
-      <artifactId>rest-assured</artifactId>
-      <version>${rest-assured.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-runner</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>4.8.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.23.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-junit5</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>generate-marc-utils</artifactId>
@@ -196,68 +198,123 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
-      <groupId>org.folio</groupId>
-      <artifactId>postgres-testing</artifactId>
-      <version>${raml-module-builder.version}</version>
+      <groupId>org.marc4j</groupId>
+      <artifactId>marc4j</artifactId>
+      <version>${marc4j.version}</version>
     </dependency>
+
+    <!-- Test dependencies -->
     <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>s3</artifactId>
-      <version>${aws-sdk-java.version}</version>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-to-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>${testcontainer.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainer.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${testcontainer.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <version>${awaitility.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-jre8-standalone</artifactId>
+      <version>${wiremock.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>${mockito-inline.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
-          <release>17</release>
-          <encoding>UTF-8</encoding>
-          <useIncrementalCompilation>false</useIncrementalCompilation>
-          <annotationProcessors>
-            <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-          </annotationProcessors>
-          <generatedSourcesDirectory>${project.build.directory}/generated-sources/service/manager</generatedSourcesDirectory>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+          <excludes>
+            <exclude>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-configuration-processor</artifactId>
+            </exclude>
+          </excludes>
         </configuration>
-        <executions>
-          <execution>
-            <id>default-compile</id>
-            <phase>process-sources</phase>
-          </execution>
-          <execution>
-            <id>build-generated-code</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.8.1</version>
+        <configuration>
+          <generateBackupPoms>false</generateBackupPoms>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>${maven-build-helper-plugin.version}</version>
         <executions>
           <execution>
-            <id>add_generated_sources_folder</id>
+            <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
             </goals>
-            <phase>initialize</phase>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources/raml-jaxrs</source>
+                <source>${project.build.directory}/generated-sources</source>
               </sources>
             </configuration>
           </execution>
@@ -265,78 +322,47 @@
       </plugin>
 
       <plugin>
-        <groupId>org.folio</groupId>
-        <artifactId>domain-models-maven-plugin</artifactId>
-        <version>${raml-module-builder.version}</version>
+        <groupId>org.openapitools</groupId>
+        <artifactId>openapi-generator-maven-plugin</artifactId>
+        <version>${maven-openapi-generator-plugin.version}</version>
         <executions>
           <execution>
-            <id>generate_interfaces</id>
+            <id>mod-data-export-openapi</id>
             <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>com.nickwongdev</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.12.6</version>
-        <configuration>
-          <verbose>true</verbose>
-          <complianceLevel>11</complianceLevel>
-          <includes>
-            <include>**/impl/*.java</include>
-            <include>**/*.aj</include>
-          </includes>
-          <aspectDirectory>src/main/java/org/folio/rest/annotations</aspectDirectory>
-          <XaddSerialVersionUID>true</XaddSerialVersionUID>
-          <showWeaveInfo>true</showWeaveInfo>
-          <aspectLibraries>
-            <aspectLibrary>
-              <groupId>org.folio</groupId>
-              <artifactId>domain-models-api-aspects</artifactId>
-            </aspectLibrary>
-          </aspectLibraries>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>1.9.6</version>
-          </dependency>
-          <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjtools</artifactId>
-            <version>1.9.6</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0.0</version>
-        <executions>
-          <execution>
-            <id>set-system-properties</id>
-            <goals>
-              <goal>set-system-properties</goal>
+              <goal>generate</goal>
             </goals>
             <configuration>
-              <properties>
-                <property>
-                  <name>log4j.configurationFile</name>
-                  <value>${project.baseUri}src/main/resources/log4j2.properties</value>
-                </property>
-              </properties>
+              <inputSpec>${data-export.yaml.file}</inputSpec>
+              <output>${project.build.directory}/generated-sources</output>
+              <generatorName>spring</generatorName>
+              <modelPackage>${project.groupId}.dataexp.domain.dto</modelPackage>
+              <apiPackage>${project.groupId}.dataexp.rest.resource</apiPackage>
+              <generateApis>true</generateApis>
+              <generateApiTests>true</generateApiTests>
+              <generateApiDocumentation>true</generateApiDocumentation>
+              <generateModels>true</generateModels>
+
+              <generateModelTests>false</generateModelTests>
+              <generateSupportingFiles>true</generateSupportingFiles>
+              <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+              <generateModelDocumentation>true</generateModelDocumentation>
+              <configOptions>
+                <java8>true</java8>
+                <dateLibrary>java</dateLibrary>
+                <interfaceOnly>true</interfaceOnly>
+                <useSpringBoot3>true</useSpringBoot3>
+                <additionalModelTypeAnnotations>@lombok.Builder @lombok.NoArgsConstructor @lombok.AllArgsConstructor</additionalModelTypeAnnotations>
+              </configOptions>
+            </configuration>
+          </execution>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <inputSpec>${data-export.yaml.file}</inputSpec>
+              <output>${project.build.directory}/docs/mod-data-export</output>
+              <generatorName>html2</generatorName>
             </configuration>
           </execution>
         </executions>
@@ -344,25 +370,40 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>${lombok.mapstruct-binding.version}</version>
+            </path>
+            <path>
+              <groupId>org.mapstruct</groupId>
+              <artifactId>mapstruct-processor</artifactId>
+              <version>${mapstruct.version}</version>
+            </path>
+            <path>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-configuration-processor</artifactId>
+              <version>${project.parent.version}</version>
+            </path>
+          </annotationProcessorPaths>
+          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>${maven-resources-plugin.version}</version>
         <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/classes/apidocs/raml</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${ramlfiles_path}</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
           <execution>
             <id>filter-descriptor-inputs</id>
             <phase>generate-resources</phase>
@@ -386,7 +427,7 @@
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0</version>
+        <version>${maven-copy-rename-plugin.version}</version>
         <executions>
           <execution>
             <id>rename-descriptor-outputs</id>
@@ -404,6 +445,10 @@
                   <sourceFile>${project.build.directory}/DeploymentDescriptor-template.json</sourceFile>
                   <destinationFile>${project.build.directory}/DeploymentDescriptor.json</destinationFile>
                 </fileSet>
+                <fileSet>
+                  <sourceFile>${project.build.directory}/docs/mod-data-export/index.html</sourceFile>
+                  <destinationFile>${project.build.directory}/apidocs/mod-data-export.html</destinationFile>
+                </fileSet>
               </fileSets>
             </configuration>
           </execution>
@@ -412,61 +457,12 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>org.folio.rest.RestLauncher</Main-Class>
-                    <Main-Verticle>org.folio.rest.RestVerticle</Main-Verticle>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>**/Log4j2Plugins.dat</exclude>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <artifactSet />
-              <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <useSystemClassLoader>false</useSystemClassLoader>
-          <systemPropertyVariables>
-            <vertx.logger-delegate-factory-class-name>
-              io.vertx.core.logging.Log4j2LogDelegateFactory
-            </vertx.logger-delegate-factory-class-name>
-          </systemPropertyVariables>
-          <excludes>
-            <!--  The tests in these packages are run as part of a test Suite -->
-            <exclude>org/folio/rest/impl/**Test.java</exclude>
-            <exclude>org/folio/clients/**Test.java</exclude>
-          </excludes>
           <includes>
-            <include>org/folio/rest/impl/StorageTestSuite.java</include>
-            <include>**/*Test.java</include>
-            <include>**/*Tests.java</include>
+            <include>org/folio/dataexp/**</include>
           </includes>
         </configuration>
       </plugin>
@@ -474,7 +470,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>${maven-release-plugin.version}</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
@@ -483,31 +479,37 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
+        <configuration>
+          <groups>integration</groups>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 
   <scm>
-    <url>https://github.com/folio-org/mod-data-export</url>
-    <connection>scm:git:git://github.com/folio-org/mod-data-export</connection>
-    <developerConnection>scm:git:git@github.com:folio-org/mod-data-export.git</developerConnection>
+    <url>https://github.com/folio-org/${project.artifactId}</url>
+    <connection>scm:git:git://github.com/folio-org/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <repositories>
     <repository>
       <id>folio-nexus</id>
-      <name>FOLIO Maven Repository</name>
-      <url>https://repository.folio.org/repository/maven-folio</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>folio-nexus</id>
       <name>FOLIO Maven repository</name>
       <url>https://repository.folio.org/repository/maven-folio</url>
-    </pluginRepository>
-  </pluginRepositories>
+    </repository>
+    <repository>
+      <id>index-data-nexus</id>
+      <name>FOLIO Maven repository</name>
+      <url>https://maven.indexdata.com</url>
+    </repository>
+  </repositories>
 
   <distributionManagement>
     <repository>

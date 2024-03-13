@@ -21,18 +21,18 @@ name: api-lint
 # e.g. false
 
 env:
-  API_TYPES: 'RAML'
-  API_DIRECTORIES: 'ramls'
+  API_TYPES: 'OAS'
+  API_DIRECTORIES: 'src/main/resources/swagger.api'
   API_EXCLUDES: ''
   API_WARNINGS: false
 
 on:
   push:
     paths:
-      - 'ramls/**'
+      - 'src/main/resources/swagger.api/**'
   pull_request:
     paths:
-      - 'ramls/**'
+      - 'src/main/resources/swagger.api/**'
 
 jobs:
   api-lint:

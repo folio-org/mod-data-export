@@ -17,7 +17,7 @@ FOLIO data export module.
 #### Important notes
 
 ## LIMITATIONS OF THE MODULE
-For current releases, S3-compatible file storage (using MinIO client) is supported 
+For current releases, S3-compatible file storage (using MinIO client) is supported
 to store the exported MARC files.
 
 ## OTHER
@@ -107,7 +107,7 @@ at the [FOLIO issue tracker](https://dev.folio.org/guidelines/issue-tracker/).
 To configure your own rules, you need to add it to the [mod-configuration module](https://github.com/folio-org/mod-configuration).
 "Code" value to use in the request - "RULES_OVERRIDE".
 "Value" field represents the rules, create your rules in the proper format(the example of default data-export rules - https://github.com/folio-org/mod-data-export/blob/master/src/main/resources/rules/rulesDefault.json).
-Convert the rules to the String format (you can use online [converter](https://tools.knowledgewalls.com/jsontostring)). Put the result string to the "value" field in the request body. 
+Convert the rules to the String format (you can use online [converter](https://tools.knowledgewalls.com/jsontostring)). Put the result string to the "value" field in the request body.
 The description of how to create a configuration in mod-configuration module - https://github.com/folio-org/mod-configuration/blob/master/README.md.
 `If there are rules in mod-configuration, and they are enabled, they always will be used for the mapping process for a given tenant.`
 
@@ -137,6 +137,13 @@ The average memory usage is ~200 MiB.
 For Custom mapping profile, the max usage of memory is 250 MiB during the process of export 1 million records.
 The average memory usage is ~190 MiB.
 
+#### MINIO storage memory settings for /data-export/export-all
+Depending on the total amount of records to be exported, the size of minio storage required for the successful export can be various.
+For example, 1 output mrc file with 100k records occupies 115Mb of minio storage and for 8180068 instances 
+it requires 82 files, so the total size of files will be 115 * 82 = 9.43Gb for only 1 export execution. 
+These results should be taken into account when setting up configuration for minio storage, especially for 
+larger data sets and parallel export.
+
 
 
 The [raml-module-builder](https://github.com/folio-org/raml-module-builder) framework.
@@ -144,3 +151,20 @@ The [raml-module-builder](https://github.com/folio-org/raml-module-builder) fram
 Other [modules](https://dev.folio.org/source-code/#server-side).
 
 Other FOLIO Developer documentation is at [dev.folio.org](https://dev.folio.org/)
+
+### Environment variables
+This module uses S3 storage for files. AWS S3 and Minio Server are supported for files storage.
+It is also necessary to specify variable S3_IS_AWS to determine if AWS S3 is used as files storage. By default,
+this variable is `false` and means that MinIO server is used as storage.
+This value should be `true` if AWS S3 is used.
+
+| Name                    | Default value          | Description                                |
+|:------------------------|:-----------------------|:-------------------------------------------|
+| S3_URL                  | http://127.0.0.1:9000/ | S3 url                                     |
+| S3_REGION               | -                      | S3 region                                  |
+| S3_BUCKET               | -                      | S3 bucket                                  |
+| S3_ACCESS_KEY_ID        | -                      | S3 access key                              |
+| S3_SECRET_ACCESS_KEY    | -                      | S3 secret key                              |
+| S3_IS_AWS               | false                  | Specify if AWS S3 is used as files storage |
+
+

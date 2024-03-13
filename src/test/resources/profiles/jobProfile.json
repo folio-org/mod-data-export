@@ -1,7 +1,0 @@
-{
-  "id": "448ae575-daec-49c1-8041-d64c8ed8e5b1",
-  "name": "job profile name",
-  "destination": "fileSystem",
-  "description": "Job profile description",
-  "mappingProfileId": "3798f546-7afb-11ea-bc55-0242ac130003"
-}

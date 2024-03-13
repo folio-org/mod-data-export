@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of related users",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "relatedUsers": {
+      "description": "List of related users",
+      "type": "array",
+      "id": "relatedUsersList",
+      "items": {
+        "type": "object",
+        "$ref": "relatedUser.json"
+      }
+    },
+    "totalRecords": {
+      "type": "integer"
+    }
+  }
+}
