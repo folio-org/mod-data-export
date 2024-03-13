@@ -42,7 +42,7 @@ import static org.awaitility.Awaitility.await;
 public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
-  private static final long SEARCH_POLL_INTERVAL = 5L;
+  private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
   private static final int TIME_TO_WAIT_FOR_SEARCH_IDS_SECONDS = 60 * 60 * 3;
 
   private final ExportIdEntityRepository exportIdEntityRepository;
@@ -132,7 +132,7 @@ public class InputFileProcessor {
       try {
         var idsJobPayload = new IdsJobPayload().withEntityType(IdsJobPayload.EntityType.valueOf(idType.name())).withQuery(cql);
         var idsJob = searchClient.submitIdsJob(idsJobPayload);
-        await().with().pollInterval(SEARCH_POLL_INTERVAL, SECONDS)
+        await().with().pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
           .atMost(TIME_TO_WAIT_FOR_SEARCH_IDS_SECONDS, SECONDS)
           .until(() -> getJobSearchStatus(idsJob.getId().toString()) != IdsJob.Status.IN_PROGRESS);
         var jobStatus = getJobSearchStatus(idsJob.getId().toString());
