@@ -153,7 +153,7 @@ public class InputFileProcessor {
             progress.setReadIds(progress.getReadIds() + partition.size());
             jobExecutionService.save(jobExecution);
           }
-        } else if (idsJob.getStatus() == IdsJob.Status.ERROR) {
+        } else if (jobStatus == IdsJob.Status.ERROR) {
           log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(fileDefinition.getFileName()),
             fileDefinition.getJobExecutionId());
