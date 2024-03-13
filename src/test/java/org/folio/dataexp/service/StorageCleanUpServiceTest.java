@@ -40,7 +40,7 @@ class StorageCleanUpServiceTest extends BaseDataExportInitializer {
           .sourcePath("path")
           .fileName(fileName)
           .metadata(new Metadata()
-            .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(2)))))
+            .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(25)))))
         .build());
 
       s3Client.write(path, new ByteArrayInputStream("content".getBytes()));
