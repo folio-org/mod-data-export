@@ -19,4 +19,7 @@ public interface SearchClient {
 
   @GetMapping(value = "/{jobId}/ids", produces = APPLICATION_JSON_VALUE)
   ResourceIds getResourceIds(@PathVariable String jobId);
+
+  @GetMapping(value = "/{jobId}", produces = APPLICATION_JSON_VALUE)
+  IdsJob getJobStatus(@PathVariable String jobId);
 }
