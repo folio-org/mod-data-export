@@ -19,6 +19,7 @@ import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -43,8 +44,9 @@ public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
   private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
-  private static final int TIME_TO_WAIT_FOR_SEARCH_IDS_SECONDS = 60 * 60 * 3;
 
+  @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
+  private int waitSearchIdsTimeSeconds;
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
@@ -133,7 +135,7 @@ public class InputFileProcessor {
         var idsJobPayload = new IdsJobPayload().withEntityType(IdsJobPayload.EntityType.valueOf(idType.name())).withQuery(cql);
         var idsJob = searchClient.submitIdsJob(idsJobPayload);
         await().with().pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
-          .atMost(TIME_TO_WAIT_FOR_SEARCH_IDS_SECONDS, SECONDS)
+          .atMost(waitSearchIdsTimeSeconds, SECONDS)
           .until(() -> getJobSearchStatus(idsJob.getId().toString()) != IdsJob.Status.IN_PROGRESS);
         var jobStatus = getJobSearchStatus(idsJob.getId().toString());
         if (jobStatus == IdsJob.Status.COMPLETED) {

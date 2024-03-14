@@ -67,6 +67,7 @@ management:
       enabled: true
 debug: false
 application:
+  wait-search-ids-time: ${WAIT_SEARCH_IDS_TIME:10800}
   export-ids-batch: ${EXPORT_IDS_BATCH:1000}
   export-files:
     max-pool-size: ${EXPORT_FILES_MAX_POOL_SIZE:5}
