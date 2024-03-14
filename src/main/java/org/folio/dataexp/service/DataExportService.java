@@ -59,6 +59,7 @@ public class DataExportService {
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
     jobExecution.setHrId(jobExecutionService.getNextHrid());
+    jobExecution.setStartedDate(new Date());
     var runBy = getRunBy();
     jobExecution.setRunBy(runBy);
     var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
@@ -92,7 +93,6 @@ public class DataExportService {
   private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportStatistic commonExportStatistic, ExportRequest exportRequest) {
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
-    jobExecution.setStartedDate(currentDate);
     jobExecution.setLastUpdatedDate(currentDate);
     if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
       jobExecution.setCompletedDate(currentDate);
