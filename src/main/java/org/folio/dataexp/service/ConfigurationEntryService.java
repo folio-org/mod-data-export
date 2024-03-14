@@ -1,10 +1,11 @@
 package org.folio.dataexp.service;
 
+import static com.github.jknack.handlebars.internal.lang3.StringUtils.EMPTY;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
-import org.folio.spring.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class ConfigurationEntryService {
       .getConfigs()
       .stream()
       .findFirst()
-      .orElseThrow(() -> new NotFoundException(String.format("The config entry wasn't found by query = %s ", query)));
+      .orElse(new ConfigurationEntry().value(EMPTY));
   }
 
 
