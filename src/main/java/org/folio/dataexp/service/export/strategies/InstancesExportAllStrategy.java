@@ -21,7 +21,6 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
@@ -46,13 +45,13 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       HoldingsRecordEntityRepository holdingsRecordEntityRepository, ItemEntityRepository itemEntityRepository,
       RuleFactory ruleFactory, RuleHandler ruleHandler, RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider,
       MappingProfileEntityRepository mappingProfileEntityRepository,
-      InstanceWithHridEntityRepository instanceWithHridEntityRepository, ErrorLogService errorLogService,
+      InstanceWithHridEntityRepository instanceWithHridEntityRepository,
       MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
       FolioInstanceAllRepository folioInstanceAllRepository,
       MarcInstanceAllRepository marcInstanceAllRepository) {
     super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
         itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
-        instanceWithHridEntityRepository, errorLogService, marcRecordEntityRepository, instanceEntityRepository);
+        instanceWithHridEntityRepository, marcRecordEntityRepository, instanceEntityRepository);
     this.folioInstanceAllRepository = folioInstanceAllRepository;
     this.marcInstanceAllRepository = marcInstanceAllRepository;
   }
