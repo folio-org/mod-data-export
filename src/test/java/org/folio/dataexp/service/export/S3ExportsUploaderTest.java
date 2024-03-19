@@ -70,7 +70,7 @@ class S3ExportsUploaderTest {
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
-    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class));
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
@@ -128,7 +128,7 @@ class S3ExportsUploaderTest {
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
-    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class));
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
@@ -163,7 +163,7 @@ class S3ExportsUploaderTest {
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
-    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class));
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
