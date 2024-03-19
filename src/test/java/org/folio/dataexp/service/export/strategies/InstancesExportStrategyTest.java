@@ -109,6 +109,7 @@ class InstancesExportStrategyTest {
 
   @BeforeEach
   void setUp() {
+    instancesExportStrategy.errorLogService = errorLogService;
     instancesExportStrategy.entityManager = entityManager;
   }
 

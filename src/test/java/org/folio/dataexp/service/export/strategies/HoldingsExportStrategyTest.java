@@ -80,6 +80,7 @@ class HoldingsExportStrategyTest {
   @BeforeEach
   void setUp() {
     holdingsExportStrategy.entityManager = entityManager;
+    holdingsExportStrategy.errorLogService = errorLogService;
   }
 
   @Test

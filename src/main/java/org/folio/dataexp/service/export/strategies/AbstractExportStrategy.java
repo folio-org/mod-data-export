@@ -50,6 +50,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private JobExecutionService jobExecutionService;
   private JsonToMarcConverter jsonToMarcConverter;
+
   protected ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
 
