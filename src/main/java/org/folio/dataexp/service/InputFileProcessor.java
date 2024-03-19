@@ -1,9 +1,11 @@
 package org.folio.dataexp.service;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.SearchClient;
@@ -17,6 +19,7 @@ import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -32,13 +35,18 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.awaitility.Awaitility.await;
+
 @Component
 @RequiredArgsConstructor
 @Log4j2
 public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
+  private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
 
+  @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
+  private int waitSearchIdsTimeSeconds;
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
@@ -126,28 +134,40 @@ public class InputFileProcessor {
       try {
         var idsJobPayload = new IdsJobPayload().withEntityType(IdsJobPayload.EntityType.valueOf(idType.name())).withQuery(cql);
         var idsJob = searchClient.submitIdsJob(idsJobPayload);
-        if (idsJob.getStatus() == IdsJob.Status.COMPLETED) {
+        await().with().pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
+          .atMost(waitSearchIdsTimeSeconds, SECONDS)
+          .until(() -> getJobSearchStatus(idsJob.getId().toString()) != IdsJob.Status.IN_PROGRESS);
+        var jobStatus = getJobSearchStatus(idsJob.getId().toString());
+        if (jobStatus == IdsJob.Status.COMPLETED) {
           var resourceIds = searchClient.getResourceIds(idsJob.getId().toString());
           log.info("CQL totalRecords: {} for file definition id: {}", resourceIds.getTotalRecords(), fileDefinition.getId());
           List<ExportIdEntity> entities = resourceIds.getIds()
             .stream().map(id -> new ExportIdEntity()
               .withJobExecutionId(fileDefinition.getJobExecutionId())
               .withInstanceId(id.getId())).toList();
-          exportIdEntityRepository.saveAll(entities);
           var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
           var progress = jobExecution.getProgress();
           progress.setTotal(entities.size());
           jobExecutionService.save(jobExecution);
-        } else if (idsJob.getStatus() == IdsJob.Status.ERROR) {
+          var partitions = ListUtils.partition(entities, BATCH_SIZE_TO_SAVE);
+          for (var partition : partitions) {
+            insertExportIdService.saveBatch(partition);
+            progress.setReadIds(progress.getReadIds() + partition.size());
+            jobExecutionService.save(jobExecution);
+          }
+        } else if (jobStatus == IdsJob.Status.ERROR) {
           log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(fileDefinition.getFileName()),
             fileDefinition.getJobExecutionId());
-        } else {
-          log.error("Unexpected IdsJob.Status from mod-search: {}, file definition id: {}", idsJob.getStatus(), fileDefinition.getId());
         }
+        log.info("IdsJob.Status from mod-search: {}, file definition id: {}", jobStatus, fileDefinition.getId());
       } catch (Exception exc) {
         log.error("Error occurred while CQL export: {}, file definition id: {}", exc.getMessage(), fileDefinition.getId());
       }
     }
+  }
+
+  private IdsJob.Status getJobSearchStatus(String jobId) {
+    return searchClient.getJobStatus(jobId).getStatus();
   }
 }

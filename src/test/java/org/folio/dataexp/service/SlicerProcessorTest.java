@@ -7,6 +7,8 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.IdsJob;
 import org.folio.dataexp.domain.dto.IdsJobPayload;
+import org.folio.dataexp.domain.dto.JobExecution;
+import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class SlicerProcessorTest extends BaseDataExportInitializer {
@@ -55,14 +58,20 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload_for_slicer.cql");
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
-    fileDefinition.setJobExecutionId(UUID.randomUUID());
+
+    var progress = new JobExecutionProgress();
+    var jobExecution = JobExecution.builder().id(UUID.randomUUID()).build();
+    jobExecution.setProgress(progress);
+    fileDefinition.setJobExecutionId(jobExecution.getId());
 
     s3Client.createBucketIfNotExists();
 
     var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
-    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(new IdsJob().withId(fileDefinition.getJobExecutionId())
+    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(new IdsJob().withId(UUID.randomUUID())
+      .withStatus(IdsJob.Status.COMPLETED));
+    when(searchClient.getJobStatus(anyString())).thenReturn(new IdsJob().withId(UUID.randomUUID())
       .withStatus(IdsJob.Status.COMPLETED));
     var resourceIds = new ResourceIds().withIds(List.of(
       new ResourceIds.Id().withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd")),
@@ -70,7 +79,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecutionEntity = JobExecutionEntity.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
       inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
