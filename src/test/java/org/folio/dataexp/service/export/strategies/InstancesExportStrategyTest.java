@@ -125,13 +125,13 @@ class InstancesExportStrategyTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
 
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
 
-    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
   }
 
@@ -142,7 +142,7 @@ class InstancesExportStrategyTest {
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(0, actualMarcRecords.size());
   }
 

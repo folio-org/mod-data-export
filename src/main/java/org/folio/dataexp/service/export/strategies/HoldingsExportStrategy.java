@@ -63,7 +63,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
 
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                               UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
           HOLDING_MARC_TYPE, "ACTUAL");

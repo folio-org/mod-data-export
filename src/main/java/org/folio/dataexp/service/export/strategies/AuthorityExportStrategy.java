@@ -20,6 +20,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_UUID_IS_SET_TO_DELETION;
+
 @Log4j2
 @Component
 @RequiredArgsConstructor
@@ -31,9 +35,13 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   protected final FolioExecutionContext context;
 
   @Override
-  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                        UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       List<MarcRecordEntity> marcAuthorities = getMarcAuthorities(externalIds);
+      log.info("Total marc authorities: {}", marcAuthorities.size());
+      handleDeleted(marcAuthorities, jobExecutionId, exportRequest);
+      log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
@@ -59,6 +67,30 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
 
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
+  }
+
+  private void handleDeleted(List<MarcRecordEntity> marcAuthorities, UUID jobExecutionId, ExportRequest exportRequest) {
+    var iterator = marcAuthorities.iterator();
+    while (iterator.hasNext()) {
+      var rec = iterator.next();
+      if (rec.getState().equals("DELETED")) {
+        if (!isDeletedJobProfile(exportRequest.getJobProfileId())) {
+          var msg = format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), rec.getExternalId());
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(),
+            List.of(msg), jobExecutionId);
+          log.error(msg);
+          iterator.remove();
+        }
+      } else if (rec.getState().equals("ACTUAL")) {
+        if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
+          var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+            List.of(msg), jobExecutionId);
+          log.error(msg);
+          iterator.remove();
+        }
+      }
+    }
   }
 
   @Override
