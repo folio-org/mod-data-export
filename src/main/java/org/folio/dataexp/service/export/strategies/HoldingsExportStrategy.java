@@ -57,7 +57,6 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
   private final RuleHandler ruleHandler;
   private final ReferenceDataProvider referenceDataProvider;
-  private final ErrorLogService errorLogService;
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;

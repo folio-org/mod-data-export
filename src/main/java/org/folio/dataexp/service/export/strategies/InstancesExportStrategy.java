@@ -76,7 +76,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
-  private final ErrorLogService errorLogService;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
   protected final InstanceEntityRepository instanceEntityRepository;

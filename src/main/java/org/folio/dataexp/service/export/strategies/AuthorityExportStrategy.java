@@ -81,14 +81,12 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
           log.error(msg);
           iterator.remove();
         }
-      } else if (rec.getState().equals("ACTUAL")) {
-        if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
-          var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-            List.of(msg), jobExecutionId);
-          log.error(msg);
-          iterator.remove();
-        }
+      } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
+        var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+          List.of(msg), jobExecutionId);
+        log.error(msg);
+        iterator.remove();
       }
     }
   }
