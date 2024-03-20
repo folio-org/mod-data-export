@@ -40,6 +40,9 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       List<MarcRecordEntity> marcAuthorities = getMarcAuthorities(externalIds);
       log.info("Total marc authorities: {}", marcAuthorities.size());
+      if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
+        log.info("Deleted job profile for authority is being used.");
+      }
       handleDeleted(marcAuthorities, jobExecutionId, exportRequest);
       log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
