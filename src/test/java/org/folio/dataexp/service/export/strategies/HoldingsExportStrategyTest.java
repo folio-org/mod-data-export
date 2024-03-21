@@ -80,13 +80,14 @@ class HoldingsExportStrategyTest {
   @BeforeEach
   void setUp() {
     holdingsExportStrategy.entityManager = entityManager;
+    holdingsExportStrategy.errorLogService = errorLogService;
   }
 
   @Test
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest());
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
     verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIsAndStateIs(anySet(), isA(String.class), isA(String.class));
   }
 
@@ -95,7 +96,7 @@ class HoldingsExportStrategyTest {
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest());
+    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
     verify(marcRecordEntityRepository, times(0)).findByExternalIdInAndRecordTypeIsAndStateIs(anySet(), isA(String.class), isA(String.class));
   }
 

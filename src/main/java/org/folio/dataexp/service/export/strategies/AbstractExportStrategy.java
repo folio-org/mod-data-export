@@ -50,7 +50,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private JobProfileEntityRepository jobProfileEntityRepository;
   private JobExecutionService jobExecutionService;
   private JsonToMarcConverter jsonToMarcConverter;
-  private ErrorLogService errorLogService;
+
+  protected ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
 
   @PersistenceContext
@@ -93,7 +94,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     }
   }
 
-  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest);
+  abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                                 UUID jobExecutionId);
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                 UUID jobExecutionId, ExportStrategyStatistic exportStatistic);
@@ -119,7 +121,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected void createAndSaveMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       UUID jobExecutionId, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var externalIdsWithMarcRecord = new HashSet<UUID>();
-    var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest);
+    var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest, jobExecutionId);
     createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
     var result = getGeneratedMarc(externalIds, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
     saveMarc(result, exportStatistic, localStorageWriter);
@@ -177,6 +179,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         });
     exportStatistic.setFailed(exportStatistic.getFailed() + result.getFailedIds().size());
     exportStatistic.addNotExistIdsAll(result.getNotExistIds());
+  }
+
+  protected boolean isDeletedJobProfile(UUID jobProfileId) {
+    return StringUtils.equals(jobProfileId.toString(), "2c9be114-6d35-4408-adac-9ead35f51a27");
   }
 
   private void saveDuplicateErrors(LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>> duplicatedUuidWithIdentifiers,

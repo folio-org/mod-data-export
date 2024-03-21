@@ -1,5 +1,15 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
+import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
@@ -48,16 +58,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
-import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.ID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
-import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
-
 @Log4j2
 @Component
 @AllArgsConstructor
@@ -76,13 +76,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
-  private final ErrorLogService errorLogService;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
   protected final InstanceEntityRepository instanceEntityRepository;
 
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                               UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds, INSTANCE_MARC_TYPE, "ACTUAL");
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());

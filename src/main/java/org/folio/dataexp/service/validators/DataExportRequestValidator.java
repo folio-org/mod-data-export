@@ -10,6 +10,10 @@ import org.folio.dataexp.util.ErrorCode;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
 
 @Component
 @RequiredArgsConstructor
@@ -40,6 +44,15 @@ public class DataExportRequestValidator {
         errorMsg += "Only csv format is supported for authority export";
       }
     }
+    if (exportRequest.getIdType() != ExportRequest.IdTypeEnum.AUTHORITY && isDeletedJobProfile(exportRequest.getJobProfileId())) {
+      var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+      errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+        List.of(msg), fileDefinition.getJobExecutionId());
+      if (!errorMsg.isEmpty()) {
+        errorMsg += "; ";
+      }
+      errorMsg += msg;
+    }
     if (!errorMsg.isEmpty()) {
       throw new DataExportRequestValidationException(errorMsg);
     }
@@ -47,5 +60,9 @@ public class DataExportRequestValidator {
 
   private boolean isDefaultAuthorityProfile(String mappingProfileId) {
     return StringUtils.equals(mappingProfileId, "5d636597-a59d-4391-a270-4e79d5ba70e3");
+  }
+
+  private boolean isDeletedJobProfile(UUID jobProfileId) {
+    return StringUtils.equals(jobProfileId.toString(), "2c9be114-6d35-4408-adac-9ead35f51a27");
   }
 }
