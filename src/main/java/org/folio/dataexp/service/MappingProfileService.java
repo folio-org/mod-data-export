@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.ParametersInner;
+import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
@@ -122,7 +123,7 @@ public class MappingProfileService {
     var parameters = new ArrayList<ParametersInner>();
     for (int i = 0; i < transformations.size(); i++) {
       var transformation = transformations.get(i);
-      if (StringUtils.isEmpty(transformation.getTransformation())) {
+      if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
         var type = transformation.getRecordType().getValue().toLowerCase();
         throw new MappingProfileTransformationEmptyException(String.format(TRANSFORMATION_EMPTY_VALUE_MESSAGE, type));
       }
