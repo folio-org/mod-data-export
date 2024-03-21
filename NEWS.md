@@ -1,4 +1,105 @@
-## v4.9.0 Unreleased
+## v5.1.0 Unreleased
+
+## 03/20/2024 v5.0.0 Released
+
+This release contains migration to Spring-based approach
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.7...v5.0.0)
+
+### Technical tasks
+* [MDEXP-733](https://folio-org.atlassian.net/browse/MDEXP-733) Adjust clean-up files timer
+* [MDEXP-731](https://folio-org.atlassian.net/browse/MDEXP-731) Export gets stuck when no indicators in the rule
+* [MDEXP-725](https://folio-org.atlassian.net/browse/MDEXP-725) Reference data is not included in export/fail export
+* [MDEXP-724](https://folio-org.atlassian.net/browse/MDEXP-724) mod-data-export: spring upgrade
+* [MDEXP-723](https://folio-org.atlassian.net/browse/MDEXP-723) Improve progress calculation statistic of data export for spring base module
+* [MDEXP-720](https://folio-org.atlassian.net/browse/MDEXP-720) Clean job_executions_export_ids table after export for spring base module
+* [MDEXP-713](https://folio-org.atlassian.net/browse/MDEXP-713) Provide accurate progress information on Export all jobs
+* [MDEXP-712](https://folio-org.atlassian.net/browse/MDEXP-712) Implement the proper error message value
+* [MDEXP-711](https://folio-org.atlassian.net/browse/MDEXP-711) Return list of the job profiles used in completed jobs
+* [MDEXP-690](https://folio-org.atlassian.net/browse/MDEXP-690) Export MARC Instances with edited SRS
+* [MDEXP-689](https://folio-org.atlassian.net/browse/MDEXP-689) NPE at the time of Mapping Profile and Job Profile update flow
+* [MDEXP-687](https://folio-org.atlassian.net/browse/MDEXP-687) Data Export: enable async mode
+* [MDEXP-686](https://folio-org.atlassian.net/browse/MDEXP-686) Add the ability to sort a number of fields in the data export
+* [MDEXP-685](https://folio-org.atlassian.net/browse/MDEXP-685) Variable for Inventory record link in Error log should be reworked to avoid manual configuration.
+* [MDEXP-684](https://folio-org.atlassian.net/browse/MDEXP-684) Avoid manual configuration for data-export
+* [MDEXP-677](https://folio-org.atlassian.net/browse/MDEXP-677) Files upload flow rework
+* [MDEXP-644](https://folio-org.atlassian.net/browse/MDEXP-644) mod-search usage to retrieve instances ids by cql
+* [MDEXP-642](https://folio-org.atlassian.net/browse/MDEXP-642) Files Download: Rewrite/clean up existing and non-changed logic
+* [MDEXP-641](https://folio-org.atlassian.net/browse/MDEXP-641) Quick-Export: Rewrite/clean up existing and non-changed logic
+* [MDEXP-640](https://folio-org.atlassian.net/browse/MDEXP-640) Data-Export: Rewrite/clean up existing and non-changed logic
+* [MDEXP-634](https://folio-org.atlassian.net/browse/MDEXP-634) Slicer component: configuration support
+* [MDEXP-631](https://folio-org.atlassian.net/browse/MDEXP-631) Logs API, Transformation fields API: Rewrite/clean up existing and non-changed logic
+* [MDEXP-630](https://folio-org.atlassian.net/browse/MDEXP-630) /data-export/export: Single File Processor
+* [MDEXP-629](https://folio-org.atlassian.net/browse/MDEXP-629) /data-export/file-definitions/{id}/upload: upload refactoring
+* [MDEXP-628](https://folio-org.atlassian.net/browse/MDEXP-628) /data-export/export: Holdings Strategy
+* [MDEXP-627](https://folio-org.atlassian.net/browse/MDEXP-627) /data-export/export: Authority Strategy
+* [MDEXP-626](https://folio-org.atlassian.net/browse/MDEXP-626) /data-export/export: Instances Strategy
+* [MDEXP-624](https://folio-org.atlassian.net/browse/MDEXP-624) Create liqubase scripts for new DB objects described in the design confluence page
+* [MDEXP-623](https://folio-org.atlassian.net/browse/MDEXP-623) Migrate RAML API definitions to OpenAPI definitions
+* [MDEXP-622](https://folio-org.atlassian.net/browse/MDEXP-622) Create a project skeleton in a new branch.
+* [MDEXP-621](https://folio-org.atlassian.net/browse/MDEXP-621) Export all endpoint
+* [MDEXP-110](https://folio-org.atlassian.net/browse/MDEXP-110) Return list of users who run the completed jobs
+
+## 12/05/2023 v4.8.7 Released
+
+This release includes only folio-s3-client upgrade
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.6...v4.8.7)
+
+## 11/29/2023 v4.8.6 Released
+
+This release includes bug fix for failed jobs position in job executions view
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.5...v4.8.6)
+
+### Bug Fixes
+* [MDEXP-668](https://issues.folio.org/browse/MDEXP-668) Regression: Failed jobs listed always on top of the queue when completeDate is missing
+
+## 11/10/2023 v4.8.5 Released
+
+This release includes folio-s3-client update.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.4...v4.8.5)
+
+## 11/10/2023 v4.8.4 Released
+
+This release includes bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.3...v4.8.4)
+
+### Bug Fixes
+* [MDEXP-658](https://issues.folio.org/browse/MDEXP-658) bump up folio-s3-client
+
+## 11/10/2023 v4.8.3 Released
+
+This release includes bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.1...v4.8.2)
+
+### Bug Fixes
+* [MDEXP-660](https://issues.folio.org/browse/MDEXP-660) Specify missing interface dependencies
+* [MDEXP-654](https://issues.folio.org/browse/MDEXP-654) Missed details for user friendly error in data export log when multiple SRS records are linked to one instance
+
+## 11/06/2023 v4.8.2 Released
+
+This release includes only bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.1...v4.8.2)
+
+### Bug Fixes
+* [MDEXP-659](https://issues.folio.org/browse/MDEXP-659) Invalid values in export logs for some Failed exports
+* [MDEXP-658](https://issues.folio.org/browse/MDEXP-658) Data Export fails/stops triggered by  a  large file (> 196K)
+* [MDEXP-653](https://issues.folio.org/browse/MDEXP-653) "Failed" column is populated differently depending on the place in the file of record with duplicates
+* [MDEXP-557](https://issues.folio.org/browse/MDEXP-557) "Failed" column is not populated on the "Logs" pane of Data Export
+
+## 10/18/2023 v4.8.1 Released
+
+This release includes fix for migration scripts.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v4.8.0...v4.8.1)
+
+### Stories
+* [MDEXP-625](https://issues.folio.org/browse/MDEXP-625) Swap migration scripts
 
 ## 10/12/2023 v4.8.0 Released
 This release includes export of shared instances, authorities, updates for job execution schema, bug fixes.
@@ -176,7 +277,7 @@ This release includes the interface version bumping for SRS and mod-inventory re
 
 ### Stories
 * [MDEXP-403](https://issues.folio.org/browse/MDEXP-403) align dependency versions affected by Inventory's Optimistic Locking
-* [MDEXP-407](https://issues.folio.org/browse/MDEXP-407) Update srs interface version 
+* [MDEXP-407](https://issues.folio.org/browse/MDEXP-407) Update srs interface version
 
 ### Bug Fixes
 * [MDEXP-388](https://issues.folio.org/browse/MDEXP-388) 0% coverage reported by Sonarcloud for mod-data-export
@@ -198,16 +299,16 @@ in MARC file.
 ## 03/12/2020 v4.0.0 Released
  Major version release which includes below features :
  * allow a user to append holdings and item data with MARC bib record when the user wants to export the record from SRS
- * improve validation for mapping profile transformations: add general backend validation during saving; allow to pass transformations with empty value; allow characters in indicator fields  
+ * improve validation for mapping profile transformations: add general backend validation during saving; allow to pass transformations with empty value; allow characters in indicator fields
  * improve error logs: reflect in error logs what record exactly leads to the exception during the export and append exactly the field name that causes the error; append a link to the inventory record if the export fails
  * add a quick export feature: provide an endpoint to trigger the export based on a provided list of identifiers or CQL statement and can be used in triggering exports by external scripts
  * add more Instance fields to append during generating MARC bib record on the fly: Invalid ISBN, Linking ISBN, Invalid ISSN, Cancelled GPO Item Number identifiers; other standard identifiers, publisher or distributor number, and canceled system control numbers
  * add specific MARC for Holdings record fields mapping rules to map holdings data during generating MARC bib record on the fly
  * add personal data disclosure form
  * upgrade RMB to version 32.2.0
- 
+
  [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.4...v4.0.0)
- 
+
 ### Stories
 * [MDEXP-265](https://issues.folio.org/browse/MDEXP-265) - Applying mapping profile - holdings and item transformations provided - entire SRS record
 * [MDEXP-315](https://issues.folio.org/browse/MDEXP-315) - Add validation to the transformation elements
@@ -219,7 +320,7 @@ in MARC file.
 * [MDEXP-348](https://issues.folio.org/browse/MDEXP-348) - Allow characters in indicator fields
 * [MDEXP-349](https://issues.folio.org/browse/MDEXP-349) - Enhancements to /data-export/quick-export endpoint
 * [MDEXP-346](https://issues.folio.org/browse/MDEXP-346) - The field name is missing if the reference name has changed
-* [MDEXP-12](https://issues.folio.org/browse/MDEXP-12) - Create Inventory Holdings to MFHD record mapping rules  
+* [MDEXP-12](https://issues.folio.org/browse/MDEXP-12) - Create Inventory Holdings to MFHD record mapping rules
 * [MDEXP-353](https://issues.folio.org/browse/MDEXP-353) - Upgrade to RMB 32
 * [MDEXP-191](https://issues.folio.org/browse/MDEXP-191) - Generate MARC bib record - Identifiers part III - appending subfields
 * [MDEXP-358](https://issues.folio.org/browse/MDEXP-358) - Add personal data disclosure form
@@ -262,7 +363,7 @@ This is a bugfix release for correcting SQL statement name in the migration scri
 ## 11/07/2020 v3.0.1 Released
 This hotfix release includes fixes to handle csv file with different symbols, handle empty csv file correctly,
 displaying UUIDs of records from inventory or SRS that were not found in error logs,fixed missing $ 3 subfield in MARC
-file and duplication of multiple error log entries. Also, this release includes migration script for 
+file and duplication of multiple error log entries. Also, this release includes migration script for
 mapping profiles.
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v3.0.0...v3.0.1)
@@ -358,7 +459,7 @@ This is a bugfix release to address upgrade issues from v1.1.1 to current versio
 
 
 ## 07/13/2020 v2.1.2 Released
-This bugfix release includes fixes to concurrency issues while exporting jobs and also fixes empty query sent to 
+This bugfix release includes fixes to concurrency issues while exporting jobs and also fixes empty query sent to
 inventory which was causing un responsive module
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.1...v2.1.2)
@@ -370,7 +471,7 @@ inventory which was causing un responsive module
 
 ## 07/09/2020 v2.1.1 Released
 This release includes minor bug fixes related to job profile name and minor performance improvement for generating instances on the fly
- 
+
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.1.0...v2.1.1)
 
 ### Stories
@@ -385,7 +486,7 @@ This release includes minor bug fixes related to job profile name and minor perf
 ## 06/25/2020 v2.1.0 Released
 The major change in this release is the interface dependency change to "source-storage-source-records" for performance reasons.
 Also other minor changes include jobprofile association with job execution and MARC field combining on Transformations
- 
+
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v2.0.0...v2.1.0)
 
 ### Stories
@@ -400,7 +501,7 @@ Also other minor changes include jobprofile association with job execution and M
 * [MDEXP-186](https://issues.folio.org/browse/MDEXP-186) - Invalid fileDefinition returns success for /export
 
 ## 06/12/2020 v2.0.0 Released
-The major changes in this release include, generating MARC records on the fly for Instances, being able to define mapping profiles with 
+The major changes in this release include, generating MARC records on the fly for Instances, being able to define mapping profiles with
 transformations for holdings and items, and corresponding job profiles to trigger export job. There is also ability to transform existing MARC records
 on the fly by specifying transformations
 
