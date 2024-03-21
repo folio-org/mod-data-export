@@ -22,6 +22,6 @@ public class DataExportController implements  ExportApi {
   @Override
   public ResponseEntity<Void> postDataExport(ExportRequest exportRequest) {
     dataExportService.postDataExport(exportRequest);
-    return new ResponseEntity<>(HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
