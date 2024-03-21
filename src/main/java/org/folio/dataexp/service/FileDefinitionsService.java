@@ -1,5 +1,7 @@
 package org.folio.dataexp.service;
 
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -29,6 +31,9 @@ public class FileDefinitionsService {
   private final FolioExecutionContext folioExecutionContext;
 
   public FileDefinition postFileDefinition(FileDefinition fileDefinition) {
+    if (isEmpty(fileDefinition.getId())) {
+      fileDefinition.setId(UUID.randomUUID());
+    }
     log.info("Post file definition by id {}", fileDefinition.getId());
     fileDefinitionValidator.validate(fileDefinition);
     var jobExecution = jobExecutionService.save(new JobExecution().status(JobExecution.StatusEnum.NEW));
