@@ -37,6 +37,7 @@ class DataExportRequestValidatorTest {
 
     var exportRequest = new ExportRequest();
     exportRequest.setIdType(ExportRequest.IdTypeEnum.HOLDING);
+    exportRequest.setJobProfileId(UUID.randomUUID());
 
     assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, "uuid"));
   }
