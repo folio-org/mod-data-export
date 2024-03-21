@@ -66,7 +66,8 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest(), UUID.randomUUID());
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
+        new ExportRequest().jobProfileId(UUID.randomUUID()), UUID.randomUUID());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -102,7 +103,8 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(notFoundUUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile, new ExportRequest(), UUID.randomUUID());
+      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
+        new ExportRequest().jobProfileId(UUID.randomUUID()), UUID.randomUUID());
 
       assertThat(marcRecords).isEmpty();
     }
