@@ -146,7 +146,6 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
   }
 
-
   @Test
   @SneakyThrows
   void postMappingProfileTestIfTransformationNotMatchPattern() {
