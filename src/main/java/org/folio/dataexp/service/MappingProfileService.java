@@ -33,7 +33,7 @@ public class MappingProfileService {
   private static final String ERROR_CODE = "javax.validation.constraints.Pattern.message";
   private static final String ERROR_VALIDATION_PARAMETER_KEY_PATTERN = "transformations[%s].transformation";
   private static final String ERROR_VALIDATION_MESSAGE_PATTERN = "must match \\\"%s\\\"";
-  private static final String TRANSFORMATION_EMPTY_VALUE_MESSAGE = "Transformations for fields with %s record type cannot be empty. Please provide a value.";
+  private static final String TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
 
   private final FolioExecutionContext folioExecutionContext;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
@@ -124,8 +124,7 @@ public class MappingProfileService {
     for (int i = 0; i < transformations.size(); i++) {
       var transformation = transformations.get(i);
       if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
-        var type = transformation.getRecordType().getValue().toLowerCase();
-        throw new MappingProfileTransformationEmptyException(String.format(TRANSFORMATION_EMPTY_VALUE_MESSAGE, type));
+        throw new MappingProfileTransformationEmptyException(TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE);
       }
       var matcher = TRANSFORMATION_PATTERN.matcher(transformation.getTransformation());
       if (!matcher.matches()) {
