@@ -31,7 +31,7 @@ class DataExportControllerTest extends BaseDataExportInitializer {
         .post("/data-export/export")
         .headers(defaultHeaders())
         .content(asJsonString(exportRequest)))
-      .andExpect(status().isOk());
+      .andExpect(status().isNoContent());
 
     verify(dataExportService).postDataExport(isA(ExportRequest.class));
   }
