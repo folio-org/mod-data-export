@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -123,9 +124,6 @@ public class MappingProfileService {
     var parameters = new ArrayList<ParametersInner>();
     for (int i = 0; i < transformations.size(); i++) {
       var transformation = transformations.get(i);
-      if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
-        throw new MappingProfileTransformationEmptyException(TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE);
-      }
       var matcher = TRANSFORMATION_PATTERN.matcher(transformation.getTransformation());
       if (!matcher.matches()) {
         var parameter = ParametersInner.builder()
@@ -136,14 +134,21 @@ public class MappingProfileService {
     }
     if (!parameters.isEmpty()) {
       var errors = new Errors();
-      var error = new org.folio.dataexp.domain.dto.Error();
-      error.setCode(ERROR_CODE);
-      error.type("1");
-      error.message(String.format(ERROR_VALIDATION_MESSAGE_PATTERN, TRANSFORMATION_PATTERN));
-      errors.addErrorsItem(error);
-      error.setParameters(parameters);
-      errors.setTotalRecords(1);
+      for (var parameter : parameters) {
+        var errorItem = new org.folio.dataexp.domain.dto.Error();
+        errorItem.setCode(ERROR_CODE);
+        errorItem.type("1");
+        errorItem.message(String.format(ERROR_VALIDATION_MESSAGE_PATTERN, TRANSFORMATION_PATTERN));
+        errors.addErrorsItem(errorItem);
+        errorItem.setParameters(List.of(parameter));
+      }
+      errors.setTotalRecords(errors.getErrors().size());
       throw new MappingProfileTransformationPatternException("Mapping profile validation exception", errors);
+    }
+    for (var transformation : transformations) {
+      if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
+        throw new MappingProfileTransformationEmptyException(TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE);
+      }
     }
   }
 }

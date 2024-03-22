@@ -148,17 +148,24 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
 
   @Test
   @SneakyThrows
-  void postMappingProfileTestIfTransformationNotMatchPattern() {
-    var transformation = new Transformations();
-    transformation.setFieldId("holdings.callnumber");
-    transformation.setPath("$.holdings[*].callNumber");
-    transformation.setRecordType(RecordTypes.HOLDINGS);
-    transformation.setTransformation("902q $wqeqwe");
+  void postMappingProfileTestIfTransformationsNotMatchPattern() {
+    var transformation1 = new Transformations();
+    transformation1.setFieldId("holdings.callnumber");
+    transformation1.setPath("$.holdings[*].callNumber");
+    transformation1.setRecordType(RecordTypes.HOLDINGS);
+    transformation1.setTransformation("902q $aaa");
+
+    var transformation2 = new Transformations();
+    transformation2.setFieldId("holdings.callnumber");
+    transformation2.setPath("$.holdings[*].callNumber");
+    transformation2.setRecordType(RecordTypes.HOLDINGS);
+    transformation2.setTransformation("902q $bbb");
+
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
-    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setTransformations(List.of(transformation1, transformation2));
     var user = new User();
     user.setPersonal(new User.Personal());
 
@@ -174,15 +181,26 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var mapper = new ObjectMapper();
 
     var errors = mapper.readValue(response, Errors.class);
+    assertEquals(2, errors.getErrors().size());
+
     var error = errors.getErrors().get(0);
 
     assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
     assertEquals(1, error.getParameters().size());
+    assertEquals("transformations[0].transformation", error.getParameters().get(0).getKey());
+    assertEquals("902q $aaa", error.getParameters().get(0).getValue());
+
+    error = errors.getErrors().get(1);
+
+    assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
+    assertEquals(1, error.getParameters().size());
+    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
+    assertEquals("902q $bbb", error.getParameters().get(0).getValue());
   }
 
   @Test
   @SneakyThrows
-  void postMappingProfileTestIfTransformationEmpty() {
+  void postMappingProfileTestIfItemTransformationEmpty() {
     var transformation = new Transformations();
     transformation.setFieldId("holdings.callnumber");
     transformation.setPath("$.holdings[*].callNumber");
@@ -207,6 +225,51 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var response = result.getResponse().getContentAsString();
     var expected = "Transformations for fields with item record type cannot be empty. Please provide a value.";
     assertEquals(expected, response);
+  }
+
+  @Test
+  @SneakyThrows
+  void postMappingProfileTestIfItemTransformationEmptyAndTransformationsNotMatchPattern() {
+    var transformation1 = new Transformations();
+    transformation1.setFieldId("holdings.callnumber");
+    transformation1.setPath("$.holdings[*].callNumber");
+    transformation1.setRecordType(RecordTypes.ITEM);
+    transformation1.setTransformation(StringUtils.EMPTY);
+
+    var transformation2 = new Transformations();
+    transformation2.setFieldId("holdings.callnumber");
+    transformation2.setPath("$.holdings[*].callNumber");
+    transformation2.setRecordType(RecordTypes.HOLDINGS);
+    transformation2.setTransformation("902q $bbb");
+
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setDefault(true);
+    mappingProfile.setName("mappingProfile");
+    mappingProfile.setTransformations(List.of(transformation1, transformation2));
+    var user = new User();
+    user.setPersonal(new User.Personal());
+
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
+
+    var result = mockMvc.perform(MockMvcRequestBuilders
+        .post("/data-export/mapping-profiles")
+        .headers(defaultHeaders())
+        .content(asJsonString(mappingProfile)))
+      .andExpect(status().isUnprocessableEntity()).andReturn();
+
+    var response = result.getResponse().getContentAsString();
+    var mapper = new ObjectMapper();
+
+    var errors = mapper.readValue(response, Errors.class);
+    assertEquals(1, errors.getErrors().size());
+
+    var error = errors.getErrors().get(0);
+
+    assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
+    assertEquals(1, error.getParameters().size());
+    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
+    assertEquals("902q $bbb", error.getParameters().get(0).getValue());
   }
 
   @Test
