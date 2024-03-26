@@ -15,7 +15,6 @@ import org.folio.dataexp.repository.MarcHoldingsAllRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
@@ -37,11 +36,11 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
       RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
-      ErrorLogService errorLogService, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
+      HoldingsRecordEntityRepository holdingsRecordEntityRepository,
       MarcRecordEntityRepository marcRecordEntityRepository, FolioHoldingsAllRepository folioHoldingsAllRepository,
       MarcHoldingsAllRepository marcHoldingsAllRepository) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
-        errorLogService, holdingsRecordEntityRepository, marcRecordEntityRepository);
+        holdingsRecordEntityRepository, marcRecordEntityRepository);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }

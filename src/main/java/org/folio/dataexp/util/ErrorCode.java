@@ -54,7 +54,9 @@ public enum ErrorCode {
   ERROR_JOB_IS_EXPIRED(ERROR_MESSAGE_PLACEHOLDER_CODE, "Job was expired: no updates for more than 1 hour"),
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
   ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s"),
-  ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC("error.recordIsTooLong", "Record is too long to be a valid MARC binary record, it's length would be %d which is more than 99999 bytes");
+  ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC("error.recordIsTooLong", "Record is too long to be a valid MARC binary record, it's length would be %d which is more than 99999 bytes"),
+  ERROR_MESSAGE_UUID_IS_SET_TO_DELETION("error.setToDeletion", "%s is set for deletion and cannot be exported using this profile"),
+  ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION("error.onlyForSetToDeletion", "This profile can only be used to export authority records set for deletion");
 
 
   private final String code;
@@ -94,6 +96,8 @@ public enum ErrorCode {
     errorCodesForUUIDs.add(UNDEFINED.getCode());
     errorCodesForUUIDs.add(ERROR_DUPLICATE_SRS_RECORD.getCode());
     errorCodesForUUIDs.add(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode());
+    errorCodesForUUIDs.add(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode());
+    errorCodesForUUIDs.add(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
     return errorCodesForUUIDs;
   }
 }

@@ -1,5 +1,13 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
+import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
@@ -15,7 +23,6 @@ import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
@@ -37,14 +44,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
-import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.ID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
-
 @Log4j2
 @Component
 @AllArgsConstructor
@@ -57,13 +56,13 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
   private final RuleHandler ruleHandler;
   private final ReferenceDataProvider referenceDataProvider;
-  private final ErrorLogService errorLogService;
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
 
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                               UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
           HOLDING_MARC_TYPE, "ACTUAL");
