@@ -98,7 +98,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       if (auditInstances.isEmpty()) {
         return Optional.empty();
       }
-      var auditInstance= auditInstances.get(0);
+      var auditInstance = auditInstances.get(0);
       var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
       exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
       var instanceAssociatedJsonObject = new JSONObject();
