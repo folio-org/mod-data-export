@@ -23,6 +23,6 @@ public class AuditInstanceEntity {
 
   @Id
   private UUID id;
-  @Column(name = "jsonb", columnDefinition = "jsonb")
-  private String jsonb;
+  private String title;
+  private String hrid;
 }

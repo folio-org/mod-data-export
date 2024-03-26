@@ -38,11 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.ID_KEY;
-import static org.folio.dataexp.service.export.Constants.RECORD_KEY;
-import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
-
 @Log4j2
 @Component
 public class InstancesExportAllStrategy extends InstancesExportStrategy {
@@ -103,21 +98,15 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       if (auditInstances.isEmpty()) {
         return Optional.empty();
       }
-      var jsonObject= getAsJsonObject(auditInstances.get(0).getJsonb());
-      if (jsonObject.isPresent()) {
-        var recordJsonObject = (JSONObject)jsonObject.get().get(RECORD_KEY);
-        var hrid = recordJsonObject.getAsString(HRID_KEY);
-        var title = jsonObject.get().getAsString(TITLE_KEY);
-        var uuid = recordJsonObject.getAsString(ID_KEY);
-        var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-        exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + hrid);
-        var instanceAssociatedJsonObject = new JSONObject();
-        instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
-        instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);
-        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, title);
-        exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
-        return Optional.of(exportIdentifiers);
-      }
+      var auditInstance= auditInstances.get(0);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
+      var instanceAssociatedJsonObject = new JSONObject();
+      instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+      instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+      return Optional.of(exportIdentifiers);
     }
     return opt;
   }
