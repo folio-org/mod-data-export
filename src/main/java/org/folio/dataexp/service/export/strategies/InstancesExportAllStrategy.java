@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.extern.log4j.Log4j2;
+import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -8,6 +9,7 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.FolioInstanceAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
@@ -21,6 +23,7 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
@@ -30,8 +33,15 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.RECORD_KEY;
+import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 @Log4j2
 @Component
@@ -39,6 +49,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private final FolioInstanceAllRepository folioInstanceAllRepository;
   private final MarcInstanceAllRepository marcInstanceAllRepository;
+  private final AuditInstanceEntityRepository auditInstanceEntityRepository;
 
   public InstancesExportAllStrategy(ConsortiaService consortiaService,
       InstanceCentralTenantRepository instanceCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
@@ -48,12 +59,13 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       InstanceWithHridEntityRepository instanceWithHridEntityRepository,
       MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
       FolioInstanceAllRepository folioInstanceAllRepository,
-      MarcInstanceAllRepository marcInstanceAllRepository) {
+      MarcInstanceAllRepository marcInstanceAllRepository, AuditInstanceEntityRepository auditInstanceEntityRepository) {
     super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
         itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
         instanceWithHridEntityRepository, marcRecordEntityRepository, instanceEntityRepository);
     this.folioInstanceAllRepository = folioInstanceAllRepository;
     this.marcInstanceAllRepository = marcInstanceAllRepository;
+    this.auditInstanceEntityRepository = auditInstanceEntityRepository;
   }
 
   @Override
@@ -81,6 +93,33 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
+  }
+
+  @Override
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+    var opt = super.getIdentifiers(id);
+    if (opt.isEmpty()) {
+      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
+      if (auditInstances.isEmpty()) {
+        return Optional.empty();
+      }
+      var jsonObject= getAsJsonObject(auditInstances.get(0).getJsonb());
+      if (jsonObject.isPresent()) {
+        var recordJsonObject = (JSONObject)jsonObject.get().get(RECORD_KEY);
+        var hrid = recordJsonObject.getAsString(HRID_KEY);
+        var title = jsonObject.get().getAsString(TITLE_KEY);
+        var uuid = recordJsonObject.getAsString(ID_KEY);
+        var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+        exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + hrid);
+        var instanceAssociatedJsonObject = new JSONObject();
+        instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
+        instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);
+        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, title);
+        exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+        return Optional.of(exportIdentifiers);
+      }
+    }
+    return opt;
   }
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,

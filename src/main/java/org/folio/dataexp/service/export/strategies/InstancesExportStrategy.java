@@ -138,7 +138,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
     if (instances.isEmpty()) return Optional.empty();
     var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
