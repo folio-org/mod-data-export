@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.spring.FolioExecutionContext;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 public class AuthorityExportStrategy extends AbstractExportStrategy {
 
   private final ConsortiaService consortiaService;
+  private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   protected final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
   protected final FolioExecutionContext context;
@@ -88,17 +90,23 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
           msg = format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), rec.getExternalId());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(),
             List.of(msg), jobExecutionId);
-        } else {
+          log.error(msg);
           msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
-            List.of(msg), jobExecutionId);
+          var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode());
+          if (!errors.isEmpty()) {
+            errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
+              List.of(msg), jobExecutionId);
+          }
+          log.error(msg);
+          iterator.remove();
         }
-        log.error(msg);
-        iterator.remove();
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-          List.of(msg), jobExecutionId);
+        var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
+        if (!errors.isEmpty()) {
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+            List.of(msg), jobExecutionId);
+        }
         log.error(msg);
         iterator.remove();
       }
