@@ -10,6 +10,6 @@ import java.util.Optional;
 
 public interface RuleBuilder {
 
-  Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) throws TransformationRuleException;
+  Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) throws TransformationRuleException;
 
 }

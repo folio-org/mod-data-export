@@ -87,7 +87,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
     .build();
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) throws TransformationRuleException {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) throws TransformationRuleException {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
     String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;

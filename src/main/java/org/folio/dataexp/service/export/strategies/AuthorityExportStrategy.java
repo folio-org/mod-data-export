@@ -1,5 +1,14 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static java.lang.String.format;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.maxBy;
+import static java.util.stream.Collectors.toList;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_UUID_IS_SET_TO_DELETION;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -19,10 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static java.lang.String.format;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_UUID_IS_SET_TO_DELETION;
 
 @Log4j2
 @Component
@@ -44,6 +49,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         log.info("Deleted job profile for authority is being used.");
       }
       handleDeleted(marcAuthorities, jobExecutionId, exportRequest);
+      marcAuthorities = handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities);
       log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
       var foundIds = marcAuthorities.stream().map(rec -> rec.getExternalId()).collect(Collectors.toSet());
@@ -85,13 +91,26 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
           iterator.remove();
         }
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
-        var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-          List.of(msg), jobExecutionId);
+        String msg;
+        if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
+          msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+            List.of(msg), jobExecutionId);
+        } else {
+          msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
+            List.of(msg), jobExecutionId);
+        }
         log.error(msg);
         iterator.remove();
       }
     }
+  }
+
+  private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
+    return marcAuthorities.stream().collect(
+      groupingBy(MarcRecordEntity::getExternalId,
+        maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream().flatMap(e -> e.stream()).collect(toList());
   }
 
   @Override

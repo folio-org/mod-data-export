@@ -1,9 +1,9 @@
 {
   "id": "2c9be114-6d35-4408-adac-9ead35f51a27",
-  "name": "Export deleted authority records job profile",
+  "name": "Deleted authority export job profile",
   "default" : true,
   "destination": "fileSystem",
-  "description": "Export deleted authority records job profile",
+  "description": "Deleted authority export job profile",
   "userInfo": {
     "firstName": "System",
     "lastName": "Process",

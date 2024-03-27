@@ -3,7 +3,8 @@ CREATE SCHEMA diku_mod_entities_links;
 CREATE TYPE diku_mod_source_record_storage.record_state AS ENUM ('ACTUAL', 'DRAFT', 'OLD', 'DELETED');
 CREATE TYPE diku_mod_source_record_storage.record_type AS ENUM ('MARC_BIB', 'MARC_AUTHORITY', 'MARC_HOLDING', 'EDIFACT');
 CREATE TABLE diku_mod_source_record_storage.records_lb (id UUID, external_id UUID, leader_record_status character(1),
-  state diku_mod_source_record_storage.record_state, record_type diku_mod_source_record_storage.record_type, suppress_discovery boolean DEFAULT false);
+  state diku_mod_source_record_storage.record_state, record_type diku_mod_source_record_storage.record_type, suppress_discovery boolean DEFAULT false,
+  generation integer);
 CREATE TABLE diku_mod_source_record_storage.marc_records_lb (id UUID, content JSONB);
 CREATE TABLE diku_mod_entities_links.authority (id UUID);
 INSERT INTO diku_mod_source_record_storage.marc_records_lb (id, content)
@@ -1007,7 +1008,8 @@ CREATE SCHEMA central_mod_source_record_storage;
 CREATE TYPE central_mod_source_record_storage.record_state AS ENUM ('ACTUAL', 'DRAFT', 'OLD', 'DELETED');
 CREATE TYPE central_mod_source_record_storage.record_type AS ENUM ('MARC_BIB', 'MARC_AUTHORITY', 'MARC_HOLDING', 'EDIFACT');
 CREATE TABLE central_mod_source_record_storage.records_lb (id UUID, external_id UUID, leader_record_status character(1),
-  state diku_mod_source_record_storage.record_state, record_type diku_mod_source_record_storage.record_type, suppress_discovery boolean DEFAULT false);
+  state diku_mod_source_record_storage.record_state, record_type diku_mod_source_record_storage.record_type, suppress_discovery boolean DEFAULT false,
+  generation integer);
 CREATE TABLE central_mod_source_record_storage.marc_records_lb (id UUID, content JSONB);
 INSERT INTO central_mod_source_record_storage.marc_records_lb (id, content)
 	VALUES ('ed0ad74c-98f1-11ee-b9d1-0242ac120002', '{
