@@ -83,24 +83,22 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     while (iterator.hasNext()) {
       var rec = iterator.next();
       if (rec.getState().equals("DELETED")) {
-        if (!isDeletedJobProfile(exportRequest.getJobProfileId())) {
-          var msg = format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), rec.getExternalId());
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(),
-            List.of(msg), jobExecutionId);
-          log.error(msg);
-          iterator.remove();
-        }
-      } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         String msg;
-        if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
-          msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+        if (!isDeletedJobProfile(exportRequest.getJobProfileId())) {
+          msg = format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), rec.getExternalId());
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(),
             List.of(msg), jobExecutionId);
         } else {
           msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
             List.of(msg), jobExecutionId);
         }
+        log.error(msg);
+        iterator.remove();
+      } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
+        var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+          List.of(msg), jobExecutionId);
         log.error(msg);
         iterator.remove();
       }
