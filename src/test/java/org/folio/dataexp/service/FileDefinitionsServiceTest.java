@@ -49,7 +49,6 @@ class FileDefinitionsServiceTest {
   @Test
   void postFileDefinitionTest() {
     var fileDefinition = new FileDefinition();
-    fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
 
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
@@ -59,6 +58,7 @@ class FileDefinitionsServiceTest {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
     var savedFileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
+    assertNotNull(savedFileDefinition.getId());
     assertEquals(FileDefinition.StatusEnum.NEW, savedFileDefinition.getStatus());
     assertNotNull(savedFileDefinition.getJobExecutionId());
 
