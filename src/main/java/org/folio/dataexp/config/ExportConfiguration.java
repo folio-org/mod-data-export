@@ -28,7 +28,9 @@ public class ExportConfiguration {
   public List<Rule> defaultRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_RULES)) {
-      List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
+      var rules = new String(is.readAllBytes());
+      List<Rule> defaultRules = mapper.readValue(rules.getBytes(), mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
+      log.info("Default rules: {}", rules);
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default rules for export");
