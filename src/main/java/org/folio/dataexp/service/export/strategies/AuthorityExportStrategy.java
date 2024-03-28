@@ -116,7 +116,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
     return marcAuthorities.stream().collect(
       groupingBy(MarcRecordEntity::getExternalId,
-        maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream().flatMap(e -> e.stream()).collect(toList());
+        maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream()
+      .flatMap(entities -> entities.stream()).collect(toList());
   }
 
   @Override
