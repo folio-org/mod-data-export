@@ -25,7 +25,6 @@ import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.service.export.strategies.translation.builder.DefaultTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.TranslationBuilder;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.TransformationFieldsConfig;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
