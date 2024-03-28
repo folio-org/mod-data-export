@@ -337,6 +337,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
+            text/plain:
+              example: "Invalid request"
         '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
@@ -964,3 +966,4 @@ components:
       schema:
         default: false
         type: boolean
+
