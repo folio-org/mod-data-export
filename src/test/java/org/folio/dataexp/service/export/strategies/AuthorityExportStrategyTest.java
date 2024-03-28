@@ -213,7 +213,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
         new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE), jobExecutionId);
       assertThat(marcRecords).hasSize(1);
       var errors = errorLogService.getByQuery(format("(jobExecutionId==%s)", jobExecutionId));
-      assertThat(errors).hasSize(1);
+      assertThat(errors).hasSize(2);
       var error = errors.get(0);
       assertEquals(format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), LOCAL_MARC_AUTHORITY_DELETED_UUID_1), error.getErrorMessageValues().get(0));
       assertEquals(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(), error.getErrorMessageCode());

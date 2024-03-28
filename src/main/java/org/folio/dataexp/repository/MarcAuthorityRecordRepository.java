@@ -17,13 +17,13 @@ public class MarcAuthorityRecordRepository {
 
   @PersistenceContext
   private EntityManager entityManager;
-  private final static String QUERY_NON_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery\n"
+  private final static String QUERY_NON_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery, generation\n"
       + "    FROM %s_mod_source_record_storage.records_lb records_lb\n"
       + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)"
       + "    WHERE state IN ('ACTUAL', 'DELETED') AND record_type = 'MARC_AUTHORITY'"
       + "    AND external_id in :ids";
 
-  private final static String QUERY_INCLUDING_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery\n"
+  private final static String QUERY_INCLUDING_DELETED = "SELECT id, content, external_id, record_type, state, leader_record_status, suppress_discovery, generation\n"
       + "    FROM %s_mod_source_record_storage.records_lb records_lb\n"
       + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)"
       + "    WHERE record_type = 'MARC_AUTHORITY'"

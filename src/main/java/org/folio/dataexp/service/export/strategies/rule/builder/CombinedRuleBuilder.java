@@ -31,7 +31,7 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
   }
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
     Optional<Rule> defaultRuleOptional = super.build(rules, defaultFieldId);
     if (defaultRuleOptional.isPresent()) {
       Rule defaultRule = defaultRuleOptional.get();

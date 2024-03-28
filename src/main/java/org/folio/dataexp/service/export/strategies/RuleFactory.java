@@ -96,7 +96,7 @@ public class RuleFactory {
     for (Transformations mappingTransformation : mappingTransformations) {
       if (isTransformationValidAndNotBlank(mappingTransformation)
         && isPermanentLocationNotEqualsTemporaryLocation(temporaryLocationTransformation, mappingTransformation)) {
-        rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation, errorLogService);
+        rule = ruleBuilders.get(TRANSFORMATION_BUILDER_KEY).build(rules, mappingTransformation);
       } else if (isInstanceTransformationValidAndBlank(mappingTransformation) || isHoldingsTransformationValidAndBlank(mappingTransformation)) {
         rule = createDefaultByTransformations(mappingTransformation, defaultRules);
       } else if (RecordTypes.ITEM.equals(mappingTransformation.getRecordType())) {
@@ -116,10 +116,10 @@ public class RuleFactory {
       && RecordTypes.INSTANCE.equals(recordType)) {
       for (Map.Entry<String, RuleBuilder> ruleBuilderEntry : ruleBuilders.entrySet()) {
         if (mappingTransformation.getFieldId().contains(ruleBuilderEntry.getKey())) {
-          return ruleBuilderEntry.getValue().build(defaultRules, mappingTransformation, errorLogService);
+          return ruleBuilderEntry.getValue().build(defaultRules, mappingTransformation);
         }
       }
-      return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation, errorLogService);
+      return ruleBuilders.get(DEFAULT_BUILDER_KEY).build(defaultRules, mappingTransformation);
     }
     return Optional.empty();
   }
