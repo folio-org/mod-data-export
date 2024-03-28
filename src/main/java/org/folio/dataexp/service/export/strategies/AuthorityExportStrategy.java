@@ -117,7 +117,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     return marcAuthorities.stream().collect(
       groupingBy(MarcRecordEntity::getExternalId,
         maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream()
-      .flatMap(entities -> entities.stream()).collect(toList());
+      .flatMap(Optional::stream).collect(toList());
   }
 
   @Override
