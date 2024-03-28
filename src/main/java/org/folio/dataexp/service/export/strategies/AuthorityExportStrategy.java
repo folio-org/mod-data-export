@@ -92,8 +92,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
             List.of(msg), jobExecutionId);
           log.error(msg);
           msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
-          var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode());
-          if (!errors.isEmpty()) {
+          var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode());
+          if (errors.isEmpty()) {
             errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
               List.of(msg), jobExecutionId);
           }
@@ -103,7 +103,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
         var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
-        if (!errors.isEmpty()) {
+        if (errors.isEmpty()) {
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
             List.of(msg), jobExecutionId);
         }
