@@ -30,4 +30,5 @@ public class MarcRecordEntity {
   private String state;
   private Character leaderRecordStatus;
   private Boolean suppressDiscovery;
+  private Integer generation;
 }

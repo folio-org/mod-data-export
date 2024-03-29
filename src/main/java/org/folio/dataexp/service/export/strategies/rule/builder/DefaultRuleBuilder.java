@@ -1,8 +1,7 @@
 package org.folio.dataexp.service.export.strategies.rule.builder;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.processor.rule.Rule;
@@ -17,7 +16,7 @@ import static java.util.Objects.nonNull;
 public class DefaultRuleBuilder implements RuleBuilder {
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) {
     return build(rules, mappingTransformation.getFieldId());
   }
 
