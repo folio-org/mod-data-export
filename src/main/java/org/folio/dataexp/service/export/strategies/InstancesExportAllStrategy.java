@@ -96,6 +96,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (opt.isEmpty()) {
       var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
       if (auditInstances.isEmpty()) {
+        log.info("getIdentifiers:: not found for instance by id {}", id);
         return Optional.empty();
       }
       var auditInstance = auditInstances.get(0);
