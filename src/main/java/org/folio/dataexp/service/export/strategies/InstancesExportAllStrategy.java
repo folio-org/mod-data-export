@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -93,23 +94,26 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   @Override
   public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var opt = super.getIdentifiers(id);
-    if (opt.isEmpty()) {
-      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
-      if (auditInstances.isEmpty()) {
-        log.info("getIdentifiers:: not found for instance by id {}", id);
+    if (opt.isPresent()) {
+      var identifiers = opt.get();
+      if (Objects.isNull(identifiers.getAssociatedJsonObject())) {
+        var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
+        if (auditInstances.isEmpty()) {
+          log.info("getIdentifiers:: not found for instance by id {}", id);
+          var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+          exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
+          return Optional.of(exportIdentifiers);
+        }
+        var auditInstance = auditInstances.get(0);
         var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-        exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
+        exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
+        var instanceAssociatedJsonObject = new JSONObject();
+        instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+        instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+        exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
         return Optional.of(exportIdentifiers);
       }
-      var auditInstance = auditInstances.get(0);
-      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
-      var instanceAssociatedJsonObject = new JSONObject();
-      instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
-      instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
-      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
-      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
-      return Optional.of(exportIdentifiers);
     }
     return opt;
   }
