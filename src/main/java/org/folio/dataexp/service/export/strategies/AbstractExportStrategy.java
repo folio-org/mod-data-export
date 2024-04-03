@@ -152,6 +152,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       } catch (Exception e) {
         log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
         exportStatistic.incrementFailed();
+        errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
         continue;
       }
       localStorageWriter.write(marc);
