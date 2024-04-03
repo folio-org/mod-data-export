@@ -100,9 +100,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
         if (auditInstances.isEmpty()) {
           log.info("getIdentifiers:: not found for instance by id {}", id);
-          var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-          exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
-          return Optional.of(exportIdentifiers);
+          return getDefaultIdentifiers(id);
         }
         var auditInstance = auditInstances.get(0);
         var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();

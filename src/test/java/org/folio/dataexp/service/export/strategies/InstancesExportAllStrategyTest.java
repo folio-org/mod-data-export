@@ -45,4 +45,16 @@ class InstancesExportAllStrategyTest {
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
     assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
   }
+
+  @Test
+  void getIdentifierMessageIfInstanceDoesNotExistTest() {
+    var instanceId  = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+    when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+
+    var opt = instancesExportAllStrategy.getIdentifiers(instanceId);
+
+    assertTrue(opt.isPresent());
+    assertEquals("Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e", opt.get().getIdentifierHridMessage());
+  }
 }
