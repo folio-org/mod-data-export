@@ -1,5 +1,18 @@
 ## v5.1.0 Unreleased
 
+## 04/03/2024 v5.0.1 Released
+
+This release contains minor improvements and bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.0...v5.0.1)
+
+### Bug fixes
+* [MDEXP-743](https://folio-org.atlassian.net/browse/MDEXP-743) Unhandled error when id is missing in POST /file-definition request's payload
+* [MDEXP-739](https://folio-org.atlassian.net/browse/MDEXP-739) mod-data-export documentation updating
+
+### Technical tasks
+* [MDEXP-741](https://folio-org.atlassian.net/browse/MDEXP-741) Data export should provide UnprocessableEntity response according karate scenarios
+
 ## 03/20/2024 v5.0.0 Released
 
 This release contains migration to Spring-based approach
