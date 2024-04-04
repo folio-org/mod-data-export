@@ -93,27 +93,24 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   @Override
   public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
-    var opt = super.getIdentifiers(id);
-    if (opt.isPresent()) {
-      var identifiers = opt.get();
-      if (Objects.isNull(identifiers.getAssociatedJsonObject())) {
-        var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
-        if (auditInstances.isEmpty()) {
-          log.info("getIdentifiers:: not found for instance by id {}", id);
-          return getDefaultIdentifiers(id);
-        }
-        var auditInstance = auditInstances.get(0);
-        var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-        exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
-        var instanceAssociatedJsonObject = new JSONObject();
-        instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
-        instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
-        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
-        exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
-        return Optional.of(exportIdentifiers);
+    var identifiers = super.getIdentifiers(id);
+    if (identifiers.isPresent() && Objects.isNull(identifiers.get().getAssociatedJsonObject())) {
+      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
+      if (auditInstances.isEmpty()) {
+        log.info("getIdentifiers:: not found for instance by id {}", id);
+        return getDefaultIdentifiers(id);
       }
+      var auditInstance = auditInstances.get(0);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
+      var instanceAssociatedJsonObject = new JSONObject();
+      instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+      instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+      return Optional.of(exportIdentifiers);
     }
-    return opt;
+    return identifiers;
   }
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
