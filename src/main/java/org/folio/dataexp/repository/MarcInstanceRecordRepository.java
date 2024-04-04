@@ -17,7 +17,7 @@ public class MarcInstanceRecordRepository {
   @PersistenceContext
   private EntityManager entityManager;
 
-  private final static String QUERY = "SELECT id, content, external_id, record_type, leader_record_status, suppress_discovery, state "
+  private final static String QUERY = "SELECT id, content, external_id, record_type, leader_record_status, suppress_discovery, state, generation "
       + "    FROM %s_mod_source_record_storage.records_lb records_lb\n"
       + "    JOIN %s_mod_source_record_storage.marc_records_lb using(id)\n"
       + "    WHERE records_lb.state = 'ACTUAL' AND records_lb.leader_record_status != 'd' AND records_lb.record_type = 'MARC_BIB'"
