@@ -11,4 +11,5 @@
     <include file="changes/slice_records_all_ids.xml" relativeToChangelogFile="true"/>
     <include file="changes/enrich_tables.xml" relativeToChangelogFile="true"/>
     <include file="changes/job_executions_exports_ids_unique_constraint.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_generation.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
