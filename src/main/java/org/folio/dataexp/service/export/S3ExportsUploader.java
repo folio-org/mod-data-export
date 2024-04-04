@@ -66,7 +66,7 @@ public class S3ExportsUploader {
     var s3path = getPathToStoredFiles(jobExecution.getId(), s3Name);
     if (fileToUpload.length() > 0) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
-        s3Client.write(s3path, inputStream, inputStream.available());
+        s3Client.write(s3path, inputStream, fileToUpload.length());
       }
       log.info(fileToUpload.getPath() + " uploaded as " + s3Name);
       removeTempDirForJobExecution(jobExecution.getId());
@@ -103,7 +103,7 @@ public class S3ExportsUploader {
     }
     var s3ZipPath = getPathToStoredFiles(jobExecution.getId(), zipFileName);
     try (var inputStream = new BufferedInputStream(new FileInputStream(zip))) {
-        s3Client.write(s3ZipPath, inputStream, inputStream.available());
+        s3Client.write(s3ZipPath, inputStream, zip.length());
     }
     FileUtils.delete(zip);
     removeTempDirForJobExecution(jobExecution.getId());
