@@ -1,5 +1,14 @@
 ## v5.1.0 Unreleased
 
+## 04/05/2024 v5.0.2 Released
+
+This release contains fixing for file saving
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.1...v5.0.2)
+
+### Bug fixes
+* [MDEXP-746](https://folio-org.atlassian.net/browse/MDEXP-746) Files larger 2Gb cannot be completely saved
+
 ## 04/03/2024 v5.0.1 Released
 
 This release contains minor improvements and bug fixes
