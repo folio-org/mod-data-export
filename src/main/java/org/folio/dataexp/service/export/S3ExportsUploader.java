@@ -3,12 +3,10 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.s3.client.FolioS3Client;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
@@ -35,9 +33,6 @@ public class S3ExportsUploader {
 
   public static final String EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE = "File for exports is empty";
   private final FolioS3Client s3Client;
-
-  @Value("${application.export-tmp-storage}")
-  private String exportTmpStorage;
 
   public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
     if (exports.isEmpty()) {
@@ -116,11 +111,7 @@ public class S3ExportsUploader {
   }
 
   private String getTempDirForJobExecutionId(UUID jobExecutionId) {
-    var tempDir = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
-    if (StringUtils.isNotEmpty(exportTmpStorage)) {
-      return exportTmpStorage + "/" + tempDir;
-    }
-    return tempDir;
+    return String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
   }
 
   private void removeTempDirForJobExecution(UUID jobExecutionId) throws IOException {
