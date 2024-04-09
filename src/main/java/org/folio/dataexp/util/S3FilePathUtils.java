@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class S3FilePathUtils {
 
-  public static final String TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID = "mod-data-export/download/%s/";
+  private static final String TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID = "mod-data-export/download/%s/";
   private static final String SLICED_FILE_LOCATION_PATH = TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID + "%s";
   private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
 

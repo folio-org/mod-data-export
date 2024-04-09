@@ -1,9 +1,11 @@
 package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +22,6 @@ import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 import static org.folio.dataexp.service.export.S3ExportsUploader.EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE;
-import static org.folio.dataexp.util.S3FilePathUtils.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class S3ExportsUploaderTest {
 
+  private static final String EXPORT_TEMP_STORAGE = "temp";
   @Mock
   private FolioS3Client s3Client;
 
@@ -57,7 +59,7 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecution.getId());
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var fileLocation = temDirLocation + initialFileName;
@@ -78,12 +80,40 @@ class S3ExportsUploaderTest {
 
   @Test
   @SneakyThrows
+  void uploadSingleExportsIfTempStorageExistsTest() {
+    s3ExportsUploader.exportTmpStorage = EXPORT_TEMP_STORAGE;
+    var marc = "marc";
+    var initialFileName = "marc_export";
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setHrId(200);
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
+    Files.createDirectories(Path.of(temDirLocation));
+
+    var fileLocation = temDirLocation + initialFileName;
+    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    writer.write(marc);
+    writer.close();
+    var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
+
+    var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString() + "/marc_export-200.mrc";
+    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName);
+    assertEquals(expectedS3Path, s3Path);
+
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
+
+    var temDir = new File(temDirLocation);
+    assertFalse(temDir.exists());
+  }
+
+  @Test
+  @SneakyThrows
   void uploadSingleExportsIfEmptyTest() {
     var initialFileName = "marc_export";
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecution.getId());
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var fileLocation = temDirLocation + initialFileName;
@@ -108,7 +138,7 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecution.getId());
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var fileLocation1 = temDirLocation + exportFileName1;
@@ -144,7 +174,7 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecution.getId());
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var fileLocation1 = temDirLocation + exportFileName1;
@@ -178,7 +208,7 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecution.getId());
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var fileLocation1 = temDirLocation + exportFileName1;
