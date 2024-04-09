@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
-import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
+import static org.folio.dataexp.util.S3FilePathUtils.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

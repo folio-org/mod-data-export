@@ -3,10 +3,13 @@ package org.folio.dataexp.service.export;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
@@ -22,7 +25,6 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 
 
@@ -32,6 +34,9 @@ import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 public class S3ExportsUploader {
 
   private final FolioS3Client s3Client;
+  @Value("${application.export-tmp-storage}")
+  private String exportTmpStorage;
+
   public static final String EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE = "File for exports is empty";
 
   public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
@@ -79,7 +84,7 @@ public class S3ExportsUploader {
 
   private String uploadZip (JobExecution jobExecution, List<File> exports, String fileName) throws IOException {
     var zipFileName = String.format("%s-%s.zip", fileName, jobExecution.getHrId());
-    var zipDirPath =  getTempDirForJobExecutionId(jobExecution.getId()) + "zip/";
+    var zipDirPath =  S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecution.getId()) + "zip/";
     Files.createDirectories(Path.of(zipDirPath));
     var zipFilePath = zipDirPath + zipFileName;
     var zip = Files.createFile(Path.of(zipFilePath)).toFile();
@@ -110,11 +115,7 @@ public class S3ExportsUploader {
     return s3ZipPath;
   }
 
-  private String getTempDirForJobExecutionId(UUID jobExecutionId) {
-    return String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
-  }
-
   private void removeTempDirForJobExecution(UUID jobExecutionId) throws IOException {
-    FileUtils.deleteDirectory(new File(getTempDirForJobExecutionId(jobExecutionId)));
+    FileUtils.deleteDirectory(new File(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
   }
 }
