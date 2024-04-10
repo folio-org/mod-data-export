@@ -49,7 +49,7 @@ public class S3ExportsUploader {
     try {
       String uploadedPath;
       if (exports.size() > 1) {
-        var filesToExport = exports.stream().map(e -> new File(e.getFileLocation()))
+        var filesToExport = exports.stream().map(e -> new File(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, e.getFileLocation())))
           .filter(f -> f.length() > 0).toList();
         if (filesToExport.size() > 1) {
           uploadedPath = uploadZip(jobExecution, filesToExport, initialFileName);
@@ -60,7 +60,7 @@ public class S3ExportsUploader {
           throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
         }
       } else {
-        var fileToExport = new File(exports.get(0).getFileLocation());
+        var fileToExport = new File(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, exports.get(0).getFileLocation()));
         uploadedPath = uploadMarc(jobExecution, fileToExport, initialFileName);
       }
       return uploadedPath;

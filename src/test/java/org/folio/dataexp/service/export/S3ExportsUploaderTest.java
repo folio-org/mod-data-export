@@ -90,10 +90,11 @@ class S3ExportsUploaderTest {
     var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
-    var fileLocation = temDirLocation + initialFileName;
-    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var fileLocation = String.format("mod-data-export/download/%s/%s", jobExecution.getId(), initialFileName);
+    var writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation), OUTPUT_BUFFER_SIZE);
     writer.write(marc);
     writer.close();
+
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
     var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString() + "/marc_export-200.mrc";
@@ -178,13 +179,13 @@ class S3ExportsUploaderTest {
     var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
-    var fileLocation1 = temDirLocation + exportFileName1;
-    var writer =  new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    var fileLocation1 = String.format("mod-data-export/download/%s/%s", jobExecution.getId(), exportFileName1);
+    var writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation1), OUTPUT_BUFFER_SIZE);
     writer.write(marc);
     writer.close();
 
-    var fileLocation2 = temDirLocation + exportFileName2;
-    writer =  new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    var fileLocation2 = String.format("mod-data-export/download/%s/%s", jobExecution.getId(), exportFileName2);
+    writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation2), OUTPUT_BUFFER_SIZE);
     writer.write(marc);
     writer.close();
 
