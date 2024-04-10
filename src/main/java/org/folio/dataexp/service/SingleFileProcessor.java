@@ -33,8 +33,8 @@ public class SingleFileProcessor {
   protected final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobExecutionService jobExecutionService;
   private final ErrorLogService errorLogService;
-  protected int exportIdsBatch;
-  protected String exportTmpStorage;
+  private int exportIdsBatch;
+  private String exportTmpStorage;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {

@@ -81,7 +81,7 @@ class S3ExportsUploaderTest {
   @Test
   @SneakyThrows
   void uploadSingleExportsIfTempStorageExistsTest() {
-    s3ExportsUploader.exportTmpStorage = EXPORT_TEMP_STORAGE;
+    s3ExportsUploader.setExportTmpStorage(EXPORT_TEMP_STORAGE);
     var marc = "marc";
     var initialFileName = "marc_export";
     var jobExecution = new JobExecution();
@@ -155,6 +155,43 @@ class S3ExportsUploaderTest {
     var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
 
     var expectedS3Path = temDirLocation + "marc_export-200.zip";
+    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
+    assertEquals(expectedS3Path, s3Path);
+
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
+
+    var temDir = new File(temDirLocation);
+    assertFalse(temDir.exists());
+  }
+
+  @Test
+  @SneakyThrows
+  void uploadMultipleExportsIfTempStorageExistsTest() {
+    s3ExportsUploader.setExportTmpStorage(EXPORT_TEMP_STORAGE);
+    var marc = "marc";
+    var initialFileName = "marc_export";
+    var exportFileName1 = "marc_export_sliced_1.mrc";
+    var exportFileName2 = "marc_export_sliced_2.mrc";
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setHrId(200);
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
+    Files.createDirectories(Path.of(temDirLocation));
+
+    var fileLocation1 = temDirLocation + exportFileName1;
+    var writer =  new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    writer.write(marc);
+    writer.close();
+
+    var fileLocation2 = temDirLocation + exportFileName2;
+    writer =  new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    writer.write(marc);
+    writer.close();
+
+    var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
+    var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
+
+    var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString() + "/marc_export-200.zip";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
