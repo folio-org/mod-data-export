@@ -175,6 +175,12 @@
     </dependency>
 
     <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3-transfer-manager</artifactId>
+      <version>${aws-sdk-java.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>io.hypersistence</groupId>
       <artifactId>hypersistence-utils-hibernate-63</artifactId>
       <version>${hypersistence-utils-hibernate-63.version}</version>
