@@ -43,7 +43,7 @@
     <apache-commons-io.version>2.11.0</apache-commons-io.version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
-    <aws-sdk-java.version>2.19.2</aws-sdk-java.version>
+    <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <folio-s3-client.version>2.2.0-SNAPSHOT</folio-s3-client.version>
     <marc4j.version>2.9.2</marc4j.version>
