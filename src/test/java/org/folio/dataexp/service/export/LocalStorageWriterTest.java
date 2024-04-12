@@ -2,6 +2,8 @@ package org.folio.dataexp.service.export;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,7 +12,6 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
-import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,7 +21,7 @@ class LocalStorageWriterTest {
   @SneakyThrows
   void writeTest() {
     var jobExecutionId = UUID.randomUUID();
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecutionId);
     Files.createDirectories(Path.of(temDirLocation));
     var fileLocation = temDirLocation + "marc.mrc";
 
@@ -38,7 +39,7 @@ class LocalStorageWriterTest {
   void writeIfExceptionTest() {
     String invalidData = null;
     var jobExecutionId = UUID.randomUUID();
-    var temDirLocation  = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecutionId);
     Files.createDirectories(Path.of(temDirLocation));
     var fileLocation = temDirLocation + "marc.mrc";
 

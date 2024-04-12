@@ -1,14 +1,14 @@
 package org.folio.dataexp.util;
 
-import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
-import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
+import java.util.UUID;
 
 public class S3FilePathUtils {
 
-
+  private static final String TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID = "mod-data-export/download/%s/";
   private static final String SLICED_FILE_LOCATION_PATH = TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID + "%s";
-  public static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
+  private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
 
   private S3FilePathUtils() {
   }
@@ -27,5 +27,20 @@ public class S3FilePathUtils {
 
   public static String getPathToUploadedFiles(UUID fileDefinitionId, String fileName) {
     return getPathToUploadedFiles(fileDefinitionId.toString(), fileName);
+  }
+
+  public static String getTempDirForJobExecutionId(String exportTmpStorage, UUID jobExecutionId) {
+    var tempDir = String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId);
+    if (StringUtils.isNotEmpty(exportTmpStorage)) {
+      return exportTmpStorage + "/" + tempDir;
+    }
+    return tempDir;
+  }
+
+  public static String getLocalStorageWriterPath(String exportTmpStorage, String location) {
+    if (StringUtils.isNotEmpty(exportTmpStorage)) {
+      return exportTmpStorage + "/" + location;
+    }
+    return location;
   }
 }
