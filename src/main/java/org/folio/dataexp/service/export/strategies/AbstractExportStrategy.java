@@ -26,6 +26,7 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
+  protected String exportTmpStorage;
 
   private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
@@ -60,6 +62,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
     this.exportIdsBatch = exportIdsBatch;
+  }
+
+  @Value("${application.export-tmp-storage}")
+  protected void setExportTmpStorage(String exportTmpStorage) {
+    this.exportTmpStorage = exportTmpStorage;
   }
 
   @Override
@@ -105,7 +112,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException;
 
   protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
-    return new LocalStorageWriter(exportFilesEntity.getFileLocation(), OUTPUT_BUFFER_SIZE);
+    return new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, exportFilesEntity.getFileLocation()), OUTPUT_BUFFER_SIZE);
   }
 
   protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
@@ -150,8 +157,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
               .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
         }
       } catch (Exception e) {
-        log.error("Error converting json to marc for record {}", marcRecordEntity.getExternalId());
+        var errorMessage = "Error converting json to marc for record " + marcRecordEntity.getExternalId().toString();
+        log.error(errorMessage);
         exportStatistic.incrementFailed();
+        errorLogService.saveGeneralError(errorMessage, jobExecutionId);
         continue;
       }
       localStorageWriter.write(marc);

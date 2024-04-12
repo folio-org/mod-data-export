@@ -139,9 +139,9 @@ The average memory usage is ~190 MiB.
 
 #### MINIO storage memory settings for /data-export/export-all
 Depending on the total amount of records to be exported, the size of minio storage required for the successful export can be various.
-For example, 1 output mrc file with 100k records occupies 115Mb of minio storage and for 8180068 instances 
-it requires 82 files, so the total size of files will be 115 * 82 = 9.43Gb for only 1 export execution. 
-These results should be taken into account when setting up configuration for minio storage, especially for 
+For example, 1 output mrc file with 100k records occupies 115Mb of minio storage and for 8180068 instances
+it requires 82 files, so the total size of files will be 115 * 82 = 9.43Gb for only 1 export execution.
+These results should be taken into account when setting up configuration for minio storage, especially for
 larger data sets and parallel export.
 
 
@@ -158,13 +158,14 @@ It is also necessary to specify variable S3_IS_AWS to determine if AWS S3 is use
 this variable is `false` and means that MinIO server is used as storage.
 This value should be `true` if AWS S3 is used.
 
-| Name                    | Default value          | Description                                |
-|:------------------------|:-----------------------|:-------------------------------------------|
-| S3_URL                  | http://127.0.0.1:9000/ | S3 url                                     |
-| S3_REGION               | -                      | S3 region                                  |
-| S3_BUCKET               | -                      | S3 bucket                                  |
-| S3_ACCESS_KEY_ID        | -                      | S3 access key                              |
-| S3_SECRET_ACCESS_KEY    | -                      | S3 secret key                              |
-| S3_IS_AWS               | false                  | Specify if AWS S3 is used as files storage |
+| Name                                  | Default value          | Description                                |
+|:--------------------------------------|:-----------------------|:-------------------------------------------|
+| S3_URL                                | http://127.0.0.1:9000/ | S3 url                                     |
+| S3_REGION                             | -                      | S3 region                                  |
+| S3_BUCKET                             | -                      | S3 bucket                                  |
+| S3_ACCESS_KEY_ID                      | -                      | S3 access key                              |
+| S3_SECRET_ACCESS_KEY                  | -                      | S3 secret key                              |
+| S3_IS_AWS                             | false                  | Specify if AWS S3 is used as files storage |
+| EXPORT_TMP_STORAGE                    | -                      | Volume to store exports files              |
 
 

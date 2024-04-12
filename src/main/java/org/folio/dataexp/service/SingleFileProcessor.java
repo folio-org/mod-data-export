@@ -11,6 +11,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.UUID;
-
-import static org.folio.dataexp.util.Constants.TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -34,11 +33,17 @@ public class SingleFileProcessor {
   protected final JobExecutionEntityRepository jobExecutionEntityRepository;
   private final JobExecutionService jobExecutionService;
   private final ErrorLogService errorLogService;
-  protected int exportIdsBatch;
+  private int exportIdsBatch;
+  private String exportTmpStorage;
 
   @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
   protected void setExportIdsBatch(int exportIdsBatch) {
     this.exportIdsBatch = exportIdsBatch;
+  }
+
+  @Value("${application.export-tmp-storage}")
+  protected void setExportTmpStorage(String exportTmpStorage) {
+    this.exportTmpStorage = exportTmpStorage;
   }
 
   public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
@@ -64,7 +69,7 @@ public class SingleFileProcessor {
       return;
     }
     try {
-      Files.createDirectories(Path.of(String.format(TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID, jobExecutionId)));
+      Files.createDirectories(Path.of(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
     } catch (IOException e) {
       throw new DataExportException("Can not create temp directory for job execution " + jobExecutionId);
     }
