@@ -51,6 +51,13 @@
         "MARC"
       ]
     },
+    "suppression": {
+      "description": "Fields to suppress",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "metadata": {
       "description": "Metadata provided by the server",
       "type": "object",
