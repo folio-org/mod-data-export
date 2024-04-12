@@ -43,6 +43,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -129,6 +130,52 @@ class AbstractExportStrategyTest {
 
     verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(2)).write(isA(String.class));
+  }
+
+  @Test
+  void saveMarcToLocalStorageWhenMarcJsonInvalidTest() {
+    var progress = new JobExecutionProgress();
+    var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
+    var jobProfileEntity = new JobProfileEntity();
+    jobProfileEntity.setId(UUID.randomUUID());
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setJobProfileId(jobProfileEntity.getId());
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+
+    var mappingProfileEntity = new MappingProfileEntity();
+    mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+
+    JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
+      .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
+      .withFromId(UUID.randomUUID()).withToId(UUID.randomUUID()).withStatus(JobExecutionExportFilesStatus.ACTIVE);
+
+    var exportIdEntity = new ExportIdEntity().withJobExecutionId(exportFilesEntity.getJobExecutionId())
+      .withId(0).withInstanceId(exportId);
+    var json = """
+      {
+        invalid
+      }""";
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0);
+    var marcRecords = new ArrayList<MarcRecordEntity>();
+    marcRecords.add(marcRecordEntity);
+    ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);
+
+    var slice = new SliceImpl<>(List.of(exportIdEntity), PageRequest.of(0, 1), false);
+
+    when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class), isA(Pageable.class))).thenReturn(slice);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
+
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
+    assertEquals(0, exportStatistic.getExported());
+    assertEquals(0, exportStatistic.getDuplicatedSrs());
+    assertEquals(1, exportStatistic.getFailed());
+
+    assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
+
+    verify(errorLogService).saveGeneralError(isA(String.class), eq(jobExecution.getId()));
   }
 
   @Test

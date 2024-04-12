@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.extern.log4j.Log4j2;
+import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -8,6 +9,7 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.FolioInstanceAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
@@ -21,6 +23,7 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +33,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,6 +45,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private final FolioInstanceAllRepository folioInstanceAllRepository;
   private final MarcInstanceAllRepository marcInstanceAllRepository;
+  private final AuditInstanceEntityRepository auditInstanceEntityRepository;
 
   public InstancesExportAllStrategy(ConsortiaService consortiaService,
       InstanceCentralTenantRepository instanceCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
@@ -48,12 +55,13 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       InstanceWithHridEntityRepository instanceWithHridEntityRepository,
       MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
       FolioInstanceAllRepository folioInstanceAllRepository,
-      MarcInstanceAllRepository marcInstanceAllRepository) {
+      MarcInstanceAllRepository marcInstanceAllRepository, AuditInstanceEntityRepository auditInstanceEntityRepository) {
     super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
         itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
         instanceWithHridEntityRepository, marcRecordEntityRepository, instanceEntityRepository);
     this.folioInstanceAllRepository = folioInstanceAllRepository;
     this.marcInstanceAllRepository = marcInstanceAllRepository;
+    this.auditInstanceEntityRepository = auditInstanceEntityRepository;
   }
 
   @Override
@@ -81,6 +89,28 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
+  }
+
+  @Override
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+    var identifiers = super.getIdentifiers(id);
+    if (identifiers.isPresent() && Objects.isNull(identifiers.get().getAssociatedJsonObject())) {
+      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
+      if (auditInstances.isEmpty()) {
+        log.info("getIdentifiers:: not found for instance by id {}", id);
+        return getDefaultIdentifiers(id);
+      }
+      var auditInstance = auditInstances.get(0);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
+      var instanceAssociatedJsonObject = new JSONObject();
+      instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+      instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+      exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
+      return Optional.of(exportIdentifiers);
+    }
+    return identifiers;
   }
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,

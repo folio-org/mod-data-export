@@ -31,8 +31,8 @@ import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 @Log4j2
 public class S3ExportsUploader {
 
-  private final FolioS3Client s3Client;
   public static final String EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE = "File for exports is empty";
+  private final FolioS3Client s3Client;
 
   public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports, String initialFileName) {
     if (exports.isEmpty()) {

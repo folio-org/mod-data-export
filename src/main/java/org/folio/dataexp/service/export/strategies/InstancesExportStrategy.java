@@ -138,9 +138,12 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
-    if (instances.isEmpty()) return Optional.empty();
+    if (instances.isEmpty()) {
+      log.info("getIdentifiers:: not found for instance by id {}", id);
+      return getDefaultIdentifiers(id);
+    }
     var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
@@ -155,7 +158,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       exportIdentifiers.setAssociatedJsonObject(instanceAssociatedJsonObject);
       return Optional.of(exportIdentifiers);
     }
-    return Optional.empty();
+    return getDefaultIdentifiers(id);
+  }
+
+  protected Optional<ExportIdentifiersForDuplicateErrors> getDefaultIdentifiers(UUID id) {
+    var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+    exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
+    return Optional.of(exportIdentifiers);
   }
 
   protected List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
