@@ -165,6 +165,18 @@ class InstancesExportStrategyTest {
   }
 
   @Test
+  void getIdentifierMessageIfInstanceDoesNotExistTest() {
+    var instanceId  = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+
+    var opt = instancesExportStrategy.getIdentifiers(instanceId);
+
+    assertTrue(opt.isPresent());
+    assertEquals("Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e", opt.get().getIdentifierHridMessage());
+  }
+
+  @Test
   void getGeneratedMarcTest() throws TransformationRuleException {
     var transformation = new Transformations();
     var mappingProfile =  new MappingProfile();

@@ -1,5 +1,6 @@
 CREATE SCHEMA diku_mod_inventory_storage;
 CREATE TABLE diku_mod_inventory_storage.instance (id UUID, jsonb JSONB);
+CREATE TABLE diku_mod_inventory_storage.audit_instance (id UUID, jsonb JSONB);
 CREATE TABLE diku_mod_inventory_storage.holdings_record (id UUID, jsonb JSONB, instanceid UUID);
 CREATE TABLE diku_mod_inventory_storage.item (id UUID, jsonb JSONB, holdingsrecordid UUID);
 CREATE TABLE diku_mod_inventory_storage.authority (id UUID);

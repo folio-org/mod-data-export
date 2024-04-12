@@ -33,6 +33,7 @@ import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 public class S3ExportsUploader {
 
   public static final String EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE = "File for exports is empty";
+  private final FolioS3Client s3Client;
 
   private final FolioS3Client s3Client;
   private String exportTmpStorage;
