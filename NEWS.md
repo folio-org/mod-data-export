@@ -1,5 +1,11 @@
 ## v5.1.0 Unreleased
 
+## 04/15/2024 v5.0.3 Released
+
+This release contains aws-sdk and folio-s3-client versions upgrading
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.2...v5.0.3)
+
 ## 04/05/2024 v5.0.2 Released
 
 This release contains fixing for file saving
