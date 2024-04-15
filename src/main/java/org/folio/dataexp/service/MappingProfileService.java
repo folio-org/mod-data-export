@@ -3,18 +3,12 @@ package org.folio.dataexp.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
-import org.folio.dataexp.domain.dto.ParametersInner;
-import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileSuppressionFieldPatternException;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.MappingProfileValidator;
@@ -22,12 +16,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
