@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Component
+@RequiredArgsConstructor
 public class MappingProfileValidator {
 
   private static final String VALIDATION_ERROR_MESSAGE = "Mapping profile validation exception";
