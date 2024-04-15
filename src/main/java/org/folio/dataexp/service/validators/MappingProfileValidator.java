@@ -31,12 +31,10 @@ public class MappingProfileValidator {
   private static final Pattern SUPPRESSION_FIELD_PATTERN = Pattern.compile("^\\d{3}$");
   private static final String ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN = "suppressionFields[%s]";
 
-
   public void validate(MappingProfile mappingProfile) {
     validateMappingProfileTransformations(mappingProfile);
     validateMappingProfileSuppression(mappingProfile);
   }
-
 
   private void validateMappingProfileTransformations(MappingProfile mappingProfile) {
     var transformations = mappingProfile.getTransformations();
