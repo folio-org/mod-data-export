@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class MappingProfileValidatorTest {
+class MappingProfileValidatorTest {
 
   @Test
   void validateMappingProfileTransformationsTest() {
