@@ -130,7 +130,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
     mappingProfile.setTransformations(List.of(transformation));
-    mappingProfile.setSuppression(List.of("902"));
+    mappingProfile.setFieldsSuppression("902");
     var user = new User();
     user.setPersonal(new User.Personal());
 
@@ -286,7 +286,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
     mappingProfile.setTransformations(List.of(transformation));
-    mappingProfile.setSuppression(List.of("90"));
+    mappingProfile.setFieldsSuppression("897 , 90");
     var user = new User();
     user.setPersonal(new User.Personal());
 
@@ -310,7 +310,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
 
     assertEquals("must match \\\"^\\d{3}$\\\"", error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("suppressionFields[0]", error.getParameters().get(0).getKey());
+    assertEquals("suppressionFields[1]", error.getParameters().get(0).getKey());
     assertEquals("90", error.getParameters().get(0).getValue());
   }
 

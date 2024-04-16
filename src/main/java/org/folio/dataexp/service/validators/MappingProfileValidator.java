@@ -6,7 +6,8 @@ import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.ParametersInner;
 import org.folio.dataexp.domain.dto.RecordTypes;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileSuppressionFieldPatternException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ public class MappingProfileValidator {
 
   private static final Pattern SUPPRESSION_FIELD_PATTERN = Pattern.compile("^\\d{3}$");
   private static final String ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN = "suppressionFields[%s]";
+  private static final String ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE = "Suppression field can not be used only for Item record type";
 
   public void validate(MappingProfile mappingProfile) {
     validateMappingProfileTransformations(mappingProfile);
@@ -70,11 +72,17 @@ public class MappingProfileValidator {
   }
 
   private void validateMappingProfileSuppression(MappingProfile mappingProfile) {
-    var suppressionFields = mappingProfile.getSuppression();
-    if (Objects.nonNull(suppressionFields)) {
+    var recordTypes = mappingProfile.getRecordTypes();
+    boolean isExistAllItemRecordType = recordTypes.stream().allMatch(type -> type == RecordTypes.ITEM);
+    if (!recordTypes.isEmpty() && isExistAllItemRecordType) {
+      throw new MappingProfileFieldsSuppressionException(ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE);
+    }
+    var fieldsSuppressionAsStr = mappingProfile.getFieldsSuppression();
+    if (Objects.nonNull(fieldsSuppressionAsStr)) {
+      var fieldsSuppression = fieldsSuppressionAsStr.split(",");
       var parameters = new ArrayList<ParametersInner>();
-      for (int i = 0; i < suppressionFields.size(); i++) {
-        var suppression = suppressionFields.get(i);
+      for (int i = 0; i < fieldsSuppression.length; i++) {
+        var suppression = StringUtils.trim(fieldsSuppression[i]);
         var matcher = SUPPRESSION_FIELD_PATTERN.matcher(suppression);
         if (!matcher.matches()) {
           var parameter = ParametersInner.builder()
@@ -94,7 +102,7 @@ public class MappingProfileValidator {
           errorItem.setParameters(List.of(parameter));
         }
         errors.setTotalRecords(errors.getErrors().size());
-        throw new MappingProfileSuppressionFieldPatternException(VALIDATION_ERROR_MESSAGE, errors);
+        throw new MappingProfileFieldsSuppressionPatternException(VALIDATION_ERROR_MESSAGE, errors);
       }
     }
   }
