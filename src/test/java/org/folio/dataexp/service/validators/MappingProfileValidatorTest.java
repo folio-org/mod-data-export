@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.validators;
 
+import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MappingProfileValidatorTest {
@@ -63,5 +65,8 @@ class MappingProfileValidatorTest {
 
     mappingProfile.setFieldsSuppression("900");
     assertThrows(MappingProfileFieldsSuppressionException.class, () -> validator.validate(mappingProfile));
+
+    mappingProfile.setFieldsSuppression(StringUtils.EMPTY);
+    assertDoesNotThrow(() -> validator.validate(mappingProfile));
   }
 }

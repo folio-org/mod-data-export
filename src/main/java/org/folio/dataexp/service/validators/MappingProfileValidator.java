@@ -74,11 +74,11 @@ public class MappingProfileValidator {
   private void validateMappingProfileSuppression(MappingProfile mappingProfile) {
     var recordTypes = mappingProfile.getRecordTypes();
     boolean isExistAllItemRecordType = recordTypes.stream().allMatch(type -> type == RecordTypes.ITEM);
-    if (!recordTypes.isEmpty() && isExistAllItemRecordType) {
-      throw new MappingProfileFieldsSuppressionException(ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE);
-    }
     var fieldsSuppressionAsStr = mappingProfile.getFieldsSuppression();
-    if (Objects.nonNull(fieldsSuppressionAsStr)) {
+    if (StringUtils.isNotEmpty(fieldsSuppressionAsStr)) {
+      if (!recordTypes.isEmpty() && isExistAllItemRecordType) {
+        throw new MappingProfileFieldsSuppressionException(ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE);
+      }
       var fieldsSuppression = fieldsSuppressionAsStr.split(",");
       var parameters = new ArrayList<ParametersInner>();
       for (int i = 0; i < fieldsSuppression.length; i++) {
