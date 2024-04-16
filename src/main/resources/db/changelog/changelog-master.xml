@@ -13,4 +13,5 @@
     <include file="changes/job_executions_exports_ids_unique_constraint.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_generation.xml" relativeToChangelogFile="true"/>
     <include file="changes/audit_instance_view.xml" relativeToChangelogFile="true"/>
+    <include file="changes/update_default_authority_profiles.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
