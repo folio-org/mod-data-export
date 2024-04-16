@@ -131,8 +131,6 @@ $$
 $$;
 
 -- error_logs
-DELETE FROM error_logs WHERE jsonb ->> 'jobExecutionId' = '';
-
 ALTER TABLE error_logs ADD COLUMN IF NOT EXISTS job_execution_id uuid;
 
 do
