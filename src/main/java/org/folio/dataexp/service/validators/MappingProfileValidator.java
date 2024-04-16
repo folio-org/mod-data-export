@@ -31,6 +31,7 @@ public class MappingProfileValidator {
   private static final Pattern SUPPRESSION_FIELD_PATTERN = Pattern.compile("^\\d{3}$");
   private static final String ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN = "suppressionFields[%s]";
   private static final String ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE = "Suppression field can not be used only for Item record type";
+  private static final String SUPPRESSION_VALIDATION_ERROR_MESSAGE = "Suppressed fields can be represented by three digits only and need to be separated by a comma.";
 
   public void validate(MappingProfile mappingProfile) {
     validateMappingProfileTransformations(mappingProfile);
@@ -101,7 +102,7 @@ public class MappingProfileValidator {
           errorItem.setParameters(List.of(parameter));
         }
         errors.setTotalRecords(errors.getErrors().size());
-        throw new MappingProfileFieldsSuppressionPatternException(VALIDATION_ERROR_MESSAGE, errors);
+        throw new MappingProfileFieldsSuppressionPatternException(SUPPRESSION_VALIDATION_ERROR_MESSAGE, errors);
       }
     }
   }
