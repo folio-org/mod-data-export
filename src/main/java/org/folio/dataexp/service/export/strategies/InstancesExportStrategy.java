@@ -180,6 +180,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         copyDefaultMappingProfile.setTransformations(new ArrayList<>(defaultMappingProfile.getTransformations()));
       }
       copyDefaultMappingProfile.setDescription(defaultMappingProfile.getDescription());
+      copyDefaultMappingProfile.setFieldsSuppression(mappingProfile.getFieldsSuppression());
+      copyDefaultMappingProfile.setSuppress999ff(mappingProfile.getSuppress999ff());
       var mappingProfileWithHoldingsAndItems = appendHoldingsAndItemTransformations(mappingProfile, copyDefaultMappingProfile);
       rules = ruleFactory.getRules(mappingProfileWithHoldingsAndItems);
     } else {
