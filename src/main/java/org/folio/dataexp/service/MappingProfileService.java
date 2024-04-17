@@ -3,43 +3,31 @@ package org.folio.dataexp.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
-import org.folio.dataexp.domain.dto.ParametersInner;
-import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
-import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.validators.MappingProfileValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 public class MappingProfileService {
 
-  private static final Pattern TRANSFORMATION_PATTERN = Pattern.compile("((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))");
-  private static final String ERROR_CODE = "javax.validation.constraints.Pattern.message";
-  private static final String ERROR_VALIDATION_PARAMETER_KEY_PATTERN = "transformations[%s].transformation";
-  private static final String ERROR_VALIDATION_MESSAGE_PATTERN = "must match \\\"%s\\\"";
-  private static final String TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
-
   private final FolioExecutionContext folioExecutionContext;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
   private final UserClient userClient;
+  private final MappingProfileValidator mappingProfileValidator;
 
   public void deleteMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
@@ -82,7 +70,7 @@ public class MappingProfileService {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
-    validateMappingProfileTransformations(mappingProfile);
+    mappingProfileValidator.validate(mappingProfile);
 
     var saved = mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     return saved.getMappingProfile();
@@ -116,39 +104,9 @@ public class MappingProfileService {
 
     mappingProfile.setMetadata(metadata);
 
+    mappingProfileValidator.validate(mappingProfile);
+
     mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
   }
 
-  private void validateMappingProfileTransformations(MappingProfile mappingProfile) {
-    var transformations = mappingProfile.getTransformations();
-    var parameters = new ArrayList<ParametersInner>();
-    for (int i = 0; i < transformations.size(); i++) {
-      var transformation = transformations.get(i);
-      var matcher = TRANSFORMATION_PATTERN.matcher(transformation.getTransformation());
-      if (!matcher.matches()) {
-        var parameter = ParametersInner.builder()
-          .key(String.format(ERROR_VALIDATION_PARAMETER_KEY_PATTERN, i))
-          .value(transformation.getTransformation()).build();
-        parameters.add(parameter);
-      }
-    }
-    if (!parameters.isEmpty()) {
-      var errors = new Errors();
-      for (var parameter : parameters) {
-        var errorItem = new org.folio.dataexp.domain.dto.Error();
-        errorItem.setCode(ERROR_CODE);
-        errorItem.type("1");
-        errorItem.message(String.format(ERROR_VALIDATION_MESSAGE_PATTERN, TRANSFORMATION_PATTERN));
-        errors.addErrorsItem(errorItem);
-        errorItem.setParameters(List.of(parameter));
-      }
-      errors.setTotalRecords(errors.getErrors().size());
-      throw new MappingProfileTransformationPatternException("Mapping profile validation exception", errors);
-    }
-    for (var transformation : transformations) {
-      if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
-        throw new MappingProfileTransformationEmptyException(TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE);
-      }
-    }
-  }
 }

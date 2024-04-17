@@ -10,6 +10,7 @@ import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
+import org.folio.dataexp.service.validators.MappingProfileValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,8 @@ class MappingProfileServiceTest {
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Mock
   private MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
+  @Mock
+  private MappingProfileValidator mappingProfileValidator;
   @Mock
   private UserClient userClient;
 
@@ -114,6 +117,7 @@ class MappingProfileServiceTest {
     mappingProfileService.postMappingProfile(mappingProfile);
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
+    verify(mappingProfileValidator).validate(isA(MappingProfile.class));
   }
 
   @Test
@@ -135,5 +139,6 @@ class MappingProfileServiceTest {
     mappingProfileService.putMappingProfile(mappingProfile.getId(), mappingProfile);
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
+    verify(mappingProfileValidator).validate(isA(MappingProfile.class));
   }
 }
