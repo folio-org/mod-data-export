@@ -1,5 +1,12 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,16 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import static java.lang.Boolean.TRUE;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Component
@@ -57,8 +62,43 @@ public class RuleFactory {
     this.defaultHoldingsRulesFromConfigFile = defaultHoldingsRulesFromConfigFile;
   }
 
-
   public List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
+    var rules = buildRules(mappingProfile);
+    if (shouldSuppress999ff(mappingProfile)) {
+      rules = rules.stream()
+        .filter(rule -> !is999ff(rule))
+        .toList();
+    }
+    if (isNotEmpty(mappingProfile.getFieldsSuppression())) {
+      var fieldsToSuppress = Arrays.stream(mappingProfile.getFieldsSuppression()
+        .split(","))
+        .map(StringUtils::trim)
+        .toList();
+      return isEmpty(fieldsToSuppress) ?
+        rules :
+        rules.stream()
+          .filter(rule -> !(fieldsToSuppress.contains(rule.getField())))
+          .toList();
+    }
+    return rules;
+  }
+
+  private boolean shouldSuppress999ff(MappingProfile mappingProfile) {
+    return !isNull(mappingProfile.getSuppress999ff()) && mappingProfile.getSuppress999ff();
+  }
+
+  private boolean is999ff(Rule rule) {
+    return "999".equals(rule.getField()) && "ff".equals(fetchIndicators(rule));
+  }
+
+  private String fetchIndicators(Rule rule) {
+    return rule.getDataSources().stream()
+      .filter(dataSource -> nonNull(dataSource.getIndicator()))
+      .map(dataSource -> dataSource.getTranslation().getParameter("value"))
+      .collect(Collectors.joining());
+  }
+
+  public List<Rule> buildRules(MappingProfile mappingProfile) throws TransformationRuleException {
     if (mappingProfile != null && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       return create(mappingProfile);
     }
