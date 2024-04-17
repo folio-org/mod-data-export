@@ -51,6 +51,15 @@
         "MARC"
       ]
     },
+    "fieldsSuppression": {
+      "description":  "Fields to suppress",
+      "type": "string"
+    },
+    "suppress999ff": {
+      "description":  "Supress 999 field rule",
+      "type": "boolean",
+      "default": false
+    },
     "metadata": {
       "description": "Metadata provided by the server",
       "type": "object",

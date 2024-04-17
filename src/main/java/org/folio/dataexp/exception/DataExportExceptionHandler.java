@@ -9,6 +9,8 @@ import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,16 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(MappingProfileTransformationEmptyException.class)
   public ResponseEntity<String> handleMappingProfileTransformationEmptyException(final MappingProfileTransformationEmptyException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(MappingProfileFieldsSuppressionPatternException.class)
+  public ResponseEntity<Errors> handleMappingProfileFieldsSuppressionPatternException(final MappingProfileFieldsSuppressionPatternException e) {
+    return new ResponseEntity<>(e.getErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(MappingProfileFieldsSuppressionException.class)
+  public ResponseEntity<Errors> handleMappingProfileFieldsSuppressionException(final MappingProfileFieldsSuppressionException e) {
+    return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
   }
 
   @ExceptionHandler(DefaultJobProfileException.class)

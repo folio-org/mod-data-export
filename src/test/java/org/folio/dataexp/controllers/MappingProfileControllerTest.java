@@ -130,6 +130,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
     mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setFieldsSuppression("902");
     var user = new User();
     user.setPersonal(new User.Personal());
 
@@ -274,11 +275,58 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
 
   @Test
   @SneakyThrows
+  void postMappingProfileIfSuppressionNotMatchTest() {
+    var transformation = new Transformations();
+    transformation.setFieldId("holdings.callnumber");
+    transformation.setPath("$.holdings[*].callNumber");
+    transformation.setRecordType(RecordTypes.HOLDINGS);
+    transformation.setTransformation("900  $a");
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setDefault(true);
+    mappingProfile.setName("mappingProfile");
+    mappingProfile.setTransformations(List.of(transformation));
+    mappingProfile.setFieldsSuppression("897 , 90");
+    var user = new User();
+    user.setPersonal(new User.Personal());
+
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
+    when(userClient.getUserById(isA(String.class))).thenReturn(user);
+
+    var result = mockMvc.perform(MockMvcRequestBuilders
+        .post("/data-export/mapping-profiles")
+        .headers(defaultHeaders())
+        .content(asJsonString(mappingProfile)))
+      .andExpect(status().isUnprocessableEntity()).andReturn();
+
+    var response = result.getResponse().getContentAsString();
+    var mapper = new ObjectMapper();
+
+    var errors = mapper.readValue(response, Errors.class);
+    assertEquals(1, errors.getErrors().size());
+
+    var error = errors.getErrors().get(0);
+
+    assertEquals("must match \\\"^\\d{3}$\\\"", error.getMessage());
+    assertEquals(1, error.getParameters().size());
+    assertEquals("suppressionFields[1]", error.getParameters().get(0).getKey());
+    assertEquals("90", error.getParameters().get(0).getValue());
+  }
+
+  @Test
+  @SneakyThrows
   void putMappingProfileTest() {
+    var transformation = new Transformations();
+    transformation.setFieldId("holdings.callnumber");
+    transformation.setPath("$.holdings[*].callNumber");
+    transformation.setRecordType(RecordTypes.HOLDINGS);
+    transformation.setTransformation("900  $a");
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(false);
     mappingProfile.setName("mappingProfile");
+    mappingProfile.setTransformations(List.of(transformation));
     mappingProfile.setMetadata(new Metadata().createdDate(new Date()));
     var user = new User();
     user.setPersonal(new User.Personal());
@@ -300,10 +348,16 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
   @Test
   @SneakyThrows
   void putDefaultMappingProfileTest() {
+    var transformation = new Transformations();
+    transformation.setFieldId("holdings.callnumber");
+    transformation.setPath("$.holdings[*].callNumber");
+    transformation.setRecordType(RecordTypes.HOLDINGS);
+    transformation.setTransformation("900  $a");
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
+    mappingProfile.setTransformations(List.of(transformation));
 
     var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
