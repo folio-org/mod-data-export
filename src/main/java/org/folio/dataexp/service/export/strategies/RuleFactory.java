@@ -65,6 +65,12 @@ public class RuleFactory {
   }
 
   public List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
+    try {
+      log.info("Mapping profile: {}", new ObjectMapper().writeValueAsString(mappingProfile));
+    } catch (JsonProcessingException e) {
+      log.error("Error parsing profile json", e);
+    }
+
     var rules = buildRules(mappingProfile);
     if (shouldSuppress999ff(mappingProfile)) {
       rules = rules.stream()
