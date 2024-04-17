@@ -1,5 +1,15 @@
 ## v5.1.0 Unreleased
 
+## 04/17/2024 v5.0.4 Released
+
+This release contains marking default authorities and deletion of error_logs where 'jobExecutionId' is empty
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.3...v5.0.4)
+
+### Technical tasks
+* [MDEXP-753](https://folio-org.atlassian.net/browse/MDEXP-753) Automate manual marking default authorities profiles as default
+* [MDEXP-752](https://folio-org.atlassian.net/browse/MDEXP-752) Automate manual deletion of error_logs where 'jobExecutionId' = ''
+
 ## 04/15/2024 v5.0.3 Released
 
 This release contains aws-sdk and folio-s3-client versions upgrading
