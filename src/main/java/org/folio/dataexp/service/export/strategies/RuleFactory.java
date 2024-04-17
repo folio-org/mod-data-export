@@ -7,6 +7,8 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -80,6 +82,13 @@ public class RuleFactory {
           .filter(rule -> !(fieldsToSuppress.contains(rule.getField())))
           .toList();
     }
+
+    try {
+      log.info("Rules found: {}", new ObjectMapper().writeValueAsString(rules));
+    } catch (JsonProcessingException e) {
+      log.error("Error parsing rules json", e);
+    }
+
     return rules;
   }
 
