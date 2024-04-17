@@ -9,6 +9,7 @@
     <include file="changes/add_config.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_export_all.xml" relativeToChangelogFile="true"/>
     <include file="changes/slice_records_all_ids.xml" relativeToChangelogFile="true"/>
+    <include file="changes/delete_error_logs_empty_job_execution_id.xml" relativeToChangelogFile="true"/>
     <include file="changes/enrich_tables.xml" relativeToChangelogFile="true"/>
     <include file="changes/job_executions_exports_ids_unique_constraint.xml" relativeToChangelogFile="true"/>
     <include file="changes/update_default_authority_profiles.xml" relativeToChangelogFile="true"/>
