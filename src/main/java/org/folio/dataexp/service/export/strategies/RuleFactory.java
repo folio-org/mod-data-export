@@ -6,6 +6,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.COMMA;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
@@ -66,12 +67,12 @@ public class RuleFactory {
     var rules = buildRules(mappingProfile);
     if (shouldSuppress999ff(mappingProfile)) {
       rules = rules.stream()
-        .filter(rule -> !is999ff(rule))
+        .filter(rule -> !("999".equals(rule.getField()) && "ff".equals(fetchIndicators(rule))))
         .toList();
     }
     if (isNotEmpty(mappingProfile.getFieldsSuppression())) {
       var fieldsToSuppress = Arrays.stream(mappingProfile.getFieldsSuppression()
-        .split(","))
+        .split(COMMA))
         .map(StringUtils::trim)
         .toList();
       return isEmpty(fieldsToSuppress) ?
@@ -85,10 +86,6 @@ public class RuleFactory {
 
   private boolean shouldSuppress999ff(MappingProfile mappingProfile) {
     return !isNull(mappingProfile.getSuppress999ff()) && mappingProfile.getSuppress999ff();
-  }
-
-  private boolean is999ff(Rule rule) {
-    return "999".equals(rule.getField()) && "ff".equals(fetchIndicators(rule));
   }
 
   private String fetchIndicators(Rule rule) {
