@@ -57,13 +57,13 @@ public class MarcDeletedIdsService {
     // shared
     var centralTenantId = consortiaService.getCentralTenantId();
     if (StringUtils.isNotEmpty(centralTenantId)) {
-      runInFolioContext(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext), () -> {
+      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
         var marcIdsFromCentral = sourceStorageClient.getMarcRecordsIdentifiers(payload, centralTenantId).getRecords().stream()
           .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
         log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
         marcDeletedIdsCollection.getDeletedMarcIds().addAll(marcIdsFromCentral);
         marcDeletedIdsCollection.setTotalRecords(marcDeletedIdsCollection.getTotalRecords() + marcIdsFromCentral.size());
-      });
+      }
     }
 
     return marcDeletedIdsCollection;
