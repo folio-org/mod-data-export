@@ -35,7 +35,7 @@ public class MarcDeletedIdsService {
 
   private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM = "005.date from '%s'";
   private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date from '%s'-005.date to '%s'";
+  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
   private final static String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
 
   private final SourceStorageClient sourceStorageClient;

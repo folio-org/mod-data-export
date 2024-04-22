@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
+import static java.util.Objects.nonNull;
+
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -22,7 +24,9 @@ public class MarcDeletedIdsController implements MarcDeletedIdsApi {
 
   @Override
   public ResponseEntity<MarcDeletedIdsCollection> getMarcDeletedIds(Date from, Date to) {
-    log.info("GET MARC deleted IDs with date from {}, date to {}", from.toInstant(), to.toInstant());
+    var dateFrom = nonNull(from) ? from.toInstant() : null;
+    var dateTo = nonNull(to) ? to.toInstant() : null;
+    log.info("GET MARC deleted IDs with date from {}, date to {}", dateFrom, dateTo);
     var marcDeletedIdsCollection = marcDeletedIdsService.getMarcDeletedIds(from, to);
     return new ResponseEntity<>(marcDeletedIdsCollection, HttpStatus.OK);
   }
