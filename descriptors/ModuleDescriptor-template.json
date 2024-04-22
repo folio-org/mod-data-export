@@ -439,6 +439,7 @@
             "data-export.marc-deleted-ids.collection.get"
           ],
           "modulePermissions": [
+            "source-storage.records.get"
           ]
         }
       ]
