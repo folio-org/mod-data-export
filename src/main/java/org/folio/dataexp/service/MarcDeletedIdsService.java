@@ -37,7 +37,7 @@ public class MarcDeletedIdsService {
       .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
     var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-      .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
+      .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).collect(Collectors.toList());
     marcDeletedIdsCollection.setDeletedMarcIds(marcIds);
     marcDeletedIdsCollection.setTotalRecords(marcIds.size());
     log.info("Found deleted MARC IDs: {}", marcDeletedIdsCollection.getDeletedMarcIds());
