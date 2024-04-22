@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Collection of deleted MARC IDs",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "deletedMarcIds": {
+      "description": "List of deleted MARC IDs",
+      "type": "array",
+      "id": "deletedMarcIdsList",
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "totalRecords": {
+      "description": "Total number of deleted MARC IDs",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "transformationFields",
+    "totalRecords"
+  ]
+}
