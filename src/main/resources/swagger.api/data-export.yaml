@@ -799,6 +799,42 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /marc-deleted-ids:
+    get:
+      description: Get IDs of MARC records marked as deleted
+      operationId: getMarcDeletedIds
+      parameters:
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: IDs of deleted MARCs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/marcDeletedIdsCollection'
+              example:
+                $ref: 'examples/marcDeletedIdsCollection.json'
+        '404':
+          description: Not Found
+          content:
+            text/plain:
+              example: "Deleted MARC IDs not found"
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:
@@ -932,6 +968,8 @@ components:
       $ref: 'schemas/relatedUserCollection.json'
     timerDescriptor:
       $ref: 'schemas/okapi/TimerDescriptor.json'
+    marcDeletedIdsCollection:
+      $ref: 'schemas/marcDeletedIdsCollection.json'
 
   parameters:
     trait_queryable:
