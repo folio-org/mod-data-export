@@ -34,7 +34,7 @@ public class MarcDeletedIdsServiceTest extends BaseDataExportInitializer {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var payload = new MarcRecordIdentifiersPayload()
         .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
-      var res = sourceStorageClient.getMarcRecordsIdentifiers(payload, "central");
+//      var res = sourceStorageClient.getMarcRecordsIdentifiers(payload, "central");
     }
   }
 }
