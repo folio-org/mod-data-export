@@ -71,11 +71,11 @@ public class MarcDeletedIdsService {
 
   private void enrichWithDate(MarcRecordIdentifiersPayload payload, Date from, Date to) {
     if (nonNull(from) && isNull(to)) {
-      payload.withFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN)));
+      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN)));
     } else if (nonNull(to) && isNull(from)) {
-      payload.withFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN)));
+      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN)));
     } else if (nonNull(from) && nonNull(to)) {
-      payload.withFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
+      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
         DateFormatUtils.format(to, DATE_PATTERN)));
     }
   }
