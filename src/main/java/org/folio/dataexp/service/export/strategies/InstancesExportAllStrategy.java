@@ -171,14 +171,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     log.info("processMarcInstances instances all externalIds: {}", externalIds.size());
-    createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
+    createAndSaveMarcFromJsonRecord(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
         marcRecords, localStorageWriter);
   }
 
   private void processFolioInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<InstanceEntity> folioInstances, LocalStorageWriter localStorageWriter) {
     var result = getGeneratedMarc(folioInstances, mappingProfile, exportFilesEntity.getJobExecutionId());
-    saveMarc(result, exportStatistic, localStorageWriter);
+    createAndSaveGeneratedMarc(result, exportStatistic, localStorageWriter);
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {

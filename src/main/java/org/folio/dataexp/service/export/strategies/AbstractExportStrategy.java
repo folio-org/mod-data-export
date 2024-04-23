@@ -129,13 +129,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       UUID jobExecutionId, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var externalIdsWithMarcRecord = new HashSet<UUID>();
     var marcRecords = getMarcRecords(externalIds, mappingProfile, exportRequest, jobExecutionId);
-    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
+    createAndSaveMarcFromJsonRecord(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
     var result = getGeneratedMarc(externalIds, mappingProfile, exportRequest, jobExecutionId, exportStatistic);
-    saveMarc(result, exportStatistic, localStorageWriter);
+    createAndSaveGeneratedMarc(result, exportStatistic, localStorageWriter);
   }
 
-  protected void createMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
-      UUID jobExecutionId, Set<UUID> externalIdsWithMarcRecord, List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
+  protected void createAndSaveMarcFromJsonRecord(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
+                                                 UUID jobExecutionId, Set<UUID> externalIdsWithMarcRecord, List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     marcRecords = new ArrayList<>(marcRecords);
     log.info("marcRecords size: {}", marcRecords.size());
     Map<UUID, MarcFields> additionalFieldsPerId = null;
@@ -178,7 +178,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     externalIds.removeAll(externalIdsWithMarcRecord);
   }
 
-  protected void saveMarc(GeneratedMarcResult result, ExportStrategyStatistic exportStatistic, LocalStorageWriter localStorageWriter) {
+  protected void createAndSaveGeneratedMarc(GeneratedMarcResult result, ExportStrategyStatistic exportStatistic, LocalStorageWriter localStorageWriter) {
     log.info("Generated marc size: {}", result.getMarcRecords().size());
     result.getMarcRecords().forEach(marc -> {
           if (StringUtils.isNotEmpty(marc)) {
