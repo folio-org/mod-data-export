@@ -72,7 +72,7 @@ public class RuleFactory {
     }
     if (isNotEmpty(mappingProfile.getFieldsSuppression())) {
       var fieldsToSuppress = Arrays.stream(mappingProfile.getFieldsSuppression()
-          .split(COMMA))
+        .split(COMMA))
         .map(StringUtils::trim)
         .toList();
       return isEmpty(fieldsToSuppress) ?
