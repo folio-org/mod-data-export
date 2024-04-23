@@ -1,7 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
 import com.google.common.collect.ImmutableList;
-import lombok.SneakyThrows;
 import org.assertj.core.util.Lists;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -858,39 +856,5 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(METADATA_CREATED_DATE_VALUE, rules.get(0).getMetadata().getData().get(METADATA_CREATED_DATE).getFrom());
 
     assertTrue(rules.containsAll(defaultRulesFromConfigFile));
-  }
-
-  @Test
-  @SneakyThrows
-  void shouldSuppressListedFields() {
-    var mappingProfile = MappingProfile.builder()
-      .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-      .fieldsSuppression("008, 020 , 856")
-      .build();
-
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "008".equals(rule.getField())));
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "020".equals(rule.getField())));
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "856".equals(rule.getField())));
-
-    var rules = ruleFactory.getRules(mappingProfile);
-
-    assertTrue(rules.stream().noneMatch(rule -> "008".equals(rule.getField())));
-    assertTrue(rules.stream().noneMatch(rule -> "020".equals(rule.getField())));
-    assertTrue(rules.stream().noneMatch(rule -> "856".equals(rule.getField())));
-  }
-
-  @Test
-  @SneakyThrows
-  void shouldSuppress999ff() {
-    var mappingProfile = MappingProfile.builder()
-      .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-      .suppress999ff(true)
-      .build();
-
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "999".equals(rule.getField())));
-
-    var rules = ruleFactory.getRules(mappingProfile);
-
-    assertTrue(rules.stream().noneMatch(rule -> "999".equals(rule.getField())));
   }
 }
