@@ -16,7 +16,9 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,28 +47,37 @@ public class MarcDeletedIdsService {
 
   public MarcDeletedIdsCollection getMarcDeletedIds(Date from, Date to) {
     var marcDeletedIdsCollection = new MarcDeletedIdsCollection();
-    var payload = new MarcRecordIdentifiersPayload()
-      .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
+    var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
-    var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-      .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).collect(Collectors.toList());
+
+    List<UUID> marcIds = new ArrayList<>();
+    marcIds.addAll(fetchFromLocalTenant(payload, marcDeletedIdsCollection));
+    marcIds.addAll(fetchFromCentralTenant(payload, marcDeletedIdsCollection));
+
     marcDeletedIdsCollection.setDeletedMarcIds(marcIds);
     marcDeletedIdsCollection.setTotalRecords(marcIds.size());
-    log.info("Found deleted MARC IDs: {}", marcDeletedIdsCollection.getDeletedMarcIds());
 
-    // shared
+    return marcDeletedIdsCollection;
+  }
+
+  private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload, MarcDeletedIdsCollection marcDeletedIdsCollection) {
+    var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
+      .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
+    log.info("Found deleted MARC IDs from member tenant: {}", marcDeletedIdsCollection.getDeletedMarcIds());
+    return marcIds;
+  }
+
+  private List<UUID> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload, MarcDeletedIdsCollection marcDeletedIdsCollection) {
     var centralTenantId = consortiaService.getCentralTenantId();
-    if (StringUtils.isNotEmpty(centralTenantId)) {
+    if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
         var marcIdsFromCentral = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
           .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
         log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
-        marcDeletedIdsCollection.getDeletedMarcIds().addAll(marcIdsFromCentral);
-        marcDeletedIdsCollection.setTotalRecords(marcDeletedIdsCollection.getTotalRecords() + marcIdsFromCentral.size());
+        return marcIdsFromCentral;
       }
     }
-
-    return marcDeletedIdsCollection;
+    return Collections.emptyList();
   }
 
   private void enrichWithDate(MarcRecordIdentifiersPayload payload, Date from, Date to) {
