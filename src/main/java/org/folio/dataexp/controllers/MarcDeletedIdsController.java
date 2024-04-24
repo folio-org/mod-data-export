@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 
-import static java.util.Objects.nonNull;
-
 @RestController
 @RequiredArgsConstructor
 @Log4j2

@@ -34,10 +34,10 @@ import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 @Log4j2
 public class MarcDeletedIdsService {
 
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM = "005.date from '%s'";
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
-  private final static String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
+  private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM = "005.date from '%s'";
+  private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
+  private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
+  private static final String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
 
   private final SourceStorageClient sourceStorageClient;
   private final ConsortiaService consortiaService;
@@ -66,7 +66,7 @@ public class MarcDeletedIdsService {
 
   private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
     var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-      .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
+      .collect(Collectors.toSet()).stream().map(UUID::fromString).toList();
     log.info("Found deleted MARC IDs from member tenant: {}", marcIds.size());
     return marcIds;
   }
@@ -76,7 +76,7 @@ public class MarcDeletedIdsService {
     if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
         var marcIdsFromCentral = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-          .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
+          .collect(Collectors.toSet()).stream().map(UUID::fromString).toList();
         log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
         return marcIdsFromCentral;
       }
