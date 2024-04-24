@@ -23,11 +23,8 @@ public class MarcDeletedIdsController implements MarcDeletedIdsApi {
   private final MarcDeletedIdsService marcDeletedIdsService;
 
   @Override
-  public ResponseEntity<MarcDeletedIdsCollection> getMarcDeletedIds(Date from, Date to) {
-    var dateFrom = nonNull(from) ? from.toInstant() : null;
-    var dateTo = nonNull(to) ? to.toInstant() : null;
-    log.info("GET MARC deleted IDs with date from {}, date to {}", dateFrom, dateTo);
-    var marcDeletedIdsCollection = marcDeletedIdsService.getMarcDeletedIds(from, to);
+  public ResponseEntity<MarcDeletedIdsCollection> getMarcDeletedIds(Date from, Date to, Integer offset, Integer limit) {
+    var marcDeletedIdsCollection = marcDeletedIdsService.getMarcDeletedIds(from, to, offset, limit);
     return new ResponseEntity<>(marcDeletedIdsCollection, HttpStatus.OK);
   }
 }

@@ -35,24 +35,31 @@ import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 @Log4j2
 public class MarcDeletedIdsService {
 
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM = "005.date from '%s'";
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
-  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
+  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM = "(005.date from '%s')%s";
+  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "(005.date to '%s')%s";
+  private final static String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "(005.date in '%s-%s')%s";
   private final static String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
+  private final static String FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE = "%s(952.value is 'present')";
+  private final static String FIELD_SEARCH_AND_CONDITION = " and ";
 
   private final SourceStorageClient sourceStorageClient;
   private final ConsortiaService consortiaService;
   private final FolioExecutionContext folioExecutionContext;
   private final FolioModuleMetadata folioModuleMetadata;
 
-  public MarcDeletedIdsCollection getMarcDeletedIds(Date from, Date to) {
+  public MarcDeletedIdsCollection getMarcDeletedIds(Date from, Date to, Integer offset, Integer limit) {
+    var dateFrom = nonNull(from) ? from.toInstant() : null;
+    var dateTo = nonNull(to) ? to.toInstant() : null;
+    log.info("GET MARC deleted IDs with date from {}, date to {}, offset {}, limit {}", dateFrom, dateTo, offset,
+      limit);
     var marcDeletedIdsCollection = new MarcDeletedIdsCollection();
-    var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
-    enrichWithDate(payload, from, to);
+    var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED)
+      .withOffset(offset).withLimit(limit);
+    enrichWithDateAnd952(payload, from, to);
 
     List<UUID> marcIds = new ArrayList<>();
-    marcIds.addAll(fetchFromLocalTenant(payload, marcDeletedIdsCollection));
-    marcIds.addAll(fetchFromCentralTenant(payload, marcDeletedIdsCollection));
+    marcIds.addAll(fetchFromLocalTenant(payload));
+    marcIds.addAll(fetchFromCentralTenant(payload));
 
     marcDeletedIdsCollection.setDeletedMarcIds(marcIds);
     marcDeletedIdsCollection.setTotalRecords(marcIds.size());
@@ -60,14 +67,14 @@ public class MarcDeletedIdsService {
     return marcDeletedIdsCollection;
   }
 
-  private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload, MarcDeletedIdsCollection marcDeletedIdsCollection) {
+  private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
     var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
       .collect(Collectors.toSet()).stream().map(rec -> UUID.fromString(rec)).toList();
-    log.info("Found deleted MARC IDs from member tenant: {}", marcDeletedIdsCollection.getDeletedMarcIds());
+    log.info("Found deleted MARC IDs from member tenant: {}", marcIds.size());
     return marcIds;
   }
 
-  private List<UUID> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload, MarcDeletedIdsCollection marcDeletedIdsCollection) {
+  private List<UUID> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload) {
     var centralTenantId = consortiaService.getCentralTenantId();
     if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
@@ -80,18 +87,64 @@ public class MarcDeletedIdsService {
     return Collections.emptyList();
   }
 
-  private void enrichWithDate(MarcRecordIdentifiersPayload payload, Date from, Date to) {
-    if (nonNull(from) && isNull(to)) {
-      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN)));
-    } else if (nonNull(to) && isNull(from)) {
-      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN)));
-    } else if (nonNull(from) && nonNull(to)) {
-      payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
-        DateFormatUtils.format(to, DATE_PATTERN)));
+//  private void enrichWithDateAnd952(MarcRecordIdentifiersPayload payload, Date from, Date to) {
+//    if (nonNull(from)) {
+//      if (isNull(to)) {
+//        if (isCurrentTenantCentral()) {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN),
+//            StringUtils.EMPTY));
+//        } else {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN),
+//            format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+//        }
+//      } else {
+//        if (isCurrentTenantCentral()) {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
+//            DateFormatUtils.format(to, DATE_PATTERN), StringUtils.EMPTY));
+//        } else {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
+//            DateFormatUtils.format(to, DATE_PATTERN), format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+//        }
+//      }
+//    } else {
+//      if (nonNull(to)) {
+//        if (isCurrentTenantCentral()) {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN),
+//            StringUtils.EMPTY));
+//        } else {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN),
+//            format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+//        }
+//      } else {
+//        if (!isCurrentTenantCentral()) {
+//          payload.setFieldsSearchExpression(format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, StringUtils.EMPTY));
+//        }
+//      }
+//    }
+//  }
+
+  private void enrichWithDateAnd952(MarcRecordIdentifiersPayload payload, Date from, Date to) {
+    StringBuilder searchExpression = new StringBuilder();
+
+    if (nonNull(from)) {
+      if (nonNull(to)) {
+        searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
+          DateFormatUtils.format(to, DATE_PATTERN), isCurrentTenantCentral() ? StringUtils.EMPTY : format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+      } else {
+        searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN),
+          isCurrentTenantCentral() ? StringUtils.EMPTY : format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+      }
+    } else if (nonNull(to)) {
+      searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN),
+        isCurrentTenantCentral() ? StringUtils.EMPTY : format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, FIELD_SEARCH_AND_CONDITION)));
+    } else if (!isCurrentTenantCentral()) {
+      searchExpression.append(format(FIELD_SEARCH_EXPRESSION_HOLDINGS_PRESENCE_TEMPLATE, StringUtils.EMPTY));
     }
+
+    payload.setFieldsSearchExpression(searchExpression.toString());
   }
 
-  public static FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
+  private FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
     if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
       // create deep copy of headers in order to make switching context thread safe
       var headersCopy = SerializationUtils.clone((HashMap<String, Collection<String>>) context.getAllHeaders());
@@ -102,9 +155,8 @@ public class MarcDeletedIdsService {
     throw new IllegalStateException("Okapi headers not provided");
   }
 
-  public static void runInFolioContext(FolioExecutionContext context, Runnable runnable) {
-    try (var fec = new FolioExecutionContextSetter(context)) {
-      runnable.run();
-    }
+  private boolean isCurrentTenantCentral() {
+    var centralTenantId = consortiaService.getCentralTenantId();
+    return StringUtils.isNotEmpty(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId());
   }
 }

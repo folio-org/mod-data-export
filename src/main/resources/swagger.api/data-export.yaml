@@ -816,6 +816,8 @@ paths:
           schema:
             type: string
             format: date
+        - $ref: '#/components/parameters/trait_pageable_offset'
+        - $ref: '#/components/parameters/trait_pageable_limit'
       responses:
         '200':
           description: IDs of deleted MARCs
