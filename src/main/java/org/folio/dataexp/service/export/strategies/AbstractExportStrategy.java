@@ -157,10 +157,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         }
         marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
       } catch (Exception e) {
-        var errorMessage = "Error converting json to marc for record " + marcRecordEntity.getExternalId().toString();
-        log.error(errorMessage);
         exportStatistic.incrementFailed();
-        errorLogService.saveGeneralError(errorMessage, jobExecutionId);
+        saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
         continue;
       }
       localStorageWriter.write(marc);
@@ -210,6 +208,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         }
       }
     }
+  }
+
+  public void saveConvertJsonRecordToMarcRecordError(MarcRecordEntity marcRecordEntity, UUID jobExecutionId, Exception e) {
+    var errorMessage = "Error converting json to marc for record " + marcRecordEntity.getExternalId().toString();
+    log.error(errorMessage + " : " + e.getMessage());
+    errorLogService.saveGeneralError(errorMessage, jobExecutionId);
   }
 
   private String getDuplicatedSRSErrorMessage(UUID externalId, List<MarcRecordEntity> marcRecords, ExportIdentifiersForDuplicateErrors exportIdentifiers) {
