@@ -1,8 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.junit.jupiter.api.Test;
@@ -30,18 +28,15 @@ class MarcSuppressProcessorTest {
   @Test
   void shouldSuppress999ff() {
     var mappingProfile = MappingProfile.builder().suppress999ff(true).build();
-    var record1 = new RecordImpl();
-    record1.setLeader(new LeaderImpl("01428nam a22003733c 4500"));
-    record1.addVariableField(new DataFieldImpl("999", 'f', 'f'));
+    var record = new RecordImpl();
+    record.setLeader(new LeaderImpl("01428nam a22003733c 4500"));
+    record.addVariableField(new DataFieldImpl("999", 'f', 'f'));
+    record.addVariableField(new DataFieldImpl("999", 'f', ' '));
     var processor = new MarcSuppressProcessor(mappingProfile);
-    processor.suppress(record1);
-    assertNull(record1.getVariableField("999"));
-
-    var record2 = new RecordImpl();
-    record2.setLeader(new LeaderImpl("01428nam a22003733c 4500"));
-    record2.addVariableField(new DataFieldImpl("999", 'f', ' '));
-    processor = new MarcSuppressProcessor(mappingProfile);
-    processor.suppress(record2);
-    assertNotNull(record2.getVariableField("999"));
+    processor.suppress(record);
+    assertThat(record.getDataFields()).hasSize(1);
+    var dataField = record.getDataFields().get(0);
+    assertThat(dataField.getIndicator1()).isEqualTo('f');
+    assertThat(dataField.getIndicator2()).isEqualTo(' ');
   }
 }
