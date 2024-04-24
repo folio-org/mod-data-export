@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MarcRecordsIdentifiersResponse {
+
   private List<String> records;
   private int totalCount;
+
 }

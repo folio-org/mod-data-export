@@ -13,4 +13,5 @@ public interface SourceStorageClient {
 
   @PostMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
   MarcRecordsIdentifiersResponse getMarcRecordsIdentifiers(@RequestBody MarcRecordIdentifiersPayload marcRecordIdentifiersPayload);
+
 }
