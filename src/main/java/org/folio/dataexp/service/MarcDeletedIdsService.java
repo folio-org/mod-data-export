@@ -21,9 +21,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -52,7 +52,7 @@ public class MarcDeletedIdsService {
     var marcDeletedIdsCollection = new MarcDeletedIdsCollection();
     var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED)
       .withOffset(offset).withLimit(limit);
-    enrichWithDateAnd952(payload, from, to);
+    enrichWithDate(payload, from, to);
 
     List<UUID> marcIds = new ArrayList<>();
     marcIds.addAll(fetchFromLocalTenant(payload));
@@ -65,8 +65,7 @@ public class MarcDeletedIdsService {
   }
 
   private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
-    var marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-      .collect(Collectors.toSet()).stream().map(UUID::fromString).toList();
+    var marcIds = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().map(UUID::fromString).toList();
     log.info("Found deleted MARC IDs from member tenant: {}", marcIds.size());
     return marcIds;
   }
@@ -75,8 +74,7 @@ public class MarcDeletedIdsService {
     var centralTenantId = consortiaService.getCentralTenantId();
     if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        var marcIdsFromCentral = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords().stream()
-          .collect(Collectors.toSet()).stream().map(UUID::fromString).toList();
+        var marcIdsFromCentral = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().map(UUID::fromString).toList();
         log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
         return marcIdsFromCentral;
       }
@@ -84,21 +82,21 @@ public class MarcDeletedIdsService {
     return Collections.emptyList();
   }
 
-  private void enrichWithDateAnd952(MarcRecordIdentifiersPayload payload, Date from, Date to) {
-    StringBuilder searchExpression = new StringBuilder();
+  private void enrichWithDate(MarcRecordIdentifiersPayload payload, Date from, Date to) {
+    String searchExpression = null;
 
     if (nonNull(from)) {
       if (nonNull(to)) {
-        searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
-          DateFormatUtils.format(to, DATE_PATTERN)));
+        searchExpression = format(FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE, DateFormatUtils.format(from, DATE_PATTERN),
+          DateFormatUtils.format(to, DATE_PATTERN));
       } else {
-        searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN)));
+        searchExpression = format(FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN));
       }
     } else if (nonNull(to)) {
-      searchExpression.append(format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN)));
+      searchExpression = format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN));
     }
 
-    payload.setFieldsSearchExpression(searchExpression.toString());
+    payload.setFieldsSearchExpression(searchExpression);
   }
 
   private FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {

@@ -129,6 +129,6 @@ class MarcDeletedIdsServiceTest {
 
     var payload = payloadArgumentCaptor.getValue();
     assertThat(payload.getLeaderSearchExpression()).isEqualTo("p_05 = 'd'");
-    assertThat(payload.getFieldsSearchExpression()).isEmpty();
+    assertThat(payload.getFieldsSearchExpression()).isNull();
   }
 }
