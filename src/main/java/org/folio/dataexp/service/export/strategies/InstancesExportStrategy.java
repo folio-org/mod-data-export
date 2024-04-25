@@ -166,9 +166,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var errorMessage = e.getMessage();
     var instances = instanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
     if (errorMessage.contains(LONG_MARC_RECORD_MESSAGE) && !instances.isEmpty()) {
-      var jsonObject =  getAsJsonObject(instances.get(0).getJsonb());
+      var jsonObject= getAsJsonObject(instances.get(0).getJsonb());
       if (jsonObject.isPresent()) {
-        var instanceJson = jsonObject.get();
+        var instanceJson= jsonObject.get();
         errorLogService.saveWithAffectedRecord(instanceJson, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         return;
       }
