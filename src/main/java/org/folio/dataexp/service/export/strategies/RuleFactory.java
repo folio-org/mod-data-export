@@ -66,6 +66,7 @@ public class RuleFactory {
   public List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
     var rules = buildRules(mappingProfile);
     if (shouldSuppress999ff(mappingProfile)) {
+      log.info("Suppressing 999ff");
       rules = rules.stream()
         .filter(rule -> !("999".equals(rule.getField()) && "ff".equals(fetchIndicators(rule))))
         .toList();
@@ -75,6 +76,7 @@ public class RuleFactory {
         .split(COMMA))
         .map(StringUtils::trim)
         .toList();
+      log.info("Suppressing fields [{}]", String.join(COMMA, fieldsToSuppress));
       return isEmpty(fieldsToSuppress) ?
         rules :
         rules.stream()

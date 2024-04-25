@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.util.Constants.COMMA;
 
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.marc4j.marc.Record;
 
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Log4j2
 public class MarcSuppressProcessor {
   private final Set<String> fieldsToSuppress;
   private final boolean suppress999ff;
@@ -23,6 +25,7 @@ public class MarcSuppressProcessor {
         .map(String::trim)
         .collect(Collectors.toSet());
     suppress999ff = Boolean.TRUE.equals(mappingProfile.getSuppress999ff());
+    log.info("Suppress 999ff={}, fields to suppress=[{}]", suppress999ff, String.join(COMMA, fieldsToSuppress));
   }
 
   public Record suppress(Record rec) {
