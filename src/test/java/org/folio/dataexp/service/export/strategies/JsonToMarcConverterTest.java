@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.SneakyThrows;
+import org.folio.dataexp.domain.dto.MappingProfile;
 import org.junit.jupiter.api.Test;
 import org.marc4j.marc.impl.DataFieldImpl;
 
@@ -26,7 +27,7 @@ class JsonToMarcConverterTest {
     var convertor = new JsonToMarcConverter();
 
     var expected = "00067cy  a22000494  4500001001400000tag000300014\u001Eho00000000009\u001Eab\u001E\u001D";
-    var actual = convertor.convertJsonRecordToMarcRecord(json, List.of(variableField));
+    var actual = convertor.convertJsonRecordToMarcRecord(json, List.of(variableField), new MappingProfile());
     assertEquals(expected, actual);
   }
 

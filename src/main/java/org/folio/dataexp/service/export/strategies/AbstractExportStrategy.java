@@ -151,7 +151,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       var marc = StringUtils.EMPTY;
       try {
         var marcHoldingsItemsFields = additionalFieldsPerId.getOrDefault(marcRecordEntity.getExternalId(), new MarcFields());
-        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
+        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields(), mappingProfile);
         if (marcHoldingsItemsFields.getErrorMessages().size() > 0) {
           errorLogService
               .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
