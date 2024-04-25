@@ -120,17 +120,18 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     var errorMessage = e.getMessage();
     if (!instances.isEmpty() || !errorMessage.contains(LONG_MARC_RECORD_MESSAGE)) {
       super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
-    }
-    var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
-    if (!auditInstances.isEmpty()) {
-      var auditInstance = auditInstances.get(0);
-      var instanceAssociatedJsonObject = new JSONObject();
-      instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
-      instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
-      instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
-      errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
     } else {
-      super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
+      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
+      if (!auditInstances.isEmpty()) {
+        var auditInstance = auditInstances.get(0);
+        var instanceAssociatedJsonObject = new JSONObject();
+        instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+        instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+      } else {
+        super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
+      }
     }
   }
 

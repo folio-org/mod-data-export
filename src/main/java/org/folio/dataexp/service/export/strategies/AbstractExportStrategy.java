@@ -270,7 +270,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setErrorLogService(ErrorLogService errorLogService) {
+  protected void setErrorLogService(ErrorLogService errorLogService) {
     this.errorLogService = errorLogService;
   }
 
