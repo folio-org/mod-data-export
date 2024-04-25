@@ -7,6 +7,7 @@ import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -82,7 +84,7 @@ class InstancesExportAllStrategyTest {
     when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(auditInstanceEntity));
 
     instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
   }
 
   @Test
@@ -100,7 +102,7 @@ class InstancesExportAllStrategyTest {
 
     instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
 
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
   }
 
 
