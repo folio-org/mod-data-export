@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.SourceStorageClient;
+import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.dataexp.domain.dto.MarcRecordsIdentifiersResponse;
 import org.folio.spring.FolioExecutionContext;
@@ -14,6 +15,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.Resource;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -38,6 +40,8 @@ class MarcDeletedIdsServiceTest {
   private FolioExecutionContext folioExecutionContext;
   @Mock
   private FolioModuleMetadata folioModuleMetadata;
+  @Mock
+  private FileDefinitionsService fileDefinitionsService;
   @Captor
   private ArgumentCaptor<MarcRecordIdentifiersPayload> payloadArgumentCaptor;
   @InjectMocks
@@ -49,9 +53,12 @@ class MarcDeletedIdsServiceTest {
       .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID().toString())).withTotalCount(1));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("central");
+    var fileDefinition = new FileDefinition().size(1).id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
 
-    var res = marcDeletedIdsService.getMarcDeletedIds(null, null, null, null);
-    assertThat(res.getTotalRecords()).isEqualTo(1);
+    var res = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+    assertThat(res.getSize()).isEqualTo(1);
   }
 
   @Test
@@ -61,9 +68,12 @@ class MarcDeletedIdsServiceTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("member")));
+    var fileDefinition = new FileDefinition().size(2).id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
 
-    var res = marcDeletedIdsService.getMarcDeletedIds(null, null, null, null);
-    assertThat(res.getTotalRecords()).isEqualTo(2);
+    var res = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+    assertThat(res.getSize()).isEqualTo(2);
   }
 
   @Test
@@ -74,8 +84,12 @@ class MarcDeletedIdsServiceTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("member")));
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
+
     var date = new SimpleDateFormat(DATE_PATTERN);
-    marcDeletedIdsService.getMarcDeletedIds(date.parse("20240424"), date.parse("20240424"), null, null);
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(date.parse("20240424"), date.parse("20240424"));
     verify(sourceStorageClient, times(2)).getMarcRecordsIdentifiers(payloadArgumentCaptor.capture());
 
     var payload = payloadArgumentCaptor.getValue();
@@ -91,8 +105,12 @@ class MarcDeletedIdsServiceTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("member")));
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
+
     var date = new SimpleDateFormat(DATE_PATTERN);
-    marcDeletedIdsService.getMarcDeletedIds(date.parse("20240424"), null, null, null);
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(date.parse("20240424"), null);
     verify(sourceStorageClient, times(2)).getMarcRecordsIdentifiers(payloadArgumentCaptor.capture());
 
     var payload = payloadArgumentCaptor.getValue();
@@ -108,8 +126,12 @@ class MarcDeletedIdsServiceTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("member")));
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
+
     var date = new SimpleDateFormat(DATE_PATTERN);
-    marcDeletedIdsService.getMarcDeletedIds(null, date.parse("20240424"), null, null);
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, date.parse("20240424"));
     verify(sourceStorageClient, times(2)).getMarcRecordsIdentifiers(payloadArgumentCaptor.capture());
 
     var payload = payloadArgumentCaptor.getValue();
@@ -124,7 +146,11 @@ class MarcDeletedIdsServiceTest {
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("member")));
-    marcDeletedIdsService.getMarcDeletedIds(null, null, null, null);
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class))).thenReturn(fileDefinition);
+    when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class))).thenReturn(fileDefinition);
+
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
     verify(sourceStorageClient, times(2)).getMarcRecordsIdentifiers(payloadArgumentCaptor.capture());
 
     var payload = payloadArgumentCaptor.getValue();

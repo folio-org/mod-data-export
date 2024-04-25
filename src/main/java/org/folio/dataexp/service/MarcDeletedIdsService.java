@@ -7,13 +7,14 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.folio.dataexp.client.SourceStorageClient;
-import org.folio.dataexp.domain.dto.MarcDeletedIdsCollection;
+import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.scope.FolioExecutionContextSetter;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -43,46 +43,40 @@ public class MarcDeletedIdsService {
   private final ConsortiaService consortiaService;
   private final FolioExecutionContext folioExecutionContext;
   private final FolioModuleMetadata folioModuleMetadata;
+  private final FileDefinitionsService fileDefinitionsService;
 
-  public MarcDeletedIdsCollection getMarcDeletedIds(Date from, Date to, Integer offset, Integer limit) {
+  public FileDefinition getFileDefinitionForMarcDeletedIds(Date from, Date to) {
     var dateFrom = nonNull(from) ? from.toInstant() : null;
     var dateTo = nonNull(to) ? to.toInstant() : null;
-    log.info("GET MARC deleted IDs with date from {}, date to {}, offset {}, limit {}", dateFrom, dateTo, offset,
-      limit);
-    var marcDeletedIdsCollection = new MarcDeletedIdsCollection();
-    var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED)
-      .withOffset(offset).withLimit(limit);
+    log.info("GET MARC deleted IDs with date from {}, date to {}", dateFrom, dateTo);
+    var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
-    List<UUID> marcIds = new ArrayList<>();
+    List<String> marcIds = new ArrayList<>();
     marcIds.addAll(fetchFromLocalTenant(payload));
-    if (nonNull(limit)) {
-      limit -= marcIds.size();
-      payload.setLimit(limit);
-    }
-    if (nonNull(offset)) {
-      offset = offset - marcIds.size() < 0 ? 0 : offset - marcIds.size();
-      payload.setOffset(offset);
-    }
     marcIds.addAll(fetchFromCentralTenant(payload));
+    var fileContent = String.join(System.lineSeparator(), marcIds);
 
-    marcDeletedIdsCollection.setDeletedMarcIds(marcIds);
-    marcDeletedIdsCollection.setTotalRecords(marcIds.size());
-
-    return marcDeletedIdsCollection;
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setSize(marcIds.size());
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    fileDefinition.setFileName("marcDeletedIds.csv");
+    fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
+    fileDefinition = fileDefinitionsService.uploadFile(fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
+    return fileDefinition;
   }
 
-  private List<UUID> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
-    var marcIds = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().map(UUID::fromString).toList();
+  private List<String> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
+    var marcIds = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().toList();
     log.info("Found deleted MARC IDs from member tenant: {}", marcIds.size());
     return marcIds;
   }
 
-  private List<UUID> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload) {
+  private List<String> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload) {
     var centralTenantId = consortiaService.getCentralTenantId();
     if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        var marcIdsFromCentral = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().map(UUID::fromString).toList();
+        var marcIdsFromCentral = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().toList();
         log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
         return marcIdsFromCentral;
       }

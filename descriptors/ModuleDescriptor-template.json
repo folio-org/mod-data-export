@@ -429,18 +429,6 @@
           ],
           "modulePermissions": [
           ]
-        },
-        {
-          "methods": [
-            "GET"
-          ],
-          "pathPattern": "/data-export/marc-deleted-ids",
-          "permissionsRequired": [
-            "data-export.marc-deleted-ids.collection.get"
-          ],
-          "modulePermissions": [
-            "source-storage.records.get"
-          ]
         }
       ]
     },
@@ -621,11 +609,6 @@
       "description": "To return only users which executed export"
     },
     {
-      "permissionName": "data-export.marc-deleted-ids.collection.get",
-      "displayName": "Data Export - MARC deleted IDs",
-      "description": "To return MARC record IDs marked as deleted"
-    },
-    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -654,8 +637,7 @@
         "data-export.quick.export.post",
         "data-export.configuration.post",
         "data-export.export.all",
-        "data-export.related-users.collection.get",
-        "data-export.marc-deleted-ids.collection.get"
+        "data-export.related-users.collection.get"
       ],
       "visible": false
     }
