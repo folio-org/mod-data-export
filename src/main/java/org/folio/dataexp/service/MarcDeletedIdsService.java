@@ -56,6 +56,14 @@ public class MarcDeletedIdsService {
 
     List<UUID> marcIds = new ArrayList<>();
     marcIds.addAll(fetchFromLocalTenant(payload));
+    if (nonNull(limit)) {
+      limit -= marcIds.size();
+      payload.setLimit(limit);
+    }
+    if (nonNull(offset)) {
+      offset = offset - marcIds.size() < 0 ? 0 : offset - marcIds.size();
+      payload.setOffset(offset);
+    }
     marcIds.addAll(fetchFromCentralTenant(payload));
 
     marcDeletedIdsCollection.setDeletedMarcIds(marcIds);
