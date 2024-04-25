@@ -2,27 +2,14 @@ package org.folio.dataexp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
-import org.folio.spring.DefaultFolioExecutionContext;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.integration.XOkapiHeaders;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -40,9 +27,6 @@ public class MarcDeletedIdsService {
   private static final String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
 
   private final SourceStorageClient sourceStorageClient;
-  private final ConsortiaService consortiaService;
-  private final FolioExecutionContext folioExecutionContext;
-  private final FolioModuleMetadata folioModuleMetadata;
   private final FileDefinitionsService fileDefinitionsService;
 
   public FileDefinition getFileDefinitionForMarcDeletedIds(Date from, Date to) {
@@ -52,9 +36,8 @@ public class MarcDeletedIdsService {
     var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
-    List<String> marcIds = new ArrayList<>();
-    marcIds.addAll(fetchFromLocalTenant(payload));
-    marcIds.addAll(fetchFromCentralTenant(payload));
+    List<String> marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+    log.info("Found deleted MARC IDs: {}", marcIds.size());
     var fileContent = String.join(System.lineSeparator(), marcIds);
 
     var fileDefinition = new FileDefinition();
@@ -64,24 +47,6 @@ public class MarcDeletedIdsService {
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     fileDefinition = fileDefinitionsService.uploadFile(fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
-  }
-
-  private List<String> fetchFromLocalTenant(MarcRecordIdentifiersPayload payload) {
-    var marcIds = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().toList();
-    log.info("Found deleted MARC IDs from member tenant: {}", marcIds.size());
-    return marcIds;
-  }
-
-  private List<String> fetchFromCentralTenant(MarcRecordIdentifiersPayload payload) {
-    var centralTenantId = consortiaService.getCentralTenantId();
-    if (StringUtils.isNotEmpty(centralTenantId) && !centralTenantId.equals(folioExecutionContext.getTenantId())) {
-      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-        var marcIdsFromCentral = new HashSet<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords()).stream().toList();
-        log.info("Found deleted MARC IDs from central tenant: {}", marcIdsFromCentral.size());
-        return marcIdsFromCentral;
-      }
-    }
-    return Collections.emptyList();
   }
 
   private void enrichWithDate(MarcRecordIdentifiersPayload payload, Date from, Date to) {
@@ -99,16 +64,5 @@ public class MarcDeletedIdsService {
     }
 
     payload.setFieldsSearchExpression(searchExpression);
-  }
-
-  private FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
-    if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
-      // create deep copy of headers in order to make switching context thread safe
-      var headersCopy = SerializationUtils.clone((HashMap<String, Collection<String>>) context.getAllHeaders());
-      headersCopy.put(XOkapiHeaders.TENANT, List.of(tenantId));
-      log.info("FOLIO context initialized with tenant {}", tenantId);
-      return new DefaultFolioExecutionContext(folioModuleMetadata, headersCopy);
-    }
-    throw new IllegalStateException("Okapi headers not provided");
   }
 }
