@@ -6,6 +6,7 @@ import static org.folio.dataexp.util.Constants.COMMA;
 
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public class MarcSuppressProcessor {
   public Record suppress(Record rec) {
     if (suppress999ff) {
       var records = rec.getDataFields().stream()
-        .filter(f -> "999".equals(f.getTag()) && 'f' == f.getIndicator1() && 'f' == f.getIndicator2())
+        .filter(this::shouldSuppress999ff)
         .toList();
       records.forEach(rec::removeVariableField);
     }
@@ -42,5 +43,9 @@ public class MarcSuppressProcessor {
       records.forEach(rec::removeVariableField);
     }
     return rec;
+  }
+
+  private boolean shouldSuppress999ff(DataField dataField) {
+    return "999".equals(dataField.getTag()) && 'f' == dataField.getIndicator1() && 'f' == dataField.getIndicator2();
   }
 }
