@@ -932,8 +932,6 @@ components:
       $ref: 'schemas/relatedUserCollection.json'
     timerDescriptor:
       $ref: 'schemas/okapi/TimerDescriptor.json'
-    marcDeletedIdsCollection:
-      $ref: 'schemas/marcDeletedIdsCollection.json'
 
   parameters:
     trait_queryable:
