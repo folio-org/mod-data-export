@@ -155,7 +155,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           errorLogService
             .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
         }
-        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields());
+        marc = jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecordEntity.getContent(), marcHoldingsItemsFields.getHoldingItemsFields(), mappingProfile);
       } catch (Exception e) {
         exportStatistic.incrementFailed();
         saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);

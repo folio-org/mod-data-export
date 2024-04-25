@@ -96,6 +96,7 @@ class AbstractExportStrategyTest {
 
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+    mappingProfileEntity.setMappingProfile(new MappingProfile());
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
       .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
