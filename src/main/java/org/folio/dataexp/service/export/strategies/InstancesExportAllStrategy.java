@@ -129,6 +129,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
         instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
         errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+        log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
       } else {
         super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
       }
