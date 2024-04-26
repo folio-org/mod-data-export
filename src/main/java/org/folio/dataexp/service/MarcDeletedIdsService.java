@@ -45,7 +45,7 @@ public class MarcDeletedIdsService {
     var fileDefinition = new FileDefinition();
     fileDefinition.setSize(marcIds.size());
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
-    fileDefinition.setFileName("marcDeletedIds.csv");
+    fileDefinition.setFileName("deleted-marc-bib-records.csv");
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     fileDefinition = fileDefinitionsService.uploadFile(fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
