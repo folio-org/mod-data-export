@@ -9,4 +9,5 @@ public class Constants {
   public static final String ERROR_MESSAGE_PLACEHOLDER_CODE = "error.messagePlaceholder";
   public static final String OKAPI_URL = "http://_";
   public static final String COMMA = ",";
+  public static final String DATE_PATTERN = "yyyyMMdd";
 }
