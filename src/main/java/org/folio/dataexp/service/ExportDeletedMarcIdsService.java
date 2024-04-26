@@ -23,7 +23,7 @@ public class ExportDeletedMarcIdsService {
     var fileDefinition = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(request.getFrom(), request.getTo());
     var defaultJobProfileId = getDefaultJobProfileId();
     var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(defaultJobProfileId)
-      .build();
+      .all(false).quick(false).build();
     dataExportService.postDataExport(exportRequest);
   }
 

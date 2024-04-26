@@ -1,10 +1,10 @@
 package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.folio.dataexp.exception.file.definition.FileExtensionException;
 import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
@@ -16,9 +16,9 @@ import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationE
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
 public class DataExportExceptionHandler {
@@ -88,8 +88,13 @@ public class DataExportExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(ConstraintViolationException.class)
-  public ResponseEntity<String> handleMethodArgumentTypeMismatchException() {
-    return new ResponseEntity<>("Invalid date format for query parameter", HttpStatus.BAD_REQUEST);
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<String> handleInvalidDateException() {
+    return new ResponseEntity<>("Invalid date format for payload", HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ExportDeletedDateRangeException.class)
+  public ResponseEntity<String> handleInvalidDateRangeException(final ExportDeletedDateRangeException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }

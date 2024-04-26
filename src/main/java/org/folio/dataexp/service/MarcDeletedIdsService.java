@@ -6,6 +6,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
+import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ public class MarcDeletedIdsService {
     var dateFrom = nonNull(from) ? from.toInstant() : null;
     var dateTo = nonNull(to) ? to.toInstant() : null;
     log.info("GET MARC deleted IDs with date from {}, date to {}", dateFrom, dateTo);
+    validateDates(from, to);
     var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
@@ -64,5 +66,13 @@ public class MarcDeletedIdsService {
     }
 
     payload.setFieldsSearchExpression(searchExpression);
+  }
+
+  private void validateDates(Date from, Date until) {
+    if (nonNull(from) && nonNull(until)) {
+      if (from.toInstant().isAfter(until.toInstant())) {
+        throw new ExportDeletedDateRangeException("Invalid date range for payload: date 'from' cannot be after date 'to'.");
+      }
+    }
   }
 }
