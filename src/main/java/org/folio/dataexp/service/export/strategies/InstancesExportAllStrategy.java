@@ -25,6 +25,7 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -113,6 +114,28 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     return identifiers;
   }
 
+  @Override
+  public void saveConvertJsonRecordToMarcRecordError(MarcRecordEntity marcRecordEntity, UUID jobExecutionId, Exception e) {
+    var instances = instanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
+    var errorMessage = e.getMessage();
+    if (!instances.isEmpty() || !errorMessage.contains(LONG_MARC_RECORD_MESSAGE)) {
+      super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
+    } else {
+      var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
+      if (!auditInstances.isEmpty()) {
+        var auditInstance = auditInstances.get(0);
+        var instanceAssociatedJsonObject = new JSONObject();
+        instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
+        instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
+        instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+        log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
+      } else {
+        super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
+      }
+    }
+  }
+
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var deletedFolioInstances = getFolioDeleted(exportRequest);
@@ -171,14 +194,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     log.info("processMarcInstances instances all externalIds: {}", externalIds.size());
-    createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
+    createAndSaveMarcFromJsonRecord(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
         marcRecords, localStorageWriter);
   }
 
   private void processFolioInstances(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<InstanceEntity> folioInstances, LocalStorageWriter localStorageWriter) {
     var result = getGeneratedMarc(folioInstances, mappingProfile, exportFilesEntity.getJobExecutionId());
-    saveMarc(result, exportStatistic, localStorageWriter);
+    createAndSaveGeneratedMarc(result, exportStatistic, localStorageWriter);
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {

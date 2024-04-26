@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -362,5 +363,37 @@ class InstancesExportStrategyTest {
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
 
     assertEquals("tag ab", actualMarcField.getHoldingItemsFields().get(0).toString());
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfNotRecordLongErrorTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage = "error message";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
+
+    var expectedErrorMessage = "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
+    verify(errorLogService).saveGeneralError(expectedErrorMessage, jobExecutionId);
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfErrorRecordTooLongTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage = "Record is too long to be a valid MARC binary record, it's length would be 113937 which is more thatn 99999 bytes 2024";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
   }
 }
