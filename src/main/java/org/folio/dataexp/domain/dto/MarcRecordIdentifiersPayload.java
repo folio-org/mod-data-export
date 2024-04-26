@@ -15,9 +15,9 @@ public class MarcRecordIdentifiersPayload {
 
   private String leaderSearchExpression;
   private String fieldsSearchExpression;
-  private boolean suppressFromDiscovery;
-  private boolean deleted;
-  private int offset;
-  private int limit;
+  private Boolean suppressFromDiscovery;
+  private Boolean deleted;
+  private Integer offset;
+  private Integer limit;
 
 }

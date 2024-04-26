@@ -799,6 +799,37 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /export-deleted:
+    post:
+      description: Export of deleted MARC IDs
+      operationId: postExportDeletedMarcIds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exportDeletedMarcIdsRequest'
+            example:
+              $ref: 'examples/exportDeletedMarcIdsRequest.json'
+      responses:
+        '204':
+          description: Data export of deleted MARC IDs started
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid request parameters"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:
@@ -932,6 +963,8 @@ components:
       $ref: 'schemas/relatedUserCollection.json'
     timerDescriptor:
       $ref: 'schemas/okapi/TimerDescriptor.json'
+    exportDeletedMarcIdsRequest:
+      $ref: 'schemas/exportDeletedMarcIdsRequest.json'
 
   parameters:
     trait_queryable:
