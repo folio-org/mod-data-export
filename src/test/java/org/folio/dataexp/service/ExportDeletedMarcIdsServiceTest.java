@@ -5,7 +5,6 @@ import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,8 +34,6 @@ class ExportDeletedMarcIdsServiceTest {
   @Mock
   private MarcDeletedIdsService marcDeletedIdsService;
   @Mock
-  private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock
   private DataExportService dataExportService;
 
   @InjectMocks
@@ -55,8 +52,6 @@ class ExportDeletedMarcIdsServiceTest {
     request.setFrom(from);
     request.setTo(to);
 
-    when(jobProfileEntityRepository.findIdOfDefaultJobProfileByName(ExportRequest.IdTypeEnum.INSTANCE.getValue()))
-      .thenReturn(List.of(UUID.randomUUID()));
     when(marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(from, to)).thenReturn(fileDefinition);
 
     exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
