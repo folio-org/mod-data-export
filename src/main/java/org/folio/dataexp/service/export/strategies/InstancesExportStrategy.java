@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
 public class InstancesExportStrategy extends AbstractExportStrategy {
 
   protected static final String INSTANCE_MARC_TYPE = "MARC_BIB";
-
+  protected static final String LONG_MARC_RECORD_MESSAGE = "Record is too long to be a valid MARC binary record";
   private final ConsortiaService consortiaService;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
@@ -161,13 +161,29 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return getDefaultIdentifiers(id);
   }
 
+  @Override
+  public void saveConvertJsonRecordToMarcRecordError(MarcRecordEntity marcRecordEntity, UUID jobExecutionId, Exception e) {
+    var errorMessage = e.getMessage();
+    var instances = instanceEntityRepository.findByIdIn(Set.of(marcRecordEntity.getExternalId()));
+    if (errorMessage.contains(LONG_MARC_RECORD_MESSAGE) && !instances.isEmpty()) {
+      var jsonObject= getAsJsonObject(instances.get(0).getJsonb());
+      if (jsonObject.isPresent()) {
+        var instanceJson= jsonObject.get();
+        errorLogService.saveWithAffectedRecord(instanceJson, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+        log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
+        return;
+      }
+    }
+    super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
+  }
+
   protected Optional<ExportIdentifiersForDuplicateErrors> getDefaultIdentifiers(UUID id) {
     var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
     exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
     return Optional.of(exportIdentifiers);
   }
 
-  protected List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
+  private List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {
     List<Rule> rules;
     if (mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var defaultMappingProfile = mappingProfileEntityRepository.getReferenceById(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID)).getMappingProfile();
@@ -187,7 +203,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     } else {
       rules = ruleFactory.getRules(mappingProfile);
     }
-
     return rules;
   }
 
