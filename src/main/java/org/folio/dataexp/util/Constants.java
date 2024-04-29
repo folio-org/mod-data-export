@@ -11,4 +11,5 @@ public class Constants {
   public static final String COMMA = ",";
   public static final String DATE_PATTERN = "yyyyMMdd";
   public static final String DEFAULT_INSTANCE_JOB_PROFILE_ID = "6f7f3cd7-9f24-42eb-ae91-91af1cd54d0a";
+  public static final String DELETED_MARC_IDS_FILE_NAME = "deleted-marc-bib-records.csv";
 }

@@ -19,6 +19,7 @@ import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
+import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +55,7 @@ public class MarcDeletedIdsService {
     var fileDefinition = new FileDefinition();
     fileDefinition.setSize(marcIds.size());
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
-    fileDefinition.setFileName("deleted-marc-bib-records.csv");
+    fileDefinition.setFileName(DELETED_MARC_IDS_FILE_NAME);
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     fileDefinition = fileDefinitionsService.uploadFile(fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
