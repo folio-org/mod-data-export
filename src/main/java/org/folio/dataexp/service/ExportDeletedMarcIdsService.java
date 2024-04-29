@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
-import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+
+import static java.util.Objects.nonNull;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -16,18 +18,13 @@ public class ExportDeletedMarcIdsService {
 
   private final MarcDeletedIdsService marcDeletedIdsService;
   private final DataExportService dataExportService;
-  private final JobProfileEntityRepository jobProfileEntityRepository;
 
   public void postExportDeletedMarcIds(ExportDeletedMarcIdsRequest request) {
     log.info("POST export deleted MARC IDs");
-    var fileDefinition = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(request.getFrom(), request.getTo());
-    var defaultJobProfileId = getDefaultJobProfileId();
-    var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(defaultJobProfileId)
+    var fileDefinition = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(nonNull(request) ? request.getFrom() : null,
+      nonNull(request) ? request.getTo() : null);
+    var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID))
       .all(false).quick(false).build();
     dataExportService.postDataExport(exportRequest);
-  }
-
-  private UUID getDefaultJobProfileId() {
-    return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(ExportRequest.IdTypeEnum.INSTANCE.getValue()).get(0);
   }
 }

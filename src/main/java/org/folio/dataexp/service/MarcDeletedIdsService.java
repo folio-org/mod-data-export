@@ -10,10 +10,13 @@ import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 
@@ -31,10 +34,16 @@ public class MarcDeletedIdsService {
   private final FileDefinitionsService fileDefinitionsService;
 
   public FileDefinition getFileDefinitionForMarcDeletedIds(Date from, Date to) {
-    var dateFrom = nonNull(from) ? from.toInstant() : null;
-    var dateTo = nonNull(to) ? to.toInstant() : null;
-    log.info("GET MARC deleted IDs with date from {}, date to {}", dateFrom, dateTo);
     validateDates(from, to);
+    if (isNull(from) && isNull(to)) {
+      Date now = new Date();
+      Date previousDay = Date.from(LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC")).minusDays(1).
+        atZone(ZoneId.of("UTC")).toInstant());
+      from = previousDay;
+      to = previousDay;
+      log.info("The previous day is used: {}", from.toInstant());
+    }
+    log.info("GET MARC deleted IDs with date from {}, date to {}", from, to);
     var payload = new MarcRecordIdentifiersPayload().withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
@@ -69,10 +78,8 @@ public class MarcDeletedIdsService {
   }
 
   private void validateDates(Date from, Date until) {
-    if (nonNull(from) && nonNull(until)) {
-      if (from.toInstant().isAfter(until.toInstant())) {
-        throw new ExportDeletedDateRangeException("Invalid date range for payload: date 'from' cannot be after date 'to'.");
-      }
+    if (nonNull(from) && nonNull(until) && from.toInstant().isAfter(until.toInstant())) {
+      throw new ExportDeletedDateRangeException("Invalid date range for payload: date 'from' cannot be after date 'to'.");
     }
   }
 }

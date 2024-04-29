@@ -804,7 +804,7 @@ paths:
       description: Export of deleted MARC IDs
       operationId: postExportDeletedMarcIds
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
