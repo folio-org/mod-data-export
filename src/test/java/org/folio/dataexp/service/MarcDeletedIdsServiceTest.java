@@ -5,6 +5,7 @@ import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.dataexp.domain.dto.MarcRecordsIdentifiersResponse;
+import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -13,19 +14,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
-
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MarcDeletedIdsServiceTest {
+
+  private final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
   @Mock
   private SourceStorageClient sourceStorageClient;
@@ -103,7 +109,7 @@ class MarcDeletedIdsServiceTest {
   }
 
   @Test
-  void shouldHavePayloadWithNoDate_IfDateIsNotUsed() {
+  void shouldHavePayloadWithPreviousDay_IfDateIsNotUsed() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
       .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID().toString())).withTotalCount(1));
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
@@ -115,6 +121,16 @@ class MarcDeletedIdsServiceTest {
 
     var payload = payloadArgumentCaptor.getValue();
     assertThat(payload.getLeaderSearchExpression()).isEqualTo("p_05 = 'd'");
-    assertThat(payload.getFieldsSearchExpression()).isNull();
+    var previousDay = LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern(DATE_PATTERN));
+    assertThat(payload.getFieldsSearchExpression()).isEqualTo("005.date in '" + previousDay + "-" + previousDay + "'");
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldThrowExportDeletedDateRangeException_ifDateFromIsAfterDateTo() {
+    var from = DATE_FORMAT.parse("2024-04-24");
+    var to = DATE_FORMAT.parse("2024-04-23");
+
+    assertThrows(ExportDeletedDateRangeException.class, () -> marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(from, to));
   }
 }

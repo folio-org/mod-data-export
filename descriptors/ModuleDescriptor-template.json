@@ -90,7 +90,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "5.0",
+      "version": "5.1",
       "handlers": [
         {
           "methods": [
@@ -429,6 +429,17 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-deleted",
+          "permissionsRequired": [
+            "data-export.export-deleted.post"
+          ],
+          "modulePermissions": [
+          ]
         }
       ]
     },
@@ -609,6 +620,11 @@
       "description": "To return only users which executed export"
     },
     {
+      "permissionName": "data-export.export-deleted.post",
+      "displayName": "Data Export - deleted MARC IDs",
+      "description": "To return deleted MARC IDs"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -637,7 +653,8 @@
         "data-export.quick.export.post",
         "data-export.configuration.post",
         "data-export.export.all",
-        "data-export.related-users.collection.get"
+        "data-export.related-users.collection.get",
+        "data-export.export-deleted.post"
       ],
       "visible": false
     }
