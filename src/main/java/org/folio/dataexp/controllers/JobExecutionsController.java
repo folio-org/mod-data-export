@@ -39,6 +39,7 @@ public class JobExecutionsController implements JobExecutionsApi {
       jobExecutionCollection.setTotalRecords((int) jobExecutionsEntityPage.getTotalElements());
       return new ResponseEntity<>(jobExecutionCollection, HttpStatus.OK);
     } catch (Exception exc) {
+      exc.printStackTrace();
       return new ResponseEntity<>(new JobExecutionCollection(), HttpStatus.OK);
     }
   }
