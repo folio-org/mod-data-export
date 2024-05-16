@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -44,6 +45,7 @@ public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
   private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
+  private static final String ERROR_DUPLICATED_ID = "ERROR UUID %s repeated %s.";
 
   @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
   private int waitSearchIdsTimeSeconds;
@@ -79,7 +81,8 @@ public class InputFileProcessor {
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
     var batch = new ArrayList<ExportIdEntity>();
-    var duplicatedIds = new HashSet<UUID>();
+    var readIds = new HashSet<>();
+    var duplicatedIds = new HashMap<UUID, Integer>();
     var countOfRead = new AtomicInteger();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
@@ -89,11 +92,13 @@ public class InputFileProcessor {
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
             .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
-          if (!duplicatedIds.contains(entity.getInstanceId())) {
+          if (!readIds.contains(entity.getInstanceId())) {
             batch.add(entity);
-            duplicatedIds.add(entity.getInstanceId());
+            readIds.add(entity.getInstanceId());
           } else {
             commonExportStatistic.incrementDuplicatedUUID();
+            var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 0) + 1;
+            duplicatedIds.put(entity.getInstanceId(), countDuplicated);
           }
         } catch (Exception e) {
           log.error("Error converting {} to uuid", id);
@@ -104,9 +109,14 @@ public class InputFileProcessor {
           progress.setReadIds(countOfRead.get());
           jobExecutionService.save(jobExecution);
           batch.clear();
-          duplicatedIds.clear();
         }
       });
+      readIds.clear();
+      for (var duplicatedId : duplicatedIds.keySet()) {
+        var errorMessage = String.format(ERROR_DUPLICATED_ID, duplicatedId, duplicatedIds.get(duplicatedId));
+        errorLogService.saveGeneralError(errorMessage, jobExecution.getId());
+      }
+      duplicatedIds.clear();
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
