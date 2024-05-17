@@ -112,8 +112,8 @@ public class InputFileProcessor {
         }
       });
       readIds.clear();
-      for (var duplicatedId : duplicatedIds.keySet()) {
-        var errorMessage = String.format(ERROR_DUPLICATED_ID, duplicatedId, duplicatedIds.get(duplicatedId));
+      for (var entry : duplicatedIds.entrySet()) {
+        var errorMessage = String.format(ERROR_DUPLICATED_ID, entry.getKey(), entry.getValue());
         errorLogService.saveGeneralError(errorMessage, jobExecution.getId());
       }
       duplicatedIds.clear();
