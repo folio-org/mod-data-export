@@ -192,7 +192,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   private GeneratedMarcResult getGeneratedMarc(List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
        UUID jobExecutionId) {
-    var result = new GeneratedMarcResult();
+    var result = new GeneratedMarcResult(jobExecutionId);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     var holdingsIds = holdings.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);

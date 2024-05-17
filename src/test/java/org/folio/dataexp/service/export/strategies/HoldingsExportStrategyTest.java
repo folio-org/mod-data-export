@@ -156,7 +156,7 @@ class HoldingsExportStrategyTest {
     mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
     var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).jsonb(item).build();
 
-    var generatedMarcResult = new GeneratedMarcResult();
+    var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));

@@ -73,7 +73,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   @Override
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
-    var result = new GeneratedMarcResult();
+    var result = new GeneratedMarcResult(jobExecutionId);
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile);
     return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
@@ -133,7 +133,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
   }
 
-  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile,
+  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
                                                              List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
     entityManager.clear();
@@ -143,8 +143,10 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       existHoldingsIds.add(holding.getId());
       var holdingJsonOpt = getAsJsonObject(holding.getJsonb());
       if (holdingJsonOpt.isEmpty()) {
-        log.error("getHoldingsWithInstanceAndItems:: Error converting to json holding by id {}", holding.getId());
-        result.addIdToFailed(holding.getId());
+        var errorMessage = "Error converting to json holding by id {}" + holding.getId();
+        log.error("getHoldingsWithInstanceAndItems:: {}", errorMessage);
+        generatedMarcResult.addIdToFailed(holding.getId());
+        errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());
         continue;
       }
       var holdingJson = holdingJsonOpt.get();
@@ -174,8 +176,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     holdingsIds.forEach(
       holdingsId -> {
         log.error("getHoldingsWithInstanceAndItems:: holding by id {} does not exist", holdingsId);
-        result.addIdToNotExist(holdingsId);
-        result.addIdToFailed(holdingsId);
+        generatedMarcResult.addIdToNotExist(holdingsId);
+        generatedMarcResult.addIdToFailed(holdingsId);
       });
     return holdingsWithInstanceAndItems;
   }
