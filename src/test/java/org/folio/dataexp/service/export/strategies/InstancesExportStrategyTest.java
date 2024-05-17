@@ -338,6 +338,29 @@ class InstancesExportStrategyTest {
   }
 
   @Test
+  void getHoldingsWithInstanceAndItemsIfErrorConvertingInstanceToJsonTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var invalidInstanceJson = "{'id'  '1eaa1eef-1633-4c7e-af09-796315ebc576' 'hrid'  'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(invalidInstanceJson).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doNothing().when(instancesExportStrategy.entityManager).clear();
+
+    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId)),
+      generatedMarcResult, mappingProfile);
+
+    assertEquals(0, instancesWithHoldingsAndItems.size());
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+
+    verify(errorLogService).saveGeneralError("Error converting to json instance by id 1eaa1eef-1633-4c7e-af09-796315ebc576", jobExecutionId);
+  }
+
+  @Test
   void getAdditionalMarcFieldsByExternalIdTest() throws TransformationRuleException {
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
