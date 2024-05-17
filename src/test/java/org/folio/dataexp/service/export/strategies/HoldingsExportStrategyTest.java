@@ -175,4 +175,29 @@ class HoldingsExportStrategyTest {
     assertEquals(1, itemJsonArray.size());
   }
 
+  @Test
+  void getHoldingsWithInstanceAndItemsIfErrorConvertingHoldingToJsonTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var invalidHoldingJson = "{'id'  '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
+    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(invalidHoldingJson).id(holdingId).instanceId(instanceId).build();
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(holdingsRecordEntityRepository.findByIdIn(anySet())).thenReturn(List.of(holdingRecordEntity));
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
+
+    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile);
+
+    assertEquals(0, holdingsWithInstanceAndItems.size());
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+
+   verify(errorLogService).saveGeneralError("Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576", jobExecutionId);
+  }
 }
