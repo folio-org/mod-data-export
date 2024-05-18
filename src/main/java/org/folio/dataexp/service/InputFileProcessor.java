@@ -97,7 +97,7 @@ public class InputFileProcessor {
             readIds.add(entity.getInstanceId());
           } else {
             commonExportStatistic.incrementDuplicatedUUID();
-            var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 0) + 1;
+            var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 1) + 1;
             duplicatedIds.put(entity.getInstanceId(), countDuplicated);
           }
         } catch (Exception e) {
