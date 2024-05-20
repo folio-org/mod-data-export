@@ -45,7 +45,7 @@ public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
   private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
-  private static final String ERROR_DUPLICATED_ID = "ERROR UUID %s repeated %s.";
+  private static final String ERROR_DUPLICATED_ID = "ERROR UUID %s repeated %s times.";
 
   @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
   private int waitSearchIdsTimeSeconds;

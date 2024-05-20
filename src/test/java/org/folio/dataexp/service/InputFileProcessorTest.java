@@ -103,7 +103,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var total = exportIdEntityRepository.count();
       assertEquals(1, total);
 
-      var expected = "ERROR UUID 019e8aea-212d-4d1d-957d-0abcdd0e9acd repeated 3.";
+      var expected = "ERROR UUID 019e8aea-212d-4d1d-957d-0abcdd0e9acd repeated 3 times.";
       verify(errorLogService).saveGeneralError(expected, jobExecution.getId());
     }
   }
