@@ -123,7 +123,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   @Override
   GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
-    var result = new GeneratedMarcResult();
+    var result = new GeneratedMarcResult(jobExecutionId);
     ids.forEach(id -> {
       result.addIdToFailed(id);
       result.addIdToNotExist(id);

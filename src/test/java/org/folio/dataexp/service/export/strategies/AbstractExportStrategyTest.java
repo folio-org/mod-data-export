@@ -80,7 +80,7 @@ class AbstractExportStrategyTest {
   @BeforeEach
   void clear(){
     ((TestExportStrategy)exportStrategy).setMarcRecords(new ArrayList<>());
-    ((TestExportStrategy)exportStrategy).setGeneratedMarcResult(new GeneratedMarcResult());
+    ((TestExportStrategy)exportStrategy).setGeneratedMarcResult(new GeneratedMarcResult(UUID.randomUUID()));
   }
 
   @Test
@@ -243,7 +243,7 @@ class AbstractExportStrategyTest {
     @Setter
     private List<MarcRecordEntity> marcRecords = new ArrayList<>();
     @Setter
-    private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult();
+    private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
     @Override
     List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,

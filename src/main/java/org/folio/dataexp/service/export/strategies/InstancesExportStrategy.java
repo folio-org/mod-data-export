@@ -104,7 +104,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   @Override
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> instanceIds, MappingProfile mappingProfile, ExportRequest exportRequest,
       UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
-    var generatedMarcResult = new GeneratedMarcResult();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instanceIds, generatedMarcResult, mappingProfile);
     return getGeneratedMarc(generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
   }
@@ -275,8 +275,10 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       existInstanceIds.add(instance.getId());
       var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
       if (instanceJsonOpt.isEmpty()) {
-        log.error("getInstancesWithHoldingsAndItems:: Error converting to json instance by id {}", instance.getId());
+        var errorMessage = "Error converting to json instance by id " + instance.getId();
+        log.error("getInstancesWithHoldingsAndItems:: {}", errorMessage);
         generatedMarcResult.addIdToFailed(instance.getId());
+        errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());
         continue;
       }
       var instanceWithHoldingsAndItems = new JSONObject();

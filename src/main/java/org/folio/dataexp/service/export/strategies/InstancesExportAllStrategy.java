@@ -254,7 +254,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private GeneratedMarcResult getGeneratedMarc(List<InstanceEntity> listFolioInstances, MappingProfile mappingProfile,
       UUID jobExecutionId) {
-    var generatedMarcResult = new GeneratedMarcResult();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
     var instancesIds = listFolioInstances.stream().map(InstanceEntity::getId).collect(Collectors.toSet());
     var instancesWithHoldingsAndItems = getInstancesWithHoldingsAndItems(instancesIds, generatedMarcResult, mappingProfile, listFolioInstances);
     return getGeneratedMarc(generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);

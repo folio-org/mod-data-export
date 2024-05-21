@@ -126,7 +126,7 @@ MetaspaceSize=88m
 
 MaxMetaspaceSize=88m
 
-Xmx=540m
+Xmx=840m
 
 #### Default mapping profile
 
