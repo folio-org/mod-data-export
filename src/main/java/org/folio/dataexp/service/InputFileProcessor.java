@@ -59,7 +59,7 @@ public class InputFileProcessor {
   public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic, ExportRequest.IdTypeEnum idType) {
     try {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
-        readCqlFile(fileDefinition, idType);
+        readCqlFile(fileDefinition, idType, commonExportStatistic);
       } else {
         readCsvFile(fileDefinition, commonExportStatistic);
       }
@@ -134,7 +134,7 @@ public class InputFileProcessor {
     return countOfRead - totalExportsIds - commonExportStatistic.getDuplicatedUUIDAmount() - commonExportStatistic.getInvalidUUIDFormat().size();
   }
 
-  private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType) throws IOException {
+  private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType, CommonExportStatistic commonExportStatistic) throws IOException {
     var pathToRead = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
     String cql;
     try (InputStream is = s3Client.read(pathToRead)) {
@@ -165,6 +165,7 @@ public class InputFileProcessor {
             progress.setReadIds(progress.getReadIds() + partition.size());
             jobExecutionService.save(jobExecution);
           }
+          commonExportStatistic.setFailedToReadInputFile(false);
         } else if (jobStatus == IdsJob.Status.ERROR) {
           log.error(ERROR_INVALID_CQL_SYNTAX.getDescription(), fileDefinition.getFileName());
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_INVALID_CQL_SYNTAX.getCode(), Collections.singletonList(fileDefinition.getFileName()),

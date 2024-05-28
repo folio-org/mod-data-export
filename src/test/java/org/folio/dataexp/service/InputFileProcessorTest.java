@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -71,9 +73,11 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
+      CommonExportStatistic errors = new CommonExportStatistic();
+      inputFileProcessor.readFile(fileDefinition, errors, ExportRequest.IdTypeEnum.INSTANCE);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
+      assertFalse(errors.isFailedToReadInputFile());
     }
  }
 
@@ -110,7 +114,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
   @Test
   @SneakyThrows
-  void readCqlFileTest() {
+  void readCqlFileShouldSuccessTest() {
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.cql");
@@ -136,7 +140,8 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
+      CommonExportStatistic errorsStatistic = new CommonExportStatistic();
+      inputFileProcessor.readFile(fileDefinition, errorsStatistic, ExportRequest.IdTypeEnum.INSTANCE);
       var exportIds = exportIdEntityRepository.findAll();
 
       assertEquals(1, exportIds.size());
@@ -145,6 +150,49 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
       jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId()).getJobExecution();
       assertEquals(1, jobExecution.getProgress().getTotal());
+
+      assertFalse(errorsStatistic.isFailedToReadInputFile());
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void readCqlFileWithErrorShouldFailTest() {
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+    fileDefinition.fileName("upload.cql");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
+    fileDefinition.setJobExecutionId(UUID.randomUUID());
+
+    s3Client.createBucketIfNotExists();
+
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
+    var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
+
+    when(searchClient.submitIdsJob(any(IdsJobPayload.class))).thenReturn(new IdsJob().withId(UUID.randomUUID())
+      .withStatus(IdsJob.Status.ERROR));
+    when(searchClient.getJobStatus(anyString())).thenReturn(new IdsJob().withId(UUID.randomUUID())
+      .withStatus(IdsJob.Status.ERROR));
+    var resourceIds = new ResourceIds().withIds(List.of(
+      new ResourceIds.Id().withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd")))).withTotalRecords(1);
+    when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
+
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      jobExecution.setProgress(new JobExecutionProgress());
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      jobExecutionEntityRepository.save(jobExecutionEntity);
+      s3Client.write(path, resource.getInputStream());
+      CommonExportStatistic errorsStatistic = new CommonExportStatistic();
+      inputFileProcessor.readFile(fileDefinition, errorsStatistic, ExportRequest.IdTypeEnum.INSTANCE);
+      var exportIds = exportIdEntityRepository.findAll();
+
+      assertEquals(0, exportIds.size());
+
+      jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId()).getJobExecution();
+      assertEquals(0, jobExecution.getProgress().getTotal());
+
+      assertTrue(errorsStatistic.isFailedToReadInputFile());
     }
   }
 }
