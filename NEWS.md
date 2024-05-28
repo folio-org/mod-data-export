@@ -1,5 +1,8 @@
 ## v5.1.0 Unreleased
 
+### Bug Fixes
+* [MSEARCH-762](https://folio-org.atlassian.net/browse/MSEARCH-762) Fix error during cql files export process
+
 ## 03/20/2024 v5.0.0 Released
 
 This release contains migration to Spring-based approach
