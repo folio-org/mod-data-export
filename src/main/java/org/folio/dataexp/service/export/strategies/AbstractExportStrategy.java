@@ -69,6 +69,16 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.exportTmpStorage = exportTmpStorage;
   }
 
+  public static Optional<JSONObject> getAsJsonObject(String jsonAsString) {
+    try {
+      var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
+      return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
+    } catch (ParseException e) {
+      log.error("getAsJsonObject:: Error converting string to json {}", e.getMessage());
+    }
+    return Optional.empty();
+  }
+
   @Override
   public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
     var exportStatistic = new ExportStrategyStatistic(exportedMarcListener);
@@ -113,16 +123,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, exportFilesEntity.getFileLocation()), OUTPUT_BUFFER_SIZE);
-  }
-
-  protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
-    try {
-      var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
-      return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
-    } catch (ParseException e) {
-      log.error("getAsJsonObject:: Error converting string to json {}", e.getMessage());
-    }
-    return Optional.empty();
   }
 
   protected void createAndSaveMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
