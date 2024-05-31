@@ -14,6 +14,7 @@ import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -43,23 +44,29 @@ public class HoldingsItemsResolverService {
   private final SearchConsortiumHoldings searchConsortiumHoldings;
   private final FolioExecutionContext folioExecutionContext;
   private final FolioModuleMetadata folioModuleMetadata;
+  private final ConsortiaService consortiaService;
 
   @PersistenceContext
   protected EntityManager entityManager;
 
-  public void retrieveHoldingsAndItemsByInstanceIdForLocalTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
+  public void retrieveHoldingsAndItemsByInstanceId(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
     }
+    if (consortiaService.isCurrentTenantCentralTenant()) {
+      retrieveHoldingsAndItemsByInstanceIdForCentralTenant(instance, instanceId, instanceHrid, mappingProfile);
+    } else {
+      retrieveHoldingsAndItemsByInstanceIdForLocalTenant(instance, instanceId, instanceHrid, mappingProfile);
+    }
+  }
+
+  private void retrieveHoldingsAndItemsByInstanceIdForLocalTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
     var holdingsEntities = holdingsRecordEntityRepository.findByInstanceIdIs(instanceId);
     entityManager.clear();
     addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
   }
 
-  public void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
-    if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
-      return;
-    }
+  private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
     var consortiumHoldings = searchConsortiumHoldings.getHoldingsById(instanceId).getHoldings();
     Map<String, List<String>> consortiaHoldingsIdsPerTenant = consortiumHoldings.stream()
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
