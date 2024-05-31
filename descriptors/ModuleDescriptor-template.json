@@ -127,7 +127,8 @@
             "user-tenants.collection.get",
             "search.resources.ids.jobs.post",
             "search.resources.ids.collection.get",
-            "search.resources.ids.jobs.get"
+            "search.resources.ids.jobs.get",
+            "consortium-search.holdings.collection.get"
           ]
         },
         {
@@ -160,7 +161,8 @@
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get",
-            "user-tenants.collection.get"
+            "user-tenants.collection.get",
+            "consortium-search.holdings.collection.get"
           ]
         },
         {
