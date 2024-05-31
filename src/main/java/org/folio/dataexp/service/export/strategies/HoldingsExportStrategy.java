@@ -12,16 +12,15 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
-import org.folio.dataexp.repository.InstanceEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
-import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.repository.*;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
@@ -29,6 +28,7 @@ import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.MarcException;
@@ -56,6 +56,11 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final RuleProcessor ruleProcessor;
   private final RuleHandler ruleHandler;
   private final ReferenceDataProvider referenceDataProvider;
+  private final ConsortiaService consortiaService;
+  private final FolioExecutionContext context;
+  private final ConsortiumSearchClient consortiumSearchClient;
+  private final HoldingsCentralTenantRepository holdingsCentralTenantRepository;
+  private final MarcRecordCentralTenantRepository marcRecordCentralTenantRepository;
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
@@ -64,8 +69,23 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
+      var centralTenantId = consortiaService.getCentralTenantId();
+      if (centralTenantId.equals(context.getTenantId())) {
+        var availableTenants = consortiaService.getAffiliatedTenants();
+        Map<String, Set<UUID>> tenantIdsMap = new HashMap<>();
+        externalIds.forEach(id -> {
+          var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
+          if (availableTenants.contains(curTenant)) {
+            tenantIdsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
+          }
+        });
+        List<MarcRecordEntity> entities = new ArrayList<>();
+        tenantIdsMap.forEach((k, v) -> entities.addAll(marcRecordCentralTenantRepository.findMarcRecordsByIdIn(k, v)));
+        return entities;
+      } else {
+        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
           HOLDING_MARC_TYPE, "ACTUAL");
+      }
     }
     return new ArrayList<>();
   }

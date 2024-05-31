@@ -3,6 +3,7 @@ package org.folio.dataexp.service.export.strategies;
 import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -14,11 +15,13 @@ import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
@@ -71,6 +75,12 @@ class HoldingsExportStrategyTest {
   private ReferenceDataProvider referenceDataProvider;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private ConsortiaService consortiaService;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
+  @Mock
+  private ConsortiumSearchClient consortiumSearchClient;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -85,6 +95,7 @@ class HoldingsExportStrategyTest {
 
   @Test
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
+    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
@@ -199,5 +210,21 @@ class HoldingsExportStrategyTest {
     assertEquals(1, generatedMarcResult.getFailedIds().size());
 
    verify(errorLogService).saveGeneralError("Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576", jobExecutionId);
+  }
+
+  @Test
+  void getMarcRecordsTestIfCurrentTenantIsCentral() {
+    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
+    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
+    when(consortiaService.getAffiliatedTenants()).thenReturn(List.of("memberA", "memberB"));
+    var uuidA = UUID.randomUUID();
+    var uuidB = UUID.randomUUID();
+    when(consortiumSearchClient.getHoldingsById(uuidA.toString()).getTenantId()).thenReturn("memberA");
+    when(consortiumSearchClient.getHoldingsById(uuidB.toString()).getTenantId()).thenReturn("memberA");
+    var ids = Set.of(uuidA, uuidB);
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(true);
+    var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertThat(res).hasSize(2);
   }
 }

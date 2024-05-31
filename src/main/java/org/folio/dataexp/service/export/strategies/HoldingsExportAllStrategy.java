@@ -1,22 +1,20 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
-import org.folio.dataexp.repository.FolioHoldingsAllRepository;
-import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
-import org.folio.dataexp.repository.InstanceEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
-import org.folio.dataexp.repository.MarcHoldingsAllRepository;
-import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.repository.*;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,12 +33,14 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   private final MarcHoldingsAllRepository marcHoldingsAllRepository;
 
   public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
-      RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
-      HoldingsRecordEntityRepository holdingsRecordEntityRepository,
-      MarcRecordEntityRepository marcRecordEntityRepository, FolioHoldingsAllRepository folioHoldingsAllRepository,
-      MarcHoldingsAllRepository marcHoldingsAllRepository) {
+                                   RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
+                                   ConsortiaService consortiaService, FolioExecutionContext context, ConsortiumSearchClient consortiumSearchClient,
+                                   HoldingsCentralTenantRepository holdingsCentralTenantRepository, MarcRecordCentralTenantRepository marcRecordCentralTenantRepository,
+                                   HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
+                                   FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
-        holdingsRecordEntityRepository, marcRecordEntityRepository);
+      consortiaService, context, consortiumSearchClient, holdingsCentralTenantRepository, marcRecordCentralTenantRepository,
+      holdingsRecordEntityRepository, marcRecordEntityRepository);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }
