@@ -1,4 +1,4 @@
-package org.folio.dataexp.service.export.strategies;
+package org.folio.dataexp.util;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.MapUtils;

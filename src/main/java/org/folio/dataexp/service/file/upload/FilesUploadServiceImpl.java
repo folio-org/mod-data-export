@@ -76,9 +76,4 @@ public class FilesUploadServiceImpl implements FilesUploadService {
     fileDefinitionEntityRepository.save(fileDefinitionEntity);
     return fileDefinition;
   }
-
-  @Override
-  public FileDefinition uploadFileDependsOnTypeForQuickExport(QuickExportRequest request) {
-    return null;
-  }
 }

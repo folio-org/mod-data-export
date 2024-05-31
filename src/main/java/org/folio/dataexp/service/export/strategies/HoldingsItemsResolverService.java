@@ -31,7 +31,7 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
-import static org.folio.dataexp.service.export.strategies.FolioExecutionContextUtils.prepareContextForTenant;
+import static org.folio.dataexp.util.FolioExecutionContextUtils.prepareContextForTenant;
 
 
 @Log4j2
