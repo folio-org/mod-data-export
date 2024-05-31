@@ -15,6 +15,8 @@ import java.util.List;
 @Log4j2
 public class FolioExecutionContextUtils {
 
+  private FolioExecutionContextUtils() {}
+
   public static FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
     if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
       // create deep copy of headers in order to make switching context thread safe

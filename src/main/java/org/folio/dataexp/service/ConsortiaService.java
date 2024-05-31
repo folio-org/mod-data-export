@@ -32,6 +32,7 @@ public class ConsortiaService {
     log.info("No central tenant found");
     return StringUtils.EMPTY;
   }
+
   public boolean isCurrentTenantCentralTenant() {
     return getCentralTenantId().equals(context.getTenantId());
   }
