@@ -55,7 +55,7 @@ class HoldingsItemsResolverServiceTest {
   private HoldingsItemsResolverService holdingsItemsResolverService;
 
   @Test
-  void retrieveHoldingsAndItemsByInstanceIdForLocalTenant() {
+  void retrieveHoldingsAndItemsByInstanceIdForLocalTenantTest() {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
@@ -83,7 +83,7 @@ class HoldingsItemsResolverServiceTest {
   }
 
   @Test
-  void retrieveHoldingsAndItemsByInstanceIdForCentralTenant() {
+  void retrieveHoldingsAndItemsByInstanceIdForCentralTenantTest() {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceHrid = "instHrid";
     var holding1 = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
