@@ -209,6 +209,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     entityManager.clear();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
+      //ToDo
       holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceIdForLocalTenant(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
       var marcFields = mapFields(holdingsAndItems, mappingProfile);
       marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
@@ -275,7 +276,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-
+      //ToDo
       if (consortiaService.isCurrentTenantCentralTenant()) {
         holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceIdForCentralTenant(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
       } else {

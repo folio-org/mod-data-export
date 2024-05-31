@@ -99,6 +99,8 @@ class InstancesExportStrategyTest {
   private EntityManager entityManager;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private HoldingsItemsResolverService holdingsItemsResolverService;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -255,7 +257,7 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getHoldingsWithInstanceAndItemsTest() {
+  void getInstancesWithHoldingsAndItemsTest() {
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
@@ -294,43 +296,33 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getHoldingsWithInstanceAndItemsIfCentralTenantExistTest() {
+  void getInstancesWithHoldingsAndItemsIfCentralTenantExistTest() {
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
     var instanceFromCentralTenant =  "{'id' : '0eaa0eef-0000-0c0e-af00-000000ebc576', 'hrid' : 'instCentralHrid'}";
-    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var item = "{'barcode' : 'itemBarcode'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var instanceEntityFromCentralTenant = InstanceEntity.builder().jsonb(instanceFromCentralTenant).id(notExistId).build();
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
     when(consortiaService.getCentralTenantId()).thenReturn("central");
     when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
-    verify(holdingsRecordEntityRepository).findByInstanceIdIs(any());
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceIdForLocalTenant(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
     assertEquals(2, instancesWithHoldingsAndItems.size());
 
     var jsonObject = instancesWithHoldingsAndItems.get(0);
-    var holdingJson = (JSONObject)((JSONArray)jsonObject.get(HOLDINGS_KEY)).get(0);
-    assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
-
-    var itemJsonArray = (JSONArray)holdingJson.get(ITEMS_KEY);
-    assertEquals(1, itemJsonArray.size());
+    var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+    assertEquals("instHrid", instanceJson.get(HRID_KEY));
 
     jsonObject = instancesWithHoldingsAndItems.get(1);
-    var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+    instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
     assertEquals("instCentralHrid", instanceJson.get(HRID_KEY));
 
     assertEquals(0, generatedMarcResult.getFailedIds().size());
@@ -367,20 +359,16 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
-    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
-    var item = "{'barcode' : 'itemBarcode'}";
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var variableField = new DataFieldImpl("tag", 'a', 'b');
 
     when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
-    when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(holdingsItemsResolverService.isNeedUpdateWithHoldingsOrItems(isA(MappingProfile.class))).thenReturn(true);
+    doNothing().when(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceIdForLocalTenant(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
     when(ruleProcessor.processFields(any(), any(), any(), anyList(), any())).thenReturn(List.of(variableField));
 
     var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile);
+
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceIdForLocalTenant(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
     assertNotNull(marcFieldsByExternalId);
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
