@@ -1,16 +1,13 @@
 package org.folio.dataexp.service.export.strategies;
 
 import jakarta.persistence.EntityManager;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
-import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
-import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
@@ -49,11 +46,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
