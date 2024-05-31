@@ -207,17 +207,17 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
     entityManager.clear();
+    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
       holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
-      var marcFields = mapFields(holdingsAndItems, mappingProfile);
+      var marcFields = mapFields(holdingsAndItems, mappingProfile, referenceData);
       marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
     }
     return marcFieldsByExternalId;
   }
 
-  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) throws TransformationRuleException {
-    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
+  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile, ReferenceDataWrapper referenceData) throws TransformationRuleException {
     var rules = ruleFactory.getRules(mappingProfile);
     var finalRules = ruleHandler.preHandle(marcRecord, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(marcRecord.toJSONString());
