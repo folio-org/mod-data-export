@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.ConsortiumHoldingCollection;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -51,6 +52,8 @@ class HoldingsItemsResolverServiceTest {
   @Mock
   private FolioExecutionContext folioExecutionContext;
   @Mock
+  private UserClient userClient;
+  @Mock
   private EntityManager entityManager;
 
   @InjectMocks
@@ -88,6 +91,7 @@ class HoldingsItemsResolverServiceTest {
   void retrieveHoldingsAndItemsByInstanceIdForCentralTenantTest() {
     var user = new User();
     user.setId(UUID.randomUUID().toString());
+    user.setUsername("username");
 
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceHrid = "instHrid";
@@ -115,8 +119,13 @@ class HoldingsItemsResolverServiceTest {
     consortiumHolding2.setId(holdingId2.toString());
     consortiumHolding2.setTenantId("member2");
 
+    var consortiumHolding3 = new ConsortiumHolding();
+    consortiumHolding3.setInstanceId(instanceId.toString());
+    consortiumHolding3.setId(UUID.randomUUID().toString());
+    consortiumHolding3.setTenantId("member3");
+
     var consortiumHoldings = new ConsortiumHoldingCollection();
-    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2));
+    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2, consortiumHolding3));
 
     HashMap<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put("header", List.of("value"));
@@ -130,6 +139,7 @@ class HoldingsItemsResolverServiceTest {
     when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId1))).thenReturn(List.of(holdingRecordEntity1));
     when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId2))).thenReturn(List.of(holdingRecordEntity2));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(userClient.getUserById(user.getId())).thenReturn(user);
     doNothing().when(entityManager).clear();
 
     var instanceJson = new JSONObject();
