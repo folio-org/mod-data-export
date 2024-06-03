@@ -79,9 +79,11 @@ public class HoldingsItemsResolverService {
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
+      holdingsIds.forEach(h -> log.info("Holding id to retrieve {}", h));
       if (userTenants.contains(localTenant)) {
-        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(localTenant, folioModuleMetadata, folioExecutionContext))) {
+        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(localTenant, folioModuleMetadata, folioExecutionContext))) {;
           var holdingsEntities = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
+          log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant :: holdings entities {}", holdingsEntities.size());
           entityManager.clear();
           addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
         }
