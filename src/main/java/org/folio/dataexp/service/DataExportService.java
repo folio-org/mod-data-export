@@ -97,8 +97,14 @@ public class DataExportService {
     if (jobExecutionStatus == JobExecution.StatusEnum.FAIL) {
       jobExecution.setCompletedDate(currentDate);
     }
+    log.info("[SLY-LOG] = Job execution id is {}", jobExecution.getId());
 
-    var jobExecutionProgress = jobExecutionService.getById(jobExecution.getId()).getProgress();
+    var jobExecutionTemp = jobExecutionService.getById(jobExecution.getId());
+    log.info("[SLY-LOG] = Job by id is {}", jobExecutionTemp);
+
+    var jobExecutionProgress = jobExecutionTemp.getProgress();
+    log.info("[SLY-LOG] = jobExecutionProgress is {}", jobExecutionProgress);
+
     if (jobExecutionProgress == null) {
       jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);

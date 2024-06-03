@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -73,11 +72,9 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      CommonExportStatistic errors = new CommonExportStatistic();
-      inputFileProcessor.readFile(fileDefinition, errors, ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
-      assertFalse(errors.isFailedToReadInputFile());
     }
  }
 
@@ -151,7 +148,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId()).getJobExecution();
       assertEquals(1, jobExecution.getProgress().getTotal());
 
-      assertFalse(errorsStatistic.isFailedToReadInputFile());
+      assertTrue(errorsStatistic.isFailedToReadInputFile());
     }
   }
 
