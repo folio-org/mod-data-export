@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -39,12 +40,15 @@ import static org.folio.dataexp.util.FolioExecutionContextUtils.prepareContextFo
 @AllArgsConstructor
 public class HoldingsItemsResolverService {
 
+  private final String ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS = "%s -  the user %s does not have permissions to access the holdings record in %s data tenant.";
+
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
   private final SearchConsortiumHoldings searchConsortiumHoldings;
   private final FolioExecutionContext folioExecutionContext;
   private final FolioModuleMetadata folioModuleMetadata;
   private final ConsortiaService consortiaService;
+  private final UserClient userClient;
 
   @PersistenceContext
   protected EntityManager entityManager;
@@ -71,12 +75,22 @@ public class HoldingsItemsResolverService {
     Map<String, List<String>> consortiaHoldingsIdsPerTenant = consortiumHoldings.stream()
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
       .collect(Collectors.groupingBy(ConsortiumHolding::getTenantId, Collectors.mapping(ConsortiumHolding::getId, Collectors.toList())));
+    var userTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
-      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(entry.getKey(), folioModuleMetadata, folioExecutionContext))) {
-        var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
-        var holdingsEntities = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
-        entityManager.clear();
-        addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
+      var localTenant = entry.getKey();
+      var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
+      if (userTenants.contains(localTenant)) {
+        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(localTenant, folioModuleMetadata, folioExecutionContext))) {
+          var holdingsEntities = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
+          entityManager.clear();
+          addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
+        }
+      } else {
+        var userName = userClient.getUserById(folioExecutionContext.getUserId().toString()).getUsername();
+        holdingsIds.forEach(holdingId -> {
+          var errorMessage = String.format(ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS, holdingId, userName, localTenant);
+          log.error(errorMessage);
+        });
       }
     }
   }

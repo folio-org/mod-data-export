@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserTenant {
-  private String centralTenantId;
-  private String tenantId;
+public class Consortia {
+
+  private String id;
 }

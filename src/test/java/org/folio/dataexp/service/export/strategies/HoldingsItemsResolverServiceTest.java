@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.ConsortiumHoldingCollection;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
@@ -32,6 +33,7 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +86,9 @@ class HoldingsItemsResolverServiceTest {
 
   @Test
   void retrieveHoldingsAndItemsByInstanceIdForCentralTenantTest() {
+    var user = new User();
+    user.setId(UUID.randomUUID().toString());
+
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceHrid = "instHrid";
     var holding1 = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
@@ -117,8 +122,10 @@ class HoldingsItemsResolverServiceTest {
     okapiHeaders.put("header", List.of("value"));
 
     when(folioExecutionContext.getTenantId()).thenReturn("central");
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(okapiHeaders);
     when(consortiaService.isCurrentTenantCentralTenant()).thenReturn(true);
+    when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class))).thenReturn(List.of("member1", "member2"));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
     when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId1))).thenReturn(List.of(holdingRecordEntity1));
     when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId2))).thenReturn(List.of(holdingRecordEntity2));
