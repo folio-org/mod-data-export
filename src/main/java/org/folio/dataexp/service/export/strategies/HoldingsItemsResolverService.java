@@ -40,7 +40,7 @@ import static org.folio.dataexp.util.FolioExecutionContextUtils.prepareContextFo
 @AllArgsConstructor
 public class HoldingsItemsResolverService {
 
-  private final static String ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS = "%s - the user %s does not have permissions to access the holdings record in %s data tenant.";
+  private static final String ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS = "%s - the user %s does not have permissions to access the holdings record in %s data tenant.";
 
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
