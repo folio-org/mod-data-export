@@ -1,13 +1,9 @@
 package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
-import org.assertj.core.api.Assertions;
-import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
-import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsResponse;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.junit.jupiter.api.AssertionsKt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,11 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,10 +26,6 @@ class ExportDeletedMarcIdsServiceTest {
 
   private final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-  @Mock
-  private SourceStorageClient sourceStorageClient;
-  @Mock
-  private FileDefinitionsService fileDefinitionsService;
   @Mock
   private MarcDeletedIdsService marcDeletedIdsService;
   @Mock
@@ -69,7 +60,4 @@ class ExportDeletedMarcIdsServiceTest {
     assertThat(exportRequest.getJobProfileId()).isInstanceOf(UUID.class);
     assertEquals(jobExecutionId, response.getJobExecutionId());
   }
-
-  @Test
-  void postExportDeletedMarcIdsTestShouldReturnResponseWithJobId() {}
 }
