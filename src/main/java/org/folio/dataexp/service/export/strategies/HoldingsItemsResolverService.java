@@ -14,11 +14,10 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
+import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,8 +31,6 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
-import static org.folio.dataexp.util.FolioExecutionContextUtils.prepareContextForTenant;
-
 
 @Log4j2
 @Service
@@ -43,10 +40,10 @@ public class HoldingsItemsResolverService {
   private static final String ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS = "%s - the user %s does not have permissions to access the holdings record in %s data tenant.";
 
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  private final ItemEntityRepository itemEntityRepository;
+  private final HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
+  private final ItemEntityTenantRepository itemEntityTenantRepository;
   private final SearchConsortiumHoldings searchConsortiumHoldings;
   private final FolioExecutionContext folioExecutionContext;
-  private final FolioModuleMetadata folioModuleMetadata;
   private final ConsortiaService consortiaService;
   private final UserClient userClient;
 
@@ -67,7 +64,7 @@ public class HoldingsItemsResolverService {
   private void retrieveHoldingsAndItemsByInstanceIdForLocalTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
     var holdingsEntities = holdingsRecordEntityRepository.findByInstanceIdIs(instanceId);
     entityManager.clear();
-    addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
+    addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, folioExecutionContext.getTenantId());
   }
 
   private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
@@ -81,12 +78,10 @@ public class HoldingsItemsResolverService {
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       holdingsIds.forEach(h -> log.info("Holding id to retrieve {}", h));
       if (userTenants.contains(localTenant)) {
-        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(localTenant, folioModuleMetadata, folioExecutionContext))) {;
-          var holdingsEntities = holdingsRecordEntityRepository.findByIdIn(holdingsIds);
-          log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant :: holdings entities {}", holdingsEntities.size());
-          entityManager.clear();
-          addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile);
-        }
+        var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
+        log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant :: holdings entities {}", holdingsEntities.size());
+        entityManager.clear();
+        addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
       } else {
         var userName = userClient.getUserById(folioExecutionContext.getUserId().toString()).getUsername();
         holdingsIds.forEach(holdingId -> {
@@ -98,14 +93,14 @@ public class HoldingsItemsResolverService {
   }
 
   private void addHoldingsAndItems(JSONObject jsonToUpdateWithHoldingsAndItems, List<HoldingsRecordEntity> holdingsEntities,
-                                   String instanceHrid, MappingProfile mappingProfile) {
+                                   String instanceHrid, MappingProfile mappingProfile, String tenant) {
     if (holdingsEntities.isEmpty()) {
       return;
     }
     HashMap<UUID, List<ItemEntity>> itemsByHoldingId = new HashMap<>();
     if (mappingProfile.getRecordTypes().contains(RecordTypes.ITEM)) {
       var ids = holdingsEntities.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-      itemsByHoldingId  = itemEntityRepository.findByHoldingsRecordIdIn(ids)
+      itemsByHoldingId  = itemEntityTenantRepository.findByHoldingsRecordIdIn(tenant, ids)
         .stream().collect(Collectors.groupingBy(ItemEntity::getHoldingsRecordId,
           HashMap::new, Collectors.mapping(itemEntity -> itemEntity, Collectors.toList())));
       entityManager.clear();

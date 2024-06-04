@@ -13,7 +13,8 @@ import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
+import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -44,7 +46,9 @@ class HoldingsItemsResolverServiceTest {
   @Mock
   private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   @Mock
-  private ItemEntityRepository itemEntityRepository;
+  private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
+  @Mock
+  private ItemEntityTenantRepository itemEntityTenantRepository;
   @Mock
   private ConsortiaService consortiaService;
   @Mock
@@ -71,8 +75,9 @@ class HoldingsItemsResolverServiceTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
+    when(folioExecutionContext.getTenantId()).thenReturn("localTenant");
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(itemEntityTenantRepository.findByHoldingsRecordIdIn(anyString(), anySet())).thenReturn(List.of(itemEntity));
     doNothing().when(entityManager).clear();
 
     var instanceJson = new JSONObject();
@@ -132,13 +137,13 @@ class HoldingsItemsResolverServiceTest {
 
     when(folioExecutionContext.getTenantId()).thenReturn("central");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(okapiHeaders);
     when(consortiaService.isCurrentTenantCentralTenant()).thenReturn(true);
     when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class))).thenReturn(List.of("member1", "member2"));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
-    when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId1))).thenReturn(List.of(holdingRecordEntity1));
-    when(holdingsRecordEntityRepository.findByIdIn(Set.of(holdingId2))).thenReturn(List.of(holdingRecordEntity2));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(holdingsRecordEntityTenantRepository.findByIdIn("member1", Set.of(holdingId1))).thenReturn(List.of(holdingRecordEntity1));
+    when(holdingsRecordEntityTenantRepository.findByIdIn("member2", Set.of(holdingId2))).thenReturn(List.of(holdingRecordEntity2));
+    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member1", Set.of(holdingId1))).thenReturn(List.of(itemEntity));
+    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2", Set.of(holdingId2))).thenReturn(List.of());
     when(userClient.getUserById(user.getId())).thenReturn(user);
     doNothing().when(entityManager).clear();
 
