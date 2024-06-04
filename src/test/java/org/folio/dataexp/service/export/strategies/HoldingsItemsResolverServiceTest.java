@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.ConsortiumHoldingCollection;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -60,7 +59,7 @@ class HoldingsItemsResolverServiceTest {
   @Mock
   private FolioExecutionContext folioExecutionContext;
   @Mock
-  private UserClient userClient;
+  private UserService userService;
   @Mock
   private ErrorLogService errorLogService;
   @Mock
@@ -151,7 +150,7 @@ class HoldingsItemsResolverServiceTest {
     when(holdingsRecordEntityTenantRepository.findByIdIn("member2", Set.of(holdingId2))).thenReturn(List.of(holdingRecordEntity2));
     when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member1", Set.of(holdingId1))).thenReturn(List.of(itemEntity));
     when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2", Set.of(holdingId2))).thenReturn(List.of());
-    when(userClient.getUserById(user.getId())).thenReturn(user);
+    when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
     doNothing().when(entityManager).clear();
 
     var instanceJson = new JSONObject();
@@ -160,7 +159,7 @@ class HoldingsItemsResolverServiceTest {
 
     var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), List.of(consortiumHolding3.getId(), "username", "member3"), jobExecutionId);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), List.of(consortiumHolding3.getId(), user.getUsername(), "member3"), jobExecutionId);
   }
 }
 

@@ -7,7 +7,6 @@ import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
-import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -47,7 +46,7 @@ public class HoldingsItemsResolverService {
   private final SearchConsortiumHoldings searchConsortiumHoldings;
   private final FolioExecutionContext folioExecutionContext;
   private final ConsortiaService consortiaService;
-  private final UserClient userClient;
+  private final UserService userService;
   private final ErrorLogService errorLogService;
 
   @PersistenceContext
@@ -84,7 +83,7 @@ public class HoldingsItemsResolverService {
         entityManager.clear();
         addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
       } else {
-        var userName = userClient.getUserById(folioExecutionContext.getUserId().toString()).getUsername();
+        var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
         holdingsIds.forEach(holdingId -> {
           var errorMessage = String.format(ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS, holdingId, userName, localTenant);
           var errorMessageValues = List.of(holdingId.toString(), userName, localTenant);
