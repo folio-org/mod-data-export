@@ -231,6 +231,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var availableTenants = consortiaService.getAffiliatedTenants();
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
+      log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, context.getTenantId());
       if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
         tenantIdsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
       }
