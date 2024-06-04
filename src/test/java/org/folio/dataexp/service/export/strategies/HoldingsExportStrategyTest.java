@@ -5,15 +5,18 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.Holdings;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
+import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
+import org.folio.dataexp.repository.MarcRecordCentralTenantRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -81,6 +84,8 @@ class HoldingsExportStrategyTest {
   private FolioExecutionContext folioExecutionContext;
   @Mock
   private ConsortiumSearchClient consortiumSearchClient;
+  @Mock
+  private MarcRecordCentralTenantRepository marcRecordCentralTenantRepository;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -219,12 +224,26 @@ class HoldingsExportStrategyTest {
     when(consortiaService.getAffiliatedTenants()).thenReturn(List.of("memberA", "memberB"));
     var uuidA = UUID.randomUUID();
     var uuidB = UUID.randomUUID();
-    when(consortiumSearchClient.getHoldingsById(uuidA.toString()).getTenantId()).thenReturn("memberA");
-    when(consortiumSearchClient.getHoldingsById(uuidB.toString()).getTenantId()).thenReturn("memberA");
-    var ids = Set.of(uuidA, uuidB);
+    var uuidC = UUID.randomUUID();
+    Holdings holdingsA = new Holdings();
+    holdingsA.setTenantId("memberA");
+    Holdings holdingsB = new Holdings();
+    holdingsB.setTenantId("memberB");
+    Holdings holdingsC = new Holdings();
+    holdingsC.setTenantId("centralTenant");
+    when(consortiumSearchClient.getHoldingsById(uuidA.toString())).thenReturn(holdingsA);
+    when(consortiumSearchClient.getHoldingsById(uuidB.toString())).thenReturn(holdingsB);
+    when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
+    var ids = Set.of(uuidA, uuidB, uuidC);
+    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("centralTenant", Set.of(uuidC)))
+      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidC)));
+    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("memberA", Set.of(uuidA)))
+      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
+    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("memberB", Set.of(uuidB)))
+      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
-    assertThat(res).hasSize(2);
+    assertThat(res).hasSize(3);
   }
 }
