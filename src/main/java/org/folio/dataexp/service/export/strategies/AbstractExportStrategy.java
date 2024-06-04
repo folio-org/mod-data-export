@@ -119,7 +119,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id);
 
-  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException;
+  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) throws TransformationRuleException;
 
   protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, exportFilesEntity.getFileLocation()), OUTPUT_BUFFER_SIZE);
@@ -140,7 +140,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     log.info("marcRecords size: {}", marcRecords.size());
     Map<UUID, MarcFields> additionalFieldsPerId = null;
     try {
-      additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
+      additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile, jobExecutionId);
     } catch (TransformationRuleException e) {
       log.error(e);
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);

@@ -267,7 +267,7 @@ class InstancesExportStrategyTest {
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
         generatedMarcResult, mappingProfile);
 
-    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
 
     assertEquals(1, instancesWithHoldingsAndItems.size());
 
@@ -300,7 +300,7 @@ class InstancesExportStrategyTest {
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
-    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     assertEquals(2, instancesWithHoldingsAndItems.size());
 
     var jsonObject = instancesWithHoldingsAndItems.get(0);
@@ -349,12 +349,12 @@ class InstancesExportStrategyTest {
 
     when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
     when(holdingsItemsResolverService.isNeedUpdateWithHoldingsOrItems(isA(MappingProfile.class))).thenReturn(true);
-    doNothing().when(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
+    doNothing().when(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     when(ruleProcessor.processFields(any(), any(), any(), anyList(), any())).thenReturn(List.of(variableField));
 
-    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile);
+    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile, UUID.randomUUID());
 
-    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class));
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     assertNotNull(marcFieldsByExternalId);
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);

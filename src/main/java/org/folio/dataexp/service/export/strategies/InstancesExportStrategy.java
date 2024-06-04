@@ -198,7 +198,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException {
+  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) throws TransformationRuleException {
     var marcFieldsByExternalId = new HashMap<UUID, MarcFields>();
     if (!holdingsItemsResolver.isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return marcFieldsByExternalId;
@@ -210,7 +210,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
-      holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
+      holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile, jobExecutionId);
       var marcFields = mapFields(holdingsAndItems, mappingProfile, referenceData);
       marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
     }
@@ -277,7 +277,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
 
       if (!instancesIdsFromCentral.contains(instance.getId())) {
-        holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
+        holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile, generatedMarcResult.getJobExecutionId());
       }
 
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);

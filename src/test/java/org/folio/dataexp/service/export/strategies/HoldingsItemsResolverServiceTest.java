@@ -16,6 +16,8 @@ import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +38,10 @@ import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +61,8 @@ class HoldingsItemsResolverServiceTest {
   private FolioExecutionContext folioExecutionContext;
   @Mock
   private UserClient userClient;
+  @Mock
+  private ErrorLogService errorLogService;
   @Mock
   private EntityManager entityManager;
 
@@ -82,7 +88,7 @@ class HoldingsItemsResolverServiceTest {
 
     var instanceJson = new JSONObject();
 
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId, instanceHrid, mappingProfile);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId, instanceHrid, mappingProfile, UUID.randomUUID());
 
     var holdingJson = (JSONObject)((JSONArray)instanceJson .get(HOLDINGS_KEY)).get(0);
     assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
@@ -94,6 +100,7 @@ class HoldingsItemsResolverServiceTest {
 
   @Test
   void retrieveHoldingsAndItemsByInstanceIdForCentralTenantTest() {
+    var jobExecutionId = UUID.randomUUID();
     var user = new User();
     user.setId(UUID.randomUUID().toString());
     user.setUsername("username");
@@ -149,10 +156,11 @@ class HoldingsItemsResolverServiceTest {
 
     var instanceJson = new JSONObject();
 
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId, instanceHrid, mappingProfile);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId, instanceHrid, mappingProfile, jobExecutionId);
 
     var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), List.of(consortiumHolding3.getId(), "username", "member3"), jobExecutionId);
   }
 }
 

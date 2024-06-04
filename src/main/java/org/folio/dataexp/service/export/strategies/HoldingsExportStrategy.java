@@ -123,7 +123,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
     return new HashMap<>();
   }
 

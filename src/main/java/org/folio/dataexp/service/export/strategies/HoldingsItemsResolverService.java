@@ -17,6 +17,8 @@ import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
+import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -46,16 +48,17 @@ public class HoldingsItemsResolverService {
   private final FolioExecutionContext folioExecutionContext;
   private final ConsortiaService consortiaService;
   private final UserClient userClient;
+  private final ErrorLogService errorLogService;
 
   @PersistenceContext
   protected EntityManager entityManager;
 
-  public void retrieveHoldingsAndItemsByInstanceId(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
+  public void retrieveHoldingsAndItemsByInstanceId(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile, UUID jobExecutionId) {
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
     }
     if (consortiaService.isCurrentTenantCentralTenant()) {
-      retrieveHoldingsAndItemsByInstanceIdForCentralTenant(instance, instanceId, instanceHrid, mappingProfile);
+      retrieveHoldingsAndItemsByInstanceIdForCentralTenant(instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
     } else {
       retrieveHoldingsAndItemsByInstanceIdForLocalTenant(instance, instanceId, instanceHrid, mappingProfile);
     }
@@ -67,7 +70,7 @@ public class HoldingsItemsResolverService {
     addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, folioExecutionContext.getTenantId());
   }
 
-  private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile) {
+  private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile, UUID jobExecutionId) {
     var consortiumHoldings = searchConsortiumHoldings.getHoldingsById(instanceId).getHoldings();
     Map<String, List<String>> consortiaHoldingsIdsPerTenant = consortiumHoldings.stream()
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
@@ -76,16 +79,16 @@ public class HoldingsItemsResolverService {
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
-      holdingsIds.forEach(h -> log.info("Holding id to retrieve {}", h));
       if (userTenants.contains(localTenant)) {
         var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
-        log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant :: holdings entities {}", holdingsEntities.size());
         entityManager.clear();
         addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
       } else {
         var userName = userClient.getUserById(folioExecutionContext.getUserId().toString()).getUsername();
         holdingsIds.forEach(holdingId -> {
           var errorMessage = String.format(ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS, holdingId, userName, localTenant);
+          var errorMessageValues = List.of(holdingId.toString(), userName, localTenant);
+          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), errorMessageValues, jobExecutionId);
           log.error(errorMessage);
         });
       }
