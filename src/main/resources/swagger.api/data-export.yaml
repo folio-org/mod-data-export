@@ -812,8 +812,14 @@ paths:
             example:
               $ref: 'examples/exportDeletedMarcIdsRequest.json'
       responses:
-        '204':
-          description: Data export of deleted MARC IDs started
+        '200':
+          description: Data export of deleted MARC IDs completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exportDeletedMarcIdsResponse'
+              example:
+                $ref: 'examples/exportDeletedMarcIdsResponse.json'
         '400':
           description: Bad request
           content:
@@ -965,6 +971,8 @@ components:
       $ref: 'schemas/okapi/TimerDescriptor.json'
     exportDeletedMarcIdsRequest:
       $ref: 'schemas/exportDeletedMarcIdsRequest.json'
+    exportDeletedMarcIdsResponse:
+      $ref: 'schemas/exportDeletedMarcIdsResponse.json'
 
   parameters:
     trait_queryable:
