@@ -1,10 +1,13 @@
 package org.folio.dataexp.service;
 
 import lombok.SneakyThrows;
+import org.assertj.core.api.Assertions;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
+import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsResponse;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.junit.jupiter.api.AssertionsKt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +50,8 @@ class ExportDeletedMarcIdsServiceTest {
   @SneakyThrows
   void postExportDeletedMarcIdsTest() {
     var fileDefinition = new FileDefinition().size(1).id(UUID.randomUUID());
+    UUID jobExecutionId = UUID.randomUUID();
+    fileDefinition.setJobExecutionId(jobExecutionId);
     var from = DATE_FORMAT.parse("2024-04-24");
     var to = DATE_FORMAT.parse("2024-04-24");
     var request = new ExportDeletedMarcIdsRequest();
@@ -54,12 +60,16 @@ class ExportDeletedMarcIdsServiceTest {
 
     when(marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(from, to)).thenReturn(fileDefinition);
 
-    exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
+    var response = exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
 
     verify(dataExportService).postDataExport(exportRequestArgumentCaptor.capture());
     var exportRequest = exportRequestArgumentCaptor.getValue();
 
     assertThat(exportRequest.getFileDefinitionId()).isInstanceOf(UUID.class);
     assertThat(exportRequest.getJobProfileId()).isInstanceOf(UUID.class);
+    assertEquals(jobExecutionId, response.getJobExecutionId());
   }
+
+  @Test
+  void postExportDeletedMarcIdsTestShouldReturnResponseWithJobId() {}
 }
