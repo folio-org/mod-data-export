@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import org.folio.dataexp.domain.entity.ItemEntity;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 
+@Repository
 public class ItemEntityTenantRepository {
 
   private final static String ITEMS_QUERY = "SELECT id, jsonb, holdings_record_id FROM %s_mod_data_export.v_item WHERE holdings_record_id in :ids";
