@@ -36,11 +36,12 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
                                    RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
                                    ConsortiaService consortiaService, FolioExecutionContext context, ConsortiumSearchClient consortiumSearchClient,
                                    HoldingsCentralTenantRepository holdingsCentralTenantRepository, MarcRecordCentralTenantRepository marcRecordCentralTenantRepository,
-                                   HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
-                                   FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository) {
+                                   InstanceCentralTenantRepository instanceCentralTenantRepository, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
+                                   MarcRecordEntityRepository marcRecordEntityRepository, FolioHoldingsAllRepository folioHoldingsAllRepository,
+                                   MarcHoldingsAllRepository marcHoldingsAllRepository) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
       consortiaService, context, consortiumSearchClient, holdingsCentralTenantRepository, marcRecordCentralTenantRepository,
-      holdingsRecordEntityRepository, marcRecordEntityRepository);
+      instanceCentralTenantRepository, holdingsRecordEntityRepository, marcRecordEntityRepository);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }
