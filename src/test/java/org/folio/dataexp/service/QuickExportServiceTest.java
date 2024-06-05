@@ -32,9 +32,6 @@ class QuickExportServiceTest extends ServiceInitializer {
   @Autowired
   private QuickExportService quickExportService;
 
-  @MockBean
-  private ConsortiaService consortiaService;
-
   private static final String FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED = "011e1aea-222d-4d1d-957d-0abcdd0e9acd";
   private static final String AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED = "4a090b0f-9da3-40f1-ab17-33d6a1e3abae";
 
@@ -44,7 +41,6 @@ class QuickExportServiceTest extends ServiceInitializer {
     "INSTANCE," + FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED,
     "AUTHORITY," + AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED})
   void quickExportNoErrorsTest(String recordType, String expectedId) {
-    when(consortiaService.getCentralTenantId()).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
@@ -81,7 +77,6 @@ class QuickExportServiceTest extends ServiceInitializer {
   @SneakyThrows
   @Test
   void quickExport_shouldThrowErrorIfInvalidRecordTypeTest() {
-    when(consortiaService.getCentralTenantId()).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();

@@ -216,7 +216,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private List<HoldingsRecordEntity> getHoldings(Set<UUID> holdingsIds, UUID jobExecutionId) {
     var centralTenantId = consortiaService.getCentralTenantId();
-    if (centralTenantId.equals(context.getTenantId())) {
+    if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       Map<String, Set<UUID>> tenantIdsMap = getTenantIds(holdingsIds, centralTenantId, jobExecutionId);
       List<HoldingsRecordEntity> entities = new ArrayList<>();
       tenantIdsMap.forEach((k, v) -> entities.addAll(holdingsCentralTenantRepository.findHoldingsByIdIn(k, v)));
@@ -227,7 +227,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private List<InstanceEntity> getInstances(Set<UUID> instanceIds, UUID jobExecutionId) {
     var centralTenantId = consortiaService.getCentralTenantId();
-    if (centralTenantId.equals(context.getTenantId())) {
+    if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       Map<String, Set<UUID>> tenantIdsMap = getTenantIds(instanceIds, centralTenantId, jobExecutionId);
       List<InstanceEntity> entities = new ArrayList<>();
       tenantIdsMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository.findInstancesByIdIn(k, v)));
