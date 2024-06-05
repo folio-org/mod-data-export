@@ -25,6 +25,6 @@ public class HoldingsRecordEntity {
   private UUID id;
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private String jsonb;
-  @Column(name = "instanceid")
+
   private UUID instanceId;
 }
