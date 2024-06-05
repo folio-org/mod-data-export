@@ -243,17 +243,17 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
       log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, context.getTenantId());
-      if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
-        if (nonNull(curTenant)) {
+      if (nonNull(curTenant)) {
+        if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
           tenantIdsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
         } else {
-          var msg = format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(msg), jobExecutionId);
+          var msg = format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), id, context.getUserId(), curTenant);
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), List.of(msg), jobExecutionId);
           log.error(msg);
         }
       } else {
-        var msg = format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), id, context.getUserId(), curTenant);
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), List.of(msg), jobExecutionId);
+        var msg = format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id);
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(msg), jobExecutionId);
         log.error(msg);
       }
     });
