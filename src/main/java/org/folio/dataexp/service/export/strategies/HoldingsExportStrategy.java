@@ -61,7 +61,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final FolioExecutionContext context;
   private final ConsortiumSearchClient consortiumSearchClient;
   private final HoldingsCentralTenantRepository holdingsCentralTenantRepository;
-  private final MarcRecordCentralTenantRepository marcRecordCentralTenantRepository;
+  private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
@@ -82,7 +82,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 //          }
 //        });
         List<MarcRecordEntity> entities = new ArrayList<>();
-        tenantIdsMap.forEach((k, v) -> entities.addAll(marcRecordCentralTenantRepository.findMarcRecordsByIdIn(k, v)));
+        tenantIdsMap.forEach((k, v) -> entities.addAll(marcInstanceRecordRepository.findByExternalIdIn(k, v)));
         return entities;
       } else {
         return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,

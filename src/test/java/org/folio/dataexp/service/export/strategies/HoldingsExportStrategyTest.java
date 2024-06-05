@@ -16,7 +16,7 @@ import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
-import org.folio.dataexp.repository.MarcRecordCentralTenantRepository;
+import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
@@ -85,7 +85,7 @@ class HoldingsExportStrategyTest {
   @Mock
   private ConsortiumSearchClient consortiumSearchClient;
   @Mock
-  private MarcRecordCentralTenantRepository marcRecordCentralTenantRepository;
+  private MarcInstanceRecordRepository marcInstanceRecordRepository;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -235,11 +235,11 @@ class HoldingsExportStrategyTest {
     when(consortiumSearchClient.getHoldingsById(uuidB.toString())).thenReturn(holdingsB);
     when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
     var ids = Set.of(uuidA, uuidB, uuidC);
-    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("centralTenant", Set.of(uuidC)))
+    when(marcInstanceRecordRepository.findByExternalIdIn("centralTenant", Set.of(uuidC)))
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidC)));
-    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("memberA", Set.of(uuidA)))
+    when(marcInstanceRecordRepository.findByExternalIdIn("memberA", Set.of(uuidA)))
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
-    when(marcRecordCentralTenantRepository.findMarcRecordsByIdIn("memberB", Set.of(uuidB)))
+    when(marcInstanceRecordRepository.findByExternalIdIn("memberB", Set.of(uuidB)))
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
