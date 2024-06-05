@@ -26,7 +26,7 @@ public class MarcRecordCentralTenantRepository {
 
   public List<MarcRecordEntity> findMarcRecordsByIdIn(String tenantId, Set<UUID> ids) {
     String sql = format(QUERY, tenantId, tenantId);
-    Query q = entityManager.createNativeQuery(sql, HoldingsRecordEntity.class);
+    Query q = entityManager.createNativeQuery(sql, MarcRecordEntity.class);
     q.setParameter("ids", ids);
     return q.getResultList();
   }

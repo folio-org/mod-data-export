@@ -229,6 +229,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private Map<String, Set<UUID>> getTenantIds(Set<UUID> ids, String centralTenantId) {
     Map<String, Set<UUID>> tenantIdsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants();
+    log.info("Affiliated tenants for user {} from {} tenant: {}", context.getUserId(), context.getTenantId(), availableTenants);
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
       log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, context.getTenantId());
