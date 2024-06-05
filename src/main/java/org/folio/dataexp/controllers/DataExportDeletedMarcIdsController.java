@@ -3,6 +3,7 @@ package org.folio.dataexp.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
+import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsResponse;
 import org.folio.dataexp.rest.resource.ExportDeletedApi;
 import org.folio.dataexp.service.ExportDeletedMarcIdsService;
 import org.springframework.http.HttpStatus;
@@ -19,8 +20,8 @@ public class DataExportDeletedMarcIdsController implements ExportDeletedApi {
   private final ExportDeletedMarcIdsService exportDeletedMarcIdsService;
 
   @Override
-  public ResponseEntity<Void> postExportDeletedMarcIds(ExportDeletedMarcIdsRequest request) {
-    exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
-    return new ResponseEntity<>(HttpStatus.OK);
+  public ResponseEntity<ExportDeletedMarcIdsResponse> postExportDeletedMarcIds(ExportDeletedMarcIdsRequest request) {
+    var response = exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
