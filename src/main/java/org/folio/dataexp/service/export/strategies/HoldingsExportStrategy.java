@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static java.util.Objects.nonNull;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
@@ -233,7 +234,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
       log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, context.getTenantId());
-      if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
+      if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
         tenantIdsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
       }
     });
