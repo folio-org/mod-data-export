@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.referencedata.ReferenceDataWrapperImpl;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -41,7 +42,8 @@ public class ReferenceDataProvider {
    * This method returns the reference data that is required for generating the transformation fields during the call for
    * /transformation-fields API
    */
-  public ReferenceDataWrapper getReferenceDataForTransformationFields() {
+  @Cacheable(cacheNames = "referenceDataForTransformationFields")
+  public ReferenceDataWrapper getReferenceDataForTransformationFields(String tenantId) {
     HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>() ;
     map.put(ALTERNATIVE_TITLE_TYPES, referenceDataService.getAlternativeTitleTypes());
     map.put(CONTRIBUTOR_NAME_TYPES, referenceDataService.getContributorNameTypes());
@@ -57,7 +59,8 @@ public class ReferenceDataProvider {
   /**
    * This methods returns the reference data that is needed to map the fields to MARC , while generating marc records on the fly
    */
-  public ReferenceDataWrapper getReference() {
+  @Cacheable(cacheNames = "referenceData")
+  public ReferenceDataWrapper getReference(String tenantId) {
     HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>() ;
     map.put(ALTERNATIVE_TITLE_TYPES, referenceDataService.getAlternativeTitleTypes());
     map.put(CONTENT_TERMS, referenceDataService.getNatureOfContentTerms());

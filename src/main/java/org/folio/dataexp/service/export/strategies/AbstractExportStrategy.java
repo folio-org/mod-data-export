@@ -27,6 +27,7 @@ import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.dataexp.util.S3FilePathUtils;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +56,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
+  protected FolioExecutionContext folioExecutionContext;
 
   @PersistenceContext
   protected EntityManager entityManager;
@@ -277,5 +279,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setMarcAuthorityRecordAllRepository(MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository) {
     this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
+  }
+
+  @Autowired
+  private void setFolioExecutionContext(FolioExecutionContext folioExecutionContext) {
+    this.folioExecutionContext = folioExecutionContext;
   }
 }

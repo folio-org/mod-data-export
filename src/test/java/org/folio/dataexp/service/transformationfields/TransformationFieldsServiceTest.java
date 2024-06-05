@@ -14,6 +14,7 @@ import static org.folio.dataexp.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import org.folio.dataexp.domain.dto.TransformationFieldCollection;
 import org.folio.dataexp.util.ReferenceDataResponseUtil;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.folio.processor.referencedata.ReferenceDataWrapperImpl;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,6 +52,8 @@ class TransformationFieldsServiceTest {
   private DisplayNameKeyBuilder displayNameKeyBuilder;
   @Mock
   private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
   @InjectMocks
   private TransformationFieldsService transformationFieldsService;
   @Test
@@ -61,6 +65,7 @@ class TransformationFieldsServiceTest {
     var expectedFields = fieldsCollection.getTransformationFields().stream()
       .collect(Collectors.toMap(TransformationField::getFieldId, Function.identity()));
     mocReferenceData();
+    when(folioExecutionContext.getTenantId()).thenReturn("tenantId");
 
     var res = transformationFieldsService.getTransformationFields();
 
@@ -81,7 +86,7 @@ class TransformationFieldsServiceTest {
     map.put(ELECTRONIC_ACCESS_RELATIONSHIPS, ReferenceDataResponseUtil.getElectronicAccessRelationships());
     map.put(HOLDING_NOTE_TYPES, ReferenceDataResponseUtil.getHoldingNoteTypes());
     map.put(ITEM_NOTE_TYPES, ReferenceDataResponseUtil.getItemNoteTypes());
-    when(referenceDataProvider.getReferenceDataForTransformationFields()).thenReturn(new ReferenceDataWrapperImpl(map));
+    when(referenceDataProvider.getReferenceDataForTransformationFields(isA(String.class))).thenReturn(new ReferenceDataWrapperImpl(map));
 
     doCallRealMethod().when(pathBuilder).build(any(RecordTypes.class), any(TransformationFieldsConfig.class));
     doCallRealMethod().when(pathBuilder).build(any(RecordTypes.class), any(TransformationFieldsConfig.class), any());

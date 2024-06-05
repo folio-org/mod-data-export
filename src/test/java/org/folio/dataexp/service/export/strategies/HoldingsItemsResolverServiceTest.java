@@ -142,7 +142,7 @@ class HoldingsItemsResolverServiceTest {
 
     when(folioExecutionContext.getTenantId()).thenReturn("central");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
-    when(consortiaService.isCurrentTenantCentralTenant()).thenReturn(true);
+    when(consortiaService.isCurrentTenantCentralTenant("central")).thenReturn(true);
     when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class))).thenReturn(List.of("member1", "member2"));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
     when(holdingsRecordEntityTenantRepository.findByIdIn("member1", Set.of(holdingId1))).thenReturn(List.of(holdingRecordEntity1));

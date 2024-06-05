@@ -56,7 +56,7 @@ public class HoldingsItemsResolverService {
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
     }
-    if (consortiaService.isCurrentTenantCentralTenant()) {
+    if (consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
       retrieveHoldingsAndItemsByInstanceIdForCentralTenant(instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
     } else {
       retrieveHoldingsAndItemsByInstanceIdForLocalTenant(instance, instanceId, instanceHrid, mappingProfile);

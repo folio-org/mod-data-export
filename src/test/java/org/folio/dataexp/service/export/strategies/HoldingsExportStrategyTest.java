@@ -19,6 +19,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,8 @@ class HoldingsExportStrategyTest {
   private ReferenceDataProvider referenceDataProvider;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -79,6 +82,7 @@ class HoldingsExportStrategyTest {
 
   @BeforeEach
   void setUp() {
+    holdingsExportStrategy.folioExecutionContext = folioExecutionContext;
     holdingsExportStrategy.entityManager = entityManager;
     holdingsExportStrategy.errorLogService = errorLogService;
   }

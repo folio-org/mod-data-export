@@ -25,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 class QuickExportServiceTest extends ServiceInitializer {
@@ -44,7 +46,7 @@ class QuickExportServiceTest extends ServiceInitializer {
     "INSTANCE," + FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED,
     "AUTHORITY," + AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED})
   void quickExportNoErrorsTest(String recordType, String expectedId) {
-    when(consortiaService.getCentralTenantId()).thenReturn("");
+    when(consortiaService.getCentralTenantId(folioExecutionContext.getTenantId())).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
@@ -81,7 +83,7 @@ class QuickExportServiceTest extends ServiceInitializer {
   @SneakyThrows
   @Test
   void quickExport_shouldThrowErrorIfInvalidRecordTypeTest() {
-    when(consortiaService.getCentralTenantId()).thenReturn("");
+    when(consortiaService.getCentralTenantId(folioExecutionContext.getTenantId())).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();

@@ -79,7 +79,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       if (!externalIds.isEmpty()) {
-        var centralTenantId = consortiaService.getCentralTenantId();
+        var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
@@ -103,7 +103,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   protected GeneratedMarcResult getGeneratedMarc(GeneratedMarcResult generatedMarcResult, List<JSONObject> instancesWithHoldingsAndItems,
       MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = new ArrayList<String>();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
     List<Rule> rules;
     try {
       rules = getRules(mappingProfile);
@@ -207,7 +207,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
     entityManager.clear();
-    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
+    ReferenceDataWrapper referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
       holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile, jobExecutionId);
@@ -249,8 +249,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var notFoundInLocalTenant = new HashSet<>(instancesIds);
     notFoundInLocalTenant.removeIf(foundIds::contains);
     var instancesIdsFromCentral = new HashSet<UUID>();
-    if (!notFoundInLocalTenant.isEmpty() && !consortiaService.isCurrentTenantCentralTenant()) {
-      var centralTenantId = consortiaService.getCentralTenantId();
+    if (!notFoundInLocalTenant.isEmpty() && !consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (StringUtils.isNotEmpty(centralTenantId)) {
         var instancesFromCentralTenant = instanceCentralTenantRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
         instancesFromCentralTenant.forEach(instanceEntity -> {

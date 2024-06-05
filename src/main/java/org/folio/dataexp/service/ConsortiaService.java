@@ -24,7 +24,7 @@ public class ConsortiaService {
   private final ConsortiumClient consortiumClient;
 
   @Cacheable(value = "centralTenantCache")
-  public String getCentralTenantId() {
+  public String getCentralTenantId(String currentTenantId) {
     var userTenantCollection = consortiaClient.getUserTenantCollection();
     var userTenants = userTenantCollection.getUserTenants();
     if (!userTenants.isEmpty()) {
@@ -50,7 +50,7 @@ public class ConsortiaService {
     return new ArrayList<>();
   }
 
-  public boolean isCurrentTenantCentralTenant() {
-    return getCentralTenantId().equals(context.getTenantId());
+  public boolean isCurrentTenantCentralTenant(String currentTenantId) {
+    return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
 }
