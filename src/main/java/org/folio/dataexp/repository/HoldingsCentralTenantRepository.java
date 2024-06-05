@@ -19,7 +19,7 @@ public class HoldingsCentralTenantRepository {
   @PersistenceContext
   private EntityManager entityManager;
 
-  private final static String HOLDINGS_QUERY = "SELECT id, jsonb, instanceid as \"instanceId\" FROM %s_mod_inventory_storage.holdings_record WHERE id in :ids";
+  private final static String HOLDINGS_QUERY = "SELECT id, jsonb, instanceid as instance_id FROM %s_mod_inventory_storage.holdings_record WHERE id in :ids";
 
   public List<HoldingsRecordEntity> findHoldingsByIdIn(String tenantId, Set<UUID> ids) {
     String sql = format(HOLDINGS_QUERY, tenantId, tenantId);
