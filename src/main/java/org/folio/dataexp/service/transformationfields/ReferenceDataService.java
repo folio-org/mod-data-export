@@ -3,6 +3,7 @@ package org.folio.dataexp.service.transformationfields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
 import org.folio.dataexp.client.ContributorNameTypesClient;
@@ -36,6 +37,7 @@ import org.folio.dataexp.domain.dto.MaterialType;
 import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.dataexp.domain.dto.NatureOfContentTerm;
 import org.folio.processor.referencedata.JsonObjectWrapper;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class ReferenceDataService {
   private static final int REFERENCE_DATA_LIMIT = Integer.MAX_VALUE;
@@ -65,6 +68,7 @@ public class ReferenceDataService {
   private final MaterialTypesClient materialTypesClient;
   private final NatureOfContentTermsClient natureOfContentTermsClient;
   private final IssuanceModesClient issuanceModesClient;
+  private final FolioExecutionContext context;
 
   @Cacheable(cacheNames = "alternativeTitleTypes")
   public Map<String, JsonObjectWrapper> getAlternativeTitleTypes() {
@@ -149,9 +153,12 @@ public class ReferenceDataService {
   @Cacheable(cacheNames = "locations")
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    return ObjectUtils.isEmpty(list) ?
+    log.info("getLocations list: {}, tenant: {}", list, context.getTenantId());
+    Map<String, JsonObjectWrapper> res = ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));
+    log.info("getLocations res: {}", res);
+    return res;
   }
 
   @Cacheable(cacheNames = "campuses")
