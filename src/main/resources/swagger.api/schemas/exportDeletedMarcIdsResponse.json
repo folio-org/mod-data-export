@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Necessary data after executed export deleted MARC IDs process",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "jobExecutionId": {
+      "description": "UUID of the job execution, that had been used for export deleted process",
+      "type": "string",
+      "format": "uuid"
+    }
+  },
+  "required": [
+    "jobExecutionId"
+  ]
+}
