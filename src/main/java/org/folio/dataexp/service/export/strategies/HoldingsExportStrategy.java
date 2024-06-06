@@ -252,6 +252,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   private Map<UUID, String> getIdsTenant(Set<UUID> ids, String centralTenantId) {
+    log.info("getIdsTenant ids: {}", ids);
     Map<UUID, String> tenantIdsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants();
     ids.forEach(id -> {
@@ -267,6 +268,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private void fillOutMarcRecords(List<JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
                                   GeneratedMarcResult result, List<Rule> rules) {
+    log.info("holdingsWithInstanceAndItems: ");
+    holdingsWithInstanceAndItems.forEach(js -> System.out.println(js.toJSONString()));
     var centralTenantId = consortiaService.getCentralTenantId();
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       var ids = holdingsWithInstanceAndItems.stream().map(json -> (UUID)json.get("id")).collect(Collectors.toSet());
