@@ -273,10 +273,13 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var centralTenantId = consortiaService.getCentralTenantId();
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       var idsTenant = getIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
+      log.info("idsTenant: {}", idsTenant);
       for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
+        log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
         try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(idsTenant.get(uuidJson.getKey()), folioModuleMetadata, context))) {
           ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
           var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
+          log.info("marc: {}", marc);
           marcRecords.add(marc);
         } catch (MarcException e) {
           handleMarcException(uuidJson.getValue(), result, e, jobExecutionId);
