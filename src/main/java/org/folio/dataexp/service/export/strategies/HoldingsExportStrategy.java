@@ -51,6 +51,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,7 +129,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return Optional.empty();
   }
 
-  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, List<JSONObject> holdingsWithInstanceAndItems,
+  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, Map<UUID, JSONObject> holdingsWithInstanceAndItems,
       UUID jobExecutionId, GeneratedMarcResult result) {
     List<Rule> rules;
     try {
@@ -149,17 +150,17 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return new HashMap<>();
   }
 
-  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile, UUID jobExecutionId) {
+  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile, UUID jobExecutionId) {
     var holdings = getHoldings(holdingsIds, jobExecutionId);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds, jobExecutionId);
   }
 
-  protected List<JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
+  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
                                                              List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds, UUID jobExecutionId) {
     var instances = getInstances(instancesIds, jobExecutionId);
     entityManager.clear();
-    List<JSONObject> holdingsWithInstanceAndItems = new ArrayList<>();
+    Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
     var existHoldingsIds = new HashSet<UUID>();
     for (var holding : holdings) {
       existHoldingsIds.add(holding.getId());
@@ -192,7 +193,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       var holdingJsonArray = new JSONArray();
       holdingJsonArray.add(holdingJson);
       holdingWithInstanceAndItems.put(HOLDINGS_KEY, holdingJsonArray);
-      holdingsWithInstanceAndItems.add(holdingWithInstanceAndItems);
+      holdingsWithInstanceAndItems.put(holding.getId(), holdingWithInstanceAndItems);
     }
     holdingsIds.removeAll(existHoldingsIds);
     holdingsIds.forEach(
@@ -266,25 +267,23 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return tenantIdsMap;
   }
 
-  private void fillOutMarcRecords(List<JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
+  private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
                                   GeneratedMarcResult result, List<Rule> rules) {
-    log.info("holdingsWithInstanceAndItems: ");
-    holdingsWithInstanceAndItems.forEach(js -> System.out.println(js.toJSONString()));
+    log.info("holdingsWithInstanceAndItems: {}", holdingsWithInstanceAndItems);
     var centralTenantId = consortiaService.getCentralTenantId();
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
-      var ids = holdingsWithInstanceAndItems.stream().map(json -> (UUID)json.get("id")).collect(Collectors.toSet());
-      var idsTenant = getIdsTenant(ids, centralTenantId);
-      for (var jsonObject : holdingsWithInstanceAndItems) {
-        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(idsTenant.get(jsonObject.get("id")), folioModuleMetadata, context))) {
+      var idsTenant = getIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
+      for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
+        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(idsTenant.get(uuidJson.getKey()), folioModuleMetadata, context))) {
           ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
-          var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+          var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
           marcRecords.add(marc);
         } catch (MarcException e) {
-          handleMarcException(jsonObject, result, e, jobExecutionId);
+          handleMarcException(uuidJson.getValue(), result, e, jobExecutionId);
         }
       }
     } else {
-      for (var jsonObject : holdingsWithInstanceAndItems) {
+      for (var jsonObject : holdingsWithInstanceAndItems.values()) {
         try {
           ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
           var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);

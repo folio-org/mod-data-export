@@ -183,7 +183,7 @@ class HoldingsExportStrategyTest {
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 
-    var jsonObject = holdingsWithInstanceAndItems.get(0);
+    var jsonObject = holdingsWithInstanceAndItems.values().iterator().next();
     var holdingJson = (JSONObject)((JSONArray)jsonObject.get(HOLDINGS_KEY)).get(0);
     assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
 
