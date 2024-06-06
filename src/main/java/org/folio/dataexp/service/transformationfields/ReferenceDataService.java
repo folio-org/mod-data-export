@@ -37,7 +37,6 @@ import org.folio.dataexp.domain.dto.MaterialType;
 import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.dataexp.domain.dto.NatureOfContentTerm;
 import org.folio.processor.referencedata.JsonObjectWrapper;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -68,7 +67,6 @@ public class ReferenceDataService {
   private final MaterialTypesClient materialTypesClient;
   private final NatureOfContentTermsClient natureOfContentTermsClient;
   private final IssuanceModesClient issuanceModesClient;
-  private final FolioExecutionContext context;
 
   @Cacheable(cacheNames = "alternativeTitleTypes")
   public Map<String, JsonObjectWrapper> getAlternativeTitleTypes() {
@@ -153,7 +151,7 @@ public class ReferenceDataService {
   @Cacheable(cacheNames = "locations")
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    log.info("getLocations list: {}, tenant: {}", list, context.getTenantId());
+    log.info("getLocations list: {}", list);
     Map<String, JsonObjectWrapper> res = ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));

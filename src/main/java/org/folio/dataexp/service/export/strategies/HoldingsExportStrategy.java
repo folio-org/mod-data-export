@@ -158,7 +158,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
                                                              List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds, UUID jobExecutionId) {
-    var instances = getInstances(instancesIds, jobExecutionId);
+    var instances = getInstances(instancesIds, holdings);
     entityManager.clear();
     Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
     var existHoldingsIds = new HashSet<UUID>();
@@ -216,12 +216,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return holdingsRecordEntityRepository.findByIdIn(holdingsIds);
   }
 
-  private List<InstanceEntity> getInstances(Set<UUID> instanceIds, UUID jobExecutionId) {
+  private List<InstanceEntity> getInstances(Set<UUID> instanceIds, List<HoldingsRecordEntity> holdings) {
     var centralTenantId = consortiaService.getCentralTenantId();
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
-      Map<String, Set<UUID>> tenantIdsMap = getTenantIds(instanceIds, centralTenantId, jobExecutionId);
+      Map<UUID, String> instIdTenantMap = getInstanceIdsTenant(holdings, centralTenantId);
+      log.info("instIdTenantMap: {}", instIdTenantMap);
       List<InstanceEntity> entities = new ArrayList<>();
-      tenantIdsMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository.findInstancesByIdIn(k, v)));
+      instIdTenantMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository.findInstancesByIdIn(v, Set.of(k))));
+      log.info("entities: {}", entities);
       return entities;
     }
     return instanceEntityRepository.findByIdIn(instanceIds);
@@ -252,8 +254,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return tenantIdsMap;
   }
 
-  private Map<UUID, String> getIdsTenant(Set<UUID> ids, String centralTenantId) {
-    log.info("getIdsTenant ids: {}", ids);
+  private Map<UUID, String> getHoldingIdsTenant(Set<UUID> ids, String centralTenantId) {
+    log.info("getHoldingIdsTenant ids: {}", ids);
     Map<UUID, String> tenantIdsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants();
     ids.forEach(id -> {
@@ -267,12 +269,27 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return tenantIdsMap;
   }
 
+  private Map<UUID, String> getInstanceIdsTenant(List<HoldingsRecordEntity> holdings, String centralTenantId) {
+    log.info("getInstanceIdsTenant ids: {}", holdings);
+    Map<UUID, String> tenantIdsMap = new HashMap<>();
+    var availableTenants = consortiaService.getAffiliatedTenants();
+    holdings.forEach(hold -> {
+      var curTenant = consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
+      if (nonNull(curTenant)) {
+        if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
+          tenantIdsMap.put(hold.getInstanceId(), curTenant);
+        }
+      }
+    });
+    return tenantIdsMap;
+  }
+
   private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
                                   GeneratedMarcResult result, List<Rule> rules) {
     log.info("holdingsWithInstanceAndItems: {}", holdingsWithInstanceAndItems);
     var centralTenantId = consortiaService.getCentralTenantId();
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
-      var idsTenant = getIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
+      var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
       log.info("idsTenant: {}", idsTenant);
       for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
         log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
