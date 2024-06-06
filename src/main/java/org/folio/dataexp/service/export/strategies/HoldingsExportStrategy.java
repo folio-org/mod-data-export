@@ -11,6 +11,7 @@ import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING;
+import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -40,6 +41,8 @@ import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.MarcException;
@@ -73,6 +76,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final HoldingsCentralTenantRepository holdingsCentralTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
+  private final FolioModuleMetadata folioModuleMetadata;
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
@@ -135,21 +139,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       return result;
     }
     var marcRecords = new ArrayList<String>();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
-    for (var jsonObject : holdingsWithInstanceAndItems) {
-      try {
-        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
-        marcRecords.add(marc);
-      } catch (MarcException e) {
-        var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
-        var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-        var uuid = holdingsJsonObject.getAsString(ID_KEY);
-        result.addIdToFailed(UUID.fromString(uuid));
-        var errorMessage = format("%s for holding %s", e.getMessage(), uuid);
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
-        log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
-      }
-    }
+    fillOutMarcRecords(holdingsWithInstanceAndItems, jobExecutionId, marcRecords, result, rules);
     result.setMarcRecords(marcRecords);
     return result;
   }
@@ -237,6 +227,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   private Map<String, Set<UUID>> getTenantIds(Set<UUID> ids, String centralTenantId, UUID jobExecutionId) {
+    log.info("getTenantIds ids: {}", ids);
     Map<String, Set<UUID>> tenantIdsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants();
     log.info("Affiliated tenants for user {} from {} tenant: {}", context.getUserId(), context.getTenantId(), availableTenants);
@@ -258,6 +249,58 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       }
     });
     return tenantIdsMap;
+  }
+
+  private Map<UUID, String> getIdsTenant(Set<UUID> ids, String centralTenantId) {
+    Map<UUID, String> tenantIdsMap = new HashMap<>();
+    var availableTenants = consortiaService.getAffiliatedTenants();
+    ids.forEach(id -> {
+      var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
+      if (nonNull(curTenant)) {
+        if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
+          tenantIdsMap.put(id, curTenant);
+        }
+      }
+    });
+    return tenantIdsMap;
+  }
+
+  private void fillOutMarcRecords(List<JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
+                                  GeneratedMarcResult result, List<Rule> rules) {
+    var centralTenantId = consortiaService.getCentralTenantId();
+    if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
+      var ids = holdingsWithInstanceAndItems.stream().map(json -> (UUID)json.get("id")).collect(Collectors.toSet());
+      var idsTenant = getIdsTenant(ids, centralTenantId);
+      for (var jsonObject : holdingsWithInstanceAndItems) {
+        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(idsTenant.get(jsonObject.get("id")), folioModuleMetadata, context))) {
+          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+          var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+          marcRecords.add(marc);
+        } catch (MarcException e) {
+          handleMarcException(jsonObject, result, e, jobExecutionId);
+        }
+      }
+    } else {
+      for (var jsonObject : holdingsWithInstanceAndItems) {
+        try {
+          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+          var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+          marcRecords.add(marc);
+        } catch (MarcException e) {
+          handleMarcException(jsonObject, result, e, jobExecutionId);
+        }
+      }
+    }
+  }
+
+  private void handleMarcException(JSONObject jsonObject, GeneratedMarcResult result, MarcException e, UUID jobExecutionId) {
+    var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+    var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+    var uuid = holdingsJsonObject.getAsString(ID_KEY);
+    result.addIdToFailed(UUID.fromString(uuid));
+    var errorMessage = format("%s for holding %s", e.getMessage(), uuid);
+    errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
+    log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
   }
 
   private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
