@@ -293,8 +293,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       log.info("idsTenant: {}", idsTenant);
       for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
         log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
-        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(idsTenant.get(uuidJson.getKey()), folioModuleMetadata, context))) {
-          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+        var tenantId = idsTenant.get(uuidJson.getKey());
+        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, context))) {
+          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(tenantId);
           var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
           log.info("marc: {}", marc);
           marcRecords.add(marc);
@@ -305,7 +306,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     } else {
       for (var jsonObject : holdingsWithInstanceAndItems.values()) {
         try {
-          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(context.getTenantId());
           var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
           marcRecords.add(marc);
         } catch (MarcException e) {

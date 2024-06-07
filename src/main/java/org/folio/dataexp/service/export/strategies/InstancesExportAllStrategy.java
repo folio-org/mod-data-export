@@ -27,6 +27,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,22 +49,22 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   private final MarcInstanceAllRepository marcInstanceAllRepository;
   private final AuditInstanceEntityRepository auditInstanceEntityRepository;
 
-  public InstancesExportAllStrategy(ConsortiaService consortiaService,
-      InstanceCentralTenantRepository instanceCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
-      HoldingsRecordEntityRepository holdingsRecordEntityRepository, ItemEntityRepository itemEntityRepository,
-      RuleFactory ruleFactory, RuleHandler ruleHandler, RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider,
-      MappingProfileEntityRepository mappingProfileEntityRepository,
-      InstanceWithHridEntityRepository instanceWithHridEntityRepository,
-      MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
-      FolioInstanceAllRepository folioInstanceAllRepository,
-      MarcInstanceAllRepository marcInstanceAllRepository, AuditInstanceEntityRepository auditInstanceEntityRepository) {
+  public InstancesExportAllStrategy(ConsortiaService consortiaService, InstanceCentralTenantRepository instanceCentralTenantRepository,
+                                    MarcInstanceRecordRepository marcInstanceRecordRepository, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
+                                    ItemEntityRepository itemEntityRepository, RuleFactory ruleFactory, RuleHandler ruleHandler,
+                                    RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider, MappingProfileEntityRepository mappingProfileEntityRepository,
+                                    InstanceWithHridEntityRepository instanceWithHridEntityRepository, FolioExecutionContext folioExecutionContext,
+                                    MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
+                                    FolioInstanceAllRepository folioInstanceAllRepository, MarcInstanceAllRepository marcInstanceAllRepository,
+                                    AuditInstanceEntityRepository auditInstanceEntityRepository) {
     super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
-        itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
-        instanceWithHridEntityRepository, marcRecordEntityRepository, instanceEntityRepository);
+      itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
+      instanceWithHridEntityRepository, folioExecutionContext, marcRecordEntityRepository, instanceEntityRepository);
     this.folioInstanceAllRepository = folioInstanceAllRepository;
     this.marcInstanceAllRepository = marcInstanceAllRepository;
     this.auditInstanceEntityRepository = auditInstanceEntityRepository;
   }
+
 
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,

@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,5 +50,10 @@ class ConsortiaServiceTest {
     when(folioExecutionContext.getTenantId()).thenReturn("college");
 
     assertThat(consortiaService.getCentralTenantId()).isEqualTo("consortium");
+  }
+
+  @Test
+  void shouldThrowException_whenGetPermittedTenants_temporary() {
+    assertThrows(UnsupportedOperationException.class, () -> consortiaService.getTenantsWithPermissions(List.of("college")));
   }
 }

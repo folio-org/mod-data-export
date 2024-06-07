@@ -50,7 +50,7 @@ public class ConsortiaService {
   }
 
   @Cacheable(value = "permittedTenantsCache")
-  public List<String> getTenantsWithPermissions(List<String> permittedTenants) {
+  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
     throw new UnsupportedOperationException("This feature is not implemented yet.");
   }
 }
