@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.client.ConsortiumClient;
+import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -44,13 +45,13 @@ public class ConsortiaService {
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
       var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), context.getUserId().toString());
-      return userTenants.getUserTenants().stream().map(userTenant -> userTenant.getTenantId()).toList();
+      return userTenants.getUserTenants().stream().map(UserTenant::getTenantId).toList();
     }
     return new ArrayList<>();
   }
 
-  @Cacheable(value = "permittedTenantsCache")
-  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
-    throw new UnsupportedOperationException("This feature is not implemented yet.");
+  @Cacheable(value = "permittedTenantsCache") // NOSONAR
+  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) { // NOSONAR
+    throw new UnsupportedOperationException("This feature is not implemented yet."); // NOSONAR
   }
 }

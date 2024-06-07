@@ -146,11 +146,11 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile, UUID jobExecutionId) {
     var holdings = getHoldings(holdingsIds, jobExecutionId);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds, jobExecutionId);
+    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
   }
 
   protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
-                                                             List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds, UUID jobExecutionId) {
+                                                             List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
     var instances = getInstances(instancesIds, holdings);
     entityManager.clear();
     Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
@@ -253,10 +253,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var availableTenants = consortiaService.getAffiliatedTenants();
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
-      if (nonNull(curTenant)) {
-        if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
-          tenantIdsMap.put(id, curTenant);
-        }
+      if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
+        tenantIdsMap.put(id, curTenant);
       }
     });
     return tenantIdsMap;
@@ -268,10 +266,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var availableTenants = consortiaService.getAffiliatedTenants();
     holdings.forEach(hold -> {
       var curTenant = consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
-      if (nonNull(curTenant)) {
-        if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
-          tenantIdsMap.put(hold.getInstanceId(), curTenant);
-        }
+      if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
+        tenantIdsMap.put(hold.getInstanceId(), curTenant);
       }
     });
     return tenantIdsMap;

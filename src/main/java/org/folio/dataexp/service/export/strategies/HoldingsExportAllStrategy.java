@@ -205,7 +205,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
     var result = new GeneratedMarcResult(jobExecutionId);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     var holdingsIds = holdings.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds, jobExecutionId);
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
     return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
 }

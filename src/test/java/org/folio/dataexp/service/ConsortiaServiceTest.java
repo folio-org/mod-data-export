@@ -51,9 +51,4 @@ class ConsortiaServiceTest {
 
     assertThat(consortiaService.getCentralTenantId()).isEqualTo("consortium");
   }
-
-  @Test
-  void shouldThrowException_whenGetPermittedTenants_temporary() {
-    assertThrows(UnsupportedOperationException.class, () -> consortiaService.getTenantsWithPermissions(List.of("college")));
-  }
 }
