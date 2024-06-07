@@ -28,6 +28,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,8 @@ class InstancesExportStrategyTest {
   private ErrorLogService errorLogService;
   @Spy
   private RuleHandler ruleHandler;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
 
   @Captor
   private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;

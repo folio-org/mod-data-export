@@ -13,7 +13,9 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
+import org.folio.dataexp.repository.HoldingsCentralTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -37,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -86,6 +89,10 @@ class HoldingsExportStrategyTest {
   private ConsortiumSearchClient consortiumSearchClient;
   @Mock
   private MarcInstanceRecordRepository marcInstanceRecordRepository;
+  @Mock
+  private HoldingsCentralTenantRepository holdingsCentralTenantRepository;
+  @Mock
+  private InstanceCentralTenantRepository instanceCentralTenantRepository;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -245,5 +252,43 @@ class HoldingsExportStrategyTest {
     mappingProfile.setDefault(true);
     var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertThat(res).hasSize(3);
+  }
+
+  @Test
+  void getFolioRecordsTestIfCurrentTenantIsCentral() {
+    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
+    when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
+    when(consortiaService.getAffiliatedTenants()).thenReturn(List.of("memberA", "memberB"));
+    var uuidA = UUID.randomUUID();
+    var uuidB = UUID.randomUUID();
+    var uuidC = UUID.randomUUID();
+    Holdings holdingsA = new Holdings();
+    holdingsA.setTenantId("memberA");
+    Holdings holdingsB = new Holdings();
+    holdingsB.setTenantId("memberB");
+    Holdings holdingsC = new Holdings();
+    holdingsC.setTenantId("centralTenant");
+    when(consortiumSearchClient.getHoldingsById(uuidA.toString())).thenReturn(holdingsA);
+    when(consortiumSearchClient.getHoldingsById(uuidB.toString())).thenReturn(holdingsB);
+    when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
+    var instId = UUID.randomUUID();
+    when(instanceCentralTenantRepository.findInstancesByIdIn("centralTenant", Set.of(instId))).thenReturn(
+      List.of(new InstanceEntity().withId(instId).withJsonb("{\n" +
+        "  \"id\": \"" + instId + "\",\n" +
+        "  \"hrid\": \"in00000000024\"\n" +
+        "}")));
+    when(holdingsCentralTenantRepository.findHoldingsByIdIn("memberB", Set.of(uuidB))).thenReturn(
+      List.of(new HoldingsRecordEntity().withId(uuidC).withInstanceId(instId).withJsonb("{\n" +
+        "  \"id\": \"" + uuidB + "\",\n" +
+        "  \"hrid\": \"ho00000000009\",\n" +
+        "  \"instanceId\": \"" + instId + "\"\n" +
+        "}")));
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of("x-okapi-token", List.of("token")));
+    var ids = new HashSet<>(Set.of(uuidA, uuidB, uuidC));
+    var mappingProfile =  new MappingProfile();
+    mappingProfile.setDefault(true);
+    var res = holdingsExportStrategy.getGeneratedMarc(ids, mappingProfile, new ExportRequest(), UUID.randomUUID(),
+      new ExportStrategyStatistic(null));
+    assertThat(res.getMarcRecords()).hasSize(1);
   }
 }

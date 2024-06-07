@@ -26,10 +26,4 @@ public class FolioExecutionContextUtil {
     }
     throw new IllegalStateException("Okapi headers not provided");
   }
-
-  public static void runInFolioContext(FolioExecutionContext context, Runnable runnable) {
-    try (var fec = new FolioExecutionContextSetter(context)) {
-      runnable.run();
-    }
-  }
 }
