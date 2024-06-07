@@ -103,7 +103,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   protected GeneratedMarcResult getGeneratedMarc(GeneratedMarcResult generatedMarcResult, List<JSONObject> instancesWithHoldingsAndItems,
       MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = new ArrayList<String>();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
+    ReferenceDataWrapper referenceData = getReferenceData();
     List<Rule> rules;
     try {
       rules = getRules(mappingProfile);
@@ -114,7 +114,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     }
     for (var jsonObject :  instancesWithHoldingsAndItems) {
       try {
-        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        var marc = mapToMarc(jsonObject, rules, referenceData);
         marcRecords.add(marc);
       } catch (MarcException e) {
         var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
@@ -207,7 +207,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
     entityManager.clear();
-    ReferenceDataWrapper referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
+    ReferenceDataWrapper referenceData = getReferenceData();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
       holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile, jobExecutionId);
@@ -315,5 +315,15 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       defaultMappingProfile.setTransformations(mappingProfile.getTransformations());
     }
     return defaultMappingProfile;
+  }
+
+  private ReferenceDataWrapper getReferenceData() {
+    ReferenceDataWrapper referenceData;
+    if (consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    } else {
+      referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
+    }
+    return referenceData;
   }
 }
