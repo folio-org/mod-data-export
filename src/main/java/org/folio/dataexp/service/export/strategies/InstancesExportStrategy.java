@@ -90,7 +90,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       if (!externalIds.isEmpty()) {
-        var centralTenantId = consortiaService.getCentralTenantId();
+        var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
@@ -261,7 +261,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     notFoundInLocalTenant.removeIf(foundIds::contains);
     var instancesIdsFromCentral = new HashSet<UUID>();
     if (!notFoundInLocalTenant.isEmpty()) {
-      var centralTenantId = consortiaService.getCentralTenantId();
+      var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (StringUtils.isNotEmpty(centralTenantId)) {
         var instancesFromCentralTenant = instanceCentralTenantRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
         instancesFromCentralTenant.forEach(instanceEntity -> {

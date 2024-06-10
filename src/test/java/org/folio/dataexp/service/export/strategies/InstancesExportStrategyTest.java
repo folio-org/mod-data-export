@@ -127,7 +127,7 @@ class InstancesExportStrategyTest {
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(anySet(), anyString(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
-    when(consortiaService.getCentralTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
     var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
@@ -317,7 +317,7 @@ class InstancesExportStrategyTest {
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
-    when(consortiaService.getCentralTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);

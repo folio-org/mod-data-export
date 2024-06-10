@@ -13,7 +13,7 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.repository.HoldingsCentralTenantRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -90,7 +90,7 @@ class HoldingsExportStrategyTest {
   @Mock
   private MarcInstanceRecordRepository marcInstanceRecordRepository;
   @Mock
-  private HoldingsCentralTenantRepository holdingsCentralTenantRepository;
+  private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
   @Mock
   private InstanceCentralTenantRepository instanceCentralTenantRepository;
   @Spy
@@ -107,7 +107,7 @@ class HoldingsExportStrategyTest {
 
   @Test
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
-    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("centralTenant");
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
@@ -226,9 +226,11 @@ class HoldingsExportStrategyTest {
 
   @Test
   void getMarcRecordsTestIfCurrentTenantIsCentral() {
-    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
+    var userId = UUID.randomUUID();
+    when(consortiaService.getCentralTenantId("centralTenant")).thenReturn("centralTenant");
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
-    when(consortiaService.getAffiliatedTenants()).thenReturn(List.of("memberA", "memberB"));
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(consortiaService.getAffiliatedTenants("centralTenant", userId.toString())).thenReturn(List.of("memberA", "memberB"));
     var uuidA = UUID.randomUUID();
     var uuidB = UUID.randomUUID();
     var uuidC = UUID.randomUUID();
@@ -256,9 +258,10 @@ class HoldingsExportStrategyTest {
 
   @Test
   void getFolioRecordsTestIfCurrentTenantIsCentral() {
-    when(consortiaService.getCentralTenantId()).thenReturn("centralTenant");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("centralTenant");
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
-    when(consortiaService.getAffiliatedTenants()).thenReturn(List.of("memberA", "memberB"));
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(consortiaService.getAffiliatedTenants(any(), any())).thenReturn(List.of("memberA", "memberB"));
     var uuidA = UUID.randomUUID();
     var uuidB = UUID.randomUUID();
     var uuidC = UUID.randomUUID();
@@ -277,7 +280,7 @@ class HoldingsExportStrategyTest {
         "  \"id\": \"" + instId + "\",\n" +
         "  \"hrid\": \"in00000000024\"\n" +
         "}")));
-    when(holdingsCentralTenantRepository.findHoldingsByIdIn("memberB", Set.of(uuidB))).thenReturn(
+    when(holdingsRecordEntityTenantRepository.findByIdIn("memberB", Set.of(uuidB))).thenReturn(
       List.of(new HoldingsRecordEntity().withId(uuidC).withInstanceId(instId).withJsonb("{\n" +
         "  \"id\": \"" + uuidB + "\",\n" +
         "  \"hrid\": \"ho00000000009\",\n" +

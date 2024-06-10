@@ -14,7 +14,6 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +34,7 @@ class ConsortiaServiceTest {
     userTenantCollection.setUserTenants(List.of());
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
 
-    assertThat(consortiaService.getCentralTenantId()).isEqualTo(EMPTY);
+    assertThat(consortiaService.getCentralTenantId("diku")).isEqualTo(EMPTY);
   }
 
   @Test
@@ -49,6 +48,6 @@ class ConsortiaServiceTest {
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
     when(folioExecutionContext.getTenantId()).thenReturn("college");
 
-    assertThat(consortiaService.getCentralTenantId()).isEqualTo("consortium");
+    assertThat(consortiaService.getCentralTenantId("college")).isEqualTo("consortium");
   }
 }

@@ -25,7 +25,7 @@ import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.repository.HoldingsCentralTenantRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -74,7 +74,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private final ConsortiaService consortiaService;
   private final FolioExecutionContext context;
   private final ConsortiumSearchClient consortiumSearchClient;
-  private final HoldingsCentralTenantRepository holdingsCentralTenantRepository;
+  private final HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final FolioModuleMetadata folioModuleMetadata;
@@ -86,7 +86,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      var centralTenantId = consortiaService.getCentralTenantId();
+      var centralTenantId = consortiaService.getCentralTenantId(context.getTenantId());
       if (centralTenantId.equals(context.getTenantId())) {
         Map<String, Set<UUID>> tenantIdsMap = getTenantIds(externalIds, centralTenantId, jobExecutionId);
         List<MarcRecordEntity> entities = new ArrayList<>();
@@ -199,18 +199,18 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   private List<HoldingsRecordEntity> getHoldings(Set<UUID> holdingsIds, UUID jobExecutionId) {
-    var centralTenantId = consortiaService.getCentralTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(context.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       Map<String, Set<UUID>> tenantIdsMap = getTenantIds(holdingsIds, centralTenantId, jobExecutionId);
       List<HoldingsRecordEntity> entities = new ArrayList<>();
-      tenantIdsMap.forEach((k, v) -> entities.addAll(holdingsCentralTenantRepository.findHoldingsByIdIn(k, v)));
+      tenantIdsMap.forEach((k, v) -> entities.addAll(holdingsRecordEntityTenantRepository.findByIdIn(k, v)));
       return entities;
     }
     return holdingsRecordEntityRepository.findByIdIn(holdingsIds);
   }
 
   private List<InstanceEntity> getInstances(Set<UUID> instanceIds, List<HoldingsRecordEntity> holdings) {
-    var centralTenantId = consortiaService.getCentralTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(context.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       Map<UUID, String> instIdTenantMap = getInstanceIdsTenant(holdings, centralTenantId);
       log.info("instIdTenantMap: {}", instIdTenantMap);
@@ -225,7 +225,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private Map<String, Set<UUID>> getTenantIds(Set<UUID> ids, String centralTenantId, UUID jobExecutionId) {
     log.info("getTenantIds ids: {}", ids);
     Map<String, Set<UUID>> tenantIdsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants();
+    var availableTenants = consortiaService.getAffiliatedTenants(context.getTenantId(), context.getUserId().toString());
     log.info("Affiliated tenants for user {} from {} tenant: {}", context.getUserId(), context.getTenantId(), availableTenants);
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
@@ -250,7 +250,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private Map<UUID, String> getHoldingIdsTenant(Set<UUID> ids, String centralTenantId) {
     log.info("getHoldingIdsTenant ids: {}", ids);
     Map<UUID, String> tenantIdsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants();
+    var availableTenants = consortiaService.getAffiliatedTenants(context.getTenantId(), context.getUserId().toString());
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
       if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
@@ -263,7 +263,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private Map<UUID, String> getInstanceIdsTenant(List<HoldingsRecordEntity> holdings, String centralTenantId) {
     log.info("getInstanceIdsTenant ids: {}", holdings);
     Map<UUID, String> tenantIdsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants();
+    var availableTenants = consortiaService.getAffiliatedTenants(context.getTenantId(), context.getUserId().toString());
     holdings.forEach(hold -> {
       var curTenant = consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
       if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
@@ -276,7 +276,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
                                   GeneratedMarcResult result, List<Rule> rules) {
     log.info("holdingsWithInstanceAndItems: {}", holdingsWithInstanceAndItems);
-    var centralTenantId = consortiaService.getCentralTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(context.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
       var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
       log.info("idsTenant: {}", idsTenant);

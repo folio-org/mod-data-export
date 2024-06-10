@@ -24,7 +24,7 @@ public class ConsortiaService {
   private final ConsortiumClient consortiumClient;
 
   @Cacheable(value = "centralTenantCache")
-  public String getCentralTenantId() {
+  public String getCentralTenantId(String currentTenantId) {
     var userTenantCollection = consortiaClient.getUserTenantCollection();
     var userTenants = userTenantCollection.getUserTenants();
     if (!userTenants.isEmpty()) {
@@ -40,7 +40,7 @@ public class ConsortiaService {
   }
 
   @Cacheable(value = "affiliatedTenantsCache")
-  public List<String> getAffiliatedTenants() {
+  public List<String> getAffiliatedTenants(String currentTenantId, String userId) {
     var consortia = consortiumClient.getConsortia();
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
@@ -50,8 +50,8 @@ public class ConsortiaService {
     return new ArrayList<>();
   }
 
-  @Cacheable(value = "permittedTenantsCache") // NOSONAR
-  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) { // NOSONAR
-    throw new UnsupportedOperationException("This feature is not implemented yet."); // NOSONAR
+  @Cacheable(value = "permittedTenantsCache")
+  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
+    throw new UnsupportedOperationException("This feature is not implemented yet.");
   }
 }

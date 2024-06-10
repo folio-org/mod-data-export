@@ -9,7 +9,7 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.FolioHoldingsAllRepository;
-import org.folio.dataexp.repository.HoldingsCentralTenantRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -44,12 +44,12 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
                                    RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
                                    ConsortiaService consortiaService, FolioExecutionContext context, ConsortiumSearchClient consortiumSearchClient,
-                                   HoldingsCentralTenantRepository holdingsCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
+                                   HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
                                    InstanceCentralTenantRepository instanceCentralTenantRepository, FolioModuleMetadata folioModuleMetadata,
                                    HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
                                    FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
-      consortiaService, context, consortiumSearchClient, holdingsCentralTenantRepository, marcInstanceRecordRepository,
+      consortiaService, context, consortiumSearchClient, holdingsRecordEntityTenantRepository, marcInstanceRecordRepository,
       instanceCentralTenantRepository, folioModuleMetadata, holdingsRecordEntityRepository, marcRecordEntityRepository);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;

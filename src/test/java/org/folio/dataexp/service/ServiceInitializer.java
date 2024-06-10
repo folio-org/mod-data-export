@@ -111,6 +111,6 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
     when(materialTypesClient.getMaterialTypes(any(Long.class))).thenReturn(new MaterialTypes());
     when(natureOfContentTermsClient.getNatureOfContentTerms(any(Long.class))).thenReturn(new org.folio.dataexp.domain.dto.NatureOfContentTerms());
     when(issuanceModesClient.getIssuanceModes(any(Long.class))).thenReturn(new IssuanceModes());
-    when(consortiaService.getCentralTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId(any(String.class))).thenReturn("central");
   }
 }
