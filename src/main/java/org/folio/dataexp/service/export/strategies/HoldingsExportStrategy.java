@@ -234,14 +234,13 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
           tenantIdsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
         } else {
-          var msg = format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), id, context.getUserId(), curTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), List.of(msg), jobExecutionId);
-          log.error(msg);
+          var msgValues = List.of(id.toString(), context.getUserId().toString(), curTenant);
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);
+          log.error(format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), id, context.getUserId(), curTenant));
         }
       } else {
-        var msg = format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id);
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(msg), jobExecutionId);
-        log.error(msg);
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(id.toString()), jobExecutionId);
+        log.error(format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id));
       }
     });
     return tenantIdsMap;
