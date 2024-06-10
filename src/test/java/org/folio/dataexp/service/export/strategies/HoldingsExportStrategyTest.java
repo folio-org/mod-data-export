@@ -101,6 +101,7 @@ class HoldingsExportStrategyTest {
 
   @BeforeEach
   void setUp() {
+    holdingsExportStrategy.folioExecutionContext = folioExecutionContext;
     holdingsExportStrategy.entityManager = entityManager;
     holdingsExportStrategy.errorLogService = errorLogService;
   }

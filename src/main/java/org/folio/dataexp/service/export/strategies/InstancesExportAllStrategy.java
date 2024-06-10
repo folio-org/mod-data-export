@@ -11,11 +11,9 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.FolioInstanceAllRepository;
-import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceAllRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -49,17 +47,17 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   private final MarcInstanceAllRepository marcInstanceAllRepository;
   private final AuditInstanceEntityRepository auditInstanceEntityRepository;
 
-  public InstancesExportAllStrategy(ConsortiaService consortiaService, InstanceCentralTenantRepository instanceCentralTenantRepository,
-                                    MarcInstanceRecordRepository marcInstanceRecordRepository, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
-                                    ItemEntityRepository itemEntityRepository, RuleFactory ruleFactory, RuleHandler ruleHandler,
-                                    RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider, MappingProfileEntityRepository mappingProfileEntityRepository,
-                                    InstanceWithHridEntityRepository instanceWithHridEntityRepository, FolioExecutionContext folioExecutionContext,
-                                    MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
-                                    FolioInstanceAllRepository folioInstanceAllRepository, MarcInstanceAllRepository marcInstanceAllRepository,
-                                    AuditInstanceEntityRepository auditInstanceEntityRepository) {
-    super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository, holdingsRecordEntityRepository,
-      itemEntityRepository, ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
-      instanceWithHridEntityRepository, folioExecutionContext, marcRecordEntityRepository, instanceEntityRepository);
+  public InstancesExportAllStrategy(ConsortiaService consortiaService,
+      InstanceCentralTenantRepository instanceCentralTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
+      RuleFactory ruleFactory, RuleHandler ruleHandler, RuleProcessor ruleProcessor, ReferenceDataProvider referenceDataProvider,
+      MappingProfileEntityRepository mappingProfileEntityRepository,
+      InstanceWithHridEntityRepository instanceWithHridEntityRepository,
+      MarcRecordEntityRepository marcRecordEntityRepository, InstanceEntityRepository instanceEntityRepository,
+      FolioInstanceAllRepository folioInstanceAllRepository, HoldingsItemsResolverService holdingsItemsResolver,
+      MarcInstanceAllRepository marcInstanceAllRepository, AuditInstanceEntityRepository auditInstanceEntityRepository) {
+    super(consortiaService, instanceCentralTenantRepository, marcInstanceRecordRepository,
+        ruleFactory, ruleHandler, ruleProcessor, referenceDataProvider, mappingProfileEntityRepository,
+        instanceWithHridEntityRepository, holdingsItemsResolver, marcRecordEntityRepository, instanceEntityRepository);
     this.folioInstanceAllRepository = folioInstanceAllRepository;
     this.marcInstanceAllRepository = marcInstanceAllRepository;
     this.auditInstanceEntityRepository = auditInstanceEntityRepository;

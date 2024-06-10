@@ -44,7 +44,7 @@ public class ConsortiaService {
     var consortia = consortiumClient.getConsortia();
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
-      var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), context.getUserId().toString());
+      var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), userId);
       return userTenants.getUserTenants().stream().map(UserTenant::getTenantId).toList();
     }
     return new ArrayList<>();
@@ -53,5 +53,9 @@ public class ConsortiaService {
   @Cacheable(value = "permittedTenantsCache")
   public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
     throw new UnsupportedOperationException("This feature is not implemented yet.");
+  }
+  
+  public boolean isCurrentTenantCentralTenant(String currentTenantId) {
+    return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
 }

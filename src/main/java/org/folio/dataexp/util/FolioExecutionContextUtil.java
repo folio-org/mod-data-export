@@ -7,7 +7,6 @@ import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
-import org.folio.spring.scope.FolioExecutionContextSetter;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,6 +16,7 @@ import java.util.List;
 public class FolioExecutionContextUtil {
 
   private FolioExecutionContextUtil(){}
+
   public static FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
     if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
       // create deep copy of headers in order to make switching context thread safe

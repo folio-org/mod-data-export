@@ -265,7 +265,7 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+    Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
       return new HashMap<>();
     }
 
