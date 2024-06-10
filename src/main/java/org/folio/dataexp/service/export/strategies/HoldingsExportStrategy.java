@@ -103,7 +103,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       return result;
     }
     var marcRecords = new ArrayList<String>();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
     for (var jsonObject : holdingsWithInstanceAndItems) {
       try {
         var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
@@ -123,7 +123,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
     return new HashMap<>();
   }
 

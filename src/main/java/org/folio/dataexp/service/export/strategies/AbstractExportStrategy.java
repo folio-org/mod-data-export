@@ -27,6 +27,7 @@ import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.dataexp.util.S3FilePathUtils;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +56,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
+  protected FolioExecutionContext folioExecutionContext;
 
   @PersistenceContext
   protected EntityManager entityManager;
@@ -67,6 +69,16 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Value("${application.export-tmp-storage}")
   protected void setExportTmpStorage(String exportTmpStorage) {
     this.exportTmpStorage = exportTmpStorage;
+  }
+
+  public static Optional<JSONObject> getAsJsonObject(String jsonAsString) {
+    try {
+      var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
+      return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
+    } catch (ParseException e) {
+      log.error("getAsJsonObject:: Error converting string to json {}", e.getMessage());
+    }
+    return Optional.empty();
   }
 
   @Override
@@ -109,20 +121,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id);
 
-  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException;
+  abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) throws TransformationRuleException;
 
   protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
     return new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, exportFilesEntity.getFileLocation()), OUTPUT_BUFFER_SIZE);
-  }
-
-  protected Optional<JSONObject> getAsJsonObject(String jsonAsString) {
-    try {
-      var jsonParser = new JSONParser(DEFAULT_PERMISSIVE_MODE);
-      return Optional.of((JSONObject) jsonParser.parse(jsonAsString));
-    } catch (ParseException e) {
-      log.error("getAsJsonObject:: Error converting string to json {}", e.getMessage());
-    }
-    return Optional.empty();
   }
 
   protected void createAndSaveMarc(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
@@ -140,7 +142,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     log.info("marcRecords size: {}", marcRecords.size());
     Map<UUID, MarcFields> additionalFieldsPerId = null;
     try {
-      additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile);
+      additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile, jobExecutionId);
     } catch (TransformationRuleException e) {
       log.error(e);
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
@@ -277,5 +279,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   @Autowired
   private void setMarcAuthorityRecordAllRepository(MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository) {
     this.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
+  }
+
+  @Autowired
+  private void setFolioExecutionContext(FolioExecutionContext folioExecutionContext) {
+    this.folioExecutionContext = folioExecutionContext;
   }
 }

@@ -58,7 +58,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
       externalIds.removeAll(foundIds);
       log.info("Number of authority records found from local tenant: {}, not found: {}", foundIds.size(), externalIds.size());
       if (!externalIds.isEmpty()) {
-        var centralTenantId = consortiaService.getCentralTenantId();
+        var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var authoritiesFromCentralTenant = marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(centralTenantId, externalIds);
           log.info("Number of authority records found from central tenant: {}", authoritiesFromCentralTenant.size());
@@ -137,7 +137,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
     return new HashMap<>();
   }
 }

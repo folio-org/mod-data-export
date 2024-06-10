@@ -2,32 +2,24 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
-import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
-import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
-import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
@@ -68,14 +60,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   private final ConsortiaService consortiaService;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
-  private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  private final ItemEntityRepository itemEntityRepository;
   private final RuleFactory ruleFactory;
   private final RuleHandler ruleHandler;
   private final RuleProcessor ruleProcessor;
   private final ReferenceDataProvider referenceDataProvider;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
+  private final HoldingsItemsResolverService holdingsItemsResolver;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
   protected final InstanceEntityRepository instanceEntityRepository;
@@ -88,7 +79,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       if (!externalIds.isEmpty()) {
-        var centralTenantId = consortiaService.getCentralTenantId();
+        var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
@@ -112,7 +103,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   protected GeneratedMarcResult getGeneratedMarc(GeneratedMarcResult generatedMarcResult, List<JSONObject> instancesWithHoldingsAndItems,
       MappingProfile mappingProfile, UUID jobExecutionId) {
     var marcRecords = new ArrayList<String>();
-    ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference();
+    ReferenceDataWrapper referenceData = getReferenceData();
     List<Rule> rules;
     try {
       rules = getRules(mappingProfile);
@@ -123,7 +114,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     }
     for (var jsonObject :  instancesWithHoldingsAndItems) {
       try {
-        var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
+        var marc = mapToMarc(jsonObject, rules, referenceData);
         marcRecords.add(marc);
       } catch (MarcException e) {
         var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
@@ -207,26 +198,26 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) throws TransformationRuleException {
+  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) throws TransformationRuleException {
     var marcFieldsByExternalId = new HashMap<UUID, MarcFields>();
-    if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
+    if (!holdingsItemsResolver.isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return marcFieldsByExternalId;
     }
     var externalIds = marcRecords.stream()
       .map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
     var instanceHridEntities = instanceWithHridEntityRepository.findByIdIn(externalIds);
     entityManager.clear();
+    ReferenceDataWrapper referenceData = getReferenceData();
     for (var instanceHridEntity : instanceHridEntities) {
       var holdingsAndItems = new JSONObject();
-      addHoldingsAndItems(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile);
-      var marcFields = mapFields(holdingsAndItems, mappingProfile);
+      holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(holdingsAndItems, instanceHridEntity.getId(), instanceHridEntity.getHrid(), mappingProfile, jobExecutionId);
+      var marcFields = mapFields(holdingsAndItems, mappingProfile, referenceData);
       marcFieldsByExternalId.put(instanceHridEntity.getId(), marcFields);
     }
     return marcFieldsByExternalId;
   }
 
-  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile) throws TransformationRuleException {
-    ReferenceDataWrapper referenceData = referenceDataProvider.getReference();
+  private MarcFields mapFields(JSONObject marcRecord, MappingProfile mappingProfile, ReferenceDataWrapper referenceData) throws TransformationRuleException {
     var rules = ruleFactory.getRules(mappingProfile);
     var finalRules = ruleHandler.preHandle(marcRecord, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(marcRecord.toJSONString());
@@ -258,8 +249,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var notFoundInLocalTenant = new HashSet<>(instancesIds);
     notFoundInLocalTenant.removeIf(foundIds::contains);
     var instancesIdsFromCentral = new HashSet<UUID>();
-    if (!notFoundInLocalTenant.isEmpty()) {
-      var centralTenantId = consortiaService.getCentralTenantId();
+    if (!notFoundInLocalTenant.isEmpty() && !consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (StringUtils.isNotEmpty(centralTenantId)) {
         var instancesFromCentralTenant = instanceCentralTenantRepository.findInstancesByIdIn(centralTenantId, notFoundInLocalTenant);
         instancesFromCentralTenant.forEach(instanceEntity -> {
@@ -284,9 +275,11 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+
       if (!instancesIdsFromCentral.contains(instance.getId())) {
-        addHoldingsAndItems(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile);
+        holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile, generatedMarcResult.getJobExecutionId());
       }
+
       instancesWithHoldingsAndItems.add(instanceWithHoldingsAndItems);
     }
     instancesIds.removeAll(existInstanceIds);
@@ -297,49 +290,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         generatedMarcResult.addIdToFailed(instanceId);
       });
     return instancesWithHoldingsAndItems;
-  }
-
-  private void addHoldingsAndItems(JSONObject jsonToUpdateWithHoldingsAndItems, UUID instanceId,
-                                     String instanceHrid, MappingProfile mappingProfile) {
-    if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
-      return;
-    }
-    var holdingsEntities = holdingsRecordEntityRepository.findByInstanceIdIs(instanceId);
-    entityManager.clear();
-    if (holdingsEntities.isEmpty()) {
-      return;
-    }
-    HashMap<UUID, List<ItemEntity>> itemsByHoldingId = new HashMap<>();
-    if (mappingProfile.getRecordTypes().contains(RecordTypes.ITEM)) {
-      var ids = holdingsEntities.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
-      itemsByHoldingId  = itemEntityRepository.findByHoldingsRecordIdIn(ids)
-        .stream().collect(Collectors.groupingBy(ItemEntity::getHoldingsRecordId,
-          HashMap::new, Collectors.mapping(itemEntity -> itemEntity, Collectors.toList())));
-      entityManager.clear();
-    }
-    var holdingsJsonArray = new JSONArray();
-    for (var holdingsEntity : holdingsEntities) {
-      var itemJsonArray = new JSONArray();
-      var itemEntities = itemsByHoldingId.getOrDefault(holdingsEntity.getId(), new ArrayList<>());
-      itemEntities.forEach(itemEntity -> {
-        var itemJsonOpt = getAsJsonObject(itemEntity.getJsonb());
-        if (itemJsonOpt.isPresent()) {
-          itemJsonArray.add(itemJsonOpt.get());
-        } else {
-          log.error("addItemsToHolding:: error converting to json item by id {}", itemEntity.getId());
-        }
-      });
-      var holdingJsonOpt = getAsJsonObject(holdingsEntity.getJsonb());
-      if (holdingJsonOpt.isPresent()) {
-        var holdingJson = holdingJsonOpt.get();
-        holdingJson.put(ITEMS_KEY, itemJsonArray);
-        holdingJson.put(INSTANCE_HRID_KEY, instanceHrid);
-        holdingsJsonArray.add(holdingJson);
-      } else {
-        log.error("addItemsToHolding:: error converting to json holding by id {}", holdingsEntity.getId());
-      }
-    }
-    jsonToUpdateWithHoldingsAndItems.put(HOLDINGS_KEY, holdingsJsonArray);
   }
 
   protected String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
@@ -367,8 +317,13 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     return defaultMappingProfile;
   }
 
-  private boolean isNeedUpdateWithHoldingsOrItems(MappingProfile mappingProfile) {
-    var recordTypes = mappingProfile.getRecordTypes();
-    return recordTypes.contains(RecordTypes.HOLDINGS) || recordTypes.contains(RecordTypes.ITEM);
+  private ReferenceDataWrapper getReferenceData() {
+    ReferenceDataWrapper referenceData;
+    if (consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    } else {
+      referenceData = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
+    }
+    return referenceData;
   }
 }
