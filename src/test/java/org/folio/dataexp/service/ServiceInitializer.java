@@ -85,7 +85,7 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
   @MockBean
   private IssuanceModesClient issuanceModesClient;
   @MockBean
-  private ConsortiaService consortiaService;
+  protected ConsortiaService consortiaService;
 
   protected void handleReferenceData() {
     var user = new User();
