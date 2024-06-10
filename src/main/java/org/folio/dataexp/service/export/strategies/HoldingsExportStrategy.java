@@ -278,20 +278,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     log.info("holdingsWithInstanceAndItems: {}", holdingsWithInstanceAndItems);
     var centralTenantId = consortiaService.getCentralTenantId(context.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(context.getTenantId())) {
-      var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
-      log.info("idsTenant: {}", idsTenant);
-      for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
-        log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
-        var tenantId = idsTenant.get(uuidJson.getKey());
-        try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, context))) {
-          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(tenantId);
-          var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
-          log.info("marc: {}", marc);
-          marcRecords.add(marc);
-        } catch (MarcException e) {
-          handleMarcException(uuidJson.getValue(), result, e, jobExecutionId);
-        }
-      }
+      fillOutFromCentralTenant(holdingsWithInstanceAndItems, jobExecutionId, centralTenantId, marcRecords, result, rules);
     } else {
       for (var jsonObject : holdingsWithInstanceAndItems.values()) {
         try {
@@ -301,6 +288,24 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         } catch (MarcException e) {
           handleMarcException(jsonObject, result, e, jobExecutionId);
         }
+      }
+    }
+  }
+
+  private void fillOutFromCentralTenant(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, String centralTenantId, List<String> marcRecords,
+                                        GeneratedMarcResult result, List<Rule> rules) {
+    var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
+    log.info("idsTenant: {}", idsTenant);
+    for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
+      log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
+      var tenantId = idsTenant.get(uuidJson.getKey());
+      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, context))) {
+        ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(tenantId);
+        var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
+        log.info("marc: {}", marc);
+        marcRecords.add(marc);
+      } catch (MarcException e) {
+        handleMarcException(uuidJson.getValue(), result, e, jobExecutionId);
       }
     }
   }
