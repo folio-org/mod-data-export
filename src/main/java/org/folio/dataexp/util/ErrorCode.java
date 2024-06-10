@@ -59,7 +59,7 @@ public enum ErrorCode {
   ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION("error.onlyForSetToDeletion", "This profile can only be used to export authority records set for deletion"),
   ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED("error.profileUsedToNonDeleted", "This profile can only be used to export authority records not deleted"),
   ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING("error.tenantNotFoundForHolding", "Tenant cannot be found for holding with id %s"),
-  ERROR_MESSAGE_NO_AFFILIATION("error.noAffiliation", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant.");
+  ERROR_MESSAGE_NO_AFFILIATION("error.noAffiliation", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant."),
   ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA("error.userNotHaveAccessForHoldingsTenantData", "The user does not have permissions to access the holdings record in data tenant.");
 
   private final String code;

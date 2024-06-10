@@ -100,8 +100,6 @@ class InstancesExportStrategyTest {
   private FolioExecutionContext folioExecutionContext;
   @Spy
   private RuleHandler ruleHandler;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
 
   @Captor
   private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
