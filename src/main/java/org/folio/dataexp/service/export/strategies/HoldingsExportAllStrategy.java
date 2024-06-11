@@ -22,7 +22,6 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
-import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +42,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
                                    RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
-                                   ConsortiaService consortiaService, FolioExecutionContext context, ConsortiumSearchClient consortiumSearchClient,
+                                   ConsortiaService consortiaService, ConsortiumSearchClient consortiumSearchClient,
                                    HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
                                    InstanceCentralTenantRepository instanceCentralTenantRepository, FolioModuleMetadata folioModuleMetadata,
                                    HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
