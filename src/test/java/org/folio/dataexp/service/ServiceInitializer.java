@@ -84,6 +84,8 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
   private NatureOfContentTermsClient natureOfContentTermsClient;
   @MockBean
   private IssuanceModesClient issuanceModesClient;
+  @MockBean
+  protected ConsortiaService consortiaService;
 
   protected void handleReferenceData() {
     var user = new User();
@@ -109,5 +111,6 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
     when(materialTypesClient.getMaterialTypes(any(Long.class))).thenReturn(new MaterialTypes());
     when(natureOfContentTermsClient.getNatureOfContentTerms(any(Long.class))).thenReturn(new org.folio.dataexp.domain.dto.NatureOfContentTerms());
     when(issuanceModesClient.getIssuanceModes(any(Long.class))).thenReturn(new IssuanceModes());
+    when(consortiaService.getCentralTenantId(any(String.class))).thenReturn("central");
   }
 }

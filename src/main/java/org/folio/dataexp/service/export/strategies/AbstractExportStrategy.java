@@ -140,7 +140,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
                                                  UUID jobExecutionId, Set<UUID> externalIdsWithMarcRecord, List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     marcRecords = new ArrayList<>(marcRecords);
     log.info("marcRecords size: {}", marcRecords.size());
-    Map<UUID, MarcFields> additionalFieldsPerId = null;
+    Map<UUID, MarcFields> additionalFieldsPerId;
     try {
       additionalFieldsPerId = getAdditionalMarcFieldsByExternalId(marcRecords, mappingProfile, jobExecutionId);
     } catch (TransformationRuleException e) {

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -40,8 +39,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Autowired
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @MockBean
-  private  ConsortiaService consortiaService;
 
   private static final UUID CUSTOM_INSTANCE_MAPPING_PROFILE_ID = UUID.randomUUID();
   private static final UUID CUSTOM_HOLDINGS_MAPPING_PROFILE_ID = UUID.randomUUID();

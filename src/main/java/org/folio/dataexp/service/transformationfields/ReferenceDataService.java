@@ -3,6 +3,7 @@ package org.folio.dataexp.service.transformationfields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
 import org.folio.dataexp.client.ContributorNameTypesClient;
@@ -44,6 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class ReferenceDataService {
   private static final int REFERENCE_DATA_LIMIT = Integer.MAX_VALUE;
@@ -137,9 +139,12 @@ public class ReferenceDataService {
 
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    return ObjectUtils.isEmpty(list) ?
+    log.info("getLocations list: {}", list);
+    Map<String, JsonObjectWrapper> res = ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));
+    log.info("getLocations res: {}", res);
+    return res;
   }
 
   public Map<String, JsonObjectWrapper> getCampuses() {

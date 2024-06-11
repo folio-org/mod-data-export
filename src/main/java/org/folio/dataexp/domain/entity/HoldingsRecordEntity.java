@@ -25,5 +25,6 @@ public class HoldingsRecordEntity {
   private UUID id;
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private String jsonb;
+
   private UUID instanceId;
 }

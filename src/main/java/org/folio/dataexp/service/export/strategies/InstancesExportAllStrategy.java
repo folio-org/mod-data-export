@@ -25,6 +25,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -61,6 +62,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     this.marcInstanceAllRepository = marcInstanceAllRepository;
     this.auditInstanceEntityRepository = auditInstanceEntityRepository;
   }
+
 
   @Override
   protected void processSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,

@@ -50,6 +50,11 @@ public class ConsortiaService {
     return new ArrayList<>();
   }
 
+  @Cacheable(value = "permittedTenantsCache")
+  public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
+    throw new UnsupportedOperationException("This feature is not implemented yet.");
+  }
+  
   public boolean isCurrentTenantCentralTenant(String currentTenantId) {
     return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
