@@ -445,6 +445,7 @@
             "data-export.export-deleted.post"
           ],
           "modulePermissions": [
+            "user-tenants.collection.get"
           ]
         }
       ]
