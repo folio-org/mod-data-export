@@ -34,7 +34,7 @@ class ConsortiaServiceTest {
     userTenantCollection.setUserTenants(List.of());
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
 
-    assertThat(consortiaService.getCentralTenantId()).isEqualTo(EMPTY);
+    assertThat(consortiaService.getCentralTenantId("tenantId")).isEqualTo(EMPTY);
   }
 
   @Test
@@ -48,6 +48,6 @@ class ConsortiaServiceTest {
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
     when(folioExecutionContext.getTenantId()).thenReturn("college");
 
-    assertThat(consortiaService.getCentralTenantId()).isEqualTo("consortium");
+    assertThat(consortiaService.getCentralTenantId("college")).isEqualTo("consortium");
   }
 }

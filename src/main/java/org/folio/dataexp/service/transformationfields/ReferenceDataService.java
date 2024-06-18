@@ -3,6 +3,7 @@ package org.folio.dataexp.service.transformationfields;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
 import org.folio.dataexp.client.ContributorNameTypesClient;
@@ -36,7 +37,6 @@ import org.folio.dataexp.domain.dto.MaterialType;
 import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.dataexp.domain.dto.NatureOfContentTerm;
 import org.folio.processor.referencedata.JsonObjectWrapper;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Log4j2
 @RequiredArgsConstructor
 public class ReferenceDataService {
   private static final int REFERENCE_DATA_LIMIT = Integer.MAX_VALUE;
@@ -66,7 +67,6 @@ public class ReferenceDataService {
   private final NatureOfContentTermsClient natureOfContentTermsClient;
   private final IssuanceModesClient issuanceModesClient;
 
-  @Cacheable(cacheNames = "alternativeTitleTypes")
   public Map<String, JsonObjectWrapper> getAlternativeTitleTypes() {
     var list = alternativeTitleTypesClient.getAlternativeTitleTypes(REFERENCE_DATA_LIMIT).getAlternativeTitleTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -74,7 +74,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(Alternativetitletype::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "callNumberTypes")
   public Map<String, JsonObjectWrapper> getCallNumberTypes() {
     var list = callNumberTypesClient.getCallNumberTypes(REFERENCE_DATA_LIMIT).getCallNumberTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -82,7 +81,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(CallNumberType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "contributorNameTypes")
   public Map<String, JsonObjectWrapper> getContributorNameTypes() {
     var list = contributorNameTypesClient.getContributorNameTypes(REFERENCE_DATA_LIMIT).getContributorNameTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -90,7 +88,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(ContributorNameType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "electronicAccessRelationships")
   public Map<String, JsonObjectWrapper> getElectronicAccessRelationships() {
     var list = electronicAccessRelationshipsClient.getElectronicAccessRelationships(REFERENCE_DATA_LIMIT).getElectronicAccessRelationships();
     return ObjectUtils.isEmpty(list) ?
@@ -98,7 +95,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(ElectronicAccessRelationship::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "holdingsNoteTypes")
   public Map<String, JsonObjectWrapper> getHoldingsNoteTypes() {
     var list = holdingsNoteTypesClient.getHoldingsNoteTypes(REFERENCE_DATA_LIMIT).getHoldingsNoteTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -106,7 +102,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(HoldingsNoteType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "identifierTypes")
   public Map<String, JsonObjectWrapper> getIdentifierTypes() {
     var list = identifierTypesClient.getIdentifierTypes(REFERENCE_DATA_LIMIT).getIdentifierTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -114,7 +109,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(IdentifierType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "instanceFormats")
   public Map<String, JsonObjectWrapper> getInstanceFormats() {
     var list = instanceFormatsClient.getInstanceFormats(REFERENCE_DATA_LIMIT).getInstanceFormats();
     return ObjectUtils.isEmpty(list) ?
@@ -122,7 +116,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(InstanceFormat::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "instanceTypes")
   public Map<String, JsonObjectWrapper> getInstanceTypes() {
     var list = instanceTypesClient.getInstanceTypes(REFERENCE_DATA_LIMIT).getInstanceTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -130,7 +123,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(InstanceType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "itemNoteTypes")
   public Map<String, JsonObjectWrapper> getItemNoteTypes() {
     var list = itemNoteTypesClient.getItemNoteTypes(REFERENCE_DATA_LIMIT).getItemNoteTypes();
     return ObjectUtils.isEmpty(list) ?
@@ -138,7 +130,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(ItemNoteType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "loanTypes")
   public Map<String, JsonObjectWrapper> getLoanTypes() {
     var list = loanTypesClient.getLoanTypes(REFERENCE_DATA_LIMIT).getLoantypes();
     return ObjectUtils.isEmpty(list) ?
@@ -146,15 +137,16 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(LoanType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "locations")
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    return ObjectUtils.isEmpty(list) ?
+    log.info("getLocations list: {}", list);
+    Map<String, JsonObjectWrapper> res = ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));
+    log.info("getLocations res: {}", res);
+    return res;
   }
 
-  @Cacheable(cacheNames = "campuses")
   public Map<String, JsonObjectWrapper> getCampuses() {
     var list = locationUnitsClient.getCampuses(REFERENCE_DATA_LIMIT).getLoccamps();
     return ObjectUtils.isEmpty(list) ?
@@ -162,7 +154,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(Campus::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "institutions")
   public Map<String, JsonObjectWrapper> getInstitutions() {
     var list = locationUnitsClient.getInstitutions(REFERENCE_DATA_LIMIT).getLocinsts();
     return ObjectUtils.isEmpty(list) ?
@@ -170,7 +161,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(Institution::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "libraries")
   public Map<String, JsonObjectWrapper> getLibraries() {
     var list = locationUnitsClient.getLibraries(REFERENCE_DATA_LIMIT).getLoclibs();
     return ObjectUtils.isEmpty(list) ?
@@ -178,7 +168,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(Library::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "materialTypes")
   public Map<String, JsonObjectWrapper> getMaterialTypes() {
     var list = materialTypesClient.getMaterialTypes(REFERENCE_DATA_LIMIT).getMtypes();
     return ObjectUtils.isEmpty(list) ?
@@ -186,7 +175,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(MaterialType::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "natureOfContentTerms")
   public Map<String, JsonObjectWrapper> getNatureOfContentTerms() {
     var list = natureOfContentTermsClient.getNatureOfContentTerms(REFERENCE_DATA_LIMIT).getNatureOfContentTerms();
     return ObjectUtils.isEmpty(list) ?
@@ -194,7 +182,6 @@ public class ReferenceDataService {
       list.stream().collect(Collectors.toMap(NatureOfContentTerm::getId, this::toJsonObjectWrapper));
   }
 
-  @Cacheable(cacheNames = "issuanceModes")
   public Map<String, JsonObjectWrapper> getIssuanceModes() {
     var list = issuanceModesClient.getIssuanceModes(REFERENCE_DATA_LIMIT).getIssuanceModes();
     return ObjectUtils.isEmpty(list) ?
