@@ -123,7 +123,7 @@ class InstancesExportStrategyTest {
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(anySet(), anyString(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), anyString(), anySet())).thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
