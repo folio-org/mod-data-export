@@ -77,6 +77,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
                                                UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds, INSTANCE_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
+      log.info("marcInstances: {}, externalIds: {}", marcInstances, externalIds);
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       if (!externalIds.isEmpty()) {
