@@ -139,12 +139,10 @@ public class ReferenceDataService {
 
   public Map<String, JsonObjectWrapper> getLocations() {
     var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
-    log.info("getLocations list: {}", list);
-    Map<String, JsonObjectWrapper> res = ObjectUtils.isEmpty(list) ?
+    log.info("getLocations list size: {}", list.size());
+    return ObjectUtils.isEmpty(list) ?
       Collections.emptyMap() :
       list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));
-    log.info("getLocations res: {}", res);
-    return res;
   }
 
   public Map<String, JsonObjectWrapper> getCampuses() {
