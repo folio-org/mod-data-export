@@ -91,8 +91,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         tenantIdsMap.forEach((k, v) -> entities.addAll(marcInstanceRecordRepository.findByExternalIdIn(k, v)));
         return entities;
       } else {
-        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(externalIds,
-          HOLDING_MARC_TYPE, "ACTUAL");
+        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds,
+          HOLDING_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
       }
     }
     return new ArrayList<>();
