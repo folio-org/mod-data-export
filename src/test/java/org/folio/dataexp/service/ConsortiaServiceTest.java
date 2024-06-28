@@ -46,7 +46,6 @@ class ConsortiaServiceTest {
     otherUserTenant.setCentralTenantId("college");
     userTenantCollection.setUserTenants(List.of(centralTenant, otherUserTenant));
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
-    when(folioExecutionContext.getTenantId()).thenReturn("college");
 
     assertThat(consortiaService.getCentralTenantId("college")).isEqualTo("consortium");
   }
