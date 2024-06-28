@@ -26,7 +26,6 @@ public class MarcSuppressProcessor {
         .map(String::trim)
         .collect(Collectors.toSet());
     suppress999ff = Boolean.TRUE.equals(mappingProfile.getSuppress999ff());
-    log.info("Suppress 999ff={}, fields to suppress=[{}]", suppress999ff, String.join(COMMA, fieldsToSuppress));
   }
 
   public Record suppress(Record rec) {
