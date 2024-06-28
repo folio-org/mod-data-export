@@ -32,7 +32,7 @@ public class ConsortiaService {
       var centralTenantId = userTenants.get(0).getCentralTenantId();
       return centralTenantId;
     }
-    log.debug("No central tenant found");
+    log.debug("No central tenant found for {}", currentTenantId);
     return StringUtils.EMPTY;
   }
 
