@@ -55,6 +55,7 @@ public class ConsortiaService {
     throw new UnsupportedOperationException("This feature is not implemented yet.");
   }
 
+  @Cacheable(value = "isCurrentTenantCentralTenant")
   public boolean isCurrentTenantCentralTenant(String currentTenantId) {
     return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
