@@ -79,11 +79,14 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds, INSTANCE_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
       log.info("marcInstances: {}, externalIds: {}", marcInstances, externalIds);
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+      log.info("found ids: {}", foundIds);
       externalIds.removeAll(foundIds);
+      log.info("not found ids: {}", externalIds);
       if (!externalIds.isEmpty()) {
         var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
+          log.info("marcInstancesFromCentralTenant: {}", marcInstancesFromCentralTenant);
           marcInstances.addAll(marcInstancesFromCentralTenant);
         } else {
           log.info("Central tenant id does not exist");
@@ -127,6 +130,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);
+    log.info("generatedmarcres: {}", generatedMarcResult.getMarcRecords());
     return generatedMarcResult;
   }
 
