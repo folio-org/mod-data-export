@@ -46,7 +46,6 @@ public class QuickExportService {
     exportRequest.setFileDefinitionId(fileDefinition.getId());
     exportRequest.setQuick(true);
     exportRequest.setIdType(ExportRequest.IdTypeEnum.fromValue(quickExportRequest.getRecordType().getValue().toLowerCase()));
-    exportRequest.setDeletedMarcIds(false);
     return exportRequest;
   }
 

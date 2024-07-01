@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
@@ -76,7 +77,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
-      var states = exportRequest.getDeletedMarcIds() ? Set.of("ACTUAL", "DELETED") : Set.of("ACTUAL");
+      var states = defaultIfNull(exportRequest.getDeletedMarcIds(), false) ? Set.of("ACTUAL", "DELETED") : Set.of("ACTUAL");
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds, INSTANCE_MARC_TYPE, states);
       log.info("marcInstances: {}, externalIds: {}", marcInstances, externalIds);
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
