@@ -29,8 +29,7 @@ public class ConsortiaService {
     var userTenants = userTenantCollection.getUserTenants();
     if (!userTenants.isEmpty()) {
       log.debug("userTenants: {}", userTenants);
-      var centralTenantId = userTenants.get(0).getCentralTenantId();
-      return centralTenantId;
+      return userTenants.get(0).getCentralTenantId();
     }
     log.debug("No central tenant found for {}", currentTenantId);
     return StringUtils.EMPTY;
