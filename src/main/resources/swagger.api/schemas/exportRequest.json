@@ -49,6 +49,11 @@
       "type": "boolean",
       "default": true
     },
+    "deletedMarcIds": {
+      "description": "True if need to include DELETED state",
+      "type": "boolean",
+      "default": false
+    },
     "suppressedFromDiscovery": {
       "description": "True if need to include suppressed from discovery records, otherwise false",
       "type": "boolean",
