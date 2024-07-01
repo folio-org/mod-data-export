@@ -26,7 +26,7 @@ public class ExportDeletedMarcIdsService {
     var fileDefinition = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(nonNull(request) ? request.getFrom() : null,
       nonNull(request) ? request.getTo() : null);
     var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID))
-      .all(false).quick(false).build();
+      .all(false).quick(false).deletedRecords(true).build();
     dataExportService.postDataExport(exportRequest);
     return ExportDeletedMarcIdsResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId()).build();
   }
