@@ -33,7 +33,6 @@ import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
-import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.MarcException;
@@ -77,7 +76,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
                                                UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var marcInstances =  marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds, INSTANCE_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
-      log.info("marcInstances: {}, externalIds: {}", marcInstances, externalIds);
       var foundIds = marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       if (!externalIds.isEmpty()) {
@@ -85,8 +83,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant = marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
-        } else {
-          log.info("Central tenant id does not exist");
         }
       }
       return marcInstances;
@@ -259,8 +255,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
           copyInstances.add(instanceEntity);
           instancesIdsFromCentral.add(instanceEntity.getId());
         });
-      } else {
-        log.info("Central tenant id does not exist");
       }
     }
     var existInstanceIds = new HashSet<UUID>();

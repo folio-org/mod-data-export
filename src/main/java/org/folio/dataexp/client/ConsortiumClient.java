@@ -15,5 +15,5 @@ public interface ConsortiumClient {
   ConsortiaCollection getConsortia();
 
   @GetMapping(value = "/{consortiumId}/user-tenants", produces = MediaType.APPLICATION_JSON_VALUE)
-  UserTenantCollection getConsortiaUserTenants(@PathVariable String consortiumId, @RequestParam String userId);
+  UserTenantCollection getConsortiaUserTenants(@PathVariable String consortiumId, @RequestParam String userId, @RequestParam int limit);
 }

@@ -28,14 +28,10 @@ public class ConsortiaService {
     var userTenantCollection = consortiaClient.getUserTenantCollection();
     var userTenants = userTenantCollection.getUserTenants();
     if (!userTenants.isEmpty()) {
-      log.info("userTenants: {}", userTenants);
-      var centralTenantId = userTenants.get(0).getCentralTenantId();
-      if (centralTenantId.equals(context.getTenantId())) {
-        log.error("Current tenant is central");
-      }
-      return centralTenantId;
+      log.debug("userTenants: {}", userTenants);
+      return userTenants.get(0).getCentralTenantId();
     }
-    log.info("No central tenant found");
+    log.debug("No central tenant found for {}", currentTenantId);
     return StringUtils.EMPTY;
   }
 
@@ -44,7 +40,7 @@ public class ConsortiaService {
     var consortia = consortiumClient.getConsortia();
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
-      var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), userId);
+      var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), userId, Integer.MAX_VALUE);
       return userTenants.getUserTenants().stream().map(UserTenant::getTenantId).toList();
     }
     return new ArrayList<>();
@@ -54,7 +50,8 @@ public class ConsortiaService {
   public List<String> getTenantsWithPermissions(List<String> affiliatedTenants) {
     throw new UnsupportedOperationException("This feature is not implemented yet.");
   }
-  
+
+  @Cacheable(value = "isCurrentTenantCentralTenant")
   public boolean isCurrentTenantCentralTenant(String currentTenantId) {
     return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
