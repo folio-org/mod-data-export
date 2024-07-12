@@ -17,7 +17,6 @@ import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -32,14 +31,12 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS;
 
 @Log4j2
 @Service
 @AllArgsConstructor
 public class HoldingsItemsResolverService {
-
-  private static final String ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS = "%s - the user %s does not have permissions to access the holdings record in %s data tenant.";
-
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
   private final ItemEntityTenantRepository itemEntityTenantRepository;
@@ -85,9 +82,9 @@ public class HoldingsItemsResolverService {
       } else {
         var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
         holdingsIds.forEach(holdingId -> {
-          var errorMessage = String.format(ERROR_USER_NOT_HAVE_PERMISSIONS_FOR_HOLDINGS, holdingId, userName, localTenant);
+          var errorMessage = String.format(ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS.getDescription(), holdingId, userName, localTenant);
           var errorMessageValues = List.of(holdingId.toString(), userName, localTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), errorMessageValues, jobExecutionId);
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS.getCode(), errorMessageValues, jobExecutionId);
           log.error(errorMessage);
         });
       }

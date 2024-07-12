@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.substring;
+import static org.folio.dataexp.util.ErrorCode.ERROR_RULE_NO_INDICATORS;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -100,7 +101,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
             break;
           }
         } else {
-          throw new TransformationRuleException("Tag rule " + tagRule.getField() + " doesn't have indicators");
+          throw new TransformationRuleException(String.format(ERROR_RULE_NO_INDICATORS.getDescription(), tagRule.getField()));
         }
       }
     }

@@ -158,7 +158,7 @@ class HoldingsItemsResolverServiceTest {
 
     var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA.getCode(), List.of(consortiumHolding3.getId(), user.getUsername(), "member3"), jobExecutionId);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS.getCode(), List.of(consortiumHolding3.getId(), user.getUsername(), "member3"), jobExecutionId);
   }
 }
 
