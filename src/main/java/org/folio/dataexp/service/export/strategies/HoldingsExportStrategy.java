@@ -267,15 +267,15 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private Map<UUID, String> getInstanceIdsTenant(List<HoldingsRecordEntity> holdings, String centralTenantId) {
     log.info("getInstanceIdsTenant ids: {}", holdings);
-    Map<UUID, String> tenantIdsMap = new HashMap<>();
+    Map<UUID, String> idsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     holdings.forEach(hold -> {
       var curTenant = consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
       if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
-        tenantIdsMap.put(hold.getInstanceId(), curTenant);
+        idsMap.put(hold.getInstanceId(), curTenant);
       }
     });
-    return tenantIdsMap;
+    return idsMap;
   }
 
   private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
