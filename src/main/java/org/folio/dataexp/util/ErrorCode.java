@@ -13,7 +13,7 @@ public enum ErrorCode {
   GENERIC_ERROR_CODE("error.genericError", "Generic error"),
   FILE_DEFINITION_NOT_FOUND("error.fileDefinition.notFound", "File Definition not found"),
   S3_BUCKET_NAME_NOT_FOUND("error.s3.bucketNameNotFound", "S3 bucket name is not found in System Properties"),
-  NO_FILE_GENERATED("error.binaryFile.notGenerated", "Nothing to export: no binary file generated"),
+  NO_FILE_GENERATED("error.binaryFile.notGenerated", "Nothing to export: no .mrc file generated"),
   USER_NOT_FOUND("error.user.notFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION(INVALID_EXTENSION_ERROR_CODE, "File name extension does not corresponds csv format"),
   INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE(INVALID_EXTENSION_ERROR_CODE, "Only csv format is supported for holdings export"),
@@ -39,8 +39,8 @@ public enum ErrorCode {
   DEFAULT_MAPPING_PROFILE_NOT_FOUND("error.mappingProfile.defaultNotFound", "Default mapping profile not found"),
   ERROR_READING_FROM_INPUT_FILE("error.readingFromInputFile", "Error while reading from input file with uuids or file is empty"),
   ERROR_INVALID_CQL_SYNTAX("error.invalidCqlSyntax", "Invalid CQL syntax in %s"),
-  SOME_UUIDS_NOT_FOUND("error.uuidsNotFound", "UUIDs not found in SRS or inventory: %s"),
-  SOME_RECORDS_FAILED("error.someRecordsFailed", "Export is completed with errors, some records have failed to export, number of failed records: %s"),
+  SOME_UUIDS_NOT_FOUND("error.uuidsNotFound", "Record not found: %s"),
+  SOME_RECORDS_FAILED("error.someRecordsFailed", "Failed records number: %s"),
   DATE_PARSE_ERROR_CODE("error.mapping.dateParse", "An error occurs during parsing the date while the mapping process"),
   UNDEFINED("error.mapping.undefined", "Undefined error during the mapping process"),
   ERROR_FIELDS_MAPPING_INVENTORY("error.mapping.fieldsMappingInventory", "An error occurred during fields mapping for inventory record"),
@@ -53,14 +53,18 @@ public enum ErrorCode {
   ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED(ERROR_MESSAGE_PLACEHOLDER_CODE, "For exporting authority records only the default authority job profile is supported"),
   ERROR_JOB_IS_EXPIRED(ERROR_MESSAGE_PLACEHOLDER_CODE, "Job was expired: no updates for more than 1 hour"),
   ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE("error.fileIsTooLarge", "File being uploaded is too large"),
-  ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", " %s has following SRS records associated: %s"),
+  ERROR_DUPLICATE_SRS_RECORD("error.duplicateSRS", "Instance with HRID : %s has following SRS records associated: %s"),
   ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC("error.recordIsTooLong", "Record is too long to be a valid MARC binary record, it's length would be %d which is more than 99999 bytes"),
-  ERROR_MESSAGE_UUID_IS_SET_TO_DELETION("error.setToDeletion", "%s is set for deletion and cannot be exported using this profile"),
+  ERROR_MESSAGE_UUID_IS_SET_TO_DELETION("error.setToDeletion", "Authority record %s is set for deletion and cannot be exported using this profile"),
   ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION("error.onlyForSetToDeletion", "This profile can only be used to export authority records set for deletion"),
   ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED("error.profileUsedToNonDeleted", "This profile can only be used to export authority records not deleted"),
   ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING("error.tenantNotFoundForHolding", "Tenant cannot be found for holding with id %s"),
-  ERROR_MESSAGE_NO_AFFILIATION("error.noAffiliation", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant."),
-  ERROR_MESSAGE_USER_NOT_HAVE_ACCESS_FOR_HOLDINGS_TENANT_DATA("error.userNotHaveAccessForHoldingsTenantData", "The user does not have permissions to access the holdings record in data tenant.");
+  ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS("error.holdings.noPermissions", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant."),
+  ERROR_DUPLICATED_IDS("error.duplicatedIds", "ERROR UUID %s repeated %s times."),
+  ERROR_CONVERTING_JSON_TO_MARC("error.convertJsonToMarc", "Error converting json to marc for record %s"),
+  ERROR_RULE_NO_INDICATORS("error.noIndicators", "Tag rule %s doesn't have indicators"),
+  ERROR_CONVERTING_TO_JSON_HOLDING("error.convertingToJson.holding", "Error converting to json holding by id %s"),
+  ERROR_CONVERTING_TO_JSON_INSTANCE("error.convertingToJson.instance", "Error converting to json instance by id %s");
 
   private final String code;
   private final String description;

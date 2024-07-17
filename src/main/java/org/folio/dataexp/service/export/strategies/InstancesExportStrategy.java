@@ -6,6 +6,7 @@ import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
+import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_INSTANCE;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -262,7 +263,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       existInstanceIds.add(instance.getId());
       var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
       if (instanceJsonOpt.isEmpty()) {
-        var errorMessage = "Error converting to json instance by id " + instance.getId();
+        var errorMessage = String.format(ERROR_CONVERTING_TO_JSON_INSTANCE.getDescription(), instance.getId());
         log.error("getInstancesWithHoldingsAndItems:: {}", errorMessage);
         generatedMarcResult.addIdToFailed(instance.getId());
         errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());

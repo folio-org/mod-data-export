@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
 
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,6 @@ public class InputFileProcessor {
 
   private static final int BATCH_SIZE_TO_SAVE = 1000;
   private static final long SEARCH_POLL_INTERVAL_SECONDS = 5L;
-  private static final String ERROR_DUPLICATED_ID = "ERROR UUID %s repeated %s times.";
 
   @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
   private int waitSearchIdsTimeSeconds;
@@ -113,7 +113,7 @@ public class InputFileProcessor {
       });
       readIds.clear();
       for (var entry : duplicatedIds.entrySet()) {
-        var errorMessage = String.format(ERROR_DUPLICATED_ID, entry.getKey(), entry.getValue());
+        var errorMessage = String.format(ERROR_DUPLICATED_IDS.getDescription(), entry.getKey(), entry.getValue());
         errorLogService.saveGeneralError(errorMessage, jobExecution.getId());
       }
       duplicatedIds.clear();

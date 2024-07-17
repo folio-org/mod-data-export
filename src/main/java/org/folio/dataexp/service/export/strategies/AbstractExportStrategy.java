@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies;
 
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_JSON_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 import jakarta.persistence.EntityManager;
@@ -213,8 +214,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   public void saveConvertJsonRecordToMarcRecordError(MarcRecordEntity marcRecordEntity, UUID jobExecutionId, Exception e) {
-    var errorMessage = "Error converting json to marc for record " + marcRecordEntity.getExternalId().toString();
-    log.error(errorMessage + " : " + e.getMessage());
+    var errorMessage = String.format(ERROR_CONVERTING_JSON_TO_MARC.getDescription(), marcRecordEntity.getExternalId().toString());
+    log.error("{} : {}", errorMessage, e.getMessage());
     errorLogService.saveGeneralError(errorMessage, jobExecutionId);
   }
 
