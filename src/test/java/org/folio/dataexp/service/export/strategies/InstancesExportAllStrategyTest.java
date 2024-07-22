@@ -50,7 +50,7 @@ class InstancesExportAllStrategyTest {
     var opt = instancesExportAllStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with HRID : 123", opt.get().getIdentifierHridMessage());
+    assertEquals("123", opt.get().getIdentifierHridMessage());
 
     assertEquals(auditInstanceEntity.getId().toString(), opt.get().getAssociatedJsonObject().getAsString("id"));
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
