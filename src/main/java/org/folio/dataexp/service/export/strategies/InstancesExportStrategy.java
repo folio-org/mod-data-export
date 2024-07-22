@@ -140,7 +140,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var title = jsonObject.get().getAsString(TITLE_KEY);
       var uuid = jsonObject.get().getAsString(ID_KEY);
       var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + hrid);
+      exportIdentifiers.setIdentifierHridMessage(hrid);
       var instanceAssociatedJsonObject = new JSONObject();
       instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
       instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);

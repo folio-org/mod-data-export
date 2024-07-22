@@ -158,7 +158,7 @@ class InstancesExportStrategyTest {
     var opt = instancesExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with HRID : 123", opt.get().getIdentifierHridMessage());
+    assertEquals("123", opt.get().getIdentifierHridMessage());
 
     assertEquals("uuid", opt.get().getAssociatedJsonObject().getAsString("id"));
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
@@ -390,7 +390,7 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
-    var errorMessage = "Record is too long to be a valid MARC binary record, it's length would be 113937 which is more thatn 99999 bytes 2024";
+    var errorMessage = "Record is too long to be a valid MARC binary record, it's length would be 113937 which is more than 99999 bytes 2024";
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
 

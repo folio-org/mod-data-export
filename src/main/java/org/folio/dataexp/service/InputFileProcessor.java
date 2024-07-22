@@ -101,8 +101,8 @@ public class InputFileProcessor {
             duplicatedIds.put(entity.getInstanceId(), countDuplicated);
           }
         } catch (Exception e) {
-          log.error("Error converting {} to uuid", id);
-          commonExportStatistic.addToInvalidUUIDFormat(id);
+          log.error("Error converting {} to uuid", instanceId);
+          commonExportStatistic.addToInvalidUUIDFormat(instanceId);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           insertExportIdService.saveBatch(batch);
@@ -113,8 +113,7 @@ public class InputFileProcessor {
       });
       readIds.clear();
       for (var entry : duplicatedIds.entrySet()) {
-        var errorMessage = String.format(ERROR_DUPLICATED_IDS.getDescription(), entry.getKey(), entry.getValue());
-        errorLogService.saveGeneralError(errorMessage, jobExecution.getId());
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_DUPLICATED_IDS.getCode(), List.of(entry.getKey().toString(), Integer.toString(entry.getValue())), jobExecution.getId());
       }
       duplicatedIds.clear();
     } catch (Exception e) {
