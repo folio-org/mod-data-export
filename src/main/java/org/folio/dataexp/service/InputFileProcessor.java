@@ -101,8 +101,8 @@ public class InputFileProcessor {
             duplicatedIds.put(entity.getInstanceId(), countDuplicated);
           }
         } catch (Exception e) {
-          log.error("Error converting {} to uuid", id);
-          commonExportStatistic.addToInvalidUUIDFormat(id);
+          log.error("Error converting {} to uuid", instanceId);
+          commonExportStatistic.addToInvalidUUIDFormat(instanceId);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           insertExportIdService.saveBatch(batch);
