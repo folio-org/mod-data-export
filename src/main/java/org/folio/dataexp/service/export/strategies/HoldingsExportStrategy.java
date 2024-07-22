@@ -11,7 +11,7 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_HOLDING;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
