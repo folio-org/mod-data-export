@@ -119,7 +119,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
       var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage("Holding with hrid : " + hrid);
+      exportIdentifiers.setIdentifierHridMessage(hrid);
       return Optional.of(exportIdentifiers);
     }
     return Optional.empty();
