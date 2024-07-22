@@ -59,7 +59,7 @@ public enum ErrorCode {
   ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION("error.onlyForSetToDeletion", "This profile can only be used to export authority records set for deletion"),
   ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED("error.profileUsedToNonDeleted", "This profile can only be used to export authority records not deleted"),
   ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING("error.tenantNotFoundForHolding", "Tenant cannot be found for holding with id %s"),
-  ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS("error.holdings.noPermissions", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant."),
+  ERROR_MESSAGE_NO_AFFILIATION("error.noAffiliation", "%s -  the user %s does not have permissions to access the holdings record in %s data tenant."),
   ERROR_DUPLICATED_IDS("error.duplicatedIds", "ERROR UUID %s repeated %s times."),
   ERROR_CONVERTING_JSON_TO_MARC("error.convertJsonToMarc", "Error converting json to marc for record %s"),
   ERROR_RULE_NO_INDICATORS("error.noIndicators", "Tag rule %s doesn't have indicators"),
