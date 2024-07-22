@@ -127,7 +127,8 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
         instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
         instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
-        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+        var srsId = marcRecordEntity.isDeleted() ? marcRecordEntity.getId() : null;
+        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, srsId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
       } else {
         super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
@@ -238,10 +239,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private List<MarcRecordEntity> getMarcDeleted(ExportRequest exportRequest) {
+    List<MarcRecordEntity> result;
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return marcInstanceAllRepository.findMarcInstanceAllDeleted();
+      result = marcInstanceAllRepository.findMarcInstanceAllDeleted();
+    } else {
+      result = marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
     }
-    return marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
+    result.forEach(del -> del.setDeleted(true));
+    return result;
   }
 
   private List<InstanceEntity> getMarcInstanceDeleted(ExportRequest exportRequest) {

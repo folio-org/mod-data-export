@@ -108,7 +108,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     marcRecords.add(marcRecordEntity);
@@ -157,7 +157,7 @@ class AbstractExportStrategyTest {
       {
         invalid
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);
@@ -200,7 +200,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);

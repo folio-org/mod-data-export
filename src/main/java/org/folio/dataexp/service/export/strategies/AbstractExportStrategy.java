@@ -198,6 +198,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void saveDuplicateErrors(LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>> duplicatedUuidWithIdentifiers,
       List<MarcRecordEntity> marcRecords, UUID jobExecutionId) {
     var externalIdsAsKeys = duplicatedUuidWithIdentifiers.keySet();
+    var srsIdByExternalId = getSrsIdByDeletedExternalIdMap(marcRecords);
     for (var externalId : externalIdsAsKeys) {
       var exportIdentifiersOpt = duplicatedUuidWithIdentifiers.get(externalId);
       if (exportIdentifiersOpt.isPresent()) {
@@ -205,7 +206,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         var errorMessage = getDuplicatedSRSErrorMessage(externalId, marcRecords, exportIdentifiers);
         log.warn(errorMessage);
         if (exportIdentifiers.getAssociatedJsonObject() != null) {
-          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
+          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, srsIdByExternalId.get(externalId));
         } else {
           errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
         }
@@ -223,6 +224,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
         .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
     return String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), exportIdentifiers.getIdentifierHridMessage(), marcRecordIds);
+  }
+
+  private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
+    return marcRecords.stream().filter(marc -> marc.isDeleted()).collect(Collectors.toMap(key -> key.getExternalId(), val -> val.getId()));
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
