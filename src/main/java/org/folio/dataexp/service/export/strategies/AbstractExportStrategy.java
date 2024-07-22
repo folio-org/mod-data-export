@@ -227,7 +227,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
-    return marcRecords.stream().filter(marc -> marc.isDeleted()).collect(Collectors.toMap(key -> key.getExternalId(), val -> val.getId()));
+    return marcRecords.stream().filter(marc -> marc.isDeleted()).collect(Collectors.toMap(marc -> marc.getExternalId(), marc -> marc.getId(), (srsId1, srsId2) -> srsId1));
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
