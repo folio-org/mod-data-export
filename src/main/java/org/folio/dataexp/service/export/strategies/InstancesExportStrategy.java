@@ -121,6 +121,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
         log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid.toString()), jobExecutionId);
+        log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);

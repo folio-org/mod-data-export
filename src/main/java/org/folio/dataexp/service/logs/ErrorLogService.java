@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.logs;
 
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.dataexp.service.ConfigurationService.INVENTORY_RECORD_LINK_KEY;
