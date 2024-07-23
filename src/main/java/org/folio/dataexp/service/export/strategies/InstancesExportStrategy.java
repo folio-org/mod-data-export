@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
@@ -121,7 +122,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
         log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid.toString()), jobExecutionId);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
         log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
       }
     }
@@ -273,6 +274,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       }
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
+      instanceJson.put(DELETED_KEY, instance.isDeleted());
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
 
       if (!instancesIdsFromCentral.contains(instance.getId())) {

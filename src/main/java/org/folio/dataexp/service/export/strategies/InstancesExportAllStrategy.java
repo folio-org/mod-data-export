@@ -233,10 +233,13 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private List<InstanceEntity> getFolioDeleted(ExportRequest exportRequest) {
+    List<InstanceEntity> result;
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return folioInstanceAllRepository.findFolioInstanceAllDeleted();
+      result = folioInstanceAllRepository.findFolioInstanceAllDeleted();
+    } else {
+      result = folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
     }
-    return folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
+    return result;
   }
 
   private List<MarcRecordEntity> getMarcDeleted(ExportRequest exportRequest) {
