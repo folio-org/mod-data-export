@@ -64,7 +64,8 @@ public enum ErrorCode {
   ERROR_CONVERTING_JSON_TO_MARC("error.convertJsonToMarc", "Error converting json to marc for record %s"),
   ERROR_RULE_NO_INDICATORS("error.noIndicators", "Tag rule %s doesn't have indicators"),
   ERROR_CONVERTING_TO_JSON_HOLDING("error.convertingToJson.holding", "Error converting to json holding by id %s"),
-  ERROR_CONVERTING_TO_JSON_INSTANCE("error.convertingToJson.instance", "Error converting to json instance by id %s");
+  ERROR_CONVERTING_TO_JSON_INSTANCE("error.convertingToJson.instance", "Error converting to json instance by id %s"),
+  ERROR_DELETED_INSTANCE("error.deleted.instance", "Instance record associated with %s has been deleted.");
 
   private final String code;
   private final String description;

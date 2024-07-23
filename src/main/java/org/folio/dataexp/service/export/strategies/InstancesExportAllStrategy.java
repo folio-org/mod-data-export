@@ -127,9 +127,10 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
         instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
         instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
-        var srsId = marcRecordEntity.isDeleted() ? marcRecordEntity.getId() : null;
-        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, srsId);
+        errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_INSTANCE.getCode(), List.of(marcRecordEntity.getId().toString()), jobExecutionId);
+        log.error(String.format(ErrorCode.ERROR_DELETED_INSTANCE.getDescription(), marcRecordEntity.getId()));
       } else {
         super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
       }

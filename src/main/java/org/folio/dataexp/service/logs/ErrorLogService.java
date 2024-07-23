@@ -137,20 +137,16 @@ public class ErrorLogService {
     this.save(errorLog);
   }
 
-  public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessageCode, UUID jobExecutionId, MarcException marcException, UUID srsId) {
+  public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessageCode, UUID jobExecutionId, MarcException marcException) {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
-    String inventoryLink = getInventoryRecordLink() + instId;
-    if (nonNull(srsId)) {
-      inventoryLink = String.format("Instance record associated with %s has been deleted.", srsId);
-    }
     AffectedRecord affectedRecord = new AffectedRecord()
       .id(instId)
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryLink);
+      .inventoryRecordLink(getInventoryRecordLink() + instId);
     if (instId == null) {
       affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
     }
@@ -170,12 +166,11 @@ public class ErrorLogService {
     return save(errorLog);
   }
 
-  public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessage, String errorMessageCode, UUID jobExecutionId, UUID srsId) {
+  public ErrorLog saveWithAffectedRecord(JSONObject instance, String errorMessage, String errorMessageCode, UUID jobExecutionId) {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
     String generalEndOfErrorMsg = " cannot be determined because instance record is not found or invalid, but still contains more than 1 SRS record";
-    String inventoryLink = getInventoryRecordLink() + instId;
     if (instId == null) {
       instId = "UUID" + generalEndOfErrorMsg;
     }
@@ -185,15 +180,12 @@ public class ErrorLogService {
     if (title == null) {
       title = "Title" + generalEndOfErrorMsg;
     }
-    if (nonNull(srsId)) {
-      inventoryLink = String.format("Instance record associated with %s has been deleted.", srsId);
-    }
     var affectedRecord = new AffectedRecord()
       .id(instId)
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(inventoryLink);
+      .inventoryRecordLink(getInventoryRecordLink() + instId);
     var errorLog = new ErrorLog()
       .errorMessageCode(errorMessageCode)
       .errorMessageValues(Collections.singletonList(errorMessage))

@@ -206,7 +206,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         var errorMessage = getDuplicatedSRSErrorMessage(externalId, marcRecords, exportIdentifiers);
         log.warn(errorMessage);
         if (exportIdentifiers.getAssociatedJsonObject() != null) {
-          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId, srsIdByExternalId.get(externalId));
+          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
+          if (srsIdByExternalId.containsKey(externalId)) {
+            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_INSTANCE.getCode(), List.of(srsIdByExternalId.get(externalId).toString()), jobExecutionId);
+            log.error(String.format(ErrorCode.ERROR_DELETED_INSTANCE.getDescription(), srsIdByExternalId.get(externalId)));
+          }
         } else {
           errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
         }
