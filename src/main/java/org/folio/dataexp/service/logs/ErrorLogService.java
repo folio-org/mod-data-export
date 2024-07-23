@@ -141,7 +141,7 @@ public class ErrorLogService {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
-    String inventoryLink = (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
+    String inventoryLink = instance.containsKey(DELETED_KEY) && (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
     AffectedRecord affectedRecord = new AffectedRecord()
       .id(instId)
       .hrid(hrId)
@@ -172,7 +172,7 @@ public class ErrorLogService {
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
     String generalEndOfErrorMsg = " cannot be determined because instance record is not found or invalid, but still contains more than 1 SRS record";
-    String inventoryLink = (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
+    String inventoryLink = instance.containsKey(DELETED_KEY) && (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
     if (instId == null) {
       instId = "UUID" + generalEndOfErrorMsg;
     }
