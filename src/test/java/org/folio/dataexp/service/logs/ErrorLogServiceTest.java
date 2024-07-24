@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
 
+  private static final String LONG_MARC_RECORD_MESSAGE = "Record is too long to be a valid MARC binary record";
   @Mock
   private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   @Mock
@@ -149,7 +150,7 @@ class ErrorLogServiceTest {
   }
 
   @Test
-  void saveWithAffectedRecordErrorTest() {
+  void saveWithAffectedRecordMarcExceptionErrorTest() {
     var jobExecutionId = UUID.randomUUID();
     ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
 
@@ -162,5 +163,22 @@ class ErrorLogServiceTest {
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
     assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), errorLog.getErrorMessageCode());
+  }
+
+  @Test
+  void saveWithAffectedRecordErrorTest() {
+    var jobExecutionId = UUID.randomUUID();
+    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
+
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+
+    errorLogService.saveWithAffectedRecord(new JSONObject(), LONG_MARC_RECORD_MESSAGE, ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+    verify(errorLogEntityCqlRepository).save(captor.capture());
+
+    var errorLogEntity = captor.getValue();
+    var errorLog = errorLogEntity.getErrorLog();
+    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), errorLog.getErrorMessageCode());
+    assertEquals(LONG_MARC_RECORD_MESSAGE, errorLog.getErrorMessageValues().get(0));
   }
 }
