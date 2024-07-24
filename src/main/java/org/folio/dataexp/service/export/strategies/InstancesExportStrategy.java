@@ -118,13 +118,15 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         marcRecords.add(marc);
       } catch (MarcException e) {
         var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
-        log.debug("getGeneratedMarc instanceJson: {}", instanceJson);
+        log.info("getGeneratedMarc instanceJson: {}", instanceJson);
         var uuid = instanceJson.getAsString(ID_KEY);
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
         log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
-        log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
+        if (instanceJson.containsKey(DELETED_KEY) && (boolean)instanceJson.get(DELETED_KEY)) {
+          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
+          log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
+        }
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);
