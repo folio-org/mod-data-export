@@ -31,7 +31,7 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
 
 @Log4j2
 @Service
@@ -82,9 +82,9 @@ public class HoldingsItemsResolverService {
       } else {
         var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
         holdingsIds.forEach(holdingId -> {
-          var errorMessage = String.format(ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS.getDescription(), holdingId, userName, localTenant);
+          var errorMessage = String.format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), holdingId, userName, localTenant);
           var errorMessageValues = List.of(holdingId.toString(), userName, localTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_PERMISSIONS_FOR_HOLDINGS.getCode(), errorMessageValues, jobExecutionId);
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), errorMessageValues, jobExecutionId);
           log.error(errorMessage);
         });
       }

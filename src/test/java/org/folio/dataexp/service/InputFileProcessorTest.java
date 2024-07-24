@@ -25,6 +25,7 @@ import org.springframework.core.io.PathResource;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -103,8 +104,7 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var total = exportIdEntityRepository.count();
       assertEquals(1, total);
 
-      var expected = "ERROR UUID 019e8aea-212d-4d1d-957d-0abcdd0e9acd repeated 3 times.";
-      verify(errorLogService).saveGeneralError(expected, jobExecution.getId());
+      verify(errorLogService).saveGeneralErrorWithMessageValues(ERROR_DUPLICATED_IDS.getCode(), List.of("019e8aea-212d-4d1d-957d-0abcdd0e9acd", "3"), jobExecution.getId());
     }
   }
 

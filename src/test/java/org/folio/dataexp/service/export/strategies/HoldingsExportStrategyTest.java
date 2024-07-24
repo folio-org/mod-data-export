@@ -134,7 +134,7 @@ class HoldingsExportStrategyTest {
     var opt = holdingsExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Holding with hrid : 123", opt.get().getIdentifierHridMessage());
+    assertEquals("123", opt.get().getIdentifierHridMessage());
   }
 
   @Test
