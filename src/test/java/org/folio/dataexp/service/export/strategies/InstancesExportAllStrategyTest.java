@@ -77,7 +77,7 @@ class InstancesExportAllStrategyTest {
       .id(UUID.randomUUID()).hrid("123").title("title").build();
     var jobExecutionId = UUID.randomUUID();
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID()).build();
     var errorMessage = "Record is too long to be a valid MARC binary record, it's length would be 113937 which is more thatn 99999 bytes 2024";
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
