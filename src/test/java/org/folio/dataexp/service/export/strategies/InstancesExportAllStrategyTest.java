@@ -2,7 +2,6 @@ package org.folio.dataexp.service.export.strategies;
 
 import net.minidev.json.JSONObject;
 import org.apache.maven.shared.utils.StringUtils;
-import org.folio.dataexp.domain.bean.ReferenceData;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -18,7 +17,6 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
-import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,7 +164,6 @@ class InstancesExportAllStrategyTest {
     var auditInstanceEntity = AuditInstanceEntity.builder()
       .id(UUID.randomUUID()).hrid("123").title(generateTooLongString()).build();
     var jobExecutionId = UUID.randomUUID();
-    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceWithHoldingsAndItems = new JSONObject();
     var jsonInstance = new JSONObject();
     instanceWithHoldingsAndItems.put(INSTANCE_KEY, jsonInstance);
