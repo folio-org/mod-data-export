@@ -162,7 +162,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     if (errorMessage.contains(LONG_MARC_RECORD_MESSAGE) && !instances.isEmpty()) {
       var jsonObject= getAsJsonObject(instances.get(0).getJsonb());
       if (jsonObject.isPresent()) {
-        var instanceJson= jsonObject.get();
+        var instanceJson = jsonObject.get();
+        instanceJson.put(DELETED_KEY, instances.get(0).isDeleted());
         errorLogService.saveWithAffectedRecord(instanceJson, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
         return;

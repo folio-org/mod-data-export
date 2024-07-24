@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+
 @Log4j2
 @Component
 public class InstancesExportAllStrategy extends InstancesExportStrategy {
@@ -127,6 +129,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
         instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
         instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+        instanceAssociatedJsonObject.put(DELETED_KEY, true);
         errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(marcRecordEntity.getId().toString()), jobExecutionId);
