@@ -118,7 +118,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         marcRecords.add(marc);
       } catch (MarcException e) {
         var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
-        log.info("getGeneratedMarc instanceJson: {}", instanceJson);
+        log.debug("getGeneratedMarc instanceJson: {}", instanceJson);
         var uuid = instanceJson.getAsString(ID_KEY);
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);

@@ -1,6 +1,8 @@
 package org.folio.dataexp.service.export.strategies;
 
 import net.minidev.json.JSONObject;
+import org.apache.maven.shared.utils.StringUtils;
+import org.folio.dataexp.domain.bean.ReferenceData;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -11,12 +13,19 @@ import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
+import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
+import org.folio.processor.RuleProcessor;
+import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.ap.internal.util.Collections;
+import org.marc4j.MarcException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,9 +36,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -53,9 +67,26 @@ class InstancesExportAllStrategyTest {
   private HoldingsItemsResolverService holdingsItemsResolver;
   @Mock
   private JsonToMarcConverter jsonToMarcConverter;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
+  @Mock
+  private ConsortiaService consortiaService;
+  @Mock
+  private ReferenceDataProvider referenceDataProvider;
+  @Mock
+  private RuleFactory ruleFactory;
+  @Mock
+  private RuleHandler ruleHandler;
+  @Mock
+  private RuleProcessor ruleProcessor;
 
   @InjectMocks
   private InstancesExportAllStrategy instancesExportAllStrategy;
+
+  @BeforeEach
+  void setUp() {
+    instancesExportAllStrategy.folioExecutionContext = folioExecutionContext;
+  }
 
   @Test
   void getIdentifierMessageTest() {
@@ -102,11 +133,11 @@ class InstancesExportAllStrategyTest {
     when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(auditInstanceEntity));
 
     instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
   }
 
   @Test
-  void saveDuplicateErrorsIfMarcDeletedTest() {
+  void saveDuplicateErrorsIfInstanceDeletedTest() {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
 
     ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
@@ -128,6 +159,30 @@ class InstancesExportAllStrategyTest {
   }
 
   @Test
+  void saveInstanceTooLongErrorsIfInstanceDeletedTest() {
+    instancesExportAllStrategy.setErrorLogService(errorLogService);
+
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
+    var auditInstanceEntity = AuditInstanceEntity.builder()
+      .id(UUID.randomUUID()).hrid("123").title(generateTooLongString()).build();
+    var jobExecutionId = UUID.randomUUID();
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceWithHoldingsAndItems = new JSONObject();
+    var jsonInstance = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, jsonInstance);
+    jsonInstance.put("id", auditInstanceEntity.getId());
+    jsonInstance.put("title", auditInstanceEntity.getTitle());
+    jsonInstance.put(DELETED_KEY, true);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+
+    when(ruleProcessor.process(any(), any(), any(), any(), any())).thenThrow(new MarcException());
+
+    instancesExportAllStrategy.getGeneratedMarc(new GeneratedMarcResult(jobExecutionId), instancesWithHoldingsAndItems, new MappingProfile(), jobExecutionId);
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class), isA(MarcException.class));
+    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ERROR_DELETED_TOO_LONG_INSTANCE.getCode()), eq(List.of(auditInstanceEntity.getId().toString())), isA(UUID.class));
+  }
+
+  @Test
   void saveConvertJsonRecordToMarcRecordErrorIfErrorRecordTooLongAndInstanceNotDeletedTest() {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
 
@@ -142,7 +197,7 @@ class InstancesExportAllStrategyTest {
 
     instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
 
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage), eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
   }
 
 
@@ -159,5 +214,9 @@ class InstancesExportAllStrategyTest {
 
     var expectedErrorMessage = "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
     verify(errorLogService).saveGeneralError(expectedErrorMessage, jobExecutionId);
+  }
+
+  private String generateTooLongString() {
+    return StringUtils.repeat("abcd", 99999);
   }
 }
