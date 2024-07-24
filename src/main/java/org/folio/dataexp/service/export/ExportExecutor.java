@@ -104,8 +104,7 @@ public class ExportExecutor {
         jobExecution.setExportedFiles(Set.of(innerFile));
       } catch (S3ExportsUploadException e) {
         jobExecution.setStatus(JobExecution.StatusEnum.FAIL);
-        var errorMessage= String.format(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getDescription(), fileDefinition.getId());
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode(), List.of(errorMessage), jobExecutionId);
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode(), List.of(fileDefinition.getId().toString()), jobExecutionId);
         errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.NO_FILE_GENERATED.getCode(), List.of(ErrorCode.NO_FILE_GENERATED.getDescription()), jobExecutionId);
         log.error("updateJobExecutionStatusAndProgress:: error zip exports for jobExecutionId {} with exception {}", jobExecutionId, e.getMessage());
       }

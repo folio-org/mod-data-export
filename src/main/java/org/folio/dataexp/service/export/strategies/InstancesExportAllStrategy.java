@@ -104,7 +104,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       }
       var auditInstance = auditInstances.get(0);
       var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
+      exportIdentifiers.setIdentifierHridMessage(auditInstance.getHrid());
       var instanceAssociatedJsonObject = new JSONObject();
       instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
       instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
