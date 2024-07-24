@@ -239,6 +239,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     } else {
       result = folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
     }
+    result.forEach(del -> del.setDeleted(true));
     return result;
   }
 
