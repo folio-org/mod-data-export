@@ -253,7 +253,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     } else {
       result = marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
     }
-    result.forEach(del -> del.setDeleted(true));
+//    result.forEach(del -> del.setDeleted(true));
     return result;
   }
 
