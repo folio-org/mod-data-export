@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_JSON_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
@@ -198,6 +199,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void saveDuplicateErrors(LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>> duplicatedUuidWithIdentifiers,
       List<MarcRecordEntity> marcRecords, UUID jobExecutionId) {
     var externalIdsAsKeys = duplicatedUuidWithIdentifiers.keySet();
+    var srsIdByExternalId = getSrsIdByDeletedExternalIdMap(marcRecords);
     for (var externalId : externalIdsAsKeys) {
       var exportIdentifiersOpt = duplicatedUuidWithIdentifiers.get(externalId);
       if (exportIdentifiersOpt.isPresent()) {
@@ -205,7 +207,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         var errorMessage = getDuplicatedSRSErrorMessage(externalId, marcRecords, exportIdentifiers);
         log.warn(errorMessage);
         if (exportIdentifiers.getAssociatedJsonObject() != null) {
-          errorLogService.saveWithAffectedRecord(exportIdentifiers.getAssociatedJsonObject(), errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
+          var associatedJson = exportIdentifiers.getAssociatedJsonObject();
+          if (srsIdByExternalId.containsKey(externalId)) {
+            associatedJson.put(DELETED_KEY, true);
+            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getCode(), List.of(srsIdByExternalId.get(externalId).toString()), jobExecutionId);
+            log.error(String.format(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getDescription(), srsIdByExternalId.get(externalId)));
+          }
+          errorLogService.saveWithAffectedRecord(associatedJson, errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
         } else {
           errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
         }
@@ -223,6 +231,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var marcRecordIds = marcRecords.stream().filter(m -> m.getExternalId().equals(externalId))
         .map(e -> e.getId().toString()).collect(Collectors.joining(", "));
     return String.format(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getDescription(), exportIdentifiers.getIdentifierHridMessage(), marcRecordIds);
+  }
+
+  private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
+    return marcRecords.stream().filter(marc -> marc.isDeleted()).collect(Collectors.toMap(marc -> marc.getExternalId(), marc -> marc.getId(), (srsId1, srsId2) -> srsId1));
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {

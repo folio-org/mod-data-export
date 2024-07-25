@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+
 @Log4j2
 @Component
 public class InstancesExportAllStrategy extends InstancesExportStrategy {
@@ -127,8 +129,11 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
         instanceAssociatedJsonObject.put(ErrorLogService.HRID, auditInstance.getHrid());
         instanceAssociatedJsonObject.put(ErrorLogService.TITLE, auditInstance.getTitle());
+        instanceAssociatedJsonObject.put(DELETED_KEY, true);
         errorLogService.saveWithAffectedRecord(instanceAssociatedJsonObject, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(marcRecordEntity.getId().toString()), jobExecutionId);
+        log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), marcRecordEntity.getId()));
       } else {
         super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
       }
@@ -231,17 +236,25 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private List<InstanceEntity> getFolioDeleted(ExportRequest exportRequest) {
+    List<InstanceEntity> result;
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return folioInstanceAllRepository.findFolioInstanceAllDeleted();
+      result = folioInstanceAllRepository.findFolioInstanceAllDeleted();
+    } else {
+      result = folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
     }
-    return folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
+    result.forEach(del -> del.setDeleted(true));
+    return result;
   }
 
   private List<MarcRecordEntity> getMarcDeleted(ExportRequest exportRequest) {
+    List<MarcRecordEntity> result;
     if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return marcInstanceAllRepository.findMarcInstanceAllDeleted();
+      result = marcInstanceAllRepository.findMarcInstanceAllDeleted();
+    } else {
+      result = marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
     }
-    return marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
+    result.forEach(del -> del.setDeleted(true));
+    return result;
   }
 
   private List<InstanceEntity> getMarcInstanceDeleted(ExportRequest exportRequest) {

@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
@@ -117,10 +118,15 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
         marcRecords.add(marc);
       } catch (MarcException e) {
         var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+        log.debug("getGeneratedMarc instanceJson: {}", instanceJson);
         var uuid = instanceJson.getAsString(ID_KEY);
         generatedMarcResult.addIdToFailed(UUID.fromString(uuid));
         errorLogService.saveWithAffectedRecord(instanceJson, ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, e);
         log.error(" getGeneratedMarc:: exception to convert in marc : {} for instance {}", e.getMessage(), uuid);
+        if (instanceJson.containsKey(DELETED_KEY) && (boolean)instanceJson.get(DELETED_KEY)) {
+          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(), List.of(uuid), jobExecutionId);
+          log.error(String.format(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getDescription(), uuid));
+        }
       }
     }
     generatedMarcResult.setMarcRecords(marcRecords);
@@ -158,7 +164,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     if (errorMessage.contains(LONG_MARC_RECORD_MESSAGE) && !instances.isEmpty()) {
       var jsonObject= getAsJsonObject(instances.get(0).getJsonb());
       if (jsonObject.isPresent()) {
-        var instanceJson= jsonObject.get();
+        var instanceJson = jsonObject.get();
+        instanceJson.put(DELETED_KEY, instances.get(0).isDeleted());
         errorLogService.saveWithAffectedRecord(instanceJson, e.getMessage(), ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
         log.error("Error converting record to marc " + marcRecordEntity.getExternalId() + " : " + e.getMessage());
         return;
@@ -271,7 +278,9 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       }
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
+      instanceJson.put(DELETED_KEY, instance.isDeleted());
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+      log.debug("getInstancesWithHoldingsAndItems instanceJson: {}", instanceJson);
 
       if (!instancesIdsFromCentral.contains(instance.getId())) {
         holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(instanceWithHoldingsAndItems, instance.getId(), instanceJson.getAsString(HRID_KEY), mappingProfile, generatedMarcResult.getJobExecutionId());
