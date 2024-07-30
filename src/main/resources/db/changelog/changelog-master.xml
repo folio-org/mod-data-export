@@ -15,4 +15,5 @@
     <include file="changes/add_generation.xml" relativeToChangelogFile="true"/>
     <include file="changes/audit_instance_view.xml" relativeToChangelogFile="true"/>
     <include file="changes/update_default_authority_profiles.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_default_deleted_authority_job_profile.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
