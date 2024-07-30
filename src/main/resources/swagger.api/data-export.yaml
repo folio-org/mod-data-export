@@ -836,6 +836,43 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /export-authority-deleted:
+    post:
+      description: Export of deleted authority records
+      operationId: postExportDeletedAuthority
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exportAuthorityDeletedRequest'
+            example:
+              $ref: 'examples/exportAuthorityDeletedRequest.json'
+      responses:
+        '200':
+          description: Data export of deleted authority completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exportAuthorityDeletedResponse'
+              example:
+                $ref: 'examples/exportAuthorityDeletedResponse.json'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid request parameters"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:
@@ -973,6 +1010,10 @@ components:
       $ref: 'schemas/exportDeletedMarcIdsRequest.json'
     exportDeletedMarcIdsResponse:
       $ref: 'schemas/exportDeletedMarcIdsResponse.json'
+    exportAuthorityDeletedRequest:
+      $ref: 'schemas/exportAuthorityDeletedRequest.json'
+    exportAuthorityDeletedResponse:
+      $ref: 'schemas/exportAuthorityDeletedResponse.json'
 
   parameters:
     trait_queryable:
