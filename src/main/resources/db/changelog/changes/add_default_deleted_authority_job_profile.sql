@@ -1,7 +1,7 @@
 INSERT INTO job_profiles(id, jsonb, creation_date, created_by, mappingprofileid,
 name, description, updated_date, updated_by_user_id, updated_by_first_name, updated_by_last_name)
-VALUES
-( '2c9be114-6d35-4408-adac-9ead35f51a27',
+SELECT
+  '2c9be114-6d35-4408-adac-9ead35f51a27',
   '{
      "id": "2c9be114-6d35-4408-adac-9ead35f51a27",
      "name": "Deleted authority export job profile",
@@ -32,5 +32,5 @@ VALUES
   '00000000-0000-0000-0000-000000000000',
   'System',
   'Process'
-) ON CONFLICT DO NOTHING;
+WHERE EXISTS (SELECT 1 FROM mapping_profiles WHERE id='5d636597-a59d-4391-a270-4e79d5ba70e3') ON CONFLICT DO NOTHING;
 
