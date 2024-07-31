@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.Setter;
+import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -14,6 +15,7 @@ import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
@@ -21,6 +23,7 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +62,8 @@ class AbstractExportStrategyTest {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Mock
   private ExportIdEntityRepository exportIdEntityRepository;
+  @Mock
+  private InstanceEntityRepository instanceEntityRepository;
   @Mock
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Mock
@@ -129,6 +134,11 @@ class AbstractExportStrategyTest {
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
 
+
+    verify(errorLogService, times(1))
+      .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode()), eq(List.of(marcRecordEntity.getId().toString())), eq(jobExecution.getId()));
+    verify(errorLogService, times(1))
+      .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()), isA(List.class), eq(jobExecution.getId()));
     verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(2)).write(isA(String.class));
   }
