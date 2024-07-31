@@ -1,8 +1,8 @@
 package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.folio.dataexp.domain.dto.Errors;
+import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
 public class DataExportExceptionHandler {
@@ -97,6 +96,11 @@ public class DataExportExceptionHandler {
 
   @ExceptionHandler(ExportDeletedDateRangeException.class)
   public ResponseEntity<String> handleInvalidDateRangeException(final ExportDeletedDateRangeException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(AuthorityQueryException.class)
+  public ResponseEntity<String> handleAuthorityQueryException(final AuthorityQueryException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 }

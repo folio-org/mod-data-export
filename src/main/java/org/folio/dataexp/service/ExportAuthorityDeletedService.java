@@ -8,6 +8,7 @@ import org.folio.dataexp.domain.dto.ExportAuthorityDeletedRequest;
 import org.folio.dataexp.domain.dto.ExportAuthorityDeletedResponse;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +30,18 @@ public class ExportAuthorityDeletedService {
 
   public ExportAuthorityDeletedResponse postExportDeletedAuthority(ExportAuthorityDeletedRequest request) {
     log.info("POST export deleted authorities");
-    var authorities = authorityClient.getAuthorities(true, true, request.getQuery(), request.getLimit(),
-      request.getOffset());
-    var fileDefinition = getFileDefinition(authorities.getAuthorities().stream().map(Authority::getId).toList());
-    var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID))
-      .all(false).quick(false).idType(ExportRequest.IdTypeEnum.AUTHORITY).build();
-    dataExportService.postDataExport(exportRequest);
-    return ExportAuthorityDeletedResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId()).build();
+    try {
+      var authorities = authorityClient.getAuthorities(true, true, request.getQuery(), request.getLimit(),
+        request.getOffset());
+      var fileDefinition = getFileDefinition(authorities.getAuthorities().stream().map(Authority::getId).toList());
+      var exportRequest = ExportRequest.builder().fileDefinitionId(fileDefinition.getId()).jobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID))
+        .all(false).quick(false).idType(ExportRequest.IdTypeEnum.AUTHORITY).build();
+      dataExportService.postDataExport(exportRequest);
+      return ExportAuthorityDeletedResponse.builder().jobExecutionId(fileDefinition.getJobExecutionId()).build();
+    } catch (Exception e) {
+      log.error(e);
+      throw new AuthorityQueryException(e.getMessage());
+    }
   }
 
   private FileDefinition getFileDefinition(List<String> authorityIds) {

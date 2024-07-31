@@ -457,7 +457,8 @@
             "data-export.export-authority-deleted.post"
           ],
           "modulePermissions": [
-            "inventory-storage.authorities.collection.get"
+            "inventory-storage.authorities.collection.get",
+            "user-tenants.collection.get"
           ]
         }
       ]
