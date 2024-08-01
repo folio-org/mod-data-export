@@ -62,6 +62,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var authoritiesFromCentralTenant = marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(centralTenantId, externalIds);
           log.info("Number of authority records found from central tenant: {}", authoritiesFromCentralTenant.size());
+          handleDeleted(authoritiesFromCentralTenant, jobExecutionId, exportRequest);
           entityManager.clear();
           marcAuthorities.addAll(authoritiesFromCentralTenant);
           log.info("Total number of authority records found: {}", marcAuthorities.size());
