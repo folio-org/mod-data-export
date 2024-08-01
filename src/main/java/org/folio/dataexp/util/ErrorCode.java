@@ -66,7 +66,8 @@ public enum ErrorCode {
   ERROR_CONVERTING_TO_JSON_HOLDING("error.convertingToJson.holding", "Error converting to json holding by id %s"),
   ERROR_CONVERTING_TO_JSON_INSTANCE("error.convertingToJson.instance", "Error converting to json instance by id %s"),
   ERROR_DELETED_DUPLICATED_INSTANCE("error.deletedDuplicate.instance", "Instance record associated with %s has been deleted."),
-  ERROR_DELETED_TOO_LONG_INSTANCE("error.deletedTooLong.instance", "Instance record with id = %s has been deleted.");
+  ERROR_DELETED_TOO_LONG_INSTANCE("error.deletedTooLong.instance", "Instance record with id = %s has been deleted."),
+  ERROR_NON_EXISTING_INSTANCE("error.nonExisting.instance", "%s");
 
   private final String code;
   private final String description;
