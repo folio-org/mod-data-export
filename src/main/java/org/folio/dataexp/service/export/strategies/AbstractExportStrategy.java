@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static java.util.stream.Collectors.toMap;
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
@@ -16,11 +17,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
+import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
@@ -50,6 +53,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected int exportIdsBatch;
   protected String exportTmpStorage;
 
+  private InstanceEntityRepository instanceEntityRepository;
   private ExportIdEntityRepository exportIdEntityRepository;
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
@@ -59,6 +63,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   protected ErrorLogService errorLogService;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   protected FolioExecutionContext folioExecutionContext;
+
 
   @PersistenceContext
   protected EntityManager entityManager;
@@ -155,7 +160,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       var marc = StringUtils.EMPTY;
       try {
         var marcHoldingsItemsFields = additionalFieldsPerId.getOrDefault(marcRecordEntity.getExternalId(), new MarcFields());
-        if (marcHoldingsItemsFields.getErrorMessages().size() > 0) {
+        if (!marcHoldingsItemsFields.getErrorMessages().isEmpty()) {
           errorLogService
             .saveGeneralErrorWithMessageValues(ERROR_FIELDS_MAPPING_SRS.getCode(), marcHoldingsItemsFields.getErrorMessages(), jobExecutionId);
         }
@@ -199,7 +204,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   private void saveDuplicateErrors(LinkedHashMap<UUID, Optional<ExportIdentifiersForDuplicateErrors>> duplicatedUuidWithIdentifiers,
       List<MarcRecordEntity> marcRecords, UUID jobExecutionId) {
     var externalIdsAsKeys = duplicatedUuidWithIdentifiers.keySet();
-    var srsIdByExternalId = getSrsIdByDeletedExternalIdMap(marcRecords);
+    var srsIdByExternalId = getSrsIdByExternalIdMap(marcRecords);
+    var deletedSrsIdByExternalId = getSrsIdByDeletedExternalIdMap(marcRecords);
     for (var externalId : externalIdsAsKeys) {
       var exportIdentifiersOpt = duplicatedUuidWithIdentifiers.get(externalId);
       if (exportIdentifiersOpt.isPresent()) {
@@ -208,13 +214,17 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
         log.warn(errorMessage);
         if (exportIdentifiers.getAssociatedJsonObject() != null) {
           var associatedJson = exportIdentifiers.getAssociatedJsonObject();
-          if (srsIdByExternalId.containsKey(externalId)) {
+          if (deletedSrsIdByExternalId.containsKey(externalId)) {
             associatedJson.put(DELETED_KEY, true);
-            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getCode(), List.of(srsIdByExternalId.get(externalId).toString()), jobExecutionId);
-            log.error(String.format(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getDescription(), srsIdByExternalId.get(externalId)));
+            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getCode(), List.of(deletedSrsIdByExternalId.get(externalId).toString()), jobExecutionId);
+            log.error(String.format(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getDescription(), deletedSrsIdByExternalId.get(externalId)));
           }
           errorLogService.saveWithAffectedRecord(associatedJson, errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
         } else {
+          if (instanceEntityRepository.findByIdIn(Set.of(externalId)).isEmpty()) {
+            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode(),
+              List.of(String.format(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getDescription(), srsIdByExternalId.get(externalId))), jobExecutionId);
+          }
           errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
         }
       }
@@ -234,7 +244,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
-    return marcRecords.stream().filter(marc -> marc.isDeleted()).collect(Collectors.toMap(marc -> marc.getExternalId(), marc -> marc.getId(), (srsId1, srsId2) -> srsId1));
+    return marcRecords.stream()
+      .filter(MarcRecordEntity::isDeleted)
+      .collect(toMap(MarcRecordEntity::getExternalId, MarcRecordEntity::getId, (srsId1, srsId2) -> srsId1));
+  }
+
+  private Map<UUID, UUID> getSrsIdByExternalIdMap(List<MarcRecordEntity> marcRecords) {
+    return marcRecords.stream()
+      .collect(toMap(MarcRecordEntity::getExternalId, MarcRecordEntity::getId, (srsId1, srsId2) -> srsId1));
   }
 
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
@@ -257,6 +274,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       createAndSaveMarc(exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, localStorageWriter);
     }
+  }
+
+  @Autowired
+  private void setInstanceEntityRepository(InstanceEntityRepository instanceEntityRepository) {
+    this.instanceEntityRepository = instanceEntityRepository;
   }
 
   @Autowired
