@@ -447,6 +447,19 @@
           "modulePermissions": [
             "user-tenants.collection.get"
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-authority-deleted",
+          "permissionsRequired": [
+            "data-export.export-authority-deleted.post"
+          ],
+          "modulePermissions": [
+            "inventory-storage.authorities.collection.get",
+            "user-tenants.collection.get"
+          ]
         }
       ]
     },
@@ -632,6 +645,11 @@
       "description": "To return deleted MARC IDs"
     },
     {
+      "permissionName": "data-export.export-authority-deleted.post",
+      "displayName": "Data Export - deleted authorities",
+      "description": "To return deleted authorities"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -661,7 +679,8 @@
         "data-export.configuration.post",
         "data-export.export.all",
         "data-export.related-users.collection.get",
-        "data-export.export-deleted.post"
+        "data-export.export-deleted.post",
+        "data-export.export-authority-deleted.post"
       ],
       "visible": false
     }
