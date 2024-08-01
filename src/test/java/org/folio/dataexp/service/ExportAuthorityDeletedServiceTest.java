@@ -1,5 +1,12 @@
 package org.folio.dataexp.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.util.Constants.DELETED_AUTHORITIES_FILE_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.AuthorityClient;
 import org.folio.dataexp.domain.dto.AuthorityCollection;
@@ -16,13 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dataexp.util.Constants.DELETED_AUTHORITIES_FILE_NAME;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExportAuthorityDeletedServiceTest {

@@ -1,5 +1,8 @@
 package org.folio.dataexp.service;
 
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DELETED_AUTHORITIES_FILE_NAME;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AuthorityClient;
@@ -14,9 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-
-import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DELETED_AUTHORITIES_FILE_NAME;
 
 @Log4j2
 @RequiredArgsConstructor
