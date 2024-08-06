@@ -16,7 +16,7 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent()).hasSize(2);
+      assertThat(slice.getContent()).hasSize(5);
     }
   }
 
@@ -24,7 +24,7 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
-      assertThat(slice.getContent()).hasSize(1);
+      assertThat(slice.getContent()).hasSize(3);
     }
   }
 
@@ -32,7 +32,7 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcInstanceAllRepository.findMarcInstanceAllDeleted();
-      assertThat(list).hasSize(15);
+      assertThat(list).hasSize(12);
     }
   }
 
@@ -40,7 +40,7 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcInstanceAllRepository.findMarcInstanceAllDeletedNonSuppressed();
-      assertThat(list).hasSize(8);
+      assertThat(list).hasSize(6);
     }
   }
 }
