@@ -86,6 +86,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private void handleDeleted(List<MarcRecordEntity> marcAuthorities, UUID jobExecutionId, ExportRequest exportRequest,
                              Set<String> alreadySavedErrors) {
     var iterator = marcAuthorities.iterator();
+    List<String> errorsForDelProfile = new ArrayList<>();
     while (iterator.hasNext()) {
       var rec = iterator.next();
       if (rec.getState().equals("DELETED")) {
@@ -111,13 +112,16 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
         var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
         if (errors.isEmpty()) {
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-            List.of(msg), jobExecutionId);
+          errorsForDelProfile.add(msg);
+//          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+//            List.of(msg), jobExecutionId);
         }
         log.error(msg);
         iterator.remove();
       }
     }
+    errorsForDelProfile.forEach(msg -> errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+      List.of(msg), jobExecutionId));
   }
 
   private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
