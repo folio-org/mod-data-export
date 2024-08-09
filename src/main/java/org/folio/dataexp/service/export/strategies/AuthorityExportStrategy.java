@@ -120,8 +120,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         iterator.remove();
       }
     }
-    errorsForDelProfile.forEach(msg -> errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-      List.of(msg), jobExecutionId));
+//    errorsForDelProfile.forEach(msg -> errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+//      List.of(msg), jobExecutionId));
   }
 
   private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
