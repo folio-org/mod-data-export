@@ -86,6 +86,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private void handleDeleted(List<MarcRecordEntity> marcAuthorities, UUID jobExecutionId, ExportRequest exportRequest,
                              Set<String> alreadySavedErrors) {
     var iterator = marcAuthorities.iterator();
+    var errorsForDeletedProfile = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
+    var errorsForNonDeletedProfile = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode());
     while (iterator.hasNext()) {
       var rec = iterator.next();
       if (rec.getState().equals("DELETED")) {
@@ -99,8 +101,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
           }
           log.error(msg);
           msg = ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getDescription();
-          var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode());
-          if (errors.isEmpty()) {
+          if (errorsForNonDeletedProfile.isEmpty()) {
             errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
               List.of(msg), jobExecutionId);
           }
@@ -109,8 +110,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         }
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-//        var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
-        if (!alreadySavedErrors.contains(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode())) {
+        if (errorsForDeletedProfile.isEmpty()) {
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
             List.of(msg), jobExecutionId);
           alreadySavedErrors.add(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
