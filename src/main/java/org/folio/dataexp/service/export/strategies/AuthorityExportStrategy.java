@@ -86,7 +86,6 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private void handleDeleted(List<MarcRecordEntity> marcAuthorities, UUID jobExecutionId, ExportRequest exportRequest,
                              Set<String> alreadySavedErrors) {
     var iterator = marcAuthorities.iterator();
-    List<String> errorsForDelProfile = new ArrayList<>();
     while (iterator.hasNext()) {
       var rec = iterator.next();
       if (rec.getState().equals("DELETED")) {
@@ -111,11 +110,11 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
 //        var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
-//        if (errors.isEmpty()) {
-          errorsForDelProfile.add(msg);
+        if (!alreadySavedErrors.contains(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode())) {
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
             List.of(msg), jobExecutionId);
-//        }
+          alreadySavedErrors.add(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
+        }
         log.error(msg);
         iterator.remove();
       }
