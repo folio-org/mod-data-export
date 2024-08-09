@@ -115,7 +115,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(8, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -128,17 +128,12 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(outputMrcFile).containsOnlyOnce("i1880f178-f243-4e4a-bf1c-9e1e62b3171d");
 
         // Check MARC
-        assertThat(outputMrcFile).containsOnlyOnce("i2320f178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i4444f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i6666f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i7777f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i8888f178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i10001178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i20002178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i30003178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i72727277-f243-4e4a-bf1c-9e1e62b3171d");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(13);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(8);
       });
     }
   }
@@ -235,7 +230,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(22, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(13, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -250,7 +245,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i1640f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i1880f178-f243-4e4a-bf1c-9e1e62b3171d");
 
         // Non-deleted:
@@ -260,32 +254,23 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Check MARC
         // Suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i40004178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i50005178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i60006178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i6666f178-1111-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i7777f178-1111-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i8888f178-1111-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i1640f777-f243-4e4a-bf1c-9e1e62b3171d");
 
         // Non-deleted:
         assertThat(outputMrcFile).containsOnlyOnce("i71717177-f243-4e4a-bf1c-9e1e62b3171d");
 
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i10001178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i20002178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i30003178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i6666f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i7777f178-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i8888f178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i4444f178-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i2320f178-f243-4e4a-bf1c-9e1e62b3171d");
 
         // Non-deleted:
         assertThat(outputMrcFile).containsOnlyOnce("i72727277-f243-4e4a-bf1c-9e1e62b3171d");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(22);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(13);
 
         removeCustomInstanceJobProfile();
       });
@@ -309,7 +294,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(7, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -328,12 +313,15 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Suppressed:
         // Non-deleted:
         assertThat(outputMrcFile).containsOnlyOnce("s7171713e-f9e2-4cb2-a52b-e9155acfc119");
+        assertThat(outputMrcFile).containsOnlyOnce("s7777793e-f9e2-4cb2-a52b-e9155acfc119");
 
         // Not suppressed:
         // Non-deleted:
         assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+        assertThat(outputMrcFile).containsOnlyOnce("s555d1aea-222d-4d1d-957d-0abcdd0e9acd");
+        assertThat(outputMrcFile).containsOnlyOnce("s8888893e-f9e2-4cb2-a52b-e9155acfc119");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(4);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(7);
       });
     }
   }
@@ -407,7 +395,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(3, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(5, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -423,8 +411,10 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Not suppressed:
         // Non-deleted:
         assertThat(outputMrcFile).containsOnlyOnce("s7272723e-f9e2-4cb2-a52b-e9155acfc119");
+        assertThat(outputMrcFile).containsOnlyOnce("s555d1aea-222d-4d1d-957d-0abcdd0e9acd");
+        assertThat(outputMrcFile).containsOnlyOnce("s8888893e-f9e2-4cb2-a52b-e9155acfc119");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(3);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(5);
       });
     }
   }
@@ -491,7 +481,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(15, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
         var expectedFileName = "holding-all.csv";
@@ -521,7 +511,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Check MARC
         // Suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("s444444ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s777777ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s888888ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s15471150-7c9b-48b0-86eb-178a494e25fe");
@@ -531,8 +520,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("s555555ea-1111-4d1d-957d-0abcdd0e9acd");
-        assertThat(outputMrcFile).containsOnlyOnce("s666666ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s912349ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s25472250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("s35473350-7c9b-48b0-86eb-178a494e25fe");
@@ -541,7 +528,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(18);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(15);
       });
     }
   }
@@ -567,7 +554,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(18, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(12, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -593,9 +580,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Check MARC
         // Suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i44444477-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i77777777-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i88888877-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i15461150-7c9b-48b0-86eb-178a494e25fe");
 
         // Non-deleted:
@@ -603,9 +587,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i55555577-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i66666677-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i91234977-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i25462250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("i35463350-7c9b-48b0-86eb-178a494e25fe");
 
@@ -613,7 +594,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(outputMrcFile).containsOnlyOnce("i22222250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("i33333350-7c9b-48b0-86eb-178a494e25fe");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(18);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(12);
 
         removeCustomHoldingsJobProfile();
       });
@@ -638,7 +619,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(9, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -657,8 +638,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Check MARC
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("s555555ea-1111-4d1d-957d-0abcdd0e9acd");
-        assertThat(outputMrcFile).containsOnlyOnce("s666666ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s912349ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s25472250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("s35473350-7c9b-48b0-86eb-178a494e25fe");
@@ -667,7 +646,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(outputMrcFile).containsOnlyOnce("s222222ea-1111-4d1d-957d-0abcdd0e9acd");
         assertThat(outputMrcFile).containsOnlyOnce("s333333ea-1111-4d1d-957d-0abcdd0e9acd");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(11);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(9);
       });
     }
   }
@@ -693,7 +672,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
+        assertEquals(8, jobExecution.getJobExecution().getProgress().getTotal());
 
         var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
@@ -712,9 +691,6 @@ class DataExportAllServiceTest extends ServiceInitializer {
         // Check MARC
         // Not suppressed:
         // Deleted:
-        assertThat(outputMrcFile).containsOnlyOnce("i55555577-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i66666677-f243-4e4a-bf1c-9e1e62b3171d");
-        assertThat(outputMrcFile).containsOnlyOnce("i91234977-f243-4e4a-bf1c-9e1e62b3171d");
         assertThat(outputMrcFile).containsOnlyOnce("i25462250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("i35463350-7c9b-48b0-86eb-178a494e25fe");
 
@@ -722,7 +698,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(outputMrcFile).containsOnlyOnce("i22222250-7c9b-48b0-86eb-178a494e25fe");
         assertThat(outputMrcFile).containsOnlyOnce("i33333350-7c9b-48b0-86eb-178a494e25fe");
 
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(11);
+        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(8);
 
         removeCustomHoldingsJobProfile();
       });
