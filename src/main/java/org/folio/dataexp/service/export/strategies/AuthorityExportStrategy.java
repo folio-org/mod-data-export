@@ -110,18 +110,16 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         }
       } else if (rec.getState().equals("ACTUAL") && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
-        var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
-        if (errors.isEmpty()) {
+//        var errors = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode());
+//        if (errors.isEmpty()) {
           errorsForDelProfile.add(msg);
-//          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-//            List.of(msg), jobExecutionId);
-        }
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+            List.of(msg), jobExecutionId);
+//        }
         log.error(msg);
         iterator.remove();
       }
     }
-//    errorsForDelProfile.forEach(msg -> errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-//      List.of(msg), jobExecutionId));
   }
 
   private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
