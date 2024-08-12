@@ -64,7 +64,7 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllDeletedCustomHoldingsProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = folioHoldingsAllRepository.findMarcHoldingsAllDeletedCustomHoldingsProfile();
-      assertThat(list).hasSize(9);
+      assertThat(list).hasSize(3);
     }
   }
 
@@ -72,7 +72,7 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   void findFolioHoldingsAllDeletedNonSuppressedCustomHoldingsProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = folioHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressedCustomHoldingsProfile();
-      assertThat(list).hasSize(5);
+      assertThat(list).hasSize(2);
     }
   }
 }

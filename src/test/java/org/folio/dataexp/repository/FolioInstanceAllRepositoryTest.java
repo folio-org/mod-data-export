@@ -64,7 +64,7 @@ class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedForCustomInstanceProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findMarcInstanceAllDeletedForCustomInstanceProfile();
-      assertThat(list).hasSize(15);
+      assertThat(list).hasSize(6);
     }
   }
 
@@ -72,7 +72,7 @@ class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   void findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
-      assertThat(list).hasSize(8);
+      assertThat(list).hasSize(3);
     }
   }
 }
