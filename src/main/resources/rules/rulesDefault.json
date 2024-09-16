@@ -1,8 +1,8 @@
 [
   {
-    "id": "instance.leader",
+    "id": "instance.leader17-19",
     "field": "leader",
-    "description": "Leader",
+    "description": "Leader 17-19 positions",
     "dataSources": [
       {
         "translation": {
@@ -15,6 +15,22 @@
         }
       }
     ]
+  },
+  {
+    "id": "instance.leader05",
+    "field": "leader",
+    "description": "Leader 05 position",
+    "dataSources": [
+      {
+        "translation": {
+          "function": "set_status_deleted"
+        }
+      }
+    ],
+    "metadata": {
+      "discoverySuppress": "$.instance.discoverySuppress",
+      "staffSuppress": "$.instance.staffSuppress"
+    }
   },
   {
     "id": "instance.hrid",
