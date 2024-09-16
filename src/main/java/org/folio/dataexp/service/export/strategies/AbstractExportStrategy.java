@@ -2,7 +2,6 @@ package org.folio.dataexp.service.export.strategies;
 
 import static java.util.stream.Collectors.toMap;
 import static net.minidev.json.parser.JSONParser.DEFAULT_PERMISSIVE_MODE;
-import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_JSON_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
@@ -17,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
-import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
@@ -205,28 +203,17 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       List<MarcRecordEntity> marcRecords, UUID jobExecutionId) {
     var externalIdsAsKeys = duplicatedUuidWithIdentifiers.keySet();
     var srsIdByExternalId = getSrsIdByExternalIdMap(marcRecords);
-    var deletedSrsIdByExternalId = getSrsIdByDeletedExternalIdMap(marcRecords);
     for (var externalId : externalIdsAsKeys) {
       var exportIdentifiersOpt = duplicatedUuidWithIdentifiers.get(externalId);
       if (exportIdentifiersOpt.isPresent()) {
         var exportIdentifiers = exportIdentifiersOpt.get();
         var errorMessage = getDuplicatedSRSErrorMessage(externalId, marcRecords, exportIdentifiers);
         log.warn(errorMessage);
-        if (exportIdentifiers.getAssociatedJsonObject() != null) {
-          var associatedJson = exportIdentifiers.getAssociatedJsonObject();
-          if (deletedSrsIdByExternalId.containsKey(externalId)) {
-            associatedJson.put(DELETED_KEY, true);
-            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getCode(), List.of(deletedSrsIdByExternalId.get(externalId).toString()), jobExecutionId);
-            log.error(String.format(ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE.getDescription(), deletedSrsIdByExternalId.get(externalId)));
-          }
-          errorLogService.saveWithAffectedRecord(associatedJson, errorMessage, ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), jobExecutionId);
-        } else {
-          if (instanceEntityRepository.findByIdIn(Set.of(externalId)).isEmpty()) {
-            errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode(),
-              List.of(String.format(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getDescription(), srsIdByExternalId.get(externalId))), jobExecutionId);
-          }
-          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
+        if (instanceEntityRepository.findByIdIn(Set.of(externalId)).isEmpty()) {
+          errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode(),
+            List.of(String.format(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getDescription(), srsIdByExternalId.get(externalId))), jobExecutionId);
         }
+        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode(), List.of(errorMessage), jobExecutionId);
       }
     }
   }
@@ -277,7 +264,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setInstanceEntityRepository(InstanceEntityRepository instanceEntityRepository) {
+  protected void setInstanceEntityRepository(InstanceEntityRepository instanceEntityRepository) {
     this.instanceEntityRepository = instanceEntityRepository;
   }
 

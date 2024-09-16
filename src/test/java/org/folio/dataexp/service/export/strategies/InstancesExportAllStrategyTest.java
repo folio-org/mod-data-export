@@ -17,9 +17,11 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.ap.internal.util.Collections;
@@ -27,6 +29,7 @@ import org.marc4j.MarcException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -39,6 +42,7 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
+import static org.folio.dataexp.util.ErrorCode.ERROR_NON_EXISTING_INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -137,8 +141,10 @@ class InstancesExportAllStrategyTest {
   @Test
   void saveDuplicateErrorsIfInstanceDeletedTest() {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
+    instancesExportAllStrategy.setInstanceEntityRepository(instanceEntityRepository);
 
     ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
+
     var auditInstanceEntity = AuditInstanceEntity.builder()
       .id(UUID.randomUUID()).hrid("123").title("title").build();
     var jobExecutionId = UUID.randomUUID();
@@ -153,7 +159,8 @@ class InstancesExportAllStrategyTest {
     when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(auditInstanceEntity));
 
     instancesExportAllStrategy.createAndSaveMarcFromJsonRecord(externalIds, statistic, new MappingProfile(), jobExecutionId, Set.of(instanceId), List.of(marcRecord, marcRecordDuplicate), localStorageWriter);
-    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ERROR_DELETED_DUPLICATED_INSTANCE.getCode()), eq(List.of(marcRecord.getId().toString())), isA(UUID.class));
+    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ERROR_NON_EXISTING_INSTANCE.getCode()), eq(List.of(marcRecord.getId().toString())), isA(UUID.class));
+
   }
 
   @Test
