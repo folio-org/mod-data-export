@@ -102,7 +102,7 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.sourceRecords.get",
+            "source-storage.stream.marc-record-identifiers.collection.post",
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
