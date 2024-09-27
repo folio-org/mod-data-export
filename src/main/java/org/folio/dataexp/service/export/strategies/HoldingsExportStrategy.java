@@ -249,7 +249,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
             var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
               curTenant);
             errorLogService.saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
-            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), msgValues));
+            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), msgValues.toArray()));
           }
         } else {
           var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()), curTenant);
