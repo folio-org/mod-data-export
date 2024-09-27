@@ -85,12 +85,16 @@
     {
       "id": "search",
       "version": "0.6 1.0"
+    },
+    {
+      "id": "permissions",
+      "version": "5.6"
     }
   ],
   "provides": [
     {
       "id": "data-export",
-      "version": "5.2",
+      "version": "5.3",
       "handlers": [
         {
           "methods": [
@@ -130,7 +134,8 @@
             "search.resources.ids.jobs.get",
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
-            "consortium-search.holdings.item.get"
+            "consortium-search.holdings.item.get",
+            "data-export.permissions-self-check.get"
           ]
         },
         {
@@ -166,7 +171,8 @@
             "user-tenants.collection.get",
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
-            "consortium-search.holdings.item.get"
+            "consortium-search.holdings.item.get",
+            "data-export.permissions-self-check.get"
           ]
         },
         {
@@ -460,6 +466,12 @@
             "inventory-storage.authorities.collection.get",
             "user-tenants.collection.get"
           ]
+        },
+        {
+          "methods": [ "GET" ],
+          "pathPattern": "/data-export/permissions-self-check",
+          "permissionsRequired": ["data-export.permissions-self-check.get"],
+          "modulePermissions": ["perms.users.get"]
         }
       ]
     },
@@ -650,6 +662,11 @@
       "description": "To return deleted authorities"
     },
     {
+      "permissionName" : "data-export.permissions-self-check.get",
+      "displayName" : "Set of users permissions for self check",
+      "description" : "Set of users permissions for self check"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -680,7 +697,8 @@
         "data-export.export.all",
         "data-export.related-users.collection.get",
         "data-export.export-deleted.post",
-        "data-export.export-authority-deleted.post"
+        "data-export.export-authority-deleted.post",
+        "data-export.permissions-self-check.get"
       ],
       "visible": false
     }
