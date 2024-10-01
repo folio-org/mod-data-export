@@ -19,7 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
+class DownloadRecordControllerTest extends BaseDataExportInitializer {
 
   @MockBean
   private DownloadRecordService downloadRecordService;
@@ -33,19 +33,20 @@ class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
     var expectedFileName = authorityId + formatPostfix + ".mrc";
     var mockData = "some data".getBytes();
     var mockResource = new ByteArrayResource(mockData);
-    when(downloadRecordService.processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix))
+    when(downloadRecordService.processRecordDownload(authorityId, isUtf == null || isUtf, formatPostfix, "AUTHORITY"))
       .thenReturn(mockResource);
 
     mockMvc.perform(MockMvcRequestBuilders
-        .get("/data-export/download-authority/{authorityId}", authorityId)
+        .get("/data-export/download-record/{recordId}", authorityId)
         .param("utf", isUtf != null ? isUtf.toString() : null)
+        .param("idType", "AUTHORITY")
         .headers(defaultHeaders()))
       .andExpect(status().isOk())
       .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
       .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + expectedFileName + "\""))
       .andExpect(content().bytes(mockData));
 
-    verify(downloadRecordService).processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix);
+    verify(downloadRecordService).processRecordDownload(authorityId, isUtf == null || isUtf, formatPostfix, "AUTHORITY");
   }
 
   private static Stream<Boolean> provideUtfFlags() {

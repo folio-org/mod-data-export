@@ -873,16 +873,25 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
-  /download-authority/{authorityId}:
+  /download-record/{recordId}:
     get:
-      description: Download single authority record by id
-      operationId: downloadAuthorityById
+      description: Download single authority or instance record by id
+      operationId: downloadRecordById
       parameters:
-        - name: authorityId
+        - name: recordId
           in: path
           required: true
           schema:
             $ref: "#/components/schemas/uuid"
+        - name: idType
+          description: "Specifies the type of record to download."
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - AUTHORITY
+              - INSTANCE
         - name: utf
           in: query
           description: "Specify whether to encode the file in UTF-8."

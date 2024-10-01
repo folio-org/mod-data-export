@@ -4,7 +4,7 @@ package org.folio.dataexp.controllers;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.rest.resource.DownloadAuthorityApi;
+import org.folio.dataexp.rest.resource.DownloadRecordApi;
 import org.folio.dataexp.service.DownloadRecordService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @Log4j2
 @RequestMapping("/data-export")
-public class DownloadAuthorityController implements DownloadAuthorityApi {
+public class DownloadRecordController implements DownloadRecordApi {
 
   private static final String UTF_FORMAT_POSTFIX = "-utf";
   private static final String MARC8_FORMAT_POSTFIX = "-marc8";
@@ -27,10 +27,10 @@ public class DownloadAuthorityController implements DownloadAuthorityApi {
   private final DownloadRecordService downloadRecordService;
 
   @Override
-  public ResponseEntity<Resource> downloadAuthorityById(UUID authorityId, Boolean isUtf) {
+  public ResponseEntity<Resource> downloadRecordById(UUID recordId, String idType, Boolean isUtf) {
     var formatPostfix = Boolean.TRUE.equals(isUtf) ? UTF_FORMAT_POSTFIX : MARC8_FORMAT_POSTFIX;
-    ByteArrayResource resource = downloadRecordService.processAuthorityDownload(authorityId, isUtf, formatPostfix);
-    String fileName = authorityId + formatPostfix + ".mrc";
+    ByteArrayResource resource = downloadRecordService.processRecordDownload(recordId, isUtf, formatPostfix, idType);
+    String fileName = recordId + formatPostfix + ".mrc";
     return ResponseEntity.ok()
       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
       .contentType(MediaType.APPLICATION_OCTET_STREAM)

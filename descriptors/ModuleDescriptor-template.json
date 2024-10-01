@@ -465,9 +465,9 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/download-authority/{authorityId}",
+          "pathPattern": "/data-export/download-record/{recordId}",
           "permissionsRequired": [
-            "data-export.download-authority.item.get"
+            "data-export.download-record.item.get"
           ],
           "modulePermissions": [
 
@@ -662,9 +662,9 @@
       "description": "To return deleted authorities"
     },
     {
-      "permissionName": "data-export.download-authority.item.get",
-      "displayName": "Data Export - download authority",
-      "description": "Entry point to download single authority file in the specified format"
+      "permissionName": "data-export.download-record.item.get",
+      "displayName": "Data Export - download record",
+      "description": "Entry point to download single record file in the specified format"
     },
     {
       "permissionName": "data-export.all",
@@ -698,7 +698,7 @@
         "data-export.related-users.collection.get",
         "data-export.export-deleted.post",
         "data-export.export-authority-deleted.post",
-        "data-export.download-authority.item.get"
+        "data-export.download-record.item.get"
       ],
       "visible": false
     }

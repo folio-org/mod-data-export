@@ -37,7 +37,21 @@ public class DownloadRecordService {
   private final InputFileProcessor inputFileProcessor;
   protected final FolioExecutionContext folioExecutionContext;
 
-  public ByteArrayResource processAuthorityDownload(final UUID authorityId, boolean isUtf, String formatPostfix) {
+  public ByteArrayResource processRecordDownload(final UUID recordId,
+                                                 boolean isUtf,
+                                                 final String formatPostfix,
+                                                 final String idType) {
+    if ("AUTHORITY".equals(idType)) {
+      return processAuthorityDownload(recordId, isUtf, formatPostfix);
+    }
+    else {
+      log.error("processRecordDownload:: unsupported record id type: {}", idType);
+      throw new DownloadRecordException("Unsupported record id type: %s".formatted(idType));
+    }
+  }
+
+  public ByteArrayResource processAuthorityDownload(final UUID authorityId, boolean isUtf, final String formatPostfix) {
+    log.info("processAuthorityDownload:: start downloading authority with id: {}, isUtf: {}", authorityId, isUtf);
     var dirName = authorityId.toString() + formatPostfix;
     var marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent.isEmpty()) {
