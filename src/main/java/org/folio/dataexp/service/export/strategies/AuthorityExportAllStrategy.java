@@ -32,7 +32,7 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
   }
 
   @Override
-  protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
+  public List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findAllByExternalIdIn(context.getTenantId(), externalIds);
   }
 

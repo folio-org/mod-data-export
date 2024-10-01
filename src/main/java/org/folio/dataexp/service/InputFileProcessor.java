@@ -38,6 +38,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 
 @Component
 @RequiredArgsConstructor
@@ -65,6 +66,16 @@ public class InputFileProcessor {
       }
     } catch (Exception e) {
       throw new DataExportException(e.getMessage());
+    }
+  }
+
+  public String readMarcFile(String dirName) throws IOException {
+    var pathToRead = getPathToStoredRecord(dirName, "%s.mrc".formatted(dirName));
+    if (s3Client.list(pathToRead).isEmpty()) {
+      return StringUtils.EMPTY;
+    }
+    try (InputStream is = s3Client.read(pathToRead)) {
+      return IOUtils.toString(is, StandardCharsets.UTF_8);
     }
   }
 

@@ -6,6 +6,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.marc4j.MarcException;
 import org.marc4j.MarcJsonReader;
 import org.marc4j.MarcStreamWriter;
+import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.VariableField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.impl.SortedMarcFactoryImpl;
@@ -22,11 +23,19 @@ import java.util.List;
 public class JsonToMarcConverter {
 
   public String convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields, MappingProfile mappingProfile) throws IOException {
+    return convertJsonRecordToMarcRecord(jsonRecord, additionalFields, mappingProfile, true);
+  }
+
+  public String convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields, MappingProfile mappingProfile,
+    boolean isUtf) throws IOException {
     var byteArrayInputStream = new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
     var byteArrayOutputStream = new ByteArrayOutputStream();
     try (byteArrayInputStream; byteArrayOutputStream) {
       var marcJsonReader = new MarcJsonReader(byteArrayInputStream);
       var marcStreamWriter = new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
+      if (!isUtf) {
+        marcStreamWriter.setConverter(new UnicodeToAnsel());
+      }
       writeMarc(marcJsonReader, marcStreamWriter, additionalFields, mappingProfile);
       return byteArrayOutputStream.toString();
     } catch (IOException e) {

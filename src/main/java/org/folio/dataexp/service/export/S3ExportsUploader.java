@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 
 
@@ -65,6 +66,21 @@ public class S3ExportsUploader {
       return uploadedPath;
     } catch (IOException e) {
       throw new S3ExportsUploadException(e.getMessage());
+    }
+  }
+
+  public void uploadSingleRecordById(String dirName, File fileToUpload) throws IOException {
+    var s3FileName = "%s.mrc".formatted(dirName);
+    var s3path = getPathToStoredRecord(dirName, s3FileName);
+    if (fileToUpload.length() > 0) {
+      try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
+        s3Client.write(s3path, inputStream, fileToUpload.length());
+      }
+      log.info(fileToUpload.getPath() + " uploaded as " + s3FileName);
+      removeTempDirForRecord(dirName);
+    } else {
+      removeTempDirForRecord(dirName);
+      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
     }
   }
 
@@ -119,5 +135,9 @@ public class S3ExportsUploader {
 
   private void removeTempDirForJobExecution(UUID jobExecutionId) throws IOException {
     FileUtils.deleteDirectory(new File(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
+  }
+
+  private void removeTempDirForRecord(final String dirName) throws IOException {
+    FileUtils.deleteDirectory(new File(S3FilePathUtils.getTempDirForRecordId(exportTmpStorage, dirName)));
   }
 }

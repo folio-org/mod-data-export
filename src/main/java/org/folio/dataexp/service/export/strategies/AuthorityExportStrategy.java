@@ -79,7 +79,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     return new ArrayList<>();
   }
 
-  protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
+  public List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
   }
 
@@ -122,7 +122,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     }
   }
 
-  private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
+  public List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
     return marcAuthorities.stream().collect(
       groupingBy(MarcRecordEntity::getExternalId,
         maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream()

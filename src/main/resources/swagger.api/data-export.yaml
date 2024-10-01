@@ -873,6 +873,36 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /download-authority/{authorityId}:
+    get:
+      description: Download single authority record by id
+      operationId: downloadAuthorityById
+      parameters:
+        - name: authorityId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/uuid"
+        - name: utf
+          in: query
+          description: "Specify whether to encode the file in UTF-8."
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A file download in binary format
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: Internal server errors
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:

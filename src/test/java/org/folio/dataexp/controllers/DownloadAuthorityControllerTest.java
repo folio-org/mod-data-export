@@ -1,0 +1,54 @@
+package org.folio.dataexp.controllers;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.UUID;
+import java.util.stream.Stream;
+import lombok.SneakyThrows;
+import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.service.DownloadAuthorityService;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
+
+  @MockBean
+  private DownloadAuthorityService downloadAuthorityService;
+
+  @SneakyThrows
+  @ParameterizedTest
+  @MethodSource("provideUtfFlags")
+  void downloadAuthorityById_whenNoUftProvided(Boolean isUtf) {
+    var authorityId = UUID.randomUUID();
+    var formatPostfix = Boolean.FALSE.equals(isUtf) ? "-marc8" : "-utf";
+    var expectedFileName = authorityId + formatPostfix + ".mrc";
+    var mockData = "some data".getBytes();
+    var mockResource = new ByteArrayResource(mockData);
+    when(downloadAuthorityService.processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix))
+      .thenReturn(mockResource);
+
+    mockMvc.perform(MockMvcRequestBuilders
+        .get("/data-export/download-authority/{authorityId}", authorityId)
+        .param("utf", isUtf != null ? isUtf.toString() : null)
+        .headers(defaultHeaders()))
+      .andExpect(status().isOk())
+      .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+      .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + expectedFileName + "\""))
+      .andExpect(content().bytes(mockData));
+
+    verify(downloadAuthorityService).processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix);
+  }
+
+  private static Stream<Boolean> provideUtfFlags() {
+    return Stream.of(null, Boolean.TRUE, Boolean.FALSE);
+  }
+}
