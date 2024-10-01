@@ -25,13 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 
-class DownloadAuthorityTest extends BaseDataExportInitializer {
+class DownloadRecordTest extends BaseDataExportInitializer {
 
   @Autowired
   private FolioS3Client s3Client;
 
   @Autowired
-  private DownloadAuthorityService downloadAuthorityService;
+  private DownloadRecordService downloadRecordService;
 
   @Autowired
   private InputFileProcessor inputFileProcessor;
@@ -57,7 +57,7 @@ class DownloadAuthorityTest extends BaseDataExportInitializer {
   void whenAuthorityIsMissing_downloadShouldFail() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       Exception exception = assertThrows(DownloadRecordException.class, () -> {
-        downloadAuthorityService.processAuthorityDownload(LOCAL_MARC_AUTHORITY_UUID, true, "-utf");
+        downloadRecordService.processAuthorityDownload(LOCAL_MARC_AUTHORITY_UUID, true, "-utf");
       });
       assertEquals("Couldn't find authority in db for ID: 17eed93e-f9e2-4cb2-a52b-e9155acfc119",
         exception.getMessage());
@@ -71,7 +71,7 @@ class DownloadAuthorityTest extends BaseDataExportInitializer {
       var filePath = "mod-data-export/download/4a090b0f-9da3-40f1-ab17-33d6a1e3abae-%s/4a090b0f-9da3-40f1-ab17-33d6a1e3abae-%s.mrc".formatted(postfix, postfix);
       var expectedResult = new ByteArrayResource(fileContent.getBytes());
 
-      var actualResult = downloadAuthorityService.processAuthorityDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix);
+      var actualResult = downloadRecordService.processAuthorityDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix);
 
       assertEquals(expectedResult, actualResult);
       assertEquals(filePath, s3Client.list(filePath).get(0));
@@ -86,7 +86,7 @@ class DownloadAuthorityTest extends BaseDataExportInitializer {
       s3Client.write(filePath, new BufferedInputStream(new ByteArrayInputStream(fileContent.getBytes())));
       var expectedResult = new ByteArrayResource(fileContent.getBytes());
 
-      var actualResult = downloadAuthorityService.processAuthorityDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix);
+      var actualResult = downloadRecordService.processAuthorityDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix);
 
       assertEquals(expectedResult, actualResult);
     }

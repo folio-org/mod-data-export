@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class DownloadAuthorityService {
+public class DownloadRecordService {
 
   private final AuthorityExportStrategy authorityExportStrategy;
   private final MappingProfileEntityRepository mappingProfileEntityRepository;

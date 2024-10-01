@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
-import org.folio.dataexp.service.DownloadAuthorityService;
+import org.folio.dataexp.service.DownloadRecordService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
 
   @MockBean
-  private DownloadAuthorityService downloadAuthorityService;
+  private DownloadRecordService downloadRecordService;
 
   @SneakyThrows
   @ParameterizedTest
@@ -33,7 +33,7 @@ class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
     var expectedFileName = authorityId + formatPostfix + ".mrc";
     var mockData = "some data".getBytes();
     var mockResource = new ByteArrayResource(mockData);
-    when(downloadAuthorityService.processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix))
+    when(downloadRecordService.processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix))
       .thenReturn(mockResource);
 
     mockMvc.perform(MockMvcRequestBuilders
@@ -45,7 +45,7 @@ class DownloadAuthorityControllerTest extends BaseDataExportInitializer {
       .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + expectedFileName + "\""))
       .andExpect(content().bytes(mockData));
 
-    verify(downloadAuthorityService).processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix);
+    verify(downloadRecordService).processAuthorityDownload(authorityId, isUtf == null || isUtf, formatPostfix);
   }
 
   private static Stream<Boolean> provideUtfFlags() {
