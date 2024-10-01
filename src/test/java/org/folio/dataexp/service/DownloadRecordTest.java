@@ -64,6 +64,17 @@ class DownloadRecordTest extends BaseDataExportInitializer {
     }
   }
 
+  @Test
+  void whenUnknownRecordId_downloadShouldFail() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      Exception exception = assertThrows(DownloadRecordException.class, () -> {
+        downloadRecordService.processRecordDownload(LOCAL_MARC_AUTHORITY_UUID, true, "-utf", "HOLDING");
+      });
+      assertEquals("Unsupported record id type: HOLDING",
+        exception.getMessage());
+    }
+  }
+
   @ParameterizedTest
   @MethodSource("providedData")
   void whenMarcFileDoesntExist_generateFileAndSaveInS3(boolean isUtf, String postfix, String fileContent) {
@@ -71,7 +82,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
       var filePath = "mod-data-export/download/4a090b0f-9da3-40f1-ab17-33d6a1e3abae-%s/4a090b0f-9da3-40f1-ab17-33d6a1e3abae-%s.mrc".formatted(postfix, postfix);
       var expectedResult = new ByteArrayResource(fileContent.getBytes());
 
-      var actualResult = downloadRecordService.processAuthorityDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix);
+      var actualResult = downloadRecordService.processRecordDownload(LOCAL_AUTHORITY_UUID, isUtf, postfix, "AUTHORITY");
 
       assertEquals(expectedResult, actualResult);
       assertEquals(filePath, s3Client.list(filePath).get(0));

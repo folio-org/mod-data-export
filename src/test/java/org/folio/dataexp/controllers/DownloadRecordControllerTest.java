@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.service.DownloadRecordService;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,7 +28,7 @@ class DownloadRecordControllerTest extends BaseDataExportInitializer {
   @SneakyThrows
   @ParameterizedTest
   @MethodSource("provideUtfFlags")
-  void downloadAuthorityById_whenNoUftProvided(Boolean isUtf) {
+  void downloadAuthorityById_shouldReturnFile_whenInputDataValid(Boolean isUtf) {
     var authorityId = UUID.randomUUID();
     var formatPostfix = Boolean.FALSE.equals(isUtf) ? "-marc8" : "-utf";
     var expectedFileName = authorityId + formatPostfix + ".mrc";
