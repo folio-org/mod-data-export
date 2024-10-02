@@ -6,7 +6,7 @@ import net.minidev.json.JSONObject;
 
 @Setter
 @Getter
-public class ExportIdentifiersForDuplicateErrors {
+public class ExportIdentifiersForDuplicateError {
 
   private String identifierHridMessage;
   private JSONObject associatedJsonObject;

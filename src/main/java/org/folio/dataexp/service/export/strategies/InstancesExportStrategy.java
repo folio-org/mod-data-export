@@ -134,7 +134,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   }
 
   @Override
-  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
     var instances = instanceEntityRepository.findByIdIn(Set.of(id));
     if (instances.isEmpty()) {
       log.info("getIdentifiers:: not found for instance by id {}", id);
@@ -145,8 +145,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
       var title = jsonObject.get().getAsString(TITLE_KEY);
       var uuid = jsonObject.get().getAsString(ID_KEY);
-      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
-      exportIdentifiers.setIdentifierHridMessage(hrid);
+      var exportIdentifiers = new ExportIdentifiersForDuplicateError();
+      exportIdentifiers.setIdentifierHridMessage("Instance with HRID: " + hrid);
       var instanceAssociatedJsonObject = new JSONObject();
       instanceAssociatedJsonObject.put(ErrorLogService.ID, uuid);
       instanceAssociatedJsonObject.put(ErrorLogService.HRID, hrid);
@@ -174,8 +174,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     super.saveConvertJsonRecordToMarcRecordError(marcRecordEntity, jobExecutionId, e);
   }
 
-  protected Optional<ExportIdentifiersForDuplicateErrors> getDefaultIdentifiers(UUID id) {
-    var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+  protected Optional<ExportIdentifiersForDuplicateError> getDefaultIdentifiers(UUID id) {
+    var exportIdentifiers = new ExportIdentifiersForDuplicateError();
     exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
     return Optional.of(exportIdentifiers);
   }
