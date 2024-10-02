@@ -98,7 +98,7 @@ public class ExportExecutor {
       var fileDefinition= queryResult.get(0).getFileDefinition();
       var initialFileName= FilenameUtils.getBaseName(fileDefinition.getFileName());
       try {
-        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);//
+        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
         var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
           .fileName(FilenameUtils.getName(innerFileName));
         jobExecution.setExportedFiles(Set.of(innerFile));

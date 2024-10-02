@@ -1,13 +1,7 @@
 package org.folio.dataexp.service;
 
 
-import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
-import static org.folio.dataexp.util.S3FilePathUtils.RECORD_LOCATION_PATH;
-
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -16,11 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
-import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.S3ExportsUploader;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
 import org.folio.dataexp.service.export.strategies.JsonToMarcConverter;
-import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
@@ -56,7 +48,7 @@ public class DownloadRecordService {
     var marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent.isEmpty()) {
       marcFileContent = generateAuthorityFileContent(authorityId, isUtf);
-      saveMarcFile(dirName, marcFileContent);
+      uploadMarcFile(dirName, marcFileContent);
     }
     return new ByteArrayResource(marcFileContent.getBytes());
   }
@@ -93,38 +85,11 @@ public class DownloadRecordService {
     return marcAuthorities.get(0);
   }
 
-  private void saveMarcFile(final String dirName, final String marcFileContent) {
-    var localStorageWriterPath = saveMarcFileToLocalStorage(dirName, marcFileContent);
-    uploadMarcFile(dirName, localStorageWriterPath);
-  }
-
-  private String saveMarcFileToLocalStorage(final String dirName, final String marcFileContent) {
-    var localFileLocation = RECORD_LOCATION_PATH.formatted(dirName, dirName) + ".mrc";
-    var localStorageWriterPath = S3FilePathUtils.getLocalStorageWriterPath(
-      authorityExportStrategy.getExportTmpStorage(), localFileLocation);
-    createDirectoryForLocalStorage(dirName);
-    var localStorageWriter = new LocalStorageWriter(localStorageWriterPath, OUTPUT_BUFFER_SIZE);
-    localStorageWriter.write(marcFileContent);
-    localStorageWriter.close();
-    return localStorageWriterPath;
-  }
-
-  private void createDirectoryForLocalStorage(final String dirName) {
+  private void uploadMarcFile(final String dirName, final String marcFileContent) {
     try {
-      Files.createDirectories(
-        Path.of(S3FilePathUtils.getTempDirForRecordId(authorityExportStrategy.getExportTmpStorage(), dirName)));
+      s3Uploader.uploadSingleRecordById(dirName, marcFileContent);
     } catch (IOException e) {
-      log.error("createDirectoryForLocalStorage:: Can not create temp directory for record {}", dirName);
-      throw new DownloadRecordException(e.getMessage());
-    }
-  }
-
-  private void uploadMarcFile(String dirName, String localStorageWriterPath) {
-    var fileToUpload = new File(localStorageWriterPath);
-    try {
-      s3Uploader.uploadSingleRecordById(dirName, fileToUpload);
-    } catch (IOException e) {
-      log.error("uploadMarcFile:: Error while upload marc file {} to remote storage", localStorageWriterPath);
+      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName);
       throw new DownloadRecordException(e.getMessage());
     }
   }

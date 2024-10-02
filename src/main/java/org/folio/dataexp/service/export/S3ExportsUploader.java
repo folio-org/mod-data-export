@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export;
 
+import java.io.ByteArrayInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
@@ -69,17 +70,15 @@ public class S3ExportsUploader {
     }
   }
 
-  public void uploadSingleRecordById(String dirName, File fileToUpload) throws IOException {
+  public void uploadSingleRecordById(String dirName, String marcFileContent) throws IOException {
     var s3FileName = "%s.mrc".formatted(dirName);
     var s3path = getPathToStoredRecord(dirName, s3FileName);
-    if (fileToUpload.length() > 0) {
-      try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
-        s3Client.write(s3path, inputStream, fileToUpload.length());
+    if (!marcFileContent.isEmpty()) {
+      try (var inputStream = new BufferedInputStream(new ByteArrayInputStream(marcFileContent.getBytes()))) {
+        s3Client.write(s3path, inputStream);
       }
-      log.info(fileToUpload.getPath() + " uploaded as " + s3FileName);
-      removeTempDirForRecord(dirName);
+      log.info("Marc record uploaded as " + s3FileName);
     } else {
-      removeTempDirForRecord(dirName);
       throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
     }
   }
@@ -135,9 +134,5 @@ public class S3ExportsUploader {
 
   private void removeTempDirForJobExecution(UUID jobExecutionId) throws IOException {
     FileUtils.deleteDirectory(new File(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
-  }
-
-  private void removeTempDirForRecord(final String dirName) throws IOException {
-    FileUtils.deleteDirectory(new File(S3FilePathUtils.getTempDirForRecordId(exportTmpStorage, dirName)));
   }
 }
