@@ -4,9 +4,9 @@ package org.folio.dataexp.controllers;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.domain.dto.IdType;
 import org.folio.dataexp.rest.resource.DownloadRecordApi;
 import org.folio.dataexp.service.DownloadRecordService;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,11 +26,12 @@ public class DownloadRecordController implements DownloadRecordApi {
 
   private final DownloadRecordService downloadRecordService;
 
+
   @Override
-  public ResponseEntity<Resource> downloadRecordById(UUID recordId, String idType, Boolean isUtf) {
+  public ResponseEntity<Resource> downloadRecordById(UUID recordId, IdType idType, Boolean isUtf) {
     var formatPostfix = Boolean.TRUE.equals(isUtf) ? UTF_FORMAT_POSTFIX : MARC8_FORMAT_POSTFIX;
-    ByteArrayResource resource = downloadRecordService.processRecordDownload(recordId, isUtf, formatPostfix, idType);
-    String fileName = recordId + formatPostfix + ".mrc";
+    var resource = downloadRecordService.processRecordDownload(recordId, isUtf, formatPostfix, idType);
+    var fileName = recordId + formatPostfix + ".mrc";
     return ResponseEntity.ok()
       .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
       .contentType(MediaType.APPLICATION_OCTET_STREAM)

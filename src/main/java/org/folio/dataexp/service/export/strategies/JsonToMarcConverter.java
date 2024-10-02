@@ -22,12 +22,13 @@ import java.util.List;
 @Component
 public class JsonToMarcConverter {
 
-  public String convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields, MappingProfile mappingProfile) throws IOException {
-    return convertJsonRecordToMarcRecord(jsonRecord, additionalFields, mappingProfile, true);
+  public String convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields,
+    MappingProfile mappingProfile) throws IOException {
+    return convertJsonRecordToMarcRecord(jsonRecord, additionalFields, mappingProfile, true).toString();
   }
 
-  public String convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields, MappingProfile mappingProfile,
-    boolean isUtf) throws IOException {
+  public ByteArrayOutputStream convertJsonRecordToMarcRecord(String jsonRecord, List<VariableField> additionalFields,
+    MappingProfile mappingProfile, boolean isUtf) throws IOException {
     var byteArrayInputStream = new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
     var byteArrayOutputStream = new ByteArrayOutputStream();
     try (byteArrayInputStream; byteArrayOutputStream) {
@@ -37,7 +38,7 @@ public class JsonToMarcConverter {
         marcStreamWriter.setConverter(new UnicodeToAnsel());
       }
       writeMarc(marcJsonReader, marcStreamWriter, additionalFields, mappingProfile);
-      return byteArrayOutputStream.toString();
+      return byteArrayOutputStream;
     } catch (IOException e) {
       log.error(e.getMessage());
       throw e;

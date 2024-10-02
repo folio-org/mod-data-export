@@ -282,5 +282,15 @@ class AbstractExportStrategyTest {
     protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
       return localStorageWriter;
     }
+
+    @Override
+    public MarcRecordEntity getMarcRecord(UUID externalId) {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
+    }
+
+    @Override
+    public MappingProfile getDefaultMappingProfile() {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
+    }
   }
 }

@@ -70,17 +70,13 @@ public class S3ExportsUploader {
     }
   }
 
-  public void uploadSingleRecordById(String dirName, String marcFileContent) throws IOException {
+  public void uploadSingleRecordById(String dirName, byte[] marcFileContentBytes) throws IOException {
     var s3FileName = "%s.mrc".formatted(dirName);
     var s3path = getPathToStoredRecord(dirName, s3FileName);
-    if (!marcFileContent.isEmpty()) {
-      try (var inputStream = new BufferedInputStream(new ByteArrayInputStream(marcFileContent.getBytes()))) {
-        s3Client.write(s3path, inputStream);
-      }
-      log.info("Marc record uploaded as " + s3FileName);
-    } else {
-      throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
+    try (var inputStream = new ByteArrayInputStream(marcFileContentBytes)) {
+      s3Client.write(s3path, inputStream);
     }
+    log.info("Marc record uploaded as " + s3FileName);
   }
 
   private String uploadMarc(JobExecution jobExecution, File fileToUpload, String fileName) throws IOException {

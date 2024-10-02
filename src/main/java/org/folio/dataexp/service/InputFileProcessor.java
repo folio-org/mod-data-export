@@ -69,14 +69,12 @@ public class InputFileProcessor {
     }
   }
 
-  public String readMarcFile(String dirName) throws IOException {
+  public InputStream readMarcFile(String dirName) {
     var pathToRead = getPathToStoredRecord(dirName, "%s.mrc".formatted(dirName));
     if (s3Client.list(pathToRead).isEmpty()) {
-      return StringUtils.EMPTY;
+      return null;
     }
-    try (InputStream is = s3Client.read(pathToRead)) {
-      return IOUtils.toString(is, StandardCharsets.UTF_8);
-    }
+    return s3Client.read(pathToRead);
   }
 
   private void readCsvFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {

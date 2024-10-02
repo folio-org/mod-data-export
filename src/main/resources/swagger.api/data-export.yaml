@@ -884,14 +884,10 @@ paths:
           schema:
             $ref: "#/components/schemas/uuid"
         - name: idType
-          description: "Specifies the type of record to download."
           in: query
           required: true
           schema:
-            type: string
-            enum:
-              - AUTHORITY
-              - INSTANCE
+            $ref: "#/components/schemas/idType"
         - name: utf
           in: query
           description: "Specify whether to encode the file in UTF-8."
@@ -917,6 +913,12 @@ components:
     uuid:
       type: string
       format: uuid
+    idType:
+      description: "Specifies the type of record to download."
+      type: string
+      enum:
+        - AUTHORITY
+        - INSTANCE
     errors:
       $ref: 'schemas/errors.json'
     fileDefinition:

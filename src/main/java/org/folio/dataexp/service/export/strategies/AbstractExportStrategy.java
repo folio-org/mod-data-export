@@ -123,6 +123,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                  UUID jobExecutionId);
+  public abstract MarcRecordEntity getMarcRecord(UUID externalId);
+
+  public abstract MappingProfile getDefaultMappingProfile();
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                 UUID jobExecutionId, ExportStrategyStatistic exportStatistic);

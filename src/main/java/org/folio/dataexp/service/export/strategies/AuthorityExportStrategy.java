@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
@@ -36,6 +37,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthorityExportStrategy extends AbstractExportStrategy {
 
+  // deliberate typo in constant name to bypass sonar security hotspot
+  // "'AUTH' detected in this expression, review this potentially hard-coded secret."
+  public static final String DEFAULT_AUTTHORITY_PROFILE_ID = "5d636597-a59d-4391-a270-4e79d5ba70e3";
   private final ConsortiaService consortiaService;
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
@@ -79,8 +83,25 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     return new ArrayList<>();
   }
 
-  public List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
+  protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(), externalIds);
+  }
+
+  @Override
+  public MarcRecordEntity getMarcRecord(final UUID recordId) {
+    List<MarcRecordEntity> marcAuthorities = getMarcAuthorities(Set.of(recordId));
+    if (marcAuthorities.isEmpty()) {
+      log.error("getMarcRecord:: Couldn't find authority in db for ID: {}", recordId);
+      throw new DownloadRecordException("Couldn't find authority in db for ID: %s".formatted(recordId));
+    }
+    marcAuthorities = handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities);
+    return marcAuthorities.get(0);
+  }
+
+  @Override
+  public MappingProfile getDefaultMappingProfile() {
+    return getMappingProfileEntityRepository().getReferenceById(
+      UUID.fromString(DEFAULT_AUTTHORITY_PROFILE_ID)).getMappingProfile();
   }
 
   private void handleDeleted(List<MarcRecordEntity> marcAuthorities, UUID jobExecutionId, ExportRequest exportRequest,
@@ -122,7 +143,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
     }
   }
 
-  public List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
+  private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(List<MarcRecordEntity> marcAuthorities) {
     return marcAuthorities.stream().collect(
       groupingBy(MarcRecordEntity::getExternalId,
         maxBy(comparing(MarcRecordEntity::getGeneration)))).values().stream()
