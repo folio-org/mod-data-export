@@ -25,7 +25,6 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -94,7 +93,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   @Override
-  public Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
+  public Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
     var identifiers = super.getIdentifiers(id);
     if (identifiers.isPresent() && Objects.isNull(identifiers.get().getAssociatedJsonObject())) {
       var auditInstances = auditInstanceEntityRepository.findByIdIn(Set.of(id));
@@ -103,7 +102,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         return getDefaultIdentifiers(id);
       }
       var auditInstance = auditInstances.get(0);
-      var exportIdentifiers = new ExportIdentifiersForDuplicateErrors();
+      var exportIdentifiers = new ExportIdentifiersForDuplicateError();
       exportIdentifiers.setIdentifierHridMessage("Instance with HRID : " + auditInstance.getHrid());
       var instanceAssociatedJsonObject = new JSONObject();
       instanceAssociatedJsonObject.put(ErrorLogService.ID, auditInstance.getId());
