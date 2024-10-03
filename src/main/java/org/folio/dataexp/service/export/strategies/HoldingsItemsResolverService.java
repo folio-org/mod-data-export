@@ -12,11 +12,13 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
+import org.folio.dataexp.exception.permissions.check.ViewPermissionDoesNotExist;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +29,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
+import static org.folio.dataexp.util.ErrorCode.ERROR_INSTANCE_NO_PERMISSION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
 
 @Log4j2
@@ -45,6 +49,7 @@ public class HoldingsItemsResolverService {
   private final ConsortiaService consortiaService;
   private final UserService userService;
   private final ErrorLogService errorLogService;
+  private final PermissionsValidator permissionsValidator;
 
   @PersistenceContext
   protected EntityManager entityManager;
@@ -72,13 +77,27 @@ public class HoldingsItemsResolverService {
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
       .collect(Collectors.groupingBy(ConsortiumHolding::getTenantId, Collectors.mapping(ConsortiumHolding::getId, Collectors.toList())));
     var userTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    boolean errorForInstanceAlreadySaved = false;
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       if (userTenants.contains(localTenant)) {
-        var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
-        entityManager.clear();
-        addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
+
+        try {
+          permissionsValidator.checkInstanceViewPermissions(localTenant);
+          var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
+          entityManager.clear();
+          addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
+        } catch (ViewPermissionDoesNotExist e) {
+          if (!errorForInstanceAlreadySaved) {
+            var msgValues = List.of(instanceId.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
+              localTenant);
+            errorLogService.saveGeneralErrorWithMessageValues(ERROR_INSTANCE_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
+            log.error(format(ERROR_INSTANCE_NO_PERMISSION.getDescription(), msgValues.toArray()));
+            errorForInstanceAlreadySaved = true;
+          }
+        }
+
       } else {
         var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
         holdingsIds.forEach(holdingId -> {
