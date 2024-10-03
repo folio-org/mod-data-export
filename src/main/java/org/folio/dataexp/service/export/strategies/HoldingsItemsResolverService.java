@@ -55,6 +55,7 @@ public class HoldingsItemsResolverService {
   protected EntityManager entityManager;
 
   public void retrieveHoldingsAndItemsByInstanceId(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile, UUID jobExecutionId) {
+    log.info("retrieveHoldingsAndItemsByInstanceId");
     if (!isNeedUpdateWithHoldingsOrItems(mappingProfile)) {
       return;
     }
@@ -72,18 +73,22 @@ public class HoldingsItemsResolverService {
   }
 
   private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile, UUID jobExecutionId) {
+    log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant: {}", instance.toJSONString());
     var consortiumHoldings = searchConsortiumHoldings.getHoldingsById(instanceId).getHoldings();
     Map<String, List<String>> consortiaHoldingsIdsPerTenant = consortiumHoldings.stream()
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
       .collect(Collectors.groupingBy(ConsortiumHolding::getTenantId, Collectors.mapping(ConsortiumHolding::getId, Collectors.toList())));
     var userTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     boolean errorForInstanceAlreadySaved = false;
+    log.info("consortiaHoldingsIdsPerTenant: {}", consortiaHoldingsIdsPerTenant);
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
+      log.info("entry: {}", entry);
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       if (userTenants.contains(localTenant)) {
 
         try {
+          log.info("entry userTenants.contains(localTenant): {}", entry);
           permissionsValidator.checkInstanceViewPermissions(localTenant);
           var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
           entityManager.clear();

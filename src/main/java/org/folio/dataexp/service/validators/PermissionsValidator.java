@@ -19,8 +19,10 @@ public class PermissionsValidator {
 
   public void checkInstanceViewPermissions(String tenantId) throws ViewPermissionDoesNotExist {
     if (!isInstanceViewPermissionExists(tenantId)) {
+      log.info("checkInstanceViewPermissions throws");
       throw new ViewPermissionDoesNotExist();
     }
+    log.info("checkInstanceViewPermissions not throws");
   }
 
   public boolean isInstanceViewPermissionExists(String tenantId) {
