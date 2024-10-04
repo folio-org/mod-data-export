@@ -16,6 +16,7 @@ import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,8 @@ class HoldingsItemsResolverServiceTest {
   private ErrorLogService errorLogService;
   @Mock
   private EntityManager entityManager;
+  @Mock
+  private PermissionsValidator permissionsValidator;
 
   @InjectMocks
   private HoldingsItemsResolverService holdingsItemsResolverService;
