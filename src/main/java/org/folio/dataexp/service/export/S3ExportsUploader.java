@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export;
 
+import java.io.ByteArrayInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 
 
@@ -66,6 +68,15 @@ public class S3ExportsUploader {
     } catch (IOException e) {
       throw new S3ExportsUploadException(e.getMessage());
     }
+  }
+
+  public void uploadSingleRecordById(String dirName, byte[] marcFileContentBytes) throws IOException {
+    var s3FileName = "%s.mrc".formatted(dirName);
+    var s3path = getPathToStoredRecord(dirName, s3FileName);
+    try (var inputStream = new ByteArrayInputStream(marcFileContentBytes)) {
+      s3Client.write(s3path, inputStream);
+    }
+    log.info("Marc record uploaded as " + s3FileName);
   }
 
   private String uploadMarc(JobExecution jobExecution, File fileToUpload, String fileName) throws IOException {

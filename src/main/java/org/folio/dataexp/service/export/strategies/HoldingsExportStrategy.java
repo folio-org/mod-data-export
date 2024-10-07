@@ -349,4 +349,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     });
     holdingJson.put(ITEMS_KEY, itemJsonArray);
   }
+
+  @Override
+  public MarcRecordEntity getMarcRecord(UUID externalId) {
+    throw new UnsupportedOperationException("The functionality is not required for holdings.");
+  }
+
+  @Override
+  public MappingProfile getDefaultMappingProfile() {
+    throw new UnsupportedOperationException("The functionality is not required for holdings.");
+  }
 }

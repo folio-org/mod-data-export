@@ -90,7 +90,7 @@
   "provides": [
     {
       "id": "data-export",
-      "version": "5.2",
+      "version": "5.3",
       "handlers": [
         {
           "methods": [
@@ -460,6 +460,18 @@
             "inventory-storage.authorities.collection.get",
             "user-tenants.collection.get"
           ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/download-record/{recordId}",
+          "permissionsRequired": [
+            "data-export.download-record.item.get"
+          ],
+          "modulePermissions": [
+
+          ]
         }
       ]
     },
@@ -650,6 +662,11 @@
       "description": "To return deleted authorities"
     },
     {
+      "permissionName": "data-export.download-record.item.get",
+      "displayName": "Data Export - download record",
+      "description": "Entry point to download single record file in the specified format"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -680,7 +697,8 @@
         "data-export.export.all",
         "data-export.related-users.collection.get",
         "data-export.export-deleted.post",
-        "data-export.export-authority-deleted.post"
+        "data-export.export-authority-deleted.post",
+        "data-export.download-record.item.get"
       ],
       "visible": false
     }
