@@ -17,6 +17,17 @@ INSERT INTO diku_mod_source_record_storage.marc_records_lb (id, content)
                                                            "008": "210701t20222022nyua   c      001 0 eng d"
                                                          },
                                                          {
+                                                           "373": {
+                                                             "ind1": " ",
+                                                             "ind2": " ",
+                                                             "subfields": [
+                                                               {
+                                                                 "a": "πανεπιστήμιο"
+                                                               }
+                                                             ]
+                                                           }
+                                                          },
+                                                          {
                                                            "999": {
                                                              "ind1": "f",
                                                              "ind2": "f",
@@ -770,7 +781,7 @@ INSERT INTO diku_mod_source_record_storage.marc_records_lb (id, content)
                                                            "001": "in00000001098"
                                                          },
                                                          {
-                                                           "008": "210701t20222022nyua   c      001 0 eng d"
+                                                           "008": "210701t20222022nyua   c      001 0 eng d πανεπιστήμιο"
                                                          },
                                                          {
                                                            "999": {

@@ -2,6 +2,8 @@ package org.folio.dataexp.service.export;
 
 import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.IdType;
+import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportStrategy;
@@ -40,4 +42,10 @@ public class ExportStrategyFactory {
     return instancesExportStrategy;
   }
 
+  public AbstractExportStrategy getExportStrategy(IdType recordIdType) {
+    return switch (recordIdType) {
+      case AUTHORITY -> authorityExportStrategy;
+      case INSTANCE -> instancesExportStrategy;
+    };
+  }
 }

@@ -9,6 +9,7 @@ public class S3FilePathUtils {
   private static final String TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID = "mod-data-export/download/%s/";
   private static final String SLICED_FILE_LOCATION_PATH = TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID + "%s";
   private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
+  public static final String RECORD_LOCATION_PATH = "mod-data-export/download/%s/%s";
 
   private S3FilePathUtils() {
   }
@@ -42,5 +43,9 @@ public class S3FilePathUtils {
       return exportTmpStorage + "/" + location;
     }
     return location;
+  }
+
+  public static String getPathToStoredRecord(String dirName, String fileName) {
+    return String.format(RECORD_LOCATION_PATH, dirName, fileName);
   }
 }
