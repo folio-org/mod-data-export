@@ -5,6 +5,7 @@ import org.folio.dataexp.domain.dto.Errors;
 import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.folio.dataexp.exception.file.definition.FileExtensionException;
 import org.folio.dataexp.exception.file.definition.FileSizeException;
@@ -102,5 +103,10 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(AuthorityQueryException.class)
   public ResponseEntity<String> handleAuthorityQueryException(final AuthorityQueryException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DownloadRecordException.class)
+  public ResponseEntity<String> handleDownloadRecordException(final DownloadRecordException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

@@ -37,12 +37,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.lang.String.format;
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_DUPLICATED_INSTANCE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
-import static org.folio.dataexp.util.ErrorCode.ERROR_NON_EXISTING_INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -159,8 +158,8 @@ class InstancesExportAllStrategyTest {
     when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(auditInstanceEntity));
 
     instancesExportAllStrategy.createAndSaveMarcFromJsonRecord(externalIds, statistic, new MappingProfile(), jobExecutionId, Set.of(instanceId), List.of(marcRecord, marcRecordDuplicate), localStorageWriter);
-    verify(errorLogService).saveGeneralErrorWithMessageValues(eq(ERROR_NON_EXISTING_INSTANCE.getCode()), eq(List.of(marcRecord.getId().toString())), isA(UUID.class));
-
+    var expectedErrorMessage = format("Instance with HRID : 123 has following SRS records associated: %s, %s", marcRecord.getId(), marcRecordDuplicate.getId());
+    verify(errorLogService).saveWithAffectedRecord(any(), eq(expectedErrorMessage), eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()), eq(jobExecutionId));
   }
 
   @Test

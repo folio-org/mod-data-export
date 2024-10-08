@@ -1,7 +1,6 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.Setter;
-import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
@@ -268,8 +267,8 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
-      var identifiers = new ExportIdentifiersForDuplicateErrors();
+    Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
+      var identifiers = new ExportIdentifiersForDuplicateError();
       identifiers.setIdentifierHridMessage("hrid123");
       return Optional.of(identifiers);
     }
@@ -282,6 +281,16 @@ class AbstractExportStrategyTest {
     @Override
     protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
       return localStorageWriter;
+    }
+
+    @Override
+    public MarcRecordEntity getMarcRecord(UUID externalId) {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
+    }
+
+    @Override
+    public MappingProfile getDefaultMappingProfile() {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
     }
   }
 }
