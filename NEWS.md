@@ -1,7 +1,7 @@
 ## v5.1.0 Unreleased
 
 ### Technical tasks
-* [MDEXP-801](https://folio-org.atlassian.net/browse/MDEXP-801) Upgrade "instance-storage version to 11.0 and "holdings-storage" to 8.0
+* [MDEXP-801](https://folio-org.atlassian.net/browse/MDEXP-801) Upgrade "holdings-storage" to 8.0
 
 ## 03/20/2024 v5.0.0 Released
 
