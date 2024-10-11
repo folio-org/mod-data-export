@@ -208,7 +208,10 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+      return folioInstanceAllRepository.findFolioInstanceAll(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
+    } else if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return folioInstanceAllRepository.findFolioInstanceAllNonDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
           pageble);
     }

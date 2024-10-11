@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FolioInstanceAllRepository extends Repository<InstanceEntity, UUID> {
+  // all instances, including set for deletion
+  @Query(value = "SELECT * FROM v_folio_instance_all WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
+  Slice<InstanceEntity> findFolioInstanceAll(UUID fromId, UUID toId, Pageable page);
 
   // onlyNonDeleted, suppressedFromDiscovery = true
   @Query(value = "SELECT * FROM v_folio_instance_all_non_deleted WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
