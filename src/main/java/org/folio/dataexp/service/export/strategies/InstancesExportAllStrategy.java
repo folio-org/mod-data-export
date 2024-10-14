@@ -141,9 +141,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
-    var deletedFolioInstances = getFolioDeleted(exportRequest);
-    entityManager.clear();
-    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioInstances, localStorageWriter);
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var deletedMarcRecords = getMarcDeleted(exportRequest);
       entityManager.clear();
@@ -208,7 +205,10 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+      return folioInstanceAllRepository.findFolioInstanceAll(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
+    } else if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return folioInstanceAllRepository.findFolioInstanceAllNonDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
           pageble);
     }
