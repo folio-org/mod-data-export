@@ -141,9 +141,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
 
   private void handleDeleted(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
-    var deletedFolioInstances = getFolioDeleted(exportRequest);
-    entityManager.clear();
-    processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedFolioInstances, localStorageWriter);
     if (Boolean.TRUE.equals(mappingProfile.getDefault()) || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var deletedMarcRecords = getMarcDeleted(exportRequest);
       entityManager.clear();
