@@ -155,7 +155,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   private void processFolioSlices(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
     var folioSlice = nextFolioSlice(exportFilesEntity, exportRequest, PageRequest.of(0, exportIdsBatch));
-    log.info("slice: {}", folioSlice);
     entityManager.clear();
     processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, folioSlice.getContent(), localStorageWriter);
     log.info("Slice size for instances export all folio: {}", folioSlice.getContent().size());
