@@ -18,5 +18,4 @@
     <include file="changes/add_default_deleted_authority_job_profile.xml" relativeToChangelogFile="true"/>
     <include file="changes/remove_audit_for_marc.xml" relativeToChangelogFile="true"/>
     <include file="changes/export_all_set_for_deletion.xml" relativeToChangelogFile="true"/>
-    <include file="changes/export_all_set_for_deletion_fix.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
