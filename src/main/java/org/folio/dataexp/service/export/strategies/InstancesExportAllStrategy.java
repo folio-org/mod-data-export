@@ -147,6 +147,7 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
       processMarcInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcRecords, localStorageWriter);
     } else {
       var deletedMarcInstances = getMarcInstanceDeleted(exportRequest);
+      log.info("deleted marc instances: {}", deletedMarcInstances);
       entityManager.clear();
       processFolioInstances(exportFilesEntity, exportStatistic, mappingProfile, deletedMarcInstances, localStorageWriter);
     }
