@@ -205,11 +205,14 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
   }
 
   private Slice<InstanceEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
-    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+    if (Boolean.TRUE.equals(exportRequest.getDeletedRecords()) && Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
       return folioInstanceAllRepository.findFolioInstanceAll(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
         pageble);
+    } else if (Boolean.TRUE.equals(exportRequest.getDeletedRecords())) {
+      return folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+        pageble);
     } else if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      return folioInstanceAllRepository.findFolioInstanceAllNonDeleted(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
+      return folioInstanceAllRepository.findFolioInstanceAllNonDeletedSuppressed(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
           pageble);
     }
     return folioInstanceAllRepository.findFolioInstanceAllNonDeletedNonSuppressed(exportFilesEntity.getFromId(),
@@ -232,17 +235,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
     }
     return  folioInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(exportFilesEntity.getFromId(), exportFilesEntity.getToId(),
         pageble);
-  }
-
-  private List<InstanceEntity> getFolioDeleted(ExportRequest exportRequest) {
-    List<InstanceEntity> result;
-    if (Boolean.TRUE.equals(exportRequest.getSuppressedFromDiscovery())) {
-      result = folioInstanceAllRepository.findFolioInstanceAllDeleted();
-    } else {
-      result = folioInstanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
-    }
-    result.forEach(del -> del.setDeleted(true));
-    return result;
   }
 
   private List<MarcRecordEntity> getMarcDeleted(ExportRequest exportRequest) {

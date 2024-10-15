@@ -10,9 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FolioInstanceAllRepository extends Repository<InstanceEntity, UUID> {
-  // all instances, including set for deletion
+  // all instances, including suppressed from discovery and set for deletion
   @Query(value = "SELECT * FROM v_folio_instance_all WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
   Slice<InstanceEntity> findFolioInstanceAll(UUID fromId, UUID toId, Pageable page);
+
+  // all instances, including and set for deletion, not suppressed from discovery
+  @Query(value = "SELECT * FROM v_folio_all_deleted_non_suppressed WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
+  Slice<InstanceEntity> findFolioInstanceAllDeletedNonSuppressed(UUID fromId, UUID toId, Pageable page);
+
+  // all instances, including suppressed from discovery, not set for deletion
+  @Query(value = "SELECT * FROM v_folio_all_non_deleted_suppressed WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
+  Slice<InstanceEntity> findFolioInstanceAllNonDeletedSuppressed(UUID fromId, UUID toId, Pageable page);
 
   // onlyNonDeleted, suppressedFromDiscovery = true
   @Query(value = "SELECT * FROM v_folio_instance_all_non_deleted WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
@@ -21,10 +29,6 @@ public interface FolioInstanceAllRepository extends Repository<InstanceEntity, U
   // onlyNonDeleted, suppressedFromDiscovery = false
   @Query(value = "SELECT * FROM v_folio_instance_all_non_deleted_non_suppressed WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
   Slice<InstanceEntity> findFolioInstanceAllNonDeletedNonSuppressed(UUID fromId, UUID toId, Pageable page);
-
-  // onlyDeleted, suppressedFromDiscovery = true
-  @Query(value = "SELECT * FROM v_instance_all_folio_deleted ORDER BY id ASC", nativeQuery = true)
-  List<InstanceEntity> findFolioInstanceAllDeleted();
 
   // onlyDeleted, suppressedFromDiscovery = false
   @Query(value = "SELECT * FROM v_instance_all_folio_deleted_not_suppressed ORDER BY id ASC", nativeQuery = true)
