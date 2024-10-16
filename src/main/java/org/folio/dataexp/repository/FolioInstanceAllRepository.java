@@ -14,10 +14,6 @@ public interface FolioInstanceAllRepository extends Repository<InstanceEntity, U
   @Query(value = "SELECT * FROM v_folio_instance_all WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
   Slice<InstanceEntity> findFolioInstanceAll(UUID fromId, UUID toId, Pageable page);
 
-  // all instances, including and set for deletion, not suppressed from discovery
-  @Query(value = "SELECT * FROM v_folio_all_deleted_non_suppressed WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
-  Slice<InstanceEntity> findFolioInstanceAllDeletedNonSuppressed(UUID fromId, UUID toId, Pageable page);
-
   // all instances, including suppressed from discovery, not set for deletion
   @Query(value = "SELECT * FROM v_folio_all_non_deleted_suppressed WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC", nativeQuery = true)
   Slice<InstanceEntity> findFolioInstanceAllNonDeletedSuppressed(UUID fromId, UUID toId, Pageable page);
