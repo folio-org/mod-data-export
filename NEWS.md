@@ -2,6 +2,7 @@
 
 ### Technical tasks
 * [MDEXP-801](https://folio-org.atlassian.net/browse/MDEXP-801) Upgrade "holdings-storage" to 8.0
+* [MDEXP-797](https://folio-org.atlassian.net/browse/MDEXP-797) Update `source-storage-source-records` to `v3.2` and rename related module permission
 
 ## 03/20/2024 v5.0.0 Released
 
