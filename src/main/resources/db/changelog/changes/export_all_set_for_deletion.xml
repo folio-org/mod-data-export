@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="export_all_set_for_deletion" author="Firebird">
+    <changeSet id="export_all_set_for_deletion" author="Firebird" runOnChange="true">
         <createProcedure path="export_all_set_for_deletion.sql" relativeToChangelogFile="true" />
     </changeSet>
 

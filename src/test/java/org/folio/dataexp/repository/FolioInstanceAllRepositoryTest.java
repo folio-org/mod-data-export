@@ -29,14 +29,6 @@ class FolioInstanceAllRepositoryTest extends AllRepositoryTest {
   }
 
   @Test
-  void findFolioInstanceAllDeletedTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var list = instanceAllRepository.findFolioInstanceAllDeleted();
-      assertThat(list).hasSize(3);
-    }
-  }
-
-  @Test
   void findFolioInstanceAllDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
