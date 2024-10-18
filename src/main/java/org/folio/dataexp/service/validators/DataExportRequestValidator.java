@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dataexp.service.export.strategies.AuthorityExportStrategy.DEFAULT_AUTTHORITY_PROFILE_ID;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
 
 @Component
@@ -59,7 +60,7 @@ public class DataExportRequestValidator {
   }
 
   private boolean isDefaultAuthorityProfile(String mappingProfileId) {
-    return StringUtils.equals(mappingProfileId, "5d636597-a59d-4391-a270-4e79d5ba70e3");
+    return StringUtils.equals(mappingProfileId, DEFAULT_AUTTHORITY_PROFILE_ID);
   }
 
   private boolean isDeletedJobProfile(UUID jobProfileId) {

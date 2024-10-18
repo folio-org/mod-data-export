@@ -9,6 +9,7 @@ import static org.folio.dataexp.util.ErrorCode.ERROR_FIELDS_MAPPING_SRS;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -47,6 +48,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Log4j2
+@Getter
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
@@ -96,7 +98,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     try {
       localStorageWriter.close();
     } catch (Exception e) {
-      log.error("saveMarcToRemoteStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
+      log.error("saveMarcToLocalStorage:: Error while saving file {} to local storage for job execution {}", exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.removeExported();
       long countFailed = exportIdEntityRepository.countExportIds(exportFilesEntity.getJobExecutionId(),
@@ -121,6 +123,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   abstract List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                  UUID jobExecutionId);
+  public abstract MarcRecordEntity getMarcRecord(UUID externalId);
+
+  public abstract MappingProfile getDefaultMappingProfile();
 
   abstract GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile, ExportRequest exportRequest,
                                                 UUID jobExecutionId, ExportStrategyStatistic exportStatistic);

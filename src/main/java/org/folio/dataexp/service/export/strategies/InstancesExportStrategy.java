@@ -19,6 +19,7 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
+import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
@@ -59,6 +60,8 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
 
   protected static final String INSTANCE_MARC_TYPE = "MARC_BIB";
   protected static final String LONG_MARC_RECORD_MESSAGE = "Record is too long to be a valid MARC binary record";
+  public static final String DEFAULT_INSTANCE_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+
   private final ConsortiaService consortiaService;
   private final InstanceCentralTenantRepository instanceCentralTenantRepository;
   private final MarcInstanceRecordRepository marcInstanceRecordRepository;
@@ -178,6 +181,23 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
     var exportIdentifiers = new ExportIdentifiersForDuplicateError();
     exportIdentifiers.setIdentifierHridMessage("Instance with ID : " + id);
     return Optional.of(exportIdentifiers);
+  }
+
+  @Override
+  public MarcRecordEntity getMarcRecord(final UUID recordId) {
+    var instances = marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(Set.of(recordId),
+      INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+    if (instances.isEmpty()) {
+      log.error("getMarcRecord:: Couldn't find instance in db for ID: {}", recordId);
+      throw new DownloadRecordException("Couldn't find instance in db for ID: %s".formatted(recordId));
+    }
+    return instances.get(0);
+  }
+
+  @Override
+  public MappingProfile getDefaultMappingProfile() {
+    return mappingProfileEntityRepository.getReferenceById(
+      UUID.fromString(DEFAULT_INSTANCE_PROFILE_ID)).getMappingProfile();
   }
 
   private List<Rule> getRules(MappingProfile mappingProfile) throws TransformationRuleException {

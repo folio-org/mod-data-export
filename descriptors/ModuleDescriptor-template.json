@@ -4,7 +4,7 @@
   "requires": [
     {
       "id": "source-storage-source-records",
-      "version": "3.0"
+      "version": "3.2"
     },
     {
       "id": "users",
@@ -12,11 +12,11 @@
     },
     {
       "id": "instance-storage",
-      "version": "7.7 8.0 9.0 10.0"
+      "version": "7.7 8.0 9.0 10.0 11.0"
     },
     {
       "id": "holdings-storage",
-      "version": "4.5 5.0 6.0 7.0"
+      "version": "4.5 5.0 6.0 7.0 8.0"
     },
     {
       "id": "item-storage",
@@ -106,7 +106,7 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.sourceRecords.get",
+            "source-storage.stream.marc-record-identifiers.collection.post",
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
@@ -468,10 +468,24 @@
           ]
         },
         {
-          "methods": [ "GET" ],
+          "methods": [ 
+            "GET" 
+          ],
           "pathPattern": "/data-export/permissions-self-check",
           "permissionsRequired": ["data-export.permissions-self-check.get"],
           "modulePermissions": ["perms.users.get"]
+        },
+        {
+          "methods": [ 
+            "GET" 
+          ],
+          "pathPattern": "/data-export/download-record/{recordId}",
+          "permissionsRequired": [
+            "data-export.download-record.item.get"
+          ],
+          "modulePermissions": [
+
+          ]
         }
       ]
     },
@@ -667,6 +681,11 @@
       "description" : "Set of users permissions for self check"
     },
     {
+      "permissionName": "data-export.download-record.item.get",
+      "displayName": "Data Export - download record",
+      "description": "Entry point to download single record file in the specified format"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -698,7 +717,8 @@
         "data-export.related-users.collection.get",
         "data-export.export-deleted.post",
         "data-export.export-authority-deleted.post",
-        "data-export.permissions-self-check.get"
+        "data-export.permissions-self-check.get",
+        "data-export.download-record.item.get"
       ],
       "visible": false
     }

@@ -900,6 +900,41 @@ paths:
               schema:
                 type: string
                 example: Internal server error
+  /download-record/{recordId}:
+    get:
+      description: Download single authority or instance record by id
+      operationId: downloadRecordById
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/uuid"
+        - name: idType
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/idType"
+        - name: utf
+          in: query
+          description: "Specify whether to encode the file in UTF-8."
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A file download in binary format
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: Internal server errors
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:
@@ -907,6 +942,12 @@ components:
       format: uuid
     userPermission:
       type: string
+    idType:
+      description: "Specifies the type of record to download."
+      type: string
+      enum:
+        - AUTHORITY
+        - INSTANCE
     errors:
       $ref: 'schemas/errors.json'
     fileDefinition:
