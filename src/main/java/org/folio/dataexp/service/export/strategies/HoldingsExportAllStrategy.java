@@ -21,6 +21,7 @@ import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.processor.RuleProcessor;
 import org.folio.spring.FolioModuleMetadata;
 import org.springframework.data.domain.PageRequest;
@@ -46,10 +47,11 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
                                    HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
                                    InstanceCentralTenantRepository instanceCentralTenantRepository, FolioModuleMetadata folioModuleMetadata,
                                    HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
-                                   FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository, UserService userService) {
+                                   FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository, UserService userService,
+                                   PermissionsValidator permissionsValidator) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
       consortiaService, consortiumSearchClient, holdingsRecordEntityTenantRepository, marcInstanceRecordRepository,
-      instanceCentralTenantRepository, folioModuleMetadata, userService, holdingsRecordEntityRepository, marcRecordEntityRepository);
+      instanceCentralTenantRepository, folioModuleMetadata, userService, holdingsRecordEntityRepository, marcRecordEntityRepository, permissionsValidator);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }
