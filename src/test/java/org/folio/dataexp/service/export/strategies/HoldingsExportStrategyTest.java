@@ -14,7 +14,6 @@ import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.exception.permissions.check.ViewPermissionDoesNotExist;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
@@ -259,6 +258,7 @@ class HoldingsExportStrategyTest {
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
     when(marcInstanceRecordRepository.findByExternalIdIn("memberB", Set.of(uuidB)))
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
@@ -283,6 +283,7 @@ class HoldingsExportStrategyTest {
     when(consortiumSearchClient.getHoldingsById(uuidA.toString())).thenReturn(holdingsA);
     when(consortiumSearchClient.getHoldingsById(uuidB.toString())).thenReturn(holdingsB);
     when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var instId = UUID.randomUUID();
     when(instanceCentralTenantRepository.findInstancesByIdIn("centralTenant", Set.of(instId))).thenReturn(
       List.of(new InstanceEntity().withId(instId).withJsonb("{\n" +
@@ -322,7 +323,7 @@ class HoldingsExportStrategyTest {
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(holdings);
     when(consortiaService.getAffiliatedTenants("central", userId.toString())).thenReturn(List.of("college"));
-    doThrow(new ViewPermissionDoesNotExist()).when(permissionsValidator).checkInstanceViewPermissions("college");
+    when(permissionsValidator.checkInstanceViewPermissions("college")).thenReturn(false);
     doNothing().when(holdingsExportStrategy.entityManager).clear();
     when(userService.getUserName("central", userId.toString())).thenReturn("central_admin");
 

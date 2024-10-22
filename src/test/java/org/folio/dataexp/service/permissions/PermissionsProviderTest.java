@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -33,7 +34,8 @@ class PermissionsProviderTest {
   void getUserPermissionsTest() {
     when(permissionsSelfCheckClient.getUserPermissionsForSelfCheck()).thenReturn(List.of("some permission"));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("college")));
-    var userPerms = permissionsProvider.getUserPermissions("college");
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
+    var userPerms = permissionsProvider.getUserPermissions("college", folioExecutionContext.getUserId().toString());
     assertEquals("some permission", userPerms.get(0));
   }
 }

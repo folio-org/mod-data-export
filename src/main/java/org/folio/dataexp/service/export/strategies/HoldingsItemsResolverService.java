@@ -12,7 +12,6 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.ItemEntity;
-import org.folio.dataexp.exception.permissions.check.ViewPermissionDoesNotExist;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
@@ -73,7 +72,6 @@ public class HoldingsItemsResolverService {
   }
 
   private void retrieveHoldingsAndItemsByInstanceIdForCentralTenant(JSONObject instance, UUID instanceId, String instanceHrid, MappingProfile mappingProfile, UUID jobExecutionId) {
-    log.info("retrieveHoldingsAndItemsByInstanceIdForCentralTenant: {}", instance.toJSONString());
     var consortiumHoldings = searchConsortiumHoldings.getHoldingsById(instanceId).getHoldings();
     Map<String, List<String>> consortiaHoldingsIdsPerTenant = consortiumHoldings.stream()
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
@@ -86,14 +84,11 @@ public class HoldingsItemsResolverService {
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
       if (userTenants.contains(localTenant)) {
-
-        try {
-          log.info("entry userTenants.contains(localTenant): {}", entry);
-          permissionsValidator.checkInstanceViewPermissions(localTenant);
+        if (permissionsValidator.checkInstanceViewPermissions(localTenant)) {
           var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
           entityManager.clear();
           addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
-        } catch (ViewPermissionDoesNotExist e) {
+        } else {
           if (!errorForInstanceAlreadySaved) {
             var msgValues = List.of(instanceId.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
               localTenant);

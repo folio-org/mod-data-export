@@ -21,7 +21,7 @@ public class PermissionsProvider {
   private final FolioModuleMetadata folioModuleMetadata;
 
   @Cacheable(cacheNames = "userPermissions")
-  public List<String> getUserPermissions(String tenantId) {
+  public List<String> getUserPermissions(String tenantId, String userId) {
     try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))) {
       return permissionsSelfCheckClient.getUserPermissionsForSelfCheck();
     }

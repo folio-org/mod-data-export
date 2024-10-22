@@ -14,4 +14,5 @@ public class Constants {
   public static final String DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID = "2c9be114-6d35-4408-adac-9ead35f51a27";
   public static final String DELETED_MARC_IDS_FILE_NAME = "deleted-marc-bib-records.csv";
   public static final String DELETED_AUTHORITIES_FILE_NAME = "deleted-authority-records.csv";
+  public static final String INVENTORY_VIEW_PERMISSION = "ui-inventory.instance.view";
 }

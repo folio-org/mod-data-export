@@ -2,7 +2,6 @@ package org.folio.dataexp.service.validators;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.exception.permissions.check.ViewPermissionDoesNotExist;
 import org.folio.dataexp.service.permissions.PermissionsProvider;
 import org.folio.dataexp.service.permissions.RequiredPermissionResolver;
 import org.folio.spring.FolioExecutionContext;
@@ -17,17 +16,13 @@ public class PermissionsValidator {
   private final RequiredPermissionResolver requiredPermissionResolver;
   private final FolioExecutionContext folioExecutionContext;
 
-  public void checkInstanceViewPermissions(String tenantId) throws ViewPermissionDoesNotExist {
-    if (!isInstanceViewPermissionExists(tenantId)) {
-      log.info("checkInstanceViewPermissions throws");
-      throw new ViewPermissionDoesNotExist();
-    }
-    log.info("checkInstanceViewPermissions not throws");
+  public boolean checkInstanceViewPermissions(String tenantId) {
+    return isInstanceViewPermissionExists(tenantId);
   }
 
   public boolean isInstanceViewPermissionExists(String tenantId) {
     var readPermissionForEntity = requiredPermissionResolver.getReadPermission();
-    var userPermissions = permissionsProvider.getUserPermissions(tenantId);
+    var userPermissions = permissionsProvider.getUserPermissions(tenantId, folioExecutionContext.getUserId().toString());
     var isViewPermissionsExist = userPermissions.contains(readPermissionForEntity);
     log.info("isInstanceViewPermissionExists:: user {} has read permissions {} in tenant {}", folioExecutionContext.getUserId(),
       isViewPermissionsExist, tenantId);

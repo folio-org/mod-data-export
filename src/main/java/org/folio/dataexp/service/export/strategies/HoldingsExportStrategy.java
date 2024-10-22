@@ -28,7 +28,6 @@ import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.exception.permissions.check.ViewPermissionDoesNotExist;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
@@ -242,10 +241,9 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, folioExecutionContext.getTenantId());
       if (nonNull(curTenant)) {
         if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
-          try {
-            permissionsValidator.checkInstanceViewPermissions(curTenant);
+          if (permissionsValidator.checkInstanceViewPermissions(curTenant)) {
             idsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
-          } catch (ViewPermissionDoesNotExist e) {
+          } else {
             var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
               curTenant);
             errorLogService.saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
