@@ -36,9 +36,7 @@ import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -154,6 +152,7 @@ class HoldingsItemsResolverServiceTest {
     when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2", Set.of(holdingId2))).thenReturn(List.of());
     when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
     doNothing().when(entityManager).clear();
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
 
     var instanceJson = new JSONObject();
 
