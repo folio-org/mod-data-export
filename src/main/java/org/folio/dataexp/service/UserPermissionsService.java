@@ -1,5 +1,7 @@
 package org.folio.dataexp.service;
 
+import static org.folio.dataexp.util.Constants.INVENTORY_VIEW_PERMISSION;
+
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,9 +14,6 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-
-import static org.folio.dataexp.util.Constants.INVENTORY_VIEW_PERMISSION;
-
 
 @RequiredArgsConstructor
 @Log4j2
