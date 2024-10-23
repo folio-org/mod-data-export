@@ -67,7 +67,9 @@ public enum ErrorCode {
   ERROR_CONVERTING_TO_JSON_INSTANCE("error.convertingToJson.instance", "Error converting to json instance by id %s"),
   ERROR_DELETED_DUPLICATED_INSTANCE("error.deletedDuplicate.instance", "Instance record associated with %s has been deleted."),
   ERROR_DELETED_TOO_LONG_INSTANCE("error.deletedTooLong.instance", "Instance record with id = %s has been deleted."),
-  ERROR_NON_EXISTING_INSTANCE("error.nonExisting.instance", "%s");
+  ERROR_NON_EXISTING_INSTANCE("error.nonExisting.instance", "%s"),
+  ERROR_HOLDINGS_NO_PERMISSION("error.holdings.noPermission", "%s - the user %s does not have permissions to access the holdings record in %s data tenant."),
+  ERROR_INSTANCE_NO_PERMISSION("error.instance.noPermission", "%s the user %s does not have permissions to view holdings or items in %s data tenant.");
 
   private final String code;
   private final String description;

@@ -16,8 +16,10 @@ import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.ItemEntityTenantRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,9 +37,7 @@ import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,6 +63,8 @@ class HoldingsItemsResolverServiceTest {
   private ErrorLogService errorLogService;
   @Mock
   private EntityManager entityManager;
+  @Mock
+  private PermissionsValidator permissionsValidator;
 
   @InjectMocks
   private HoldingsItemsResolverService holdingsItemsResolverService;
@@ -151,6 +153,7 @@ class HoldingsItemsResolverServiceTest {
     when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2", Set.of(holdingId2))).thenReturn(List.of());
     when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
     doNothing().when(entityManager).clear();
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
 
     var instanceJson = new JSONObject();
 
@@ -159,6 +162,45 @@ class HoldingsItemsResolverServiceTest {
     var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
     verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_NO_AFFILIATION.getCode(), List.of(consortiumHolding3.getId(), user.getUsername(), "member3"), jobExecutionId);
+  }
+
+  @Test
+  void retrieveHoldingsAndItemsByInstanceIdForCentralTenant_whenNoPermissionForHoldingTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var user = new User();
+    user.setId(UUID.randomUUID().toString());
+    user.setUsername("username");
+
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceHrid = "instHrid";
+    var holdingId1 = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var consortiumHolding1 = new ConsortiumHolding();
+    consortiumHolding1.setInstanceId(instanceId.toString());
+    consortiumHolding1.setId(holdingId1.toString());
+    consortiumHolding1.setTenantId("member1");
+
+    var consortiumHoldings = new ConsortiumHoldingCollection();
+    consortiumHoldings.setHoldings(List.of(consortiumHolding1));
+
+    when(folioExecutionContext.getTenantId()).thenReturn("central");
+    when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
+    when(consortiaService.isCurrentTenantCentralTenant("central")).thenReturn(true);
+    when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class))).thenReturn(List.of("member1", "member2"));
+    when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
+    when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(false);
+
+    var instanceJson = new JSONObject();
+
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId, instanceHrid, mappingProfile, jobExecutionId);
+
+    var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
+    Assertions.assertNull(holdings);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_INSTANCE_NO_PERMISSION.getCode(), List.of(instanceId.toString(), user.getUsername(), "member1"), jobExecutionId);
   }
 }
 

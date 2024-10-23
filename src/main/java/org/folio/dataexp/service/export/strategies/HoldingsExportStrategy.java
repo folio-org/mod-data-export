@@ -10,6 +10,7 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_HOLDING;
+import static org.folio.dataexp.util.ErrorCode.ERROR_HOLDINGS_NO_PERMISSION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING;
@@ -37,6 +38,7 @@ import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -82,6 +84,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   protected final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
+  protected final PermissionsValidator permissionsValidator;
 
   private Map<String, Set<UUID>> tenantIdsMap;
 
@@ -238,7 +241,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, folioExecutionContext.getTenantId());
       if (nonNull(curTenant)) {
         if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
-          idsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
+          if (permissionsValidator.checkInstanceViewPermissions(curTenant)) {
+            idsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
+          } else {
+            var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
+              curTenant);
+            errorLogService.saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
+            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), msgValues.toArray()));
+          }
         } else {
           var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()), curTenant);
           errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);

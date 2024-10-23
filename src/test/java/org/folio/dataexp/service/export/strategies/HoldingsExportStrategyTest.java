@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import jakarta.persistence.EntityManager;
+import lombok.SneakyThrows;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.client.ConsortiumSearchClient;
@@ -24,6 +25,7 @@ import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.spring.FolioExecutionContext;
@@ -47,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
+import static org.folio.dataexp.util.ErrorCode.ERROR_HOLDINGS_NO_PERMISSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,6 +98,10 @@ class HoldingsExportStrategyTest {
   private InstanceCentralTenantRepository instanceCentralTenantRepository;
   @Spy
   private RuleHandler ruleHandler;
+  @Mock
+  private PermissionsValidator permissionsValidator;
+  @Mock
+  private UserService userService;
 
   @InjectMocks
   private HoldingsExportStrategy holdingsExportStrategy;
@@ -251,6 +258,7 @@ class HoldingsExportStrategyTest {
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
     when(marcInstanceRecordRepository.findByExternalIdIn("memberB", Set.of(uuidB)))
       .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var mappingProfile =  new MappingProfile();
     mappingProfile.setDefault(true);
     var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
@@ -275,6 +283,7 @@ class HoldingsExportStrategyTest {
     when(consortiumSearchClient.getHoldingsById(uuidA.toString())).thenReturn(holdingsA);
     when(consortiumSearchClient.getHoldingsById(uuidB.toString())).thenReturn(holdingsB);
     when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
+    when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var instId = UUID.randomUUID();
     when(instanceCentralTenantRepository.findInstancesByIdIn("centralTenant", Set.of(instId))).thenReturn(
       List.of(new InstanceEntity().withId(instId).withJsonb("{\n" +
@@ -294,5 +303,35 @@ class HoldingsExportStrategyTest {
     var res = holdingsExportStrategy.getGeneratedMarc(ids, mappingProfile, new ExportRequest(), UUID.randomUUID(),
       new ExportStrategyStatistic(null));
     assertThat(res.getMarcRecords()).hasSize(1);
+  }
+
+  @Test
+  @SneakyThrows
+  void getHoldingsWithInstanceAndItems_whenNotEnoughPermissionsTest() {
+    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+    var userId = UUID.randomUUID();
+    var holdings = new Holdings();
+    holdings.setTenantId("college");
+    var jobExecutionId = UUID.randomUUID();
+
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(folioExecutionContext.getTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId("central")).thenReturn("central");
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(holdings);
+    when(consortiaService.getAffiliatedTenants("central", userId.toString())).thenReturn(List.of("college"));
+    when(permissionsValidator.checkInstanceViewPermissions("college")).thenReturn(false);
+    doNothing().when(holdingsExportStrategy.entityManager).clear();
+    when(userService.getUserName("central", userId.toString())).thenReturn("central_admin");
+
+    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+
+    assertEquals(0, holdingsWithInstanceAndItems.size());
+    var msgValues = List.of(holdingId.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
+      "college");
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
   }
 }
