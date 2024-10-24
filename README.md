@@ -158,14 +158,14 @@ It is also necessary to specify variable S3_IS_AWS to determine if AWS S3 is use
 this variable is `false` and means that MinIO server is used as storage.
 This value should be `true` if AWS S3 is used.
 
-| Name                                  | Default value          | Description                                |
-|:--------------------------------------|:-----------------------|:-------------------------------------------|
-| S3_URL                                | http://127.0.0.1:9000/ | S3 url                                     |
-| S3_REGION                             | -                      | S3 region                                  |
-| S3_BUCKET                             | -                      | S3 bucket                                  |
-| S3_ACCESS_KEY_ID                      | -                      | S3 access key                              |
-| S3_SECRET_ACCESS_KEY                  | -                      | S3 secret key                              |
-| S3_IS_AWS                             | false                  | Specify if AWS S3 is used as files storage |
-| EXPORT_TMP_STORAGE                    | -                      | Volume to store exports files              |
-
+| Name                                           | Default value              | Description                                |
+|:-----------------------------------------------|:---------------------------|:-------------------------------------------|
+| S3_URL                                         | http://127.0.0.1:9000/     | S3 url                                     |
+| S3_REGION                                      | -                          | S3 region                                  |
+| S3_BUCKET                                      | -                          | S3 bucket                                  |
+| S3_ACCESS_KEY_ID                               | -                          | S3 access key                              |
+| S3_SECRET_ACCESS_KEY                           | -                          | S3 secret key                              |
+| S3_IS_AWS                                      | false                      | Specify if AWS S3 is used as files storage |
+| EXPORT_TMP_STORAGE                             | -                          | Volume to store exports files              |
+| PLATFORM                                       | okapi                      | Specifies if okapi or eureka platform      |
 

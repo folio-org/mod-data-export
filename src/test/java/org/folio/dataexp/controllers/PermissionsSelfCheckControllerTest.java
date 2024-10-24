@@ -2,7 +2,7 @@ package org.folio.dataexp.controllers;
 
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
-import org.folio.dataexp.client.UserPermissionsClient;
+import org.folio.dataexp.client.OkapiUserPermissionsClient;
 import org.folio.dataexp.domain.dto.UserPermissions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,12 +17,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PermissionsSelfCheckControllerTest extends BaseDataExportInitializer {
 
   @MockBean
-  private UserPermissionsClient userPermissionsClient;
+  private OkapiUserPermissionsClient okapiUserPermissionsClient;
 
   @Test
   @SneakyThrows
   void postCleanUpFiles() {
-    when(userPermissionsClient.getPermissions(any(String.class))).thenReturn(
+    when(okapiUserPermissionsClient.getPermissions(any(String.class))).thenReturn(
       new UserPermissions().withPermissionNames(List.of("some permission")));
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/permissions-self-check")

@@ -91,6 +91,12 @@
       "version": "5.6"
     }
   ],
+  "optional": [
+    {
+      "id": "permissions-users",
+      "version": "1.0"
+    }
+  ],
   "provides": [
     {
       "id": "data-export",
@@ -468,16 +474,19 @@
           ]
         },
         {
-          "methods": [ 
-            "GET" 
+          "methods": [
+            "GET"
           ],
           "pathPattern": "/data-export/permissions-self-check",
           "permissionsRequired": ["data-export.permissions-self-check.get"],
-          "modulePermissions": ["perms.users.get"]
+          "modulePermissions": [
+            "perms.users.get",
+            "permissions.users.item.get"
+          ]
         },
         {
-          "methods": [ 
-            "GET" 
+          "methods": [
+            "GET"
           ],
           "pathPattern": "/data-export/download-record/{recordId}",
           "permissionsRequired": [
