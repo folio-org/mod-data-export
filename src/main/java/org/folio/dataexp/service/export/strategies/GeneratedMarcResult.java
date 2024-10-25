@@ -8,9 +8,14 @@ import java.util.UUID;
 
 @Getter
 public class GeneratedMarcResult {
+  private UUID jobExecutionId;
   private List<String> marcRecords = new ArrayList<>();
   private final List<UUID> failedIds = new ArrayList<>();
   private final List<UUID> notExistIds = new ArrayList<>();
+
+  public GeneratedMarcResult(UUID jobExecutionId) {
+    this.jobExecutionId = jobExecutionId;
+  }
 
   public void setMarcRecords(List<String> marcRecords) {
     this.marcRecords = marcRecords;

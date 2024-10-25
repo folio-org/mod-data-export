@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,6 +83,7 @@ public class BaseDataExportInitializer {
   protected static final String TENANT = "diku";
   protected static final UUID DEFAULT_HOLDINGS_JOB_PROFILE = UUID.fromString("5e9835fc-0e51-44c8-8a47-f7b8fce35da7");
   protected static final UUID DEFAULT_AUTHORITY_JOB_PROFILE = UUID.fromString("56944b1c-f3f9-475b-bed0-7387c33620ce");
+  public static final UUID DEFAULT_DELETED_AUTHORITY_JOB_PROFILE = UUID.fromString("2c9be114-6d35-4408-adac-9ead35f51a27");
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
   public static final String S3_ACCESS_KEY = "minio-access-key";
   public static final String S3_SECRET_KEY = "minio-secret-key";
@@ -94,7 +96,8 @@ public class BaseDataExportInitializer {
   private static final GenericContainer<?> s3;
 
   static {
-    postgresDBContainer = new PostgreSQLContainer<>("postgres:12");
+    postgresDBContainer
+      = new PostgreSQLContainer<>(Objects.toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
     postgresDBContainer.start();
     s3 = new GenericContainer<>("minio/minio:latest")
       .withEnv("MINIO_ACCESS_KEY", S3_ACCESS_KEY)

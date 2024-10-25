@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INVALID_CQL_SYNTAX;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -36,6 +38,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredRecord;
 
 @Component
 @RequiredArgsConstructor
@@ -66,6 +69,14 @@ public class InputFileProcessor {
     }
   }
 
+  public InputStream readMarcFile(String dirName) {
+    var pathToRead = getPathToStoredRecord(dirName, "%s.mrc".formatted(dirName));
+    if (s3Client.list(pathToRead).isEmpty()) {
+      return null;
+    }
+    return s3Client.read(pathToRead);
+  }
+
   private void readCsvFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     var progress = jobExecution.getProgress();
@@ -79,7 +90,8 @@ public class InputFileProcessor {
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);
     }
     var batch = new ArrayList<ExportIdEntity>();
-    var duplicatedIds = new HashSet<UUID>();
+    var readIds = new HashSet<>();
+    var duplicatedIds = new HashMap<UUID, Integer>();
     var countOfRead = new AtomicInteger();
     try (InputStream is = s3Client.read(pathToRead); BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       reader.lines().forEach(id -> {
@@ -89,24 +101,30 @@ public class InputFileProcessor {
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
             .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
-          if (!duplicatedIds.contains(entity.getInstanceId())) {
+          if (!readIds.contains(entity.getInstanceId())) {
             batch.add(entity);
-            duplicatedIds.add(entity.getInstanceId());
+            readIds.add(entity.getInstanceId());
           } else {
             commonExportStatistic.incrementDuplicatedUUID();
+            var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 1) + 1;
+            duplicatedIds.put(entity.getInstanceId(), countDuplicated);
           }
         } catch (Exception e) {
-          log.error("Error converting {} to uuid", id);
-          commonExportStatistic.addToInvalidUUIDFormat(id);
+          log.error("Error converting {} to uuid", instanceId);
+          commonExportStatistic.addToInvalidUUIDFormat(instanceId);
         }
         if (batch.size() == BATCH_SIZE_TO_SAVE) {
           insertExportIdService.saveBatch(batch);
           progress.setReadIds(countOfRead.get());
           jobExecutionService.save(jobExecution);
           batch.clear();
-          duplicatedIds.clear();
         }
       });
+      readIds.clear();
+      for (var entry : duplicatedIds.entrySet()) {
+        errorLogService.saveGeneralErrorWithMessageValues(ERROR_DUPLICATED_IDS.getCode(), List.of(entry.getKey().toString(), Integer.toString(entry.getValue())), jobExecution.getId());
+      }
+      duplicatedIds.clear();
     } catch (Exception e) {
       commonExportStatistic.setFailedToReadInputFile(true);
       log.error("Failed to read for file definition {}", fileDefinition.getId(), e);

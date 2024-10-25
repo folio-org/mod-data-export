@@ -13,6 +13,7 @@ import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
@@ -24,14 +25,17 @@ import org.springframework.core.io.PathResource;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dataexp.util.ErrorCode.ERROR_DUPLICATED_IDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class InputFileProcessorTest extends BaseDataExportInitializer {
 
   private static final String UPLOADED_FILE_PATH_CSV = "src/test/resources/upload.csv";
+  private static final String UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV = "src/test/resources/upload_duplicated.csv";
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";
 
   @Autowired
@@ -42,6 +46,8 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
+  @MockBean
+  private ErrorLogService errorLogService;
   @MockBean
   private SearchClient searchClient;
 
@@ -71,6 +77,36 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       assertEquals(2, total);
     }
  }
+
+  @Test
+  @SneakyThrows
+  void readCsvFileIfDuplicatedTest() {
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+    fileDefinition.fileName("upload_duplicated.csv");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    fileDefinition.setJobExecutionId(UUID.randomUUID());
+
+    s3Client.createBucketIfNotExists();
+
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
+    var resource = new PathResource(UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV);
+
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      jobExecutionEntityRepository.save(jobExecutionEntity);
+      s3Client.write(path, resource.getInputStream());
+      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
+
+      var total = exportIdEntityRepository.count();
+      assertEquals(1, total);
+
+      verify(errorLogService).saveGeneralErrorWithMessageValues(ERROR_DUPLICATED_IDS.getCode(), List.of("019e8aea-212d-4d1d-957d-0abcdd0e9acd", "3"), jobExecution.getId());
+    }
+  }
 
   @Test
   @SneakyThrows

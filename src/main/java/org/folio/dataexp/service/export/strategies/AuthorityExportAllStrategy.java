@@ -6,6 +6,7 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 @Component
 public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
 
-  public AuthorityExportAllStrategy(ConsortiaService consortiaService, MarcAuthorityRecordRepository marcAuthorityRecordRepository, FolioExecutionContext context) {
-    super(consortiaService, marcAuthorityRecordRepository, context);
+  public AuthorityExportAllStrategy(ConsortiaService consortiaService, ErrorLogEntityCqlRepository errorLogEntityCqlRepository,
+                                    MarcAuthorityRecordRepository marcAuthorityRecordRepository, FolioExecutionContext context) {
+    super(consortiaService, errorLogEntityCqlRepository, marcAuthorityRecordRepository, context);
   }
 
   @Override
@@ -71,6 +73,6 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
   protected void createAndSaveMarc(Set<UUID> externalIds, List<MarcRecordEntity> marcRecords, ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile, UUID jobExecutionId, LocalStorageWriter localStorageWriter) {
     var externalIdsWithMarcRecord = new HashSet<UUID>();
-    createMarc(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
+    createAndSaveMarcFromJsonRecord(externalIds, exportStatistic, mappingProfile, jobExecutionId, externalIdsWithMarcRecord, marcRecords, localStorageWriter);
   }
 }

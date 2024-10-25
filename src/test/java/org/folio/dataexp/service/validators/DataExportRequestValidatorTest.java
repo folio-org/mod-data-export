@@ -13,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.dataexp.BaseDataExportInitializer.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +37,7 @@ class DataExportRequestValidatorTest {
 
     var exportRequest = new ExportRequest();
     exportRequest.setIdType(ExportRequest.IdTypeEnum.HOLDING);
+    exportRequest.setJobProfileId(UUID.randomUUID());
 
     assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, "uuid"));
   }
@@ -61,5 +62,26 @@ class DataExportRequestValidatorTest {
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
     var defaultAuthorityMappingProfile = "5d636597-a59d-4391-a270-4e79d5ba70e3";
     assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, defaultAuthorityMappingProfile));
+  }
+
+  @Test
+  void validateAuthorityDeletedProfileExportRequestTest() {
+    when(errorLogService.saveGeneralErrorWithMessageValues("error.onlyForSetToDeletion",
+      List.of("This profile can only be used to export authority records set for deletion"), null))
+      .thenReturn(new ErrorLog());
+    var validator = new DataExportRequestValidator(errorLogService);
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+
+    fileDefinition.setSize(500_000);
+
+    var exportRequest = new ExportRequest();
+    exportRequest.setIdType(ExportRequest.IdTypeEnum.INSTANCE);
+    exportRequest.setJobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE);
+
+    assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, "uuid"));
+
+    exportRequest.setIdType(ExportRequest.IdTypeEnum.HOLDING);
+    assertThrows(DataExportRequestValidationException.class, () -> validator.validate(exportRequest, fileDefinition, "uuid"));
   }
 }

@@ -3,6 +3,7 @@ package org.folio.dataexp.service.logs;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.dataexp.service.ConfigurationService.INVENTORY_RECORD_LINK_KEY;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
 import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
@@ -140,12 +141,13 @@ public class ErrorLogService {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
+    String inventoryLink = instance.containsKey(DELETED_KEY) && (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
     AffectedRecord affectedRecord = new AffectedRecord()
       .id(instId)
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(getInventoryRecordLink() + instId);
+      .inventoryRecordLink(inventoryLink);
     if (instId == null) {
       affectedRecord.setId("UUID cannot be determined because record is invalid: field '999' or subfield 'i' not found");
     }
@@ -170,6 +172,7 @@ public class ErrorLogService {
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
     String generalEndOfErrorMsg = " cannot be determined because instance record is not found or invalid, but still contains more than 1 SRS record";
+    String inventoryLink = instance.containsKey(DELETED_KEY) && (boolean)instance.get(DELETED_KEY) ? EMPTY : getInventoryRecordLink() + instId;
     if (instId == null) {
       instId = "UUID" + generalEndOfErrorMsg;
     }
@@ -184,7 +187,7 @@ public class ErrorLogService {
       .hrid(hrId)
       .title(title)
       .recordType(RecordTypes.INSTANCE)
-      .inventoryRecordLink(getInventoryRecordLink() + instId);
+      .inventoryRecordLink(inventoryLink);
     var errorLog = new ErrorLog()
       .errorMessageCode(errorMessageCode)
       .errorMessageValues(Collections.singletonList(errorMessage))

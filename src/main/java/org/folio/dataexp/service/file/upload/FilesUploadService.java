@@ -2,7 +2,6 @@ package org.folio.dataexp.service.file.upload;
 
 
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
@@ -29,12 +28,4 @@ public interface FilesUploadService {
    * @return {@link FileDefinition}
    */
   FileDefinition errorUploading(UUID fileDefinitionId);
-
-  /**
-   * Upload file for quick export with {@link FileDefinition}
-   *
-   * @param request        {@link QuickExportRequest}
-   * @return {@link FileDefinition}
-   */
-  FileDefinition uploadFileDependsOnTypeForQuickExport(QuickExportRequest request);
 }

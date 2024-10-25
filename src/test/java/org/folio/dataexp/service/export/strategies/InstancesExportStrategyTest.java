@@ -1,16 +1,13 @@
 package org.folio.dataexp.service.export.strategies;
 
 import jakarta.persistence.EntityManager;
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
-import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
-import org.folio.dataexp.domain.entity.ItemEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
@@ -28,6 +25,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
+import org.folio.spring.FolioExecutionContext;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -48,11 +47,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,6 +94,10 @@ class InstancesExportStrategyTest {
   private EntityManager entityManager;
   @Mock
   private ErrorLogService errorLogService;
+  @Mock
+  private HoldingsItemsResolverService holdingsItemsResolverService;
+  @Mock
+  private FolioExecutionContext folioExecutionContext;
   @Spy
   private RuleHandler ruleHandler;
 
@@ -109,7 +109,9 @@ class InstancesExportStrategyTest {
 
   @BeforeEach
   void setUp() {
+    instancesExportStrategy.errorLogService = errorLogService;
     instancesExportStrategy.entityManager = entityManager;
+    instancesExportStrategy.folioExecutionContext = folioExecutionContext;
   }
 
   @Test
@@ -121,17 +123,17 @@ class InstancesExportStrategyTest {
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIs(anySet(), anyString(), anyString())).thenReturn(new ArrayList<>(List.of(marcRecord)));
-    when(consortiaService.getCentralTenantId()).thenReturn("central");
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), anyString(), anySet())).thenReturn(new ArrayList<>(List.of(marcRecord)));
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet())).thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
 
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
 
-    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
   }
 
@@ -142,7 +144,7 @@ class InstancesExportStrategyTest {
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest());
+    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(0, actualMarcRecords.size());
   }
 
@@ -156,11 +158,23 @@ class InstancesExportStrategyTest {
     var opt = instancesExportStrategy.getIdentifiers(UUID.randomUUID());
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with HRID : 123", opt.get().getIdentifierHridMessage());
+    assertEquals("Instance with HRID: 123", opt.get().getIdentifierHridMessage());
 
     assertEquals("uuid", opt.get().getAssociatedJsonObject().getAsString("id"));
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
     assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
+  }
+
+  @Test
+  void getIdentifierMessageIfInstanceDoesNotExistTest() {
+    var instanceId  = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
+
+    var opt = instancesExportStrategy.getIdentifiers(instanceId);
+
+    assertTrue(opt.isPresent());
+    assertEquals("Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e", opt.get().getIdentifierHridMessage());
   }
 
   @Test
@@ -241,37 +255,29 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getHoldingsWithInstanceAndItemsTest() {
+  void getInstancesWithHoldingsAndItemsTest() {
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
-    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var item = "{'barcode' : 'itemBarcode'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
-    var generatedMarcResult = new GeneratedMarcResult();
+    var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
     doNothing().when(instancesExportStrategy.entityManager).clear();
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)),
         generatedMarcResult, mappingProfile);
 
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
+
     assertEquals(1, instancesWithHoldingsAndItems.size());
 
     var jsonObject = instancesWithHoldingsAndItems.get(0);
-    var holdingJson = (JSONObject)((JSONArray)jsonObject.get(HOLDINGS_KEY)).get(0);
-    assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
-
-    var itemJsonArray = (JSONArray)holdingJson.get(ITEMS_KEY);
-    assertEquals(1, itemJsonArray.size());
+    var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+    assertEquals("instHrid", instanceJson.get(HRID_KEY));
 
     assertEquals(1, generatedMarcResult.getFailedIds().size());
     assertEquals(notExistId, generatedMarcResult.getFailedIds().get(0));
@@ -280,47 +286,60 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void getHoldingsWithInstanceAndItemsIfCentralTenantExistTest() {
+  void getInstancesWithHoldingsAndItemsIfCentralTenantExistTest() {
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
     var instanceFromCentralTenant =  "{'id' : '0eaa0eef-0000-0c0e-af00-000000ebc576', 'hrid' : 'instCentralHrid'}";
-    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var item = "{'barcode' : 'itemBarcode'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var instanceEntityFromCentralTenant = InstanceEntity.builder().jsonb(instanceFromCentralTenant).id(notExistId).build();
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
-    var generatedMarcResult = new GeneratedMarcResult();
+    var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
-    when(consortiaService.getCentralTenantId()).thenReturn("central");
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
 
     var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
-    verify(holdingsRecordEntityRepository).findByInstanceIdIs(any());
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     assertEquals(2, instancesWithHoldingsAndItems.size());
 
     var jsonObject = instancesWithHoldingsAndItems.get(0);
-    var holdingJson = (JSONObject)((JSONArray)jsonObject.get(HOLDINGS_KEY)).get(0);
-    assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
-
-    var itemJsonArray = (JSONArray)holdingJson.get(ITEMS_KEY);
-    assertEquals(1, itemJsonArray.size());
+    var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+    assertEquals("instHrid", instanceJson.get(HRID_KEY));
 
     jsonObject = instancesWithHoldingsAndItems.get(1);
-    var instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
+    instanceJson = (JSONObject)jsonObject.get(INSTANCE_KEY);
     assertEquals("instCentralHrid", instanceJson.get(HRID_KEY));
 
     assertEquals(0, generatedMarcResult.getFailedIds().size());
     assertEquals(0, generatedMarcResult.getNotExistIds().size());
+  }
+
+  @Test
+  void getHoldingsWithInstanceAndItemsIfErrorConvertingInstanceToJsonTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var invalidInstanceJson = "{'id'  '1eaa1eef-1633-4c7e-af09-796315ebc576' 'hrid'  'instHrid'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(invalidInstanceJson).id(instanceId).build();
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+    doNothing().when(instancesExportStrategy.entityManager).clear();
+
+    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId)),
+      generatedMarcResult, mappingProfile);
+
+    assertEquals(0, instancesWithHoldingsAndItems.size());
+    assertEquals(1, generatedMarcResult.getFailedIds().size());
+
+    verify(errorLogService).saveGeneralError("Error converting to json instance by id 1eaa1eef-1633-4c7e-af09-796315ebc576", jobExecutionId);
   }
 
   @Test
@@ -330,24 +349,52 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
-    var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
-    var item = "{'barcode' : 'itemBarcode'}";
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     var variableField = new DataFieldImpl("tag", 'a', 'b');
 
     when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(List.of(holdingRecordEntity));
-    when(instanceWithHridEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceHridEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIn(anySet())).thenReturn(List.of(itemEntity));
+    when(holdingsItemsResolverService.isNeedUpdateWithHoldingsOrItems(isA(MappingProfile.class))).thenReturn(true);
+    doNothing().when(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     when(ruleProcessor.processFields(any(), any(), any(), anyList(), any())).thenReturn(List.of(variableField));
 
-    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile);
+    var marcFieldsByExternalId= instancesExportStrategy.getAdditionalMarcFieldsByExternalId(List.of(marcRecord), mappingProfile, UUID.randomUUID());
+
+    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
     assertNotNull(marcFieldsByExternalId);
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
 
     assertEquals("tag ab", actualMarcField.getHoldingItemsFields().get(0).toString());
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfNotRecordLongErrorTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage = "error message";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
+
+    var expectedErrorMessage = "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
+    verify(errorLogService).saveGeneralError(expectedErrorMessage, jobExecutionId);
+  }
+
+  @Test
+  void saveConvertJsonRecordToMarcRecordErrorIfErrorRecordTooLongTest() {
+    var jobExecutionId = UUID.randomUUID();
+    var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid', 'title' : 'title'}";
+    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
+    var errorMessage = "Record is too long to be a valid MARC binary record, it's length would be 113937 which is more than 99999 bytes 2024";
+
+    when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
+
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
+    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
   }
 }

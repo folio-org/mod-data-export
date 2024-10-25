@@ -337,6 +337,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errors'
+            text/plain:
+              example: "Invalid request"
         '500':
           description: Internal server errors, e.g. due to misconfiguration
           content:
@@ -797,11 +799,155 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
+  /export-deleted:
+    post:
+      description: Export of deleted MARC IDs
+      operationId: postExportDeletedMarcIds
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exportDeletedMarcIdsRequest'
+            example:
+              $ref: 'examples/exportDeletedMarcIdsRequest.json'
+      responses:
+        '200':
+          description: Data export of deleted MARC IDs completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exportDeletedMarcIdsResponse'
+              example:
+                $ref: 'examples/exportDeletedMarcIdsResponse.json'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid request parameters"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
+  /export-authority-deleted:
+    post:
+      description: Export of deleted authority records
+      operationId: postExportDeletedAuthority
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/exportAuthorityDeletedRequest'
+            example:
+              $ref: 'examples/exportAuthorityDeletedRequest.json'
+      responses:
+        '200':
+          description: Data export of deleted authority completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exportAuthorityDeletedResponse'
+              example:
+                $ref: 'examples/exportAuthorityDeletedResponse.json'
+        '400':
+          description: Bad request
+          content:
+            text/plain:
+              example: "invalid request parameters"
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors'
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              example: "Internal server error"
+  /permissions-self-check:
+    get:
+      description: Get users permissions
+      operationId: getUsersPermissions
+      responses:
+        '200':
+          description: List of actual users permissions for current tenant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/userPermission"
+        '404':
+          description: No found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Desired permissions not found
+        '500':
+          description: Internal server errors, e.g. due to misconfiguration
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Internal server error
+  /download-record/{recordId}:
+    get:
+      description: Download single authority or instance record by id
+      operationId: downloadRecordById
+      parameters:
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/uuid"
+        - name: idType
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/idType"
+        - name: utf
+          in: query
+          description: "Specify whether to encode the file in UTF-8."
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: A file download in binary format
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '500':
+          description: Internal server errors
+          content:
+            text/plain:
+              example: "Internal server error"
 components:
   schemas:
     uuid:
       type: string
       format: uuid
+    userPermission:
+      type: string
+    idType:
+      description: "Specifies the type of record to download."
+      type: string
+      enum:
+        - AUTHORITY
+        - INSTANCE
     errors:
       $ref: 'schemas/errors.json'
     fileDefinition:
@@ -930,6 +1076,14 @@ components:
       $ref: 'schemas/relatedUserCollection.json'
     timerDescriptor:
       $ref: 'schemas/okapi/TimerDescriptor.json'
+    exportDeletedMarcIdsRequest:
+      $ref: 'schemas/exportDeletedMarcIdsRequest.json'
+    exportDeletedMarcIdsResponse:
+      $ref: 'schemas/exportDeletedMarcIdsResponse.json'
+    exportAuthorityDeletedRequest:
+      $ref: 'schemas/exportAuthorityDeletedRequest.json'
+    exportAuthorityDeletedResponse:
+      $ref: 'schemas/exportAuthorityDeletedResponse.json'
 
   parameters:
     trait_queryable:
@@ -964,3 +1118,4 @@ components:
       schema:
         default: false
         type: boolean
+

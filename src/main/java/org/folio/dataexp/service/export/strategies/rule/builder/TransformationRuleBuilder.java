@@ -5,6 +5,7 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 import static org.apache.commons.lang3.StringUtils.substring;
+import static org.folio.dataexp.util.ErrorCode.ERROR_RULE_NO_INDICATORS;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
@@ -25,7 +26,6 @@ import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.service.export.strategies.translation.builder.DefaultTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder;
 import org.folio.dataexp.service.export.strategies.translation.builder.TranslationBuilder;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.TransformationFieldsConfig;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
@@ -87,7 +87,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
     .build();
 
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation, ErrorLogService errorLogService) throws TransformationRuleException {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) throws TransformationRuleException {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
     String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;
@@ -101,7 +101,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
             break;
           }
         } else {
-          throw new TransformationRuleException("Tag rule " + tagRule.getField() + " doesn't have indicators");
+          throw new TransformationRuleException(String.format(ERROR_RULE_NO_INDICATORS.getDescription(), tagRule.getField()));
         }
       }
     }

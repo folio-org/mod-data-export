@@ -17,6 +17,7 @@ import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.exception.TransformationValidationException;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,10 +36,11 @@ public class TransformationFieldsService {
   private final DisplayNameKeyBuilder displayNameKeyBuilder;
   private final FieldIdBuilder fieldIdBuilder;
   private final ReferenceDataProvider referenceDataProvider;
+  private final FolioExecutionContext folioExecutionContext;
 
   public TransformationFieldCollection getTransformationFields() {
     List<TransformationField> transformationFields = new ArrayList<>();
-    var referenceData = referenceDataProvider.getReferenceDataForTransformationFields();
+    var referenceData = referenceDataProvider.getReferenceDataForTransformationFields(folioExecutionContext.getTenantId());
     transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELDS_CONFIGS, referenceData));
     transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELDS_CONFIGS, referenceData));

@@ -14,6 +14,7 @@ import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
@@ -21,6 +22,7 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -58,6 +61,8 @@ class AbstractExportStrategyTest {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Mock
   private ExportIdEntityRepository exportIdEntityRepository;
+  @Mock
+  private InstanceEntityRepository instanceEntityRepository;
   @Mock
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Mock
@@ -79,7 +84,7 @@ class AbstractExportStrategyTest {
   @BeforeEach
   void clear(){
     ((TestExportStrategy)exportStrategy).setMarcRecords(new ArrayList<>());
-    ((TestExportStrategy)exportStrategy).setGeneratedMarcResult(new GeneratedMarcResult());
+    ((TestExportStrategy)exportStrategy).setGeneratedMarcResult(new GeneratedMarcResult(UUID.randomUUID()));
   }
 
   @Test
@@ -95,6 +100,7 @@ class AbstractExportStrategyTest {
 
     var mappingProfileEntity = new MappingProfileEntity();
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+    mappingProfileEntity.setMappingProfile(new MappingProfile());
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
       .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
@@ -106,7 +112,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     marcRecords.add(marcRecordEntity);
@@ -127,8 +133,59 @@ class AbstractExportStrategyTest {
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
 
+
+    verify(errorLogService, times(1))
+      .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode()), eq(List.of(marcRecordEntity.getId().toString())), eq(jobExecution.getId()));
+    verify(errorLogService, times(1))
+      .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()), isA(List.class), eq(jobExecution.getId()));
     verify(jobExecutionEntityRepository, times(2)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(2)).write(isA(String.class));
+  }
+
+  @Test
+  void saveMarcToLocalStorageWhenMarcJsonInvalidTest() {
+    var progress = new JobExecutionProgress();
+    var exportId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
+    var jobProfileEntity = new JobProfileEntity();
+    jobProfileEntity.setId(UUID.randomUUID());
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setJobProfileId(jobProfileEntity.getId());
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+
+    var mappingProfileEntity = new MappingProfileEntity();
+    mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+
+    JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
+      .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location").withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
+      .withFromId(UUID.randomUUID()).withToId(UUID.randomUUID()).withStatus(JobExecutionExportFilesStatus.ACTIVE);
+
+    var exportIdEntity = new ExportIdEntity().withJobExecutionId(exportFilesEntity.getJobExecutionId())
+      .withId(0).withInstanceId(exportId);
+    var json = """
+      {
+        invalid
+      }""";
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
+    var marcRecords = new ArrayList<MarcRecordEntity>();
+    marcRecords.add(marcRecordEntity);
+    ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);
+
+    var slice = new SliceImpl<>(List.of(exportIdEntity), PageRequest.of(0, 1), false);
+
+    when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class), isA(Pageable.class))).thenReturn(slice);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId())).thenReturn(jobExecution);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId())).thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId())).thenReturn(mappingProfileEntity);
+
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
+    assertEquals(0, exportStatistic.getExported());
+    assertEquals(0, exportStatistic.getDuplicatedSrs());
+    assertEquals(1, exportStatistic.getFailed());
+
+    assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
+
+    verify(errorLogService).saveGeneralError(isA(String.class), eq(jobExecution.getId()));
   }
 
   @Test
@@ -152,7 +209,7 @@ class AbstractExportStrategyTest {
       {
           "leader": "00476cy  a22001574  4500"
       }""";
-    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false);
+    var marcRecordEntity = new MarcRecordEntity(UUID.randomUUID(), exportId, json, "type", "ACTUAL", 'c', false, 0, false);
     var marcRecords = new ArrayList<MarcRecordEntity>();
     marcRecords.add(marcRecordEntity);
     ((TestExportStrategy)exportStrategy).setMarcRecords(marcRecords);
@@ -195,10 +252,11 @@ class AbstractExportStrategyTest {
     @Setter
     private List<MarcRecordEntity> marcRecords = new ArrayList<>();
     @Setter
-    private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult();
+    private GeneratedMarcResult generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
     @Override
-    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest) {
+    List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
+                                          UUID jobExecutionId) {
       return marcRecords;
     }
 
@@ -209,20 +267,30 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    Optional<ExportIdentifiersForDuplicateErrors> getIdentifiers(UUID id) {
-      var identifiers = new ExportIdentifiersForDuplicateErrors();
+    Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
+      var identifiers = new ExportIdentifiersForDuplicateError();
       identifiers.setIdentifierHridMessage("hrid123");
       return Optional.of(identifiers);
     }
 
     @Override
-    Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile) {
+    Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
       return new HashMap<>();
     }
 
     @Override
     protected LocalStorageWriter createLocalStorageWrite(JobExecutionExportFilesEntity exportFilesEntity) {
       return localStorageWriter;
+    }
+
+    @Override
+    public MarcRecordEntity getMarcRecord(UUID externalId) {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
+    }
+
+    @Override
+    public MappingProfile getDefaultMappingProfile() {
+      throw new UnsupportedOperationException("The functionality is not required for testing.");
     }
   }
 }

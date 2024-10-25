@@ -1,15 +1,24 @@
 package org.folio.dataexp.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.folio.dataexp.domain.dto.Errors;
+import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.exception.export.DownloadRecordException;
+import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.folio.dataexp.exception.file.definition.FileExtensionException;
 import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
+import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -36,6 +45,26 @@ public class DataExportExceptionHandler {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
   }
 
+  @ExceptionHandler(MappingProfileTransformationPatternException.class)
+  public ResponseEntity<Errors> handleMappingProfileValidationException(final MappingProfileTransformationPatternException e) {
+    return new ResponseEntity<>(e.getErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(MappingProfileTransformationEmptyException.class)
+  public ResponseEntity<String> handleMappingProfileTransformationEmptyException(final MappingProfileTransformationEmptyException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(MappingProfileFieldsSuppressionPatternException.class)
+  public ResponseEntity<Errors> handleMappingProfileFieldsSuppressionPatternException(final MappingProfileFieldsSuppressionPatternException e) {
+    return new ResponseEntity<>(e.getErrors(), HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(MappingProfileFieldsSuppressionException.class)
+  public ResponseEntity<Errors> handleMappingProfileFieldsSuppressionException(final MappingProfileFieldsSuppressionException e) {
+    return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
   @ExceptionHandler(DefaultJobProfileException.class)
   public ResponseEntity<String> handleDefaultJobProfileException(final DefaultJobProfileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
@@ -59,5 +88,25 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(SliceSizeValidationException.class)
   public ResponseEntity<String> handleConfigurationValidationException(final SliceSizeValidationException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<String> handleInvalidDateException() {
+    return new ResponseEntity<>("Invalid date format for payload", HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(ExportDeletedDateRangeException.class)
+  public ResponseEntity<String> handleInvalidDateRangeException(final ExportDeletedDateRangeException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(AuthorityQueryException.class)
+  public ResponseEntity<String> handleAuthorityQueryException(final AuthorityQueryException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DownloadRecordException.class)
+  public ResponseEntity<String> handleDownloadRecordException(final DownloadRecordException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

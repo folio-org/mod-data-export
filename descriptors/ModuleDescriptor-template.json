@@ -4,7 +4,7 @@
   "requires": [
     {
       "id": "source-storage-source-records",
-      "version": "3.0"
+      "version": "3.2"
     },
     {
       "id": "users",
@@ -12,11 +12,11 @@
     },
     {
       "id": "instance-storage",
-      "version": "7.7 8.0 9.0 10.0"
+      "version": "7.7 8.0 9.0 10.0 11.0"
     },
     {
       "id": "holdings-storage",
-      "version": "4.5 5.0 6.0"
+      "version": "4.5 5.0 6.0 7.0 8.0"
     },
     {
       "id": "item-storage",
@@ -85,12 +85,22 @@
     {
       "id": "search",
       "version": "0.6 1.0"
+    },
+    {
+      "id": "permissions",
+      "version": "5.6"
+    }
+  ],
+  "optional": [
+    {
+      "id": "permissions-users",
+      "version": "1.0"
     }
   ],
   "provides": [
     {
       "id": "data-export",
-      "version": "5.0",
+      "version": "5.3",
       "handlers": [
         {
           "methods": [
@@ -102,7 +112,7 @@
           ],
           "modulePermissions": [
             "users.item.get",
-            "source-storage.sourceRecords.get",
+            "source-storage.stream.marc-record-identifiers.collection.post",
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
@@ -127,7 +137,11 @@
             "user-tenants.collection.get",
             "search.resources.ids.jobs.post",
             "search.resources.ids.collection.get",
-            "search.resources.ids.jobs.get"
+            "search.resources.ids.jobs.get",
+            "consortium-search.holdings.collection.get",
+            "consortia.user-tenants.collection.get",
+            "consortium-search.holdings.item.get",
+            "data-export.permissions-self-check.get"
           ]
         },
         {
@@ -160,7 +174,11 @@
             "inventory-storage.holdings-note-types.collection.get",
             "inventory-storage.item-note-types.collection.get",
             "inventory-storage.call-number-types.collection.get",
-            "user-tenants.collection.get"
+            "user-tenants.collection.get",
+            "consortium-search.holdings.collection.get",
+            "consortia.user-tenants.collection.get",
+            "consortium-search.holdings.item.get",
+            "data-export.permissions-self-check.get"
           ]
         },
         {
@@ -429,6 +447,54 @@
           ],
           "modulePermissions": [
           ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-deleted",
+          "permissionsRequired": [
+            "data-export.export-deleted.post"
+          ],
+          "modulePermissions": [
+            "user-tenants.collection.get"
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/export-authority-deleted",
+          "permissionsRequired": [
+            "data-export.export-authority-deleted.post"
+          ],
+          "modulePermissions": [
+            "inventory-storage.authorities.collection.get",
+            "user-tenants.collection.get"
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/permissions-self-check",
+          "permissionsRequired": ["data-export.permissions-self-check.get"],
+          "modulePermissions": [
+            "perms.users.get",
+            "permissions.users.item.get"
+          ]
+        },
+        {
+          "methods": [
+            "GET"
+          ],
+          "pathPattern": "/data-export/download-record/{recordId}",
+          "permissionsRequired": [
+            "data-export.download-record.item.get"
+          ],
+          "modulePermissions": [
+
+          ]
         }
       ]
     },
@@ -609,6 +675,26 @@
       "description": "To return only users which executed export"
     },
     {
+      "permissionName": "data-export.export-deleted.post",
+      "displayName": "Data Export - deleted MARC IDs",
+      "description": "To return deleted MARC IDs"
+    },
+    {
+      "permissionName": "data-export.export-authority-deleted.post",
+      "displayName": "Data Export - deleted authorities",
+      "description": "To return deleted authorities"
+    },
+    {
+      "permissionName" : "data-export.permissions-self-check.get",
+      "displayName" : "Set of users permissions for self check",
+      "description" : "Set of users permissions for self check"
+    },
+    {
+      "permissionName": "data-export.download-record.item.get",
+      "displayName": "Data Export - download record",
+      "description": "Entry point to download single record file in the specified format"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -637,7 +723,11 @@
         "data-export.quick.export.post",
         "data-export.configuration.post",
         "data-export.export.all",
-        "data-export.related-users.collection.get"
+        "data-export.related-users.collection.get",
+        "data-export.export-deleted.post",
+        "data-export.export-authority-deleted.post",
+        "data-export.permissions-self-check.get",
+        "data-export.download-record.item.get"
       ],
       "visible": false
     }

@@ -14,5 +14,5 @@ public class Constants {
   public static final String TITLE_KEY = "title";
   public static final String HOLDINGS_KEY = "holdings";
   public static final String ITEMS_KEY = "items";
-  public static final String DELETED_AUDIT_RECORD = "record";
+  public static final String DELETED_KEY = "deleted";
 }

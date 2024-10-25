@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import lombok.extern.log4j.Log4j2;
+import org.folio.dataexp.client.ConsortiumSearchClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
@@ -8,16 +9,21 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.FolioHoldingsAllRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcHoldingsAllRepository;
+import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
+import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
-import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.processor.RuleProcessor;
+import org.folio.spring.FolioModuleMetadata;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -36,12 +42,16 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   private final MarcHoldingsAllRepository marcHoldingsAllRepository;
 
   public HoldingsExportAllStrategy(InstanceEntityRepository instanceEntityRepository, ItemEntityRepository itemEntityRepository,
-      RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
-      ErrorLogService errorLogService, HoldingsRecordEntityRepository holdingsRecordEntityRepository,
-      MarcRecordEntityRepository marcRecordEntityRepository, FolioHoldingsAllRepository folioHoldingsAllRepository,
-      MarcHoldingsAllRepository marcHoldingsAllRepository) {
+                                   RuleFactory ruleFactory, RuleProcessor ruleProcessor, RuleHandler ruleHandler, ReferenceDataProvider referenceDataProvider,
+                                   ConsortiaService consortiaService, ConsortiumSearchClient consortiumSearchClient,
+                                   HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository, MarcInstanceRecordRepository marcInstanceRecordRepository,
+                                   InstanceCentralTenantRepository instanceCentralTenantRepository, FolioModuleMetadata folioModuleMetadata,
+                                   HoldingsRecordEntityRepository holdingsRecordEntityRepository, MarcRecordEntityRepository marcRecordEntityRepository,
+                                   FolioHoldingsAllRepository folioHoldingsAllRepository, MarcHoldingsAllRepository marcHoldingsAllRepository, UserService userService,
+                                   PermissionsValidator permissionsValidator) {
     super(instanceEntityRepository, itemEntityRepository, ruleFactory, ruleProcessor, ruleHandler, referenceDataProvider,
-        errorLogService, holdingsRecordEntityRepository, marcRecordEntityRepository);
+      consortiaService, consortiumSearchClient, holdingsRecordEntityTenantRepository, marcInstanceRecordRepository,
+      instanceCentralTenantRepository, folioModuleMetadata, userService, holdingsRecordEntityRepository, marcRecordEntityRepository, permissionsValidator);
     this.folioHoldingsAllRepository = folioHoldingsAllRepository;
     this.marcHoldingsAllRepository = marcHoldingsAllRepository;
   }
@@ -133,14 +143,14 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   private void processMarcHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<MarcRecordEntity> marcRecords, LocalStorageWriter localStorageWriter) {
     var externalIds = marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
-    createMarc(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
+    createAndSaveMarcFromJsonRecord(externalIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(), new HashSet<>(),
         marcRecords, localStorageWriter);
   }
 
   private void processFolioHoldings(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       List<HoldingsRecordEntity> folioHoldings, LocalStorageWriter localStorageWriter) {
     var result = getGeneratedMarc(folioHoldings, mappingProfile, exportFilesEntity.getJobExecutionId());
-    saveMarc(result, exportStatistic, localStorageWriter);
+    createAndSaveGeneratedMarc(result, exportStatistic, localStorageWriter);
   }
 
   private Slice<HoldingsRecordEntity> nextFolioSlice(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, Pageable pageble) {
@@ -193,7 +203,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
 
   private GeneratedMarcResult getGeneratedMarc(List<HoldingsRecordEntity> holdings, MappingProfile mappingProfile,
        UUID jobExecutionId) {
-    var result = new GeneratedMarcResult();
+    var result = new GeneratedMarcResult(jobExecutionId);
     var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
     var holdingsIds = holdings.stream().map(HoldingsRecordEntity::getId).collect(Collectors.toSet());
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
