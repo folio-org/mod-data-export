@@ -40,7 +40,7 @@
 
     <folio-spring-base.version>8.1.0</folio-spring-base.version>
     <folio-spring-cql.version>8.1.0</folio-spring-cql.version>
-    <generate-marc-utils-version>1.9.0-SNAPSHOT</generate-marc-utils-version>
+    <generate-marc-utils-version>1.9.0</generate-marc-utils-version>
     <apache-commons-io.version>2.11.0</apache-commons-io.version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
