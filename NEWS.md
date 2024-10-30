@@ -1,8 +1,75 @@
-## v5.1.0 Unreleased
+## v5.2.0 Unreleased
+
+## 10/30/2024 v5.1.0 Released
+
+This release contains logic for permissions handling, improvement for export all, bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.4...v5.1.0)
+
+### Stories
+* [MDEXP-802](https://folio-org.atlassian.net/browse/MDEXP-802) Support Eureka permissions model for data export
+* [MDEXP-798](https://folio-org.atlassian.net/browse/MDEXP-798) Authority download implementation as mrc file
+* [MDEXP-793](https://folio-org.atlassian.net/browse/MDEXP-793) Export all - Set LDR05 to "d" for records set for deletion
+* [MDEXP-787](https://folio-org.atlassian.net/browse/MDEXP-787) Export all - Combine "error.nonExisting.instance" and "error.deletedDuplicate.instance" errors
+* [MDEXP-785](https://folio-org.atlassian.net/browse/MDEXP-785) Set LDR05 to "d" for records set for deletion
+* [MDEXP-783](https://folio-org.atlassian.net/browse/MDEXP-783) Slow Queries when checking deleted records in tables mod_inventory_storage.audit_instance and mod_inventory_storage.audit_holdings_record for Data-Export-All
+* [MDEXP-770](https://folio-org.atlassian.net/browse/MDEXP-770) Provide missing error messages and clean up existing errors for data export
+* [MDEXP-750](https://folio-org.atlassian.net/browse/MDEXP-750) Create environment variable for volume to store files in mod-data-export
+* [MDEXP-742](https://folio-org.atlassian.net/browse/MDEXP-742) Exclude fields from export records
+* [MDEXP-730](https://folio-org.atlassian.net/browse/MDEXP-730) MARC Search Client
+* [MDEXP-726](https://folio-org.atlassian.net/browse/MDEXP-726) Extend mapping profile schema
+* [MDEXP-695](https://folio-org.atlassian.net/browse/MDEXP-695) Export Instances with Custom Export Profile from Central Tenant
+* [MDEXP-681](https://folio-org.atlassian.net/browse/MDEXP-681) Ability to export deleted MARC authority records - support in ECS environment
 
 ### Technical tasks
 * [MDEXP-801](https://folio-org.atlassian.net/browse/MDEXP-801) Upgrade "holdings-storage" to 8.0
 * [MDEXP-797](https://folio-org.atlassian.net/browse/MDEXP-797) Update `source-storage-source-records` to `v3.2` and rename related module permission
+
+### Bug Fixes
+* [MDEXP-777](https://issues.folio.org/browse/MDEXP-777) ECS | Export all Instances with Custom profile includes NoAffiliation error while User has affiliations with all tenants
+* [MDEXP-764](https://issues.folio.org/browse/MDEXP-764) Export with the file containing mix of deleted and not deleted authorities ids stuck in Progress or executed for long time
+* [MDEXP-758](https://issues.folio.org/browse/MDEXP-758) Deleted authority export job profile is absent on https://folio-testing-sprint-fs09000000.ci.folio.org/ environment
+* [MDEXP-757](https://issues.folio.org/browse/MDEXP-757) Not all errors listed have details in error logs
+* [MDEXP-756](https://issues.folio.org/browse/MDEXP-756) "Error.recordIsTooLong" error is not displayed on Error log page for Custom profile with SRS
+* [MDEXP-740](https://issues.folio.org/browse/MDEXP-740) Export all - Number of duplicates reported in "Failed" column doesn't correspond with the number of duplicates on Error logs page
+
+## 04/17/2024 v5.0.4 Released
+
+This release contains marking default authorities and deletion of error_logs where 'jobExecutionId' is empty
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.3...v5.0.4)
+
+### Technical tasks
+* [MDEXP-753](https://folio-org.atlassian.net/browse/MDEXP-753) Automate manual marking default authorities profiles as default
+* [MDEXP-752](https://folio-org.atlassian.net/browse/MDEXP-752) Automate manual deletion of error_logs where 'jobExecutionId' = ''
+
+## 04/15/2024 v5.0.3 Released
+
+This release contains aws-sdk and folio-s3-client versions upgrading
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.2...v5.0.3)
+
+## 04/05/2024 v5.0.2 Released
+
+This release contains fixing for file saving
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.1...v5.0.2)
+
+### Bug fixes
+* [MDEXP-746](https://folio-org.atlassian.net/browse/MDEXP-746) Files larger 2Gb cannot be completely saved
+
+## 04/03/2024 v5.0.1 Released
+
+This release contains minor improvements and bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.0.0...v5.0.1)
+
+### Bug fixes
+* [MDEXP-743](https://folio-org.atlassian.net/browse/MDEXP-743) Unhandled error when id is missing in POST /file-definition request's payload
+* [MDEXP-739](https://folio-org.atlassian.net/browse/MDEXP-739) mod-data-export documentation updating
+
+### Technical tasks
+* [MDEXP-741](https://folio-org.atlassian.net/browse/MDEXP-741) Data export should provide UnprocessableEntity response according karate scenarios
 
 ## 03/20/2024 v5.0.0 Released
 
