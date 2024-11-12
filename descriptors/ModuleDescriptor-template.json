@@ -83,10 +83,6 @@
       "version": "2.2"
     },
     {
-      "id": "consortium",
-      "version": "1.1"
-    },
-    {
       "id": "loan-types",
       "version": "2.3"
     },
