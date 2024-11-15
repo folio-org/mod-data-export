@@ -7,6 +7,7 @@ import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.integration.XOkapiHeaders;
 
 import java.util.Collection;
 import java.util.HashMap;
