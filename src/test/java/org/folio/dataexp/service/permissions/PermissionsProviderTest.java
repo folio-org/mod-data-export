@@ -2,7 +2,7 @@ package org.folio.dataexp.service.permissions;
 
 
 import org.folio.dataexp.client.PermissionsSelfCheckClient;
-import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.junit.jupiter.api.Test;
