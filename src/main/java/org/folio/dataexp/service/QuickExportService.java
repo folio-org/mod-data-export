@@ -65,6 +65,12 @@ public class QuickExportService {
   }
 
   private UUID getDefaultJobProfileId(QuickExportRequest quickExportRequest) {
+    var predefinedId = quickExportRequest.getJobProfileId();
+
+    if (predefinedId != null) {
+      return predefinedId;
+    }
+    
     var ids = jobProfileEntityRepository.findIdOfDefaultJobProfileByName(quickExportRequest.getRecordType().getValue().toLowerCase());
     if (ids.isEmpty()) {
       log.error("No default job profile found by the following recordType: {}", quickExportRequest.getRecordType());
