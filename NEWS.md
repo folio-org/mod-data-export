@@ -1,5 +1,19 @@
 ## v5.2.0 Unreleased
 
+## 11/15/2024 v5.1.1 Released
+
+This release contains dependency upgrades, bug fix
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.0...v5.1.1)
+
+### Technical tasks
+* [MDEXP-806](https://folio-org.atlassian.net/browse/MDEXP-806) Upgrade deps for Ramsons: Spring Boot 3.3.4, folio-spring-support 8.2.0, RMB 35.3.0
+
+### Bug Fixes
+* [MDEXP-811](https://issues.folio.org/browse/MDEXP-811) Missing interface dependencies in module descriptor
+* [MDEXP-810](https://issues.folio.org/browse/MDEXP-810) x-okapi-tenant header duplication
+
+
 ## 10/30/2024 v5.1.0 Released
 
 This release contains logic for permissions handling, improvement for export all, bug fixes
