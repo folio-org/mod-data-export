@@ -1,5 +1,14 @@
 ## v5.2.0 Unreleased
 
+## 11/27/2024 v5.1.2 Released
+
+This release contains bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.1...v5.1.2)
+
+### Bug Fixes
+* [MDEXP-815](https://issues.folio.org/browse/MDEXP-815) Eureka | Quick export of MARC authority is done with wrong profile on bugfest non-ECS, ECS environment
+
 ## 11/15/2024 v5.1.1 Released
 
 This release contains dependency upgrades, bug fix
