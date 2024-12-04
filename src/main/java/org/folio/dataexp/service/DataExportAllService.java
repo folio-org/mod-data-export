@@ -1,8 +1,10 @@
 package org.folio.dataexp.service;
 
-import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -50,8 +52,12 @@ public class DataExportAllService {
 
   private UUID getDefaultJobProfileId(ExportAllRequest exportAllRequest) {
     if (nonNull(exportAllRequest.getIdType())) {
-      return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(exportAllRequest.getIdType().getValue()).get(0);
+      return switch (exportAllRequest.getIdType()) {
+        case INSTANCE -> UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID);
+        case HOLDING -> UUID.fromString(DEFAULT_HOLDINGS_JOB_PROFILE_ID);
+        case AUTHORITY -> UUID.fromString(DEFAULT_AUTHORITY_JOB_PROFILE_ID);
+      };
     }
-    return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(ExportRequest.IdTypeEnum.INSTANCE.getValue()).get(0);
+    return UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID);
   }
 }
