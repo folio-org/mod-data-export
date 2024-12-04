@@ -11,7 +11,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,7 +22,6 @@ public class DataExportAllService {
 
   private final FileDefinitionsService fileDefinitionsService;
   private final DataExportService dataExportService;
-  private final JobProfileEntityRepository jobProfileEntityRepository;
 
   public void postDataExportAll(ExportAllRequest exportAllRequest) {
     var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(exportAllRequest.getIdType() + "-all.csv");
