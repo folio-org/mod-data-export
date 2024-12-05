@@ -1,7 +1,7 @@
 package org.folio.dataexp.service.permissions;
 
 
-import org.folio.dataexp.client.PermissionsSelfCheckClient;
+import org.folio.dataexp.service.UserPermissionsService;
 import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 class PermissionsProviderTest {
 
   @Mock
-  private PermissionsSelfCheckClient permissionsSelfCheckClient;
+  private UserPermissionsService userPermissionsService;
   @Mock
   private FolioExecutionContext folioExecutionContext;
   @Mock
@@ -32,7 +32,7 @@ class PermissionsProviderTest {
 
   @Test
   void getUserPermissionsTest() {
-    when(permissionsSelfCheckClient.getUserPermissionsForSelfCheck()).thenReturn(List.of("some permission"));
+    when(userPermissionsService.getPermissions()).thenReturn(List.of("some permission"));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("college")));
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     var userPerms = permissionsProvider.getUserPermissions("college", folioExecutionContext.getUserId().toString());

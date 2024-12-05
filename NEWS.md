@@ -1,5 +1,15 @@
 ## v5.2.0 Unreleased
 
+## 12/5/2024 v5.1.3 Released
+
+This release contains bug fixes
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.2...v5.1.3)
+
+### Bug Fixes
+* [EUREKA-529](https://folio-org.atlassian.net/browse/EUREKA-529) Eureka  | Export of a large file with 100K instances is stuck in progress in Data Export app
+
+
 ## 11/27/2024 v5.1.2 Released
 
 This release contains bug fixes

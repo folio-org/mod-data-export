@@ -169,7 +169,9 @@
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
             "consortium-search.holdings.item.get",
-            "data-export.permissions-self-check.get"
+            "data-export.permissions-self-check.get",
+            "perms.users.get",
+            "permissions.users.item.get"
           ]
         },
         {
@@ -206,7 +208,9 @@
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
             "consortium-search.holdings.item.get",
-            "data-export.permissions-self-check.get"
+            "data-export.permissions-self-check.get",
+            "perms.users.get",
+            "permissions.users.item.get"
           ]
         },
         {
@@ -755,7 +759,9 @@
         "data-export.export-deleted.post",
         "data-export.export-authority-deleted.post",
         "data-export.permissions-self-check.get",
-        "data-export.download-record.item.get"
+        "data-export.download-record.item.get",
+        "perms.users.get",
+        "permissions.users.item.get"
       ],
       "visible": false
     }
