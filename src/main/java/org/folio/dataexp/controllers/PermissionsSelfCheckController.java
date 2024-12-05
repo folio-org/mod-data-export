@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/data-export")
 @RequiredArgsConstructor
-@Log4j2
+@Deprecated
 public class PermissionsSelfCheckController implements org.folio.dataexp.rest.resource.PermissionsSelfCheckApi {
 
   private final UserPermissionsService userPermissionsService;
