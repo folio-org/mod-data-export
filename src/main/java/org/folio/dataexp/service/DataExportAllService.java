@@ -1,15 +1,16 @@
 package org.folio.dataexp.service;
 
-import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
-import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -21,7 +22,6 @@ public class DataExportAllService {
 
   private final FileDefinitionsService fileDefinitionsService;
   private final DataExportService dataExportService;
-  private final JobProfileEntityRepository jobProfileEntityRepository;
 
   public void postDataExportAll(ExportAllRequest exportAllRequest) {
     var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0).fileName(exportAllRequest.getIdType() + "-all.csv");
@@ -50,8 +50,12 @@ public class DataExportAllService {
 
   private UUID getDefaultJobProfileId(ExportAllRequest exportAllRequest) {
     if (nonNull(exportAllRequest.getIdType())) {
-      return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(exportAllRequest.getIdType().getValue()).get(0);
+      return switch (exportAllRequest.getIdType()) {
+        case INSTANCE -> UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID);
+        case HOLDING -> UUID.fromString(DEFAULT_HOLDINGS_JOB_PROFILE_ID);
+        case AUTHORITY -> UUID.fromString(DEFAULT_AUTHORITY_JOB_PROFILE_ID);
+      };
     }
-    return jobProfileEntityRepository.findIdOfDefaultJobProfileByName(ExportRequest.IdTypeEnum.INSTANCE.getValue()).get(0);
+    return UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID);
   }
 }

@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -70,16 +73,15 @@ public class QuickExportService {
     if (predefinedId != null) {
       return predefinedId;
     }
-    
-    var ids = jobProfileEntityRepository.findIdOfDefaultJobProfileByName(quickExportRequest.getRecordType().getValue().toLowerCase());
-    if (ids.isEmpty()) {
-      log.error("No default job profile found by the following recordType: {}", quickExportRequest.getRecordType());
-      throw new DataExportRequestValidationException("No default job profile found by the following recordType: " + quickExportRequest.getRecordType());
-    }
-    if (ids.size() > 1) {
-      log.warn("More than 1 job profile found by the following recordType: {}, only first one will be used: {}",
-        quickExportRequest.getRecordType(), ids.get(0));
-    }
-    return ids.get(0);
+
+    return switch (quickExportRequest.getRecordType()) {
+      case INSTANCE -> UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID);
+      case HOLDINGS -> UUID.fromString(DEFAULT_HOLDINGS_JOB_PROFILE_ID);
+      case AUTHORITY -> UUID.fromString(DEFAULT_AUTHORITY_JOB_PROFILE_ID);
+      default -> {
+        log.error("No default job profile found by the following recordType: {}", quickExportRequest.getRecordType());
+        throw new DataExportRequestValidationException("No default job profile found by the following recordType: " + quickExportRequest.getRecordType());
+      }
+    };
   }
 }
