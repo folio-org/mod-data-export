@@ -40,6 +40,7 @@ public class ConsortiaService {
     var consortia = consortiumClient.getConsortia();
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
+      log.info("<EUREKA> getAffiliatedTenants:: consortia {} tenant {} user {}", consortiaList.get(0).getId(), currentTenantId, userId);
       var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0).getId(), userId, Integer.MAX_VALUE);
       return userTenants.getUserTenants().stream().map(UserTenant::getTenantId).toList();
     }
