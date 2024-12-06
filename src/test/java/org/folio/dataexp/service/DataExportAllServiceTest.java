@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import com.github.jknack.handlebars.internal.Files;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
+import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -16,7 +17,11 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.nio.charset.Charset;
@@ -26,8 +31,12 @@ import java.util.UUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 
 class DataExportAllServiceTest extends ServiceInitializer {
 
@@ -39,6 +48,13 @@ class DataExportAllServiceTest extends ServiceInitializer {
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Autowired
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+
+  @Mock
+  private FileDefinitionsService mockFileDefinitionService;
+  @Mock
+  private DataExportService mockDataExportService;
+  @InjectMocks
+  private DataExportAllService mockDataExportAllService;
 
   private static final UUID CUSTOM_INSTANCE_MAPPING_PROFILE_ID = UUID.randomUUID();
   private static final UUID CUSTOM_HOLDINGS_MAPPING_PROFILE_ID = UUID.randomUUID();
@@ -949,6 +965,24 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
       });
     }
+  }
+
+  @ParameterizedTest
+  @EnumSource(value = ExportAllRequest.IdTypeEnum.class)
+  void getDefaultJobProfileIdTest(ExportAllRequest.IdTypeEnum idType) {
+    var exportAllRequest = new ExportAllRequest().idType(idType);
+    mockDataExportAllService.postDataExportAll(exportAllRequest);
+    var exportRequestArgumentCaptor = ArgumentCaptor.forClass(ExportRequest.class);
+    verify(mockDataExportService).postDataExport(exportRequestArgumentCaptor.capture());
+    String expected = null;
+    if (idType == ExportAllRequest.IdTypeEnum.HOLDING) {
+      expected = DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+    } else if (idType == ExportAllRequest.IdTypeEnum.AUTHORITY) {
+      expected = DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+    } else if (idType == ExportAllRequest.IdTypeEnum.INSTANCE) {
+      expected = DEFAULT_INSTANCE_JOB_PROFILE_ID;
+    }
+    assertEquals(UUID.fromString(expected), exportRequestArgumentCaptor.getValue().getJobProfileId());
   }
 
   private void createCustomInstanceJobProfile() {
