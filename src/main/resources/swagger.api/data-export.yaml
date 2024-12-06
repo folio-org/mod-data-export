@@ -873,33 +873,6 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
-  /permissions-self-check:
-    get:
-      description: Get users permissions
-      operationId: getUsersPermissions
-      responses:
-        '200':
-          description: List of actual users permissions for current tenant
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/userPermission"
-        '404':
-          description: No found
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: Desired permissions not found
-        '500':
-          description: Internal server errors, e.g. due to misconfiguration
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: Internal server error
   /download-record/{recordId}:
     get:
       description: Download single authority or instance record by id
@@ -940,8 +913,6 @@ components:
     uuid:
       type: string
       format: uuid
-    userPermission:
-      type: string
     idType:
       description: "Specifies the type of record to download."
       type: string
