@@ -169,7 +169,6 @@
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
             "consortium-search.holdings.item.get",
-            "data-export.permissions-self-check.get",
             "perms.users.get",
             "permissions.users.item.get"
           ]
@@ -208,7 +207,6 @@
             "consortium-search.holdings.collection.get",
             "consortia.user-tenants.collection.get",
             "consortium-search.holdings.item.get",
-            "data-export.permissions-self-check.get",
             "perms.users.get",
             "permissions.users.item.get"
           ]
@@ -509,17 +507,6 @@
           "methods": [
             "GET"
           ],
-          "pathPattern": "/data-export/permissions-self-check",
-          "permissionsRequired": ["data-export.permissions-self-check.get"],
-          "modulePermissions": [
-            "perms.users.get",
-            "permissions.users.item.get"
-          ]
-        },
-        {
-          "methods": [
-            "GET"
-          ],
           "pathPattern": "/data-export/download-record/{recordId}",
           "permissionsRequired": [
             "data-export.download-record.item.get"
@@ -717,11 +704,6 @@
       "description": "To return deleted authorities"
     },
     {
-      "permissionName" : "data-export.permissions-self-check.get",
-      "displayName" : "Set of users permissions for self check",
-      "description" : "Set of users permissions for self check"
-    },
-    {
       "permissionName": "data-export.download-record.item.get",
       "displayName": "Data Export - download record",
       "description": "Entry point to download single record file in the specified format"
@@ -758,7 +740,6 @@
         "data-export.related-users.collection.get",
         "data-export.export-deleted.post",
         "data-export.export-authority-deleted.post",
-        "data-export.permissions-self-check.get",
         "data-export.download-record.item.get",
         "perms.users.get",
         "permissions.users.item.get"

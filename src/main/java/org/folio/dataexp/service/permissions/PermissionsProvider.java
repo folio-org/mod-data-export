@@ -2,7 +2,6 @@ package org.folio.dataexp.service.permissions;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.client.PermissionsSelfCheckClient;
 import org.folio.dataexp.service.UserPermissionsService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
