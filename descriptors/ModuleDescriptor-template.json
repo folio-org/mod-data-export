@@ -111,6 +111,10 @@
       "version": "0.6 1.0"
     },
     {
+      "id": "consortium-search",
+      "version": "2.1"
+    },
+    {
       "id": "permissions",
       "version": "5.6"
     }
