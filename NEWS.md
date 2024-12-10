@@ -1,5 +1,14 @@
 ## v5.2.0 Unreleased
 
+## 12/10/2024 v5.1.4 Released
+
+This release contains bug fixes, updates for missing interfaces.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.3...v5.1.4)
+
+### Bug Fixes
+* [MDEXP-817](https://folio-org.atlassian.net/browse/MDEXP-817) Deleted authority export job profile is displayed for Export all authorities done without specifying profile id on Eureka environment
+
 ## 12/5/2024 v5.1.3 Released
 
 This release contains bug fixes
