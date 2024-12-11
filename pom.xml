@@ -38,8 +38,8 @@
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
-    <folio-spring-base.version>8.2.2</folio-spring-base.version>
-    <folio-spring-cql.version>8.2.2</folio-spring-cql.version>
+    <folio-spring-base.version>8.2.1</folio-spring-base.version>
+    <folio-spring-cql.version>8.2.1</folio-spring-cql.version>
     <generate-marc-utils-version>1.9.0</generate-marc-utils-version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
