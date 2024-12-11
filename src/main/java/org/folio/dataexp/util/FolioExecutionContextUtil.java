@@ -8,6 +8,7 @@ import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
+import org.folio.spring.utils.FolioExecutionContextUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,13 +20,6 @@ public class FolioExecutionContextUtil {
   private FolioExecutionContextUtil(){}
 
   public static FolioExecutionContext prepareContextForTenant(String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
-    if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
-      // create deep copy of headers in order to make switching context thread safe
-      var headersCopy = SerializationUtils.clone((HashMap<String, Collection<String>>) context.getAllHeaders());
-      headersCopy.put(XOkapiHeaders.TENANT, List.of(tenantId));
-      log.info("FOLIO context initialized with tenant {}", tenantId);
-      return new DefaultFolioExecutionContext(folioModuleMetadata, headersCopy);
-    }
-    throw new IllegalStateException("Okapi headers not provided");
+    return FolioExecutionContextUtils.prepareContextForTenant(tenantId, folioModuleMetadata, context);
   }
 }
