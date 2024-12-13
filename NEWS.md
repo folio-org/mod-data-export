@@ -1,5 +1,14 @@
 ## v5.2.0 Unreleased
 
+## 12/10/2024 v5.1.5 Released
+
+This release contains bug fixes.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.4...v5.1.5)
+
+### Bug Fixes
+* [MDEXP-818](https://folio-org.atlassian.net/browse/MDEXP-818) Upgrade deps fixing vulnerabilities for Ramsons
+
 ## 12/10/2024 v5.1.4 Released
 
 This release contains bug fixes, updates for missing interfaces.
