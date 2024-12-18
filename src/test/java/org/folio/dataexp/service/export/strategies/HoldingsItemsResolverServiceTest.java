@@ -136,8 +136,13 @@ class HoldingsItemsResolverServiceTest {
     consortiumHolding3.setId(UUID.randomUUID().toString());
     consortiumHolding3.setTenantId("member3");
 
+    var consortiumHolding4 = new ConsortiumHolding();
+    consortiumHolding4.setInstanceId(instanceId.toString());
+    consortiumHolding4.setId(UUID.randomUUID().toString());
+    consortiumHolding4.setTenantId("member4");
+
     var consortiumHoldings = new ConsortiumHoldingCollection();
-    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2, consortiumHolding3));
+    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2, consortiumHolding3, consortiumHolding4));
 
     HashMap<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put("header", List.of("value"));
@@ -161,7 +166,7 @@ class HoldingsItemsResolverServiceTest {
 
     var holdings = (JSONArray)instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_NO_AFFILIATION.getCode(), List.of(consortiumHolding3.getId(), user.getUsername(), "member3"), jobExecutionId);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(ErrorCode.ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(), List.of(instanceId.toString(), user.getUsername(), "member3,member4"), jobExecutionId);
   }
 
   @Test
