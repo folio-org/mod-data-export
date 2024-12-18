@@ -180,7 +180,6 @@ class HoldingsItemsResolverServiceTest {
     var holding1 = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId1 = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
 
-    var item = "{'barcode' : 'itemBarcode'}";
     var holdingRecordEntity1 = HoldingsRecordEntity.builder().jsonb(holding1).id(holdingId1).instanceId(instanceId).build();
 
     var mappingProfile = new MappingProfile();
