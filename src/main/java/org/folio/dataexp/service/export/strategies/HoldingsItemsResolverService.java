@@ -77,38 +77,44 @@ public class HoldingsItemsResolverService {
       .filter(h -> !folioExecutionContext.getTenantId().equals(h.getTenantId()))
       .collect(Collectors.groupingBy(ConsortiumHolding::getTenantId, Collectors.mapping(ConsortiumHolding::getId, Collectors.toList())));
     removeNotAffiliatedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
-    boolean errorForInstanceAlreadySaved = false;
-    log.info("consortiaHoldingsIdsPerTenant: {}", consortiaHoldingsIdsPerTenant);
+    removeNotPermittedTenants(consortiaHoldingsIdsPerTenant, instanceId, jobExecutionId);
     for (var entry : consortiaHoldingsIdsPerTenant.entrySet()) {
       log.info("entry: {}", entry);
       var localTenant = entry.getKey();
       var holdingsIds = entry.getValue().stream().map(UUID::fromString).collect(Collectors.toSet());
-      if (permissionsValidator.checkInstanceViewPermissions(localTenant)) {
-        var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
-        entityManager.clear();
-        addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
-      } else {
-        if (!errorForInstanceAlreadySaved) {
-          var msgValues = List.of(instanceId.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
-            localTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_INSTANCE_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
-          log.error(format(ERROR_INSTANCE_NO_PERMISSION.getDescription(), msgValues.toArray()));
-          errorForInstanceAlreadySaved = true;
-        }
-      }
+      var holdingsEntities = holdingsRecordEntityTenantRepository.findByIdIn(localTenant, holdingsIds);
+      entityManager.clear();
+      addHoldingsAndItems(instance, holdingsEntities, instanceHrid, mappingProfile, localTenant);
     }
   }
 
-  public void removeNotAffiliatedTenants(Map<String, List<String>> consortiaHoldingsIdsPerTenant, UUID instanceId, UUID jobExecutionId) {
+  private void removeNotAffiliatedTenants(Map<String, List<String>> consortiaHoldingsIdsPerTenant, UUID instanceId, UUID jobExecutionId) {
     var userTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    var notAffiliatedTenants = consortiaHoldingsIdsPerTenant.keySet().stream().filter(tenant -> !userTenants.contains(tenant)).sorted().toList();
-    var notAffiliatedTenantsAsStr = String.join(",", notAffiliatedTenants);
-    var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    var errorMessageValues = List.of(instanceId.toString(), userName, notAffiliatedTenantsAsStr);
-    errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(), errorMessageValues, jobExecutionId);
-    var errorMessage = String.format(ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getDescription(), instanceId, userName, notAffiliatedTenantsAsStr);
-    log.error(errorMessage);
-    notAffiliatedTenants.forEach(consortiaHoldingsIdsPerTenant::remove);
+    var notAffiliatedTenants = consortiaHoldingsIdsPerTenant.keySet().stream()
+      .filter(tenant -> !userTenants.contains(tenant)).sorted().toList();
+    if (!notAffiliatedTenants.isEmpty()) {
+      var notAffiliatedTenantsAsStr = String.join(",", notAffiliatedTenants);
+      var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+      var errorMessageValues = List.of(instanceId.toString(), userName, notAffiliatedTenantsAsStr);
+      errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(), errorMessageValues, jobExecutionId);
+      var errorMessage = String.format(ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getDescription(), instanceId, userName, notAffiliatedTenantsAsStr);
+      log.error(errorMessage);
+      notAffiliatedTenants.forEach(consortiaHoldingsIdsPerTenant::remove);
+    }
+  }
+
+  private void removeNotPermittedTenants(Map<String, List<String>> consortiaHoldingsIdsPerTenant, UUID instanceId, UUID jobExecutionId) {
+    var notPermittedTenants = consortiaHoldingsIdsPerTenant.keySet().stream()
+      .filter(tenant -> !permissionsValidator.isInstanceViewPermissionExists(tenant)).sorted().toList();
+    if (!notPermittedTenants.isEmpty()) {
+      var notPermittedTenantsAsStr = String.join(",", notPermittedTenants);
+      var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+      var errorMessageValues = List.of(instanceId.toString(), userName, notPermittedTenantsAsStr);
+      errorLogService.saveGeneralErrorWithMessageValues(ERROR_INSTANCE_NO_PERMISSION.getCode(), errorMessageValues, jobExecutionId);
+      var errorMessage = String.format(ERROR_INSTANCE_NO_PERMISSION.getDescription(), instanceId, userName, notPermittedTenantsAsStr);
+      log.error(errorMessage);
+      notPermittedTenants.forEach(consortiaHoldingsIdsPerTenant::remove);
+    }
   }
 
   private void addHoldingsAndItems(JSONObject jsonToUpdateWithHoldingsAndItems, List<HoldingsRecordEntity> holdingsEntities,
