@@ -115,7 +115,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
       return generatedMarcResult;
     }
-    for (var jsonObject :  instancesWithHoldingsAndItems) {
+    for (var jsonObject : instancesWithHoldingsAndItems) {
       try {
         var marc = mapToMarc(jsonObject, rules, referenceData);
         marcRecords.add(marc);
