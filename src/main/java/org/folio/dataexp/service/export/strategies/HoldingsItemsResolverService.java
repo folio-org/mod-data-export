@@ -33,6 +33,7 @@ import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
+import static org.folio.dataexp.util.Constants.COMMA;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INSTANCE_NO_PERMISSION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_INSTANCE_NO_AFFILIATION;
 
@@ -93,7 +94,7 @@ public class HoldingsItemsResolverService {
     var notAffiliatedTenants = consortiaHoldingsIdsPerTenant.keySet().stream()
       .filter(tenant -> !userTenants.contains(tenant)).sorted().toList();
     if (!notAffiliatedTenants.isEmpty()) {
-      var notAffiliatedTenantsAsStr = String.join(",", notAffiliatedTenants);
+      var notAffiliatedTenantsAsStr = String.join(COMMA, notAffiliatedTenants);
       var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
       var errorMessageValues = List.of(instanceId.toString(), userName, notAffiliatedTenantsAsStr);
       errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(), errorMessageValues, jobExecutionId);
@@ -107,7 +108,7 @@ public class HoldingsItemsResolverService {
     var notPermittedTenants = consortiaHoldingsIdsPerTenant.keySet().stream()
       .filter(tenant -> !permissionsValidator.isInstanceViewPermissionExists(tenant)).sorted().toList();
     if (!notPermittedTenants.isEmpty()) {
-      var notPermittedTenantsAsStr = String.join(",", notPermittedTenants);
+      var notPermittedTenantsAsStr = String.join(COMMA, notPermittedTenants);
       var userName = userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
       var errorMessageValues = List.of(instanceId.toString(), userName, notPermittedTenantsAsStr);
       errorLogService.saveGeneralErrorWithMessageValues(ERROR_INSTANCE_NO_PERMISSION.getCode(), errorMessageValues, jobExecutionId);
