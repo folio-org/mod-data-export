@@ -12,7 +12,7 @@ import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_HOLDING;
 import static org.folio.dataexp.util.ErrorCode.ERROR_HOLDINGS_NO_PERMISSION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_NO_AFFILIATION;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
@@ -251,8 +251,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
           }
         } else {
           var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()), curTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);
-          log.error(format(ERROR_MESSAGE_NO_AFFILIATION.getDescription(), id, folioExecutionContext.getUserId(), curTenant));
+          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);
+          log.error(format(ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getDescription(), id, folioExecutionContext.getUserId(), curTenant));
         }
       } else {
         errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(id.toString()), jobExecutionId);
