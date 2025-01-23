@@ -1,5 +1,11 @@
 ## v5.2.0 Unreleased
 
+## 01/23/2024 v5.1.6 Released
+
+This release contains bug fixes (adding missing interface).
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.5...v5.1.6)
+
 ## 12/10/2024 v5.1.5 Released
 
 This release contains bug fixes.
