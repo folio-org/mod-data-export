@@ -12,8 +12,8 @@ import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
@@ -31,11 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class JobProfileControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private JobProfileEntityRepository jobProfileEntityRepository;
-  @MockBean
+  @MockitoBean
   private JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
-  @MockBean
+  @MockitoBean
   private UserClient userClient;
 
   @Test

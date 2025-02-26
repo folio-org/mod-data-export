@@ -13,15 +13,15 @@ import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Collections;
 import java.util.UUID;
 
 class LogsControllerTest extends BaseDataExportInitializer {
-  @MockBean
+  @MockitoBean
   private ErrorLogEntityCqlRepository repository;
 
   @Test

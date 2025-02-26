@@ -16,8 +16,8 @@ import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Date;
@@ -33,11 +33,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class MappingProfileControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private MappingProfileEntityRepository mappingProfileEntityRepository;
-  @MockBean
+  @MockitoBean
   private MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
-  @MockBean
+  @MockitoBean
   private UserClient userClient;
 
   @Test

@@ -36,7 +36,7 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -52,39 +52,39 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
   @Autowired
   protected JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
 
-  @MockBean
+  @MockitoBean
   private UserClient userClient;
-  @MockBean
+  @MockitoBean
   private AlternativeTitleTypesClient alternativeTitleTypesClient;
-  @MockBean
+  @MockitoBean
   private CallNumberTypesClient callNumberTypesClient;
-  @MockBean
+  @MockitoBean
   private ContributorNameTypesClient contributorNameTypesClient;
-  @MockBean
+  @MockitoBean
   private ElectronicAccessRelationshipsClient electronicAccessRelationshipsClient;
-  @MockBean
+  @MockitoBean
   private HoldingsNoteTypesClient holdingsNoteTypesClient;
-  @MockBean
+  @MockitoBean
   private IdentifierTypesClient identifierTypesClient;
-  @MockBean
+  @MockitoBean
   private InstanceFormatsClient instanceFormatsClient;
-  @MockBean
+  @MockitoBean
   private InstanceTypesClient instanceTypesClient;
-  @MockBean
+  @MockitoBean
   private ItemNoteTypesClient itemNoteTypesClient;
-  @MockBean
+  @MockitoBean
   private LoanTypesClient loanTypesClient;
-  @MockBean
+  @MockitoBean
   private LocationsClient locationsClient;
-  @MockBean
+  @MockitoBean
   private LocationUnitsClient locationUnitsClient;
-  @MockBean
+  @MockitoBean
   private MaterialTypesClient materialTypesClient;
-  @MockBean
+  @MockitoBean
   private NatureOfContentTermsClient natureOfContentTermsClient;
-  @MockBean
+  @MockitoBean
   private IssuanceModesClient issuanceModesClient;
-  @MockBean
+  @MockitoBean
   protected ConsortiaService consortiaService;
 
   protected void handleReferenceData() {

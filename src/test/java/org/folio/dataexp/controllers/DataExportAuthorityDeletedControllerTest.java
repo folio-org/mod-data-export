@@ -9,12 +9,12 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportAuthorityDeletedRequest;
 import org.folio.dataexp.service.ExportAuthorityDeletedService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class DataExportAuthorityDeletedControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private ExportAuthorityDeletedService exportAuthorityDeletedService;
 
   @Test

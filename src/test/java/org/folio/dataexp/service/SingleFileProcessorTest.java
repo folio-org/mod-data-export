@@ -10,7 +10,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,11 +26,11 @@ import static org.mockito.Mockito.when;
 
 class SingleFileProcessorTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @MockBean
+  @MockitoBean
   private ExportExecutor exportExecutor;
-  @MockBean
+  @MockitoBean
   private JobExecutionService jobExecutionService;
 
   @Autowired

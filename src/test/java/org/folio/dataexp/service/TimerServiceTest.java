@@ -14,8 +14,8 @@ import org.folio.dataexp.domain.dto.TimerDescriptor;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.net.URI;
 import java.util.Collections;
@@ -24,7 +24,7 @@ import java.util.Collections;
 class TimerServiceTest extends BaseDataExportInitializer {
   @Autowired
   private TimerService timerService;
-  @MockBean
+  @MockitoBean
   private OkapiClient okapiClient;
 
   @Test
