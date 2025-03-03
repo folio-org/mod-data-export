@@ -98,6 +98,7 @@ public class InputFileProcessor {
         countOfRead.incrementAndGet();
         commonExportStatistic.setFailedToReadInputFile(false);
         var instanceId = id.replace("\"", StringUtils.EMPTY);
+        instanceId = StringUtils.stripStart(instanceId, "\uFEFF");
         try {
           var entity = ExportIdEntity.builder().jobExecutionId(fileDefinition
             .getJobExecutionId()).instanceId(UUID.fromString(instanceId)).build();
