@@ -25,8 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class DownloadRecordTest extends BaseDataExportInitializer {
 
@@ -39,7 +39,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   @Autowired
   private InputFileProcessor inputFileProcessor;
 
-  @MockBean
+  @MockitoBean
   private MappingProfileEntityRepository mappingProfileEntityRepository;
 
   private static final String AUTHORITY_ID = "4a090b0f-9da3-40f1-ab17-33d6a1e3abae";

@@ -18,7 +18,7 @@ import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.UUID;
 
@@ -34,23 +34,23 @@ import static org.mockito.Mockito.when;
 
 class DataExportServiceTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @MockBean
+  @MockitoBean
   private JobProfileEntityRepository jobProfileEntityRepository;
-  @MockBean
+  @MockitoBean
   private ExportIdEntityRepository exportIdEntityRepository;
-  @MockBean
+  @MockitoBean
   private InputFileProcessor inputFileProcessor;
-  @MockBean
+  @MockitoBean
   private SlicerProcessor slicerProcessor;
-  @MockBean
+  @MockitoBean
   private SingleFileProcessorAsync singleFileProcessorAsync;
-  @MockBean
+  @MockitoBean
   private UserClient userClient;
-  @MockBean
+  @MockitoBean
   private DataExportRequestValidator dataExportRequestValidator;
-  @MockBean
+  @MockitoBean
   private JobExecutionService jobExecutionService;
 
   @Autowired

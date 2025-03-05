@@ -20,9 +20,9 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.PathResource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +48,7 @@ class SlicerProcessorTest extends BaseDataExportInitializer {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Autowired
   private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @MockBean
+  @MockitoBean
   private SearchClient searchClient;
 
   @Test

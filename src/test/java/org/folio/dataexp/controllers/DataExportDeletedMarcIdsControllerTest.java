@@ -5,7 +5,7 @@ import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
 import org.folio.dataexp.service.ExportDeletedMarcIdsService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Date;
@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class DataExportDeletedMarcIdsControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private ExportDeletedMarcIdsService exportDeletedMarcIdsService;
 
   @Test

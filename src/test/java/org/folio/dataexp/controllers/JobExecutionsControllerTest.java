@@ -7,8 +7,8 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class JobExecutionsControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
 
   @Test

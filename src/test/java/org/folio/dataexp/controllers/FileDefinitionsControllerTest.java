@@ -7,7 +7,7 @@ import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.service.FileDefinitionsService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.UUID;
@@ -20,9 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class FileDefinitionsControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @MockBean
+  @MockitoBean
   private FileDefinitionsService fileDefinitionsService;
 
   @Test

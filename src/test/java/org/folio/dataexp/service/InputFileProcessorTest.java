@@ -19,8 +19,8 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.PathResource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 import java.util.UUID;
@@ -47,9 +47,9 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Autowired
   private ExportIdEntityRepository exportIdEntityRepository;
-  @MockBean
+  @MockitoBean
   private ErrorLogService errorLogService;
-  @MockBean
+  @MockitoBean
   private SearchClient searchClient;
 
   @Test

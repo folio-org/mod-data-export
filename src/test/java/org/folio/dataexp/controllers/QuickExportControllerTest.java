@@ -6,7 +6,7 @@ import org.folio.dataexp.domain.dto.QuickExportRequest;
 import org.folio.dataexp.service.QuickExportService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class QuickExportControllerTest extends BaseDataExportInitializer {
 
-  @MockBean
+  @MockitoBean
   private QuickExportService quickExportService;
 
   @ParameterizedTest

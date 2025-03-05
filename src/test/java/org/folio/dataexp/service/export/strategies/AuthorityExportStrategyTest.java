@@ -10,7 +10,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +39,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   @Autowired
   private ErrorLogService errorLogService;
 
-  @MockBean
+  @MockitoBean
   private ConsortiaClient consortiaClient;
 
   @Test
