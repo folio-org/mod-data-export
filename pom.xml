@@ -54,6 +54,7 @@
     <lombok.mapstruct-binding.version>0.2.0</lombok.mapstruct-binding.version>
     <awaitility.version>4.2.0</awaitility.version>
     <json-smart.version>2.5.2</json-smart.version>
+    <json-path.version>2.9.0</json-path.version>
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.17.6</testcontainer.version>
@@ -269,6 +270,12 @@
       <artifactId>mockito-inline</artifactId>
       <version>${mockito-inline.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jayway.jsonpath</groupId>
+      <artifactId>json-path</artifactId>
+      <version>${json-path.version}</version>
     </dependency>
   </dependencies>
 
