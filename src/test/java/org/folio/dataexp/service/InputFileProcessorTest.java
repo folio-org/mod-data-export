@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 class InputFileProcessorTest extends BaseDataExportInitializer {
 
   private static final String UPLOADED_FILE_PATH_CSV = "src/test/resources/upload.csv";
+  private static final String UPLOADED_FILE_PATH_WITH_UTF8_BOM_CSV = "src/test/resources/upload_with_bom.csv";
   private static final String UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV = "src/test/resources/upload_duplicated.csv";
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";
 
@@ -77,6 +78,33 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       assertEquals(2, total);
     }
  }
+
+  @Test
+  @SneakyThrows
+  void readCsvFileWithUtf8BomTest() {
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+    fileDefinition.fileName("upload.csv");
+    fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CSV);
+    fileDefinition.setJobExecutionId(UUID.randomUUID());
+
+    s3Client.createBucketIfNotExists();
+
+    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(), fileDefinition.getFileName());
+    var resource = new PathResource(UPLOADED_FILE_PATH_WITH_UTF8_BOM_CSV);
+
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecutionProgress = new JobExecutionProgress();
+      jobExecution.setProgress(jobExecutionProgress);
+      var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
+      jobExecutionEntityRepository.save(jobExecutionEntity);
+      s3Client.write(path, resource.getInputStream());
+      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
+      var total = exportIdEntityRepository.count();
+      assertEquals(2, total);
+    }
+  }
 
   @Test
   @SneakyThrows
