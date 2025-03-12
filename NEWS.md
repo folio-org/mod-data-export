@@ -1,4 +1,19 @@
-## v5.2.0 Unreleased
+## v5.3.0 Unreleased
+
+## 03/12/2025 v5.2.0 Released
+
+This release contains bug fixes and dependencies upgrading together with migration to Java 21
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.3...v5.2.0)
+
+### Bug Fixes
+* [MDEXP-824](https://folio-org.atlassian.net/browse/MDEXP-824) First Instance UUID record from .csv file with "UTF-8 with BOM" encoding is processed as error in Data export
+* [MDEXP-818](https://folio-org.atlassian.net/browse/MDEXP-818) Upgrade deps fixing vulnerabilities for Ramsons
+* [MDEXP-817](https://folio-org.atlassian.net/browse/MDEXP-817) Deleted authority export job profile is displayed for Export all authorities done without specifying profile id on Eureka environment
+* [MDEXP-805](https://folio-org.atlassian.net/browse/MDEXP-805) Issues with errors "error.noAffiliation" and “error.instance.noPermission” when export Instances from Central tenant
+
+### Technical tasks
+* [MDEXP-826](https://folio-org.atlassian.net/browse/MDEXP-826) Update to mod-data-export Java 21
 
 ## 12/5/2024 v5.1.3 Released
 
