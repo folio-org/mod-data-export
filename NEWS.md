@@ -1,5 +1,15 @@
 ## v5.3.0 Unreleased
 
+## 03/27/2025 v5.2.1 Released
+
+This release contains only tech debts.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.2.0...v5.2.1)
+
+### Tech Debts
+* [MDEXP-833](https://folio-org.atlassian.net/browse/MDEXP-833) Remove openssh sshpass (sftp) from Dockerfile
+* Connection pool size improvements
+
 ## 03/12/2025 v5.2.0 Released
 
 This release contains bug fixes and dependencies upgrading together with migration to Java 21
