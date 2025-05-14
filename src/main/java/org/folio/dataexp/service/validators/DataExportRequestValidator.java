@@ -36,14 +36,14 @@ public class DataExportRequestValidator {
           Collections.singletonList(ErrorCode.ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED.getDescription()), fileDefinition.getJobExecutionId());
         errorMsg = "For exporting authority records only the default authority job profile is supported";
       }
-      if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
-        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getCode(),
-          Collections.singletonList(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getDescription()), fileDefinition.getJobExecutionId());
-        if (!errorMsg.isEmpty()) {
-          errorMsg += "; ";
-        }
-        errorMsg += "Only csv format is supported for authority export";
-      }
+//      if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
+//        errorLogService.saveGeneralErrorWithMessageValues(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getCode(),
+//          Collections.singletonList(ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_AUTHORITY_ID_TYPE.getDescription()), fileDefinition.getJobExecutionId());
+//        if (!errorMsg.isEmpty()) {
+//          errorMsg += "; ";
+//        }
+//        errorMsg += "Only csv format is supported for authority export";
+//      }
     }
     if (exportRequest.getIdType() != ExportRequest.IdTypeEnum.AUTHORITY && isDeletedJobProfile(exportRequest.getJobProfileId())) {
       var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
