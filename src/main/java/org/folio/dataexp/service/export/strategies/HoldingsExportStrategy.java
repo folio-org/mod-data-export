@@ -222,10 +222,10 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId())) {
       Map<UUID, String> instIdTenantMap = getInstanceIdsTenant(holdings, centralTenantId);
-      log.info("instIdTenantMap: {}", instIdTenantMap);
+      log.debug("instIdTenantMap: {}", instIdTenantMap);
       List<InstanceEntity> entities = new ArrayList<>();
       instIdTenantMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository.findInstancesByIdIn(v, Set.of(k))));
-      log.info("entities: {}", entities);
+      log.debug("entities: {}", entities);
       return entities;
     }
     return instanceEntityRepository.findByIdIn(instanceIds);
@@ -263,7 +263,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   private Map<UUID, String> getHoldingIdsTenant(Set<UUID> ids, String centralTenantId) {
-    log.info("getHoldingIdsTenant ids: {}", ids);
+    log.debug("getHoldingIdsTenant ids: {}", ids);
     Map<UUID, String> idsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     ids.forEach(id -> {
@@ -276,7 +276,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   private Map<UUID, String> getInstanceIdsTenant(List<HoldingsRecordEntity> holdings, String centralTenantId) {
-    log.info("getInstanceIdsTenant ids: {}", holdings);
+    log.debug("getInstanceIdsTenant ids: {}", holdings);
     Map<UUID, String> idsMap = new HashMap<>();
     var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
     holdings.forEach(hold -> {
@@ -290,7 +290,6 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
                                   GeneratedMarcResult result, List<Rule> rules) {
-    log.info("holdingsWithInstanceAndItems: {}", holdingsWithInstanceAndItems);
     var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId())) {
       fillOutFromCentralTenant(holdingsWithInstanceAndItems, jobExecutionId, centralTenantId, marcRecords, result, rules);
@@ -312,12 +311,12 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
     log.info("idsTenant: {}", idsTenant);
     for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
-      log.info("uuidJson: {}, {}", uuidJson, idsTenant.get(uuidJson.getKey()));
       var tenantId = idsTenant.get(uuidJson.getKey());
+
       try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))) {
         ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(tenantId);
         var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
-        log.info("marc: {}", marc);
+
         marcRecords.add(marc);
       } catch (MarcException e) {
         handleMarcException(uuidJson.getValue(), result, e, jobExecutionId);
