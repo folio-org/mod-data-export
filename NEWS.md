@@ -2,7 +2,7 @@
 
 ## 06/16/2025 v5.1.7 Released
 
-This release contains bug fixes (adding missing interface).
+This release contains only cleanup logs
 
 [Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.6...v5.1.7)
 
