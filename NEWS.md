@@ -1,5 +1,14 @@
 ## v5.3.0 Unreleased
 
+## 06/16/2025 v5.2.2 Released
+
+This release contains only cleanup logs
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.2.1...v5.2.2)
+
+### Technical tasks
+* [MDEXP-843](https://folio-org.atlassian.net/browse/MDEXP-843) Remove extra-logging from mod-data-export module
+
 ## 03/27/2025 v5.2.1 Released
 
 This release contains only tech debts.
