@@ -1,5 +1,14 @@
 ## v5.2.0 Unreleased
 
+## 06/16/2025 v5.1.7 Released
+
+This release contains bug fixes (adding missing interface).
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.1.6...v5.1.7)
+
+### Technical tasks
+* [MDEXP-843](https://folio-org.atlassian.net/browse/MDEXP-843) Remove extra-logging from mod-data-export module
+
 ## 01/23/2024 v5.1.6 Released
 
 This release contains bug fixes (adding missing interface).
