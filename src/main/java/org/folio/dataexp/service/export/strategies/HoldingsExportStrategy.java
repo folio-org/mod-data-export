@@ -108,7 +108,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   @Override
   public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
-      UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+                                              UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult(jobExecutionId);
     var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, jobExecutionId);
     return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
@@ -129,7 +129,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, Map<UUID, JSONObject> holdingsWithInstanceAndItems,
-      UUID jobExecutionId, GeneratedMarcResult result) {
+                                                 UUID jobExecutionId, GeneratedMarcResult result) {
     List<Rule> rules;
     try {
       rules = ruleFactory.getRules(mappingProfile);
@@ -156,7 +156,7 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   }
 
   protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
-                                                             List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
+                                                                  List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
     var instances = getInstances(instancesIds, holdings);
     entityManager.clear();
     Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
@@ -247,7 +247,8 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
             var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
               curTenant);
             errorLogService.saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
-            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), msgValues.toArray()));
+            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), id, folioExecutionContext.getUserId(), curTenant));
+
           }
         } else {
           var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()), curTenant);
