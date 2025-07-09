@@ -96,7 +96,7 @@
     },
     {
       "id": "resource-ids-streaming",
-      "version": "0.3"
+      "version": "1.0"
     },
     {
       "id": "call-number-types",
@@ -105,10 +105,6 @@
     {
       "id": "inventory-record-bulk",
       "version": "1.0"
-    },
-    {
-      "id": "search",
-      "version": "0.6 1.0"
     },
     {
       "id": "consortium-search",
@@ -250,8 +246,7 @@
             "data-export.file-definitions.upload.post"
           ],
           "modulePermissions": [
-            "inventory-storage.record-bulk.ids.get",
-            "search.instances.ids.collection.get"
+            "inventory-storage.record-bulk.ids.get"
           ]
         },
         {
