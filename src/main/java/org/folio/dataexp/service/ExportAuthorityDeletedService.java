@@ -29,7 +29,7 @@ public class ExportAuthorityDeletedService {
   private final DataExportService dataExportService;
 
   public ExportAuthorityDeletedResponse postExportDeletedAuthority(ExportAuthorityDeletedRequest request) {
-    log.info("POST export deleted authorities");
+    log.info("POST export deleted authorities: {}, query: {}", request, request.getQuery());
     try {
       var authorities = authorityClient.getAuthorities(true, true, request.getQuery(), request.getLimit(),
         request.getOffset());
