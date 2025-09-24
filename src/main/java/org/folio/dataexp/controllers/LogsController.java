@@ -15,6 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for error log operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -23,14 +26,36 @@ public class LogsController implements LogsApi {
 
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
+  /**
+   * Gets error logs by CQL query.
+   *
+   * @param query CQL query string
+   * @param offset offset for pagination
+   * @param limit limit for pagination
+   * @return response entity with error log collection
+   */
   @Override
-  public ResponseEntity<ErrorLogCollection> getErrorLogsByQuery(String query, Integer offset, Integer limit) {
-    if (StringUtils.isEmpty(query)) query = QUERY_CQL_ALL_RECORDS;
-    var errorLogsPage  = errorLogEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
-    var errorLogs = errorLogsPage.stream().map(ErrorLogEntity::getErrorLog).toList();
+  public ResponseEntity<ErrorLogCollection> getErrorLogsByQuery(
+      String query,
+      Integer offset,
+      Integer limit
+  ) {
+    if (StringUtils.isEmpty(query)) {
+      query = QUERY_CQL_ALL_RECORDS;
+    }
+    var errorLogsPage = errorLogEntityCqlRepository.findByCql(
+        query,
+        OffsetRequest.of(offset, limit)
+    );
+    var errorLogs = errorLogsPage.stream()
+        .map(ErrorLogEntity::getErrorLog)
+        .toList();
     var errorLogCollection = new ErrorLogCollection()
-      .errorLogs(errorLogs)
-      .totalRecords((int) errorLogsPage.getTotalElements());
-    return new ResponseEntity<>(errorLogCollection, HttpStatus.OK);
+        .errorLogs(errorLogs)
+        .totalRecords((int) errorLogsPage.getTotalElements());
+    return new ResponseEntity<>(
+        errorLogCollection,
+        HttpStatus.OK
+    );
   }
 }

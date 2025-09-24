@@ -1,15 +1,17 @@
 package org.folio.dataexp.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * DTO representing user permissions.
+ */
 @Data
 @With
 @Builder(toBuilder = true)
@@ -17,9 +19,15 @@ import java.util.List;
 @AllArgsConstructor
 public class UserPermissions {
 
+  /**
+   * List of permission names.
+   */
   @JsonProperty("permissionNames")
   private List<String> permissionNames = new ArrayList<>();
 
+  /**
+   * List of permissions.
+   */
   @JsonProperty("permissions")
   private List<String> permissions = new ArrayList<>();
 }

@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for exporting all records.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -18,9 +21,17 @@ public class DataExportAllController implements ExportAllApi {
 
   private final DataExportAllService dataExportAllService;
 
+  /**
+   * Initiates export of all records.
+   *
+   * @param exportAllRequest export all request object
+   * @return response entity with OK status
+   */
   @Override
   public ResponseEntity<Void> postExportAll(ExportAllRequest exportAllRequest) {
     dataExportAllService.postDataExportAll(exportAllRequest);
-    return new ResponseEntity<>(HttpStatus.OK);
+    return new ResponseEntity<>(
+        HttpStatus.OK
+    );
   }
 }

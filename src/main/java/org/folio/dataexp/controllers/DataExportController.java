@@ -10,18 +10,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
+/**
+ * Controller for data export operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
 @RequestMapping("/data-export")
-public class DataExportController implements  ExportApi {
+public class DataExportController implements ExportApi {
 
   private final DataExportService dataExportService;
 
+  /**
+   * Initiates data export.
+   *
+   * @param exportRequest export request object
+   * @return response entity with no content status
+   */
   @Override
   public ResponseEntity<Void> postDataExport(ExportRequest exportRequest) {
     dataExportService.postDataExport(exportRequest);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(
+        HttpStatus.NO_CONTENT
+    );
   }
 }
