@@ -5,8 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Utility class for resolving external API paths used in the data export module.
+ */
 public class ExternalPathResolver {
 
+  /**
+   * Private constructor to prevent instantiation.
+   */
   private ExternalPathResolver() {
   }
 
@@ -83,22 +89,47 @@ public class ExternalPathResolver {
       .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue() + "/%s")));
     EXTERNAL_APIS_WITH_ID = Collections.unmodifiableMap(apis.entrySet()
         .stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue() + "/%s")));
+        .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue()
+          + "/%s")));
 
   }
 
+  /**
+   * Returns the resource path for the specified field.
+   *
+   * @param field the field name
+   * @return the resource path, or null if not found
+   */
   public static String resourcesPath(String field) {
     return EXTERNAL_APIS.get(field);
   }
 
+  /**
+   * Returns the resource path with a prefix for the specified field.
+   *
+   * @param field the field name
+   * @return the resource path with prefix, or null if not found
+   */
   public static String resourcesPathWithPrefix(String field) {
     return EXTERNAL_APIS_WITH_PREFIX.get(field);
   }
 
+  /**
+   * Returns the resource path with a suffix for the specified field.
+   *
+   * @param field the field name
+   * @return the resource path with suffix, or null if not found
+   */
   public static String resourcesPathWithSuffix(String field) {
     return EXTERNAL_APIS_WITH_SUFFIX.get(field);
   }
 
+  /**
+   * Returns the resource path with an ID for the specified field.
+   *
+   * @param field the field name
+   * @return the resource path with ID, or null if not found
+   */
   public static String resourcesPathWithId(String field) {
     return EXTERNAL_APIS_WITH_ID.get(field);
   }
