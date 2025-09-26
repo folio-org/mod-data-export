@@ -53,7 +53,7 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
+    var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
     commonExportStatistic.addToNotExistUUIDAll(exportStatistic.getNotExistIds());
     synchronized (this) {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);

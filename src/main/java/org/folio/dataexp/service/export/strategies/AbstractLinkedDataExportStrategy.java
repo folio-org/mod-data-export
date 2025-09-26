@@ -49,7 +49,7 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
   }
 
   @Override
-  public ExportStrategyStatistic saveLinkedDataToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
+  public ExportStrategyStatistic saveOutputToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
     var exportStatistic = new ExportStrategyStatistic(exportedMarcListener);
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWrite(exportFilesEntity);
@@ -65,11 +65,6 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
       exportStatistic.setFailed((int) countFailed);
     }
     return exportStatistic;
-  }
-
-  @Override
-  public ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
-    throw new UnsupportedOperationException("Strategy does not support MARC");
   }
 
   @Override
