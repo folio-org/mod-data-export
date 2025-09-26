@@ -8,5 +8,7 @@ public interface ExportStrategy {
 
   ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener);
 
+  ExportStrategyStatistic saveLinkedDataToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener);
+
   void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic);
 }

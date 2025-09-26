@@ -109,6 +109,11 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Override
+  public ExportStrategyStatistic saveLinkedDataToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity, ExportRequest exportRequest, ExportedMarcListener exportedMarcListener) {
+    throw new UnsupportedOperationException("Strategy does not support linked data");
+  }
+
+  @Override
   public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);

@@ -11,6 +11,7 @@ import org.folio.dataexp.service.export.strategies.HoldingsExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
+import org.folio.dataexp.service.export.strategies.LinkedDataExportStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,6 +21,7 @@ public class ExportStrategyFactory {
   private final HoldingsExportStrategy holdingsExportStrategy;
   private final InstancesExportStrategy instancesExportStrategy;
   private final AuthorityExportStrategy authorityExportStrategy;
+  private final LinkedDataExportStrategy linkedDataExportStrategy;
   private final InstancesExportAllStrategy instancesExportAllStrategy;
   private final HoldingsExportAllStrategy holdingsExportAllStrategy;
   private final AuthorityExportAllStrategy authorityExportAllStrategy;
@@ -35,6 +37,9 @@ public class ExportStrategyFactory {
         return authorityExportAllStrategy;
       }
       return authorityExportStrategy;
+    }
+    if (exportRequest.getRecordType() == ExportRequest.RecordTypeEnum.LINKED_DATA) {
+      return linkedDataExportStrategy;
     }
     if (Boolean.TRUE.equals(exportRequest.getAll())) {
       return instancesExportAllStrategy;
