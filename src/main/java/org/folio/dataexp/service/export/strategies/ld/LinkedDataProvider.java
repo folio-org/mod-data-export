@@ -1,4 +1,4 @@
-package org.folio.dataexp.service.export.strategies;
+package org.folio.dataexp.service.export.strategies.ld;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

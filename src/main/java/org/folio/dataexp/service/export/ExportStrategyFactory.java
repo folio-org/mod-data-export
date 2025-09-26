@@ -11,7 +11,7 @@ import org.folio.dataexp.service.export.strategies.HoldingsExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
-import org.folio.dataexp.service.export.strategies.LinkedDataExportStrategy;
+import org.folio.dataexp.service.export.strategies.ld.LinkedDataExportStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
