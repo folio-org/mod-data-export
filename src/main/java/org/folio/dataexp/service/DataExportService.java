@@ -57,7 +57,6 @@ public class DataExportService {
    * @param exportRequest The export request.
    */
   public void postDataExport(ExportRequest exportRequest) {
-    var commonExportFails = new CommonExportStatistic();
     var fileDefinitionEntity =  fileDefinitionEntityRepository
         .getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
@@ -84,7 +83,6 @@ public class DataExportService {
       updateJobExecutionForPostDataExport(
           jobExecution,
           JobExecution.StatusEnum.FAIL,
-          commonExportFails,
           exportRequest
       );
       log.error(e.getMessage());
@@ -101,9 +99,9 @@ public class DataExportService {
     updateJobExecutionForPostDataExport(
         jobExecution,
         JobExecution.StatusEnum.IN_PROGRESS,
-        commonExportFails,
         exportRequest
     );
+    var commonExportFails = new CommonExportStatistic();
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
       if (Boolean.FALSE.equals(exportRequest.getAll())
             && Boolean.FALSE.equals(exportRequest.getQuick())) {
@@ -116,7 +114,6 @@ public class DataExportService {
       updateJobExecutionForPostDataExport(
           jobExecution,
           JobExecution.StatusEnum.IN_PROGRESS,
-          commonExportFails,
           exportRequest
       );
       singleFileProcessorAsync.exportBySingleFile(
@@ -132,13 +129,11 @@ public class DataExportService {
    *
    * @param jobExecution The job execution.
    * @param jobExecutionStatus The status to set.
-   * @param commonExportStatistic Export statistics.
    * @param exportRequest The export request.
    */
   private void updateJobExecutionForPostDataExport(
       JobExecution jobExecution,
       JobExecution.StatusEnum jobExecutionStatus,
-      CommonExportStatistic commonExportStatistic,
       ExportRequest exportRequest
   ) {
     jobExecution.setStatus(jobExecutionStatus);

@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -47,7 +48,7 @@ class S3ExportsUploaderTest {
     jobExecution.setHrId(200);
 
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, List.of(), initialFileName));
+        s3ExportsUploader.upload(jobExecution, Collections.emptyList(), initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
   }
 
@@ -129,7 +130,8 @@ class S3ExportsUploaderTest {
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName));
+        s3ExportsUploader.upload(jobExecution, Collections.singletonList(export),
+          initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);
@@ -279,8 +281,9 @@ class S3ExportsUploaderTest {
     var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
 
     var initialFileName = "marc_export";
+    var list = List.of(export1, export2);
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName));
+        s3ExportsUploader.upload(jobExecution, list, initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);

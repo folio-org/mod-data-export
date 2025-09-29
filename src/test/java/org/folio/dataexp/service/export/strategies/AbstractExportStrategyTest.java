@@ -144,8 +144,8 @@ class AbstractExportStrategyTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
 
     verify(errorLogService, times(1))
-        .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode()),
-            eq(List.of(marcRecordEntity.getId().toString())), eq(jobExecution.getId()));
+        .saveGeneralErrorWithMessageValues(ErrorCode.ERROR_NON_EXISTING_INSTANCE.getCode(),
+            List.of(marcRecordEntity.getId().toString()), jobExecution.getId());
     verify(errorLogService, times(1))
         .saveGeneralErrorWithMessageValues(eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()),
             isA(List.class), eq(jobExecution.getId()));

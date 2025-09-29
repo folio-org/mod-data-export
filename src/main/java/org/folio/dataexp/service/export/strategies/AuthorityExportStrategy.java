@@ -61,18 +61,19 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile,
       ExportRequest exportRequest, UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      List<MarcRecordEntity> marcAuthorities = getMarcAuthorities(externalIds);
+      List<MarcRecordEntity> marcAuthorities = new ArrayList<>(getMarcAuthorities(externalIds));
       log.info("Total marc authorities: {}", marcAuthorities.size());
       if (isDeletedJobProfile(exportRequest.getJobProfileId())) {
         log.info("Deleted job profile for authority is being used.");
       }
       Set<String> alreadySavedErrors = new HashSet<>();
       handleDeleted(marcAuthorities, jobExecutionId, exportRequest, alreadySavedErrors);
-      marcAuthorities = handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities);
+      marcAuthorities =
+          new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
       log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
       var foundIds = marcAuthorities.stream()
-          .map(rec -> rec.getExternalId())
+          .map(MarcRecordEntity::getExternalId)
           .collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       log.info(
@@ -146,8 +147,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
           "Couldn't find authority in db for ID: %s".formatted(recordId)
       );
     }
-    marcAuthorities = handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities);
-    return marcAuthorities.get(0);
+    marcAuthorities = new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
+    return marcAuthorities.getFirst();
   }
 
   /**
@@ -243,7 +244,7 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
         .values()
         .stream()
         .flatMap(Optional::stream)
-        .collect(toList());
+        .toList();
   }
 
   /**
