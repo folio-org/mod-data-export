@@ -68,7 +68,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
       }
       Set<String> alreadySavedErrors = new HashSet<>();
       handleDeleted(marcAuthorities, jobExecutionId, exportRequest, alreadySavedErrors);
-      marcAuthorities = new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
+      marcAuthorities =
+          new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
       log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
       var foundIds = marcAuthorities.stream()
