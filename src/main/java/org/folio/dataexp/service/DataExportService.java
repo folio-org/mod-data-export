@@ -2,6 +2,11 @@ package org.folio.dataexp.service;
 
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
+import java.util.Date;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
@@ -23,12 +28,9 @@ import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.Set;
-import java.util.UUID;
-
+/**
+ * Service for handling data export operations.
+ */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -49,12 +51,18 @@ public class DataExportService {
   private final MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
+  /**
+   * Initiates a data export operation.
+   *
+   * @param exportRequest The export request.
+   */
   public void postDataExport(ExportRequest exportRequest) {
     var commonExportFails = new CommonExportStatistic();
-    var fileDefinitionEntity =  fileDefinitionEntityRepository.
-      getReferenceById(exportRequest.getFileDefinitionId());
+    var fileDefinitionEntity =  fileDefinitionEntityRepository
+        .getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
-    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(
+        exportRequest.getJobProfileId());
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
@@ -64,33 +72,75 @@ public class DataExportService {
     jobExecution.setRunBy(runBy);
     var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
     var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
-      .fileName(FilenameUtils.getName(innerFileName));
+        .fileName(FilenameUtils.getName(innerFileName));
     jobExecution.setExportedFiles(Set.of(innerFile));
     try {
-      dataExportRequestValidator.validate(exportRequest, fileDefinition, jobProfileEntity.getJobProfile().getMappingProfileId().toString());
+      dataExportRequestValidator.validate(
+          exportRequest,
+          fileDefinition,
+          jobProfileEntity.getJobProfile().getMappingProfileId().toString()
+      );
     } catch (DataExportRequestValidationException e) {
-      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.FAIL, commonExportFails, exportRequest);
+      updateJobExecutionForPostDataExport(
+          jobExecution,
+          JobExecution.StatusEnum.FAIL,
+          commonExportFails,
+          exportRequest
+      );
       log.error(e.getMessage());
       return;
     }
-    log.info("Post data export{} for file definition {} and job profile {} with job execution {}",
-        Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "", exportRequest.getFileDefinitionId(), exportRequest.getJobProfileId(), jobExecution.getId());
+    log.info(
+        "Post data export{} for file definition {} and job profile {} with job execution {}",
+        Boolean.TRUE.equals(exportRequest.getAll()) ? " all" : "",
+        exportRequest.getFileDefinitionId(),
+        exportRequest.getJobProfileId(),
+        jobExecution.getId()
+    );
 
-    updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails, exportRequest);
+    updateJobExecutionForPostDataExport(
+        jobExecution,
+        JobExecution.StatusEnum.IN_PROGRESS,
+        commonExportFails,
+        exportRequest
+    );
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
-      if (Boolean.FALSE.equals(exportRequest.getAll()) && Boolean.FALSE.equals(exportRequest.getQuick())) {
+      if (Boolean.FALSE.equals(exportRequest.getAll())
+            && Boolean.FALSE.equals(exportRequest.getQuick())) {
         inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
         log.info("File has been read successfully.");
       }
       slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
       log.info("Instance IDs have been sliced successfully.");
 
-      updateJobExecutionForPostDataExport(jobExecution, JobExecution.StatusEnum.IN_PROGRESS, commonExportFails, exportRequest);
-      singleFileProcessorAsync.exportBySingleFile(jobExecution.getId(), exportRequest, commonExportFails);
+      updateJobExecutionForPostDataExport(
+          jobExecution,
+          JobExecution.StatusEnum.IN_PROGRESS,
+          commonExportFails,
+          exportRequest
+      );
+      singleFileProcessorAsync.exportBySingleFile(
+          jobExecution.getId(),
+          exportRequest,
+          commonExportFails
+      );
     }));
   }
 
-  private void updateJobExecutionForPostDataExport(JobExecution jobExecution, JobExecution.StatusEnum jobExecutionStatus, CommonExportStatistic commonExportStatistic, ExportRequest exportRequest) {
+  /**
+   * Updates the job execution status and progress for a data export.
+   *
+   * @param jobExecution The job execution.
+   * @param jobExecutionStatus The status to set.
+   * @param commonExportStatistic Export statistics.
+   * @param exportRequest The export request.
+   */
+  private void updateJobExecutionForPostDataExport(
+      JobExecution jobExecution,
+      JobExecution.StatusEnum jobExecutionStatus,
+      CommonExportStatistic commonExportStatistic,
+      ExportRequest exportRequest
+  ) {
     jobExecution.setStatus(jobExecutionStatus);
     var currentDate = new Date();
     jobExecution.setLastUpdatedDate(currentDate);
@@ -109,6 +159,11 @@ public class DataExportService {
     jobExecutionService.save(jobExecution);
   }
 
+  /**
+   * Gets the user information for the runBy field.
+   *
+   * @return JobExecutionRunBy object.
+   */
   private JobExecutionRunBy getRunBy() {
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -119,12 +174,30 @@ public class DataExportService {
     return runBy;
   }
 
-  private String getDefaultFileName (FileDefinition fileDefinition, JobExecution jobExecution) {
+  /**
+   * Gets the default file name for the export.
+   *
+   * @param fileDefinition The file definition.
+   * @param jobExecution The job execution.
+   * @return The file name.
+   */
+  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
     var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
     return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
   }
 
-  private void updateTotal(ExportRequest exportRequest, UUID jobExecutionId,  JobExecutionProgress jobExecutionProgress) {
+  /**
+   * Updates the total count in job execution progress based on the export request.
+   *
+   * @param exportRequest The export request.
+   * @param jobExecutionId The job execution ID.
+   * @param jobExecutionProgress The job execution progress.
+   */
+  private void updateTotal(
+      ExportRequest exportRequest,
+      UUID jobExecutionId,
+      JobExecutionProgress jobExecutionProgress
+  ) {
     if (Boolean.TRUE.equals(exportRequest.getAll())) {
       if (jobExecutionProgress.getTotal() == 0) {
         if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
@@ -134,7 +207,11 @@ public class DataExportService {
         } else if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.AUTHORITY) {
           jobExecutionProgress.setTotal((int) marcAuthorityRecordAllRepository.count());
         }
-        log.info("Total for export-all {}: {}", exportRequest.getIdType(), jobExecutionProgress.getTotal());
+        log.info(
+            "Total for export-all {}: {}",
+            exportRequest.getIdType(),
+            jobExecutionProgress.getTotal()
+        );
       }
     } else if (Boolean.TRUE.equals(exportRequest.getQuick())) {
       long totalExportsIds = exportIdEntityRepository.countByJobExecutionId(jobExecutionId);

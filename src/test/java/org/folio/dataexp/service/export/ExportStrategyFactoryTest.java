@@ -1,5 +1,7 @@
 package org.folio.dataexp.service.export;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class ExportStrategyFactoryTest {
@@ -36,22 +36,28 @@ class ExportStrategyFactoryTest {
 
   @Test
   void getExportStrategyTest() {
-    var strategy = exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING));
+    var strategy = exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING));
     assertTrue(strategy instanceof HoldingsExportStrategy);
 
-    strategy =  exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE));
+    strategy =  exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE));
     assertTrue(strategy instanceof InstancesExportStrategy);
 
-    strategy =  exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY));
+    strategy =  exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY));
     assertTrue(strategy instanceof AuthorityExportStrategy);
 
-    strategy = exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING).all(true));
+    strategy = exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING).all(true));
     assertTrue(strategy instanceof HoldingsExportAllStrategy);
 
-    strategy =  exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(true));
+    strategy =  exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(true));
     assertTrue(strategy instanceof InstancesExportAllStrategy);
 
-    strategy =  exportStrategyFactory.getExportStrategy(new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY).all(true));
+    strategy =  exportStrategyFactory.getExportStrategy(
+        new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY).all(true));
     assertTrue(strategy instanceof AuthorityExportAllStrategy);
   }
 }

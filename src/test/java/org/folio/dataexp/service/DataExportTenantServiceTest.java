@@ -1,13 +1,13 @@
 package org.folio.dataexp.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DataExportTenantServiceTest extends BaseDataExportInitializer {
 

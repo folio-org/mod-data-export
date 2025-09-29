@@ -1,5 +1,12 @@
 package org.folio.dataexp.service;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -19,14 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MappingProfileServiceTest {
@@ -50,7 +49,8 @@ class MappingProfileServiceTest {
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setDefault(false);
     mappingProfile.setName("mappingProfile");
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
 
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
@@ -67,7 +67,8 @@ class MappingProfileServiceTest {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
     mappingProfileService.getMappingProfileById(mappingProfile.getId());
@@ -83,14 +84,17 @@ class MappingProfileServiceTest {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     PageImpl<MappingProfileEntity> page = new PageImpl<>(List.of(entity));
 
-    when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     mappingProfileService.getMappingProfiles("query", 2, 1);
 
-    verify(mappingProfileEntityCqlRepository).findByCql(isA(String.class), isA(OffsetRequest.class));
+    verify(mappingProfileEntityCqlRepository).findByCql(isA(String.class),
+        isA(OffsetRequest.class));
   }
 
   @Test
@@ -108,7 +112,8 @@ class MappingProfileServiceTest {
     mappingProfile.setTransformations(List.of(transformation));
     var user = new User();
     user.setPersonal(new User.Personal());
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
 
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
@@ -130,7 +135,8 @@ class MappingProfileServiceTest {
     var user = new User();
     user.setPersonal(new User.Personal());
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);

@@ -32,16 +32,20 @@ import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.Translation;
 
 
+/**
+ * Builder for transformation rules based on mapping transformations.
+ */
 public class TransformationRuleBuilder implements RuleBuilder {
 
-  private static final Comparator<String> SUBFIELD_COMPARATOR = Comparator.nullsLast((subField0, subField1) -> {
-    // Objects with not empty subfield value should be at the top of the sorted list.
-    // If the DataSource contains numeric subfields, it will follow the alphabetical subfields.
-    if (isNumeric(subField0) == isNumeric(subField1)) {
-      return subField0.compareTo(subField1);
-    }
-    return isNumeric(subField0) && !isNumeric(subField1) ? 1 : -1;
-  });
+  private static final Comparator<String> SUBFIELD_COMPARATOR =
+      Comparator.nullsLast((subField0, subField1) -> {
+        // Objects with not empty subfield value should be at the top of the sorted list.
+        // If the DataSource contains numeric subfields, it will follow the alphabetical subfields.
+        if (isNumeric(subField0) == isNumeric(subField1)) {
+          return subField0.compareTo(subField1);
+        }
+        return isNumeric(subField0) && !isNumeric(subField1) ? 1 : -1;
+      });
 
   private static final String SET_VALUE_FUNCTION = "set_value";
   private static final String VALUE_PARAMETER = "value";
@@ -66,33 +70,45 @@ public class TransformationRuleBuilder implements RuleBuilder {
   private static final String MOD_OF_ISSUANCE_ID_FUNCTION = "set_mode_of_issuance_id";
   private static final String DEFAULT = "default";
 
-  private static final Map<String, String> translationFunctions = ImmutableMap.<String, String>builder()
-    .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
-    .put(PERMANENT_LOAN_TYPE_FIELD_ID, SET_LOAN_TYPE_FUNCTION)
-    .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
-    .put(SET_METADATA_UPDATED_DATE_FIELD_ID, SET_METADATA_DATE_TIME_FUNCTION)
-    .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_DATE_TIME_FUNCTION)
-    .put(TransformationFieldsConfig.HOLDINGS_CALL_NUMBER_TYPE.getFieldId().toLowerCase(), SET_CALL_NUMBER_TYPE_ID_FUNCTION)
-    .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
-    .put(PERMANENT_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .put(TEMPORARY_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .put(EFFECTIVE_LOCATION_NAME, SET_LOCATION_FUNCTION)
-    .build();
+  private static final Map<String, String> translationFunctions =
+      ImmutableMap.<String, String>builder()
+        .put(MATERIAL_TYPE_FIELD_ID, SET_MATERIAL_TYPE_FUNCTION)
+        .put(PERMANENT_LOAN_TYPE_FIELD_ID, SET_LOAN_TYPE_FUNCTION)
+        .put(INSTANCE_TYPE_FIELD_ID, SET_INSTANCE_TYPE_ID_FUNCTION)
+        .put(SET_METADATA_UPDATED_DATE_FIELD_ID, SET_METADATA_DATE_TIME_FUNCTION)
+        .put(SET_METADATA_CREATED_DATE_FIELD_ID, SET_METADATA_DATE_TIME_FUNCTION)
+        .put(TransformationFieldsConfig.HOLDINGS_CALL_NUMBER_TYPE.getFieldId().toLowerCase(),
+          SET_CALL_NUMBER_TYPE_ID_FUNCTION)
+        .put(MOD_OF_ISSUANCE_ID, MOD_OF_ISSUANCE_ID_FUNCTION)
+        .put(PERMANENT_LOCATION_NAME, SET_LOCATION_FUNCTION)
+        .put(TEMPORARY_LOCATION_NAME, SET_LOCATION_FUNCTION)
+        .put(EFFECTIVE_LOCATION_NAME, SET_LOCATION_FUNCTION)
+        .build();
 
-  private static final Map<String, TranslationBuilder> translationBuilders = ImmutableMap.<String, TranslationBuilder>builder()
-    .put(PERMANENT_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(TEMPORARY_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(EFFECTIVE_LOCATION_NAME, new LocationTranslationBuilder())
-    .put(DEFAULT, new DefaultTranslationBuilder())
-    .build();
+  private static final Map<String, TranslationBuilder> translationBuilders =
+      ImmutableMap.<String, TranslationBuilder>builder()
+      .put(PERMANENT_LOCATION_NAME, new LocationTranslationBuilder())
+      .put(TEMPORARY_LOCATION_NAME, new LocationTranslationBuilder())
+      .put(EFFECTIVE_LOCATION_NAME, new LocationTranslationBuilder())
+      .put(DEFAULT, new DefaultTranslationBuilder())
+      .build();
 
+  /**
+   * Builds a transformation rule based on the provided rules and mapping transformation.
+   *
+   * @param rules collection of rules
+   * @param mappingTransformation transformation mapping
+   * @return an Optional containing the Rule if present
+   * @throws TransformationRuleException if rule building fails
+   */
   @Override
-  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation) throws TransformationRuleException {
+  public Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation)
+      throws TransformationRuleException {
     String field = substring(mappingTransformation.getTransformation(), 0, 3);
     String indicators = substring(mappingTransformation.getTransformation(), 3, 5);
     Rule rule;
     Optional<Rule> existingRule = Optional.empty();
-    for (Rule tagRule: rules) {
+    for (Rule tagRule : rules) {
       if (tagRule.getField().equals(field)) {
         var tagRuleIndicators = tagRule.getIndicators();
         if (nonNull(tagRuleIndicators)) {
@@ -101,16 +117,18 @@ public class TransformationRuleBuilder implements RuleBuilder {
             break;
           }
         } else {
-          throw new TransformationRuleException(String.format(ERROR_RULE_NO_INDICATORS.getDescription(), tagRule.getField()));
+          throw new TransformationRuleException(ERROR_RULE_NO_INDICATORS.getDescription()
+            .formatted(tagRule.getField()));
         }
       }
     }
-    //If there is already an existing rule, then just append the subfield, without indicators
+    // If there is already an existing rule, then just append the subfield, without indicators
     if (existingRule.isPresent()) {
       rule = existingRule.get();
       rule.getDataSources().addAll(buildDataSources(mappingTransformation, false));
 
-      if (!existingRule.get().isItemTypeRule() && mappingTransformation.getRecordType() == RecordTypes.ITEM) {
+      if (!existingRule.get().isItemTypeRule()
+          && mappingTransformation.getRecordType() == RecordTypes.ITEM) {
         rule.setItemTypeRule(RecordTypes.ITEM == mappingTransformation.getRecordType());
       }
 
@@ -123,7 +141,8 @@ public class TransformationRuleBuilder implements RuleBuilder {
     }
     if (MapUtils.isNotEmpty(mappingTransformation.getMetadataParameters())) {
       Map<String, String> metadata = new HashMap<>();
-      for (Map.Entry<String, String> metadataParameter : mappingTransformation.getMetadataParameters().entrySet()) {
+      for (Map.Entry<String, String> metadataParameter : mappingTransformation
+          .getMetadataParameters().entrySet()) {
         metadata.put(metadataParameter.getKey(), metadataParameter.getValue());
       }
       rule.setMetadata(metadata);
@@ -132,7 +151,8 @@ public class TransformationRuleBuilder implements RuleBuilder {
     return Optional.of(rule);
   }
 
-  private List<DataSource> buildDataSources(Transformations mappingTransformation, boolean setIndicators) {
+  private List<DataSource> buildDataSources(Transformations mappingTransformation,
+      boolean setIndicators) {
     List<DataSource> dataSources = new ArrayList<>();
     DataSource fromDataSource = new DataSource();
     fromDataSource.setFrom(mappingTransformation.getPath());
@@ -143,7 +163,7 @@ public class TransformationRuleBuilder implements RuleBuilder {
     Matcher matcher = pattern.matcher(transformation);
     if (matcher.find()) {
       fromDataSource.setSubfield(matcher.group());
-      //set indicator fields only for a unique rule
+      // set indicator fields only for a unique rule
       if (setIndicators) {
         String indicator1 = substring(mappingTransformation.getTransformation(), 3, 4);
         String indicator2 = substring(mappingTransformation.getTransformation(), 4, 5);
@@ -159,9 +179,11 @@ public class TransformationRuleBuilder implements RuleBuilder {
     translationFunctions.forEach((key, value) -> {
       if (isNotEmpty(fieldId) && fieldId.contains(key)) {
         Translation translation;
-        List<String> fieldParts = Splitter.on(".").splitToList(mappingTransformation.getFieldId());
+        List<String> fieldParts = Splitter.on(".").splitToList(mappingTransformation
+            .getFieldId());
         if (fieldParts.size() > 1 && translationBuilders.containsKey(fieldParts.get(1))) {
-          translation = translationBuilders.get(fieldParts.get(1)).build(value, mappingTransformation);
+          translation = translationBuilders.get(fieldParts.get(1)).build(value,
+            mappingTransformation);
         } else {
           translation = translationBuilders.get(DEFAULT).build(value, mappingTransformation);
         }

@@ -1,16 +1,15 @@
 package org.folio.dataexp.service.export.strategies.handlers;
 
+import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.util.List;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class RuleHandlerTest {
 

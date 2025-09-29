@@ -36,20 +36,22 @@ class DownloadRecordControllerTest extends BaseDataExportInitializer {
     var expectedFileName = authorityId + formatPostfix + ".mrc";
     var mockData = "some data".getBytes();
     var mockResource = new InputStreamResource(new ByteArrayInputStream(mockData));
-    when(downloadRecordService.processRecordDownload(authorityId, isUtf == null || isUtf, formatPostfix, IdType.AUTHORITY))
-      .thenReturn(mockResource);
+    when(downloadRecordService.processRecordDownload(authorityId, isUtf == null
+        || isUtf, formatPostfix, IdType.AUTHORITY)).thenReturn(mockResource);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/download-record/{recordId}", authorityId)
         .param("utf", isUtf != null ? isUtf.toString() : null)
         .param("idType", "AUTHORITY")
         .headers(defaultHeaders()))
-      .andExpect(status().isOk())
-      .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
-      .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + expectedFileName + "\""))
-      .andExpect(content().bytes(mockData));
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+        .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + expectedFileName + "\""))
+        .andExpect(content().bytes(mockData));
 
-    verify(downloadRecordService).processRecordDownload(authorityId, isUtf == null || isUtf, formatPostfix, IdType.AUTHORITY);
+    verify(downloadRecordService).processRecordDownload(authorityId,
+        isUtf == null || isUtf, formatPostfix, IdType.AUTHORITY);
   }
 
   private static Stream<Arguments> providedData() {

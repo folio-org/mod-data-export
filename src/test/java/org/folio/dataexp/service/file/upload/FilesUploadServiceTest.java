@@ -1,5 +1,13 @@
 package org.folio.dataexp.service.file.upload;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.InputStream;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
@@ -12,15 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
-
-import java.io.InputStream;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FilesUploadServiceTest {
@@ -46,16 +45,19 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     fileDefinition.setMetadata(new Metadata());
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
+    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
+        .build();
     var resource = new PathResource(UPLOADED_FILE_PATH);
 
-    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId)).thenReturn(fileDefinitionEntity);
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
+        .thenReturn(fileDefinitionEntity);
 
     fileUploadService.uploadFile(fileDefinitionId, resource);
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
-    verify(fileDefinitionEntityRepository, times(2)).save(isA(FileDefinitionEntity.class));
+    verify(fileDefinitionEntityRepository, times(2))
+        .save(isA(FileDefinitionEntity.class));
     verify(s3Client).write(isA(String.class), isA(InputStream.class));
   }
 
@@ -70,8 +72,10 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     fileDefinition.setMetadata(new Metadata());
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId)).thenReturn(fileDefinitionEntity);
+    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
+        .build();
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
+        .thenReturn(fileDefinitionEntity);
 
     fileUploadService.errorUploading(fileDefinitionId);
 

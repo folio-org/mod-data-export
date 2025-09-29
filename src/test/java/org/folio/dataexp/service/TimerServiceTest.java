@@ -7,6 +7,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
+import java.util.Collections;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.OkapiClient;
 import org.folio.dataexp.domain.dto.RoutingEntry;
@@ -17,9 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import java.net.URI;
-import java.util.Collections;
-
 @TestPropertySource(properties = "application.clean-up-files-delay=10")
 class TimerServiceTest extends BaseDataExportInitializer {
   @Autowired
@@ -29,11 +28,13 @@ class TimerServiceTest extends BaseDataExportInitializer {
 
   @Test
   void shouldUpdateTimerIfDelayWasSet() {
-    when(okapiClient.getTimerDescriptors(any(URI.class), anyString())).thenReturn(Collections.singletonList(new TimerDescriptor()
-      .id("mod-data-export_0").routingEntry(new RoutingEntry().pathPattern("/data-export/clean-up-files").delay("15"))));
+    when(okapiClient.getTimerDescriptors(any(URI.class), anyString()))
+        .thenReturn(Collections.singletonList(new TimerDescriptor()
+            .id("mod-data-export_0").routingEntry(new RoutingEntry()
+                .pathPattern("/data-export/clean-up-files").delay("15"))));
 
     var expectedDescriptor = new TimerDescriptor()
-      .id("mod-data-export_0").routingEntry(new RoutingEntry().unit("hour").delay("10"));
+        .id("mod-data-export_0").routingEntry(new RoutingEntry().unit("hour").delay("10"));
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       timerService.updateCleanUpFilesTimerIfRequired();
@@ -43,12 +44,15 @@ class TimerServiceTest extends BaseDataExportInitializer {
 
   @Test
   void shouldNotUpdateTimerIfValuesAreEqual() {
-    when(okapiClient.getTimerDescriptors(any(URI.class), anyString())).thenReturn(Collections.singletonList(new TimerDescriptor()
-      .id("mod-data-export_0").routingEntry(new RoutingEntry().pathPattern("/data-export/clean-up-files").delay("10"))));
+    when(okapiClient.getTimerDescriptors(any(URI.class), anyString()))
+        .thenReturn(Collections.singletonList(new TimerDescriptor()
+            .id("mod-data-export_0").routingEntry(new RoutingEntry()
+                .pathPattern("/data-export/clean-up-files").delay("10"))));
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       timerService.updateCleanUpFilesTimerIfRequired();
-      verify(okapiClient, times(0)).updateTimer(any(URI.class), anyString(), any(TimerDescriptor.class));
+      verify(okapiClient, times(0)).updateTimer(any(URI.class),
+          anyString(), any(TimerDescriptor.class));
     }
   }
 }

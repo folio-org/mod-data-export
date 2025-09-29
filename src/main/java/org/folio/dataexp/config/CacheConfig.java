@@ -1,7 +1,7 @@
 package org.folio.dataexp.config;
 
-import java.util.concurrent.TimeUnit;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.concurrent.TimeUnit;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -21,7 +21,7 @@ public class CacheConfig {
    * @return a configured Caffeine instance
    */
   @Bean
-  public Caffeine caffeineConfig() { //NOSONAR
+  public Caffeine caffeineConfig() { // NOSONAR
     return Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS);
   }
 
@@ -32,7 +32,7 @@ public class CacheConfig {
    * @return a configured CacheManager
    */
   @Bean
-  public CacheManager cacheManager(Caffeine caffeine) { //NOSONAR
+  public CacheManager cacheManager(Caffeine caffeine) { // NOSONAR
     CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
     caffeineCacheManager.setCaffeine(caffeine);
     return caffeineCacheManager;

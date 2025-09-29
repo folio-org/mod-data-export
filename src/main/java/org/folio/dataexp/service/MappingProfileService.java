@@ -1,5 +1,7 @@
 package org.folio.dataexp.service;
 
+import java.util.Date;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.UserClient;
@@ -16,9 +18,9 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.UUID;
-
+/**
+ * Service for managing mapping profiles.
+ */
 @Service
 @RequiredArgsConstructor
 public class MappingProfileService {
@@ -29,27 +31,61 @@ public class MappingProfileService {
   private final UserClient userClient;
   private final MappingProfileValidator mappingProfileValidator;
 
+  /**
+   * Deletes a mapping profile by its ID.
+   *
+   * @param mappingProfileId The mapping profile UUID.
+   * @throws DefaultMappingProfileException if the profile is default.
+   */
   public void deleteMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault()))
+    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Deletion of default mapping profile is forbidden");
+    }
     mappingProfileEntityRepository.deleteById(mappingProfileId);
   }
 
+  /**
+   * Retrieves a mapping profile entity by its ID.
+   *
+   * @param mappingProfileId The mapping profile UUID.
+   * @return The MappingProfileEntity.
+   */
   public MappingProfileEntity getMappingProfileById(UUID mappingProfileId) {
     return mappingProfileEntityRepository.getReferenceById(mappingProfileId);
   }
 
+  /**
+   * Retrieves mapping profiles by CQL query, offset, and limit.
+   *
+   * @param query The CQL query.
+   * @param offset The offset.
+   * @param limit The limit.
+   * @return MappingProfileCollection containing results.
+   */
   public MappingProfileCollection getMappingProfiles(String query, Integer offset, Integer limit) {
-    if (StringUtils.isEmpty(query)) query = "(cql.allRecords=1)";
-    var mappingProfilesPage = mappingProfileEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
-    var mappingProfiles = mappingProfilesPage.stream().map(MappingProfileEntity::getMappingProfile).toList();
+    if (StringUtils.isEmpty(query)) {
+      query = "(cql.allRecords=1)";
+    }
+    var mappingProfilesPage = mappingProfileEntityCqlRepository.findByCql(
+        query,
+        OffsetRequest.of(offset, limit)
+    );
+    var mappingProfiles = mappingProfilesPage.stream()
+        .map(MappingProfileEntity::getMappingProfile)
+        .toList();
     var mappingProfileCollection = new MappingProfileCollection();
     mappingProfileCollection.setMappingProfiles(mappingProfiles);
     mappingProfileCollection.setTotalRecords((int) mappingProfilesPage.getTotalElements());
     return mappingProfileCollection;
   }
 
+  /**
+   * Creates and saves a new mapping profile.
+   *
+   * @param mappingProfile The MappingProfile to save.
+   * @return The saved MappingProfile.
+   */
   public MappingProfile postMappingProfile(MappingProfile mappingProfile) {
     var userId = folioExecutionContext.getUserId().toString();
     var user = userClient.getUserById(userId);
@@ -72,10 +108,19 @@ public class MappingProfileService {
 
     mappingProfileValidator.validate(mappingProfile);
 
-    var saved = mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
+    var saved = mappingProfileEntityRepository.save(
+        MappingProfileEntity.fromMappingProfile(mappingProfile)
+    );
     return saved.getMappingProfile();
   }
 
+  /**
+   * Updates an existing mapping profile.
+   *
+   * @param mappingProfileId The mapping profile UUID.
+   * @param mappingProfile The MappingProfile to update.
+   * @throws DefaultMappingProfileException if the profile is default.
+   */
   public void putMappingProfile(UUID mappingProfileId, MappingProfile mappingProfile) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
     if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
@@ -94,19 +139,20 @@ public class MappingProfileService {
     var metadataOfExistingMappingProfile = mappingProfileEntity.getMappingProfile().getMetadata();
 
     var metadata = Metadata.builder()
-      .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
-      .updatedDate(new Date())
-      .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
-      .updatedByUserId(userId)
-      .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
-      .updatedByUsername(user.getUsername())
-      .build();
+        .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
+        .updatedDate(new Date())
+        .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
+        .updatedByUserId(userId)
+        .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
+        .updatedByUsername(user.getUsername())
+        .build();
 
     mappingProfile.setMetadata(metadata);
 
     mappingProfileValidator.validate(mappingProfile);
 
-    mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
+    mappingProfileEntityRepository.save(
+        MappingProfileEntity.fromMappingProfile(mappingProfile)
+    );
   }
-
 }

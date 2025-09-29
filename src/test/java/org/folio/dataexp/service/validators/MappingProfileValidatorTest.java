@@ -1,5 +1,10 @@
 package org.folio.dataexp.service.validators;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -8,12 +13,6 @@ import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressi
 import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MappingProfileValidatorTest {
 
@@ -31,7 +30,8 @@ class MappingProfileValidatorTest {
     mappingProfile.setTransformations(List.of(transformation));
 
     var validator = new MappingProfileValidator();
-    assertThrows(MappingProfileTransformationPatternException.class, () -> validator.validate(mappingProfile));
+    assertThrows(MappingProfileTransformationPatternException.class, () ->
+        validator.validate(mappingProfile));
   }
 
   @Test
@@ -44,13 +44,16 @@ class MappingProfileValidatorTest {
     var validator = new MappingProfileValidator();
 
     mappingProfile.setFieldsSuppression("90");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () -> validator.validate(mappingProfile));
+    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
+        validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression("9000");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () -> validator.validate(mappingProfile));
+    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
+        validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression("aab, 900");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () -> validator.validate(mappingProfile));
+    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
+        validator.validate(mappingProfile));
   }
 
   @Test
@@ -64,7 +67,8 @@ class MappingProfileValidatorTest {
     mappingProfile.recordTypes(List.of(RecordTypes.ITEM));
 
     mappingProfile.setFieldsSuppression("900");
-    assertThrows(MappingProfileFieldsSuppressionException.class, () -> validator.validate(mappingProfile));
+    assertThrows(MappingProfileFieldsSuppressionException.class, () ->
+        validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression(StringUtils.EMPTY);
     assertDoesNotThrow(() -> validator.validate(mappingProfile));

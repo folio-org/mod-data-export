@@ -1,5 +1,8 @@
 package org.folio.dataexp.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
@@ -37,9 +40,6 @@ import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 abstract class ServiceInitializer extends BaseDataExportInitializer {
 
@@ -94,13 +94,20 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
     personal.setLastName("testuser");
     user.setPersonal(personal);
     when(userClient.getUserById(any(String.class))).thenReturn(user);
-    when(alternativeTitleTypesClient.getAlternativeTitleTypes(any(Long.class))).thenReturn(new AlternativeDataTypes());
-    when(callNumberTypesClient.getCallNumberTypes(any(Long.class))).thenReturn(new org.folio.dataexp.domain.dto.CallNumberTypes());
-    when(contributorNameTypesClient.getContributorNameTypes(any(Long.class))).thenReturn(new ContributorNameTypes());
-    when(electronicAccessRelationshipsClient.getElectronicAccessRelationships(any(Long.class))).thenReturn(new ElectronicAccessRelationships());
-    when(holdingsNoteTypesClient.getHoldingsNoteTypes(any(Long.class))).thenReturn(new org.folio.dataexp.domain.dto.HoldingsNoteTypes());
-    when(identifierTypesClient.getIdentifierTypes(any(Long.class))).thenReturn(new IdentifierTypes());
-    when(instanceFormatsClient.getInstanceFormats(any(Long.class))).thenReturn(new InstanceFormats());
+    when(alternativeTitleTypesClient.getAlternativeTitleTypes(any(Long.class)))
+        .thenReturn(new AlternativeDataTypes());
+    when(callNumberTypesClient.getCallNumberTypes(any(Long.class)))
+        .thenReturn(new org.folio.dataexp.domain.dto.CallNumberTypes());
+    when(contributorNameTypesClient.getContributorNameTypes(any(Long.class)))
+        .thenReturn(new ContributorNameTypes());
+    when(electronicAccessRelationshipsClient.getElectronicAccessRelationships(any(Long.class)))
+        .thenReturn(new ElectronicAccessRelationships());
+    when(holdingsNoteTypesClient.getHoldingsNoteTypes(any(Long.class)))
+        .thenReturn(new org.folio.dataexp.domain.dto.HoldingsNoteTypes());
+    when(identifierTypesClient.getIdentifierTypes(any(Long.class)))
+        .thenReturn(new IdentifierTypes());
+    when(instanceFormatsClient.getInstanceFormats(any(Long.class)))
+        .thenReturn(new InstanceFormats());
     when(instanceTypesClient.getInstanceTypes(any(Long.class))).thenReturn(new InstanceTypes());
     when(itemNoteTypesClient.getItemNoteTypes(any(Long.class))).thenReturn(new ItemNoteTypes());
     when(loanTypesClient.getLoanTypes(any(Long.class))).thenReturn(new LoanTypes());
@@ -109,7 +116,8 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
     when(locationUnitsClient.getLibraries(any(Long.class))).thenReturn(new Libraries());
     when(locationUnitsClient.getInstitutions(any(Long.class))).thenReturn(new Institutions());
     when(materialTypesClient.getMaterialTypes(any(Long.class))).thenReturn(new MaterialTypes());
-    when(natureOfContentTermsClient.getNatureOfContentTerms(any(Long.class))).thenReturn(new org.folio.dataexp.domain.dto.NatureOfContentTerms());
+    when(natureOfContentTermsClient.getNatureOfContentTerms(any(Long.class)))
+        .thenReturn(new org.folio.dataexp.domain.dto.NatureOfContentTerms());
     when(issuanceModesClient.getIssuanceModes(any(Long.class))).thenReturn(new IssuanceModes());
     when(consortiaService.getCentralTenantId(any(String.class))).thenReturn("central");
   }

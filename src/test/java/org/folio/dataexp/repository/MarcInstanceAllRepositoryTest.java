@@ -1,11 +1,11 @@
 package org.folio.dataexp.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
 
@@ -15,7 +15,8 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findMarcInstanceAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeleted(MIN_UUID, MAX_UUID,
+          PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(5);
     }
   }
@@ -23,7 +24,8 @@ class MarcInstanceAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findMarcInstanceAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = marcInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressed(MIN_UUID,
+          MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(3);
     }
   }

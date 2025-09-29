@@ -1,6 +1,5 @@
 package org.folio.dataexp.service;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +16,9 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for downloading MARC records by ID.
+ */
 @Service
 @AllArgsConstructor
 @Log4j2
@@ -28,46 +30,93 @@ public class DownloadRecordService {
   private final InputFileProcessor inputFileProcessor;
   protected final FolioExecutionContext folioExecutionContext;
 
-  public InputStreamResource processRecordDownload(final UUID recordId,
-                                                 boolean isUtf,
-                                                 final String formatPostfix,
-                                                 final IdType idType) {
-    log.info("processRecordDownload:: start downloading record with id: {}, isUtf: {}", recordId, isUtf);
+  /**
+   * Processes the download of a record by its ID.
+   *
+   * @param recordId The record UUID.
+   * @param isUtf Whether to use UTF encoding.
+   * @param formatPostfix Format postfix for the file.
+   * @param idType The type of ID.
+   * @return InputStreamResource containing the record data.
+   */
+  public InputStreamResource processRecordDownload(
+      final UUID recordId,
+      boolean isUtf,
+      final String formatPostfix,
+      final IdType idType
+  ) {
+    log.info(
+        "processRecordDownload:: start downloading record with id: {}, isUtf: {}",
+        recordId,
+        isUtf
+    );
     var dirName = recordId.toString() + formatPostfix;
     InputStream marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent == null) {
       byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType);
       uploadMarcFile(dirName, marcFileContentBytes);
       return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
-    }
-    else {
+    } else {
       return new InputStreamResource(marcFileContent);
     }
-
   }
 
+  /**
+   * Gets the content of a MARC file if it exists.
+   *
+   * @param dirName Directory name.
+   * @return InputStream of the file, or null if not found.
+   */
   private InputStream getContentIfFileExists(final String dirName) {
     return inputFileProcessor.readMarcFile(dirName);
   }
 
-  private byte[] generateRecordFileContentBytes(final UUID recordId, boolean isUtf, final IdType idType) {
+  /**
+   * Generates the MARC file content bytes for a record.
+   *
+   * @param recordId The record UUID.
+   * @param isUtf Whether to use UTF encoding.
+   * @param idType The type of ID.
+   * @return Byte array of the MARC file content.
+   */
+  private byte[] generateRecordFileContentBytes(
+      final UUID recordId,
+      boolean isUtf,
+      final IdType idType
+  ) {
     var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
     var marcRecord = exportStrategy.getMarcRecord(recordId);
     var mappingProfile = exportStrategy.getDefaultMappingProfile();
     try {
-      return jsonToMarcConverter.convertJsonRecordToMarcRecord(marcRecord.getContent(), List.of(), mappingProfile,
-        isUtf).toByteArray();
+      return jsonToMarcConverter.convertJsonRecordToMarcRecord(
+          marcRecord.getContent(),
+          List.of(),
+          mappingProfile,
+          isUtf
+      ).toByteArray();
     } catch (IOException e) {
-      log.error("generateRecordFileContent :: Error generating content for record with ID: {}", recordId);
+      log.error(
+          "generateRecordFileContent :: Error generating content for record with ID: {}",
+          recordId
+      );
       throw new DownloadRecordException(e.getMessage());
     }
   }
 
+  /**
+   * Uploads the MARC file to remote storage.
+   *
+   * @param dirName Directory name.
+   * @param marcFileContentBytes Byte array of MARC file content.
+   */
   private void uploadMarcFile(final String dirName, byte[] marcFileContentBytes) {
     try {
       s3Uploader.uploadSingleRecordById(dirName, marcFileContentBytes);
     } catch (IOException e) {
-      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName);
+      log.error(
+          "uploadMarcFile:: Error while upload marc file to remote storage {}",
+          dirName
+      );
       throw new DownloadRecordException(e.getMessage());
     }
   }

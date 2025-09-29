@@ -9,22 +9,50 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
+/**
+ * Asynchronous processor for exporting records by single file.
+ */
 @Component
 public class SingleFileProcessorAsync extends SingleFileProcessor {
 
+  /**
+   * Constructs an asynchronous single file processor.
+   *
+   * @param exportExecutor The export executor.
+   * @param jobExecutionExportFilesEntityRepository Repository for export files.
+   * @param jobExecutionEntityRepository Repository for job executions.
+   * @param jobExecutionService Service for job executions.
+   * @param errorLogService Service for error logs.
+   */
   @Autowired
-  public SingleFileProcessorAsync(ExportExecutor exportExecutor, JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
-                                  JobExecutionEntityRepository jobExecutionEntityRepository, JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
-    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository, jobExecutionService, errorLogService);
+  public SingleFileProcessorAsync(ExportExecutor exportExecutor,
+      JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository,
+      JobExecutionEntityRepository jobExecutionEntityRepository,
+      JobExecutionService jobExecutionService, ErrorLogService errorLogService) {
+    super(exportExecutor, jobExecutionExportFilesEntityRepository, jobExecutionEntityRepository,
+        jobExecutionService, errorLogService);
   }
 
+  /**
+   * Executes the export asynchronously for a single file.
+   *
+   * @param export The JobExecutionExportFilesEntity.
+   * @param exportRequest The export request.
+   * @param commonExportStatistic Export statistics.
+   */
   @Override
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest, CommonExportStatistic commonExportStatistic) {
+  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest,
+      CommonExportStatistic commonExportStatistic) {
     var exportRequestCopy = getExportRequestCopy(exportRequest);
     exportExecutor.exportAsynch(export, exportRequestCopy, commonExportStatistic);
   }
 
+  /**
+   * Creates a copy of the export request.
+   *
+   * @param exportRequest The export request.
+   * @return A copy of ExportRequest.
+   */
   private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {
     return ExportRequest.builder()
       .fileDefinitionId(exportRequest.getFileDefinitionId())

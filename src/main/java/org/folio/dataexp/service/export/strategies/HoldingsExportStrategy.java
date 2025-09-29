@@ -11,11 +11,21 @@ import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_HOLDING;
 import static org.folio.dataexp.util.ErrorCode.ERROR_HOLDINGS_NO_PERMISSION;
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import net.minidev.json.JSONArray;
@@ -28,8 +38,8 @@ import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
+import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
@@ -51,21 +61,14 @@ import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.MarcException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+/**
+ * Export strategy for Holdings records.
+ */
 @Log4j2
 @Component
 @RequiredArgsConstructor
 public class HoldingsExportStrategy extends AbstractExportStrategy {
+
   protected static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 
   private final InstanceEntityRepository instanceEntityRepository;
@@ -88,36 +91,108 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   private Map<String, Set<UUID>> tenantIdsMap;
 
+  /**
+   * Gets MARC records for Holdings.
+   */
   @Override
-  public List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile, ExportRequest exportRequest,
-                                               UUID jobExecutionId) {
+  public List<MarcRecordEntity> getMarcRecords(
+      Set<UUID> externalIds,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      UUID jobExecutionId
+  ) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
-      var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+      var centralTenantId = consortiaService.getCentralTenantId(
+          folioExecutionContext.getTenantId());
       if (centralTenantId.equals(folioExecutionContext.getTenantId())) {
-        tenantIdsMap = getTenantIds(externalIds, centralTenantId, jobExecutionId);
+        tenantIdsMap = getTenantIds(
+            externalIds,
+            centralTenantId,
+            jobExecutionId
+        );
         List<MarcRecordEntity> entities = new ArrayList<>();
-        tenantIdsMap.forEach((k, v) -> entities.addAll(marcInstanceRecordRepository.findByExternalIdIn(k, v)));
+        tenantIdsMap.forEach(
+            (k, v) -> entities.addAll(marcInstanceRecordRepository.findByExternalIdIn(k, v)));
         return entities;
       } else {
-        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(externalIds,
-          HOLDING_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
+        return marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            externalIds,
+            HOLDING_MARC_TYPE,
+            Set.of("ACTUAL", "DELETED")
+        );
       }
     }
     return new ArrayList<>();
   }
 
+  /**
+   * Gets generated MARC result for Holdings.
+   */
   @Override
-  public GeneratedMarcResult getGeneratedMarc(Set<UUID> holdingsIds, MappingProfile mappingProfile, ExportRequest exportRequest,
-                                              UUID jobExecutionId, ExportStrategyStatistic exportStatistic) {
+  public GeneratedMarcResult getGeneratedMarc(
+      Set<UUID> holdingsIds,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      UUID jobExecutionId,
+      ExportStrategyStatistic exportStatistic
+  ) {
     var result = new GeneratedMarcResult(jobExecutionId);
-    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, jobExecutionId);
+    var holdingsWithInstanceAndItems = getHoldingsWithInstanceAndItems(
+        holdingsIds,
+        result,
+        mappingProfile,
+        jobExecutionId
+    );
     return getGeneratedMarc(mappingProfile, holdingsWithInstanceAndItems, jobExecutionId, result);
   }
 
+  /**
+   * Generates a MARC result for the given holdings and their associated instance and item data,
+   * using the provided mapping profile and job execution ID.
+   *
+   * @param mappingProfile                The mapping profile to use for transformation.
+   * @param holdingsWithInstanceAndItems  Map of holding UUIDs to JSONObjects containing holding,
+   *                                      instance, and items data.
+   * @param jobExecutionId                The job execution ID for error logging.
+   * @param result                        The result object to populate with MARC records and
+   *                                      errors.
+   * @return The generated MARC result containing MARC records and error information.
+   */
+  protected GeneratedMarcResult getGeneratedMarc(
+      MappingProfile mappingProfile,
+      Map<UUID, JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId,
+      GeneratedMarcResult result
+  ) {
+    List<Rule> rules;
+    try {
+      rules = ruleFactory.getRules(mappingProfile);
+    } catch (TransformationRuleException e) {
+      log.error(e);
+      errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
+      return result;
+    }
+    var marcRecords = new ArrayList<String>();
+    fillOutMarcRecords(
+        holdingsWithInstanceAndItems,
+        jobExecutionId,
+        marcRecords,
+        result,
+        rules
+    );
+    result.setMarcRecords(marcRecords);
+    return result;
+  }
+
+  /**
+   * Gets identifiers for duplicate error.
+   */
   @Override
   Optional<ExportIdentifiersForDuplicateError> getIdentifiers(UUID id) {
     var holdings = holdingsRecordEntityRepository.findByIdIn(Set.of(id));
-    if (holdings.isEmpty()) return Optional.empty();
+    if (holdings.isEmpty()) {
+      return Optional.empty();
+    }
     var jsonObject =  getAsJsonObject(holdings.get(0).getJsonb());
     if (jsonObject.isPresent()) {
       var hrid = jsonObject.get().getAsString(HRID_KEY);
@@ -128,35 +203,81 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     return Optional.empty();
   }
 
-  protected GeneratedMarcResult getGeneratedMarc(MappingProfile mappingProfile, Map<UUID, JSONObject> holdingsWithInstanceAndItems,
-                                                 UUID jobExecutionId, GeneratedMarcResult result) {
-    List<Rule> rules;
-    try {
-      rules = ruleFactory.getRules(mappingProfile);
-    } catch (TransformationRuleException e) {
-      log.error(e);
-      errorLogService.saveGeneralError(e.getMessage(), jobExecutionId);
-      return result;
-    }
-    var marcRecords = new ArrayList<String>();
-    fillOutMarcRecords(holdingsWithInstanceAndItems, jobExecutionId, marcRecords, result, rules);
-    result.setMarcRecords(marcRecords);
-    return result;
-  }
-
+  /**
+   * Gets additional MARC fields by external ID.
+   */
   @Override
-  public Map<UUID,MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
+  public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(
+      List<MarcRecordEntity> marcRecords,
+      MappingProfile mappingProfile,
+      UUID jobExecutionId
+  ) {
     return new HashMap<>();
   }
 
-  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult result, MappingProfile mappingProfile, UUID jobExecutionId) {
-    var holdings = getHoldings(holdingsIds, jobExecutionId);
-    var instancesIds = holdings.stream().map(HoldingsRecordEntity::getInstanceId).collect(Collectors.toSet());
-    return getHoldingsWithInstanceAndItems(holdingsIds, result, mappingProfile, holdings, instancesIds);
+  /**
+   * Gets a MARC record by external ID.
+   */
+  @Override
+  public MarcRecordEntity getMarcRecord(UUID externalId) {
+    throw new UnsupportedOperationException("The functionality is not required for holdings.");
   }
 
-  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(Set<UUID> holdingsIds, GeneratedMarcResult generatedMarcResult, MappingProfile mappingProfile,
-                                                                  List<HoldingsRecordEntity> holdings, Set<UUID> instancesIds) {
+  /**
+   * Gets the default mapping profile for Holdings.
+   */
+  @Override
+  public MappingProfile getDefaultMappingProfile() {
+    throw new UnsupportedOperationException("The functionality is not required for holdings.");
+  }
+
+  /**
+   * Retrieves a map of holding IDs to JSONObjects containing the holding, its associated instance,
+   * and optionally its items, based on the provided holdings IDs.
+   *
+   * @param holdingsIds   Set of holding UUIDs to retrieve.
+   * @param result        The result object to record failures and non-existent holdings.
+   * @param mappingProfile The mapping profile to determine if items should be included.
+   * @param jobExecutionId The job execution ID for error logging.
+   * @return Map of holding UUIDs to JSONObjects containing holding, instance, and items data.
+   */
+  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(
+      Set<UUID> holdingsIds,
+      GeneratedMarcResult result,
+      MappingProfile mappingProfile,
+      UUID jobExecutionId
+  ) {
+    var holdings = getHoldings(holdingsIds, jobExecutionId);
+    var instancesIds = holdings.stream()
+        .map(HoldingsRecordEntity::getInstanceId)
+        .collect(Collectors.toSet());
+    return getHoldingsWithInstanceAndItems(
+        holdingsIds,
+        result,
+        mappingProfile,
+        holdings,
+        instancesIds
+    );
+  }
+
+  /**
+   * Retrieves a map of holding IDs to JSONObjects containing the holding, its associated instance,
+   * and optionally its items, using already-fetched holdings and instance IDs.
+   *
+   * @param holdingsIds         Set of holding UUIDs to retrieve.
+   * @param generatedMarcResult The result object to record failures and non-existent holdings.
+   * @param mappingProfile      The mapping profile to determine if items should be included.
+   * @param holdings            List of HoldingsRecordEntity objects.
+   * @param instancesIds        Set of instance UUIDs associated with the holdings.
+   * @return Map of holding UUIDs to JSONObjects containing holding, instance, and items data.
+   */
+  protected Map<UUID, JSONObject> getHoldingsWithInstanceAndItems(
+      Set<UUID> holdingsIds,
+      GeneratedMarcResult generatedMarcResult,
+      MappingProfile mappingProfile,
+      List<HoldingsRecordEntity> holdings,
+      Set<UUID> instancesIds
+  ) {
     var instances = getInstances(instancesIds, holdings);
     entityManager.clear();
     Map<UUID, JSONObject> holdingsWithInstanceAndItems = new LinkedHashMap<>();
@@ -165,10 +286,16 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       existHoldingsIds.add(holding.getId());
       var holdingJsonOpt = getAsJsonObject(holding.getJsonb());
       if (holdingJsonOpt.isEmpty()) {
-        var errorMessage = String.format(ERROR_CONVERTING_TO_JSON_HOLDING.getDescription(), holding.getId());
+        var errorMessage = String.format(
+            ERROR_CONVERTING_TO_JSON_HOLDING.getDescription(),
+            holding.getId()
+        );
         log.error("getHoldingsWithInstanceAndItems:: {}", errorMessage);
         generatedMarcResult.addIdToFailed(holding.getId());
-        errorLogService.saveGeneralError(errorMessage, generatedMarcResult.getJobExecutionId());
+        errorLogService.saveGeneralError(
+            errorMessage,
+            generatedMarcResult.getJobExecutionId()
+        );
         continue;
       }
       var holdingJson = holdingJsonOpt.get();
@@ -177,7 +304,10 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
         if (instance.getId().equals(holding.getInstanceId())) {
           var instanceJsonOpt = getAsJsonObject(instance.getJsonb());
           if (instanceJsonOpt.isEmpty()) {
-            log.error("getHoldingsWithInstanceAndItems:: Error converting to json instance by id {}", instance.getId());
+            log.error(
+                "getHoldingsWithInstanceAndItems:: Error converting to json instance by id {}",
+                instance.getId()
+            );
           } else {
             var instanceJson = instanceJsonOpt.get();
             holdingWithInstanceAndItems.appendField(INSTANCE_KEY, instanceJson);
@@ -196,11 +326,14 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     }
     holdingsIds.removeAll(existHoldingsIds);
     holdingsIds.forEach(
-      holdingsId -> {
-        log.error("getHoldingsWithInstanceAndItems:: holding by id {} does not exist", holdingsId);
-        generatedMarcResult.addIdToNotExist(holdingsId);
-        generatedMarcResult.addIdToFailed(holdingsId);
-      });
+        holdingsId -> {
+          log.error(
+              "getHoldingsWithInstanceAndItems:: holding by id {} does not exist",
+              holdingsId
+          );
+          generatedMarcResult.addIdToNotExist(holdingsId);
+          generatedMarcResult.addIdToFailed(holdingsId);
+        });
     return holdingsWithInstanceAndItems;
   }
 
@@ -211,53 +344,116 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       if (isNull(tenantIdsMap)) {
         tenantIdsMap = getTenantIds(holdingsIds, centralTenantId, jobExecutionId);
       }
-      tenantIdsMap.forEach((k, v) -> entities.addAll(holdingsRecordEntityTenantRepository.findByIdIn(k, v)));
+      tenantIdsMap.forEach(
+          (k, v) -> entities.addAll(holdingsRecordEntityTenantRepository.findByIdIn(k, v)));
       tenantIdsMap = null;
       return entities;
     }
     return holdingsRecordEntityRepository.findByIdIn(holdingsIds);
   }
 
-  private List<InstanceEntity> getInstances(Set<UUID> instanceIds, List<HoldingsRecordEntity> holdings) {
+  private List<InstanceEntity> getInstances(Set<UUID> instanceIds,
+      List<HoldingsRecordEntity> holdings) {
     var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId())) {
       Map<UUID, String> instIdTenantMap = getInstanceIdsTenant(holdings, centralTenantId);
       log.debug("instIdTenantMap: {}", instIdTenantMap);
       List<InstanceEntity> entities = new ArrayList<>();
-      instIdTenantMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository.findInstancesByIdIn(v, Set.of(k))));
+      instIdTenantMap.forEach((k, v) -> entities.addAll(instanceCentralTenantRepository
+          .findInstancesByIdIn(v, Set.of(k))));
       log.debug("entities: {}", entities);
       return entities;
     }
     return instanceEntityRepository.findByIdIn(instanceIds);
   }
 
-  private Map<String, Set<UUID>> getTenantIds(Set<UUID> ids, String centralTenantId, UUID jobExecutionId) {
+  private Map<String, Set<UUID>> getTenantIds(
+      Set<UUID> ids,
+      String centralTenantId,
+      UUID jobExecutionId
+  ) {
     log.info("getTenantIds ids: {}", ids);
     Map<String, Set<UUID>> idsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    log.info("Affiliated tenants for user {} from {} tenant: {}", folioExecutionContext.getUserId(), folioExecutionContext.getTenantId(), availableTenants);
+    var availableTenants = consortiaService.getAffiliatedTenants(
+        folioExecutionContext.getTenantId(),
+        folioExecutionContext.getUserId().toString()
+    );
+    log.info(
+        "Affiliated tenants for user {} from {} tenant: {}",
+        folioExecutionContext.getUserId(),
+        folioExecutionContext.getTenantId(),
+        availableTenants
+    );
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
-      log.info("ID: {}, tenant: {}, actualTenant: {}", id, curTenant, folioExecutionContext.getTenantId());
+      log.info(
+          "ID: {}, tenant: {}, actualTenant: {}",
+          id,
+          curTenant,
+          folioExecutionContext.getTenantId()
+      );
       if (nonNull(curTenant)) {
         if (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId)) {
           if (permissionsValidator.checkInstanceViewPermissions(curTenant)) {
             idsMap.computeIfAbsent(curTenant, k -> new HashSet<>()).add(id);
           } else {
-            var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
-              curTenant);
-            errorLogService.saveGeneralErrorWithMessageValues(ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
-            log.error(format(ERROR_HOLDINGS_NO_PERMISSION.getDescription(), id, folioExecutionContext.getUserId(), curTenant));
-
+            var msgValues = List.of(
+                id.toString(),
+                userService.getUserName(
+                    folioExecutionContext.getTenantId(),
+                    folioExecutionContext.getUserId().toString()
+                ),
+                curTenant
+            );
+            errorLogService.saveGeneralErrorWithMessageValues(
+                ERROR_HOLDINGS_NO_PERMISSION.getCode(),
+                msgValues,
+                jobExecutionId
+            );
+            log.error(
+                format(
+                    ERROR_HOLDINGS_NO_PERMISSION.getDescription(),
+                    id,
+                    folioExecutionContext.getUserId(),
+                    curTenant
+                )
+            );
           }
         } else {
-          var msgValues = List.of(id.toString(), userService.getUserName(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()), curTenant);
-          errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getCode(), msgValues, jobExecutionId);
-          log.error(format(ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getDescription(), id, folioExecutionContext.getUserId(), curTenant));
+          var msgValues = List.of(
+              id.toString(),
+              userService.getUserName(
+                  folioExecutionContext.getTenantId(),
+                  folioExecutionContext.getUserId().toString()
+              ),
+              curTenant
+          );
+          errorLogService.saveGeneralErrorWithMessageValues(
+              ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getCode(),
+              msgValues,
+              jobExecutionId
+          );
+          log.error(
+              format(
+                  ERROR_MESSAGE_HOLDINGS_NO_AFFILIATION.getDescription(),
+                  id,
+                  folioExecutionContext.getUserId(),
+                  curTenant
+              )
+          );
         }
       } else {
-        errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(), List.of(id.toString()), jobExecutionId);
-        log.error(format(ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(), id));
+        errorLogService.saveGeneralErrorWithMessageValues(
+            ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getCode(),
+            List.of(id.toString()),
+            jobExecutionId
+        );
+        log.error(
+            format(
+                ERROR_MESSAGE_TENANT_NOT_FOUND_FOR_HOLDING.getDescription(),
+                id
+            )
+        );
       }
     });
     return idsMap;
@@ -266,38 +462,62 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
   private Map<UUID, String> getHoldingIdsTenant(Set<UUID> ids, String centralTenantId) {
     log.debug("getHoldingIdsTenant ids: {}", ids);
     Map<UUID, String> idsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    var availableTenants = consortiaService.getAffiliatedTenants(
+        folioExecutionContext.getTenantId(),
+        folioExecutionContext.getUserId().toString()
+    );
     ids.forEach(id -> {
       var curTenant = consortiumSearchClient.getHoldingsById(id.toString()).getTenantId();
-      if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
+      if (nonNull(curTenant)
+          && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
         idsMap.put(id, curTenant);
       }
     });
     return idsMap;
   }
 
-  private Map<UUID, String> getInstanceIdsTenant(List<HoldingsRecordEntity> holdings, String centralTenantId) {
+  private Map<UUID, String> getInstanceIdsTenant(
+      List<HoldingsRecordEntity> holdings,
+      String centralTenantId
+  ) {
     log.debug("getInstanceIdsTenant ids: {}", holdings);
     Map<UUID, String> idsMap = new HashMap<>();
-    var availableTenants = consortiaService.getAffiliatedTenants(folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    var availableTenants = consortiaService.getAffiliatedTenants(
+        folioExecutionContext.getTenantId(),
+        folioExecutionContext.getUserId().toString()
+    );
     holdings.forEach(hold -> {
       var curTenant = consortiumSearchClient.getHoldingsById(hold.getId().toString()).getTenantId();
-      if (nonNull(curTenant) && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
+      if (nonNull(curTenant)
+          && (availableTenants.contains(curTenant) || curTenant.equals(centralTenantId))) {
         idsMap.put(hold.getInstanceId(), curTenant);
       }
     });
     return idsMap;
   }
 
-  private void fillOutMarcRecords(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, List<String> marcRecords,
-                                  GeneratedMarcResult result, List<Rule> rules) {
+  private void fillOutMarcRecords(
+      Map<UUID, JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId,
+      List<String> marcRecords,
+      GeneratedMarcResult result,
+      List<Rule> rules
+  ) {
     var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId())) {
-      fillOutFromCentralTenant(holdingsWithInstanceAndItems, jobExecutionId, centralTenantId, marcRecords, result, rules);
+      fillOutFromCentralTenant(
+          holdingsWithInstanceAndItems,
+          jobExecutionId,
+          centralTenantId,
+          marcRecords,
+          result,
+          rules
+      );
     } else {
       for (var jsonObject : holdingsWithInstanceAndItems.values()) {
         try {
-          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(folioExecutionContext.getTenantId());
+          ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(
+              folioExecutionContext.getTenantId());
           var marc = mapToMarc(jsonObject, rules, referenceDataWrapper);
           marcRecords.add(marc);
         } catch (MarcException e) {
@@ -307,14 +527,23 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     }
   }
 
-  private void fillOutFromCentralTenant(Map<UUID, JSONObject> holdingsWithInstanceAndItems, UUID jobExecutionId, String centralTenantId, List<String> marcRecords,
-                                        GeneratedMarcResult result, List<Rule> rules) {
+  private void fillOutFromCentralTenant(
+      Map<UUID, JSONObject> holdingsWithInstanceAndItems,
+      UUID jobExecutionId,
+      String centralTenantId,
+      List<String> marcRecords,
+      GeneratedMarcResult result,
+      List<Rule> rules
+  ) {
     var idsTenant = getHoldingIdsTenant(holdingsWithInstanceAndItems.keySet(), centralTenantId);
     log.info("idsTenant: {}", idsTenant);
     for (Map.Entry<UUID, JSONObject> uuidJson : holdingsWithInstanceAndItems.entrySet()) {
       var tenantId = idsTenant.get(uuidJson.getKey());
 
-      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))) {
+      try (
+          var ignored = new FolioExecutionContextSetter(
+              prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))
+      ) {
         ReferenceDataWrapper referenceDataWrapper = referenceDataProvider.getReference(tenantId);
         var marc = mapToMarc(uuidJson.getValue(), rules, referenceDataWrapper);
 
@@ -325,25 +554,48 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
     }
   }
 
-  private void handleMarcException(JSONObject jsonObject, GeneratedMarcResult result, MarcException e, UUID jobExecutionId) {
+  private void handleMarcException(
+      JSONObject jsonObject,
+      GeneratedMarcResult result,
+      MarcException e,
+      UUID jobExecutionId
+  ) {
     var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
     var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
     var uuid = holdingsJsonObject.getAsString(ID_KEY);
     result.addIdToFailed(UUID.fromString(uuid));
     var errorMessage = format("%s for holding %s", e.getMessage(), uuid);
-    errorLogService.saveGeneralErrorWithMessageValues(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), List.of(errorMessage), jobExecutionId);
+    errorLogService.saveGeneralErrorWithMessageValues(
+        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+        List.of(errorMessage),
+        jobExecutionId
+    );
     log.error(" getGeneratedMarc::  exception to convert in marc: {}", errorMessage);
   }
 
-  private String mapToMarc(JSONObject jsonObject, List<Rule> rules, ReferenceDataWrapper referenceDataWrapper) {
+  private String mapToMarc(
+      JSONObject jsonObject,
+      List<Rule> rules,
+      ReferenceDataWrapper referenceDataWrapper
+  ) {
     rules = ruleHandler.preHandle(jsonObject, rules);
     EntityReader entityReader = new JPathSyntaxEntityReader(jsonObject.toJSONString());
     RecordWriter recordWriter = new MarcRecordWriter();
-    return ruleProcessor.process(entityReader, recordWriter, referenceDataWrapper, rules, (translationException -> {
-      var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
-      var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
-      log.warn("mapToSrs:: exception: {} for holding {}", translationException.getCause().getMessage(), holdingsJsonObject.getAsString(ID_KEY));
-    }));
+    return ruleProcessor.process(
+        entityReader,
+        recordWriter,
+        referenceDataWrapper,
+        rules,
+        (translationException -> {
+          var holdingsArray = (JSONArray) jsonObject.get(HOLDINGS_KEY);
+          var holdingsJsonObject = (JSONObject) holdingsArray.get(0);
+          log.warn(
+              "mapToSrs:: exception: {} for holding {}",
+              translationException.getCause().getMessage(),
+              holdingsJsonObject.getAsString(ID_KEY)
+          );
+        })
+    );
   }
 
   private void addItemsToHolding(JSONObject holdingJson, UUID holdingId) {
@@ -358,15 +610,5 @@ public class HoldingsExportStrategy extends AbstractExportStrategy {
       }
     });
     holdingJson.put(ITEMS_KEY, itemJsonArray);
-  }
-
-  @Override
-  public MarcRecordEntity getMarcRecord(UUID externalId) {
-    throw new UnsupportedOperationException("The functionality is not required for holdings.");
-  }
-
-  @Override
-  public MappingProfile getDefaultMappingProfile() {
-    throw new UnsupportedOperationException("The functionality is not required for holdings.");
   }
 }

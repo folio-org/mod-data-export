@@ -14,6 +14,6 @@ class CleanUpFilesControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .post("/data-export/clean-up-files")
         .headers(defaultHeaders()))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
   }
 }

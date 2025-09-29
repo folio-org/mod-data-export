@@ -19,6 +19,8 @@ import static org.folio.dataexp.util.ExternalPathResolver.LOCATIONS;
 import static org.folio.dataexp.util.ExternalPathResolver.MATERIAL_TYPES;
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.processor.referencedata.JsonObjectWrapper;
@@ -30,13 +32,8 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * The component is responsible to provide reference data.
- * Caches data for the given job id.
- * If requested data is not found by the given job id then performs loading.
+ * Provides reference data for transformation fields, with caching and multi-tenant support.
  */
 @Component
 @RequiredArgsConstructor
@@ -47,15 +44,21 @@ public class ReferenceDataProvider {
   private final FolioModuleMetadata folioModuleMetadata;
 
   /**
-   * This method returns the reference data that is required for generating the transformation fields during the call for
-   * /transformation-fields API
+   * Returns reference data required for generating transformation fields.
+   * Caches data for the given tenant.
+   *
+   * @param tenantId the tenant ID
+   * @return reference data wrapper
    */
   @Cacheable(cacheNames = "referenceDataForTransformationFields")
   public ReferenceDataWrapper getReferenceDataForTransformationFields(String tenantId) {
-    HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>() ;
+    HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>();
     map.put(ALTERNATIVE_TITLE_TYPES, referenceDataService.getAlternativeTitleTypes());
     map.put(CONTRIBUTOR_NAME_TYPES, referenceDataService.getContributorNameTypes());
-    map.put(ELECTRONIC_ACCESS_RELATIONSHIPS, referenceDataService.getElectronicAccessRelationships());
+    map.put(
+        ELECTRONIC_ACCESS_RELATIONSHIPS,
+        referenceDataService.getElectronicAccessRelationships()
+    );
     map.put(INSTANCE_TYPES, referenceDataService.getInstanceTypes());
     map.put(IDENTIFIER_TYPES, referenceDataService.getIdentifierTypes());
     map.put(ISSUANCE_MODES, referenceDataService.getIssuanceModes());
@@ -65,11 +68,15 @@ public class ReferenceDataProvider {
   }
 
   /**
-   * This methods returns the reference data that is needed to map the fields to MARC , while generating marc records on the fly
+   * Returns reference data needed to map fields to MARC, for generating MARC records on the fly.
+   * Caches data for the given tenant.
+   *
+   * @param tenantId the tenant ID
+   * @return reference data wrapper
    */
   @Cacheable(cacheNames = "referenceData")
   public ReferenceDataWrapper getReference(String tenantId) {
-    HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>() ;
+    HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>();
     map.put(ALTERNATIVE_TITLE_TYPES, referenceDataService.getAlternativeTitleTypes());
     map.put(CONTENT_TERMS, referenceDataService.getNatureOfContentTerms());
     map.put(IDENTIFIER_TYPES, referenceDataService.getIdentifierTypes());
@@ -82,40 +89,111 @@ public class ReferenceDataProvider {
     map.put(MATERIAL_TYPES, referenceDataService.getMaterialTypes());
     map.put(INSTANCE_TYPES, referenceDataService.getInstanceTypes());
     map.put(INSTANCE_FORMATS, referenceDataService.getInstanceFormats());
-    map.put(ELECTRONIC_ACCESS_RELATIONSHIPS, referenceDataService.getElectronicAccessRelationships());
+    map.put(
+        ELECTRONIC_ACCESS_RELATIONSHIPS,
+        referenceDataService.getElectronicAccessRelationships()
+    );
     map.put(ISSUANCE_MODES, referenceDataService.getIssuanceModes());
     map.put(CALL_NUMBER_TYPES, referenceDataService.getCallNumberTypes());
     return new ReferenceDataWrapperImpl(map);
   }
 
+  /**
+   * Returns reference data for central tenant and affiliated user tenants.
+   * Caches data for the central tenant and user ID.
+   *
+   * @param centralTenant the central tenant ID
+   * @param userId the user ID
+   * @return reference data wrapper
+   */
   @Cacheable(cacheNames = "referenceDataForCentralTenantAndUserTenants")
   public ReferenceDataWrapper getReference(String centralTenant, String userId) {
     var userTenants = consortiaService.getAffiliatedTenants(centralTenant, userId);
     var referenceData = getReference(centralTenant);
     for (var userTenant : userTenants) {
-      try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(userTenant, folioModuleMetadata, folioExecutionContext))) {
+      try (
+          var ignored = new FolioExecutionContextSetter(
+              prepareContextForTenant(
+                  userTenant, folioModuleMetadata, folioExecutionContext
+              )
+          )
+      ) {
         var userTenantReferenceData = getReference(userTenant);
-        putIfNotExist(referenceData.get(ALTERNATIVE_TITLE_TYPES), userTenantReferenceData.get(ALTERNATIVE_TITLE_TYPES));
-        putIfNotExist(referenceData.get(CONTENT_TERMS), userTenantReferenceData.get(CONTENT_TERMS));
-        putIfNotExist(referenceData.get(IDENTIFIER_TYPES), userTenantReferenceData.get(IDENTIFIER_TYPES));
-        putIfNotExist(referenceData.get(CONTRIBUTOR_NAME_TYPES), userTenantReferenceData.get(CONTRIBUTOR_NAME_TYPES));
-        putIfNotExist(referenceData.get(LOCATIONS), userTenantReferenceData.get(LOCATIONS));
-        putIfNotExist(referenceData.get(LOAN_TYPES), userTenantReferenceData.get(LOAN_TYPES));
-        putIfNotExist(referenceData.get(LIBRARIES), userTenantReferenceData.get(LIBRARIES));
-        putIfNotExist(referenceData.get(CAMPUSES), userTenantReferenceData.get(CAMPUSES));
-        putIfNotExist(referenceData.get(INSTITUTIONS), userTenantReferenceData.get(INSTITUTIONS));
-        putIfNotExist(referenceData.get(MATERIAL_TYPES), userTenantReferenceData.get(MATERIAL_TYPES));
-        putIfNotExist(referenceData.get(INSTANCE_TYPES), userTenantReferenceData.get(INSTANCE_TYPES));
-        putIfNotExist(referenceData.get(INSTANCE_FORMATS), userTenantReferenceData.get(INSTANCE_FORMATS));
-        putIfNotExist(referenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS), userTenantReferenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS));
-        putIfNotExist(referenceData.get(ISSUANCE_MODES), userTenantReferenceData.get(ISSUANCE_MODES));
-        putIfNotExist(referenceData.get(CALL_NUMBER_TYPES), userTenantReferenceData.get(CALL_NUMBER_TYPES));
+        putIfNotExist(
+            referenceData.get(ALTERNATIVE_TITLE_TYPES),
+            userTenantReferenceData.get(ALTERNATIVE_TITLE_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(CONTENT_TERMS),
+            userTenantReferenceData.get(CONTENT_TERMS)
+        );
+        putIfNotExist(
+            referenceData.get(IDENTIFIER_TYPES),
+            userTenantReferenceData.get(IDENTIFIER_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(CONTRIBUTOR_NAME_TYPES),
+            userTenantReferenceData.get(CONTRIBUTOR_NAME_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(LOCATIONS),
+            userTenantReferenceData.get(LOCATIONS)
+        );
+        putIfNotExist(
+            referenceData.get(LOAN_TYPES),
+            userTenantReferenceData.get(LOAN_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(LIBRARIES),
+            userTenantReferenceData.get(LIBRARIES)
+        );
+        putIfNotExist(
+            referenceData.get(CAMPUSES),
+            userTenantReferenceData.get(CAMPUSES)
+        );
+        putIfNotExist(
+            referenceData.get(INSTITUTIONS),
+            userTenantReferenceData.get(INSTITUTIONS)
+        );
+        putIfNotExist(
+            referenceData.get(MATERIAL_TYPES),
+            userTenantReferenceData.get(MATERIAL_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(INSTANCE_TYPES),
+            userTenantReferenceData.get(INSTANCE_TYPES)
+        );
+        putIfNotExist(
+            referenceData.get(INSTANCE_FORMATS),
+            userTenantReferenceData.get(INSTANCE_FORMATS)
+        );
+        putIfNotExist(
+            referenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS),
+            userTenantReferenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS)
+        );
+        putIfNotExist(
+            referenceData.get(ISSUANCE_MODES),
+            userTenantReferenceData.get(ISSUANCE_MODES)
+        );
+        putIfNotExist(
+            referenceData.get(CALL_NUMBER_TYPES),
+            userTenantReferenceData.get(CALL_NUMBER_TYPES)
+        );
       }
     }
     return referenceData;
   }
 
-  private void putIfNotExist(Map<String,JsonObjectWrapper> target, Map<String,JsonObjectWrapper> source) {
+  /**
+   * Adds entries from source to target map if not already present.
+   *
+   * @param target the target map
+   * @param source the source map
+   */
+  private void putIfNotExist(
+        Map<String, JsonObjectWrapper> target,
+        Map<String, JsonObjectWrapper> source
+  ) {
     var tmp = new HashMap<>(source);
     tmp.keySet().removeAll(target.keySet());
     target.putAll(tmp);

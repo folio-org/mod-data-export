@@ -1,24 +1,5 @@
 package org.folio.dataexp.service.export.strategies;
 
-import com.google.common.collect.ImmutableList;
-import lombok.SneakyThrows;
-import org.assertj.core.util.Lists;
-import org.folio.dataexp.BaseDataExportInitializer;
-import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.dto.RecordTypes;
-import org.folio.dataexp.domain.dto.Transformations;
-import org.folio.dataexp.exception.TransformationRuleException;
-import org.folio.processor.rule.Rule;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
@@ -49,9 +30,27 @@ import static org.folio.dataexp.service.export.strategies.TransformationConstant
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.CAMPUSES;
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.INSTITUTIONS;
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.LIBRARIES;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import org.assertj.core.util.Lists;
+import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationRuleException;
+import org.folio.processor.rule.Rule;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class RuleFactoryTest extends BaseDataExportInitializer {
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
@@ -85,7 +84,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   private static final String LIBRARY_ID_FIELD = "libraryId";
   private static final String METADATA_CREATED_DATE = "created date";
   private static final String METADATA_CREATED_DATE_VALUE = "2021-07-15T11:07:49.212+00:00";
-  private static final Map<String, String> METADATA = Map.of(METADATA_CREATED_DATE, METADATA_CREATED_DATE_VALUE);
+  private static final Map<String, String> METADATA = Map.of(METADATA_CREATED_DATE,
+      METADATA_CREATED_DATE_VALUE);
 
   @Autowired
   private RuleFactory ruleFactory;
@@ -120,7 +120,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty() throws TransformationRuleException {
+  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty()
+      throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -134,7 +135,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingRecordType() throws TransformationRuleException {
+  void shouldReturnDefaultHoldingRulesWhenMappingProfileTransformationsIsEmptyHoldingRecordType()
+      throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -148,7 +150,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultInstanceAndHoldingRules_whenMappingProfileTransformationsIsEmpty_HoldingAndInstanceRecordTypes() throws TransformationRuleException {
+  void shouldReturnDefaultInstanceAndHoldingRulesWhenMappingProfileTransformationsIsEmptyHoldingAndInstanceRecordTypes() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -166,7 +168,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(false);
@@ -185,7 +188,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -205,7 +209,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -225,7 +230,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId() throws TransformationRuleException {
+  void shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId()
+      throws TransformationRuleException {
     // given
     var existDefaultRuleId = "instance.metadata.updateddate";
     Transformations transformations = new Transformations();
@@ -248,11 +254,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(existDefaultRuleId, rules.get(0).getId());
     assertEquals("005", rules.get(0).getField());
     assertEquals("Date and Time of Latest Transaction", rules.get(0).getDescription());
-    assertEquals("$.instance.metadata.updatedDate", rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals("$.instance.metadata.updatedDate", rules.get(0).getDataSources()
+        .get(0).getFrom());
   }
 
   @Test
-  void shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield() throws TransformationRuleException {
+  void shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -274,7 +282,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield() throws TransformationRuleException {
+  void shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield()
+      throws TransformationRuleException {
     // given
     Transformations transformations1 = new Transformations();
     transformations1.setEnabled(true);
@@ -304,7 +313,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators() throws TransformationRuleException {
+  void shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -325,15 +335,20 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
     assertEquals(SUBFIELD_A, rules.get(0).getDataSources().get(0).getSubfield());
     assertEquals(FIRST_INDICATOR, rules.get(0).getDataSources().get(1).getIndicator());
-    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(1).getTranslation().getFunction());
-    assertEquals(SPACE, rules.get(0).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(1).getTranslation()
+        .getFunction());
+    assertEquals(SPACE, rules.get(0).getDataSources().get(1).getTranslation()
+        .getParameter(VALUE_PARAMETER));
     assertEquals(SECOND_INDICATOR, rules.get(0).getDataSources().get(2).getIndicator());
-    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(2).getTranslation().getFunction());
-    assertEquals(SPACE, rules.get(0).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(2).getTranslation()
+        .getFunction());
+    assertEquals(SPACE, rules.get(0).getDataSources().get(2).getTranslation()
+        .getParameter(VALUE_PARAMETER));
   }
 
   @Test
-  void shouldReturnTransformationRulesetPermanentLocationTranslation() throws TransformationRuleException {
+  void shouldReturnTransformationRulesetPermanentLocationTranslation()
+      throws TransformationRuleException {
     // given
     Transformations permanentLocationTransformations = new Transformations();
     permanentLocationTransformations.setEnabled(true);
@@ -352,11 +367,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
   }
 
   @Test
-  void shouldNotReturnTransformationRulesetPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation() throws TransformationRuleException {
+  void shouldNotReturnTransformationRulesetPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation()
+      throws TransformationRuleException {
     // given
     Transformations permanentLocationTransformations = new Transformations();
     permanentLocationTransformations.setEnabled(true);
@@ -372,7 +389,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setTransformations(Lists.newArrayList(permanentLocationTransformations, temporaryLocationTransformations));
+    mappingProfile.setTransformations(Lists.newArrayList(permanentLocationTransformations,
+        temporaryLocationTransformations));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -381,11 +399,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
   }
 
   @Test
-  void shouldReturnTransformationRulesetTemporaryLocationTranslation() throws TransformationRuleException {
+  void shouldReturnTransformationRulesetTemporaryLocationTranslation()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -404,11 +424,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCodeField() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForCodeField()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -427,12 +449,15 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForLibraryName() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryName()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -451,14 +476,19 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(LIBRARIES, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(LIBRARY_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(LIBRARIES, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(LIBRARY_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForLibraryCode() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryCode()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -477,15 +507,20 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(LIBRARIES, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(LIBRARY_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(LIBRARIES, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(LIBRARY_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
 
   @Test
-  void shouldReturnTransformationRulesetEffectiveLocationTranslation() throws TransformationRuleException {
+  void shouldReturnTransformationRulesetEffectiveLocationTranslation()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -504,11 +539,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCampusName() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForCampusName()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -527,14 +564,19 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(CAMPUSES, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(CAMPUS_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(CAMPUSES, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(CAMPUS_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForCampusCode() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForCampusCode()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -553,14 +595,19 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(CAMPUSES, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(CAMPUS_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(CAMPUSES, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(CAMPUS_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForInstitutionName() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionName()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -579,14 +626,19 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(INSTITUTIONS, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(INSTITUTION_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(INSTITUTIONS, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(INSTITUTION_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
   @Test
-  void shouldReturnPermanentLocationRulesetTranslationForInstitutionCode() throws TransformationRuleException {
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionCode()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -605,14 +657,19 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
-    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
-    assertEquals(INSTITUTIONS, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
-    assertEquals(INSTITUTION_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
+    assertEquals(CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(FIELD_KEY));
+    assertEquals(INSTITUTIONS, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_KEY));
+    assertEquals(INSTITUTION_ID_FIELD, rules.get(0).getDataSources().get(0).getTranslation()
+        .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
   }
 
   @Test
-  void shouldReturnRulesetDefaultTranslationWhenFieldIdContainsOneWord() throws TransformationRuleException {
+  void shouldReturnRulesetDefaultTranslationWhenFieldIdContainsOneWord()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -622,7 +679,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
-    mappingProfile .setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -631,12 +688,14 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
     assertNull(rules.get(0).getDataSources().get(0).getTranslation().getParameters());
   }
 
   @Test
-  void shouldReturnTransformationRulesetMaterialTypeTranslation() throws TransformationRuleException {
+  void shouldReturnTransformationRulesetMaterialTypeTranslation()
+      throws TransformationRuleException {
     // given
     Transformations temporaryLocationTransformations = new Transformations();
     temporaryLocationTransformations.setEnabled(true);
@@ -655,11 +714,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     assertEquals(1, rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(MATERIAL_TYPE_PATH, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(SET_MATERIAL_TYPE_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation()
+        .getFunction());
   }
 
   @Test
-  void shouldReturnSingleRule_WhenTransformationHasMultipleSubFieldssetSameFieldId() throws TransformationRuleException {
+  void shouldReturnSingleRuleWhenTransformationHasMultipleSubFieldssetSameFieldId()
+      throws TransformationRuleException {
     // given
     Transformations transformation1 = new Transformations();
     transformation1.setEnabled(true);
@@ -679,22 +740,25 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     transformation3.setPath(CALLNUMBER_SUFFIX_FIELD_PATH);
     transformation3.setTransformation("900ff$c");
     transformation3.setRecordType(RecordTypes.ITEM);
-    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
+    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2,
+        transformation3);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setTransformations(transformations);
-    //when
+    // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
-    //then
-    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).collect(Collectors.toList());
+    // then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900"))
+        .collect(Collectors.toList());
     assertEquals(1, ruleList.size());
-    //3 data sources for subfields $a, $b, $c and 2 for indicators
+    // 3 data sources for subfields $a, $b, $c and 2 for indicators
     assertEquals(5, ruleList.get(0).getDataSources().size());
   }
 
   @Test
-  void shouldReturnDifferentRules_WhenTransformationHasMultipleSubFieldssetSameFieldIdButDifferentIndicators() throws TransformationRuleException {
+  void shouldReturnDifferentRulesWhenTransformationHasMultipleSubFieldssetSameFieldIdButDifferentIndicators()
+      throws TransformationRuleException {
     // given
     Transformations transformation1 = new Transformations();
     transformation1.setEnabled(true);
@@ -714,30 +778,35 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     transformation3.setPath(CALLNUMBER_SUFFIX_FIELD_PATH);
     transformation3.setTransformation("90011$c");
     transformation3.setRecordType(RecordTypes.ITEM);
-    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2, transformation3);
+    List<Transformations> transformations = Lists.newArrayList(transformation1, transformation2,
+        transformation3);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
     mappingProfile.setTransformations(transformations);
-    //when
+    // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
-    //then
-    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).collect(Collectors.toList());
+    // then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900"))
+        .collect(Collectors.toList());
     assertEquals(3, ruleList.size());
-    //3 data sources for subfields $a, $b, $c and 2 for indicators
+    // 3 data sources for subfields $a, $b, $c and 2 for indicators
     assertEquals(3, ruleList.get(0).getDataSources().size());
-    //the first field's indicators are used
-    assertEquals(2, ruleList.get(0).getDataSources().stream().
-      filter(ds -> ds.getIndicator() != null && ds.getTranslation().getParameter("value").equals("f")).count());
+    // the first field's indicators are used
+    assertEquals(2, ruleList.get(0).getDataSources().stream()
+        .filter(ds -> ds.getIndicator() != null && ds.getTranslation()
+            .getParameter("value").equals("f")).count());
   }
 
   @Test
-  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields() throws TransformationRuleException {
+  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields()
+      throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
     transformation.setFieldId("instance.electronic.access.linktext.related.resource");
-    transformation.setPath("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
+    transformation.setPath("$.instance.electronicAccess[?(@.relationshipId=='"
+        + "5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
     transformation.setTransformation(EMPTY);
     transformation.setRecordType(RecordTypes.INSTANCE);
     List<Transformations> transformations = Lists.newArrayList(transformation);
@@ -752,19 +821,23 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     // then
     assertEquals(1, rules.size());
     assertEquals("856", rules.get(0).getField());
-    assertEquals("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText", rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals("$.instance.electronicAccess[?(@.relationshipId=='5bfe1"
+        + "b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
+        rules.get(0).getDataSources().get(0).getFrom());
     assertEquals("y", rules.get(0).getDataSources().get(0).getSubfield());
     assertEquals("1", rules.get(0).getDataSources().get(1).getIndicator());
     assertEquals("2", rules.get(0).getDataSources().get(2).getIndicator());
   }
 
   @Test
-  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField() throws TransformationRuleException {
+  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField()
+      throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
     transformation.setFieldId("instance.electronic.access.linktext.related.resource");
-    transformation.setPath("$.instance.electronicAccess[?(@.relationshipId=='5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
+    transformation.setPath("$.instance.electronicAccess[?(@.relationshipId=='5bfe1"
+        + "b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
     transformation.setTransformation(EMPTY);
     transformation.setRecordType(RecordTypes.INSTANCE);
     List<Transformations> transformations = Lists.newArrayList(transformation);
@@ -780,7 +853,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId() throws TransformationRuleException {
+  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId()
+      throws TransformationRuleException {
     // given
     Transformations transformation = new Transformations();
     transformation.setEnabled(true);
@@ -801,8 +875,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations() throws TransformationRuleException {
-    int transformationRulesAmount = 2;
+  void shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations()
+      throws TransformationRuleException {
     // given
     Transformations holdingsTransformations = new Transformations();
     holdingsTransformations.setEnabled(true);
@@ -818,14 +892,18 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     itemTransformations.setRecordType(RecordTypes.ITEM);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
-    mappingProfile.setTransformations(ImmutableList.of(holdingsTransformations, itemTransformations));
-    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+    mappingProfile.setTransformations(ImmutableList.of(holdingsTransformations,
+        itemTransformations));
+    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.INSTANCE,
+        RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
 
     // then
-    assertEquals(defaultRulesFromConfigFile.size() + transformationRulesAmount, rules.size());
+    int transformationRulesAmount = 2;
+    assertEquals(defaultRulesFromConfigFile.size() + transformationRulesAmount,
+        rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
     assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
@@ -834,8 +912,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata() throws TransformationRuleException {
-    int transformationRulesAmount = 1;
+  void shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata()
+      throws TransformationRuleException {
     // given
     Transformations itemTransformation = new Transformations();
     itemTransformation.setEnabled(true);
@@ -852,10 +930,13 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
     // then
-    assertEquals(transformationRulesAmount + defaultRulesFromConfigFile.size(), rules.size());
+    int transformationRulesAmount = 1;
+    assertEquals(transformationRulesAmount + defaultRulesFromConfigFile.size(),
+        rules.size());
     assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
     assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
-    assertEquals(METADATA_CREATED_DATE_VALUE, rules.get(0).getMetadata().getData().get(METADATA_CREATED_DATE).getFrom());
+    assertEquals(METADATA_CREATED_DATE_VALUE, rules.get(0).getMetadata().getData()
+        .get(METADATA_CREATED_DATE).getFrom());
 
     assertTrue(rules.containsAll(defaultRulesFromConfigFile));
   }
@@ -863,15 +944,17 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   @Test
   @SneakyThrows
   void shouldSuppressListedFields() {
+    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule ->
+        "008".equals(rule.getField())));
+    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule ->
+        "020".equals(rule.getField())));
+    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule ->
+        "856".equals(rule.getField())));
+
     var mappingProfile = MappingProfile.builder()
-      .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-      .fieldsSuppression("008, 020 , 856")
-      .build();
-
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "008".equals(rule.getField())));
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "020".equals(rule.getField())));
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "856".equals(rule.getField())));
-
+        .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
+        .fieldsSuppression("008, 020 , 856")
+        .build();
     var rules = ruleFactory.getRules(mappingProfile);
 
     assertTrue(rules.stream().noneMatch(rule -> "008".equals(rule.getField())));
@@ -883,11 +966,12 @@ class RuleFactoryTest extends BaseDataExportInitializer {
   @SneakyThrows
   void shouldSuppress999ff() {
     var mappingProfile = MappingProfile.builder()
-      .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-      .suppress999ff(true)
-      .build();
+        .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
+        .suppress999ff(true)
+        .build();
 
-    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "999".equals(rule.getField())));
+    assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule ->
+        "999".equals(rule.getField())));
 
     var rules = ruleFactory.getRules(mappingProfile);
 

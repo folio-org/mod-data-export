@@ -1,13 +1,15 @@
 package org.folio.dataexp.service.export.strategies.translation.builder;
 
 import com.google.common.base.Splitter;
-import org.folio.dataexp.domain.dto.Transformations;
-import org.folio.processor.translations.Translation;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.processor.translations.Translation;
 
+/**
+ * TranslationBuilder implementation for location-based translations.
+ */
 public class LocationTranslationBuilder implements TranslationBuilder {
 
   public static final String LIBRARIES = "loclibs";
@@ -24,6 +26,13 @@ public class LocationTranslationBuilder implements TranslationBuilder {
   private static final String CAMPUS_KEY = "campus";
   private static final String INSTITUTION_KEY = "institution";
 
+  /**
+   * Builds a location translation using the provided function name and mapping transformation.
+   *
+   * @param functionName the name of the translation function
+   * @param mappingTransformation the transformation mapping
+   * @return a Translation object
+   */
   @Override
   public Translation build(String functionName, Transformations mappingTransformation) {
     Translation translation = new Translation();

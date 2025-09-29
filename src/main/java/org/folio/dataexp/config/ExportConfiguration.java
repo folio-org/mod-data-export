@@ -42,7 +42,7 @@ public class ExportConfiguration {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_RULES)) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory()
-        .constructCollectionType(List.class, Rule.class));
+          .constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default rules for export");
@@ -61,7 +61,7 @@ public class ExportConfiguration {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_HOLDINGS_RULES)) {
       List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory()
-        .constructCollectionType(List.class, Rule.class));
+          .constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default holdings rules for export");

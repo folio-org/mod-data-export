@@ -543,6 +543,8 @@
           <logViolationsToConsole>true</logViolationsToConsole>
           <configLocation>checkstyle/checkstyle.xml</configLocation>
           <cacheFile>${project.build.directory}/cachefile</cacheFile>
+          <suppressionsLocation>checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
+          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
         </configuration>
       </plugin>
 

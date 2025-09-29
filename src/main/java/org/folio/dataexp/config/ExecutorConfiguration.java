@@ -26,8 +26,8 @@ public class ExecutorConfiguration {
     var executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(maxPollSize);
     executor.setMaxPoolSize(maxPollSize);
-    executor.setTaskDecorator(FolioExecutionScopeExecutionContextManager::
-      getRunnableWithCurrentFolioContext);
+    executor.setTaskDecorator(FolioExecutionScopeExecutionContextManager
+        ::getRunnableWithCurrentFolioContext);
     executor.initialize();
     return executor;
   }

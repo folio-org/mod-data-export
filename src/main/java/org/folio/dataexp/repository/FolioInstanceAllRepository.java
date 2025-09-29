@@ -45,7 +45,7 @@ public interface FolioInstanceAllRepository extends Repository<InstanceEntity, U
    */
   @Query(
       value = "SELECT * FROM v_folio_instance_all_non_deleted"
-        + "WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC",
+        + " WHERE id BETWEEN ?1 AND ?2 ORDER BY id ASC",
       nativeQuery = true
   )
   Slice<InstanceEntity> findFolioInstanceAllNonDeleted(

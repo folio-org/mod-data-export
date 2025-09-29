@@ -1,5 +1,15 @@
 package org.folio.dataexp.service;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.UserClient;
@@ -19,18 +29,6 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import java.util.UUID;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class DataExportServiceTest extends BaseDataExportInitializer {
 
@@ -73,19 +71,21 @@ class DataExportServiceTest extends BaseDataExportInitializer {
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
     var fileDefinition = new FileDefinition().id(exportRequest.getFileDefinitionId())
-      .jobExecutionId(UUID.randomUUID()).fileName("instance");
+        .jobExecutionId(UUID.randomUUID()).fileName("instance");
     var fileDefinitionEntity = FileDefinitionEntity.builder()
-      .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
+        .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
     var jobProfile = new JobProfile().id(exportRequest.getJobProfileId())
-      .name("jobProfileName").mappingProfileId(UUID.randomUUID());
+        .name("jobProfileName").mappingProfileId(UUID.randomUUID());
     var jobProfileEntity = JobProfileEntity.builder()
         .jobProfile(jobProfile).id(jobProfile.getId()).build();
 
     var jobExecution = new JobExecution().id(fileDefinition.getId());
 
-    when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
-    when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
+    when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(fileDefinitionEntity);
+    when(jobProfileEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(jobProfileEntity);
     when(jobExecutionService.getById(isA(UUID.class))).thenReturn(jobExecution);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
     when(jobExecutionService.getNextHrid()).thenReturn(200);
@@ -93,9 +93,11 @@ class DataExportServiceTest extends BaseDataExportInitializer {
       dataExportService.postDataExport(exportRequest);
     }
     await().atMost(2, SECONDS).untilAsserted(() -> {
-      verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportStatistic.class), isA(ExportRequest.IdTypeEnum.class));
+      verify(inputFileProcessor).readFile(eq(fileDefinition), isA(CommonExportStatistic.class),
+          isA(ExportRequest.IdTypeEnum.class));
       verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
-      verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()), eq(exportRequest), isA(CommonExportStatistic.class));
+      verify(singleFileProcessorAsync).exportBySingleFile(eq(jobExecution.getId()),
+          eq(exportRequest), isA(CommonExportStatistic.class));
       verify(jobExecutionService).getNextHrid();
       verify(jobExecutionService, times(2)).save(isA(JobExecution.class));
       verify(userClient).getUserById(isA(String.class));
@@ -103,7 +105,8 @@ class DataExportServiceTest extends BaseDataExportInitializer {
       assertEquals(JobExecution.StatusEnum.IN_PROGRESS, jobExecution.getStatus());
       assertEquals(200, jobExecution.getHrId());
       var exportedFiles = jobExecution.getExportedFiles();
-      JobExecutionExportedFilesInner inner = (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
+      JobExecutionExportedFilesInner inner =
+          (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
       assertEquals("instance-200.mrc", inner.getFileName());
     });
   }

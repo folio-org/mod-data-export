@@ -28,8 +28,9 @@ class DataExportAuthorityDeletedControllerTest extends BaseDataExportInitializer
         .post("/data-export/export-authority-deleted")
         .headers(defaultHeaders())
         .content(asJsonString(request)))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
 
-    verify(exportAuthorityDeletedService).postExportDeletedAuthority(isA(ExportAuthorityDeletedRequest.class));
+    verify(exportAuthorityDeletedService)
+        .postExportDeletedAuthority(isA(ExportAuthorityDeletedRequest.class));
   }
 }

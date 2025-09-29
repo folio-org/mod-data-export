@@ -1,5 +1,11 @@
 package org.folio.dataexp.controllers;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -10,13 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.List;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class JobExecutionsControllerTest extends BaseDataExportInitializer {
 
@@ -30,15 +29,17 @@ class JobExecutionsControllerTest extends BaseDataExportInitializer {
     jobExecution.setId(UUID.randomUUID());
 
 
-    var entity = JobExecutionEntity.builder().id(jobExecution.getId()).jobExecution(jobExecution).build();
+    var entity = JobExecutionEntity.builder().id(jobExecution.getId()).jobExecution(jobExecution)
+        .build();
     PageImpl<JobExecutionEntity> page = new PageImpl<>(List.of(entity));
 
-    when(jobExecutionEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(jobExecutionEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-executions?query=query")
         .headers(defaultHeaders()))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -47,6 +48,6 @@ class JobExecutionsControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .delete("/data-export/job-executions/" + UUID.randomUUID())
         .headers(defaultHeaders()))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
   }
 }

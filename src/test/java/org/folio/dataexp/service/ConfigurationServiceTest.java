@@ -1,5 +1,7 @@
 package org.folio.dataexp.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.Config;
 import org.folio.dataexp.repository.ConfigurationRepository;
@@ -7,8 +9,6 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ConfigurationServiceTest extends BaseDataExportInitializer {
 

@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Collections;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ErrorLog;
@@ -17,9 +19,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Collections;
-import java.util.UUID;
-
 class LogsControllerTest extends BaseDataExportInitializer {
   @MockitoBean
   private ErrorLogEntityCqlRepository repository;
@@ -28,17 +27,17 @@ class LogsControllerTest extends BaseDataExportInitializer {
   @SneakyThrows
   void getTransformationFieldsTest() {
     var entity = ErrorLogEntity.builder()
-      .id(UUID.randomUUID())
-      .errorLog(new ErrorLog().id(UUID.randomUUID()))
-      .build();
+        .id(UUID.randomUUID())
+        .errorLog(new ErrorLog().id(UUID.randomUUID()))
+        .build();
 
     when(repository.findByCql(anyString(), any(OffsetRequest.class)))
-      .thenReturn(new PageImpl<>(Collections.singletonList(entity)));
+        .thenReturn(new PageImpl<>(Collections.singletonList(entity)));
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/logs?offset=0&limit=1")
         .headers(defaultHeaders())
         .contentType(APPLICATION_JSON))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 }

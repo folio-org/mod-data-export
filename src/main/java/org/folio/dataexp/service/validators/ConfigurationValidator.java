@@ -6,10 +6,19 @@ import org.folio.dataexp.exception.configuration.SliceSizeValidationException;
 import org.folio.dataexp.service.SlicerProcessor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Validator for configuration values, such as slice size.
+ */
 @Component
 @Log4j2
 public class ConfigurationValidator {
 
+  /**
+   * Validates the given configuration.
+   * Throws {@link SliceSizeValidationException} if the slice size is invalid.
+   *
+   * @param config the configuration to validate
+   */
   public void validate(Config config) {
     if (config.getKey().equals(SlicerProcessor.SLICE_SIZE_KEY)) {
       try {

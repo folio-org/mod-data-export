@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.UUID;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
 import org.folio.dataexp.client.ContributorNameTypesClient;
@@ -60,9 +62,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.UUID;
-
 @ExtendWith(MockitoExtension.class)
 class ReferenceDataServiceTest {
   @Spy
@@ -104,9 +103,10 @@ class ReferenceDataServiceTest {
   void testGetAlternativeTitleTypes() {
     var id = UUID.randomUUID().toString();
     when(alternativeTitleTypesClient.getAlternativeTitleTypes(Integer.MAX_VALUE))
-      .thenReturn(new AlternativeDataTypes()
-        .alternativeTitleTypes(Collections.singletonList(new Alternativetitletype().id(id).name("name")))
-        .totalRecords(1));
+        .thenReturn(new AlternativeDataTypes()
+            .alternativeTitleTypes(Collections.singletonList(new Alternativetitletype().id(id)
+            .name("name")))
+            .totalRecords(1));
     var map = referenceDataService.getAlternativeTitleTypes();
 
     var actualValue = map.get(id);
@@ -117,11 +117,11 @@ class ReferenceDataServiceTest {
   void testGetCallNumberTypes() {
     var id = UUID.randomUUID().toString();
     when(callNumberTypesClient.getCallNumberTypes(Integer.MAX_VALUE))
-      .thenReturn(new CallNumberTypes()
-        .callNumberTypes(Collections.singletonList(new CallNumberType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new CallNumberTypes()
+            .callNumberTypes(Collections.singletonList(new CallNumberType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getCallNumberTypes();
 
@@ -133,11 +133,11 @@ class ReferenceDataServiceTest {
   void testGetContributorNameTypes() {
     var id = UUID.randomUUID().toString();
     when(contributorNameTypesClient.getContributorNameTypes(Integer.MAX_VALUE))
-      .thenReturn(new ContributorNameTypes()
-        .contributorNameTypes(Collections.singletonList(new ContributorNameType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new ContributorNameTypes()
+            .contributorNameTypes(Collections.singletonList(new ContributorNameType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getContributorNameTypes();
 
@@ -149,11 +149,10 @@ class ReferenceDataServiceTest {
   void testGetElectronicAccessRelationships() {
     var id = UUID.randomUUID().toString();
     when(electronicAccessRelationshipsClient.getElectronicAccessRelationships(Integer.MAX_VALUE))
-      .thenReturn(new ElectronicAccessRelationships()
-        .electronicAccessRelationships(Collections.singletonList(new ElectronicAccessRelationship()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new ElectronicAccessRelationships()
+            .electronicAccessRelationships(Collections.singletonList(
+                new ElectronicAccessRelationship().id(id).name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getElectronicAccessRelationships();
 
@@ -165,11 +164,11 @@ class ReferenceDataServiceTest {
   void testGetHoldingsNoteTypes() {
     var id = UUID.randomUUID().toString();
     when(holdingsNoteTypesClient.getHoldingsNoteTypes(Integer.MAX_VALUE))
-      .thenReturn(new HoldingsNoteTypes()
-        .holdingsNoteTypes(Collections.singletonList(new HoldingsNoteType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new HoldingsNoteTypes()
+            .holdingsNoteTypes(Collections.singletonList(new HoldingsNoteType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getHoldingsNoteTypes();
 
@@ -181,11 +180,11 @@ class ReferenceDataServiceTest {
   void testGetIdentifierTypes() {
     var id = UUID.randomUUID().toString();
     when(identifierTypesClient.getIdentifierTypes(Integer.MAX_VALUE))
-      .thenReturn(new IdentifierTypes()
-        .identifierTypes(Collections.singletonList(new IdentifierType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new IdentifierTypes()
+            .identifierTypes(Collections.singletonList(new IdentifierType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getIdentifierTypes();
 
@@ -197,11 +196,11 @@ class ReferenceDataServiceTest {
   void testGetInstanceFormats() {
     var id = UUID.randomUUID().toString();
     when(instanceFormatsClient.getInstanceFormats(Integer.MAX_VALUE))
-      .thenReturn(new InstanceFormats()
-        .instanceFormats(Collections.singletonList(new InstanceFormat()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new InstanceFormats()
+            .instanceFormats(Collections.singletonList(new InstanceFormat()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getInstanceFormats();
 
@@ -213,11 +212,11 @@ class ReferenceDataServiceTest {
   void testGetInstanceTypes() {
     var id = UUID.randomUUID().toString();
     when(instanceTypesClient.getInstanceTypes(Integer.MAX_VALUE))
-      .thenReturn(new InstanceTypes()
-        .instanceTypes(Collections.singletonList(new InstanceType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new InstanceTypes()
+            .instanceTypes(Collections.singletonList(new InstanceType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getInstanceTypes();
 
@@ -229,11 +228,11 @@ class ReferenceDataServiceTest {
   void testGetItemNoteTypes() {
     var id = UUID.randomUUID().toString();
     when(itemNoteTypesClient.getItemNoteTypes(Integer.MAX_VALUE))
-      .thenReturn(new ItemNoteTypes()
-        .itemNoteTypes(Collections.singletonList(new ItemNoteType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new ItemNoteTypes()
+            .itemNoteTypes(Collections.singletonList(new ItemNoteType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getItemNoteTypes();
 
@@ -245,11 +244,11 @@ class ReferenceDataServiceTest {
   void testGetLoanTypes() {
     var id = UUID.randomUUID().toString();
     when(loanTypesClient.getLoanTypes(Integer.MAX_VALUE))
-      .thenReturn(new LoanTypes()
-        .loantypes(Collections.singletonList(new LoanType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new LoanTypes()
+            .loantypes(Collections.singletonList(new LoanType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getLoanTypes();
 
@@ -261,11 +260,11 @@ class ReferenceDataServiceTest {
   void testGetLocations() {
     var id = UUID.randomUUID().toString();
     when(locationsClient.getLocations(Integer.MAX_VALUE))
-      .thenReturn(new Locations()
-        .locations(Collections.singletonList(new Location()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new Locations()
+            .locations(Collections.singletonList(new Location()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getLocations();
 
@@ -277,11 +276,11 @@ class ReferenceDataServiceTest {
   void testGetCampuses() {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getCampuses(Integer.MAX_VALUE))
-      .thenReturn(new Campuses()
-        .loccamps(Collections.singletonList(new Campus()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new Campuses()
+            .loccamps(Collections.singletonList(new Campus()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getCampuses();
 
@@ -293,11 +292,11 @@ class ReferenceDataServiceTest {
   void testGetInstitutions() {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getInstitutions(Integer.MAX_VALUE))
-      .thenReturn(new Institutions()
-        .locinsts(Collections.singletonList(new Institution()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new Institutions()
+            .locinsts(Collections.singletonList(new Institution()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getInstitutions();
 
@@ -309,11 +308,11 @@ class ReferenceDataServiceTest {
   void testGetLibraries() {
     var id = UUID.randomUUID().toString();
     when(locationUnitsClient.getLibraries(Integer.MAX_VALUE))
-      .thenReturn(new Libraries()
-        .loclibs(Collections.singletonList(new Library()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new Libraries()
+            .loclibs(Collections.singletonList(new Library()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getLibraries();
 
@@ -325,11 +324,11 @@ class ReferenceDataServiceTest {
   void testGetMaterialTypes() {
     var id = UUID.randomUUID().toString();
     when(materialTypesClient.getMaterialTypes(Integer.MAX_VALUE))
-      .thenReturn(new MaterialTypes()
-        .mtypes(Collections.singletonList(new MaterialType()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new MaterialTypes()
+            .mtypes(Collections.singletonList(new MaterialType()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getMaterialTypes();
 
@@ -341,11 +340,11 @@ class ReferenceDataServiceTest {
   void testGetNatureOfContentTerms() {
     var id = UUID.randomUUID().toString();
     when(natureOfContentTermsClient.getNatureOfContentTerms(Integer.MAX_VALUE))
-      .thenReturn(new NatureOfContentTerms()
-        .natureOfContentTerms(Collections.singletonList(new NatureOfContentTerm()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new NatureOfContentTerms()
+            .natureOfContentTerms(Collections.singletonList(new NatureOfContentTerm()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getNatureOfContentTerms();
 
@@ -357,11 +356,11 @@ class ReferenceDataServiceTest {
   void testGetIssuanceModes() {
     var id = UUID.randomUUID().toString();
     when(issuanceModesClient.getIssuanceModes(Integer.MAX_VALUE))
-      .thenReturn(new IssuanceModes()
-        .issuanceModes(Collections.singletonList(new ModeOfIssuance()
-          .id(id)
-          .name("name")))
-        .totalRecords(1));
+        .thenReturn(new IssuanceModes()
+            .issuanceModes(Collections.singletonList(new ModeOfIssuance()
+                .id(id)
+                .name("name")))
+            .totalRecords(1));
 
     var map = referenceDataService.getIssuanceModes();
 
@@ -372,9 +371,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyAlternativeTitleTypes() {
     when(alternativeTitleTypesClient.getAlternativeTitleTypes(Integer.MAX_VALUE))
-      .thenReturn(new AlternativeDataTypes()
-        .alternativeTitleTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new AlternativeDataTypes()
+            .alternativeTitleTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getAlternativeTitleTypes();
 
@@ -384,9 +383,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyCallNumberTypes() {
     when(callNumberTypesClient.getCallNumberTypes(Integer.MAX_VALUE))
-      .thenReturn(new CallNumberTypes()
-        .callNumberTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new CallNumberTypes()
+            .callNumberTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getCallNumberTypes();
 
@@ -396,9 +395,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyContributorNameTypes() {
     when(contributorNameTypesClient.getContributorNameTypes(Integer.MAX_VALUE))
-      .thenReturn(new ContributorNameTypes()
-        .contributorNameTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new ContributorNameTypes()
+            .contributorNameTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getContributorNameTypes();
 
@@ -408,9 +407,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyElectronicAccessRelationships() {
     when(electronicAccessRelationshipsClient.getElectronicAccessRelationships(Integer.MAX_VALUE))
-      .thenReturn(new ElectronicAccessRelationships()
-        .electronicAccessRelationships(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new ElectronicAccessRelationships()
+            .electronicAccessRelationships(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getElectronicAccessRelationships();
 
@@ -420,9 +419,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyHoldingsNoteTypes() {
     when(holdingsNoteTypesClient.getHoldingsNoteTypes(Integer.MAX_VALUE))
-      .thenReturn(new HoldingsNoteTypes()
-        .holdingsNoteTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new HoldingsNoteTypes()
+            .holdingsNoteTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getHoldingsNoteTypes();
 
@@ -432,9 +431,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyIdentifierTypes() {
     when(identifierTypesClient.getIdentifierTypes(Integer.MAX_VALUE))
-      .thenReturn(new IdentifierTypes()
-        .identifierTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new IdentifierTypes()
+            .identifierTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getIdentifierTypes();
 
@@ -444,9 +443,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyInstanceFormats() {
     when(instanceFormatsClient.getInstanceFormats(Integer.MAX_VALUE))
-      .thenReturn(new InstanceFormats()
-        .instanceFormats(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new InstanceFormats()
+            .instanceFormats(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getInstanceFormats();
 
@@ -456,9 +455,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyInstanceTypes() {
     when(instanceTypesClient.getInstanceTypes(Integer.MAX_VALUE))
-      .thenReturn(new InstanceTypes()
-        .instanceTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new InstanceTypes()
+            .instanceTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getInstanceTypes();
 
@@ -468,9 +467,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyItemNoteTypes() {
     when(itemNoteTypesClient.getItemNoteTypes(Integer.MAX_VALUE))
-      .thenReturn(new ItemNoteTypes()
-        .itemNoteTypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new ItemNoteTypes()
+            .itemNoteTypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getItemNoteTypes();
 
@@ -480,9 +479,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyLoanTypes() {
     when(loanTypesClient.getLoanTypes(Integer.MAX_VALUE))
-      .thenReturn(new LoanTypes()
-        .loantypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new LoanTypes()
+            .loantypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getLoanTypes();
 
@@ -492,9 +491,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyLocations() {
     when(locationsClient.getLocations(Integer.MAX_VALUE))
-      .thenReturn(new Locations()
-        .locations(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new Locations()
+            .locations(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getLocations();
 
@@ -504,9 +503,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyCampuses() {
     when(locationUnitsClient.getCampuses(Integer.MAX_VALUE))
-      .thenReturn(new Campuses()
-        .loccamps(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new Campuses()
+            .loccamps(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getCampuses();
 
@@ -516,9 +515,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyInstitutions() {
     when(locationUnitsClient.getInstitutions(Integer.MAX_VALUE))
-      .thenReturn(new Institutions()
-        .locinsts(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new Institutions()
+            .locinsts(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getInstitutions();
 
@@ -528,9 +527,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyLibraries() {
     when(locationUnitsClient.getLibraries(Integer.MAX_VALUE))
-      .thenReturn(new Libraries()
-        .loclibs(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new Libraries()
+            .loclibs(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getLibraries();
 
@@ -540,9 +539,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyMaterialTypes() {
     when(materialTypesClient.getMaterialTypes(Integer.MAX_VALUE))
-      .thenReturn(new MaterialTypes()
-        .mtypes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new MaterialTypes()
+            .mtypes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getMaterialTypes();
 
@@ -552,9 +551,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyNatureOfContentTerms() {
     when(natureOfContentTermsClient.getNatureOfContentTerms(Integer.MAX_VALUE))
-      .thenReturn(new NatureOfContentTerms()
-        .natureOfContentTerms(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new NatureOfContentTerms()
+            .natureOfContentTerms(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getNatureOfContentTerms();
 
@@ -564,9 +563,9 @@ class ReferenceDataServiceTest {
   @Test
   void testGetEmptyIssuanceModes() {
     when(issuanceModesClient.getIssuanceModes(Integer.MAX_VALUE))
-      .thenReturn(new IssuanceModes()
-        .issuanceModes(Collections.emptyList())
-        .totalRecords(0));
+        .thenReturn(new IssuanceModes()
+            .issuanceModes(Collections.emptyList())
+            .totalRecords(0));
 
     var map = referenceDataService.getIssuanceModes();
 

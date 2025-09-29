@@ -1,5 +1,11 @@
 package org.folio.dataexp.service;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.client.ConsortiumClient;
 import org.folio.dataexp.domain.dto.Consortia;
@@ -12,13 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ConsortiaServiceTest {
@@ -52,7 +51,8 @@ class ConsortiaServiceTest {
     userTenantCollection.setUserTenants(List.of(centralTenant, otherUserTenant));
     when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
 
-    assertThat(consortiaService.getCentralTenantId("college")).isEqualTo("consortium");
+    assertThat(consortiaService.getCentralTenantId("college"))
+        .isEqualTo("consortium");
   }
 
   @Test
@@ -69,7 +69,8 @@ class ConsortiaServiceTest {
     userTenantCollection.setUserTenants(List.of(userTenant));
 
     when(consortiumClient.getConsortia()).thenReturn(consortiaCollection);
-    when(consortiumClient.getConsortiaUserTenants("consortiaId", "userId", Integer.MAX_VALUE)).thenReturn(userTenantCollection);
+    when(consortiumClient.getConsortiaUserTenants("consortiaId", "userId",
+        Integer.MAX_VALUE)).thenReturn(userTenantCollection);
 
     var expected = List.of("memberTenantId");
     var actual = consortiaService.getAffiliatedTenants("currentTenantId", "userId");

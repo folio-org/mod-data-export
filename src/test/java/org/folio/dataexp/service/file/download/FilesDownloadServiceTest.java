@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import java.util.UUID;
-
+import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.service.JobExecutionService;
@@ -16,8 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 class FilesDownloadServiceTest {
@@ -39,8 +37,9 @@ class FilesDownloadServiceTest {
     var jobExecutionId = UUID.randomUUID();
     var exportFileId = UUID.randomUUID();
 
-    var jobExecution = new JobExecution().exportedFiles(Set.of(new JobExecutionExportedFilesInner().fileId(exportFileId)
-        .fileName("file.mrc")));
+    var jobExecution = new JobExecution().exportedFiles(Set.of(
+        new JobExecutionExportedFilesInner().fileId(exportFileId)
+            .fileName("file.mrc")));
 
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(s3Client.getPresignedUrl(any())).thenReturn(expectedPresignedUrl);
