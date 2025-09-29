@@ -14,6 +14,6 @@ class ExpireJobsControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .post("/data-export/expire-jobs")
         .headers(defaultHeaders()))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
   }
 }

@@ -1,5 +1,13 @@
 package org.folio.dataexp.service.transformationfields;
 
+import static org.folio.dataexp.util.ExternalPathResolver.LOCATIONS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.folio.spring.FolioExecutionContext;
@@ -9,15 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
-import static org.folio.dataexp.util.ExternalPathResolver.LOCATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ReferenceDataProviderTest {
@@ -35,9 +34,6 @@ class ReferenceDataProviderTest {
 
   @Test
   void getReferenceForCentralAndUsersTenantsTest() {
-    var central = "central";
-    var userId = UUID.randomUUID().toString();
-    var userTenants = List.of("member");
     var okapiHeaders = new HashMap<String, Collection<String>>();
     okapiHeaders.put("header", List.of("value"));
 
@@ -52,7 +48,11 @@ class ReferenceDataProviderTest {
     locationsCentralReferenceData.put(locationCentralId, locationCentral);
     locationsMemberReferenceData.put(locationMemberId, locationMember);
 
-    when(referenceDataService.getLocations()).thenReturn(locationsCentralReferenceData, locationsMemberReferenceData);
+    var central = "central";
+    var userId = UUID.randomUUID().toString();
+    var userTenants = List.of("member");
+    when(referenceDataService.getLocations()).thenReturn(locationsCentralReferenceData,
+        locationsMemberReferenceData);
     when(consortiaService.getAffiliatedTenants(central, userId)).thenReturn(userTenants);
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(okapiHeaders);
 

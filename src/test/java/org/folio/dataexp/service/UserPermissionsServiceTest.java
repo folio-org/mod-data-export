@@ -1,6 +1,5 @@
 package org.folio.dataexp.service;
 
-
 import static org.folio.dataexp.service.UserPermissionsService.EUREKA_PLATFORM;
 import static org.folio.dataexp.service.UserPermissionsService.OKAPI_PLATFORM;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -9,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-
 import org.folio.dataexp.client.EurekaUserPermissionsClient;
 import org.folio.dataexp.client.OkapiUserPermissionsClient;
 import org.folio.dataexp.domain.dto.UserPermissions;
@@ -36,7 +34,8 @@ class UserPermissionsServiceTest {
   @Test
   void getPermissionsTest() {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(okapiUserPermissionsClient.getPermissions(isA(String.class))).thenReturn(new UserPermissions());
+    when(okapiUserPermissionsClient.getPermissions(isA(String.class)))
+        .thenReturn(new UserPermissions());
 
     userPermissionsService.setPlatform(OKAPI_PLATFORM);
     userPermissionsService.getPermissions();
@@ -46,7 +45,8 @@ class UserPermissionsServiceTest {
   @Test
   void getPermissionsIfEurekaTest() {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(eurekaUserPermissionsClient.getPermissions(isA(String.class), anyList())).thenReturn(new UserPermissions());
+    when(eurekaUserPermissionsClient.getPermissions(isA(String.class), anyList()))
+        .thenReturn(new UserPermissions());
 
     userPermissionsService.setPlatform(EUREKA_PLATFORM);
     userPermissionsService.getPermissions();

@@ -2,6 +2,10 @@ package org.folio.dataexp.controllers;
 
 import static java.lang.Boolean.TRUE;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -22,11 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
+/**
+ * Controller for job profile operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -38,63 +40,133 @@ public class JobProfileController implements JobProfilesApi {
   private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
   private final UserClient userClient;
 
+  /**
+   * Deletes a job profile by its ID.
+   *
+   * @param jobProfileId job profile UUID
+   * @return response entity with no content status
+   */
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault()))
+    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
       throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
+    }
     jobProfileEntityRepository.deleteById(jobProfileId);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    return new ResponseEntity<>(
+        HttpStatus.NO_CONTENT
+    );
   }
 
+  /**
+   * Gets a job profile by its ID.
+   *
+   * @param jobProfileId job profile UUID
+   * @return response entity with job profile
+   */
   @Override
   public ResponseEntity<JobProfile> getJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    return new ResponseEntity<>(jobProfileEntity.getJobProfile(), HttpStatus.OK);
+    return new ResponseEntity<>(
+        jobProfileEntity.getJobProfile(),
+        HttpStatus.OK
+    );
   }
 
+  /**
+   * Gets job profiles, optionally filtered by usage or query.
+   *
+   * @param used whether to filter by used profiles
+   * @param query CQL query string
+   * @param offset offset for pagination
+   * @param limit limit for pagination
+   * @return response entity with job profile collection
+   */
   @Override
-  public ResponseEntity<JobProfileCollection> getJobProfiles(Boolean used, String query, Integer offset, Integer limit) {
-    if(TRUE.equals(used)){
-      return new ResponseEntity<>(getUsedJobProfiles(offset, limit), HttpStatus.OK);
+  public ResponseEntity<JobProfileCollection> getJobProfiles(
+      Boolean used,
+      String query,
+      Integer offset,
+      Integer limit
+  ) {
+    if (TRUE.equals(used)) {
+      return new ResponseEntity<>(
+          getUsedJobProfiles(offset, limit),
+          HttpStatus.OK
+      );
     }
-    return new ResponseEntity<>(getListOfJobProfiles(query, offset, limit), HttpStatus.OK);
+    return new ResponseEntity<>(
+        getListOfJobProfiles(query, offset, limit),
+        HttpStatus.OK
+    );
   }
 
+  /**
+   * Gets a list of job profiles by query.
+   *
+   * @param query CQL query string
+   * @param offset offset for pagination
+   * @param limit limit for pagination
+   * @return job profile collection
+   */
   private JobProfileCollection getListOfJobProfiles(String query, Integer offset, Integer limit) {
     log.info("getListOfJobProfiles::");
-    if (StringUtils.isEmpty(query)){
+    if (StringUtils.isEmpty(query)) {
       query = "(cql.allRecords=1)";
     }
-    var jobProfilesPage  = jobProfileEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
-    var jobProfiles =  jobProfilesPage.stream().map(JobProfileEntity::getJobProfile).toList();
+    var jobProfilesPage = jobProfileEntityCqlRepository.findByCql(
+        query,
+        OffsetRequest.of(offset, limit)
+    );
+    var jobProfiles = jobProfilesPage.stream()
+        .map(JobProfileEntity::getJobProfile)
+        .toList();
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
-    jobProfileCollection.setTotalRecords((int) jobProfilesPage.getTotalElements());
-
+    jobProfileCollection.setTotalRecords(
+        (int) jobProfilesPage.getTotalElements()
+    );
     return jobProfileCollection;
   }
 
+  /**
+   * Gets a collection of used job profiles.
+   *
+   * @param offset offset for pagination
+   * @param limit limit for pagination
+   * @return job profile collection
+   */
   private JobProfileCollection getUsedJobProfiles(Integer offset, Integer limit) {
     log.info("getUsedJobProfiles::");
 
-    List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit);
+    List<Object[]> jobProfileData = jobProfileEntityCqlRepository.getUsedJobProfilesData(
+        offset,
+        limit
+    );
 
     var jobProfiles = jobProfileData.stream()
         .filter(i -> Objects.nonNull(i[0]) && Objects.nonNull(i[1]))
         .map(i -> JobProfile.builder()
-          .id((UUID) i[0])
-          .name((String) i[1])
-          .build())
+            .id((UUID) i[0])
+            .name((String) i[1])
+            .build()
+        )
         .toList();
 
     var jobProfileCollection = new JobProfileCollection();
     jobProfileCollection.setJobProfiles(jobProfiles);
-    jobProfileCollection.setTotalRecords(jobProfileData.size());
-
+    jobProfileCollection.setTotalRecords(
+        jobProfileData.size()
+    );
     return jobProfileCollection;
   }
 
+  /**
+   * Creates a new job profile.
+   *
+   * @param jobProfile job profile object
+   * @return response entity with created job profile
+   */
   @Override
   public ResponseEntity<JobProfile> postJobProfile(JobProfile jobProfile) {
     var userId = folioExecutionContext.getUserId().toString();
@@ -116,10 +188,22 @@ public class JobProfileController implements JobProfilesApi {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
-    var saved = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
-    return new ResponseEntity<>(saved.getJobProfile(), HttpStatus.CREATED);
+    var saved = jobProfileEntityRepository.save(
+        JobProfileEntity.fromJobProfile(jobProfile)
+    );
+    return new ResponseEntity<>(
+        saved.getJobProfile(),
+        HttpStatus.CREATED
+    );
   }
 
+  /**
+   * Updates a job profile by its ID.
+   *
+   * @param jobProfileId job profile UUID
+   * @param jobProfile job profile object
+   * @return response entity with no content status
+   */
   @Override
   public ResponseEntity<Void> putJobProfile(UUID jobProfileId, JobProfile jobProfile) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
@@ -139,17 +223,21 @@ public class JobProfileController implements JobProfilesApi {
     var metadataOfExistingJobProfile = jobProfileEntity.getJobProfile().getMetadata();
 
     var metadata = Metadata.builder()
-      .createdDate(metadataOfExistingJobProfile.getCreatedDate())
-      .updatedDate(new Date())
-      .createdByUserId(metadataOfExistingJobProfile.getCreatedByUserId())
-      .updatedByUserId(userId)
-      .createdByUsername(metadataOfExistingJobProfile.getCreatedByUsername())
-      .updatedByUsername(user.getUsername())
-      .build();
+        .createdDate(metadataOfExistingJobProfile.getCreatedDate())
+        .updatedDate(new Date())
+        .createdByUserId(metadataOfExistingJobProfile.getCreatedByUserId())
+        .updatedByUserId(userId)
+        .createdByUsername(metadataOfExistingJobProfile.getCreatedByUsername())
+        .updatedByUsername(user.getUsername())
+        .build();
 
     jobProfile.setMetadata(metadata);
 
-    jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    jobProfileEntityRepository.save(
+        JobProfileEntity.fromJobProfile(jobProfile)
+    );
+    return new ResponseEntity<>(
+        HttpStatus.NO_CONTENT
+    );
   }
 }

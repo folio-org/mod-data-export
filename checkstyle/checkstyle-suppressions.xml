@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+  "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+  "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+<suppressions>
+  <!-- line length -->
+  <suppress checks="LineLength"
+    files="ExportIdEntityRepository.java"
+    lines="48,109"/>
+  <suppress checks="LineLength"
+    files="RuleFactoryTest.java"
+    lines="153,233,262,285,316,375,760,878,915"/>
+
+  <!-- illegal token text -->
+  <suppress checks="IllegalTokenText"
+    files="DownloadRecordTest.java"/>
+  <suppress checks="IllegalTokenText"
+    files="JsonToMarcConverterTest.java"/>
+</suppressions>

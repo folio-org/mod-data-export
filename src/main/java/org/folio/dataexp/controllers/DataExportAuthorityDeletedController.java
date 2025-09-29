@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for exporting deleted authority records.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -19,9 +22,20 @@ public class DataExportAuthorityDeletedController implements ExportAuthorityDele
 
   private final ExportAuthorityDeletedService exportAuthorityDeletedService;
 
+  /**
+   * Initiates export of deleted authority records.
+   *
+   * @param request export authority deleted request object
+   * @return response entity with export authority deleted response
+   */
   @Override
-  public ResponseEntity<ExportAuthorityDeletedResponse> postExportDeletedAuthority(ExportAuthorityDeletedRequest request) {
+  public ResponseEntity<ExportAuthorityDeletedResponse> postExportDeletedAuthority(
+      ExportAuthorityDeletedRequest request
+  ) {
     var response = exportAuthorityDeletedService.postExportDeletedAuthority(request);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    return new ResponseEntity<>(
+        response,
+        HttpStatus.OK
+    );
   }
 }

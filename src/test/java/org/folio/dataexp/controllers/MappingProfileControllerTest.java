@@ -1,6 +1,16 @@
 package org.folio.dataexp.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.BaseDataExportInitializer;
@@ -20,17 +30,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 class MappingProfileControllerTest extends BaseDataExportInitializer {
 
   @MockitoBean
@@ -48,14 +47,15 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(false);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
 
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
     mockMvc.perform(MockMvcRequestBuilders
         .delete("/data-export/mapping-profiles/" + mappingProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
 
     verify(mappingProfileEntityRepository).deleteById(isA(UUID.class));
   }
@@ -68,16 +68,18 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
 
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
     mockMvc.perform(MockMvcRequestBuilders
         .delete("/data-export/mapping-profiles/" + mappingProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden());
 
-    verify(mappingProfileEntityRepository, times(0)).deleteById(isA(UUID.class));
+    verify(mappingProfileEntityRepository, times(0))
+        .deleteById(isA(UUID.class));
   }
 
   @Test
@@ -88,14 +90,15 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
 
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/mapping-profiles/" + mappingProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -106,15 +109,17 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setDefault(true);
     mappingProfile.setName("mappingProfile");
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     PageImpl<MappingProfileEntity> page = new PageImpl<>(List.of(entity));
 
-    when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/mapping-profiles?query=query")
         .headers(defaultHeaders()))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -134,7 +139,8 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var user = new User();
     user.setPersonal(new User.Personal());
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
@@ -142,7 +148,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/mapping-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isCreated());
+        .andExpect(status().isCreated());
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
   }
@@ -176,7 +182,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/mapping-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isUnprocessableEntity()).andReturn();
+        .andExpect(status().isUnprocessableEntity()).andReturn();
 
     var response = result.getResponse().getContentAsString();
     var mapper = new ObjectMapper();
@@ -186,16 +192,22 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
 
     var error = errors.getErrors().get(0);
 
-    assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
+    assertEquals(
+        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[0].transformation", error.getParameters().get(0).getKey());
+    assertEquals("transformations[0].transformation", error.getParameters()
+        .get(0).getKey());
     assertEquals("902q $aaa", error.getParameters().get(0).getValue());
 
     error = errors.getErrors().get(1);
 
-    assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
+    assertEquals(
+        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
+    assertEquals("transformations[1].transformation",
+        error.getParameters().get(0).getKey());
     assertEquals("902q $bbb", error.getParameters().get(0).getValue());
   }
 
@@ -221,10 +233,11 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/mapping-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isUnprocessableEntity()).andReturn();
+        .andExpect(status().isUnprocessableEntity()).andReturn();
 
     var response = result.getResponse().getContentAsString();
-    var expected = "Transformations for fields with item record type cannot be empty. Please provide a value.";
+    var expected = "Transformations for fields with item record type cannot be empty."
+        + " Please provide a value.";
     assertEquals(expected, response);
   }
 
@@ -257,7 +270,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/mapping-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isUnprocessableEntity()).andReturn();
+        .andExpect(status().isUnprocessableEntity()).andReturn();
 
     var response = result.getResponse().getContentAsString();
     var mapper = new ObjectMapper();
@@ -267,9 +280,12 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
 
     var error = errors.getErrors().get(0);
 
-    assertEquals("must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"", error.getMessage());
+    assertEquals(
+        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
+    assertEquals("transformations[1].transformation",
+        error.getParameters().get(0).getKey());
     assertEquals("902q $bbb", error.getParameters().get(0).getValue());
   }
 
@@ -290,7 +306,8 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var user = new User();
     user.setPersonal(new User.Personal());
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
 
@@ -298,7 +315,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/mapping-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isUnprocessableEntity()).andReturn();
+        .andExpect(status().isUnprocessableEntity()).andReturn();
 
     var response = result.getResponse().getContentAsString();
     var mapper = new ObjectMapper();
@@ -331,7 +348,8 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var user = new User();
     user.setPersonal(new User.Personal());
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
@@ -340,7 +358,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .put("/data-export/mapping-profiles/" + mappingProfile.getId().toString())
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
   }
@@ -359,7 +377,8 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     mappingProfile.setName("mappingProfile");
     mappingProfile.setTransformations(List.of(transformation));
 
-    var entity = MappingProfileEntity.builder().id(mappingProfile.getId()).mappingProfile(mappingProfile).build();
+    var entity = MappingProfileEntity.builder().id(mappingProfile.getId())
+        .mappingProfile(mappingProfile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
 
@@ -367,7 +386,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
         .put("/data-export/mapping-profiles/" + mappingProfile.getId().toString())
         .headers(defaultHeaders())
         .content(asJsonString(mappingProfile)))
-      .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden());
 
     verify(mappingProfileEntityRepository, times(0)).save(isA(MappingProfileEntity.class));
   }

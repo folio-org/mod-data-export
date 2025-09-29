@@ -4,6 +4,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -14,9 +16,6 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.List;
-import java.util.UUID;
 
 class RelatedUsersControllerTest extends BaseDataExportInitializer {
 
@@ -34,14 +33,14 @@ class RelatedUsersControllerTest extends BaseDataExportInitializer {
 
       var entities = List.of(
         new JobExecutionEntity().withJobExecution(new JobExecution().runBy(
-          new JobExecutionRunBy().userId(userId.toString()).firstName("first name").lastName("last name")))
-          .withId(UUID.randomUUID()),
+          new JobExecutionRunBy().userId(userId.toString()).firstName("first name")
+              .lastName("last name"))).withId(UUID.randomUUID()),
         new JobExecutionEntity().withJobExecution(new JobExecution().runBy(
-            new JobExecutionRunBy().userId(userId2.toString()).firstName("first name 2").lastName("last name 2")))
-          .withId(UUID.randomUUID()),
+            new JobExecutionRunBy().userId(userId2.toString()).firstName("first name 2")
+                .lastName("last name 2"))).withId(UUID.randomUUID()),
         new JobExecutionEntity().withJobExecution(new JobExecution().runBy(
-            new JobExecutionRunBy().userId(userId.toString()).firstName("first name").lastName("last name")))
-          .withId(UUID.randomUUID()));
+            new JobExecutionRunBy().userId(userId.toString()).firstName("first name")
+              .lastName("last name"))).withId(UUID.randomUUID()));
 
       jobExecutionEntityCqlRepository.saveAll(entities);
 
@@ -49,20 +48,20 @@ class RelatedUsersControllerTest extends BaseDataExportInitializer {
           .get("/data-export/related-users")
           .headers(defaultHeaders())
           .contentType(APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().json("{\n" +
-          "    \"relatedUsers\": [{\n" +
-          "            \"firstName\": \"first name\",\n" +
-          "            \"lastName\": \"last name\",\n" +
-          "            \"userId\": \"" + userId + "\"\n" +
-          "        }," +
-          "{\n" +
-          "            \"firstName\": \"first name 2\",\n" +
-          "            \"lastName\": \"last name 2\",\n" +
-          "            \"userId\": \"" + userId2 + "\"\n" +
-          "        }],\n" +
-          "    \"totalRecords\": 2\n" +
-          "}"));
+          .andExpect(status().isOk())
+          .andExpect(content().json("{\n"
+              + "    \"relatedUsers\": [{\n"
+              + "            \"firstName\": \"first name\",\n"
+              + "            \"lastName\": \"last name\",\n"
+              + "            \"userId\": \"" + userId + "\"\n"
+              + "        },"
+              + "{\n"
+              + "            \"firstName\": \"first name 2\",\n"
+              + "            \"lastName\": \"last name 2\",\n"
+              + "            \"userId\": \"" + userId2 + "\"\n"
+              + "        }],\n"
+              + "    \"totalRecords\": 2\n"
+              + "}"));
     }
   }
 }

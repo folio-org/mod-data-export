@@ -1,5 +1,16 @@
 package org.folio.dataexp.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.ExportRequest;
@@ -11,18 +22,6 @@ import org.folio.dataexp.service.export.ExportExecutor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class SingleFileProcessorTest extends BaseDataExportInitializer {
 
@@ -43,14 +42,17 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     var parent = String.format("mod-data-export/download/%s/", jobExecutionId);
     var fileLocation = parent + "download.mrc";
     var exportEntity = JobExecutionExportFilesEntity.builder()
-      .id(UUID.randomUUID())
-      .fileLocation(fileLocation).build();
+        .id(UUID.randomUUID())
+        .fileLocation(fileLocation).build();
 
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(exportEntity));
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
+        .thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), new CommonExportStatistic());
+    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(),
+        new CommonExportStatistic());
 
-    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportStatistic.class));
+    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class),
+        isA(CommonExportStatistic.class));
   }
 
   @Test
@@ -62,7 +64,8 @@ class SingleFileProcessorTest extends BaseDataExportInitializer {
     var commonExportFails = new CommonExportStatistic();
     commonExportFails.setFailedToReadInputFile(false);
 
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(Collections.EMPTY_LIST);
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
+        .thenReturn(Collections.EMPTY_LIST);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
 
     singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(), commonExportFails);

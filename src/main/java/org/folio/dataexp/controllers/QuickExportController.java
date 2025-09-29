@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Controller for quick export operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -19,10 +22,21 @@ public class QuickExportController implements QuickExportApi {
 
   private final QuickExportService quickExportService;
 
+  /**
+   * Initiates a quick export.
+   *
+   * @param quickExportRequest quick export request object
+   * @return response entity with quick export response
+   */
   @Override
-  public ResponseEntity<QuickExportResponse> postDataExportQuickExport(QuickExportRequest quickExportRequest) {
+  public ResponseEntity<QuickExportResponse> postDataExportQuickExport(
+      QuickExportRequest quickExportRequest
+  ) {
     var response = quickExportService.postQuickExport(quickExportRequest);
     log.info("Quick export response: {}", response);
-    return new ResponseEntity<>(response, HttpStatus.OK);
+    return new ResponseEntity<>(
+        response,
+        HttpStatus.OK
+    );
   }
 }

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.client.AuthorityClient;
 import org.folio.dataexp.domain.dto.AuthorityCollection;
@@ -21,8 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
-
-import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class ExportAuthorityDeletedServiceTest {
@@ -51,19 +50,19 @@ class ExportAuthorityDeletedServiceTest {
     request.setLimit(2);
 
     when(authorityClient.getAuthorities(true, true, null, 2, 0))
-      .thenReturn(new AuthorityCollection());
+        .thenReturn(new AuthorityCollection());
     when(fileDefinitionsService.postFileDefinition(any(FileDefinition.class))).thenReturn(
       new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId));
     when(fileDefinitionsService.uploadFile(any(UUID.class), any(Resource.class))).thenReturn(
-      new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId).fileName(DELETED_AUTHORITIES_FILE_NAME));
+      new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId)
+          .fileName(DELETED_AUTHORITIES_FILE_NAME));
 
     var response = exportAuthorityDeletedService.postExportDeletedAuthority(request);
-
+    assertEquals(jobExecutionId, response.getJobExecutionId());
     verify(dataExportService).postDataExport(exportRequestArgumentCaptor.capture());
     var exportRequest = exportRequestArgumentCaptor.getValue();
 
     assertThat(exportRequest.getFileDefinitionId()).isInstanceOf(UUID.class);
     assertThat(exportRequest.getJobProfileId()).isInstanceOf(UUID.class);
-    assertEquals(jobExecutionId, response.getJobExecutionId());
   }
 }

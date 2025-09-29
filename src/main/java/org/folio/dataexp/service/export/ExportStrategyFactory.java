@@ -13,6 +13,9 @@ import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.springframework.stereotype.Component;
 
+/**
+ * Factory for selecting the appropriate export strategy based on request or record type.
+ */
 @Component
 @AllArgsConstructor
 public class ExportStrategyFactory {
@@ -24,6 +27,12 @@ public class ExportStrategyFactory {
   private final HoldingsExportAllStrategy holdingsExportAllStrategy;
   private final AuthorityExportAllStrategy authorityExportAllStrategy;
 
+  /**
+   * Gets the export strategy for the given export request.
+   *
+   * @param exportRequest the export request
+   * @return the export strategy
+   */
   public ExportStrategy getExportStrategy(ExportRequest exportRequest) {
     if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
@@ -42,6 +51,12 @@ public class ExportStrategyFactory {
     return instancesExportStrategy;
   }
 
+  /**
+   * Gets the export strategy for the given record ID type.
+   *
+   * @param recordIdType the record ID type
+   * @return the abstract export strategy
+   */
   public AbstractExportStrategy getExportStrategy(IdType recordIdType) {
     return switch (recordIdType) {
       case AUTHORITY -> authorityExportStrategy;

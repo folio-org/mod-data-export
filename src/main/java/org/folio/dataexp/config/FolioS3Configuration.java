@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for setting up the Folio S3 client.
+ */
 @Configuration
 public class FolioS3Configuration {
   @Value("${application.remote-files-storage.endpoint}")
@@ -27,6 +30,11 @@ public class FolioS3Configuration {
   @Value("#{ T(Boolean).parseBoolean('${application.remote-files-storage.awsSdk}')}")
   private boolean awsSdk;
 
+  /**
+   * Creates a FolioS3Client bean using the configured S3 properties.
+   *
+   * @return a configured FolioS3Client
+   */
   @Bean
   public FolioS3Client folioS3Client() {
     return S3ClientFactory.getS3Client(S3ClientProperties.builder()

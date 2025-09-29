@@ -1,5 +1,15 @@
 package org.folio.dataexp.service.logs;
 
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.UUID;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
@@ -18,21 +28,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 
-import java.util.List;
-import java.util.UUID;
-
-import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
 
-  private static final String LONG_MARC_RECORD_MESSAGE = "Record is too long to be a valid MARC binary record";
+  private static final String LONG_MARC_RECORD_MESSAGE =
+      "Record is too long to be a valid MARC binary record";
   @Mock
   private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   @Mock
@@ -52,7 +52,8 @@ class ErrorLogServiceTest {
     var page = new PageImpl<>(List.of(errorLogEntity));
     var query = "query";
 
-    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     var collection = errorLogService.getErrorLogsByQuery(query, 0, 1);
 
@@ -72,7 +73,8 @@ class ErrorLogServiceTest {
     var page = new PageImpl<>(List.of(errorLogEntity));
     var query = "query";
 
-    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class))).thenReturn(page);
+    when(errorLogEntityCqlRepository.findByCql(eq(query), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     var errors = errorLogService.getByQuery(query);
 
@@ -84,7 +86,8 @@ class ErrorLogServiceTest {
     var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
     errorLogService.save(errorLog);
 
     verify(errorLogEntityCqlRepository).save(isA(ErrorLogEntity.class));
@@ -95,7 +98,8 @@ class ErrorLogServiceTest {
     var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
     errorLogService.save(errorLog);
 
     verify(errorLogEntityCqlRepository).save(isA(ErrorLogEntity.class));
@@ -111,7 +115,8 @@ class ErrorLogServiceTest {
   void saveGeneralErrorTest() {
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
     errorLogService.saveGeneralError("errorCode", UUID.randomUUID());
 
     verify(errorLogEntityCqlRepository).save(isA(ErrorLogEntity.class));
@@ -119,66 +124,77 @@ class ErrorLogServiceTest {
 
   @Test
   void saveCommonExportFailsErrorsTest() {
-    var jobExecutionId = UUID.randomUUID();
     var commonFails = new CommonExportStatistic();
-    var notExistUUID = UUID.randomUUID();
-    commonFails.incrementDuplicatedUUID();
-    commonFails.addToInvalidUUIDFormat("abs");
-    commonFails.addToNotExistUUIDAll(List.of(notExistUUID));
+    var notExistUuid = UUID.randomUUID();
+    commonFails.incrementDuplicatedUuid();
+    commonFails.addToInvalidUuidFormat("abs");
+    commonFails.addToNotExistUuidAll(List.of(notExistUuid));
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
 
+    var jobExecutionId = UUID.randomUUID();
     errorLogService.saveCommonExportFailsErrors(commonFails, 3, jobExecutionId);
-    verify(errorLogEntityCqlRepository, times(3)).save(isA(ErrorLogEntity.class));
+    verify(errorLogEntityCqlRepository, times(3))
+        .save(isA(ErrorLogEntity.class));
   }
 
   @Test
   void saveFailedToReadInputFileErrorTest() {
     var jobExecutionId = UUID.randomUUID();
-    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
 
     errorLogService.saveFailedToReadInputFileError(jobExecutionId);
+    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
     verify(errorLogEntityCqlRepository).save(captor.capture());
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), errorLog.getErrorMessageCode());
+    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(),
+        errorLog.getErrorMessageCode());
   }
 
   @Test
   void saveWithAffectedRecordMarcExceptionErrorTest() {
     var jobExecutionId = UUID.randomUUID();
-    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
 
-    errorLogService.saveWithAffectedRecord(new JSONObject(), ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId, new MarcException());
+    errorLogService.saveWithAffectedRecord(new JSONObject(),
+        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId,
+        new MarcException());
+    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
     verify(errorLogEntityCqlRepository).save(captor.capture());
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), errorLog.getErrorMessageCode());
+    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+        errorLog.getErrorMessageCode());
   }
 
   @Test
   void saveWithAffectedRecordErrorTest() {
     var jobExecutionId = UUID.randomUUID();
-    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class))).thenReturn(new ErrorLogEntity());
+    when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
+        .thenReturn(new ErrorLogEntity());
 
-    errorLogService.saveWithAffectedRecord(new JSONObject(), LONG_MARC_RECORD_MESSAGE, ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+    errorLogService.saveWithAffectedRecord(new JSONObject(), LONG_MARC_RECORD_MESSAGE,
+        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+    ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
     verify(errorLogEntityCqlRepository).save(captor.capture());
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), errorLog.getErrorMessageCode());
+    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+        errorLog.getErrorMessageCode());
     assertEquals(LONG_MARC_RECORD_MESSAGE, errorLog.getErrorMessageValues().get(0));
   }
 }

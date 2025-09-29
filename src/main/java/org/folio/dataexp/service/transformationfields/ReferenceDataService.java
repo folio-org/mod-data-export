@@ -2,6 +2,9 @@ package org.folio.dataexp.service.transformationfields;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
@@ -12,12 +15,12 @@ import org.folio.dataexp.client.HoldingsNoteTypesClient;
 import org.folio.dataexp.client.IdentifierTypesClient;
 import org.folio.dataexp.client.InstanceFormatsClient;
 import org.folio.dataexp.client.InstanceTypesClient;
+import org.folio.dataexp.client.IssuanceModesClient;
 import org.folio.dataexp.client.ItemNoteTypesClient;
 import org.folio.dataexp.client.LoanTypesClient;
 import org.folio.dataexp.client.LocationUnitsClient;
 import org.folio.dataexp.client.LocationsClient;
 import org.folio.dataexp.client.MaterialTypesClient;
-import org.folio.dataexp.client.IssuanceModesClient;
 import org.folio.dataexp.client.NatureOfContentTermsClient;
 import org.folio.dataexp.domain.dto.Alternativetitletype;
 import org.folio.dataexp.domain.dto.CallNumberType;
@@ -40,10 +43,9 @@ import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+/**
+ * Service for retrieving reference data from various clients.
+ */
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -67,127 +69,272 @@ public class ReferenceDataService {
   private final NatureOfContentTermsClient natureOfContentTermsClient;
   private final IssuanceModesClient issuanceModesClient;
 
+  /**
+   * Gets alternative title types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getAlternativeTitleTypes() {
-    var list = alternativeTitleTypesClient.getAlternativeTitleTypes(REFERENCE_DATA_LIMIT).getAlternativeTitleTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(Alternativetitletype::getId, this::toJsonObjectWrapper));
+    var list = alternativeTitleTypesClient.getAlternativeTitleTypes(REFERENCE_DATA_LIMIT)
+        .getAlternativeTitleTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(Alternativetitletype::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets call number types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getCallNumberTypes() {
-    var list = callNumberTypesClient.getCallNumberTypes(REFERENCE_DATA_LIMIT).getCallNumberTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(CallNumberType::getId, this::toJsonObjectWrapper));
+    var list = callNumberTypesClient.getCallNumberTypes(REFERENCE_DATA_LIMIT)
+        .getCallNumberTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(CallNumberType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets contributor name types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getContributorNameTypes() {
-    var list = contributorNameTypesClient.getContributorNameTypes(REFERENCE_DATA_LIMIT).getContributorNameTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(ContributorNameType::getId, this::toJsonObjectWrapper));
+    var list = contributorNameTypesClient.getContributorNameTypes(REFERENCE_DATA_LIMIT)
+        .getContributorNameTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(ContributorNameType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets electronic access relationships as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getElectronicAccessRelationships() {
-    var list = electronicAccessRelationshipsClient.getElectronicAccessRelationships(REFERENCE_DATA_LIMIT).getElectronicAccessRelationships();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(ElectronicAccessRelationship::getId, this::toJsonObjectWrapper));
+    var list = electronicAccessRelationshipsClient
+        .getElectronicAccessRelationships(REFERENCE_DATA_LIMIT)
+        .getElectronicAccessRelationships();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(ElectronicAccessRelationship::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets holdings note types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getHoldingsNoteTypes() {
-    var list = holdingsNoteTypesClient.getHoldingsNoteTypes(REFERENCE_DATA_LIMIT).getHoldingsNoteTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(HoldingsNoteType::getId, this::toJsonObjectWrapper));
+    var list = holdingsNoteTypesClient.getHoldingsNoteTypes(REFERENCE_DATA_LIMIT)
+        .getHoldingsNoteTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(HoldingsNoteType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets identifier types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getIdentifierTypes() {
-    var list = identifierTypesClient.getIdentifierTypes(REFERENCE_DATA_LIMIT).getIdentifierTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(IdentifierType::getId, this::toJsonObjectWrapper));
+    var list = identifierTypesClient.getIdentifierTypes(REFERENCE_DATA_LIMIT)
+        .getIdentifierTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(IdentifierType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets instance formats as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getInstanceFormats() {
-    var list = instanceFormatsClient.getInstanceFormats(REFERENCE_DATA_LIMIT).getInstanceFormats();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(InstanceFormat::getId, this::toJsonObjectWrapper));
+    var list = instanceFormatsClient.getInstanceFormats(REFERENCE_DATA_LIMIT)
+        .getInstanceFormats();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(InstanceFormat::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets instance types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getInstanceTypes() {
-    var list = instanceTypesClient.getInstanceTypes(REFERENCE_DATA_LIMIT).getInstanceTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(InstanceType::getId, this::toJsonObjectWrapper));
+    var list = instanceTypesClient.getInstanceTypes(REFERENCE_DATA_LIMIT)
+        .getInstanceTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(InstanceType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets item note types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getItemNoteTypes() {
-    var list = itemNoteTypesClient.getItemNoteTypes(REFERENCE_DATA_LIMIT).getItemNoteTypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(ItemNoteType::getId, this::toJsonObjectWrapper));
+    var list = itemNoteTypesClient.getItemNoteTypes(REFERENCE_DATA_LIMIT)
+        .getItemNoteTypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(ItemNoteType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets loan types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getLoanTypes() {
-    var list = loanTypesClient.getLoanTypes(REFERENCE_DATA_LIMIT).getLoantypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(LoanType::getId, this::toJsonObjectWrapper));
+    var list = loanTypesClient.getLoanTypes(REFERENCE_DATA_LIMIT)
+        .getLoantypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(LoanType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets locations as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getLocations() {
-    var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT).getLocations();
+    var list = locationsClient.getLocations(REFERENCE_DATA_LIMIT)
+        .getLocations();
     log.info("getLocations list size: {}", list.size());
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(Location::getId, this::toJsonObjectWrapper));
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(Location::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets campuses as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getCampuses() {
-    var list = locationUnitsClient.getCampuses(REFERENCE_DATA_LIMIT).getLoccamps();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(Campus::getId, this::toJsonObjectWrapper));
+    var list = locationUnitsClient.getCampuses(REFERENCE_DATA_LIMIT)
+        .getLoccamps();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(Campus::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets institutions as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getInstitutions() {
-    var list = locationUnitsClient.getInstitutions(REFERENCE_DATA_LIMIT).getLocinsts();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(Institution::getId, this::toJsonObjectWrapper));
+    var list = locationUnitsClient.getInstitutions(REFERENCE_DATA_LIMIT)
+        .getLocinsts();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(Institution::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets libraries as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getLibraries() {
-    var list = locationUnitsClient.getLibraries(REFERENCE_DATA_LIMIT).getLoclibs();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(Library::getId, this::toJsonObjectWrapper));
+    var list = locationUnitsClient.getLibraries(REFERENCE_DATA_LIMIT)
+        .getLoclibs();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(Library::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets material types as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getMaterialTypes() {
-    var list = materialTypesClient.getMaterialTypes(REFERENCE_DATA_LIMIT).getMtypes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(MaterialType::getId, this::toJsonObjectWrapper));
+    var list = materialTypesClient.getMaterialTypes(REFERENCE_DATA_LIMIT)
+        .getMtypes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(MaterialType::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets nature of content terms as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getNatureOfContentTerms() {
-    var list = natureOfContentTermsClient.getNatureOfContentTerms(REFERENCE_DATA_LIMIT).getNatureOfContentTerms();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(NatureOfContentTerm::getId, this::toJsonObjectWrapper));
+    var list = natureOfContentTermsClient.getNatureOfContentTerms(REFERENCE_DATA_LIMIT)
+        .getNatureOfContentTerms();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(NatureOfContentTerm::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Gets issuance modes as reference data.
+   *
+   * @return map of ID to JsonObjectWrapper
+   */
   public Map<String, JsonObjectWrapper> getIssuanceModes() {
-    var list = issuanceModesClient.getIssuanceModes(REFERENCE_DATA_LIMIT).getIssuanceModes();
-    return ObjectUtils.isEmpty(list) ?
-      Collections.emptyMap() :
-      list.stream().collect(Collectors.toMap(ModeOfIssuance::getId, this::toJsonObjectWrapper));
+    var list = issuanceModesClient.getIssuanceModes(REFERENCE_DATA_LIMIT)
+        .getIssuanceModes();
+    return ObjectUtils.isEmpty(list)
+        ? Collections.emptyMap()
+        : list.stream().collect(
+            Collectors.toMap(ModeOfIssuance::getId, this::toJsonObjectWrapper)
+        );
   }
 
+  /**
+   * Converts an object to a JsonObjectWrapper.
+   *
+   * @param o the object
+   * @return JsonObjectWrapper
+   */
   private JsonObjectWrapper toJsonObjectWrapper(Object o) {
-    return new JsonObjectWrapper(objectMapper.convertValue(o, new TypeReference<>() {}));
+    return new JsonObjectWrapper(
+        objectMapper.convertValue(o, new TypeReference<>() {})
+    );
   }
 }

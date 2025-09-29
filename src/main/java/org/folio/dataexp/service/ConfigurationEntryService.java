@@ -8,6 +8,9 @@ import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for retrieving configuration entries from remote sources.
+ */
 @RequiredArgsConstructor
 @Log4j2
 @Service
@@ -15,13 +18,17 @@ public class ConfigurationEntryService {
 
   private final ConfigurationEntryClient configurationEntryClient;
 
-  public ConfigurationEntry retrieveSingleConfigurationEntryByQuery(String query){
+  /**
+   * Retrieves a single configuration entry by CQL query.
+   *
+   * @param query CQL query string.
+   * @return The first matching ConfigurationEntry, or an empty value if none found.
+   */
+  public ConfigurationEntry retrieveSingleConfigurationEntryByQuery(String query) {
     return configurationEntryClient.getConfigurationEntryCollectionByQuery(query)
       .getConfigs()
       .stream()
       .findFirst()
       .orElse(new ConfigurationEntry().value(EMPTY));
   }
-
-
 }

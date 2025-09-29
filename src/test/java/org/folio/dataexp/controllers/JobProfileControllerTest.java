@@ -1,5 +1,17 @@
 package org.folio.dataexp.controllers;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.UserClient;
@@ -15,19 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class JobProfileControllerTest extends BaseDataExportInitializer {
 
@@ -53,7 +52,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .delete("/data-export/job-profiles/" + jobProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
 
     verify(jobProfileEntityRepository).deleteById(isA(UUID.class));
   }
@@ -73,7 +72,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .delete("/data-export/job-profiles/" + jobProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden());
 
     verify(jobProfileEntityRepository, times(0)).deleteById(isA(UUID.class));
   }
@@ -93,7 +92,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-profiles/" + jobProfile.getId().toString())
         .headers(defaultHeaders()))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -107,41 +106,43 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
     var entity = JobProfileEntity.builder().id(jobProfile.getId()).jobProfile(jobProfile).build();
     PageImpl<JobProfileEntity> page = new PageImpl<>(List.of(entity));
 
-    when(jobProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class))).thenReturn(page);
+    when(jobProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
+        .thenReturn(page);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-profiles?query=query")
         .headers(defaultHeaders()))
-      .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
   @SneakyThrows
   void getListOfJobProfilesUsedInCompletedJobsTest() {
-    UUID id_1 = UUID.randomUUID();
-    UUID id_2 = UUID.randomUUID();
+    UUID id1 = UUID.randomUUID();
+    UUID id2 = UUID.randomUUID();
 
-    Object[] profileData_1 = new Object[2];
-    profileData_1[0] = id_1;
-    profileData_1[1] = "Default instances export job profile 1";
+    Object[] profileData1 = new Object[2];
+    profileData1[0] = id1;
+    profileData1[1] = "Default instances export job profile 1";
 
-    Object[] profileData_2 = new Object[2];
-    profileData_2[0] = id_2;
-    profileData_2[1] = "Default instances export job profile 2";
+    Object[] profileData2 = new Object[2];
+    profileData2[0] = id2;
+    profileData2[1] = "Default instances export job profile 2";
 
-    List<Object[]> jobProfileData = Arrays.asList(profileData_1, profileData_2);
+    List<Object[]> jobProfileData = Arrays.asList(profileData1, profileData2);
 
-    when(jobProfileEntityCqlRepository.getUsedJobProfilesData(isA(Integer.class), isA(Integer.class))).thenReturn(jobProfileData);
+    when(jobProfileEntityCqlRepository.getUsedJobProfilesData(isA(Integer.class),
+        isA(Integer.class))).thenReturn(jobProfileData);
 
     mockMvc.perform(MockMvcRequestBuilders
         .get("/data-export/job-profiles?used=true")
         .headers(defaultHeaders()))
-      .andExpect(status().isOk())
-      .andExpect(result -> {
-        var usedJobProfilesResponse = new JSONObject(result.getResponse().getContentAsString());
-        assertThat(usedJobProfilesResponse.getInt("totalRecords") == 2);
-        assertThat(usedJobProfilesResponse.getJSONArray("jobProfiles").length() == 2);
-      });
+        .andExpect(status().isOk())
+        .andExpect(result -> {
+          var usedJobProfilesResponse = new JSONObject(result.getResponse().getContentAsString());
+          assertThat(usedJobProfilesResponse.getInt("totalRecords") == 2);
+          assertThat(usedJobProfilesResponse.getJSONArray("jobProfiles").length() == 2);
+        });
   }
 
   @Test
@@ -163,7 +164,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
         .post("/data-export/job-profiles")
         .headers(defaultHeaders())
         .content(asJsonString(jobProfile)))
-      .andExpect(status().isCreated());
+        .andExpect(status().isCreated());
 
     verify(jobProfileEntityRepository).save(isA(JobProfileEntity.class));
   }
@@ -190,7 +191,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
         .headers(defaultHeaders())
         .content(asJsonString(jobProfile))
         .contentType(APPLICATION_JSON))
-      .andExpect(status().isNoContent());
+        .andExpect(status().isNoContent());
 
     verify(jobProfileEntityRepository).save(isA(JobProfileEntity.class));
   }
@@ -212,7 +213,7 @@ class JobProfileControllerTest extends BaseDataExportInitializer {
         .put("/data-export/job-profiles/" + jobProfile.getId().toString())
         .headers(defaultHeaders())
         .content(asJsonString(jobProfile)))
-      .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden());
 
     verify(jobProfileEntityRepository, times(0)).save(isA(JobProfileEntity.class));
   }

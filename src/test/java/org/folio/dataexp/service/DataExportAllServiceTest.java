@@ -1,7 +1,20 @@
 package org.folio.dataexp.service;
 
-import lombok.SneakyThrows;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
+import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+
 import com.github.jknack.handlebars.internal.Files;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.UUID;
+import lombok.SneakyThrows;
 import org.codehaus.plexus.util.StringUtils;
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
@@ -23,20 +36,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.UUID;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
-import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
 
 class DataExportAllServiceTest extends ServiceInitializer {
 
@@ -78,13 +77,15 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecutions.size());
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecution.getId().toString()).get(0).getFileDefinition();
         var expectedFileName = "instance-all.csv";
         assertEquals(expectedFileName, fileDefinition.getFileName());
 
         assertEquals(11, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport  =  String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -131,7 +132,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport  =  String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport  =  String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -169,7 +171,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(19, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -224,7 +227,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
       createCustomInstanceJobProfile();
 
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).jobProfileId(CUSTOM_INSTANCE_JOB_PROFILE_ID);
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true)
+          .jobProfileId(CUSTOM_INSTANCE_JOB_PROFILE_ID);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -236,7 +240,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(10, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -281,7 +286,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).deletedRecords(false);
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true)
+          .deletedRecords(false);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -293,7 +299,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(7, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -333,7 +340,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
       createCustomInstanceJobProfile();
 
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true).deletedRecords(false)
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(true)
+          .deletedRecords(false)
           .jobProfileId(CUSTOM_INSTANCE_JOB_PROFILE_ID);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
@@ -346,7 +354,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -382,7 +391,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false).deletedRecords(false);
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false)
+          .deletedRecords(false);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -394,7 +404,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(5, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -426,7 +437,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
 
       createCustomInstanceJobProfile();
 
-      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false).deletedRecords(false)
+      var exportAllRequest = new ExportAllRequest().suppressedFromDiscovery(false)
+          .deletedRecords(false)
           .jobProfileId(CUSTOM_INSTANCE_JOB_PROFILE_ID);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
@@ -438,7 +450,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         var jobExecution = jobExecutions.get(0);
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(3, jobExecution.getJobExecution().getProgress().getTotal());
-        var fileToExport = String.format("%s-%s.mrc", "instance-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "instance-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -468,7 +481,7 @@ class DataExportAllServiceTest extends ServiceInitializer {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
-        .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true);
+          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -480,11 +493,13 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(15, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecution.getId().toString()).get(0).getFileDefinition();
         var expectedFileName = "holding-all.csv";
         assertEquals(expectedFileName, fileDefinition.getFileName());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -553,7 +568,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(12, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -618,7 +634,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(9, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -671,7 +688,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(8, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -710,7 +728,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
-          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true).deletedRecords(false);
+          .jobProfileId(DEFAULT_HOLDINGS_JOB_PROFILE).suppressedFromDiscovery(true)
+          .deletedRecords(false);
       dataExportAllService.postDataExportAll(exportAllRequest);
       await().atMost(2, SECONDS).untilAsserted(() -> {
         var jobExecutions = jobExecutionEntityCqlRepository.findAll();
@@ -721,7 +740,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -761,7 +781,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       createCustomHoldingsJobProfile();
 
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.HOLDING)
-          .jobProfileId(CUSTOM_HOLDINGS_JOB_PROFILE_ID).suppressedFromDiscovery(true).deletedRecords(false);
+          .jobProfileId(CUSTOM_HOLDINGS_JOB_PROFILE_ID).suppressedFromDiscovery(true)
+          .deletedRecords(false);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -773,7 +794,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(6, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -824,7 +846,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -868,7 +891,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "holding-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "holding-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -901,7 +925,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
-        .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE).suppressedFromDiscovery(suppressedFromDiscovery);
+          .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE)
+          .suppressedFromDiscovery(suppressedFromDiscovery);
       dataExportAllService.postDataExportAll(exportAllRequest);
       await().atMost(4, SECONDS).untilAsserted(() -> {
         var jobExecutions = jobExecutionEntityCqlRepository.findAll();
@@ -912,7 +937,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
         assertEquals(4, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileToExport = String.format("%s-%s.mrc", "authority-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "authority-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -939,7 +965,8 @@ class DataExportAllServiceTest extends ServiceInitializer {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
       var exportAllRequest = new ExportAllRequest().idType(ExportAllRequest.IdTypeEnum.AUTHORITY)
-        .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE).deletedRecords(false).suppressedFromDiscovery(suppressedFromDiscovery);
+          .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE).deletedRecords(false)
+          .suppressedFromDiscovery(suppressedFromDiscovery);
       dataExportAllService.postDataExportAll(exportAllRequest);
 
       await().atMost(4, SECONDS).untilAsserted(() -> {
@@ -952,11 +979,13 @@ class DataExportAllServiceTest extends ServiceInitializer {
         assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
         assertEquals(1, jobExecution.getJobExecution().getProgress().getTotal());
 
-        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecution.getId().toString()).get(0).getFileDefinition();
+        var fileDefinition = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecution.getId().toString()).get(0).getFileDefinition();
         var expectedFileName = "authority-all.csv";
         assertEquals(expectedFileName, fileDefinition.getFileName());
 
-        var fileToExport = String.format("%s-%s.mrc", "authority-all", jobExecution.getJobExecution().getHrId());
+        var fileToExport = String.format("%s-%s.mrc", "authority-all",
+            jobExecution.getJobExecution().getHrId());
         var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
         String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
@@ -982,15 +1011,20 @@ class DataExportAllServiceTest extends ServiceInitializer {
     } else if (idType == ExportAllRequest.IdTypeEnum.INSTANCE) {
       expected = DEFAULT_INSTANCE_JOB_PROFILE_ID;
     }
-    assertEquals(UUID.fromString(expected), exportRequestArgumentCaptor.getValue().getJobProfileId());
+    assertEquals(UUID.fromString(expected), exportRequestArgumentCaptor.getValue()
+        .getJobProfileId());
   }
 
   private void createCustomInstanceJobProfile() {
-    var customInstanceMappingProfile = new MappingProfile().id(CUSTOM_INSTANCE_MAPPING_PROFILE_ID).name("Custom Instance Mapping Profile")
+    var customInstanceMappingProfile = new MappingProfile().id(CUSTOM_INSTANCE_MAPPING_PROFILE_ID)
+        .name("Custom Instance Mapping Profile")
         ._default(false).recordTypes(List.of(RecordTypes.INSTANCE));
-    mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customInstanceMappingProfile)
-        .withId(customInstanceMappingProfile.getId()).withName(customInstanceMappingProfile.getName()));
-    var customInstanceJobProfile = new JobProfile().id(CUSTOM_INSTANCE_JOB_PROFILE_ID).name("Custom Instance Job Profile")
+    mappingProfileEntityRepository.save(new MappingProfileEntity()
+        .withMappingProfile(customInstanceMappingProfile)
+        .withId(customInstanceMappingProfile.getId())
+        .withName(customInstanceMappingProfile.getName()));
+    var customInstanceJobProfile = new JobProfile().id(CUSTOM_INSTANCE_JOB_PROFILE_ID)
+        .name("Custom Instance Job Profile")
         ._default(false).mappingProfileId(CUSTOM_INSTANCE_MAPPING_PROFILE_ID);
     jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customInstanceJobProfile)
         .withId(customInstanceJobProfile.getId()).withName(customInstanceJobProfile.getName())
@@ -998,11 +1032,15 @@ class DataExportAllServiceTest extends ServiceInitializer {
   }
 
   private void createCustomHoldingsJobProfile() {
-    var customHoldingsMappingProfile = new MappingProfile().id(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID).name("Custom Holdings Mapping Profile")
+    var customHoldingsMappingProfile = new MappingProfile().id(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID)
+        .name("Custom Holdings Mapping Profile")
         ._default(false).recordTypes(List.of(org.folio.dataexp.domain.dto.RecordTypes.HOLDINGS));
-    mappingProfileEntityRepository.save(new MappingProfileEntity().withMappingProfile(customHoldingsMappingProfile)
-        .withId(customHoldingsMappingProfile.getId()).withName(customHoldingsMappingProfile.getName()));
-    var customHoldingsJobProfile = new JobProfile().id(CUSTOM_HOLDINGS_JOB_PROFILE_ID).name("Custom Holdings Job Profile")
+    mappingProfileEntityRepository.save(new MappingProfileEntity()
+        .withMappingProfile(customHoldingsMappingProfile)
+        .withId(customHoldingsMappingProfile.getId())
+        .withName(customHoldingsMappingProfile.getName()));
+    var customHoldingsJobProfile = new JobProfile().id(CUSTOM_HOLDINGS_JOB_PROFILE_ID)
+        .name("Custom Holdings Job Profile")
         ._default(false).mappingProfileId(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID);
     jobProfileEntityRepository.save(new JobProfileEntity().withJobProfile(customHoldingsJobProfile)
         .withId(customHoldingsJobProfile.getId()).withName(customHoldingsJobProfile.getName())

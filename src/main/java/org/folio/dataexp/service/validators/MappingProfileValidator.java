@@ -1,5 +1,8 @@
 package org.folio.dataexp.service.validators;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.Errors;
@@ -12,10 +15,9 @@ import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationE
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationPatternException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
+/**
+ * Validator for mapping profiles, including transformations and suppression fields.
+ */
 @Component
 @RequiredArgsConstructor
 public class MappingProfileValidator {
@@ -24,30 +26,57 @@ public class MappingProfileValidator {
   private static final String ERROR_CODE = "javax.validation.constraints.Pattern.message";
   private static final String ERROR_VALIDATION_MESSAGE_PATTERN = "must match \\\"%s\\\"";
 
-  private static final Pattern TRANSFORMATION_PATTERN = Pattern.compile("((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))");
-  private static final String ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN = "transformations[%s].transformation";
-  private static final String TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE = "Transformations for fields with item record type cannot be empty. Please provide a value.";
+  private static final Pattern TRANSFORMATION_PATTERN = Pattern.compile(
+      "((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))"
+  );
+  private static final String ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN =
+      "transformations[%s].transformation";
+  private static final String TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE =
+      "Transformations for fields with item record type cannot be empty. Please provide a value.";
 
   private static final Pattern SUPPRESSION_FIELD_PATTERN = Pattern.compile("^\\d{3}$");
-  private static final String ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN = "suppressionFields[%s]";
-  private static final String ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE = "Suppression field can not be used only for Item record type";
-  private static final String SUPPRESSION_VALIDATION_ERROR_MESSAGE = "Suppressed fields can be represented by three digits only and need to be separated by a comma.";
+  private static final String ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN =
+      "suppressionFields[%s]";
+  private static final String ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE =
+      "Suppression field can not be used only for Item record type";
+  private static final String SUPPRESSION_VALIDATION_ERROR_MESSAGE =
+      "Suppressed fields can be represented by three digits only and need to be separated"
+      + " by a comma.";
 
+  /**
+   * Validates the given mapping profile for transformations and suppression fields.
+   *
+   * @param mappingProfile the mapping profile to validate
+   */
   public void validate(MappingProfile mappingProfile) {
     validateMappingProfileTransformations(mappingProfile);
     validateMappingProfileSuppression(mappingProfile);
   }
 
+  /**
+   * Validates the transformations in the mapping profile.
+   *
+   * @param mappingProfile the mapping profile
+   * @throws MappingProfileTransformationPatternException if transformation pattern is invalid
+   * @throws MappingProfileTransformationEmptyException if transformation for item is empty
+   */
   private void validateMappingProfileTransformations(MappingProfile mappingProfile) {
     var transformations = mappingProfile.getTransformations();
     var parameters = new ArrayList<ParametersInner>();
     for (int i = 0; i < transformations.size(); i++) {
       var transformation = transformations.get(i);
-      var matcher = TRANSFORMATION_PATTERN.matcher(transformation.getTransformation());
+      var matcher = TRANSFORMATION_PATTERN.matcher(
+          transformation.getTransformation()
+      );
       if (!matcher.matches()) {
         var parameter = ParametersInner.builder()
-          .key(String.format(ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN, i))
-          .value(transformation.getTransformation()).build();
+            .key(
+                String.format(
+                    ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN, i
+                )
+            )
+            .value(transformation.getTransformation())
+            .build();
         parameters.add(parameter);
       }
     }
@@ -57,27 +86,48 @@ public class MappingProfileValidator {
         var errorItem = new org.folio.dataexp.domain.dto.Error();
         errorItem.setCode(ERROR_CODE);
         errorItem.type("1");
-        errorItem.message(String.format(ERROR_VALIDATION_MESSAGE_PATTERN, TRANSFORMATION_PATTERN));
+        errorItem.message(
+            String.format(
+                ERROR_VALIDATION_MESSAGE_PATTERN,
+                TRANSFORMATION_PATTERN
+            )
+        );
         errors.addErrorsItem(errorItem);
         errorItem.setParameters(List.of(parameter));
       }
       errors.setTotalRecords(errors.getErrors().size());
-      throw new MappingProfileTransformationPatternException(VALIDATION_ERROR_MESSAGE, errors);
+      throw new MappingProfileTransformationPatternException(
+          VALIDATION_ERROR_MESSAGE, errors
+      );
     }
     for (var transformation : transformations) {
-      if (StringUtils.isEmpty(transformation.getTransformation()) && transformation.getRecordType() == RecordTypes.ITEM) {
-        throw new MappingProfileTransformationEmptyException(TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE);
+      if (StringUtils.isEmpty(transformation.getTransformation())
+          && transformation.getRecordType() == RecordTypes.ITEM) {
+        throw new MappingProfileTransformationEmptyException(
+            TRANSFORMATION_ITEM_EMPTY_VALUE_MESSAGE
+        );
       }
     }
   }
 
+  /**
+   * Validates the suppression fields in the mapping profile.
+   *
+   * @param mappingProfile the mapping profile
+   * @throws MappingProfileFieldsSuppressionException if suppression field is used for item record
+   *         type
+   * @throws MappingProfileFieldsSuppressionPatternException if suppression field pattern is invalid
+   */
   private void validateMappingProfileSuppression(MappingProfile mappingProfile) {
     var recordTypes = mappingProfile.getRecordTypes();
-    boolean isExistAllItemRecordType = recordTypes.stream().allMatch(type -> type == RecordTypes.ITEM);
+    boolean isExistAllItemRecordType =
+        recordTypes.stream().allMatch(type -> type == RecordTypes.ITEM);
     var fieldsSuppressionAsStr = mappingProfile.getFieldsSuppression();
     if (StringUtils.isNotEmpty(fieldsSuppressionAsStr)) {
       if (!recordTypes.isEmpty() && isExistAllItemRecordType) {
-        throw new MappingProfileFieldsSuppressionException(ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE);
+        throw new MappingProfileFieldsSuppressionException(
+            ERROR_USAGE_SUPPRESSION_FIELD_FOR_ITEM_RECORD_TYPE
+        );
       }
       var fieldsSuppression = fieldsSuppressionAsStr.split(",");
       var parameters = new ArrayList<ParametersInner>();
@@ -86,8 +136,13 @@ public class MappingProfileValidator {
         var matcher = SUPPRESSION_FIELD_PATTERN.matcher(suppression);
         if (!matcher.matches()) {
           var parameter = ParametersInner.builder()
-            .key(String.format(ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN, i))
-            .value(suppression).build();
+              .key(
+                  String.format(
+                      ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN, i
+                  )
+              )
+              .value(suppression)
+              .build();
           parameters.add(parameter);
         }
       }
@@ -97,12 +152,19 @@ public class MappingProfileValidator {
           var errorItem = new org.folio.dataexp.domain.dto.Error();
           errorItem.setCode(ERROR_CODE);
           errorItem.type("1");
-          errorItem.message(String.format(ERROR_VALIDATION_MESSAGE_PATTERN, SUPPRESSION_FIELD_PATTERN));
+          errorItem.message(
+              String.format(
+                  ERROR_VALIDATION_MESSAGE_PATTERN,
+                  SUPPRESSION_FIELD_PATTERN
+              )
+          );
           errors.addErrorsItem(errorItem);
           errorItem.setParameters(List.of(parameter));
         }
         errors.setTotalRecords(errors.getErrors().size());
-        throw new MappingProfileFieldsSuppressionPatternException(SUPPRESSION_VALIDATION_ERROR_MESSAGE, errors);
+        throw new MappingProfileFieldsSuppressionPatternException(
+            SUPPRESSION_VALIDATION_ERROR_MESSAGE, errors
+        );
       }
     }
   }

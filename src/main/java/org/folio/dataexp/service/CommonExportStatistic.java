@@ -1,44 +1,85 @@
 package org.folio.dataexp.service;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
-
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 
+/**
+ * Holds statistics and state for a common export operation, such as invalid or duplicate UUIDs.
+ */
 public class CommonExportStatistic {
+  /**
+   * Indicates if reading the input file failed.
+   */
   @Getter
   @Setter
   private boolean isFailedToReadInputFile = true;
+
+  /**
+   * Set of UUIDs that do not exist.
+   */
   @Getter
-  private final Set<String> notExistUUID = Collections.synchronizedSet(new LinkedHashSet<>());
+  private final Set<String> notExistUuid = Collections.synchronizedSet(new LinkedHashSet<>());
+
+  /**
+   * List of IDs with invalid UUID format.
+   */
   @Getter
-  private final List<String> invalidUUIDFormat = new LinkedList<>();
+  private final List<String> invalidUuidFormat = new LinkedList<>();
+
+  /**
+   * Amount of duplicated UUIDs.
+   */
   @Getter
-  private int duplicatedUUIDAmount;
+  private int duplicatedUuidAmount;
+
+  /**
+   * Listener for exported MARC records.
+   */
   @Getter
   @Setter
   private ExportedMarcListener exportedMarcListener;
 
-  public void addToNotExistUUIDAll(List<UUID> ids) {
-    var idsToString = ids.stream().map(UUID::toString).toList();
-    notExistUUID.addAll(idsToString);
+  /**
+   * Adds a list of UUIDs to the set of non-existent UUIDs.
+   *
+   * @param ids List of UUIDs to add.
+   */
+  public void addToNotExistUuidAll(List<UUID> ids) {
+    var idsToString = ids.stream()
+        .map(UUID::toString)
+        .toList();
+    notExistUuid.addAll(idsToString);
   }
 
-  public void addToInvalidUUIDFormat(String id) {
-    invalidUUIDFormat.add(id);
+  /**
+   * Adds an ID to the list of invalid UUID formats.
+   *
+   * @param id The invalid ID.
+   */
+  public void addToInvalidUuidFormat(String id) {
+    invalidUuidFormat.add(id);
   }
 
-  public void incrementDuplicatedUUID(int count) {
-    this.duplicatedUUIDAmount = this.duplicatedUUIDAmount + count;
+  /**
+   * Increments the duplicated UUID amount by a given count.
+   *
+   * @param count Number to increment by.
+   */
+  public void incrementDuplicatedUuid(int count) {
+    this.duplicatedUuidAmount = this.duplicatedUuidAmount + count;
   }
 
-  public void incrementDuplicatedUUID() {
-    this.duplicatedUUIDAmount = this.duplicatedUUIDAmount + 1;
+  /**
+   * Increments the duplicated UUID amount by one.
+   */
+  public void incrementDuplicatedUuid() {
+    this.duplicatedUuidAmount = this.duplicatedUuidAmount + 1;
   }
 }

@@ -2,6 +2,10 @@ package org.folio.dataexp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.ByteArrayInputStream;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
@@ -12,11 +16,6 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.ByteArrayInputStream;
-import java.util.Date;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 class StorageCleanUpServiceTest extends BaseDataExportInitializer {
   @Autowired
@@ -34,14 +33,14 @@ class StorageCleanUpServiceTest extends BaseDataExportInitializer {
       var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinitionId, fileName);
 
       fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
-        .id(fileDefinitionId)
-        .fileDefinition(new FileDefinition()
           .id(fileDefinitionId)
-          .sourcePath("path")
-          .fileName(fileName)
-          .metadata(new Metadata()
-            .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(25)))))
-        .build());
+          .fileDefinition(new FileDefinition()
+              .id(fileDefinitionId)
+              .sourcePath("path")
+              .fileName(fileName)
+              .metadata(new Metadata()
+                  .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(25)))))
+          .build());
 
       s3Client.write(path, new ByteArrayInputStream("content".getBytes()));
       assertThat(s3Client.read(path)).hasBinaryContent("content".getBytes());

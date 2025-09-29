@@ -1,5 +1,14 @@
 package org.folio.dataexp.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.UUID;
 import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -17,16 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FileDefinitionsServiceTest {
@@ -51,10 +50,13 @@ class FileDefinitionsServiceTest {
     var fileDefinition = new FileDefinition();
     fileDefinition.fileName("upload.csv");
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
+    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
+        .build();
 
-    when(jobExecutionService.save(any(JobExecution.class))).thenReturn(new JobExecution().id(UUID.randomUUID()));
-    when(fileDefinitionEntityRepository.save(isA(FileDefinitionEntity.class))).thenReturn(fileDefinitionEntity);
+    when(jobExecutionService.save(any(JobExecution.class)))
+        .thenReturn(new JobExecution().id(UUID.randomUUID()));
+    when(fileDefinitionEntityRepository.save(isA(FileDefinitionEntity.class)))
+        .thenReturn(fileDefinitionEntity);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
     var savedFileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
@@ -76,8 +78,10 @@ class FileDefinitionsServiceTest {
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(fileDefinitionEntity);
+    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
+        .build();
+    when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(fileDefinitionEntity);
 
     fileDefinitionsService.getFileDefinitionById(UUID.randomUUID());
 
@@ -100,9 +104,11 @@ class FileDefinitionsServiceTest {
     var fileDefinitionId = UUID.randomUUID();
     var resource = new PathResource("src/test/resources/upload.csv");
 
-    when(filesUploadService.uploadFile(fileDefinitionId, resource)).thenThrow(new RuntimeException("error"));
+    when(filesUploadService.uploadFile(fileDefinitionId, resource))
+        .thenThrow(new RuntimeException("error"));
 
-    assertThrows(UploadFileException.class, () -> fileDefinitionsService.uploadFile(fileDefinitionId, resource));
+    assertThrows(UploadFileException.class, () ->
+        fileDefinitionsService.uploadFile(fileDefinitionId, resource));
   }
 
 }

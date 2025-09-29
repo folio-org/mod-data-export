@@ -1,11 +1,11 @@
 package org.folio.dataexp.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
 
@@ -15,7 +15,8 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findFolioHoldingsAllNonDeletedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeleted(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeleted(MIN_UUID, MAX_UUID,
+          PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(3);
     }
   }
@@ -23,7 +24,8 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findFolioHoldingsAllNonDeletedNonSuppressedTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeletedNonSuppressed(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = folioHoldingsAllRepository.findFolioHoldingsAllNonDeletedNonSuppressed(
+          MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
@@ -47,7 +49,8 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findFolioHoldingsAllNonDeletedCustomHoldingsProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedCustomHoldingsProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedCustomHoldingsProfile(
+          MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(3);
     }
   }
@@ -55,7 +58,9 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findFolioHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfile(MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+      var slice = folioHoldingsAllRepository
+          .findMarcHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfile(MIN_UUID, MAX_UUID,
+              PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
@@ -71,7 +76,8 @@ class FolioHoldingsAllRepositoryTest extends AllRepositoryTest {
   @Test
   void findFolioHoldingsAllDeletedNonSuppressedCustomHoldingsProfileTest() {
     try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var list = folioHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressedCustomHoldingsProfile();
+      var list = folioHoldingsAllRepository
+          .findMarcHoldingsAllDeletedNonSuppressedCustomHoldingsProfile();
       assertThat(list).hasSize(2);
     }
   }

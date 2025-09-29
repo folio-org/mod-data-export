@@ -1,12 +1,14 @@
 package org.folio.dataexp.service.export.strategies;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.marc4j.marc.VariableField;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Container for MARC fields and error messages.
+ */
 @Getter
 @Setter
 public class MarcFields {
