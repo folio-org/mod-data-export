@@ -57,7 +57,6 @@ public class DataExportService {
    * @param exportRequest The export request.
    */
   public void postDataExport(ExportRequest exportRequest) {
-    var commonExportFails = new CommonExportStatistic();
     var fileDefinitionEntity =  fileDefinitionEntityRepository
         .getReferenceById(exportRequest.getFileDefinitionId());
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
@@ -102,6 +101,7 @@ public class DataExportService {
         JobExecution.StatusEnum.IN_PROGRESS,
         exportRequest
     );
+    var commonExportFails = new CommonExportStatistic();
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
       if (Boolean.FALSE.equals(exportRequest.getAll())
             && Boolean.FALSE.equals(exportRequest.getQuick())) {
