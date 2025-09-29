@@ -9,7 +9,7 @@
     lines="48,109"/>
   <suppress checks="LineLength"
     files="RuleFactoryTest.java"
-    lines="153,233,262,285,316,375,760,878,915"/>
+    lines="152,232,261,284,315,374,759,877,914"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"
