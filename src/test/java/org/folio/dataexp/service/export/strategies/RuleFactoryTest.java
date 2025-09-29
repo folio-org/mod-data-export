@@ -40,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.assertj.core.util.Lists;
 import org.folio.dataexp.BaseDataExportInitializer;
@@ -750,7 +749,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
 
     // then
     List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900"))
-        .collect(Collectors.toList());
+        .toList();
     assertEquals(1, ruleList.size());
     // 3 data sources for subfields $a, $b, $c and 2 for indicators
     assertEquals(5, ruleList.get(0).getDataSources().size());
@@ -788,7 +787,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
 
     // then
     List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900"))
-        .collect(Collectors.toList());
+        .toList();
     assertEquals(3, ruleList.size());
     // 3 data sources for subfields $a, $b, $c and 2 for indicators
     assertEquals(3, ruleList.get(0).getDataSources().size());
@@ -892,9 +891,9 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     itemTransformations.setRecordType(RecordTypes.ITEM);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
-    mappingProfile.setTransformations(ImmutableList.of(holdingsTransformations,
+    mappingProfile.setTransformations(List.of(holdingsTransformations,
         itemTransformations));
-    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.INSTANCE,
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE,
         RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     // when

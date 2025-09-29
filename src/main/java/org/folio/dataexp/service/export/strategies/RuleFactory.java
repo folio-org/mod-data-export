@@ -126,7 +126,6 @@ public class RuleFactory {
         && !mappingProfile.getRecordTypes().contains(RecordTypes.INSTANCE)) {
       return create(mappingProfile);
     }
-    // TODO: MDEXP-673
     List<Rule> rulesFromConfig = new ArrayList<>();
     if (mappingProfile != null && isNotEmpty(rulesFromConfig)) {
       log.info(

@@ -141,10 +141,10 @@ public class ExportExecutor {
       var filesForExport = exports.stream()
           .filter(e -> e.getStatus() == JobExecutionExportFilesStatus.COMPLETED
               || e.getStatus() == JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS)
-          .collect(Collectors.toList());
+          .toList();
       var queryResult = fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
           jobExecutionId.toString());
-      var fileDefinition = queryResult.get(0).getFileDefinition();
+      var fileDefinition = queryResult.getFirst().getFileDefinition();
       var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
       try {
         var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);

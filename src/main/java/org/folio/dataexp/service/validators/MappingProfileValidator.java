@@ -27,7 +27,7 @@ public class MappingProfileValidator {
   private static final String ERROR_VALIDATION_MESSAGE_PATTERN = "must match \\\"%s\\\"";
 
   private static final Pattern TRANSFORMATION_PATTERN = Pattern.compile(
-      "((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))"
+      "((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))"
   );
   private static final String ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN =
       "transformations[%s].transformation";

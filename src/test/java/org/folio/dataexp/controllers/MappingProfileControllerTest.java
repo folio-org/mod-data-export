@@ -193,7 +193,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var error = errors.getErrors().get(0);
 
     assertEquals(
-        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
     assertEquals("transformations[0].transformation", error.getParameters()
@@ -203,7 +203,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     error = errors.getErrors().get(1);
 
     assertEquals(
-        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
     assertEquals("transformations[1].transformation",
@@ -281,7 +281,7 @@ class MappingProfileControllerTest extends BaseDataExportInitializer {
     var error = errors.getErrors().get(0);
 
     assertEquals(
-        "must match \\\"((\\d{3}([\\s]|[\\d]|[a-zA-Z]){2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
+        "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
     assertEquals("transformations[1].transformation",

@@ -84,7 +84,6 @@ public class DataExportService {
       updateJobExecutionForPostDataExport(
           jobExecution,
           JobExecution.StatusEnum.FAIL,
-          commonExportFails,
           exportRequest
       );
       log.error(e.getMessage());
@@ -101,7 +100,6 @@ public class DataExportService {
     updateJobExecutionForPostDataExport(
         jobExecution,
         JobExecution.StatusEnum.IN_PROGRESS,
-        commonExportFails,
         exportRequest
     );
     executor.execute(getRunnableWithCurrentFolioContext(() -> {
@@ -116,7 +114,6 @@ public class DataExportService {
       updateJobExecutionForPostDataExport(
           jobExecution,
           JobExecution.StatusEnum.IN_PROGRESS,
-          commonExportFails,
           exportRequest
       );
       singleFileProcessorAsync.exportBySingleFile(
@@ -132,13 +129,11 @@ public class DataExportService {
    *
    * @param jobExecution The job execution.
    * @param jobExecutionStatus The status to set.
-   * @param commonExportStatistic Export statistics.
    * @param exportRequest The export request.
    */
   private void updateJobExecutionForPostDataExport(
       JobExecution jobExecution,
       JobExecution.StatusEnum jobExecutionStatus,
-      CommonExportStatistic commonExportStatistic,
       ExportRequest exportRequest
   ) {
     jobExecution.setStatus(jobExecutionStatus);
