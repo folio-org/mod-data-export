@@ -113,7 +113,7 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
 
   protected void createAndSaveLinkedData(Set<UUID> externalIds, ExportStrategyStatistic exportStatistic, MappingProfile mappingProfile,
       UUID jobExecutionId, ExportRequest exportRequest, LocalStorageWriter localStorageWriter) {
-    // TODO: placeholder, implement correctly
+    // TODO: placeholder, implement correctly with statistic-generating error handling
     var resources = getLinkedDataResources(externalIds, mappingProfile, exportRequest, jobExecutionId);
     for (var resource : resources) {
       var os = StringUtils.EMPTY;

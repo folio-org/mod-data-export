@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.export.strategies.ld;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -14,7 +13,7 @@ public class LinkedDataExportStrategy extends AbstractLinkedDataExportStrategy {
   @Override
   List<String> getLinkedDataResources(Set<UUID> externalIds, MappingProfile mappingProfile,
       ExportRequest exportRequest, UUID jobExecutionId) {
-    // TODO: implement - call on linkedDataProvider
-    return Collections.emptyList();
+    // TODO: don't need mapping profile; do we need to work with exportRequest or job ID?
+    return linkedDataProvider.getLinkedDataResources(externalIds);
   }
 }

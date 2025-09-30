@@ -15,6 +15,6 @@ public class LinkedDataConverter {
   private Rdf4LdService rdf4LdService;
 
   public ByteArrayOutputStream convertLdJsonToBibframe2Rdf(String ldJson) throws JsonProcessingException {
-    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.RDFXML);
+    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.JSONLD);
   }
 }
