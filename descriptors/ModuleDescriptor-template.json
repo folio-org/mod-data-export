@@ -117,10 +117,6 @@
     {
       "id": "fqm-query",
       "version": "1.0 2.0"
-    },
-    {
-      "id": "entity-types",
-      "version": "1.0 2.0"
     }
   ],
   "optional": [
