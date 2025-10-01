@@ -113,6 +113,10 @@
     {
       "id": "permissions",
       "version": "5.6"
+    },
+    {
+      "id": "fqm-query",
+      "version": "1.0 2.0"
     }
   ],
   "optional": [
