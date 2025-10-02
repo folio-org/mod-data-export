@@ -16,7 +16,8 @@ public class LinkedDataProvider {
 
   private final QueryService queryService;
 
-  private static final UUID LINKED_DATA_RESOURCE = UUID.fromString("84451307-215c-4021-a46d-b9dcfada7439");
+  private static final UUID LINKED_DATA_RESOURCE =
+      UUID.fromString("84451307-215c-4021-a46d-b9dcfada7439");
   private static final String GRAPH_FIELD = "resource_subgraph";
   private static final List<String> RESOURCE_FIELDS = List.of("inventory_id", GRAPH_FIELD);
 

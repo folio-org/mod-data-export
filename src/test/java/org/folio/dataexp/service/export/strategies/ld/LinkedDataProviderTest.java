@@ -28,10 +28,10 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
     var id1 = UUID.randomUUID();
     var id2 = UUID.randomUUID();
     when(queryClient.getContents(any(ContentsRequest.class))).thenReturn(
-      List.of(
-        Map.of("inventory_id", id1, "resource_subgraph", id1.toString()),
-        Map.of("inventory_id", id2, "resource_subgraph", id2.toString())
-      )
+        List.of(
+          Map.of("inventory_id", id1, "resource_subgraph", id1.toString()),
+          Map.of("inventory_id", id2, "resource_subgraph", id2.toString())
+        )
     );
     var resources = linkedDataProvider.getLinkedDataResources(Set.of(id1, id2));
     assertEquals(2, resources.size());
