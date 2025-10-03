@@ -30,6 +30,7 @@ public class LinkedDataProvider {
   public List<String> getLinkedDataResources(Set<UUID> ids) {
     return queryService.getEntities(ids, LINKED_DATA_RESOURCE, RESOURCE_FIELDS)
       .stream()
+      .filter(resource -> resource.containsKey(GRAPH_FIELD))
       .map(resource -> (String) resource.get(GRAPH_FIELD))
       .toList();
   }
