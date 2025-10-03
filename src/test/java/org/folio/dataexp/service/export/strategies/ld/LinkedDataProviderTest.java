@@ -39,13 +39,13 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
           .map(TestResource::getResource)
           .toList());
     var validCount = resources.stream()
-      .filter(r -> r.isValid())
-      .count();
+        .filter(r -> r.isValid())
+        .count();
     var expected = resources.stream()
-      .filter(r -> r.isValid())
-      .map(TestResource::getId)
-      .map(UUID::toString)
-      .toList();
+        .filter(r -> r.isValid())
+        .map(TestResource::getId)
+        .map(UUID::toString)
+        .toList();
 
     var results = linkedDataProvider.getLinkedDataResources(
         resources.stream()
