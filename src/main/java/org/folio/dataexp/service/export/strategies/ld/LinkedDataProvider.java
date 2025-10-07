@@ -19,7 +19,8 @@ public class LinkedDataProvider {
   private static final UUID LINKED_DATA_RESOURCE =
       UUID.fromString("84451307-215c-4021-a46d-b9dcfada7439");
   private static final String GRAPH_FIELD = "resource_subgraph";
-  private static final List<String> RESOURCE_FIELDS = List.of("inventory_id", GRAPH_FIELD);
+  private static final String INVENTORY_ID_FIELD = "inventory_id";
+  private static final List<String> RESOURCE_FIELDS = List.of(INVENTORY_ID_FIELD, GRAPH_FIELD);
 
   /**
    * Retrieve Linked Data resources given a set of inventory identifiers.
