@@ -55,6 +55,8 @@
     <awaitility.version>4.2.0</awaitility.version>
     <json-smart.version>2.5.2</json-smart.version>
     <json-path.version>2.9.0</json-path.version>
+    <lib-fqm-query-processor.version>4.0.2</lib-fqm-query-processor.version>
+    <lib-linked-data-rdf4ld.version>1.0.0-SNAPSHOT</lib-linked-data-rdf4ld.version>
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.21.3</testcontainer.version>
@@ -120,6 +122,18 @@
       <groupId>org.folio</groupId>
       <artifactId>folio-spring-cql</artifactId>
       <version>${folio-spring-cql.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>lib-fqm-query-processor</artifactId>
+      <version>${lib-fqm-query-processor.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>lib-linked-data-rdf4ld</artifactId>
+      <version>${lib-linked-data-rdf4ld.version}</version>
     </dependency>
 
     <dependency>
