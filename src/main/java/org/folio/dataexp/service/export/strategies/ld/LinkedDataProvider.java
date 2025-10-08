@@ -1,9 +1,11 @@
 package org.folio.dataexp.service.export.strategies.ld;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.folio.dataexp.service.QueryService;
 import org.springframework.stereotype.Component;
 
@@ -28,11 +30,22 @@ public class LinkedDataProvider {
    * @param ids set of inventory identifiers
    * @return list of matching Linked Data export resource JSON as String
    */
-  public List<String> getLinkedDataResources(Set<UUID> ids) {
+  public List<LinkedDataResource> getLinkedDataResources(Set<UUID> ids) {
     return queryService.getEntities(ids, LINKED_DATA_RESOURCE, RESOURCE_FIELDS)
       .stream()
-      .filter(resource -> resource.containsKey(GRAPH_FIELD))
-      .map(resource -> (String) resource.get(GRAPH_FIELD))
+      .filter(this::containsRequiredKeys)
+      .map(this::createLinkedDataResource)
       .toList();
+  }
+
+  private boolean containsRequiredKeys(Map<String, Object> resource) {
+    return resource.containsKey(GRAPH_FIELD) && resource.containsKey(INVENTORY_ID_FIELD);
+  }
+
+  private LinkedDataResource createLinkedDataResource(Map<String, Object> resource) {
+    var ldr = new LinkedDataResource();
+    ldr.setInventoryId((String) resource.get(INVENTORY_ID_FIELD));
+    ldr.setResource((String) resource.get(GRAPH_FIELD));
+    return ldr;
   }
 }
