@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LinkedDataResource {
   /**
-   * Inventory UUID
+   * Inventory UUID.
    */
   private String inventoryId;
 
   /**
-   * Resource subgraph internal Linked Data JSON
+   * Resource subgraph internal Linked Data JSON.
    */
   private String resource;
 }
