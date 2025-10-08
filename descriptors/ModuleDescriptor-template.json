@@ -178,7 +178,8 @@
             "consortia.user-tenants.collection.get",
             "consortium-search.holdings.item.get",
             "perms.users.get",
-            "permissions.users.item.get"
+            "permissions.users.item.get",
+            "fqm.query.async.results.post"
           ]
         },
         {
