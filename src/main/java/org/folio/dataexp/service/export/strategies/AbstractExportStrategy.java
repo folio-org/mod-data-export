@@ -105,7 +105,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    * @return ExportStrategyStatistic containing export statistics
    */
   @Override
-  public ExportStrategyStatistic saveMarcToLocalStorage(
+  public ExportStrategyStatistic saveOutputToLocalStorage(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
       ExportedMarcListener exportedMarcListener
@@ -120,7 +120,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       localStorageWriter.close();
     } catch (Exception e) {
       log.error(
-          "saveMarcToLocalStorage:: Error while saving file {} to local storage"
+          "saveOutputToLocalStorage:: Error while saving file {} to local storage"
           + " for job execution {}",
           exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId()
       );

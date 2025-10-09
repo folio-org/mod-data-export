@@ -88,7 +88,7 @@ class AbstractExportStrategyTest {
   }
 
   @Test
-  void saveMarcToLocalStorageTest() {
+  void saveOutputToLocalStorageTest() {
     var progress = new JobExecutionProgress();
     var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
     var jobProfileEntity = new JobProfileEntity();
@@ -134,7 +134,7 @@ class AbstractExportStrategyTest {
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class)))
         .thenReturn(jobExecutionEntity);
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity,
+    var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
         new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
             1, jobExecutionEntity.getId()));
     assertEquals(2, exportStatistic.getExported());
@@ -155,7 +155,7 @@ class AbstractExportStrategyTest {
   }
 
   @Test
-  void saveMarcToLocalStorageWhenMarcJsonInvalidTest() {
+  void saveOutputToLocalStorageWhenMarcJsonInvalidTest() {
     var progress = new JobExecutionProgress();
     var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
     var jobProfileEntity = new JobProfileEntity();
@@ -198,7 +198,7 @@ class AbstractExportStrategyTest {
         .thenReturn(mappingProfileEntity);
 
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity,
+    var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
         new ExportRequest(),
         new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
     assertEquals(0, exportStatistic.getExported());
@@ -211,7 +211,7 @@ class AbstractExportStrategyTest {
   }
 
   @Test
-  void saveMarcToLocalStorageWhenLocalStorageCanNotWriteTest() {
+  void saveOutputToLocalStorageWhenLocalStorageCanNotWriteTest() {
     var jobExecution = new JobExecution();
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
@@ -254,7 +254,7 @@ class AbstractExportStrategyTest {
         isA(UUID.class))).thenReturn(1L);
     doThrow(new LocalStorageWriterException("Can not write")).when(localStorageWriter).close();
 
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(exportFilesEntity,
+    var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
         new ExportRequest(), new ExportedMarcListener(null, 1000, null));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
