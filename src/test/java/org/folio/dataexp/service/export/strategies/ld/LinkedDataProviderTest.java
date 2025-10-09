@@ -81,9 +81,11 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
       resource.setId(id);
       resource.setValid(i < validCount);
       if (i < validCount) {
-        resource.setResource(Map.of("inventory_id", id.toString(), "resource_subgraph", id.toString()));
+        resource.setResource(
+            Map.of("inventory_id", id.toString(), "resource_subgraph", id.toString()));
       } else {
-        resource.setResource(Map.of("inventory_id", id.toString(), "not_the_right_field", id.toString()));
+        resource.setResource(
+            Map.of("inventory_id", id.toString(), "not_the_right_field", id.toString()));
       }
       list.add(i, resource);
     }
