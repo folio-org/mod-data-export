@@ -17,13 +17,13 @@ import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
-import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.ExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 
@@ -39,7 +39,6 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
 
   private ExportIdEntityRepository exportIdEntityRepository;
   private JobProfileEntityRepository jobProfileEntityRepository;
-  private JobExecutionService jobExecutionService;
   private LinkedDataConverter linkedDataConverter;
 
   protected ErrorLogService errorLogService;
@@ -223,4 +222,24 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
     errorLogService.saveGeneralError(errorMessage, jobExecutionId);
   }
 
+  @Autowired
+  private void setExportIdEntityRepository(ExportIdEntityRepository exportIdEntityRepository) {
+    this.exportIdEntityRepository = exportIdEntityRepository;
+  }
+
+  @Autowired
+  private void setLinkedDataConverter(LinkedDataConverter linkedDataConverter) {
+    this.linkedDataConverter = linkedDataConverter;
+  }
+
+  @Autowired
+  private void setJobProfileEntityRepository(JobProfileEntityRepository
+      jobProfileEntityRepository) {
+    this.jobProfileEntityRepository = jobProfileEntityRepository;
+  }
+
+  @Autowired
+  protected void setErrorLogService(ErrorLogService errorLogService) {
+    this.errorLogService = errorLogService;
+  }
 }
