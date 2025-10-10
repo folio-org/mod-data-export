@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
@@ -73,7 +72,7 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveMarcToLocalStorage(
+    var exportStatistic = exportStrategy.saveOutputToLocalStorage(
         exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
     commonExportStatistic.addToNotExistUuidAll(exportStatistic.getNotExistIds());
     synchronized (this) {
