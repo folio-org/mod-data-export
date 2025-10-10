@@ -66,11 +66,11 @@ class AbstractLinkedDataExportStrategyTest {
   private LinkedDataConverter linkedDataConverter;
 
   @InjectMocks
-  private AbstractLinkedDataExportStrategy exportStrategy = new LDTestExportStrategy(1);
+  private AbstractLinkedDataExportStrategy exportStrategy = new LdTestExportStrategy(1);
 
   @BeforeEach
   void clear() {
-    ((LDTestExportStrategy) exportStrategy).setLinkedDataResources(new ArrayList<>());
+    ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(new ArrayList<>());
   }
 
   @SneakyThrows
@@ -89,7 +89,7 @@ class AbstractLinkedDataExportStrategyTest {
     linkedDataResource.setInventoryId(exportId.toString());
     linkedDataResource.setResource("{}");
     linkedDataResources.add(linkedDataResource);
-    ((LDTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
+    ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
         .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location")
@@ -140,7 +140,7 @@ class AbstractLinkedDataExportStrategyTest {
     linkedDataResource.setInventoryId(exportId.toString());
     linkedDataResource.setResource("{}}");
     linkedDataResources.add(linkedDataResource);
-    ((LDTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
+    ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
 
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
         .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location")
@@ -190,7 +190,7 @@ class AbstractLinkedDataExportStrategyTest {
     jobExecution.setJobProfileId(jobProfileEntity.getId());
 
     var linkedDataResources = new ArrayList<LinkedDataResource>();
-    ((LDTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
+    ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
 
     var exportId = UUID.randomUUID();
     JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
@@ -218,8 +218,8 @@ class AbstractLinkedDataExportStrategyTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
   }
 
-  class LDTestExportStrategy extends AbstractLinkedDataExportStrategy {
-    LDTestExportStrategy(int exportBatch) {
+  class LdTestExportStrategy extends AbstractLinkedDataExportStrategy {
+    LdTestExportStrategy(int exportBatch) {
       super.setExportIdsBatch(exportBatch);
     }
 
