@@ -73,7 +73,7 @@ public class ExportExecutor {
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(
-        exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
+        exportFilesEntity, exportRequest, commonExportStatistic.getExportedRecordsListener());
     commonExportStatistic.addToNotExistUuidAll(exportStatistic.getNotExistIds());
     synchronized (this) {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
@@ -114,7 +114,7 @@ public class ExportExecutor {
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       progress.setExported(
-          commonExportStatistic.getExportedMarcListener().getExportedCount().get());
+          commonExportStatistic.getExportedRecordsListener().getExportedCount().get());
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         progress.setTotal(
             progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());

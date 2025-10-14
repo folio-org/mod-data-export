@@ -20,7 +20,7 @@ import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.ExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
-import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
+import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +57,9 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
   public ExportStrategyStatistic saveOutputToLocalStorage(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
-      ExportedMarcListener exportedMarcListener
+      ExportedRecordsListener exportedRecordsListener
   ) {
-    var exportStatistic = new ExportStrategyStatistic(exportedMarcListener);
+    var exportStatistic = new ExportStrategyStatistic(exportedRecordsListener);
     var localStorageWriter = createLocalStorageWriter(exportFilesEntity);
     processSlices(exportFilesEntity, exportStatistic, localStorageWriter);
     try {
