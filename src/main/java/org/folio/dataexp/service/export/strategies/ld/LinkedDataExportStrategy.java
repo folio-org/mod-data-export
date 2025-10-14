@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LinkedDataExportStrategy extends AbstractLinkedDataExportStrategy {
 
-  private LinkedDataProvider linkedDataProvider;
+  private final LinkedDataProvider linkedDataProvider;
 
   /**
    * Retrieve a set of Linked Data resources given a set of instance IDs.
