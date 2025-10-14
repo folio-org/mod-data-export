@@ -18,6 +18,6 @@ public class ResourceUrlProvider implements LongFunction<String> {
   @Override
   public String apply(long id) {
     // TODO: MDEXP-873 - replace placeholder with a mod-settings based implementation
-    return String.format(URL_PATTERN, "localhost", id);
+    return String.format(URL_PATTERN, "http://localhost", id);
   }
 }
