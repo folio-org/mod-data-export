@@ -48,7 +48,8 @@
       "description": "Mapping Profile output format",
       "type": "string",
       "enum": [
-        "MARC"
+        "MARC",
+        "LINKED_DATA"
       ]
     },
     "fieldsSuppression": {
