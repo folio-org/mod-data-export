@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export.strategies.ld;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class LinkedDataProvider {
       UUID.fromString("84451307-215c-4021-a46d-b9dcfada7439");
   private static final String GRAPH_FIELD = "resource_subgraph";
   private static final String INVENTORY_ID_FIELD = "inventory_id";
+  private static final String VALUE_KEY = "value";
   private static final List<String> RESOURCE_FIELDS = List.of(INVENTORY_ID_FIELD, GRAPH_FIELD);
 
   /**
@@ -42,10 +44,20 @@ public class LinkedDataProvider {
     return resource.containsKey(GRAPH_FIELD) && resource.containsKey(INVENTORY_ID_FIELD);
   }
 
+  /*
+   * FQM returns a Map<String, Object> where the value object may be another
+   * map representing a database column type and value. Here we expect it to be
+   * "type": "jsonb", "value": "{...}"
+   */
   private LinkedDataResource createLinkedDataResource(Map<String, Object> resource) {
     var ldr = new LinkedDataResource();
     ldr.setInventoryId((String) resource.get(INVENTORY_ID_FIELD));
-    ldr.setResource((String) resource.get(GRAPH_FIELD));
+    var columnObj = resource.get(GRAPH_FIELD);
+    if (columnObj instanceof LinkedHashMap) {
+      ldr.setResource((String) ((LinkedHashMap<?, ?>) columnObj).get(VALUE_KEY));
+    } else {
+      ldr.setResource((String) resource.get(GRAPH_FIELD));
+    }
     return ldr;
   }
 }
