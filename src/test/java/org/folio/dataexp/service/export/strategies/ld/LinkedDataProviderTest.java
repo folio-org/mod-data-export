@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -78,14 +79,19 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
     for (var i = 0; i < count; i++) {
       var id = UUID.randomUUID();
       var resource = new TestResource();
+      var column = new LinkedHashMap<String, String>();
+      column.put("type", "jsonb");
+      column.put("value", id.toString());
       resource.setId(id);
       resource.setValid(i < validCount);
       if (i < validCount) {
         resource.setResource(
-            Map.of("inventory_id", id.toString(), "resource_subgraph", id.toString()));
+            Map.of("inventory_id", id.toString(),
+                   "resource_subgraph", column));
       } else {
         resource.setResource(
-            Map.of("inventory_id", id.toString(), "not_the_right_field", id.toString()));
+            Map.of("inventory_id", id.toString(),
+                   "not_the_right_field", column));
       }
       list.add(i, resource);
     }
