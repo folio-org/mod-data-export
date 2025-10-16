@@ -95,7 +95,6 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
     }
     if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
   }
 
@@ -186,7 +185,6 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
       LocalStorageWriter localStorageWriter
   ) {
     var resources = getLinkedDataResources(externalIds);
-    log.info("linkedDataResources size: {}", resources.size());
     for (var resource : resources) {
       var os = StringUtils.EMPTY;
       try {
