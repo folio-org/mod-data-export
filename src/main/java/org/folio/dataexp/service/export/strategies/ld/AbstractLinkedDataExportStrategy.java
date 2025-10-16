@@ -34,6 +34,9 @@ import org.springframework.data.domain.PageRequest;
 @Log4j2
 @Getter
 public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy {
+
+  private static final String LD_SUFFIX = "json";
+
   protected int exportIdsBatch;
   protected String exportTmpStorage;
 
@@ -80,6 +83,11 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
       exportStatistic.setFailed((int) countFailed);
     }
     return exportStatistic;
+  }
+
+  @Override
+  public String getFilenameSuffix() {
+    return LD_SUFFIX;
   }
 
   @Override
