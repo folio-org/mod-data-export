@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class AuthorityExportStrategy extends AbstractExportStrategy {
+public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
 
   // deliberate typo in constant name to bypass sonar security hotspot
   // "'AUTH' detected in this expression, review this potentially hard-coded secret."
