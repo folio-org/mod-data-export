@@ -52,7 +52,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractExportStrategyTest {
+class AbstractMarcExportStrategyTest {
 
   @Mock
   private FolioS3Client s3Client;
@@ -78,7 +78,7 @@ class AbstractExportStrategyTest {
   private JsonToMarcConverter jsonToMarcConverter;
 
   @InjectMocks
-  private AbstractExportStrategy exportStrategy = new TestExportStrategy(1);
+  private AbstractMarcExportStrategy exportStrategy = new TestExportStrategy(1);
 
   @BeforeEach
   void clear() {
@@ -276,7 +276,7 @@ class AbstractExportStrategyTest {
     assertEquals("123", jsonObject.getAsString("id"));
   }
 
-  class TestExportStrategy extends AbstractExportStrategy {
+  class TestExportStrategy extends AbstractMarcExportStrategy {
 
     TestExportStrategy(int exportBatch) {
       super.setExportIdsBatch(exportBatch);
@@ -314,7 +314,7 @@ class AbstractExportStrategyTest {
     }
 
     @Override
-    protected LocalStorageWriter createLocalStorageWrite(
+    protected LocalStorageWriter createLocalStorageWriter(
         JobExecutionExportFilesEntity exportFilesEntity) {
       return localStorageWriter;
     }
