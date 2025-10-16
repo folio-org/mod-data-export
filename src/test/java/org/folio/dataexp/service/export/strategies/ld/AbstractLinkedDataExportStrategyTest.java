@@ -18,16 +18,19 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.LinkedDataResource;
+import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
@@ -52,6 +55,8 @@ class AbstractLinkedDataExportStrategyTest {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
   @Mock
   private ExportIdEntityRepository exportIdEntityRepository;
+  @Mock
+  private MappingProfileEntityRepository mappingProfileEntityRepository;
   @Mock
   private JobProfileEntityRepository jobProfileEntityRepository;
   @Mock
@@ -83,6 +88,10 @@ class AbstractLinkedDataExportStrategyTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
 
+    var mappingProfileEntity = new MappingProfileEntity();
+    mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+    mappingProfileEntity.setMappingProfile(new MappingProfile());
+
     var linkedDataResources = new ArrayList<LinkedDataResource>();
     var linkedDataResource = new LinkedDataResource();
     var exportId = UUID.randomUUID();
@@ -103,6 +112,12 @@ class AbstractLinkedDataExportStrategyTest {
 
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class),
           isA(Pageable.class))).thenReturn(slice);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId()))
+        .thenReturn(jobExecution);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId()))
+        .thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId()))
+        .thenReturn(mappingProfileEntity);
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class)))
         .thenReturn(jobExecutionEntity);
@@ -134,6 +149,10 @@ class AbstractLinkedDataExportStrategyTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
 
+    var mappingProfileEntity = new MappingProfileEntity();
+    mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+    mappingProfileEntity.setMappingProfile(new MappingProfile());
+
     var linkedDataResources = new ArrayList<LinkedDataResource>();
     var linkedDataResource = new LinkedDataResource();
     var exportId = UUID.randomUUID();
@@ -154,6 +173,12 @@ class AbstractLinkedDataExportStrategyTest {
 
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class),
           isA(Pageable.class))).thenReturn(slice);
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId()))
+        .thenReturn(jobExecution);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId()))
+        .thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId()))
+        .thenReturn(mappingProfileEntity);
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
     when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class)))
         .thenReturn(jobExecutionEntity);
@@ -189,6 +214,10 @@ class AbstractLinkedDataExportStrategyTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
 
+    var mappingProfileEntity = new MappingProfileEntity();
+    mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
+    mappingProfileEntity.setMappingProfile(new MappingProfile());
+
     var linkedDataResources = new ArrayList<LinkedDataResource>();
     ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
 
@@ -203,6 +232,12 @@ class AbstractLinkedDataExportStrategyTest {
         .withId(0).withInstanceId(exportId);
     var slice = new SliceImpl<>(List.of(exportIdEntity), PageRequest.of(0, 1), false);
 
+    when(jobExecutionService.getById(exportIdEntity.getJobExecutionId()))
+        .thenReturn(jobExecution);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileEntity.getId()))
+        .thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId()))
+        .thenReturn(mappingProfileEntity);
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class),
           isA(Pageable.class))).thenReturn(slice);
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
