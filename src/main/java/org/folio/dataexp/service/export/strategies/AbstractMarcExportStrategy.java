@@ -302,21 +302,6 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
     );
   }
 
-  /**
-   * Gets a map of SRS IDs by deleted external ID.
-   */
-  private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
-    return marcRecords.stream()
-        .filter(MarcRecordEntity::isDeleted)
-        .collect(
-            toMap(
-                MarcRecordEntity::getExternalId,
-                MarcRecordEntity::getId,
-                (srsId1, srsId2) -> srsId1
-            )
-        );
-  }
-
   private Map<UUID, UUID> getSrsIdByExternalIdMap(List<MarcRecordEntity> marcRecords) {
     return marcRecords.stream()
         .collect(
