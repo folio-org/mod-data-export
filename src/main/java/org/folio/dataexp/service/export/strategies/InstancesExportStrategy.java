@@ -58,7 +58,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @AllArgsConstructor
-public class InstancesExportStrategy extends AbstractExportStrategy {
+public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   protected static final String INSTANCE_MARC_TYPE = "MARC_BIB";
   protected static final String LONG_MARC_RECORD_MESSAGE =

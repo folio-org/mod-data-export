@@ -67,7 +67,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class HoldingsExportStrategy extends AbstractExportStrategy {
+public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
 
   protected static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 

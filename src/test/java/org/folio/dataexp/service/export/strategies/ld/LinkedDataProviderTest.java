@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.QueryClient;
+import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -43,8 +45,7 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
         .count();
     var expected = resources.stream()
         .filter(r -> r.isValid())
-        .map(TestResource::getId)
-        .map(UUID::toString)
+        .map(TestResource::toDto)
         .toList();
 
     var results = linkedDataProvider.getLinkedDataResources(
@@ -64,6 +65,13 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
     UUID id;
     boolean valid;
     Map<String, Object> resource;
+
+    public LinkedDataResource toDto() {
+      var dto = new LinkedDataResource();
+      dto.setInventoryId(id.toString());
+      dto.setResource(id.toString());
+      return dto;
+    }
   }
 
   private static List<TestResource> generateResources(int count, int validCount) {
@@ -71,12 +79,19 @@ class LinkedDataProviderTest extends BaseDataExportInitializer {
     for (var i = 0; i < count; i++) {
       var id = UUID.randomUUID();
       var resource = new TestResource();
+      var column = new LinkedHashMap<String, String>();
+      column.put("type", "jsonb");
+      column.put("value", id.toString());
       resource.setId(id);
       resource.setValid(i < validCount);
       if (i < validCount) {
-        resource.setResource(Map.of("inventory_id", id, "resource_subgraph", id.toString()));
+        resource.setResource(
+            Map.of("inventory_id", id.toString(),
+                   "resource_subgraph", column));
       } else {
-        resource.setResource(Map.of("inventory_id", id, "not_the_right_field", id.toString()));
+        resource.setResource(
+            Map.of("inventory_id", id.toString(),
+                   "not_the_right_field", column));
       }
       list.add(i, resource);
     }
