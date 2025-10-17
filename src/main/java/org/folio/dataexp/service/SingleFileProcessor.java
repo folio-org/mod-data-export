@@ -14,7 +14,7 @@ import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.folio.dataexp.service.export.ExportExecutor;
-import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
+import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -96,12 +96,12 @@ public class SingleFileProcessor {
     }
     var exportIterator = exports.iterator();
 
-    var exportStrategyStatisticListener = new ExportedMarcListener(
+    var exportStrategyStatisticListener = new ExportedRecordsListener(
         jobExecutionEntityRepository,
         getProgressExportUpdateStep(exportRequest),
         jobExecutionId
     );
-    commonExportStatistic.setExportedMarcListener(exportStrategyStatisticListener);
+    commonExportStatistic.setExportedRecordsListener(exportStrategyStatisticListener);
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
       exportRequest.setLastExport(!exportIterator.hasNext());

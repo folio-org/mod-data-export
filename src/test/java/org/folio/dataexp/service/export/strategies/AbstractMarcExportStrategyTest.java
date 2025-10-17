@@ -135,7 +135,7 @@ class AbstractMarcExportStrategyTest {
         .thenReturn(jobExecutionEntity);
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
-        new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
+        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, jobExecutionEntity.getId()));
     assertEquals(2, exportStatistic.getExported());
     assertEquals(1, exportStatistic.getDuplicatedSrs());
@@ -200,7 +200,7 @@ class AbstractMarcExportStrategyTest {
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
         new ExportRequest(),
-        new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
+        new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionEntity.getId()));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
@@ -255,7 +255,7 @@ class AbstractMarcExportStrategyTest {
     doThrow(new LocalStorageWriterException("Can not write")).when(localStorageWriter).close();
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
-        new ExportRequest(), new ExportedMarcListener(null, 1000, null));
+        new ExportRequest(), new ExportedRecordsListener(null, 1000, null));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
