@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 
@@ -33,6 +35,17 @@ public class LocalStorageWriter extends StringWriter {
     } catch (Exception ex) {
       throw new LocalStorageWriterException(
           "Files buffer cannot be created due to error: " + ex.getMessage());
+    }
+  }
+
+  /**
+   * Return reader for output file.
+   */
+  public Optional<BufferedReader> getReader() {
+    try {
+      return Optional.of(Files.newBufferedReader(this.path));
+    } catch (Exception e) {
+      return Optional.empty();
     }
   }
 

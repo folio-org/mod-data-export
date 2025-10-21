@@ -2,7 +2,6 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
@@ -228,7 +227,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       );
       sliceStatistic.failAll();
     }
-    return new ExportSliceResult(writer.getPath(), sliceStatistic);
+    return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
   }
 
   /**
@@ -260,7 +259,16 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   ) {
     try {
       if (sliceResult.getStatistic().getExported() > 0) {
-        finalOutput.write(Files.readString(sliceResult.getOutputFile()));
+        var readerOpt = sliceResult.getReader();
+        if (readerOpt.isPresent()) {
+          var reader = readerOpt.get();
+          String line;
+          while ((line = reader.readLine()) != null) {
+            finalOutput.write(line);
+          }
+        } else {
+          sliceResult.getStatistic().failAll();
+        }
       }
     } catch (Exception e) {
       log.error(

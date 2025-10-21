@@ -7,9 +7,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import lombok.Setter;
@@ -125,6 +128,8 @@ class AbstractLinkedDataExportStrategyTest {
     output.write("{}".getBytes());
     when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class)))
         .thenReturn(output);
+    when(localStorageWriter.getReader())
+        .thenReturn(Optional.of(new BufferedReader(new StringReader("{}"))));
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
         new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
@@ -136,7 +141,7 @@ class AbstractLinkedDataExportStrategyTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportFilesEntity.getStatus());
     verify(jobExecutionEntityRepository, times(1))
         .save(isA(JobExecutionEntity.class));
-    verify(localStorageWriter, times(1)).write(isA(String.class));
+    verify(localStorageWriter, times(2)).write(isA(String.class));
   }
 
   @SneakyThrows
