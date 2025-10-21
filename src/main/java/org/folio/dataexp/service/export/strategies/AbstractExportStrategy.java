@@ -139,7 +139,9 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   /**
-   * Processes slices of export IDs for the export file entity.
+   * Processes slices of export IDs for the export file entity. This implementation
+   * takes a multithreaded approach. Override to go with non-multithreaded instead
+   * if the underlying record gathering is not guaranteed to be thread safe.
    */
   protected void processSlices(
       JobExecutionExportFilesEntity exportFilesEntity,

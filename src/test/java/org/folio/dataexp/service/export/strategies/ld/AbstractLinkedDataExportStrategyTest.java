@@ -263,7 +263,8 @@ class AbstractLinkedDataExportStrategyTest {
 
     @Override
     protected LocalStorageWriter createLocalStorageWriter(
-        JobExecutionExportFilesEntity exportFilesEntity) {
+        JobExecutionExportFilesEntity exportFilesEntity,
+        Integer pageNumber) {
       return localStorageWriter;
     }
 
