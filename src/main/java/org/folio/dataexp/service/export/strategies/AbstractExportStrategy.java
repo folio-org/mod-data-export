@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -39,6 +38,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
   protected String exportTmpStorage;
+  private static final String SAVE_ERROR = "{}: Error while saving file {} for job execution ID {}";
 
   protected ExportIdEntityRepository exportIdEntityRepository;
   protected MappingProfileEntityRepository mappingProfileEntityRepository;
@@ -87,9 +87,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       localStorageWriter.close();
     } catch (Exception e) {
       log.error(
-          "saveOutputToLocalStorage:: Error while saving file {} to local storage"
-          + " for job execution {}",
-          exportFilesEntity.getFileLocation(), jobExecutionId
+          SAVE_ERROR,
+          "saveOutputToLocalStorage",
+          exportFilesEntity.getFileLocation(),
+          jobExecutionId
       );
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.removeExported();
@@ -151,7 +152,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
     var page = 0;
     Slice<ExportIdEntity> slice;
-    try (var executor = Executors.newFixedThreadPool(getThreadPoolSize())) {
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       do {
         final var taskId = page;
         slice = exportIdEntityRepository.getExportIds(
@@ -166,7 +167,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
             .collect(Collectors.toSet());
         tasks.add(
             CompletableFuture.supplyAsync(() ->
-                createAndSaveRecords(
+                createAndSaveSliceRecords(
                     exportIds,
                     exportStatistic,
                     mappingProfile,
@@ -192,6 +193,43 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   /**
+   * Wrap actual create-and-save strategies with boilerplate writer, statistic, and
+   * return object setup.
+   */
+  protected ExportSliceResult createAndSaveSliceRecords(
+      Set<UUID> externalIds,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportRequest exportRequest,
+      int pageNumber
+  ) {
+    var jobExecutionId = exportFilesEntity.getJobExecutionId();
+    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
+    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
+    createAndSaveRecords(
+        externalIds,
+        sliceStatistic,
+        mappingProfile,
+        jobExecutionId,
+        exportRequest,
+        writer
+    );
+    try {
+      writer.close();
+    } catch (Exception e) {
+      log.error(
+          SAVE_ERROR,
+          "createAndSaveSliceRecords",
+          writer.getPath(),
+          jobExecutionId
+      );
+      sliceStatistic.failAll();
+    }
+    return new ExportSliceResult(writer.getPath(), sliceStatistic);
+  }
+
+  /**
    * Per-strategy implementation of retrieving and writing records to disk within
    * one thread out of a multithreaded approach. Writes and statistics gathering
    * are done on each thread independently of the others and returned for later
@@ -200,27 +238,18 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    * @param externalIds set of input IDs
    * @param exportStatistic main job statistics
    * @param mappingProfile mapping profile to use
-   * @param exportFilesEntity the export file entity
+   * @param jobExecutionId job ID
    * @param exportRequest the export request
-   * @param pageNumber page number of slice
-   * @return summary of thread work
+   * @param writer writes to local storage
    */
-  protected abstract ExportSliceResult createAndSaveRecords(
+  protected abstract void createAndSaveRecords(
       Set<UUID> externalIds,
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
-      JobExecutionExportFilesEntity exportFilesEntity,
+      UUID jobExecutionId,
       ExportRequest exportRequest,
-      int pageNumber
+      LocalStorageWriter writer
   );
-
-  /**
-   * If the strategy supports multithreaded export, return the desired pool size.
-   * Return 1 if multithreading is not supported.
-   *
-   * @return thread pool size
-   */
-  protected abstract int getThreadPoolSize();
 
   private void copySliceResultToFinal(
       ExportSliceResult sliceResult,
@@ -233,9 +262,10 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       }
     } catch (Exception e) {
       log.error(
-          "copySliceResultToFinal: Error while copying slice file {} to final storage"
-          + " for job execution {}",
-          sliceResult.getOutputFile(), jobExecutionId
+          SAVE_ERROR,
+          "copySliceResultToFinal",
+          sliceResult.getOutputFile(),
+          jobExecutionId
       );
       sliceResult.getStatistic().failAll();
     }

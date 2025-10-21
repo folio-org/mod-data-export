@@ -25,6 +25,7 @@ import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
@@ -34,6 +35,7 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * Abstract base class for MARC export strategies, providing common logic for exporting
@@ -101,12 +103,6 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
   abstract Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(List<MarcRecordEntity>
       marcRecords, MappingProfile mappingProfile, UUID jobExecutionId)
       throws TransformationRuleException;
-
-
-  @Override
-  protected int getThreadPoolSize() {
-    return 1;
-  }
 
   /**
    * Creates and saves MARC records for the given external IDs.
@@ -316,36 +312,61 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
   }
 
   @Override
-  protected ExportSliceResult createAndSaveRecords(
+  protected void createAndSaveRecords(
       Set<UUID> externalIds,
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
-      JobExecutionExportFilesEntity exportFilesEntity,
+      UUID jobExecutionId,
       ExportRequest exportRequest,
-      int pageNumber
+      LocalStorageWriter writer
   ) {
-    var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
-    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
     createAndSaveMarc(
         externalIds,
-        sliceStatistic,
+        exportStatistic,
         mappingProfile,
         jobExecutionId,
         exportRequest,
         writer
     );
-    try {
-      writer.close();
-    } catch (Exception e) {
-      log.error(
-          "createAndSaveRecords: Error while saving slice file {} to local storage"
-          + " for job execution {}",
-          writer.getPath(), jobExecutionId
+  }
+
+  @Override
+  protected void processSlices(
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      LocalStorageWriter localStorageWriter
+  ) {
+    var slice = exportIdEntityRepository.getExportIds(
+        exportFilesEntity.getJobExecutionId(),
+        exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(),
+        PageRequest.of(0, exportIdsBatch)
+    );
+    log.info("Slice size: {}", slice.getSize());
+    var exportIds = slice.getContent().stream()
+        .map(ExportIdEntity::getInstanceId)
+        .collect(Collectors.toSet());
+    createAndSaveMarc(
+        exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, localStorageWriter
+    );
+    while (slice.hasNext()) {
+      slice = exportIdEntityRepository.getExportIds(
+          exportFilesEntity.getJobExecutionId(),
+          exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(),
+          slice.nextPageable()
       );
-      sliceStatistic.failAll();
+      exportIds = slice.getContent().stream()
+          .map(ExportIdEntity::getInstanceId)
+          .collect(Collectors.toSet());
+      createAndSaveMarc(
+          exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, localStorageWriter
+      );
     }
-    return new ExportSliceResult(writer.getPath(), sliceStatistic);
   }
 
   @Autowired

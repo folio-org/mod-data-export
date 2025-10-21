@@ -12,10 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
-import org.folio.dataexp.service.export.strategies.ExportSliceResult;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,36 +38,15 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
    * more than one matching resource, so duplicate errors aren't tracked here.
    */
   @Override
-  protected ExportSliceResult createAndSaveRecords(
+  protected void createAndSaveRecords(
       Set<UUID> externalIds,
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
-      JobExecutionExportFilesEntity exportFilesEntity,
+      UUID jobExecutionId,
       ExportRequest exportRequest,
-      int pageNumber
+      LocalStorageWriter writer
   ) {
-    var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
-    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
-    createAndSaveLinkedData(externalIds, sliceStatistic, jobExecutionId, writer);
-    try {
-      writer.close();
-    } catch (Exception e) {
-      log.error(
-          "createAndSaveRecords: Error while saving slice file {} to local storage"
-          + " for job execution {}",
-          writer.getPath(), jobExecutionId
-      );
-      sliceStatistic.failAll();
-    }
-    return new ExportSliceResult(writer.getPath(), sliceStatistic);
-  }
-
-  @Override
-  protected int getThreadPoolSize() {
-    // TODO: provide a configured pool size, not this constant
-    // pool size of 1 for non-linked data for now? or rely on overriding processslices?
-    return 5;
+    createAndSaveLinkedData(externalIds, exportStatistic, jobExecutionId, writer);
   }
 
   /**
