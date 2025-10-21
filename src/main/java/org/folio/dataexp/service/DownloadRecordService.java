@@ -140,11 +140,11 @@ public class DownloadRecordService {
       }
       MarcReader marcReader = new MarcStreamReader(marcFileContent);
       while (marcReader.hasNext()) {
-        var record = marcReader.next();
-        var fieldToRemove = record.getVariableFields().stream()
+        var marcRecord = marcReader.next();
+        var fieldToRemove = marcRecord.getVariableFields().stream()
                 .filter(vf -> vf.getTag().equals(tag)).findFirst();
-        fieldToRemove.ifPresent(record::removeVariableField);
-        marcWriter.write(record);
+        fieldToRemove.ifPresent(marcRecord::removeVariableField);
+        marcWriter.write(marcRecord);
       }
       return new ByteArrayInputStream(marcOutputStream.toByteArray());
     } catch (IOException e) {
