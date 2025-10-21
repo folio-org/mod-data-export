@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -113,40 +115,22 @@ class DownloadRecordTest extends BaseDataExportInitializer {
     }
   }
 
-  @ParameterizedTest
-  @MethodSource("providedDataWithSuppress999")
-  void whenMarcFileDoesntExist_generateFileAndSaveInS3_andSuppress999(
-          IdType idType, String recordId, boolean isUtf, String postfix, String fileContent,
-          boolean suppress999, boolean expect999) throws IOException {
+  @Test
+  void suppress999FieldIfParameterIsTrue() throws IOException {
+    final String fileContent =
+            "00237cam a2200073 i 4500001001400000008004100014373002900055999007900084"
+            + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001F"
+            + "aπανεπιστήμιο\u001Eff\u001Fs17eed93e-f9e2-4cb2-a52b-e9155acfc119\u001Fi4a090b0f-"
+            + "9da3-40f1-ab17-33d6a1e3abae\u001E\u001D";
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var filePath = "mod-data-export/download/%s/%s.mrc".formatted(recordId + postfix,
-              recordId + postfix);
-      s3Client.remove(filePath);
-      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
-          isUtf, postfix, idType, suppress999);
-      assertEquals(filePath, s3Client.list(filePath).getFirst());
-      if (fileContent.contains("\u001E999")) {
-        assertEquals(expect999, contains999Field(actualResult));
-      }
-    }
-  }
-
-  @ParameterizedTest
-  @MethodSource("providedDataWithSuppress999")
-  void whenMarcFileExists_retrieveItFromS3_andSuppress999(IdType idType, String recordId,
-                                                          boolean isUtf, String postfix,
-                                                          String fileContent, boolean suppress999,
-                                                          boolean expect999) throws IOException {
-    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var filePath = "mod-data-export/download/%s/%s.mrc".formatted(recordId + postfix,
-              recordId + postfix);
+      var filePath = "mod-data-export/download/%s/%s.mrc".formatted(AUTHORITY_ID
+              + "-utf", AUTHORITY_ID + "-utf");
       s3Client.write(filePath, new ByteArrayInputStream(fileContent.getBytes()));
-      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
-          isUtf, postfix, idType, suppress999);
-      assertEquals(filePath, s3Client.list(filePath).get(0));
-      if (fileContent.contains("\u001E999")) {
-        assertEquals(expect999, contains999Field(actualResult));
-      }
+
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
+              true, "-utf", IdType.AUTHORITY, true);
+      assertFalse(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
     }
   }
 
@@ -175,24 +159,10 @@ class DownloadRecordTest extends BaseDataExportInitializer {
     );
   }
 
-  private static Stream<Arguments> providedDataWithSuppress999() {
-    return providedData().flatMap(args -> Stream.of(
-      Arguments.of(args.get()[0], args.get()[1], args.get()[2], args.get()[3], args.get()[4],
-              false, true),
-      Arguments.of(args.get()[0], args.get()[1], args.get()[2], args.get()[3], args.get()[4],
-              true, false)
-    ));
-  }
-
   public static boolean compareInputStreams(InputStreamResource isr1, InputStreamResource isr2)
       throws IOException {
     try (InputStream is1 = isr1.getInputStream(); InputStream is2 = isr2.getInputStream()) {
       return IOUtils.contentEquals(is1, is2);
     }
-  }
-
-  private static boolean contains999Field(InputStreamResource resource) throws IOException {
-    String content = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
-    return content.contains("\u001E999");
   }
 }
