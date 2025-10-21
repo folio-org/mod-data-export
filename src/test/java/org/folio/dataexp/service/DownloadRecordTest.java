@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.apache.commons.io.IOUtils;
@@ -67,7 +68,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var uuid = UUID.fromString(MISSING_RECORD_ID);
       Exception exception = assertThrows(DownloadRecordException.class, () -> {
-        downloadRecordService.processRecordDownload(uuid, isUtf, postfix, idType);
+        downloadRecordService.processRecordDownload(uuid, isUtf, postfix, idType, false);
       });
       assertEquals("Couldn't find %s in db for ID: %s".formatted(idType.toString().toLowerCase(),
           MISSING_RECORD_ID), exception.getMessage());
@@ -86,10 +87,10 @@ class DownloadRecordTest extends BaseDataExportInitializer {
           new InputStreamResource((new ByteArrayInputStream(fileContent.getBytes())));
 
       var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
-          isUtf, postfix, idType);
+          isUtf, postfix, idType, false);
 
       assertTrue(compareInputStreams(expectedResult, actualResult));
-      assertEquals(filePath, s3Client.list(filePath).get(0));
+      assertEquals(filePath, s3Client.list(filePath).getFirst());
     }
   }
 
@@ -105,10 +106,47 @@ class DownloadRecordTest extends BaseDataExportInitializer {
           new InputStreamResource((new ByteArrayInputStream(fileContent.getBytes())));
 
       var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
-          isUtf, postfix, idType);
+          isUtf, postfix, idType, false);
 
       assertTrue(compareInputStreams(expectedResult, actualResult));
+      assertEquals(filePath, s3Client.list(filePath).getFirst());
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("providedDataWithSuppress999")
+  void whenMarcFileDoesntExist_generateFileAndSaveInS3_andSuppress999(
+          IdType idType, String recordId, boolean isUtf, String postfix, String fileContent,
+          boolean suppress999, boolean expect999) throws IOException {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var filePath = "mod-data-export/download/%s/%s.mrc".formatted(recordId + postfix,
+              recordId + postfix);
+      s3Client.remove(filePath);
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
+          isUtf, postfix, idType, suppress999);
+      assertEquals(filePath, s3Client.list(filePath).getFirst());
+      if (fileContent.contains("\u001E999")) {
+        assertEquals(expect999, contains999Field(actualResult));
+      }
+    }
+  }
+
+  @ParameterizedTest
+  @MethodSource("providedDataWithSuppress999")
+  void whenMarcFileExists_retrieveItFromS3_andSuppress999(IdType idType, String recordId,
+                                                          boolean isUtf, String postfix,
+                                                          String fileContent, boolean suppress999,
+                                                          boolean expect999) throws IOException {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var filePath = "mod-data-export/download/%s/%s.mrc".formatted(recordId + postfix,
+              recordId + postfix);
+      s3Client.write(filePath, new ByteArrayInputStream(fileContent.getBytes()));
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(recordId),
+          isUtf, postfix, idType, suppress999);
       assertEquals(filePath, s3Client.list(filePath).get(0));
+      if (fileContent.contains("\u001E999")) {
+        assertEquals(expect999, contains999Field(actualResult));
+      }
     }
   }
 
@@ -137,10 +175,24 @@ class DownloadRecordTest extends BaseDataExportInitializer {
     );
   }
 
+  private static Stream<Arguments> providedDataWithSuppress999() {
+    return providedData().flatMap(args -> Stream.of(
+      Arguments.of(args.get()[0], args.get()[1], args.get()[2], args.get()[3], args.get()[4],
+              false, true),
+      Arguments.of(args.get()[0], args.get()[1], args.get()[2], args.get()[3], args.get()[4],
+              true, false)
+    ));
+  }
+
   public static boolean compareInputStreams(InputStreamResource isr1, InputStreamResource isr2)
       throws IOException {
     try (InputStream is1 = isr1.getInputStream(); InputStream is2 = isr2.getInputStream()) {
       return IOUtils.contentEquals(is1, is2);
     }
+  }
+
+  private static boolean contains999Field(InputStreamResource resource) throws IOException {
+    String content = IOUtils.toString(resource.getInputStream(), StandardCharsets.UTF_8);
+    return content.contains("\u001E999");
   }
 }

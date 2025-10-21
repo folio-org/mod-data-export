@@ -895,6 +895,13 @@ paths:
           schema:
             type: boolean
             default: true
+        - name: suppress999
+          in: query
+          description: "Specify whether to suppress 999 field."
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: A file download in binary format
