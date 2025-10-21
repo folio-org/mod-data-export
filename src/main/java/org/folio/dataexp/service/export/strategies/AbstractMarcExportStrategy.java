@@ -25,7 +25,6 @@ import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
@@ -35,7 +34,6 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * Abstract base class for MARC export strategies, providing common logic for exporting
@@ -105,6 +103,10 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       throws TransformationRuleException;
 
 
+  @Override
+  protected int getThreadPoolSize() {
+    return 1;
+  }
 
   /**
    * Creates and saves MARC records for the given external IDs.
@@ -314,42 +316,36 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
   }
 
   @Override
-  protected void processSlices(
-      JobExecutionExportFilesEntity exportFilesEntity,
+  protected ExportSliceResult createAndSaveRecords(
+      Set<UUID> externalIds,
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
+      JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
-      LocalStorageWriter localStorageWriter
+      int pageNumber
   ) {
-    var slice = exportIdEntityRepository.getExportIds(
-        exportFilesEntity.getJobExecutionId(),
-        exportFilesEntity.getFromId(),
-        exportFilesEntity.getToId(),
-        PageRequest.of(0, exportIdsBatch)
-    );
-    log.info("Slice size: {}", slice.getSize());
-    var exportIds = slice.getContent().stream()
-        .map(ExportIdEntity::getInstanceId)
-        .collect(Collectors.toSet());
+    var jobExecutionId = exportFilesEntity.getJobExecutionId();
+    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
+    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
     createAndSaveMarc(
-        exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-        exportRequest, localStorageWriter
+        externalIds,
+        sliceStatistic,
+        mappingProfile,
+        jobExecutionId,
+        exportRequest,
+        writer
     );
-    while (slice.hasNext()) {
-      slice = exportIdEntityRepository.getExportIds(
-          exportFilesEntity.getJobExecutionId(),
-          exportFilesEntity.getFromId(),
-          exportFilesEntity.getToId(),
-          slice.nextPageable()
+    try {
+      writer.close();
+    } catch (Exception e) {
+      log.error(
+          "createAndSaveRecords: Error while saving slice file {} to local storage"
+          + " for job execution {}",
+          writer.getPath(), jobExecutionId
       );
-      exportIds = slice.getContent().stream()
-          .map(ExportIdEntity::getInstanceId)
-          .collect(Collectors.toSet());
-      createAndSaveMarc(
-          exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-          exportRequest, localStorageWriter
-      );
+      sliceStatistic.failAll();
     }
+    return new ExportSliceResult(writer.getPath(), sliceStatistic);
   }
 
   @Autowired
