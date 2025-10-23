@@ -457,7 +457,6 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       }
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
-      instanceJson.put(DELETED_KEY, instance.isDeleted());
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
       log.debug("getInstancesWithHoldingsAndItems instanceJson: {}", instanceJson);
 
