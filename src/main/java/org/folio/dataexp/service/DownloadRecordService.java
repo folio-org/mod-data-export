@@ -14,15 +14,12 @@ import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.service.export.ExportStrategyFactory;
 import org.folio.dataexp.service.export.S3ExportsUploader;
 import org.folio.dataexp.service.export.strategies.JsonToMarcConverter;
-import org.folio.dataexp.service.export.strategies.MarcSuppressProcessor;
 import org.folio.spring.FolioExecutionContext;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.DataField;
-import org.marc4j.marc.MarcFactory;
-import org.marc4j.marc.Record;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
@@ -66,20 +63,12 @@ public class DownloadRecordService {
     var dirName = recordId.toString() + formatPostfix;
     InputStream marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent == null) {
-      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType, suppress999ff);
+      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf,
+              idType, suppress999ff);
       uploadMarcFile(dirName, marcFileContentBytes);
       return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
     } else {
       if (suppress999ff) {
-//        MarcStreamReader marcStreamReader = new MarcStreamReader(marcFileContent);
-//        var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
-//        var mappingProfile = exportStrategy.getDefaultMappingProfile();
-//        var suppressProcessor = new MarcSuppressProcessor(mappingProfile);
-//        while (marcStreamReader.hasNext()) {
-//          var marcRecord = marcStreamReader.next();
-//          suppressProcessor.suppress(marcRecord);
-//
-//        }
         marcFileContent = remove999ffField(isUtf, marcFileContent);
       }
       return new InputStreamResource(marcFileContent);
