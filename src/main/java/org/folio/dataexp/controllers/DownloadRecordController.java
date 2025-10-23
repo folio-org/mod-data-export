@@ -40,7 +40,7 @@ public class DownloadRecordController implements DownloadRecordApi {
       UUID recordId,
       IdType idType,
       Boolean isUtf,
-      Boolean suppress999
+      Boolean suppress999ff
   ) {
     var formatPostfix = Boolean.TRUE.equals(isUtf)
         ? UTF_FORMAT_POSTFIX
@@ -50,7 +50,7 @@ public class DownloadRecordController implements DownloadRecordApi {
         isUtf,
         formatPostfix,
         idType,
-        suppress999
+        suppress999ff
     );
     var fileName = recordId + formatPostfix + ".mrc";
     return ResponseEntity.ok()

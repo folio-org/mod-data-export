@@ -116,7 +116,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void suppress999FieldIfParameterIsTrue() throws IOException {
+  void suppress999ffFieldIfParameterIsTrue() throws IOException {
     final String fileContent =
             "00237cam a2200073 i 4500001001400000008004100014373002900055999007900084"
             + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001F"
@@ -135,7 +135,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void doNotSuppress999FieldIfParameterIsFalse() throws IOException {
+  void doNotSuppress999ffFieldIfParameterIsFalse() throws IOException {
     final String fileContent =
             "00237cam a2200073 i 4500001001400000008004100014373002900055999007900084"
             + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001F"
