@@ -16,7 +16,6 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
-import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.AuditInstanceEntityRepository;
 import org.folio.dataexp.repository.FolioInstanceAllRepository;
@@ -113,23 +112,6 @@ public class InstancesExportAllStrategy extends InstancesExportStrategy {
         && Boolean.TRUE.equals(exportRequest.getLastExport())) {
       handleDeleted(exportFilesEntity, exportStatistic, mappingProfile, exportRequest,
           localStorageWriter);
-    }
-  }
-
-  /**
-   * Sets status based on export statistics.
-   */
-  @Override
-  public void setStatusBaseExportStatistic(JobExecutionExportFilesEntity exportFilesEntity,
-      ExportStrategyStatistic exportStatistic) {
-    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
-    }
-    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
-    }
-    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
   }
 
