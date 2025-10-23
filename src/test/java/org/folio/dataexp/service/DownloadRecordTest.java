@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.IdType;
@@ -146,6 +147,28 @@ class DownloadRecordTest extends BaseDataExportInitializer {
               + "-utf", AUTHORITY_ID + "-utf");
       s3Client.write(filePath, new ByteArrayInputStream(fileContent.getBytes()));
 
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
+              true, "-utf", IdType.AUTHORITY, false);
+      assertTrue(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void whenMarcFileDoesntExist_suppress999ffInGeneratedMarc() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
+              true, "-utf", IdType.AUTHORITY, true);
+      assertFalse(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void whenMarcFileDoesntExist_doNotSuppress999ffInGeneratedMarc() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
               true, "-utf", IdType.AUTHORITY, false);
       assertTrue(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
