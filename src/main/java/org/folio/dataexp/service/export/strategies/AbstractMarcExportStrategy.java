@@ -45,9 +45,9 @@ import org.springframework.data.domain.PageRequest;
 @Getter
 public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy {
 
-  private InstanceEntityRepository instanceEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
 
+  protected InstanceEntityRepository instanceEntityRepository;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   protected FolioExecutionContext folioExecutionContext;
 

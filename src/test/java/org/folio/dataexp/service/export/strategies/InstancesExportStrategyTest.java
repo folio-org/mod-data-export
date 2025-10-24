@@ -111,6 +111,8 @@ class InstancesExportStrategyTest {
     instancesExportStrategy.errorLogService = errorLogService;
     instancesExportStrategy.entityManager = entityManager;
     instancesExportStrategy.folioExecutionContext = folioExecutionContext;
+    instancesExportStrategy.setInstanceEntityRepository(instanceEntityRepository);
+    instancesExportStrategy.setMappingProfileEntityRepository(mappingProfileEntityRepository);
   }
 
   @Test
