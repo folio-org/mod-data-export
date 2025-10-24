@@ -895,9 +895,9 @@ paths:
           schema:
             type: boolean
             default: true
-        - name: suppress999
+        - name: suppress999ff
           in: query
-          description: "Specify whether to suppress 999 field."
+          description: "Specify whether to suppress 999ff field."
           required: false
           schema:
             type: boolean
