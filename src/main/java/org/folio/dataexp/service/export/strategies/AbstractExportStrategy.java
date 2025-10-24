@@ -170,7 +170,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setMappingProfileEntityRepository(MappingProfileEntityRepository
+  protected void setMappingProfileEntityRepository(MappingProfileEntityRepository
         mappingProfileEntityRepository) {
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
   }

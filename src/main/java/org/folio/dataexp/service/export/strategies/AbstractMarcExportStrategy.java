@@ -45,9 +45,9 @@ import org.springframework.data.domain.PageRequest;
 @Getter
 public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy {
 
-  private InstanceEntityRepository instanceEntityRepository;
   private JsonToMarcConverter jsonToMarcConverter;
 
+  protected InstanceEntityRepository instanceEntityRepository;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   protected FolioExecutionContext folioExecutionContext;
 
@@ -300,21 +300,6 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
         exportIdentifiers.getIdentifierHridMessage(),
         marcRecordIds
     );
-  }
-
-  /**
-   * Gets a map of SRS IDs by deleted external ID.
-   */
-  private Map<UUID, UUID> getSrsIdByDeletedExternalIdMap(List<MarcRecordEntity> marcRecords) {
-    return marcRecords.stream()
-        .filter(MarcRecordEntity::isDeleted)
-        .collect(
-            toMap(
-                MarcRecordEntity::getExternalId,
-                MarcRecordEntity::getId,
-                (srsId1, srsId2) -> srsId1
-            )
-        );
   }
 
   private Map<UUID, UUID> getSrsIdByExternalIdMap(List<MarcRecordEntity> marcRecords) {
