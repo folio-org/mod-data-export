@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.export.strategies.ld;
 
-import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_LD_TO_BIBFRAME;
 
 import java.util.List;
@@ -12,19 +11,13 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.LinkedDataResource;
+import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
-import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
-import org.folio.dataexp.repository.ExportIdEntityRepository;
-import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
-import org.folio.dataexp.service.export.strategies.ExportStrategy;
+import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
-import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
-import org.folio.dataexp.service.logs.ErrorLogService;
-import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 
 /**
@@ -33,99 +26,18 @@ import org.springframework.data.domain.PageRequest;
  */
 @Log4j2
 @Getter
-public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy {
+public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStrategy {
 
   private static final String LD_SUFFIX = "json";
 
-  protected int exportIdsBatch;
-  protected String exportTmpStorage;
-
-  private ExportIdEntityRepository exportIdEntityRepository;
-  private JobProfileEntityRepository jobProfileEntityRepository;
   private LinkedDataConverter linkedDataConverter;
-
-  protected ErrorLogService errorLogService;
-
-  @Value("#{ T(Integer).parseInt('${application.export-ids-batch}')}")
-  protected void setExportIdsBatch(int exportIdsBatch) {
-    this.exportIdsBatch = exportIdsBatch;
-  }
-
-  @Value("${application.export-tmp-storage}")
-  protected void setExportTmpStorage(String exportTmpStorage) {
-    this.exportTmpStorage = exportTmpStorage;
-  }
-
-  @Override
-  public ExportStrategyStatistic saveOutputToLocalStorage(
-      JobExecutionExportFilesEntity exportFilesEntity,
-      ExportRequest exportRequest,
-      ExportedRecordsListener exportedRecordsListener
-  ) {
-    var exportStatistic = new ExportStrategyStatistic(exportedRecordsListener);
-    var localStorageWriter = createLocalStorageWriter(exportFilesEntity);
-    processSlices(exportFilesEntity, exportStatistic, localStorageWriter);
-    try {
-      localStorageWriter.close();
-    } catch (Exception e) {
-      log.error(
-          "saveOutputToLocalStorage: Error saving file {} to local storage for job execution {}",
-          exportFilesEntity.getFileLocation(),
-          exportFilesEntity.getJobExecutionId()
-      );
-      exportStatistic.setDuplicatedSrs(0);
-      exportStatistic.removeExported();
-      long countFailed = exportIdEntityRepository.countExportIds(
-          exportFilesEntity.getJobExecutionId(),
-          exportFilesEntity.getFromId(),
-          exportFilesEntity.getToId()
-      );
-      exportStatistic.setFailed((int) countFailed);
-    }
-    return exportStatistic;
-  }
 
   @Override
   public String getFilenameSuffix() {
     return LD_SUFFIX;
   }
 
-  @Override
-  public void setStatusBaseExportStatistic(
-      JobExecutionExportFilesEntity exportFilesEntity,
-      ExportStrategyStatistic exportStatistic
-  ) {
-    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() > 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
-    }
-    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
-    }
-    if (exportStatistic.getFailed() >= 0 && exportStatistic.getExported() == 0) {
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
-      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
-    }
-  }
-
   abstract List<LinkedDataResource> getLinkedDataResources(Set<UUID> externalIds);
-
-  /**
-   * Create a writer for saving an export job's output.
-   *
-   * @param exportFilesEntity export job
-   * @return output writer
-   */
-  protected LocalStorageWriter createLocalStorageWriter(
-      JobExecutionExportFilesEntity exportFilesEntity
-  ) {
-    return new LocalStorageWriter(
-        S3FilePathUtils.getLocalStorageWriterPath(
-            exportTmpStorage,
-            exportFilesEntity.getFileLocation()
-        ),
-        OUTPUT_BUFFER_SIZE
-    );
-  }
 
   /**
    * Process the whole set of export IDs in slices, where each slice is turned into a
@@ -134,14 +46,13 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
    * due to the way the only Linked Data implementation (so far) works, the input will
    * always be a set of UUIDs, and the retrieval mechanism should never respond with
    * more than one matching resource, so duplicate errors aren't tracked here.
-   *
-   * @param exportFilesEntity export job
-   * @param exportStatistic export job statistics collector
-   * @param localStorageWriter output writer
    */
+  @Override
   protected void processSlices(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
       LocalStorageWriter localStorageWriter
   ) {
     var slice = exportIdEntityRepository.getExportIds(
@@ -194,7 +105,6 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
       LocalStorageWriter localStorageWriter
   ) {
     var resources = getLinkedDataResources(externalIds);
-    log.info("linkedDataResources size: {}", resources.size());
     for (var resource : resources) {
       var os = StringUtils.EMPTY;
       try {
@@ -217,6 +127,9 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
     }
   }
 
+  /**
+   * Add a conversion error to this job's execution record.
+   */
   private void saveConvertLinkedDataResourceError(
       LinkedDataResource resource,
       UUID jobExecutionId,
@@ -231,23 +144,7 @@ public abstract class AbstractLinkedDataExportStrategy implements ExportStrategy
   }
 
   @Autowired
-  private void setExportIdEntityRepository(ExportIdEntityRepository exportIdEntityRepository) {
-    this.exportIdEntityRepository = exportIdEntityRepository;
-  }
-
-  @Autowired
   private void setLinkedDataConverter(LinkedDataConverter linkedDataConverter) {
     this.linkedDataConverter = linkedDataConverter;
-  }
-
-  @Autowired
-  private void setJobProfileEntityRepository(JobProfileEntityRepository
-      jobProfileEntityRepository) {
-    this.jobProfileEntityRepository = jobProfileEntityRepository;
-  }
-
-  @Autowired
-  protected void setErrorLogService(ErrorLogService errorLogService) {
-    this.errorLogService = errorLogService;
   }
 }

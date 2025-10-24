@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.Setter;
 import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
@@ -36,8 +37,11 @@ public class CommonExportStatistic {
   /**
    * Amount of duplicated UUIDs.
    */
-  @Getter
-  private int duplicatedUuidAmount;
+  private AtomicInteger duplicatedUuidAmount = new AtomicInteger(0);
+
+  public int getDuplicatedUuidAmount() {
+    return duplicatedUuidAmount.get();
+  }
 
   /**
    * Listener for exported records.
@@ -73,13 +77,13 @@ public class CommonExportStatistic {
    * @param count Number to increment by.
    */
   public void incrementDuplicatedUuid(int count) {
-    this.duplicatedUuidAmount = this.duplicatedUuidAmount + count;
+    duplicatedUuidAmount.addAndGet(count);
   }
 
   /**
    * Increments the duplicated UUID amount by one.
    */
   public void incrementDuplicatedUuid() {
-    this.duplicatedUuidAmount = this.duplicatedUuidAmount + 1;
+    duplicatedUuidAmount.incrementAndGet();
   }
 }

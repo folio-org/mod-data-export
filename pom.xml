@@ -45,7 +45,6 @@
     <generate-marc-utils-version>1.10.0</generate-marc-utils-version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
-    <jackson.version>2.20.0</jackson.version>
     <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <folio-s3-client.version>2.3.0</folio-s3-client.version>
@@ -67,8 +66,7 @@
     <!-- Plugins versions -->
     <maven-openapi-generator-plugin.version>6.2.1</maven-openapi-generator-plugin.version>
     <maven-copy-rename-plugin.version>1.0.1</maven-copy-rename-plugin.version>
-    <maven-build-helper-plugin.version>3.2.0</maven-build-helper-plugin.version>
-    <maven-resources-plugin.version>3.3.0</maven-resources-plugin.version>
+    <maven-build-helper-plugin.version>3.3.0</maven-build-helper-plugin.version>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     <maven-failsafe-plugin.version>3.0.0-M7</maven-failsafe-plugin.version>
@@ -295,18 +293,6 @@
     </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>${jackson.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <build>
     <plugins>
       <plugin>
@@ -323,12 +309,6 @@
             </exclude>
           </excludes>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>${maven-resources-plugin.version}</version>
       </plugin>
 
       <plugin>
@@ -439,6 +419,7 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>${maven-resources-plugin.version}</version>
         <executions>

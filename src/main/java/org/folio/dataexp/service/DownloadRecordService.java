@@ -1,8 +1,10 @@
 package org.folio.dataexp.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -13,6 +15,11 @@ import org.folio.dataexp.service.export.ExportStrategyFactory;
 import org.folio.dataexp.service.export.S3ExportsUploader;
 import org.folio.dataexp.service.export.strategies.JsonToMarcConverter;
 import org.folio.spring.FolioExecutionContext;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamReader;
+import org.marc4j.MarcStreamWriter;
+import org.marc4j.converter.impl.UnicodeToAnsel;
+import org.marc4j.marc.DataField;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
@@ -43,20 +50,27 @@ public class DownloadRecordService {
       final UUID recordId,
       boolean isUtf,
       final String formatPostfix,
-      final IdType idType
+      final IdType idType,
+      boolean suppress999ff
   ) {
     log.info(
-        "processRecordDownload:: start downloading record with id: {}, isUtf: {}",
+        "processRecordDownload:: start downloading record with id: {}, "
+                + "isUtf: {}, suppress999ff: {}",
         recordId,
-        isUtf
+        isUtf,
+        suppress999ff
     );
     var dirName = recordId.toString() + formatPostfix;
     InputStream marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent == null) {
-      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType);
+      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf,
+              idType, suppress999ff);
       uploadMarcFile(dirName, marcFileContentBytes);
       return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
     } else {
+      if (suppress999ff) {
+        marcFileContent = remove999ffField(isUtf, marcFileContent);
+      }
       return new InputStreamResource(marcFileContent);
     }
   }
@@ -82,11 +96,15 @@ public class DownloadRecordService {
   private byte[] generateRecordFileContentBytes(
       final UUID recordId,
       boolean isUtf,
-      final IdType idType
+      final IdType idType,
+      boolean suppress999ff
   ) {
     var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
     var marcRecord = exportStrategy.getMarcRecord(recordId);
     var mappingProfile = exportStrategy.getDefaultMappingProfile();
+    if (suppress999ff) {
+      mappingProfile.setSuppress999ff(true);
+    }
     try {
       return jsonToMarcConverter.convertJsonRecordToMarcRecord(
           marcRecord.getContent(),
@@ -118,6 +136,28 @@ public class DownloadRecordService {
           dirName
       );
       throw new DownloadRecordException(e.getMessage());
+    }
+  }
+
+  private InputStream remove999ffField(boolean isUtf, InputStream marcFileContent) {
+    try (var marcOutputStream = new ByteArrayOutputStream()) {
+      var marcWriter = new MarcStreamWriter(marcOutputStream, StandardCharsets.UTF_8.name());
+      if (!isUtf) {
+        marcWriter.setConverter(new UnicodeToAnsel());
+      }
+      MarcReader marcReader = new MarcStreamReader(marcFileContent);
+      while (marcReader.hasNext()) {
+        var marcRecord = marcReader.next();
+        var fieldToRemove = marcRecord.getVariableFields().stream()
+                .filter(vf -> vf instanceof DataField df && df.getTag().equals("999")
+                && df.getIndicator1() == 'f' && df.getIndicator2() == 'f').findFirst();
+        fieldToRemove.ifPresent(marcRecord::removeVariableField);
+        marcWriter.write(marcRecord);
+      }
+      return new ByteArrayInputStream(marcOutputStream.toByteArray());
+    } catch (IOException e) {
+      log.error("Failed to remove tag {} from marc record: {}", "999ff", e.getMessage());
+      return marcFileContent;
     }
   }
 }
