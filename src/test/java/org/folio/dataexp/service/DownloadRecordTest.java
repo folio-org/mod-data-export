@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.domain.dto.IdType;
@@ -113,7 +114,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void suppress999FieldIfParameterIsTrue() throws IOException {
+  void suppress999ffFieldIfParameterIsTrue() throws IOException {
     final String fileContent =
             "00237cam a2200073 i 4500001001400000008004100014373002900055999007900084"
             + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001F"
@@ -132,7 +133,7 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   }
 
   @Test
-  void doNotSuppress999FieldIfParameterIsFalse() throws IOException {
+  void doNotSuppress999ffFieldIfParameterIsFalse() throws IOException {
     final String fileContent =
             "00237cam a2200073 i 4500001001400000008004100014373002900055999007900084"
             + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001F"
@@ -146,6 +147,54 @@ class DownloadRecordTest extends BaseDataExportInitializer {
       var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
               true, "-utf", IdType.AUTHORITY, false);
       assertTrue(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void whenMarcFileDoesntExist_suppress999ffInGeneratedMarc() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
+              true, "-utf", IdType.AUTHORITY, true);
+      assertFalse(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
+    }
+  }
+
+  @Test
+  @SneakyThrows
+  void whenMarcFileDoesntExist_doNotSuppress999ffInGeneratedMarc() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var actualResult = downloadRecordService.processRecordDownload(UUID.fromString(AUTHORITY_ID),
+              true, "-utf", IdType.AUTHORITY, false);
+      assertTrue(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
+              .contains("999"));
+    }
+  }
+
+  // Java
+  @Test
+  void whenMarcFileExists_nonUtf_suppress999ff_removesField() throws IOException {
+    final String fileContent =
+            "00235cam  2200073 i 4500001001400000008004100014373002700055999007900082"
+            + "\u001Ein00000001098\u001E210701t20222022nyua   c      001 0 eng d\u001E  \u001Fa"
+            + "\u001B(Ssapfslvx\"jolr\u001B(B\u001B(B\u001Eff\u001Fs17eed93e-f9e2-4cb2-a52b-e91"
+            + "55acfc119\u001Fi4a090b0f-9da3-40f1-ab17-33d6a1e3abae\u001E\u001D";
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var filePath = "mod-data-export/download/%s/%s.mrc"
+              .formatted(AUTHORITY_ID + "-marc8", AUTHORITY_ID + "-marc8");
+      s3Client.write(filePath, new ByteArrayInputStream(fileContent.getBytes()));
+
+      var actualResult = downloadRecordService.processRecordDownload(
+              UUID.fromString(AUTHORITY_ID),
+              false, // isUtf = false
+              "-marc8",
+              IdType.AUTHORITY,
+              true // suppress999ff = true
+      );
+
+      assertFalse(IOUtils.toString(actualResult.getInputStream(), StandardCharsets.UTF_8)
               .contains("999"));
     }
   }

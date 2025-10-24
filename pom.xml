@@ -45,7 +45,6 @@
     <generate-marc-utils-version>1.10.0</generate-marc-utils-version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
-    <jackson.version>2.20.0</jackson.version>
     <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
     <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
     <folio-s3-client.version>2.3.0</folio-s3-client.version>
@@ -293,18 +292,6 @@
       <version>${json-path.version}</version>
     </dependency>
   </dependencies>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>${jackson.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 
   <build>
     <plugins>
