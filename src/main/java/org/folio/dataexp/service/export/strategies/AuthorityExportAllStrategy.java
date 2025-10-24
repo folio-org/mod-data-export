@@ -14,7 +14,6 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -33,14 +32,12 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
   public AuthorityExportAllStrategy(
       ConsortiaService consortiaService,
       ErrorLogEntityCqlRepository errorLogEntityCqlRepository,
-      MarcAuthorityRecordRepository marcAuthorityRecordRepository,
-      FolioExecutionContext context
+      MarcAuthorityRecordRepository marcAuthorityRecordRepository
   ) {
     super(
         consortiaService,
         errorLogEntityCqlRepository,
-        marcAuthorityRecordRepository,
-        context
+        marcAuthorityRecordRepository
     );
   }
 
@@ -50,7 +47,7 @@ public class AuthorityExportAllStrategy extends AuthorityExportStrategy {
   @Override
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findAllByExternalIdIn(
-        context.getTenantId(),
+        folioExecutionContext.getTenantId(),
         externalIds
     );
   }

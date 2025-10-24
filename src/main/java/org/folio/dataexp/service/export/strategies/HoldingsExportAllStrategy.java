@@ -15,7 +15,6 @@ import org.folio.dataexp.repository.FolioHoldingsAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
-import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcHoldingsAllRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -45,7 +44,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   /**
    * Constructs a new HoldingsExportAllStrategy with all required dependencies.
    *
-   * @param instanceEntityRepository Repository for instance entities.
    * @param itemEntityRepository Repository for item entities.
    * @param ruleFactory Factory for creating rules.
    * @param ruleProcessor Processor for applying rules.
@@ -65,7 +63,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
    * @param permissionsValidator Validator for permissions.
    */
   public HoldingsExportAllStrategy(
-      InstanceEntityRepository instanceEntityRepository,
       ItemEntityRepository itemEntityRepository,
       RuleFactory ruleFactory,
       RuleProcessor ruleProcessor,
@@ -85,7 +82,6 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       PermissionsValidator permissionsValidator
   ) {
     super(
-        instanceEntityRepository,
         itemEntityRepository,
         ruleFactory,
         ruleProcessor,

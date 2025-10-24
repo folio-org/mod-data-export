@@ -27,7 +27,6 @@ import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,7 +44,6 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   protected final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
-  protected final FolioExecutionContext context;
 
   /**
    * Gets MARC Authority records for the given external IDs and mapping profile.
@@ -127,7 +125,8 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    * @return list of MarcRecordEntity
    */
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
-    return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(),
+    return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(
+      folioExecutionContext.getTenantId(),
       externalIds);
   }
 
