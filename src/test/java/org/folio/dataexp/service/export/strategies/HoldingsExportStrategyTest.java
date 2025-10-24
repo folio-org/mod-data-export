@@ -110,6 +110,7 @@ class HoldingsExportStrategyTest {
     holdingsExportStrategy.folioExecutionContext = folioExecutionContext;
     holdingsExportStrategy.entityManager = entityManager;
     holdingsExportStrategy.errorLogService = errorLogService;
+    holdingsExportStrategy.setInstanceEntityRepository(instanceEntityRepository);
   }
 
   @Test
