@@ -403,7 +403,6 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       Set<UUID> instancesIds, GeneratedMarcResult generatedMarcResult,
       MappingProfile mappingProfile) {
     var instances = instanceEntityRepository.findByIdIn(instancesIds);
-    log.info("instances: {}", instances);
     entityManager.clear();
     return getInstancesWithHoldingsAndItems(
         instancesIds, generatedMarcResult, mappingProfile, instances);
@@ -459,7 +458,7 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
       var instanceWithHoldingsAndItems = new JSONObject();
       var instanceJson = instanceJsonOpt.get();
       instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
-      log.info("getInstancesWithHoldingsAndItems instanceJson: {}", instanceJson);
+      log.debug("getInstancesWithHoldingsAndItems instanceJson: {}", instanceJson);
 
       if (!instancesIdsFromCentral.contains(instance.getId())) {
         holdingsItemsResolver.retrieveHoldingsAndItemsByInstanceId(
