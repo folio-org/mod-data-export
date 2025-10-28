@@ -2,11 +2,8 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -25,7 +22,6 @@ import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 
 /**
  * Abstract base class for all export strategies, providing common logic for
@@ -37,7 +33,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
   protected String exportTmpStorage;
-  private static final String SAVE_ERROR = "{}: Error while saving file {} for job execution ID {}";
+  protected static final String SAVE_ERROR =
+      "{}: Error while saving file {} for job execution ID {}";
 
   protected ExportIdEntityRepository exportIdEntityRepository;
   protected MappingProfileEntityRepository mappingProfileEntityRepository;
@@ -138,9 +135,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   /**
-   * Processes slices of export IDs for the export file entity. This implementation
-   * takes a multithreaded approach. Override to go with non-multithreaded instead
-   * if the underlying record gathering is not guaranteed to be thread safe.
+   * Process slices of export IDs for paged record retrieval and file creation.
+   *
+   * @param exportFilesEntity the export file entity
+   * @param exportStatistic the export statistics
+   * @param mappingProfile mapping profile to use
+   * @param exportRequest  the export request
+   * @param localStorageWriter writes to local storage
    */
   protected void processSlices(
       JobExecutionExportFilesEntity exportFilesEntity,
@@ -149,48 +150,35 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       ExportRequest exportRequest,
       LocalStorageWriter localStorageWriter
   ) {
-    var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
-    var page = 0;
-    Slice<ExportIdEntity> slice;
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-      do {
-        final var taskId = page;
-        slice = exportIdEntityRepository.getExportIds(
-            jobExecutionId,
-            exportFilesEntity.getFromId(),
-            exportFilesEntity.getToId(),
-            PageRequest.of(taskId, exportIdsBatch)
-        );
-        log.debug("Slice size: {}", slice.getSize());
-        var exportIds = slice.getContent().stream()
-            .map(ExportIdEntity::getInstanceId)
-            .collect(Collectors.toSet());
-        tasks.add(
-            CompletableFuture.supplyAsync(() ->
-                createAndSaveSliceRecords(
-                    exportIds,
-                    exportStatistic,
-                    mappingProfile,
-                    exportFilesEntity,
-                    exportRequest,
-                    taskId
-                ),
-                executor
-            )
-        );
-        page++;
-      } while (slice.hasNext());
+    var slice = exportIdEntityRepository.getExportIds(
+        exportFilesEntity.getJobExecutionId(),
+        exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(),
+        PageRequest.of(0, exportIdsBatch)
+    );
+    log.info("Slice size: {}", slice.getSize());
+    var exportIds = slice.getContent().stream()
+        .map(ExportIdEntity::getInstanceId)
+        .collect(Collectors.toSet());
+    createAndSaveRecords(
+        exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, localStorageWriter
+    );
+    while (slice.hasNext()) {
+      slice = exportIdEntityRepository.getExportIds(
+          exportFilesEntity.getJobExecutionId(),
+          exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(),
+          slice.nextPageable()
+      );
+      exportIds = slice.getContent().stream()
+          .map(ExportIdEntity::getInstanceId)
+          .collect(Collectors.toSet());
+      createAndSaveRecords(
+          exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, localStorageWriter
+      );
     }
-
-    CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
-
-    tasks.stream()
-        .map(CompletableFuture::join)
-        .forEach(sliceResult -> {
-          copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
-          exportStatistic.aggregate(sliceResult.getStatistic());
-        });
   }
 
   /**
@@ -251,35 +239,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       ExportRequest exportRequest,
       LocalStorageWriter writer
   );
-
-  private void copySliceResultToFinal(
-      ExportSliceResult sliceResult,
-      LocalStorageWriter finalOutput,
-      UUID jobExecutionId
-  ) {
-    try {
-      if (sliceResult.getStatistic().getExported() > 0) {
-        var readerOpt = sliceResult.getReader();
-        if (readerOpt.isPresent()) {
-          var reader = readerOpt.get();
-          String line;
-          while ((line = reader.readLine()) != null) {
-            finalOutput.write(line);
-          }
-        } else {
-          sliceResult.getStatistic().failAll();
-        }
-      }
-    } catch (Exception e) {
-      log.error(
-          SAVE_ERROR,
-          "copySliceResultToFinal",
-          sliceResult.getOutputFile(),
-          jobExecutionId
-      );
-      sliceResult.getStatistic().failAll();
-    }
-  }
 
   /**
    * Creates a LocalStorageWriter for the given export file entity.

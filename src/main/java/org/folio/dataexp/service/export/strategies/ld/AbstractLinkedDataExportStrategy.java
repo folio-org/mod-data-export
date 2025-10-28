@@ -2,9 +2,12 @@ package org.folio.dataexp.service.export.strategies.ld;
 
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_LD_TO_BIBFRAME;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -12,10 +15,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.entity.ExportIdEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
+import org.folio.dataexp.service.export.strategies.ExportSliceResult;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 /**
  * Abstract base class for Linked Data export strategies, providing common logic
@@ -28,6 +36,92 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
   private LinkedDataConverter linkedDataConverter;
 
   abstract List<LinkedDataResource> getLinkedDataResources(Set<UUID> externalIds);
+
+  /**
+   * Processes slices of export IDs for the export file entity. This implementation
+   * takes a multithreaded approach. Override to go with non-multithreaded instead
+   * if the underlying record gathering is not guaranteed to be thread safe.
+   */
+  @Override
+  protected void processSlices(
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      LocalStorageWriter localStorageWriter
+  ) {
+    var jobExecutionId = exportFilesEntity.getJobExecutionId();
+    var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
+    var page = 0;
+    Slice<ExportIdEntity> slice;
+    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+      do {
+        final var taskId = page;
+        slice = exportIdEntityRepository.getExportIds(
+            jobExecutionId,
+            exportFilesEntity.getFromId(),
+            exportFilesEntity.getToId(),
+            PageRequest.of(taskId, exportIdsBatch)
+        );
+        log.debug("Slice size: {}", slice.getSize());
+        var exportIds = slice.getContent().stream()
+            .map(ExportIdEntity::getInstanceId)
+            .collect(Collectors.toSet());
+        tasks.add(
+            CompletableFuture.supplyAsync(() ->
+                createAndSaveSliceRecords(
+                    exportIds,
+                    exportStatistic,
+                    mappingProfile,
+                    exportFilesEntity,
+                    exportRequest,
+                    taskId
+                ),
+                executor
+            )
+        );
+        page++;
+      } while (slice.hasNext());
+    }
+
+    CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
+
+    tasks.stream()
+        .map(CompletableFuture::join)
+        .forEach(sliceResult -> {
+          copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
+          exportStatistic.aggregate(sliceResult.getStatistic());
+        });
+  }
+  
+  private void copySliceResultToFinal(
+      ExportSliceResult sliceResult,
+      LocalStorageWriter finalOutput,
+      UUID jobExecutionId
+  ) {
+    try {
+      if (sliceResult.getStatistic().getExported() > 0) {
+        var readerOpt = sliceResult.getReader();
+        if (readerOpt.isPresent()) {
+          var reader = readerOpt.get();
+          String line;
+          while ((line = reader.readLine()) != null) {
+            finalOutput.write(line);
+          }
+        } else {
+          sliceResult.getStatistic().failAll();
+        }
+      }
+    } catch (Exception e) {
+      log.error(
+          SAVE_ERROR,
+          "copySliceResultToFinal",
+          sliceResult.getOutputFile(),
+          jobExecutionId
+      );
+      sliceResult.getStatistic().failAll();
+    }
+  }
 
   /**
    * Process the whole set of export IDs in slices, where each slice is turned into a
