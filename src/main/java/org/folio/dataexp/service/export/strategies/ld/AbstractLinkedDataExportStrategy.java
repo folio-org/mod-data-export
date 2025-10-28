@@ -3,10 +3,10 @@ package org.folio.dataexp.service.export.strategies.ld;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_LD_TO_BIBFRAME;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -51,9 +51,9 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       LocalStorageWriter localStorageWriter
   ) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
     var page = 0;
     Slice<ExportIdEntity> slice;
+    var sliceResults = Collections.synchronizedList(new ArrayList<ExportSliceResult>());
     try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
       do {
         final var taskId = page;
@@ -67,27 +67,21 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
         var exportIds = slice.getContent().stream()
             .map(ExportIdEntity::getInstanceId)
             .collect(Collectors.toSet());
-        tasks.add(
-            CompletableFuture.supplyAsync(() ->
-                createAndSaveSliceRecords(
-                    exportIds,
-                    exportStatistic,
-                    mappingProfile,
-                    exportFilesEntity,
-                    exportRequest,
-                    taskId
-                ),
-                executor
-            )
+        executor.submit(() -> sliceResults.add(
+            createAndSaveSliceRecords(
+                exportIds,
+                exportStatistic,
+                mappingProfile,
+                exportFilesEntity,
+                exportRequest,
+                taskId
+            ))
         );
         page++;
       } while (slice.hasNext());
     }
 
-    CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
-
-    tasks.stream()
-        .map(CompletableFuture::join)
+    sliceResults.stream()
         .forEach(sliceResult -> {
           copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
           exportStatistic.aggregate(sliceResult.getStatistic());
