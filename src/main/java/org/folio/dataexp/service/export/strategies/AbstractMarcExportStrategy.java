@@ -25,6 +25,8 @@ import net.minidev.json.parser.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.entity.ExportIdEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -33,6 +35,7 @@ import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 /**
  * Abstract base class for MARC export strategies, providing common logic for exporting
@@ -306,6 +309,45 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
                 (srsId1, srsId2) -> srsId1
             )
         );
+  }
+
+  @Override
+  protected void processSlices(
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      LocalStorageWriter localStorageWriter
+  ) {
+    var slice = exportIdEntityRepository.getExportIds(
+        exportFilesEntity.getJobExecutionId(),
+        exportFilesEntity.getFromId(),
+        exportFilesEntity.getToId(),
+        PageRequest.of(0, exportIdsBatch)
+    );
+    log.info("Slice size: {}", slice.getSize());
+    var exportIds = slice.getContent().stream()
+        .map(ExportIdEntity::getInstanceId)
+        .collect(Collectors.toSet());
+    createAndSaveRecords(
+        exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+        exportRequest, localStorageWriter
+    );
+    while (slice.hasNext()) {
+      slice = exportIdEntityRepository.getExportIds(
+          exportFilesEntity.getJobExecutionId(),
+          exportFilesEntity.getFromId(),
+          exportFilesEntity.getToId(),
+          slice.nextPageable()
+      );
+      exportIds = slice.getContent().stream()
+          .map(ExportIdEntity::getInstanceId)
+          .collect(Collectors.toSet());
+      createAndSaveRecords(
+          exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
+          exportRequest, localStorageWriter
+      );
+    }
   }
 
   @Override

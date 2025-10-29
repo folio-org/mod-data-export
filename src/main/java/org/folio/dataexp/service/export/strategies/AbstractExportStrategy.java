@@ -4,12 +4,10 @@ import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
@@ -21,7 +19,6 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * Abstract base class for all export strategies, providing common logic for
@@ -143,80 +140,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    * @param exportRequest  the export request
    * @param localStorageWriter writes to local storage
    */
-  protected void processSlices(
+  protected abstract void processSlices(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
       ExportRequest exportRequest,
       LocalStorageWriter localStorageWriter
-  ) {
-    var slice = exportIdEntityRepository.getExportIds(
-        exportFilesEntity.getJobExecutionId(),
-        exportFilesEntity.getFromId(),
-        exportFilesEntity.getToId(),
-        PageRequest.of(0, exportIdsBatch)
-    );
-    log.info("Slice size: {}", slice.getSize());
-    var exportIds = slice.getContent().stream()
-        .map(ExportIdEntity::getInstanceId)
-        .collect(Collectors.toSet());
-    createAndSaveRecords(
-        exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-        exportRequest, localStorageWriter
-    );
-    while (slice.hasNext()) {
-      slice = exportIdEntityRepository.getExportIds(
-          exportFilesEntity.getJobExecutionId(),
-          exportFilesEntity.getFromId(),
-          exportFilesEntity.getToId(),
-          slice.nextPageable()
-      );
-      exportIds = slice.getContent().stream()
-          .map(ExportIdEntity::getInstanceId)
-          .collect(Collectors.toSet());
-      createAndSaveRecords(
-          exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
-          exportRequest, localStorageWriter
-      );
-    }
-  }
-
-  /**
-   * Wrap actual create-and-save strategies with boilerplate writer, statistic, and
-   * return object setup.
-   */
-  protected ExportSliceResult createAndSaveSliceRecords(
-      Set<UUID> externalIds,
-      ExportStrategyStatistic exportStatistic,
-      MappingProfile mappingProfile,
-      JobExecutionExportFilesEntity exportFilesEntity,
-      ExportRequest exportRequest,
-      int pageNumber
-  ) {
-    var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
-    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
-    createAndSaveRecords(
-        externalIds,
-        sliceStatistic,
-        mappingProfile,
-        jobExecutionId,
-        exportRequest,
-        writer
-    );
-    try {
-      writer.close();
-    } catch (Exception e) {
-      log.error(
-          SAVE_ERROR,
-          "createAndSaveSliceRecords",
-          writer.getPath(),
-          jobExecutionId
-      );
-      sliceStatistic.failAll();
-    }
-    return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
-  }
+  );
 
   /**
    * Per-strategy implementation of retrieving and writing records to disk within

@@ -3,10 +3,10 @@ package org.folio.dataexp.service.export.strategies.ld;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_LD_TO_BIBFRAME;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -22,6 +22,7 @@ import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportSliceResult;
 import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -33,14 +34,22 @@ import org.springframework.data.domain.Slice;
 @Getter
 public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStrategy {
 
+  protected int processSlicesThreadPoolSize;
+
   private LinkedDataConverter linkedDataConverter;
 
   abstract List<LinkedDataResource> getLinkedDataResources(Set<UUID> externalIds);
 
+  @Value("#{T(Integer).parseInt('${application.process-slices-thread-pool-size}')}")
+  protected void setProcessSlicesThreadPoolSize(int processSlicesThreadPoolSize) {
+    this.processSlicesThreadPoolSize = processSlicesThreadPoolSize;
+  }
+
   /**
    * Processes slices of export IDs for the export file entity. This implementation
-   * takes a multithreaded approach. Override to go with non-multithreaded instead
-   * if the underlying record gathering is not guaranteed to be thread safe.
+   * takes a multithreaded approach. It is generic enough that it can be moved to the
+   * superclass along with createAndSaveSliceRecords, replacing similar single-threaded
+   * implementations in other strategies when determined to be appropriate.
    */
   @Override
   protected void processSlices(
@@ -51,10 +60,17 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       LocalStorageWriter localStorageWriter
   ) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
+    var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
     var page = 0;
     Slice<ExportIdEntity> slice;
-    var sliceResults = Collections.synchronizedList(new ArrayList<ExportSliceResult>());
-    try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    // Due to uses of the synchronized keyword in some of the methods called by
+    // the per-thread work, virtual threads must be skipped, because synchronized
+    // blocks cause virtual threads to be pinned to platform threads. This may
+    // lead to resource exhaustion since virtual threads are treated as an
+    // unlimited resource, but platform threads are not. With Java 24+,
+    // synchronized blocks can be used with virtual threads, and this implementation
+    // can be rewritten to use virtual threads without CompleteableFutures.
+    try (var executor = Executors.newFixedThreadPool(processSlicesThreadPoolSize)) {
       do {
         final var taskId = page;
         slice = exportIdEntityRepository.getExportIds(
@@ -67,27 +83,72 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
         var exportIds = slice.getContent().stream()
             .map(ExportIdEntity::getInstanceId)
             .collect(Collectors.toSet());
-        executor.submit(() -> sliceResults.add(
-            createAndSaveSliceRecords(
-                exportIds,
-                exportStatistic,
-                mappingProfile,
-                exportFilesEntity,
-                exportRequest,
-                taskId
-            ))
+        tasks.add(
+            CompletableFuture.supplyAsync(() ->
+              createAndSaveSliceRecords(
+                  exportIds,
+                  exportStatistic,
+                  mappingProfile,
+                  exportFilesEntity,
+                  exportRequest,
+                  taskId
+              ))
         );
         page++;
       } while (slice.hasNext());
     }
 
-    sliceResults.stream()
+    CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
+
+    tasks.stream()
+        .map(CompletableFuture::join)
         .forEach(sliceResult -> {
           copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
           exportStatistic.aggregate(sliceResult.getStatistic());
         });
   }
   
+  /**
+   * Wrap actual create-and-save strategies with boilerplate writer, statistic, and
+   * return object setup. This is generic enough to be part of the abstract export
+   * strategy once multithreading is considered to be mature enough for general use.
+   */
+  protected ExportSliceResult createAndSaveSliceRecords(
+      Set<UUID> externalIds,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportRequest exportRequest,
+      int pageNumber
+  ) {
+    var jobExecutionId = exportFilesEntity.getJobExecutionId();
+    var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
+    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
+    createAndSaveRecords(
+        externalIds,
+        sliceStatistic,
+        mappingProfile,
+        jobExecutionId,
+        exportRequest,
+        writer
+    );
+    try {
+      writer.close();
+    } catch (Exception e) {
+      log.error(
+          SAVE_ERROR,
+          "createAndSaveSliceRecords",
+          writer.getPath(),
+          jobExecutionId
+      );
+      sliceStatistic.failAll();
+    }
+    return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
+  }
+
+  /**
+   * Consolidate slice results into a final output file.
+   */
   private void copySliceResultToFinal(
       ExportSliceResult sliceResult,
       LocalStorageWriter finalOutput,

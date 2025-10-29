@@ -78,7 +78,7 @@ class AbstractLinkedDataExportStrategyTest {
   private LinkedDataConverter linkedDataConverter;
 
   @InjectMocks
-  private AbstractLinkedDataExportStrategy exportStrategy = new LdTestExportStrategy(1);
+  private AbstractLinkedDataExportStrategy exportStrategy = new LdTestExportStrategy(1, 5);
 
   @BeforeEach
   void clear() {
@@ -288,8 +288,9 @@ class AbstractLinkedDataExportStrategyTest {
   }
 
   class LdTestExportStrategy extends AbstractLinkedDataExportStrategy {
-    LdTestExportStrategy(int exportBatch) {
+    LdTestExportStrategy(int exportBatch, int threadPool) {
       super.setExportIdsBatch(exportBatch);
+      super.setProcessSlicesThreadPoolSize(threadPool);
     }
 
     @Setter
