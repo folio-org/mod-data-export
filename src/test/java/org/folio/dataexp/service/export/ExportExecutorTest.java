@@ -98,6 +98,8 @@ class ExportExecutorTest {
     when(instancesExportStrategy.saveOutputToLocalStorage(isA(JobExecutionExportFilesEntity.class),
         isA(ExportRequest.class), isA(ExportedRecordsListener.class)))
             .thenReturn(new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    when(instancesExportStrategy.getFilenameSuffix())
+        .thenReturn("mrc");
 
     exportExecutor.export(exportEntity, new ExportRequest(), commonExportStatistic);
 
@@ -146,6 +148,8 @@ class ExportExecutorTest {
     when(instancesExportStrategy.saveOutputToLocalStorage(isA(JobExecutionExportFilesEntity.class),
         isA(ExportRequest.class), isA(ExportedRecordsListener.class)))
             .thenReturn(new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    when(instancesExportStrategy.getFilenameSuffix())
+        .thenReturn("mrc");
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2L);
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
         .id(fileDefinition.getId()).build();
