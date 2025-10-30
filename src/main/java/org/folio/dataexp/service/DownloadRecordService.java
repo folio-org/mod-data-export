@@ -63,9 +63,13 @@ public class DownloadRecordService {
     var dirName = recordId.toString() + formatPostfix;
     InputStream marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent == null) {
-      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf,
-              idType, suppress999ff);
+      byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType);
       uploadMarcFile(dirName, marcFileContentBytes);
+      if (suppress999ff) {
+        var inputStreamWithRemoved999ff = remove999ffField(isUtf,
+                new ByteArrayInputStream(marcFileContentBytes));
+        return new InputStreamResource(inputStreamWithRemoved999ff);
+      }
       return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
     } else {
       if (suppress999ff) {
@@ -96,15 +100,11 @@ public class DownloadRecordService {
   private byte[] generateRecordFileContentBytes(
       final UUID recordId,
       boolean isUtf,
-      final IdType idType,
-      boolean suppress999ff
+      final IdType idType
   ) {
     var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
     var marcRecord = exportStrategy.getMarcRecord(recordId);
     var mappingProfile = exportStrategy.getDefaultMappingProfile();
-    if (suppress999ff) {
-      mappingProfile.setSuppress999ff(true);
-    }
     try {
       return jsonToMarcConverter.convertJsonRecordToMarcRecord(
           marcRecord.getContent(),

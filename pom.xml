@@ -42,7 +42,7 @@
 
     <folio-spring-base.version>9.0.0</folio-spring-base.version>
     <folio-spring-cql.version>9.0.0</folio-spring-cql.version>
-    <generate-marc-utils-version>1.10.0</generate-marc-utils-version>
+    <generate-marc-utils-version>1.11.0-SNAPSHOT</generate-marc-utils-version>
     <apache-commons-collections.version>4.4</apache-commons-collections.version>
     <feign-jackson.version>12.1</feign-jackson.version>
     <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
