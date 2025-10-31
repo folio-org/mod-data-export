@@ -38,7 +38,7 @@ import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.export.LocalStorageWriter;
-import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
+import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +137,7 @@ class AbstractLinkedDataExportStrategyTest {
     doThrow(new LocalStorageWriterException("Cannot write")).when(localStorageWriter).close();
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
-        new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
+        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, jobExecutionEntity.getId()));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
@@ -189,7 +189,7 @@ class AbstractLinkedDataExportStrategyTest {
     var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
-        new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
+        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, jobExecutionEntity.getId()));
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
@@ -275,7 +275,7 @@ class AbstractLinkedDataExportStrategyTest {
         .thenReturn(Optional.of(new BufferedReader(new StringReader("{}"))));
 
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(exportFilesEntity,
-        new ExportRequest(), new ExportedMarcListener(jobExecutionEntityRepository,
+        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, jobExecutionEntity.getId()));
     assertEquals(threads, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());

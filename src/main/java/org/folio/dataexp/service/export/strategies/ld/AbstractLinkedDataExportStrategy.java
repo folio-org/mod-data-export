@@ -123,7 +123,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
   ) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
-    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedMarcListener());
+    var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedRecordsListener());
     createAndSaveRecords(
         externalIds,
         sliceStatistic,

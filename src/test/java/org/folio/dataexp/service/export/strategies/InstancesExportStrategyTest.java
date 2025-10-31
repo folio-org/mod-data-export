@@ -212,7 +212,7 @@ class InstancesExportStrategyTest {
     doNothing().when(instancesExportStrategy.entityManager).clear();
     instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(),
         UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedMarcListener(null, 1000, null)));
+            new ExportedRecordsListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
@@ -256,7 +256,7 @@ class InstancesExportStrategyTest {
 
     var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(),
         mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedMarcListener(null, 1000, null)));
+            new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, generatedMarcResult.getFailedIds().size());
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(),

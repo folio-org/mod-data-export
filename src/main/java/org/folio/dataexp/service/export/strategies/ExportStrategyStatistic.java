@@ -14,15 +14,15 @@ public class ExportStrategyStatistic {
   private int failed;
   private int duplicatedSrs;
   private final List<UUID> notExistIds = new ArrayList<>();
-  private ExportedMarcListener exportedMarcListener;
+  private ExportedRecordsListener exportedRecordsListener;
 
   /**
    * Constructs an ExportStrategyStatistic.
    *
-   * @param exportedMarcListener the listener for exported MARC records
+   * @param exportedRecordsListener the listener for exported records
    */
-  public ExportStrategyStatistic(ExportedMarcListener exportedMarcListener) {
-    this.exportedMarcListener = exportedMarcListener;
+  public ExportStrategyStatistic(ExportedRecordsListener exportedRecordsListener) {
+    this.exportedRecordsListener = exportedRecordsListener;
   }
 
   /**
@@ -30,15 +30,15 @@ public class ExportStrategyStatistic {
    */
   public void incrementExported() {
     this.exported = this.exported + 1;
-    exportedMarcListener.incrementExported();
+    exportedRecordsListener.incrementExported();
   }
 
   /**
    * Removes exported count and updates the listener.
    */
   public void removeExported() {
-    exportedMarcListener.removeExported(exported);
     this.exported = 0;
+    exportedRecordsListener.removeExported(exported);
   }
 
   /**

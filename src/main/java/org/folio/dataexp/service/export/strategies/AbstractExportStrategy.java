@@ -52,22 +52,22 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
 
   /**
-   * Saves MARC records to local storage for the given export file entity.
+   * Saves records to local storage for the given export file entity.
    *
    * @param exportFilesEntity the export file entity
    * @param exportRequest the export request
-   * @param exportedMarcListener the listener for exported MARC records
+   * @param exportedRecordsListener the listener for exported records
    * @return ExportStrategyStatistic containing export statistics
    */
   @Override
   public ExportStrategyStatistic saveOutputToLocalStorage(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
-      ExportedMarcListener exportedMarcListener
+      ExportedRecordsListener exportedRecordsListener
   ) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
-    var exportStatistic = new ExportStrategyStatistic(exportedMarcListener);
-    var mappingProfile = getMappingProfile(jobExecutionId);
+    var exportStatistic = new ExportStrategyStatistic(exportedRecordsListener);
+    var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWriter(exportFilesEntity);
     processSlices(
         exportFilesEntity,
