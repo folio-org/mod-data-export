@@ -161,7 +161,7 @@ class HoldingsExportStrategyTest {
         .thenReturn(List.of(holdingRecordEntity));
     holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(),
         new ExportRequest(), UUID.randomUUID(),
-        new ExportStrategyStatistic(new ExportedMarcListener(null, 1000, null)));
+        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(),
@@ -181,7 +181,7 @@ class HoldingsExportStrategyTest {
         isA(RecordWriter.class), any(), anyList(), any());
     var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(),
         new MappingProfile(), new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedMarcListener(null, 1000, null)));
+            new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, generatedMarcResult.getFailedIds().size());
     var actualErrorMessage =
         List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
