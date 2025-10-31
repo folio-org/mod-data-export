@@ -268,7 +268,7 @@ class AbstractMarcExportStrategyTest {
   @Test
   void getAsJsonObjectTest() {
     var jsonAsString = "{'id':'123'}";
-    var opt = exportStrategy.getAsJsonObject(jsonAsString);
+    var opt = TestExportStrategy.getAsJsonObject(jsonAsString);
 
     assertTrue(opt.isPresent());
 

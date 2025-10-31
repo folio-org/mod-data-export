@@ -156,7 +156,7 @@ public class BaseDataExportInitializer {
       new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-      .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+      .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
       .registerModule(new JavaTimeModule().addDeserializer(LocalDateTime.class,
           localDateTimeDeserializer))
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
