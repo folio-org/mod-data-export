@@ -131,7 +131,9 @@ public enum ErrorCode {
     "%s - the user %s does not have permissions to access the holdings record in %s data tenant."),
   ERROR_INSTANCE_NO_PERMISSION("error.instance.noPermission",
     "%s the user %s does not have permissions to view holdings or items in %s"
-    + " data tenant(s). Holdings and item records from this tenant were omitted during export.");
+    + " data tenant(s). Holdings and item records from this tenant were omitted during export."),
+  ERROR_CONVERTING_LD_TO_BIBFRAME("error.convertLdToBf",
+    "Error converting Linked Data resource to BIBFRAME 2.0 for record %s");
 
   /** The unique error code identifier. */
   private final String code;

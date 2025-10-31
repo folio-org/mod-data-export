@@ -84,6 +84,7 @@ class InstancesExportAllStrategyTest {
   @BeforeEach
   void setUp() {
     instancesExportAllStrategy.folioExecutionContext = folioExecutionContext;
+    instancesExportAllStrategy.setInstanceEntityRepository(instanceEntityRepository);
   }
 
   @Test

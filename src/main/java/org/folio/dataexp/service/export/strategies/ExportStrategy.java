@@ -16,7 +16,7 @@ public interface ExportStrategy {
    * @param exportedMarcListener the listener for exported MARC records
    * @return ExportStrategyStatistic containing export statistics
    */
-  ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity,
+  ExportStrategyStatistic saveOutputToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest, ExportedMarcListener exportedMarcListener);
 
   /**

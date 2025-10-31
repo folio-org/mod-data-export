@@ -4,7 +4,6 @@ import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.maxBy;
-import static java.util.stream.Collectors.toList;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_UUID_IS_SET_TO_DELETION;
@@ -28,7 +27,6 @@ import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
-import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class AuthorityExportStrategy extends AbstractExportStrategy {
+public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
 
   // deliberate typo in constant name to bypass sonar security hotspot
   // "'AUTH' detected in this expression, review this potentially hard-coded secret."
@@ -46,7 +44,6 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   protected final MarcAuthorityRecordRepository marcAuthorityRecordRepository;
-  protected final FolioExecutionContext context;
 
   /**
    * Gets MARC Authority records for the given external IDs and mapping profile.
@@ -128,7 +125,8 @@ public class AuthorityExportStrategy extends AbstractExportStrategy {
    * @return list of MarcRecordEntity
    */
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
-    return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(context.getTenantId(),
+    return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(
+      folioExecutionContext.getTenantId(),
       externalIds);
   }
 
