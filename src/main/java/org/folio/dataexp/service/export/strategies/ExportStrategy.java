@@ -19,6 +19,14 @@ public interface ExportStrategy {
   ExportStrategyStatistic saveOutputToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest, ExportedRecordsListener exportedRecordsListener);
 
+
+  /**
+   * Returns the filename suffix associated with this strategy.
+   *
+   * @return filename suffix
+   */
+  String getFilenameSuffix();
+
   /**
    * Sets the status of the export file entity based on export statistics.
    *

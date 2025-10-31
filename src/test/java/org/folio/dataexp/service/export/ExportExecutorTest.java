@@ -98,12 +98,15 @@ class ExportExecutorTest {
     when(instancesExportStrategy.saveOutputToLocalStorage(isA(JobExecutionExportFilesEntity.class),
         isA(ExportRequest.class), isA(ExportedRecordsListener.class)))
             .thenReturn(new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    when(instancesExportStrategy.getFilenameSuffix())
+        .thenReturn("mrc");
 
     exportExecutor.export(exportEntity, new ExportRequest(), commonExportStatistic);
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, exportEntity.getStatus());
     assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
-    verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity), "file_name");
+    verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity),
+        "file_name", "mrc");
     verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }
 
@@ -145,6 +148,8 @@ class ExportExecutorTest {
     when(instancesExportStrategy.saveOutputToLocalStorage(isA(JobExecutionExportFilesEntity.class),
         isA(ExportRequest.class), isA(ExportedRecordsListener.class)))
             .thenReturn(new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    when(instancesExportStrategy.getFilenameSuffix())
+        .thenReturn("mrc");
     when(errorLogEntityCqlRepository.countByJobExecutionId(isA(UUID.class))).thenReturn(2L);
     var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
         .id(fileDefinition.getId()).build();
@@ -159,7 +164,7 @@ class ExportExecutorTest {
     verify(errorLogService).saveCommonExportFailsErrors(commonExportStatistic, 2,
         jobExecutionId);
     verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity),
-        "file_name");
+        "file_name", "mrc");
     verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }
 }
