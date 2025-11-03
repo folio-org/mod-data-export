@@ -83,11 +83,12 @@ class AbstractLinkedDataExportStrategyTest {
 
   @Builder
   private static class TestPreparation {
+    UUID exportId;
     JobExecutionExportFilesEntity exportFilesEntity;
     JobExecutionEntity jobExecutionEntity;
   }
 
-  private TestPreparation prepare(UUID exportId, boolean include, boolean updateJob) {
+  private TestPreparation prepare(boolean include, boolean updateJob) {
     var jobProfileEntity = new JobProfileEntity();
     var jobExecution = JobExecution.builder()
             .progress(new JobExecutionProgress())
@@ -101,6 +102,7 @@ class AbstractLinkedDataExportStrategyTest {
     mappingProfileEntity.setId(jobProfileEntity.getMappingProfileId());
     mappingProfileEntity.setMappingProfile(new MappingProfile());
 
+    var exportId = UUID.randomUUID();
     var linkedDataResources = new ArrayList<LinkedDataResource>();
     if (include) {
       var linkedDataResource = new LinkedDataResource();
@@ -139,6 +141,7 @@ class AbstractLinkedDataExportStrategyTest {
     }
 
     return TestPreparation.builder()
+        .exportId(exportId)
         .exportFilesEntity(exportFilesEntity)
         .jobExecutionEntity(jobExecutionEntity)
         .build();
@@ -147,14 +150,13 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageTest() {
-    var exportId = UUID.randomUUID();
-    var preparation = prepare(exportId, true, true);
     var output = new ByteArrayOutputStream(2);
     output.write("{}".getBytes());
 
     when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class)))
         .thenReturn(output);
 
+    var preparation = prepare(true, true);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
         new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, preparation.jobExecutionEntity.getId()));
@@ -180,8 +182,7 @@ class AbstractLinkedDataExportStrategyTest {
         .thenReturn(output);
     doThrow(new LocalStorageWriterException("Cannot write")).when(localStorageWriter).close();
 
-    var exportId = UUID.randomUUID();
-    var preparation = prepare(exportId, true, true);
+    var preparation = prepare(true, true);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
         new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, preparation.jobExecutionEntity.getId()));
@@ -201,9 +202,7 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageWhenNoResults() {
-    var exportId = UUID.randomUUID();
-    var preparation = prepare(exportId, false, false);
-
+    var preparation = prepare(false, false);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
         new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, preparation.jobExecutionEntity.getId()));
@@ -211,7 +210,7 @@ class AbstractLinkedDataExportStrategyTest {
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
-    assertEquals(List.of(exportId), exportStatistic.getNotExistIds());
+    assertEquals(List.of(preparation.exportId), exportStatistic.getNotExistIds());
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
     verify(localStorageWriter, never()).write(isA(String.class));
   }
@@ -219,12 +218,10 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageConvertErrorTest() {
-    var exportId = UUID.randomUUID();
-    var preparation = prepare(exportId, true, false);
-
     doThrow(JsonProcessingException.class).when(linkedDataConverter)
         .convertLdJsonToBibframe2Rdf(isA(String.class));
 
+    var preparation = prepare(true, false);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
         new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, preparation.jobExecutionEntity.getId()));
