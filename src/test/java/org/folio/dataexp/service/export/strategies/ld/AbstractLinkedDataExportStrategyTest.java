@@ -103,10 +103,10 @@ class AbstractLinkedDataExportStrategyTest {
 
     var linkedDataResources = new ArrayList<LinkedDataResource>();
     if (include) {
-        var linkedDataResource = new LinkedDataResource();
-        linkedDataResource.setInventoryId(exportId.toString());
-        linkedDataResource.setResource("{}");
-        linkedDataResources.add(linkedDataResource);
+      var linkedDataResource = new LinkedDataResource();
+      linkedDataResource.setInventoryId(exportId.toString());
+      linkedDataResource.setResource("{}");
+      linkedDataResources.add(linkedDataResource);
     }
     ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
 
@@ -124,8 +124,6 @@ class AbstractLinkedDataExportStrategyTest {
         PageRequest.of(0, 1), 
         false);
 
-    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
-
     when(exportIdEntityRepository.getExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class),
           isA(Pageable.class))).thenReturn(slice);
     when(jobExecutionService.getById(exportIdEntity.getJobExecutionId()))
@@ -134,6 +132,7 @@ class AbstractLinkedDataExportStrategyTest {
         .thenReturn(jobProfileEntity);
     when(mappingProfileEntityRepository.getReferenceById(jobProfileEntity.getMappingProfileId()))
         .thenReturn(mappingProfileEntity);
+    var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
     if (include && updateJob) {
       when(jobExecutionEntityRepository.getReferenceById(isA(UUID.class)))
           .thenReturn(jobExecutionEntity);
@@ -172,8 +171,6 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageWhenLocalStorageCannotWriteTest() {
-    var exportId = UUID.randomUUID();
-    var preparation = prepare(exportId, true, true);
     var output = new ByteArrayOutputStream(2);
     output.write("{}".getBytes());
 
@@ -183,6 +180,8 @@ class AbstractLinkedDataExportStrategyTest {
         .thenReturn(output);
     doThrow(new LocalStorageWriterException("Cannot write")).when(localStorageWriter).close();
 
+    var exportId = UUID.randomUUID();
+    var preparation = prepare(exportId, true, true);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
         new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
             1, preparation.jobExecutionEntity.getId()));
@@ -193,8 +192,10 @@ class AbstractLinkedDataExportStrategyTest {
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
     verify(jobExecutionEntityRepository, times(1))
         .save(isA(JobExecutionEntity.class));
-    verify(exportIdEntityRepository).countExportIds(preparation.exportFilesEntity.getJobExecutionId(),
-        preparation.exportFilesEntity.getFromId(), preparation.exportFilesEntity.getToId());
+    verify(exportIdEntityRepository).countExportIds(
+        preparation.exportFilesEntity.getJobExecutionId(),
+        preparation.exportFilesEntity.getFromId(),
+        preparation.exportFilesEntity.getToId());
   }
 
   @SneakyThrows
@@ -215,7 +216,7 @@ class AbstractLinkedDataExportStrategyTest {
     verify(localStorageWriter, never()).write(isA(String.class));
   }
 
-@SneakyThrows
+  @SneakyThrows
   @Test
   void saveOutputToLocalStorageConvertErrorTest() {
     var exportId = UUID.randomUUID();
