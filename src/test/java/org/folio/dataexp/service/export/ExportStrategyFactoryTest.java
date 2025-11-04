@@ -3,12 +3,14 @@ package org.folio.dataexp.service.export;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.ExportRequest.RecordTypeEnum;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
+import org.folio.dataexp.service.export.strategies.ld.LinkedDataExportStrategy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,6 +32,8 @@ class ExportStrategyFactoryTest {
   private InstancesExportAllStrategy instancesExportAllStrategy;
   @Mock
   private AuthorityExportAllStrategy authorityExportAllStrategy;
+  @Mock
+  private LinkedDataExportStrategy linkedDataExportStrategy;
 
   @InjectMocks
   private ExportStrategyFactory exportStrategyFactory;
@@ -59,5 +63,11 @@ class ExportStrategyFactoryTest {
     strategy =  exportStrategyFactory.getExportStrategy(
         new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY).all(true));
     assertTrue(strategy instanceof AuthorityExportAllStrategy);
+
+    strategy = exportStrategyFactory.getExportStrategy(
+        new ExportRequest()
+            .idType(ExportRequest.IdTypeEnum.INSTANCE)
+            .recordType(RecordTypeEnum.LINKED_DATA));
+    assertTrue(strategy instanceof LinkedDataExportStrategy);
   }
 }

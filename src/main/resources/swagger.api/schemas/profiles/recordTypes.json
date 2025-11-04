@@ -8,6 +8,7 @@
     "HOLDINGS",
     "ITEM",
     "AUTHORITY",
-    "SRS"
+    "SRS",
+    "LINKED_DATA"
   ]
 }

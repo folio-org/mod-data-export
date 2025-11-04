@@ -13,11 +13,19 @@ public interface ExportStrategy {
    *
    * @param exportFilesEntity the export file entity
    * @param exportRequest the export request
-   * @param exportedMarcListener the listener for exported MARC records
+   * @param exportedRecordsListener the listener for exported records
    * @return ExportStrategyStatistic containing export statistics
    */
-  ExportStrategyStatistic saveMarcToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity,
-      ExportRequest exportRequest, ExportedMarcListener exportedMarcListener);
+  ExportStrategyStatistic saveOutputToLocalStorage(JobExecutionExportFilesEntity exportFilesEntity,
+      ExportRequest exportRequest, ExportedRecordsListener exportedRecordsListener);
+
+
+  /**
+   * Returns the filename suffix associated with this strategy.
+   *
+   * @return filename suffix
+   */
+  String getFilenameSuffix();
 
   /**
    * Sets the status of the export file entity based on export statistics.
