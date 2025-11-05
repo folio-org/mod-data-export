@@ -19,4 +19,5 @@
     <include file="changes/remove_audit_for_marc.xml" relativeToChangelogFile="true"/>
     <include file="changes/export_all_set_for_deletion.xml" relativeToChangelogFile="true"/>
     <include file="changes/delete_enum_types.xml" relativeToChangelogFile="true"/>
+    <include file="changes/refactored_slice_holdings_all_ids.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
