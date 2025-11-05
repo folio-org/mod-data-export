@@ -113,10 +113,6 @@
     {
       "id": "permissions",
       "version": "5.6"
-    },
-    {
-      "id": "fqm-query",
-      "version": "1.0 2.0"
     }
   ],
   "optional": [
@@ -131,6 +127,10 @@
     {
       "id": "users-keycloak",
       "version": "1.0"
+    },
+    {
+      "id": "fqm-query",
+      "version": "1.0 2.0"
     }
   ],
   "provides": [
