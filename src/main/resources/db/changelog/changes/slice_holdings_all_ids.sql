@@ -3,38 +3,28 @@ CREATE OR REPLACE PROCEDURE slice_holdings_all_ids(jobExecutionId text, fileLoca
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    -- Validate sliceSize to avoid division by zero or negative values
-    IF sliceSize IS NULL OR sliceSize <= 0 THEN
-        RAISE EXCEPTION 'sliceSize must be a positive integer. Provided: %', sliceSize;
-    END IF;
 
-    -- Validate jobExecutionId can be cast to uuid early for clearer error
-    PERFORM jobExecutionId::uuid; -- will raise if invalid
+ WITH RankedRows as (select rec.id id,(ROW_NUMBER() OVER (ORDER BY rec.id)) - 1 row_num
+    from ${myuniversity}_mod_inventory_storage.holdings_record rec order by id),
+ IndexedRows as (select id, (row_num / sliceSize) group_index, (row_num % sliceSize) local_index from RankedRows),
+ GroupedRows as (select id,
+						group_index,
+						local_index,
+						max(local_index) over (partition by group_index) max_local_index,
+						min(local_index) over (partition by group_index) min_local_index
+				 from IndexedRows),
+ SlicedInstancesIds as (
+            select group_index,
+            max(max_local_index)                                               max_local_index,
+            min(min_local_index)                                               min_local_index,
+            (ARRAY_AGG(id) FILTER (WHERE local_index = min_local_index))[1] AS min_id,
+            (ARRAY_AGG(id) FILTER (WHERE local_index = max_local_index))[1] AS max_id
+          from GroupedRows group by group_index)
 
-    WITH OrderedIds AS (
-        SELECT DISTINCT rec.id
-        FROM ${myuniversity}_mod_inventory_storage.holdings_record rec
-        ORDER BY rec.id
-    ),
-    RankedRows AS (
-        SELECT id, (ROW_NUMBER() OVER (ORDER BY id) - 1) AS row_num
-        FROM OrderedIds
-    ),
-    Sliced AS (
-        SELECT (row_num / sliceSize) AS group_index,
-               MIN(id) AS min_id,
-               MAX(id) AS max_id
-        FROM RankedRows
-        GROUP BY (row_num / sliceSize)
-        ORDER BY group_index
-    )
-    INSERT INTO job_execution_export_files(id, job_execution_id, file_location, from_id, to_id, status)
-    SELECT gen_random_uuid() AS id,
-           jobExecutionId::uuid AS job_execution_id,
-           format(fileLocation, min_id, max_id) AS file_location,
-           min_id AS from_id,
-           max_id AS to_id,
-           'SCHEDULED' AS status
-    FROM Sliced;
+insert into job_execution_export_files(id, job_execution_id, file_location, from_id, to_id, status)
+    select gen_random_uuid() as id,
+jobExecutionId::uuid as job_execution_id,format(fileLocation, min_id, max_id)
+    as file_location, min_id as from_id, max_id as to_id, 'SCHEDULED' as status from SlicedInstancesIds;
+
 END;
 $$;
