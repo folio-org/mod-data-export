@@ -22,8 +22,8 @@ BEGIN
     ),
     Sliced AS (
         SELECT (row_num / sliceSize) AS group_index,
-               MIN(id) AS min_id,
-               MAX(id) AS max_id
+               MIN(id::text)::uuid AS min_id,
+               MAX(id::text)::uuid AS max_id
         FROM RankedRows
         GROUP BY (row_num / sliceSize)
         ORDER BY group_index
