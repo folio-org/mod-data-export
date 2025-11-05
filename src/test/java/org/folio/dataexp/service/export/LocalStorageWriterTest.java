@@ -47,7 +47,6 @@ class LocalStorageWriterTest {
     var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
 
     writer.write(invalidData);
-    writer.close();
     var file = new File(fileLocation);
 
     assertFalse(file.exists());

@@ -29,7 +29,9 @@ import org.folio.dataexp.service.export.strategies.rule.builder.CombinedRuleBuil
 import org.folio.dataexp.service.export.strategies.rule.builder.DefaultRuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.RuleBuilder;
 import org.folio.dataexp.service.export.strategies.rule.builder.TransformationRuleBuilder;
+import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.processor.rule.Rule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,12 +58,16 @@ public class RuleFactory {
   private final List<Rule> defaultRulesFromConfigFile;
   private final List<Rule> defaultHoldingsRulesFromConfigFile;
 
+  @Autowired
+  private ErrorLogService errorLogService;
+
   /**
    * Constructs a RuleFactory with the provided default rules.
    *
    * @param defaultRulesFromConfigFile         default rules for instance records
    * @param defaultHoldingsRulesFromConfigFile default rules for holdings records
    */
+  @Autowired
   public RuleFactory(List<Rule> defaultRulesFromConfigFile,
       List<Rule> defaultHoldingsRulesFromConfigFile) {
     this.defaultRulesFromConfigFile = defaultRulesFromConfigFile;

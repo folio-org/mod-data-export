@@ -19,7 +19,6 @@ import org.folio.dataexp.client.LocationUnitsClient;
 import org.folio.dataexp.client.LocationsClient;
 import org.folio.dataexp.client.MaterialTypesClient;
 import org.folio.dataexp.client.NatureOfContentTermsClient;
-import org.folio.dataexp.client.QueryClient;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.AlternativeDataTypes;
 import org.folio.dataexp.domain.dto.Campuses;
@@ -85,8 +84,6 @@ abstract class ServiceInitializer extends BaseDataExportInitializer {
   private NatureOfContentTermsClient natureOfContentTermsClient;
   @MockitoBean
   private IssuanceModesClient issuanceModesClient;
-  @MockitoBean
-  private QueryClient queryClient;
   @MockitoBean
   protected ConsortiaService consortiaService;
 
