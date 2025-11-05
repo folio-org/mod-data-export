@@ -6,9 +6,9 @@ import lombok.Getter;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 
 /**
- * Listener for tracking the number of exported MARC records and updating job execution progress.
+ * Listener for tracking the number of exported records and updating job execution progress.
  */
-public class ExportedMarcListener {
+public class ExportedRecordsListener {
 
   private JobExecutionEntityRepository jobExecutionEntityRepository;
   @Getter
@@ -17,13 +17,13 @@ public class ExportedMarcListener {
   private UUID jobExecutionId;
 
   /**
-   * Constructs an ExportedMarcListener.
+   * Constructs an ExportedRecordsListener.
    *
    * @param jobExecutionEntityRepository repository for job execution entities
    * @param progressExportedUpdateStep step size for progress updates
    * @param jobExecutionId job execution ID
    */
-  public ExportedMarcListener(
+  public ExportedRecordsListener(
       JobExecutionEntityRepository jobExecutionEntityRepository,
       int progressExportedUpdateStep,
       UUID jobExecutionId

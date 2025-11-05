@@ -19,7 +19,7 @@ class ConfigurationServiceTest extends BaseDataExportInitializer {
   private ConfigurationRepository configurationRepository;
 
   @AfterEach
-  void eachTearDown() {
+  void eachConfigTearDown() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       configurationRepository.deleteAll();
     }
