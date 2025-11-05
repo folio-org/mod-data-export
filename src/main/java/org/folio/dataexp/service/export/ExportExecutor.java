@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
@@ -72,8 +73,8 @@ public class ExportExecutor {
     exportFilesEntity.setStatus(JobExecutionExportFilesStatus.ACTIVE);
     jobExecutionExportFilesEntityRepository.save(exportFilesEntity);
     var exportStrategy = exportStrategyFactory.getExportStrategy(exportRequest);
-    var exportStatistic = exportStrategy.saveOutputToLocalStorage(
-        exportFilesEntity, exportRequest, commonExportStatistic.getExportedRecordsListener());
+    var exportStatistic = exportStrategy.saveMarcToLocalStorage(
+        exportFilesEntity, exportRequest, commonExportStatistic.getExportedMarcListener());
     commonExportStatistic.addToNotExistUuidAll(exportStatistic.getNotExistIds());
     synchronized (this) {
       exportStrategy.setStatusBaseExportStatistic(exportFilesEntity, exportStatistic);
@@ -82,7 +83,7 @@ public class ExportExecutor {
           exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       updateJobExecutionStatusAndProgress(
           exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportStatistic,
-          exportRequest, exportStrategy.getFilenameSuffix());
+          exportRequest);
     }
   }
 
@@ -92,12 +93,11 @@ public class ExportExecutor {
    * @param jobExecutionId the job execution ID
    * @param exportStatistic export statistics
    * @param commonExportStatistic common export statistics
-   * @param fileSuffix final, visible filename suffix
    * @param exportRequest the export request
    */
   private void updateJobExecutionStatusAndProgress(UUID jobExecutionId,
       ExportStrategyStatistic exportStatistic, CommonExportStatistic commonExportStatistic,
-      ExportRequest exportRequest, String fileSuffix) {
+      ExportRequest exportRequest) {
     var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
@@ -115,7 +115,7 @@ public class ExportExecutor {
     var currentDate = new Date();
     if (exportsCompleted + exportsFailed + exportsCompletedWithErrors == exports.size()) {
       progress.setExported(
-          commonExportStatistic.getExportedRecordsListener().getExportedCount().get());
+          commonExportStatistic.getExportedMarcListener().getExportedCount().get());
       if (Boolean.TRUE.equals(exportRequest.getAll())) {
         progress.setTotal(
             progress.getExported() - progress.getDuplicatedSrs() + progress.getFailed());
@@ -147,8 +147,7 @@ public class ExportExecutor {
       var fileDefinition = queryResult.getFirst().getFileDefinition();
       var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
       try {
-        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName,
-            fileSuffix);
+        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
         var innerFile = new JobExecutionExportedFilesInner()
             .fileId(UUID.randomUUID())
             .fileName(FilenameUtils.getName(innerFileName));

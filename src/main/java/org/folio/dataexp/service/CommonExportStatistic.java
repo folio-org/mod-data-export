@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.Setter;
-import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
+import org.folio.dataexp.service.export.strategies.ExportedMarcListener;
 
 /**
  * Holds statistics and state for a common export operation, such as invalid or duplicate UUIDs.
@@ -44,11 +44,11 @@ public class CommonExportStatistic {
   }
 
   /**
-   * Listener for exported records.
+   * Listener for exported MARC records.
    */
   @Getter
   @Setter
-  private ExportedRecordsListener exportedRecordsListener;
+  private ExportedMarcListener exportedMarcListener;
 
   /**
    * Adds a list of UUIDs to the set of non-existent UUIDs.

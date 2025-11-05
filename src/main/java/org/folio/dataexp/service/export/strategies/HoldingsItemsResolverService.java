@@ -3,7 +3,7 @@ package org.folio.dataexp.service.export.strategies;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
-import static org.folio.dataexp.service.export.strategies.AbstractMarcExportStrategy.getAsJsonObject;
+import static org.folio.dataexp.service.export.strategies.AbstractExportStrategy.getAsJsonObject;
 import static org.folio.dataexp.util.Constants.COMMA;
 import static org.folio.dataexp.util.ErrorCode.ERROR_INSTANCE_NO_PERMISSION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_INSTANCE_NO_AFFILIATION;

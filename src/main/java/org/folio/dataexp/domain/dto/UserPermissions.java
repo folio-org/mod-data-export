@@ -23,13 +23,11 @@ public class UserPermissions {
    * List of permission names.
    */
   @JsonProperty("permissionNames")
-  @Builder.Default
   private List<String> permissionNames = new ArrayList<>();
 
   /**
    * List of permissions.
    */
   @JsonProperty("permissions")
-  @Builder.Default
   private List<String> permissions = new ArrayList<>();
 }

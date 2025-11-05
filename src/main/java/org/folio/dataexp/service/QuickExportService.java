@@ -16,6 +16,7 @@ import org.folio.dataexp.domain.dto.QuickExportResponse;
 import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
+import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,6 +29,7 @@ public class QuickExportService {
 
   private final FileDefinitionsService fileDefinitionsService;
   private final DataExportService dataExportService;
+  private final JobProfileEntityRepository jobProfileEntityRepository;
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final JobExecutionService jobExecutionService;
 

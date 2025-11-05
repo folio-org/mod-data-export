@@ -16,6 +16,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class DataExportTenantService extends TenantService {
    * @param configurationService Configuration service
    * @param timerService Timer service
    */
+  @Autowired
   public DataExportTenantService(
       JdbcTemplate jdbcTemplate,
       FolioExecutionContext context,
