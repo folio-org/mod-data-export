@@ -39,6 +39,9 @@ class DownloadRecordTest extends BaseDataExportInitializer {
   @Autowired
   private DownloadRecordService downloadRecordService;
 
+  @Autowired
+  private InputFileProcessor inputFileProcessor;
+
   @MockitoBean
   private MappingProfileEntityRepository mappingProfileEntityRepository;
 

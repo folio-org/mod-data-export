@@ -3,7 +3,7 @@ package org.folio.dataexp.service.export;
 import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.IdType;
-import org.folio.dataexp.service.export.strategies.AbstractMarcExportStrategy;
+import org.folio.dataexp.service.export.strategies.AbstractExportStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
 import org.folio.dataexp.service.export.strategies.ExportStrategy;
@@ -11,7 +11,6 @@ import org.folio.dataexp.service.export.strategies.HoldingsExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
-import org.folio.dataexp.service.export.strategies.ld.LinkedDataExportStrategy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,7 +23,6 @@ public class ExportStrategyFactory {
   private final HoldingsExportStrategy holdingsExportStrategy;
   private final InstancesExportStrategy instancesExportStrategy;
   private final AuthorityExportStrategy authorityExportStrategy;
-  private final LinkedDataExportStrategy linkedDataExportStrategy;
   private final InstancesExportAllStrategy instancesExportAllStrategy;
   private final HoldingsExportAllStrategy holdingsExportAllStrategy;
   private final AuthorityExportAllStrategy authorityExportAllStrategy;
@@ -47,9 +45,6 @@ public class ExportStrategyFactory {
       }
       return authorityExportStrategy;
     }
-    if (exportRequest.getRecordType() == ExportRequest.RecordTypeEnum.LINKED_DATA) {
-      return linkedDataExportStrategy;
-    }
     if (Boolean.TRUE.equals(exportRequest.getAll())) {
       return instancesExportAllStrategy;
     }
@@ -62,7 +57,7 @@ public class ExportStrategyFactory {
    * @param recordIdType the record ID type
    * @return the abstract export strategy
    */
-  public AbstractMarcExportStrategy getExportStrategy(IdType recordIdType) {
+  public AbstractExportStrategy getExportStrategy(IdType recordIdType) {
     return switch (recordIdType) {
       case AUTHORITY -> authorityExportStrategy;
       case INSTANCE -> instancesExportStrategy;

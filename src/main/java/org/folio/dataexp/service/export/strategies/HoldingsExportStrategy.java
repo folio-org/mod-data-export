@@ -41,6 +41,7 @@ import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
@@ -66,10 +67,11 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @RequiredArgsConstructor
-public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
+public class HoldingsExportStrategy extends AbstractExportStrategy {
 
   protected static final String HOLDING_MARC_TYPE = "MARC_HOLDING";
 
+  private final InstanceEntityRepository instanceEntityRepository;
   private final ItemEntityRepository itemEntityRepository;
   private final RuleFactory ruleFactory;
   private final RuleProcessor ruleProcessor;

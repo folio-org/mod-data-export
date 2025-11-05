@@ -31,7 +31,9 @@ import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.InstanceWithHridEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
 import org.folio.dataexp.repository.MarcRecordEntityRepository;
 import org.folio.dataexp.service.ConsortiaService;
@@ -56,7 +58,7 @@ import org.springframework.stereotype.Component;
 @Log4j2
 @Component
 @AllArgsConstructor
-public class InstancesExportStrategy extends AbstractMarcExportStrategy {
+public class InstancesExportStrategy extends AbstractExportStrategy {
 
   protected static final String INSTANCE_MARC_TYPE = "MARC_BIB";
   protected static final String LONG_MARC_RECORD_MESSAGE =
@@ -70,10 +72,12 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
   private final RuleHandler ruleHandler;
   private final RuleProcessor ruleProcessor;
   private final ReferenceDataProvider referenceDataProvider;
+  private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   private final HoldingsItemsResolverService holdingsItemsResolver;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
+  protected final InstanceEntityRepository instanceEntityRepository;
 
   /**
    * Retrieves MARC records for the given external IDs and mapping profile.

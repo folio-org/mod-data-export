@@ -10,11 +10,13 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.repository.FolioHoldingsAllRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityTenantRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
+import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.ItemEntityRepository;
 import org.folio.dataexp.repository.MarcHoldingsAllRepository;
 import org.folio.dataexp.repository.MarcInstanceRecordRepository;
@@ -44,6 +46,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
   /**
    * Constructs a new HoldingsExportAllStrategy with all required dependencies.
    *
+   * @param instanceEntityRepository Repository for instance entities.
    * @param itemEntityRepository Repository for item entities.
    * @param ruleFactory Factory for creating rules.
    * @param ruleProcessor Processor for applying rules.
@@ -63,6 +66,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
    * @param permissionsValidator Validator for permissions.
    */
   public HoldingsExportAllStrategy(
+      InstanceEntityRepository instanceEntityRepository,
       ItemEntityRepository itemEntityRepository,
       RuleFactory ruleFactory,
       RuleProcessor ruleProcessor,
@@ -82,6 +86,7 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       PermissionsValidator permissionsValidator
   ) {
     super(
+        instanceEntityRepository,
         itemEntityRepository,
         ruleFactory,
         ruleProcessor,
@@ -130,6 +135,25 @@ public class HoldingsExportAllStrategy extends HoldingsExportStrategy {
       handleDeleted(
           exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter
       );
+    }
+  }
+
+  /**
+   * Sets status based on export statistics.
+   */
+  @Override
+  public void setStatusBaseExportStatistic(
+      JobExecutionExportFilesEntity exportFilesEntity,
+      ExportStrategyStatistic exportStatistic
+  ) {
+    if (exportStatistic.getFailed() == 0 && exportStatistic.getExported() >= 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() > 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED_WITH_ERRORS);
+    }
+    if (exportStatistic.getFailed() > 0 && exportStatistic.getExported() == 0) {
+      exportFilesEntity.setStatus(JobExecutionExportFilesStatus.FAILED);
     }
   }
 

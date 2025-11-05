@@ -34,6 +34,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,11 +53,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class RuleFactoryTest extends BaseDataExportInitializer {
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
+  private static final String DEFAULT_RULE_FIELD_VALUE = "001";
+  private static final String DEFAULT_HOLDING_RULE_FIELD_VALUE = "002";
+  private static final String DEFAULT_RULE_DESCRIPTION = "defaultRuleDescription";
+  private static final String DEFAULT_HOLDING_RULE_DESCRIPTION = "defaultHoldingRuleDescription";
+  private static final String DEFAULT_RULE_FROM_VALUE = "defaultFromValue";
+  private static final String DEFAULT_HOLDING_RULE_FROM_VALUE = "defaultHoldingFromValue";
   private static final String FIELD_ID_1 = "fieldId1";
   private static final String FIELD_ID_2 = "fieldId2";
+  private static final String DEFAULT_RULE_ID = "defaultRuleId";
+  private static final String DEFAULT_HOLDING_RULE_ID = "defaultHoldingRuleId";
   private static final String TRANSFORMATIONS_PATH_1 = "transformationsPath1";
   private static final String TRANSFORMATION_FIELD_VALUE_1 = "002";
-  private static final String TRANSFORMATION_FIELD_VALUE_SET_SUBFIELD = "002  $a";
+  private static final String TRANSFORMATION_FIELD_VALUE_set_SUBFIELD = "002  $a";
   private static final String TRANSFORMATIONS_PATH_2 = "transformationsPath2";
   private static final String TRANSFORMATION_FIELD_VALUE_2 = "003";
   private static final String SUBFIELD_A = "a";
@@ -188,7 +197,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
 
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setTransformations(List.of(transformations));
+    mappingProfile.setTransformations(ImmutableList.of(transformations));
     mappingProfile.setRecordTypes(singletonList(RecordTypes.INSTANCE));
 
     // when
@@ -210,7 +219,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     transformations.setFieldId(EMPTY);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setTransformations(List.of(transformations));
+    mappingProfile.setTransformations(ImmutableList.of(transformations));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);
@@ -233,7 +242,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
 
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setTransformations(List.of(transformations));
+    mappingProfile.setTransformations(ImmutableList.of(transformations));
     mappingProfile.setRecordTypes(singletonList(RecordTypes.INSTANCE));
 
     // when
@@ -310,7 +319,7 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     transformations.setEnabled(true);
     transformations.setPath(TRANSFORMATIONS_PATH_1);
     transformations.setFieldId(FIELD_ID_1);
-    transformations.setTransformation(TRANSFORMATION_FIELD_VALUE_SET_SUBFIELD);
+    transformations.setTransformation(TRANSFORMATION_FIELD_VALUE_set_SUBFIELD);
     transformations.setRecordType(RecordTypes.ITEM);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -914,8 +923,8 @@ class RuleFactoryTest extends BaseDataExportInitializer {
     itemTransformation.setMetadataParameters(METADATA);
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
-    mappingProfile.setTransformations(List.of(itemTransformation));
-    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+    mappingProfile.setTransformations(ImmutableList.of(itemTransformation));
+    mappingProfile.setRecordTypes(ImmutableList.of(RecordTypes.ITEM));
 
     // when
     List<Rule> rules = ruleFactory.create(mappingProfile);

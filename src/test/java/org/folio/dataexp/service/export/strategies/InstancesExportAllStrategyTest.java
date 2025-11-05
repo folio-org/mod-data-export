@@ -84,7 +84,6 @@ class InstancesExportAllStrategyTest {
   @BeforeEach
   void setUp() {
     instancesExportAllStrategy.folioExecutionContext = folioExecutionContext;
-    instancesExportAllStrategy.setInstanceEntityRepository(instanceEntityRepository);
   }
 
   @Test
@@ -166,7 +165,7 @@ class InstancesExportAllStrategyTest {
 
     var externalIds = Collections.asSet(instanceId);
     var statistic = new ExportStrategyStatistic(
-        new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionId));
+        new ExportedMarcListener(jobExecutionEntityRepository, 1, jobExecutionId));
     var marcRecordDuplicate = MarcRecordEntity.builder().externalId(instanceId)
         .id(UUID.randomUUID()).build();
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID())
