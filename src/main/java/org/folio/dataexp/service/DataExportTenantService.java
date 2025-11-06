@@ -16,7 +16,6 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.liquibase.FolioSpringLiquibase;
 import org.folio.spring.service.TenantService;
 import org.folio.tenant.domain.dto.TenantAttributes;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -49,6 +48,7 @@ public class DataExportTenantService extends TenantService {
   private MappingProfileEntityRepository mappingProfileEntityRepository;
   private ConfigurationService configurationService;
   private TimerService timerService;
+  private ObjectMapper objectMapper;
 
   /**
    * Constructs a DataExportTenantService with required dependencies.
@@ -61,7 +61,6 @@ public class DataExportTenantService extends TenantService {
    * @param configurationService Configuration service
    * @param timerService Timer service
    */
-  @Autowired
   public DataExportTenantService(
       JdbcTemplate jdbcTemplate,
       FolioExecutionContext context,
@@ -69,13 +68,15 @@ public class DataExportTenantService extends TenantService {
       JobProfileEntityRepository jobProfileEntityRepository,
       MappingProfileEntityRepository mappingProfileEntityRepository,
       ConfigurationService configurationService,
-      TimerService timerService
+      TimerService timerService,
+      ObjectMapper objectMapper
   ) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.jobProfileEntityRepository = jobProfileEntityRepository;
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
     this.configurationService = configurationService;
     this.timerService = timerService;
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -128,12 +129,11 @@ public class DataExportTenantService extends TenantService {
    * @param mappingProfilePath Path to the mapping profile resource.
    */
   private void loadMappingProfile(String mappingProfilePath) {
-    var mapper = new ObjectMapper();
     try (
         InputStream is =
             DataExportTenantService.class.getResourceAsStream(mappingProfilePath)
     ) {
-      var mappingProfile = mapper.readValue(is, MappingProfile.class);
+      var mappingProfile = objectMapper.readValue(is, MappingProfile.class);
       mappingProfileEntityRepository.save(
           MappingProfileEntity.fromMappingProfile(mappingProfile)
       );
@@ -162,12 +162,11 @@ public class DataExportTenantService extends TenantService {
    * @param jobProfilePath Path to the job profile resource.
    */
   private void loadJobProfile(String jobProfilePath) {
-    var mapper = new ObjectMapper();
     try (
         InputStream is =
             DataExportTenantService.class.getResourceAsStream(jobProfilePath)
     ) {
-      var jobProfile = mapper.readValue(is, JobProfile.class);
+      var jobProfile = objectMapper.readValue(is, JobProfile.class);
       jobProfileEntityRepository.save(
           JobProfileEntity.fromJobProfile(jobProfile)
       );

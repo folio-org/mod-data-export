@@ -21,7 +21,8 @@
         "INSTANCE",
         "HOLDINGS",
         "ITEM",
-        "AUTHORITY"
+        "AUTHORITY",
+        "LINKED_DATA"
       ]
     },
     "idType": {
