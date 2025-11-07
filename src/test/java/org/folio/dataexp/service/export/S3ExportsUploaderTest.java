@@ -48,7 +48,7 @@ class S3ExportsUploaderTest {
     jobExecution.setHrId(200);
 
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, Collections.emptyList(), initialFileName, "mrc"));
+        s3ExportsUploader.upload(jobExecution, Collections.emptyList(), initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
   }
 
@@ -63,7 +63,7 @@ class S3ExportsUploaderTest {
     Files.createDirectories(Path.of(temDirLocation));
 
     var initialFileName = "marc_export";
-    var fileLocation = temDirLocation + initialFileName;
+    var fileLocation = temDirLocation + initialFileName + ".mrc";
     var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
@@ -71,7 +71,7 @@ class S3ExportsUploaderTest {
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
     var expectedS3Path = temDirLocation + "marc_export-200.mrc";
-    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName, "mrc");
+    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -92,7 +92,7 @@ class S3ExportsUploaderTest {
     Files.createDirectories(Path.of(temDirLocation));
 
     var initialFileName = "marc_export";
-    var fileLocation = String.format("mod-data-export/download/%s/%s", jobExecution.getId(),
+    var fileLocation = String.format("mod-data-export/download/%s/%s.mrc", jobExecution.getId(),
         initialFileName);
     var writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(
         EXPORT_TEMP_STORAGE, fileLocation), OUTPUT_BUFFER_SIZE);
@@ -104,7 +104,7 @@ class S3ExportsUploaderTest {
 
     var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString()
         + "/marc_export-200.mrc";
-    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName, "mrc");
+    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -131,7 +131,7 @@ class S3ExportsUploaderTest {
 
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
         s3ExportsUploader.upload(jobExecution, Collections.singletonList(export),
-          initialFileName, "mrc"));
+          initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);
@@ -167,7 +167,7 @@ class S3ExportsUploaderTest {
     var expectedS3Path = temDirLocation + "marc_export-200.zip";
     var initialFileName = "marc_export";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+        initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -211,7 +211,7 @@ class S3ExportsUploaderTest {
         + "/marc_export-200.zip";
     var initialFileName = "marc_export";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+        initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -248,7 +248,7 @@ class S3ExportsUploaderTest {
     var expectedS3Path = temDirLocation + "marc_export-200.mrc";
     var initialFileName = "marc_export";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+        initialFileName);
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -283,7 +283,7 @@ class S3ExportsUploaderTest {
     var initialFileName = "marc_export";
     var list = List.of(export1, export2);
     S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, list, initialFileName, "mrc"));
+        s3ExportsUploader.upload(jobExecution, list, initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);

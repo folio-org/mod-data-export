@@ -27,8 +27,6 @@ import org.springframework.beans.factory.annotation.Value;
 @Getter
 public abstract class AbstractExportStrategy implements ExportStrategy {
 
-  private static final String MARC_SUFFIX = "mrc";
-
   protected int exportIdsBatch;
   protected String exportTmpStorage;
 
@@ -88,11 +86,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       exportStatistic.setFailed((int) countFailed);
     }
     return exportStatistic;
-  }
-
-  @Override
-  public String getFilenameSuffix() {
-    return MARC_SUFFIX;
   }
 
   /**

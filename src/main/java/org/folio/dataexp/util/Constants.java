@@ -37,4 +37,8 @@ public class Constants {
   public static final String DELETED_AUTHORITIES_FILE_NAME = "deleted-authority-records.csv";
   /** Permission string for viewing inventory instances. */
   public static final String INVENTORY_VIEW_PERMISSION = "ui-inventory.instance.view";
+  /** File suffix for MARC records. */
+  public static final String MARC_FILE_SUFFIX = "mrc";
+  /** File suffix for Linked Data records. */
+  public static final String LINKED_DATA_FILE_SUFFIX = "json";
 }

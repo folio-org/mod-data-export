@@ -28,14 +28,7 @@ import org.springframework.data.domain.PageRequest;
 @Getter
 public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStrategy {
 
-  private static final String LD_SUFFIX = "json";
-
   private LinkedDataConverter linkedDataConverter;
-
-  @Override
-  public String getFilenameSuffix() {
-    return LD_SUFFIX;
-  }
 
   abstract List<LinkedDataResource> getLinkedDataResources(Set<UUID> externalIds);
 
