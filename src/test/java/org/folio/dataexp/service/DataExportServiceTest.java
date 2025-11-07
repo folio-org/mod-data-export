@@ -30,7 +30,8 @@ import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.scope.FolioExecutionContextSetter;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -60,9 +61,13 @@ class DataExportServiceTest extends BaseDataExportInitializer {
   @Autowired
   private DataExportService dataExportService;
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({
+    "INSTANCE, MARC, mrc",
+    "LINKED_DATA, LINKED_DATA, json"
+  })
   @SneakyThrows
-  void postDataExport() {
+  void postDataExport(String recordType, String outputFormat, String fileSuffix) {
     var userId = UUID.randomUUID();
     var user = new User();
     user.setId(userId.toString());
@@ -72,7 +77,7 @@ class DataExportServiceTest extends BaseDataExportInitializer {
     user.setPersonal(personal);
 
     var exportRequest = new ExportRequest();
-    exportRequest.setRecordType(ExportRequest.RecordTypeEnum.INSTANCE);
+    exportRequest.setRecordType(ExportRequest.RecordTypeEnum.fromValue(recordType));
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
@@ -82,10 +87,10 @@ class DataExportServiceTest extends BaseDataExportInitializer {
         .fileDefinition(fileDefinition).id(fileDefinition.getId()).build();
 
     var mappingProfile = new MappingProfile().id(UUID.randomUUID())
-        .name("mappingProfileName").outputFormat(OutputFormatEnum.MARC);
+        .name("mappingProfileName").outputFormat(OutputFormatEnum.fromValue(outputFormat));
     var mappingProfileEntity = MappingProfileEntity.builder()
         .mappingProfile(mappingProfile).id(mappingProfile.getId())
-        .format(OutputFormatEnum.MARC.toString()).build();
+        .format(outputFormat).build();
 
     var jobProfile = new JobProfile().id(exportRequest.getJobProfileId())
         .name("jobProfileName").mappingProfileId(mappingProfile.getId());
@@ -122,7 +127,7 @@ class DataExportServiceTest extends BaseDataExportInitializer {
       var exportedFiles = jobExecution.getExportedFiles();
       JobExecutionExportedFilesInner inner =
           (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
-      assertEquals("instance-200.mrc", inner.getFileName());
+      assertEquals("instance-200.%s".formatted(fileSuffix), inner.getFileName());
     });
   }
 }
