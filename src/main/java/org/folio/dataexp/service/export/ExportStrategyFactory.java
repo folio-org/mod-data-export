@@ -1,8 +1,11 @@
 package org.folio.dataexp.service.export;
 
+import static org.folio.dataexp.service.export.Constants.DEFAULT_LINKED_DATA_MAPPING_PROFILE_ID;
+
 import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.IdType;
+import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.export.strategies.AbstractMarcExportStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
@@ -28,6 +31,7 @@ public class ExportStrategyFactory {
   private final InstancesExportAllStrategy instancesExportAllStrategy;
   private final HoldingsExportAllStrategy holdingsExportAllStrategy;
   private final AuthorityExportAllStrategy authorityExportAllStrategy;
+  private final JobProfileEntityRepository jobProfileEntityRepository;
 
   /**
    * Gets the export strategy for the given export request.
@@ -47,7 +51,7 @@ public class ExportStrategyFactory {
       }
       return authorityExportStrategy;
     }
-    if (exportRequest.getRecordType() == ExportRequest.RecordTypeEnum.LINKED_DATA) {
+    if (isLinkedDataMappingProfile(exportRequest)) {
       return linkedDataExportStrategy;
     }
     if (Boolean.TRUE.equals(exportRequest.getAll())) {
@@ -67,5 +71,12 @@ public class ExportStrategyFactory {
       case AUTHORITY -> authorityExportStrategy;
       case INSTANCE -> instancesExportStrategy;
     };
+  }
+
+  private boolean isLinkedDataMappingProfile(ExportRequest exportRequest) {
+    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(
+        exportRequest.getJobProfileId());
+    var mappingProfileId = jobProfileEntity.getJobProfile().getMappingProfileId().toString();
+    return mappingProfileId.equals(DEFAULT_LINKED_DATA_MAPPING_PROFILE_ID);
   }
 }
