@@ -21,11 +21,11 @@ public class LinkedDataConverter {
    * Convert Linked Data exported resource JSON to BIBFRAME 2 vocabulary JSON-LD format.
    *
    * @param ldJson Linked Data exported resource JSON as a string
-   * @return BIBFRAME 2 JSON-LD
+   * @return BIBFRAME 2 NDJSON-LD
    * @throws JsonProcessingException when input is not valid JSON
    */
   public ByteArrayOutputStream convertLdJsonToBibframe2Rdf(String ldJson)
       throws JsonProcessingException {
-    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.JSONLD);
+    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.NDJSONLD);
   }
 }
