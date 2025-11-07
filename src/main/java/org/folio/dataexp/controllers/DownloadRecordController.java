@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.IdType;
 import org.folio.dataexp.rest.resource.DownloadRecordApi;
 import org.folio.dataexp.service.DownloadRecordService;
+import org.folio.dataexp.util.Constants;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -52,7 +53,7 @@ public class DownloadRecordController implements DownloadRecordApi {
         idType,
         suppress999ff
     );
-    var fileName = recordId + formatPostfix + ".mrc";
+    var fileName = "%s%s.%s".formatted(recordId, formatPostfix, Constants.MARC_FILE_SUFFIX);
     return ResponseEntity.ok()
         .header(
             HttpHeaders.CONTENT_DISPOSITION,

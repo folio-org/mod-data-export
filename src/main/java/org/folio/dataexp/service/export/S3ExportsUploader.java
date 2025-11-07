@@ -23,6 +23,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
+import org.folio.dataexp.util.Constants;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,7 +96,7 @@ public class S3ExportsUploader {
    */
   public void uploadSingleRecordById(String dirName, byte[] marcFileContentBytes)
       throws IOException {
-    var s3FileName = "%s.mrc".formatted(dirName);
+    var s3FileName = "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX);
     var s3path = getPathToStoredRecord(dirName, s3FileName);
     try (var inputStream = new ByteArrayInputStream(marcFileContentBytes)) {
       s3Client.write(s3path, inputStream);

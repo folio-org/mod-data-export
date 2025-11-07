@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.util.Constants;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,6 @@ public class SlicerProcessor {
   private static final String CALL_SLICE_AUTHORITIES_ALL_IDS_PROCEDURE =
       "call slice_authorities_all_ids(?, ?, ?)";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
-  private static final String MARC_EXTENSION = ".mrc";
   public static final int DEFAULT_SLICE_SIZE = 100_000;
   public static final String SLICE_SIZE_KEY = "slice_size";
 
@@ -92,7 +92,7 @@ public class SlicerProcessor {
    */
   private String createFileNameWithPlaceHolder(String fileName) {
     var baseName = FilenameUtils.getBaseName(fileName);
-    return baseName + FROM_TO_UUID_PART + MARC_EXTENSION;
+    return "%s%s.%s".formatted(baseName, FROM_TO_UUID_PART, Constants.MARC_FILE_SUFFIX);
   }
 
   /**

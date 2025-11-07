@@ -18,7 +18,7 @@ public enum ErrorCode {
   S3_BUCKET_NAME_NOT_FOUND("error.s3.bucketNameNotFound",
     "S3 bucket name is not found in System Properties"),
   NO_FILE_GENERATED("error.binaryFile.notGenerated",
-    "Nothing to export: no .mrc file generated"),
+    "Nothing to export: no output file generated"),
   USER_NOT_FOUND("error.user.notFound", "User not found"),
   INVALID_UPLOADED_FILE_EXTENSION(INVALID_EXTENSION_ERROR_CODE,
     "File name extension does not corresponds csv format"),
