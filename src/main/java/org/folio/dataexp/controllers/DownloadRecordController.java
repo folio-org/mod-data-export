@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/data-export")
 public class DownloadRecordController implements DownloadRecordApi {
 
-  private static final String UTF_FORMAT_POSTFIX = "-utf";
-  private static final String MARC8_FORMAT_POSTFIX = "-marc8";
+  private static final String UTF_FORMAT_POSTFIX = "utf";
+  private static final String MARC8_FORMAT_POSTFIX = "marc8";
 
   private final DownloadRecordService downloadRecordService;
 
@@ -49,11 +49,12 @@ public class DownloadRecordController implements DownloadRecordApi {
     var resource = downloadRecordService.processRecordDownload(
         recordId,
         isUtf,
-        formatPostfix,
+        "-" + formatPostfix,
         idType,
         suppress999ff
     );
-    var fileName = "%s%s.%s".formatted(recordId, formatPostfix, Constants.MARC_FILE_SUFFIX);
+    var fileName = Constants.FILE_NAME_FORMAT.formatted(recordId, formatPostfix,
+        Constants.MARC_FILE_SUFFIX);
     return ResponseEntity.ok()
         .header(
             HttpHeaders.CONTENT_DISPOSITION,

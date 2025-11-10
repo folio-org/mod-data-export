@@ -117,7 +117,8 @@ public class S3ExportsUploader {
   private String uploadSingleFile(JobExecution jobExecution, File fileToUpload, String fileName)
       throws IOException {
     var fileSuffix = FilenameUtils.getExtension(fileToUpload.getName());
-    var s3Name = String.format("%s-%s.%s", fileName, jobExecution.getHrId(), fileSuffix);
+    var s3Name = String.format(Constants.FILE_NAME_FORMAT, fileName, jobExecution.getHrId(),
+        fileSuffix);
     var s3path = getPathToStoredFiles(jobExecution.getId(), s3Name);
     if (fileToUpload.length() > 0) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
@@ -159,7 +160,8 @@ public class S3ExportsUploader {
             new FileInputStream(exportFile))) {
           var fileSuffix = FilenameUtils.getExtension(exportFile.getName());
           var zipEntryName = String.format(
-              "%s-%s-%s.%s", fileName, jobExecution.getHrId(), countExportsFiles, fileSuffix);
+              Constants.FILE_NAME_FORMAT, fileName, jobExecution.getHrId(), countExportsFiles,
+              fileSuffix);
           log.info(exportFile.getPath() + " add to zip as " + zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);

@@ -82,6 +82,34 @@ class S3ExportsUploaderTest {
 
   @Test
   @SneakyThrows
+  void uploadSingleExportsTestLinkedData() {
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setHrId(200);
+    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
+        jobExecution.getId());
+    Files.createDirectories(Path.of(temDirLocation));
+
+    var initialFileName = "linked_data_export";
+    var fileLocation = temDirLocation + initialFileName + ".json";
+    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var ldjson = "[{}]";
+    writer.write(ldjson);
+    writer.close();
+    var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
+
+    var expectedS3Path = temDirLocation + "linked_data_export-200.json";
+    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName);
+    assertEquals(expectedS3Path, s3Path);
+
+    verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
+
+    var temDir = new File(temDirLocation);
+    assertFalse(temDir.exists());
+  }
+
+  @Test
+  @SneakyThrows
   void uploadSingleExportsIfTempStorageExistsTest() {
     s3ExportsUploader.setExportTmpStorage(EXPORT_TEMP_STORAGE);
     var jobExecution = new JobExecution();
