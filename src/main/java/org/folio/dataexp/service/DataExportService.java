@@ -27,6 +27,7 @@ import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.dataexp.util.Constants;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -114,7 +115,8 @@ public class DataExportService {
         inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
         log.info("File has been read successfully.");
       }
-      slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
+      slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest,
+          mappingProfileEntity.getFormat());
       log.info("Instance IDs have been sliced successfully.");
 
       updateJobExecutionForPostDataExport(
@@ -186,17 +188,9 @@ public class DataExportService {
   private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution,
       String outputFormat) {
     var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
-    String fileSuffix;
-    switch (outputFormat) {
-      case "LINKED_DATA":
-        fileSuffix = Constants.LINKED_DATA_FILE_SUFFIX;
-        break;
-      case "MARC":
-      default:
-        fileSuffix = Constants.MARC_FILE_SUFFIX;
-        break;
-    }
-    return String.format("%s-%s.%s", initialFileName, jobExecution.getHrId(), fileSuffix);
+    var fileSuffix = S3FilePathUtils.getFileSuffixFromOutputFormat(outputFormat);
+    return String.format(Constants.FILE_NAME_FORMAT, initialFileName, jobExecution.getHrId(),
+        fileSuffix);
   }
 
   /**

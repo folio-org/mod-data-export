@@ -41,4 +41,6 @@ public class Constants {
   public static final String MARC_FILE_SUFFIX = "mrc";
   /** File suffix for Linked Data records. */
   public static final String LINKED_DATA_FILE_SUFFIX = "json";
+  /** Standard file path pattern: original filename, specifier, and suffix. */
+  public static final String FILE_NAME_FORMAT = "%s-%s.%s";
 }
