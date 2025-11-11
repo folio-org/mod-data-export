@@ -114,7 +114,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
         saveConvertLinkedDataResourceError(resource, jobExecutionId, e);
         continue;
       }
-      localStorageWriter.write(os);
+      localStorageWriter.write(os + System.lineSeparator());
       exportStatistic.incrementExported();
     }
     if (resources.size() < externalIds.size()) {
