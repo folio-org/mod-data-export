@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies.ld;
 
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_LD_TO_BIBFRAME;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -169,6 +170,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
           while ((line = reader.readLine()) != null) {
             finalOutput.write(line);
           }
+          Files.deleteIfExists(sliceResult.getOutputFile());
         } else {
           sliceResult.getStatistic().failAll();
         }
