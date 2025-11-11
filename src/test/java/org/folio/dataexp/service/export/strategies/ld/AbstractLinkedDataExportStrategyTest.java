@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -259,6 +260,8 @@ class AbstractLinkedDataExportStrategyTest {
         .thenReturn(output);
     when(localStorageWriter.getReader())
         .thenReturn(Optional.of(new BufferedReader(new StringReader("{}"))));
+    when(localStorageWriter.getPath())
+        .thenReturn(Path.of("/tmp/irrelevant"));
 
     var preparation = prepare(threads, true, true);
     var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
