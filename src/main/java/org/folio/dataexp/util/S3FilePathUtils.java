@@ -116,12 +116,10 @@ public class S3FilePathUtils {
    * @return file suffix
    */
   public static String getFileSuffixFromOutputFormat(String outputFormat) {
-    switch (outputFormat) {
-      case "LINKED_DATA":
-        return Constants.LINKED_DATA_FILE_SUFFIX;
-      case "MARC":
-      default:
-        return Constants.MARC_FILE_SUFFIX;
-    }
+    return switch (outputFormat) {
+      case "LINKED_DATA" -> Constants.LINKED_DATA_FILE_SUFFIX;
+      case "MARC" -> Constants.MARC_FILE_SUFFIX;
+      default -> Constants.MARC_FILE_SUFFIX;
+    };
   }
 }
