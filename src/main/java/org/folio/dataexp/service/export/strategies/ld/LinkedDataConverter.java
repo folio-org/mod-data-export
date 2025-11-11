@@ -23,7 +23,7 @@ public class LinkedDataConverter {
    * Convert Linked Data exported resource JSON to BIBFRAME 2 vocabulary JSON-LD format.
    *
    * @param ldJson Linked Data exported resource JSON as a string
-   * @return BIBFRAME 2 NDJSON-LD
+   * @return BIBFRAME 2 JSON-LD as JSON-Lines
    * @throws JsonProcessingException when input is not valid JSON
    */
   public ByteArrayOutputStream convertLdJsonToBibframe2Rdf(String ldJson)
