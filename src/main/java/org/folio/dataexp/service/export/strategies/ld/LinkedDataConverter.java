@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.WriterConfig;
+import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.folio.rdf4ld.service.Rdf4LdService;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,8 @@ public class LinkedDataConverter {
    */
   public ByteArrayOutputStream convertLdJsonToBibframe2Rdf(String ldJson)
       throws JsonProcessingException {
-    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.NDJSONLD);
+    var outputConfig = new WriterConfig();
+    outputConfig.set(BasicWriterSettings.PRETTY_PRINT, false);
+    return rdf4LdService.mapLdToBibframe2Rdf(ldJson, RDFFormat.JSONLD, outputConfig);
   }
 }
