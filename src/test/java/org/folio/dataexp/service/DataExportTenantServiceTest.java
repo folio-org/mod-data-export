@@ -23,8 +23,8 @@ class DataExportTenantServiceTest extends BaseDataExportInitializer {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportTenantService.loadReferenceData();
 
-      var expectedDefaultJobProfileAmount = 4;
-      var expectedDefaultMappingProfileAmount = 3;
+      var expectedDefaultJobProfileAmount = 5;
+      var expectedDefaultMappingProfileAmount = 4;
 
       assertEquals(expectedDefaultJobProfileAmount, jobProfileEntityRepository.count());
       assertEquals(expectedDefaultMappingProfileAmount, mappingProfileEntityRepository.count());

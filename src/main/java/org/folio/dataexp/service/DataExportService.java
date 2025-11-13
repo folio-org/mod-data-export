@@ -23,8 +23,11 @@ import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
+import org.folio.dataexp.util.Constants;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +52,7 @@ public class DataExportService {
   private final HoldingsRecordEntityRepository holdingsRecordEntityRepository;
   private final InstanceEntityRepository instanceEntityRepository;
   private final MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
+  private final MappingProfileEntityRepository mappingProfileEntityRepository;
   private final ExecutorService executor = Executors.newCachedThreadPool();
 
   /**
@@ -62,6 +66,8 @@ public class DataExportService {
     var fileDefinition = fileDefinitionEntity.getFileDefinition();
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(
         exportRequest.getJobProfileId());
+    var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(
+        jobProfileEntity.getMappingProfileId());
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     jobExecution.setJobProfileId(jobProfileEntity.getJobProfile().getId());
     jobExecution.setJobProfileName(jobProfileEntity.getJobProfile().getName());
@@ -69,7 +75,8 @@ public class DataExportService {
     jobExecution.setStartedDate(new Date());
     var runBy = getRunBy();
     jobExecution.setRunBy(runBy);
-    var innerFileName = getDefaultFileName(fileDefinition, jobExecution);
+    var innerFileName = getDefaultFileName(fileDefinition, jobExecution,
+        mappingProfileEntity.getFormat());
     var innerFile = new JobExecutionExportedFilesInner().fileId(UUID.randomUUID())
         .fileName(FilenameUtils.getName(innerFileName));
     jobExecution.setExportedFiles(Set.of(innerFile));
@@ -108,7 +115,8 @@ public class DataExportService {
         inputFileProcessor.readFile(fileDefinition, commonExportFails, exportRequest.getIdType());
         log.info("File has been read successfully.");
       }
-      slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest);
+      slicerProcessor.sliceInstancesIds(fileDefinition, exportRequest,
+          mappingProfileEntity.getFormat());
       log.info("Instance IDs have been sliced successfully.");
 
       updateJobExecutionForPostDataExport(
@@ -174,11 +182,15 @@ public class DataExportService {
    *
    * @param fileDefinition The file definition.
    * @param jobExecution The job execution.
+   * @param outputFormat The file output format.
    * @return The file name.
    */
-  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution) {
+  private String getDefaultFileName(FileDefinition fileDefinition, JobExecution jobExecution,
+      String outputFormat) {
     var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
-    return String.format("%s-%s.mrc", initialFileName, jobExecution.getHrId());
+    var fileSuffix = S3FilePathUtils.getFileSuffixFromOutputFormat(outputFormat);
+    return String.format(Constants.FILE_NAME_FORMAT, initialFileName, jobExecution.getHrId(),
+        fileSuffix);
   }
 
   /**

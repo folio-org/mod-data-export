@@ -82,7 +82,7 @@ public class ExportExecutor {
           exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId());
       updateJobExecutionStatusAndProgress(
           exportFilesEntity.getJobExecutionId(), exportStatistic, commonExportStatistic,
-          exportRequest, exportStrategy.getFilenameSuffix());
+          exportRequest);
     }
   }
 
@@ -92,12 +92,11 @@ public class ExportExecutor {
    * @param jobExecutionId the job execution ID
    * @param exportStatistic export statistics
    * @param commonExportStatistic common export statistics
-   * @param fileSuffix final, visible filename suffix
    * @param exportRequest the export request
    */
   private void updateJobExecutionStatusAndProgress(UUID jobExecutionId,
       ExportStrategyStatistic exportStatistic, CommonExportStatistic commonExportStatistic,
-      ExportRequest exportRequest, String fileSuffix) {
+      ExportRequest exportRequest) {
     var jobExecution = jobExecutionService.getById(jobExecutionId);
     var progress = jobExecution.getProgress();
     progress.setFailed(progress.getFailed() + exportStatistic.getFailed());
@@ -147,8 +146,7 @@ public class ExportExecutor {
       var fileDefinition = queryResult.getFirst().getFileDefinition();
       var initialFileName = FilenameUtils.getBaseName(fileDefinition.getFileName());
       try {
-        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName,
-            fileSuffix);
+        var innerFileName = s3Uploader.upload(jobExecution, filesForExport, initialFileName);
         var innerFile = new JobExecutionExportedFilesInner()
             .fileId(UUID.randomUUID())
             .fileName(FilenameUtils.getName(innerFileName));
