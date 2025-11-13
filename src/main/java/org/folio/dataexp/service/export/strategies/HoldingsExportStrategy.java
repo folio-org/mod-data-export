@@ -339,7 +339,7 @@ public class HoldingsExportStrategy extends AbstractMarcExportStrategy {
     var centralTenantId = consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
     if (nonNull(centralTenantId) && centralTenantId.equals(folioExecutionContext.getTenantId())) {
       List<HoldingsRecordEntity> entities = new ArrayList<>();
-      log.info("current map: {}", tenantIdsMap);
+      log.info("ids: {}\ncurrent map: {}", holdingsIds, tenantIdsMap);
       if (isNull(tenantIdsMap)) {
         tenantIdsMap = getTenantIds(holdingsIds, centralTenantId, jobExecutionId);
       }
