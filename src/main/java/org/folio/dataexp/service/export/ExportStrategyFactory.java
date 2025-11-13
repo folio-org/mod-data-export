@@ -1,7 +1,5 @@
 package org.folio.dataexp.service.export;
 
-import static org.folio.dataexp.service.export.Constants.DEFAULT_MAPPING_PROFILE_IDS;
-
 import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.IdType;
@@ -92,7 +90,7 @@ public class ExportStrategyFactory {
    * Determine if a mapping proflie is in the set of default mapping profiles.
    */
   private boolean isDefaultMappingProfile(MappingProfileEntity mappingProfileEntity) {
-    return DEFAULT_MAPPING_PROFILE_IDS.contains(mappingProfileEntity.getId().toString());
+    return mappingProfileEntity.getMappingProfile().getDefault().booleanValue();
   }
 
   /**

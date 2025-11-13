@@ -1,13 +1,5 @@
 package org.folio.dataexp.service.export;
 
-import static org.folio.dataexp.service.export.Constants.DEFAULT_AUTHORITY_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.DEFAULT_HOLDINGS_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.service.export.Constants.DEFAULT_LINKED_DATA_MAPPING_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;
-import static org.folio.dataexp.util.Constants.DEFAULT_LINKED_DATA_JOB_PROFILE_ID;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -64,104 +56,91 @@ class ExportStrategyFactoryTest {
   static Stream<Arguments> exportStrategyArguments() {
     return Stream.of(
       Arguments.of(
-        UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.INSTANCE,
         null,
         false,
         InstancesExportStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.INSTANCE,
         null,
         true,
         InstancesExportAllStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_HOLDINGS_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_HOLDINGS_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.HOLDINGS,
         null,
         false,
         HoldingsExportStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_HOLDINGS_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_HOLDINGS_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.HOLDINGS,
         null,
         true,
         HoldingsExportAllStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_AUTHORITY_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_AUTHORITY_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.AUTHORITY,
         null,
         false,
         AuthorityExportStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_AUTHORITY_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_AUTHORITY_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.AUTHORITY,
         null,
         true,
         AuthorityExportAllStrategy.class
       ),
       Arguments.of(
-        UUID.fromString(DEFAULT_LINKED_DATA_JOB_PROFILE_ID),
-        UUID.fromString(DEFAULT_LINKED_DATA_MAPPING_PROFILE_ID),
+        true,
         RecordTypes.LINKED_DATA,
         null,
         false,
         LinkedDataExportStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.INSTANCE,
         ExportRequest.IdTypeEnum.INSTANCE,
         false,
         InstancesExportStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.INSTANCE,
         ExportRequest.IdTypeEnum.INSTANCE,
         true,
         InstancesExportAllStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.HOLDINGS,
         ExportRequest.IdTypeEnum.HOLDING,
         false,
         HoldingsExportStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.HOLDINGS,
         ExportRequest.IdTypeEnum.HOLDING,
         true,
         HoldingsExportAllStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.AUTHORITY,
         ExportRequest.IdTypeEnum.AUTHORITY,
         false,
         AuthorityExportStrategy.class
       ),
       Arguments.of(
-        UUID.randomUUID(),
-        UUID.randomUUID(),
+        false,
         RecordTypes.AUTHORITY,
         ExportRequest.IdTypeEnum.AUTHORITY,
         true,
@@ -173,16 +152,18 @@ class ExportStrategyFactoryTest {
   @ParameterizedTest
   @MethodSource("exportStrategyArguments")
   void getExportStrategyTest(
-      UUID jobProfileId,
-      UUID mappingProfileId,
+      boolean defaultProfiles,
       RecordTypes recordType,
       ExportRequest.IdTypeEnum idType,
       boolean exportAll,
       Class<?> strategyClass
   ) {
+    UUID jobProfileId = UUID.randomUUID();
+    UUID mappingProfileId = UUID.randomUUID();
     var jobProfile = new JobProfile()
         .id(jobProfileId)
-        .mappingProfileId(mappingProfileId);
+        .mappingProfileId(mappingProfileId)
+        ._default(defaultProfiles);
     var jobProfileEntity = new JobProfileEntity()
         .withId(jobProfileId)
         .withMappingProfileId(mappingProfileId)
@@ -191,7 +172,8 @@ class ExportStrategyFactoryTest {
         .thenReturn(jobProfileEntity);
     var mappingProfile = new MappingProfile()
         .id(mappingProfileId)
-        .addRecordTypesItem(recordType);
+        .addRecordTypesItem(recordType)
+        ._default(defaultProfiles);
     var mappingProfileEntity = new MappingProfileEntity()
         .withId(mappingProfileId)
         .withMappingProfile(mappingProfile)

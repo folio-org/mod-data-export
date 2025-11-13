@@ -35,7 +35,6 @@
       **/src/main/java/org/folio/dataexp/repository**,
       **/src/main/java/org/folio/dataexp/util/ExternalPathResolver.java,
       **/src/main/java/org/folio/dataexp/util/Constants.java,
-      **/src/main/java/org/folio/dataexp/service/export/Constants.java,
       **/src/**/test/**/*
     </sonar.exclusions>
     <argLine />

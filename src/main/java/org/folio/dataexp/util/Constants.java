@@ -31,9 +31,6 @@ public class Constants {
   /** Default job profile ID for holdings exports. */
   public static final String DEFAULT_HOLDINGS_JOB_PROFILE_ID =
       "5e9835fc-0e51-44c8-8a47-f7b8fce35da7";
-  /** Default job profile ID for Linked Data. */
-  public static final String DEFAULT_LINKED_DATA_JOB_PROFILE_ID =
-      "42ca0945-f66c-4bc1-8d1a-7aa8b2e4483a";
   /** File name for deleted MARC bibliographic records. */
   public static final String DELETED_MARC_IDS_FILE_NAME = "deleted-marc-bib-records.csv";
   /** File name for deleted authority records. */
