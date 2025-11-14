@@ -1,11 +1,12 @@
 package org.folio.dataexp.service.export;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * Constants used for export operations.
  */
+@UtilityClass
 public class Constants {
-
-  private Constants() {}
 
   /** Default buffer size for output streams. */
   public static final int OUTPUT_BUFFER_SIZE = 8192;
