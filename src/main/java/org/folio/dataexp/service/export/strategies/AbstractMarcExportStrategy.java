@@ -104,8 +104,6 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       marcRecords, MappingProfile mappingProfile, UUID jobExecutionId)
       throws TransformationRuleException;
 
-
-
   /**
    * Creates and saves MARC records for the given external IDs.
    */
@@ -331,7 +329,7 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
     var exportIds = slice.getContent().stream()
         .map(ExportIdEntity::getInstanceId)
         .collect(Collectors.toSet());
-    createAndSaveMarc(
+    createAndSaveRecords(
         exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
         exportRequest, localStorageWriter
     );
@@ -345,11 +343,30 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
       exportIds = slice.getContent().stream()
           .map(ExportIdEntity::getInstanceId)
           .collect(Collectors.toSet());
-      createAndSaveMarc(
+      createAndSaveRecords(
           exportIds, exportStatistic, mappingProfile, exportFilesEntity.getJobExecutionId(),
           exportRequest, localStorageWriter
       );
     }
+  }
+
+  @Override
+  protected void createAndSaveRecords(
+      Set<UUID> externalIds,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      UUID jobExecutionId,
+      ExportRequest exportRequest,
+      LocalStorageWriter writer
+  ) {
+    createAndSaveMarc(
+        externalIds,
+        exportStatistic,
+        mappingProfile,
+        jobExecutionId,
+        exportRequest,
+        writer
+    );
   }
 
   @Autowired
