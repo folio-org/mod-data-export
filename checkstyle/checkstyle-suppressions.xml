@@ -8,12 +8,12 @@
     files="ExportIdEntityRepository.java"
     lines="48,109"/>
   <suppress checks="LineLength"
-    files="RuleFactoryTest.java"
+    files="RuleFactoryIT.java"
     lines="143,223,252,275,306,365,750,868,905"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"
-    files="DownloadRecordTest.java"/>
+    files="DownloadRecordIT.java"/>
   <suppress checks="IllegalTokenText"
     files="JsonToMarcConverterTest.java"/>
 </suppressions>
