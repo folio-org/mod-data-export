@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.IdType;
 import org.folio.dataexp.rest.resource.DownloadRecordApi;
 import org.folio.dataexp.service.DownloadRecordService;
+import org.folio.dataexp.util.Constants;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/data-export")
 public class DownloadRecordController implements DownloadRecordApi {
 
-  private static final String UTF_FORMAT_POSTFIX = "-utf";
-  private static final String MARC8_FORMAT_POSTFIX = "-marc8";
+  private static final String UTF_FORMAT_POSTFIX = "utf";
+  private static final String MARC8_FORMAT_POSTFIX = "marc8";
 
   private final DownloadRecordService downloadRecordService;
 
@@ -48,11 +49,12 @@ public class DownloadRecordController implements DownloadRecordApi {
     var resource = downloadRecordService.processRecordDownload(
         recordId,
         isUtf,
-        formatPostfix,
+        "-" + formatPostfix,
         idType,
         suppress999ff
     );
-    var fileName = recordId + formatPostfix + ".mrc";
+    var fileName = Constants.FILE_NAME_FORMAT.formatted(recordId, formatPostfix,
+        Constants.MARC_FILE_SUFFIX);
     return ResponseEntity.ok()
         .header(
             HttpHeaders.CONTENT_DISPOSITION,

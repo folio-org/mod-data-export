@@ -33,6 +33,7 @@ import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.Constants;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,7 +86,8 @@ public class InputFileProcessor {
    * @return InputStream of the MARC file, or null if not found.
    */
   public InputStream readMarcFile(String dirName) {
-    var pathToRead = getPathToStoredRecord(dirName, "%s.mrc".formatted(dirName));
+    var pathToRead = getPathToStoredRecord(dirName,
+        "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX));
     if (s3Client.list(pathToRead).isEmpty()) {
       return null;
     }
