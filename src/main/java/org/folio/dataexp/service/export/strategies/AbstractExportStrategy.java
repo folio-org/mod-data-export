@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.folio.dataexp.service.export.Constants.OUTPUT_BUFFER_SIZE;
 
+import java.util.Set;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +32,8 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
 
   protected int exportIdsBatch;
   protected String exportTmpStorage;
+  protected static final String SAVE_ERROR =
+      "{}: Error while saving file {} for job execution ID {}";
 
   protected ExportIdEntityRepository exportIdEntityRepository;
   protected MappingProfileEntityRepository mappingProfileEntityRepository;
@@ -64,24 +67,30 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       ExportRequest exportRequest,
       ExportedRecordsListener exportedRecordsListener
   ) {
+    var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var exportStatistic = new ExportStrategyStatistic(exportedRecordsListener);
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWriter(exportFilesEntity);
     processSlices(
-        exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter
+        exportFilesEntity,
+        exportStatistic,
+        mappingProfile,
+        exportRequest,
+        localStorageWriter
     );
     try {
       localStorageWriter.close();
     } catch (Exception e) {
       log.error(
-          "saveOutputToLocalStorage:: Error while saving file {} to local storage"
-          + " for job execution {}",
-          exportFilesEntity.getFileLocation(), exportFilesEntity.getJobExecutionId()
+          SAVE_ERROR,
+          "saveOutputToLocalStorage",
+          exportFilesEntity.getFileLocation(),
+          jobExecutionId
       );
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.removeExported();
       long countFailed = exportIdEntityRepository.countExportIds(
-          exportFilesEntity.getJobExecutionId(),
+          jobExecutionId,
           exportFilesEntity.getFromId(),
           exportFilesEntity.getToId()
       );
@@ -130,7 +139,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   /**
-   * Processes slices of export IDs for the export file entity.
+   * Process slices of export IDs for paged record retrieval and file creation.
+   *
+   * @param exportFilesEntity the export file entity
+   * @param exportStatistic the export statistics
+   * @param mappingProfile mapping profile to use
+   * @param exportRequest  the export request
+   * @param localStorageWriter writes to local storage
    */
   protected abstract void processSlices(
       JobExecutionExportFilesEntity exportFilesEntity,
@@ -141,14 +156,50 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   );
 
   /**
+   * Per-strategy implementation of retrieving and writing records to disk within
+   * one thread out of a multithreaded approach. Writes and statistics gathering
+   * are done on each thread independently of the others and returned for later
+   * final aggregation.
+   *
+   * @param externalIds set of input IDs
+   * @param exportStatistic main job statistics
+   * @param mappingProfile mapping profile to use
+   * @param jobExecutionId job ID
+   * @param exportRequest the export request
+   * @param writer writes to local storage
+   */
+  protected abstract void createAndSaveRecords(
+      Set<UUID> externalIds,
+      ExportStrategyStatistic exportStatistic,
+      MappingProfile mappingProfile,
+      UUID jobExecutionId,
+      ExportRequest exportRequest,
+      LocalStorageWriter writer
+  );
+
+  /**
    * Creates a LocalStorageWriter for the given export file entity.
    */
   protected LocalStorageWriter createLocalStorageWriter(
       JobExecutionExportFilesEntity exportFilesEntity
   ) {
+    return createLocalStorageWriter(exportFilesEntity, null);
+  }
+
+  /**
+   * Creates a LocalStorageWriter for the given export file entity and sliced page number.
+   */
+  protected LocalStorageWriter createLocalStorageWriter(
+      JobExecutionExportFilesEntity exportFilesEntity,
+      Integer pageNumber
+  ) {
+    var fileName = exportFilesEntity.getFileLocation();
+    if (pageNumber != null) {
+      fileName = "%s-%d".formatted(exportFilesEntity.getFileLocation(), pageNumber);
+    }
     return new LocalStorageWriter(
         S3FilePathUtils.getLocalStorageWriterPath(
-            exportTmpStorage, exportFilesEntity.getFileLocation()
+            exportTmpStorage, fileName
         ),
         OUTPUT_BUFFER_SIZE
     );
