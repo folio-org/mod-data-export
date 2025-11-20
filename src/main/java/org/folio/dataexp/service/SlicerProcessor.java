@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.exception.export.DataExportException;
+import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,6 @@ public class SlicerProcessor {
   private static final String CALL_SLICE_AUTHORITIES_ALL_IDS_PROCEDURE =
       "call slice_authorities_all_ids(?, ?, ?)";
   private static final String FROM_TO_UUID_PART = "_%s_%s";
-  private static final String MARC_EXTENSION = ".mrc";
   public static final int DEFAULT_SLICE_SIZE = 100_000;
   public static final String SLICE_SIZE_KEY = "slice_size";
 
@@ -44,9 +44,10 @@ public class SlicerProcessor {
    * @param fileDefinition The file definition.
    * @param exportRequest The export request.
    */
-  public void sliceInstancesIds(FileDefinition fileDefinition, ExportRequest exportRequest) {
+  public void sliceInstancesIds(FileDefinition fileDefinition, ExportRequest exportRequest,
+      String outputFormat) {
     var sliceSize = configurationService.getValue(SLICE_SIZE_KEY);
-    sliceInstancesIds(fileDefinition, Integer.parseInt(sliceSize), exportRequest);
+    sliceInstancesIds(fileDefinition, Integer.parseInt(sliceSize), exportRequest, outputFormat);
   }
 
   /**
@@ -57,8 +58,8 @@ public class SlicerProcessor {
    * @param exportRequest The export request.
    */
   public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize,
-      ExportRequest exportRequest) {
-    var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName());
+      ExportRequest exportRequest, String outputFormat) {
+    var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName(), outputFormat);
     var pathLocation = getPathToStoredFiles(
         fileDefinition.getJobExecutionId().toString(),
         fileName
@@ -90,9 +91,10 @@ public class SlicerProcessor {
    * @param fileName The base file name.
    * @return The file name with placeholders.
    */
-  private String createFileNameWithPlaceHolder(String fileName) {
+  private String createFileNameWithPlaceHolder(String fileName, String outputFormat) {
     var baseName = FilenameUtils.getBaseName(fileName);
-    return baseName + FROM_TO_UUID_PART + MARC_EXTENSION;
+    var suffix = S3FilePathUtils.getFileSuffixFromOutputFormat(outputFormat);
+    return "%s%s.%s".formatted(baseName, FROM_TO_UUID_PART, suffix);
   }
 
   /**

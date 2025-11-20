@@ -108,4 +108,18 @@ public class S3FilePathUtils {
   public static String getPathToStoredRecord(String dirName, String fileName) {
     return String.format(RECORD_LOCATION_PATH, dirName, fileName);
   }
+
+  /**
+   * Returns the file suffix based on the output format.
+   *
+   * @param outputFormat string form of MappingProfile.OutputFormatEnum
+   * @return file suffix
+   */
+  public static String getFileSuffixFromOutputFormat(String outputFormat) {
+    return switch (outputFormat) {
+      case "LINKED_DATA" -> Constants.LINKED_DATA_FILE_SUFFIX;
+      case "MARC" -> Constants.MARC_FILE_SUFFIX;
+      default -> Constants.MARC_FILE_SUFFIX;
+    };
+  }
 }
