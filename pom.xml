@@ -483,6 +483,9 @@
           <includes>
             <include>org/folio/dataexp/**</include>
           </includes>
+          <excludes>
+            <exclude>*IT.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
 
