@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.export;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 
@@ -15,6 +17,7 @@ import org.folio.dataexp.exception.export.LocalStorageWriterException;
  */
 public class LocalStorageWriter extends StringWriter {
   private final File tmp;
+  private final Path path;
   private final BufferedWriter writer;
 
   /**
@@ -25,14 +28,32 @@ public class LocalStorageWriter extends StringWriter {
    */
   public LocalStorageWriter(String path, int size) {
     try {
-      Path p = Path.of(path);
-      this.tmp = Files.createFile(p)
+      this.path = Path.of(path);
+      this.tmp = Files.createFile(this.path)
           .toFile();
       this.writer = new BufferedWriter(new FileWriter(this.tmp), size);
     } catch (Exception ex) {
       throw new LocalStorageWriterException(
           "Files buffer cannot be created due to error: " + ex.getMessage());
     }
+  }
+
+  /**
+   * Return reader for output file.
+   */
+  public Optional<BufferedReader> getReader() {
+    try {
+      return Optional.of(Files.newBufferedReader(this.path));
+    } catch (Exception e) {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Return path to output file.
+   */
+  public Path getPath() {
+    return this.path;
   }
 
   /**

@@ -63,4 +63,25 @@ public class ExportStrategyStatistic {
   public void addNotExistIdsAll(List<UUID> ids) {
     notExistIds.addAll(ids);
   }
+
+  /**
+   * Aggregate the statistics and missing results from one slice's processing into a total summary.
+   */
+  public void aggregate(ExportStrategyStatistic sliceStatistic) {
+    this.exported = this.exported + sliceStatistic.getExported();
+    this.failed = this.failed + sliceStatistic.getFailed();
+    this.duplicatedSrs = this.duplicatedSrs + sliceStatistic.getDuplicatedSrs();
+    addNotExistIdsAll(sliceStatistic.getNotExistIds());
+  }
+
+  /**
+   * Likely due to I/O errors, records could not be added to the final file, so consider them all
+   * failed instead.
+   */
+  public void failAll() {
+    var total = this.exported + this.duplicatedSrs + this.failed;
+    this.setDuplicatedSrs(0);
+    this.removeExported();
+    this.setFailed(total);
+  }
 }
