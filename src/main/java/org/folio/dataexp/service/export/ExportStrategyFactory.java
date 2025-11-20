@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.export;
 
-import java.util.Collections;
 import lombok.AllArgsConstructor;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.IdType;
