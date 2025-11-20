@@ -219,7 +219,9 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       UUID jobExecutionId,
       LocalStorageWriter localStorageWriter
   ) {
+    log.info("getting linked data");
     var resources = getLinkedDataResources(externalIds);
+    log.info("received {} resources", resources.size());
     for (var resource : resources) {
       var os = StringUtils.EMPTY;
       try {
