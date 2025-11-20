@@ -99,7 +99,8 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
                   exportFilesEntity,
                   exportRequest,
                   taskId
-              ))
+              ),
+              executor)
         );
         page++;
       } while (slice.hasNext());
