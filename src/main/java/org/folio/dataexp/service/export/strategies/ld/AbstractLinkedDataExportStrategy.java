@@ -80,7 +80,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
             exportFilesEntity.getToId(),
             PageRequest.of(taskId, exportIdsBatch)
         );
-        log.info("Slice size: {}", slice.getSize());
+        log.debug("Slice size: {}", slice.getSize());
         var exportIds = slice.getContent().stream()
             .map(ExportIdEntity::getInstanceId)
             .collect(Collectors.toSet());
@@ -102,7 +102,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
 
     CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
 
-    log.info("all tasks complete");
+    log.debug("all tasks complete");
 
     tasks.stream()
         .map(CompletableFuture::join)
@@ -125,7 +125,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       ExportRequest exportRequest,
       int pageNumber
   ) {
-    log.info("begin createAndSaveSliceRecords for {}", pageNumber);
+    log.debug("begin createAndSaveSliceRecords for {}", pageNumber);
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
     var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedRecordsListener());
@@ -148,7 +148,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       );
       sliceStatistic.failAll();
     }
-    log.info("complete createAndSaveSliceRecords for {}", pageNumber);
+    log.debug("complete createAndSaveSliceRecords for {}", pageNumber);
     return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
   }
 
@@ -219,9 +219,9 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       UUID jobExecutionId,
       LocalStorageWriter localStorageWriter
   ) {
-    log.info("getting linked data");
+    log.debug("getting linked data");
     var resources = getLinkedDataResources(externalIds);
-    log.info("received {} resources", resources.size());
+    log.debug("received {} resources", resources.size());
     for (var resource : resources) {
       var os = StringUtils.EMPTY;
       try {
