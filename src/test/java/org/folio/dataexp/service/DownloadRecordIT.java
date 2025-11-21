@@ -30,6 +30,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import java.time.ZoneOffset;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.dto.UserInfo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import java.util.Collections;
 
 class DownloadRecordIT extends BaseDataExportInitializerIT {
 
@@ -199,6 +210,155 @@ class DownloadRecordIT extends BaseDataExportInitializerIT {
     }
   }
 
+    @Test
+  void testFromMappingProfileShouldMapAllFieldsWhenInputIsFullyPopulated() {
+    // TestMate-471da5621bb58be032d62ce77cfb2175
+    // Given
+    var mappingProfileId = UUID.fromString("f0f6d967-735c-4471-98a2-3e06a558d059");
+    var createdDate = new Date(1697796000000L); // 2023-10-20T10:00:00Z
+    var updatedDate = new Date(1697799600000L); // 2023-10-20T11:00:00Z
+    var createdByUserId = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+    var updatedByUserId = "fedcba09-8765-4321-fedc-ba0987654321";
+    var firstName = "John";
+    var lastName = "Doe";
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(firstName);
+    userInfo.setLastName(lastName);
+    var metadata = new Metadata();
+    metadata.setCreatedDate(createdDate);
+    metadata.setUpdatedDate(updatedDate);
+    metadata.setCreatedByUserId(createdByUserId);
+    metadata.setUpdatedByUserId(updatedByUserId);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(mappingProfileId);
+    mappingProfile.setName("Test Profile");
+    mappingProfile.setDescription("A test description");
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.INSTANCE));
+    mappingProfile.setOutputFormat(MappingProfile.OutputFormatEnum.MARC);
+    mappingProfile.setMetadata(metadata);
+    mappingProfile.setUserInfo(userInfo);
+    // When
+    var actualEntity = MappingProfileEntity.fromMappingProfile(mappingProfile);
+    // Then
+    assertEquals(mappingProfileId, actualEntity.getId());
+    assertEquals(mappingProfile, actualEntity.getMappingProfile());
+    assertEquals("Test Profile", actualEntity.getName());
+    assertEquals("A test description", actualEntity.getDescription());
+    assertEquals(LocalDateTime.of(2023, 10, 20, 10, 0, 0), actualEntity.getCreationDate());
+    assertEquals(LocalDateTime.of(2023, 10, 20, 11, 0, 0), actualEntity.getUpdatedDate());
+    assertEquals(createdByUserId, actualEntity.getCreatedBy());
+    assertEquals(updatedByUserId, actualEntity.getUpdatedByUserId());
+    assertEquals(firstName, actualEntity.getUpdatedByFirstName());
+    assertEquals(lastName, actualEntity.getUpdatedByLastName());
+    assertEquals("SRS,INSTANCE", actualEntity.getRecordTypes());
+    assertEquals("MARC", actualEntity.getFormat());
+  }
+
+    @Test
+  void testFromMappingProfileShouldGenerateIdWhenIdIsNull() {
+    // TestMate-f02f728b280616296f91947676c9f5af
+    // Given
+    var newMappingProfile = new MappingProfile();
+    newMappingProfile.setMetadata(new Metadata());
+    newMappingProfile.setUserInfo(new UserInfo());
+    // When
+    var createdEntity = MappingProfileEntity.fromMappingProfile(newMappingProfile);
+    // Then
+    assertNotNull(newMappingProfile.getId());
+    assertNotNull(createdEntity.getId());
+    assertEquals(newMappingProfile.getId(), createdEntity.getId());
+    assertSame(newMappingProfile, createdEntity.getMappingProfile());
+    assertNull(createdEntity.getCreationDate());
+    assertNull(createdEntity.getCreatedBy());
+    assertNull(createdEntity.getUpdatedByFirstName());
+  }
+
+    @Test
+  void testFromMappingProfileShouldHandleNullMetadataAndUserInfo() {
+    // TestMate-646764d322e9cbdb444faf0b10351203
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setName("Test Profile with Nulls");
+    mappingProfile.setMetadata(null);
+    mappingProfile.setUserInfo(null);
+    // When
+    var resultEntity = MappingProfileEntity.fromMappingProfile(mappingProfile);
+    // Then
+    assertNotNull(mappingProfile.getId());
+    assertEquals(mappingProfile.getId(), resultEntity.getId());
+    assertEquals("Test Profile with Nulls", resultEntity.getName());
+    assertNull(resultEntity.getCreationDate());
+    assertNull(resultEntity.getCreatedBy());
+    assertNull(resultEntity.getUpdatedDate());
+    assertNull(resultEntity.getUpdatedByUserId());
+    assertNull(resultEntity.getUpdatedByFirstName());
+    assertNull(resultEntity.getUpdatedByLastName());
+  }
+
+    @Test
+  void testFromMappingProfileShouldHandlePartiallyNullMetadataAndUserInfo() {
+    // TestMate-3e803a2e5095e5785825afae696be7c5
+    // Given
+    var mappingProfileId = UUID.fromString("1d8200b3-d25d-4a1c-95a2-933f114948a3");
+    var createdDate = new Date(1697796000000L); // 2023-10-20T10:00:00Z
+    var updatedByUserId = "fedcba09-8765-4321-fedc-ba0987654321";
+    var firstName = "Jane";
+    var metadata = new Metadata();
+    metadata.setCreatedDate(createdDate);
+    metadata.setUpdatedByUserId(updatedByUserId);
+    metadata.setUpdatedDate(null);
+    metadata.setCreatedByUserId(null);
+    var userInfo = new UserInfo();
+    userInfo.setFirstName(firstName);
+    userInfo.setLastName(null);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(mappingProfileId);
+    mappingProfile.setName("Partial Info Profile");
+    mappingProfile.setMetadata(metadata);
+    mappingProfile.setUserInfo(userInfo);
+    // When
+    var resultEntity = MappingProfileEntity.fromMappingProfile(mappingProfile);
+    // Then
+    assertEquals(mappingProfileId, resultEntity.getId());
+    assertEquals(LocalDateTime.of(2023, 10, 20, 10, 0, 0), resultEntity.getCreationDate());
+    assertEquals(updatedByUserId, resultEntity.getUpdatedByUserId());
+    assertEquals(firstName, resultEntity.getUpdatedByFirstName());
+    assertNull(resultEntity.getUpdatedDate());
+    assertNull(resultEntity.getCreatedBy());
+    assertNull(resultEntity.getUpdatedByLastName());
+  }
+
+    @ParameterizedTest
+  @MethodSource("recordTypesScenarios")
+  void testFromMappingProfileShouldCorrectlyMapRecordTypes(List<RecordTypes> inputRecordTypes, String expectedRecordTypesString) {
+    // TestMate-1c436fb49d8962f383750084d1027f4f
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(inputRecordTypes);
+    mappingProfile.setMetadata(new Metadata());
+    mappingProfile.setUserInfo(new UserInfo());
+    // When
+    var actualEntity = MappingProfileEntity.fromMappingProfile(mappingProfile);
+    // Then
+    assertEquals(expectedRecordTypesString, actualEntity.getRecordTypes());
+  }
+
+    @Test
+  void testFromMappingProfileShouldHandleNullOutputFormat() {
+    // TestMate-cd36d89d9860c06b0554f1d959524d0f
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setName("Profile with Null Output Format");
+    mappingProfile.setOutputFormat(null);
+    mappingProfile.setMetadata(new Metadata());
+    mappingProfile.setUserInfo(new UserInfo());
+    // When
+    var resultEntity = MappingProfileEntity.fromMappingProfile(mappingProfile);
+    // Then
+    assertNull(resultEntity.getFormat());
+    assertNotNull(resultEntity.getId());
+  }
+
   private static Stream<Arguments> providedData() {
     return Stream.of(
       Arguments.of(IdType.AUTHORITY, AUTHORITY_ID, true,
@@ -229,5 +389,14 @@ class DownloadRecordIT extends BaseDataExportInitializerIT {
     try (InputStream is1 = isr1.getInputStream(); InputStream is2 = isr2.getInputStream()) {
       return IOUtils.contentEquals(is1, is2);
     }
+  }
+
+    private static Stream<Arguments> recordTypesScenarios() {
+    return Stream.of(
+      Arguments.of(List.of(RecordTypes.SRS, RecordTypes.INSTANCE), "SRS,INSTANCE"),
+      Arguments.of(List.of(RecordTypes.HOLDINGS), "HOLDINGS"),
+      Arguments.of(Collections.emptyList(), ""),
+      Arguments.of(null, null)
+    );
   }
 }
