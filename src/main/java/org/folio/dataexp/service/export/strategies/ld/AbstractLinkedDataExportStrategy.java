@@ -93,13 +93,16 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
                   exportFilesEntity,
                   exportRequest,
                   taskId
-              ))
+              ),
+              executor)
         );
         page++;
       } while (slice.hasNext());
     }
 
     CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
+
+    log.debug("all tasks complete");
 
     tasks.stream()
         .map(CompletableFuture::join)
@@ -122,6 +125,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       ExportRequest exportRequest,
       int pageNumber
   ) {
+    log.debug("begin createAndSaveSliceRecords for {}", pageNumber);
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
     var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedRecordsListener());
@@ -144,6 +148,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       );
       sliceStatistic.failAll();
     }
+    log.debug("complete createAndSaveSliceRecords for {}", pageNumber);
     return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
   }
 
@@ -214,7 +219,9 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       UUID jobExecutionId,
       LocalStorageWriter localStorageWriter
   ) {
+    log.debug("getting linked data");
     var resources = getLinkedDataResources(externalIds);
+    log.debug("received {} resources", resources.size());
     for (var resource : resources) {
       var os = StringUtils.EMPTY;
       try {
