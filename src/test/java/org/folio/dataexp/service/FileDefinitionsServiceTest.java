@@ -30,28 +30,21 @@ import org.springframework.core.io.PathResource;
 @ExtendWith(MockitoExtension.class)
 class FileDefinitionsServiceTest {
 
-  @Mock
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Mock
-  private JobExecutionService jobExecutionService;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private FileDefinitionValidator fileDefinitionValidator;
-  @Mock
-  private FilesUploadService filesUploadService;
-  @Captor
-  private ArgumentCaptor<JobExecution> jobExecutionArgumentCaptor;
-  @InjectMocks
-  private FileDefinitionsService fileDefinitionsService;
+  @Mock private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Mock private JobExecutionService jobExecutionService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FileDefinitionValidator fileDefinitionValidator;
+  @Mock private FilesUploadService filesUploadService;
+  @Captor private ArgumentCaptor<JobExecution> jobExecutionArgumentCaptor;
+  @InjectMocks private FileDefinitionsService fileDefinitionsService;
 
   @Test
   void postFileDefinitionTest() {
     var fileDefinition = new FileDefinition();
     fileDefinition.fileName("upload.csv");
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
 
     when(jobExecutionService.save(any(JobExecution.class)))
         .thenReturn(new JobExecution().id(UUID.randomUUID()));
@@ -78,8 +71,8 @@ class FileDefinitionsServiceTest {
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class)))
         .thenReturn(fileDefinitionEntity);
 
@@ -107,8 +100,8 @@ class FileDefinitionsServiceTest {
     when(filesUploadService.uploadFile(fileDefinitionId, resource))
         .thenThrow(new RuntimeException("error"));
 
-    assertThrows(UploadFileException.class, () ->
-        fileDefinitionsService.uploadFile(fileDefinitionId, resource));
+    assertThrows(
+        UploadFileException.class,
+        () -> fileDefinitionsService.uploadFile(fileDefinitionId, resource));
   }
-
 }

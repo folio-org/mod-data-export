@@ -22,43 +22,43 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class JobExecutionServiceIT extends BaseDataExportInitializerIT {
-  @Autowired
-  private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
-  @Autowired
-  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
-  @Autowired
-  private JobExecutionService jobExecutionService;
+  @Autowired private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  @Autowired private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Autowired private JobExecutionService jobExecutionService;
 
   @Test
   void shouldExpireJobExecutionsAndSetCompletedDateForFailedJobsIfNeeded() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var failedJobId = UUID.randomUUID();
       var expiredJobId = UUID.randomUUID();
       var lastUpdatedDate = new Date();
       var expiredDate = new Date(new Date().getTime() - HOURS.toMillis(1));
 
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(failedJobId)
-          .jobExecution(new JobExecution()
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(failedJobId)
-              .status(FAIL)
-              .lastUpdatedDate(lastUpdatedDate))
-          .build());
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(expiredJobId)
-          .jobExecution(new JobExecution()
+              .jobExecution(
+                  new JobExecution().id(failedJobId).status(FAIL).lastUpdatedDate(lastUpdatedDate))
+              .build());
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(expiredJobId)
-              .status(IN_PROGRESS)
-              .lastUpdatedDate(expiredDate))
-          .build());
-      errorLogEntityCqlRepository.save(ErrorLogEntity.builder()
-          .id(UUID.randomUUID())
-          .errorLog(new ErrorLog().jobExecutionId(expiredJobId))
-          .build());
-      errorLogEntityCqlRepository.save(ErrorLogEntity.builder()
-          .id(UUID.randomUUID())
-          .errorLog(new ErrorLog().jobExecutionId(expiredJobId))
-          .build());
+              .jobExecution(
+                  new JobExecution()
+                      .id(expiredJobId)
+                      .status(IN_PROGRESS)
+                      .lastUpdatedDate(expiredDate))
+              .build());
+      errorLogEntityCqlRepository.save(
+          ErrorLogEntity.builder()
+              .id(UUID.randomUUID())
+              .errorLog(new ErrorLog().jobExecutionId(expiredJobId))
+              .build());
+      errorLogEntityCqlRepository.save(
+          ErrorLogEntity.builder()
+              .id(UUID.randomUUID())
+              .errorLog(new ErrorLog().jobExecutionId(expiredJobId))
+              .build());
 
       jobExecutionService.expireJobExecutions();
 
@@ -71,8 +71,7 @@ class JobExecutionServiceIT extends BaseDataExportInitializerIT {
       assertThat(expiredJob).isPresent();
       var expiredJobExecution = expiredJob.get().getJobExecution();
       assertThat(expiredJobExecution.getStatus()).isEqualTo(FAIL);
-      assertThat(expiredJobExecution.getCompletedDate()).isCloseTo(new Date(),
-          SECONDS.toMillis(5));
+      assertThat(expiredJobExecution.getCompletedDate()).isCloseTo(new Date(), SECONDS.toMillis(5));
 
       var errorLogEntities = errorLogEntityCqlRepository.getAllByJobExecutionId(expiredJobId);
       assertThat(errorLogEntities).hasSize(1);

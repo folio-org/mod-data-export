@@ -6,14 +6,11 @@ package org.folio.dataexp.service.export.strategies;
  *
  * <p>This class provides string constants for field identifiers, JSON path expressions, and
  * function names used during transformation of holdings and item data in export processes.
- * </p>
  */
 public final class TransformationConstants {
 
-  public static final String PERMANENT_LOCATION_FIELD_ID =
-      "holdings.permanentlocation.name";
-  public static final String PERMANENT_LOCATION_CODE_FIELD_ID =
-      "holdings.permanentlocation.code";
+  public static final String PERMANENT_LOCATION_FIELD_ID = "holdings.permanentlocation.name";
+  public static final String PERMANENT_LOCATION_CODE_FIELD_ID = "holdings.permanentlocation.code";
   public static final String PERMANENT_LOCATION_LIBRARY_NAME_FIELD_ID =
       "holdings.permanentlocation.library.name";
   public static final String PERMANENT_LOCATION_LIBRARY_CODE_FIELD_ID =

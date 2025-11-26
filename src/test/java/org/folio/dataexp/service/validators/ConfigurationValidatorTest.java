@@ -13,15 +13,13 @@ class ConfigurationValidatorTest {
   void validateSliceSizeLessThanOneTest() {
     var configurationValidator = new ConfigurationValidator();
     var config = new Config().key(SlicerProcessor.SLICE_SIZE_KEY).value("0");
-    assertThrows(SliceSizeValidationException.class, () ->
-        configurationValidator.validate(config));
+    assertThrows(SliceSizeValidationException.class, () -> configurationValidator.validate(config));
   }
 
   @Test
   void validateSliceSizeNotaNumberTest() {
     var configurationValidator = new ConfigurationValidator();
     var config = new Config().key(SlicerProcessor.SLICE_SIZE_KEY).value("a50000");
-    assertThrows(SliceSizeValidationException.class, () ->
-        configurationValidator.validate(config));
+    assertThrows(SliceSizeValidationException.class, () -> configurationValidator.validate(config));
   }
 }

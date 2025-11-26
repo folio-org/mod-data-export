@@ -9,30 +9,31 @@ import org.springframework.data.domain.PageRequest;
 
 class MarcHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
 
-  @Autowired
-  private MarcHoldingsAllRepository marcHoldingsAllRepository;
+  @Autowired private MarcHoldingsAllRepository marcHoldingsAllRepository;
 
   @Test
   void findMarcHoldingsAllNonDeletedTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = marcHoldingsAllRepository.findMarcHoldingsAllNonDeleted(MIN_UUID, MAX_UUID,
-          PageRequest.of(0, exportIdsBatch));
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          marcHoldingsAllRepository.findMarcHoldingsAllNonDeleted(
+              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(6);
     }
   }
 
   @Test
   void findMarcHoldingsAllNonDeletedNonSuppressedTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
-      var slice = marcHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressed(MIN_UUID,
-          MAX_UUID, PageRequest.of(0, exportIdsBatch));
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          marcHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressed(
+              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(4);
     }
   }
 
   @Test
   void findMarcHoldingsAllDeletedTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcHoldingsAllRepository.findMarcHoldingsAllDeleted();
       assertThat(list).hasSize(6);
     }
@@ -40,7 +41,7 @@ class MarcHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
 
   @Test
   void findMarcHoldingsAllDeletedNonSuppressedTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = marcHoldingsAllRepository.findMarcHoldingsAllDeletedNonSuppressed();
       assertThat(list).hasSize(3);
     }

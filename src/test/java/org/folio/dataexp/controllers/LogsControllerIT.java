@@ -20,24 +20,25 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class LogsControllerIT extends BaseDataExportInitializerIT {
-  @MockitoBean
-  private ErrorLogEntityCqlRepository repository;
+  @MockitoBean private ErrorLogEntityCqlRepository repository;
 
   @Test
   @SneakyThrows
   void getTransformationFieldsTest() {
-    var entity = ErrorLogEntity.builder()
-        .id(UUID.randomUUID())
-        .errorLog(new ErrorLog().id(UUID.randomUUID()))
-        .build();
+    var entity =
+        ErrorLogEntity.builder()
+            .id(UUID.randomUUID())
+            .errorLog(new ErrorLog().id(UUID.randomUUID()))
+            .build();
 
     when(repository.findByCql(anyString(), any(OffsetRequest.class)))
         .thenReturn(new PageImpl<>(Collections.singletonList(entity)));
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .get("/data-export/logs?offset=0&limit=1")
-        .headers(defaultHeaders())
-        .contentType(APPLICATION_JSON))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/data-export/logs?offset=0&limit=1")
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 }

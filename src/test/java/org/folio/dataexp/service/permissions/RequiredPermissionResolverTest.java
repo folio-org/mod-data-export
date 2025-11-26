@@ -11,7 +11,7 @@ class RequiredPermissionResolverTest {
 
   @Test
   void getReadPermissionTest() {
-    assertEquals("ui-inventory.instance.view",
-        new RequiredPermissionResolver().getReadPermission());
+    assertEquals(
+        "ui-inventory.instance.view", new RequiredPermissionResolver().getReadPermission());
   }
 }

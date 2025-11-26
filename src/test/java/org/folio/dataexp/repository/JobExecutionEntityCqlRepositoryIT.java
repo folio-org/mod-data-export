@@ -15,28 +15,31 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class JobExecutionEntityCqlRepositoryIT extends BaseDataExportInitializerIT {
-  @Autowired
-  JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  @Autowired JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
 
   @Test
   void shouldGetExpiredJobs() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var expectedId = UUID.randomUUID();
       var expirationDate = new Date(new Date().getTime() - HOURS.toMillis(1));
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(expectedId)
-          .jobExecution(new JobExecution()
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(expectedId)
-              .status(IN_PROGRESS)
-              .lastUpdatedDate(new Date(new Date().getTime() - HOURS.toMillis(2))))
-          .build());
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(UUID.randomUUID())
-          .jobExecution(new JobExecution()
+              .jobExecution(
+                  new JobExecution()
+                      .id(expectedId)
+                      .status(IN_PROGRESS)
+                      .lastUpdatedDate(new Date(new Date().getTime() - HOURS.toMillis(2))))
+              .build());
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(UUID.randomUUID())
-              .status(IN_PROGRESS)
-              .lastUpdatedDate(new Date()))
-          .build());
+              .jobExecution(
+                  new JobExecution()
+                      .id(UUID.randomUUID())
+                      .status(IN_PROGRESS)
+                      .lastUpdatedDate(new Date()))
+              .build());
 
       var res = jobExecutionEntityCqlRepository.getExpiredJobs(expirationDate);
 
@@ -48,27 +51,24 @@ class JobExecutionEntityCqlRepositoryIT extends BaseDataExportInitializerIT {
 
   @Test
   void shouldGetFailedJobsWithoutCompletedDate() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var expectedId = UUID.randomUUID();
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(expectedId)
-          .jobExecution(new JobExecution()
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(expectedId)
-              .status(FAIL))
-          .build());
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(UUID.randomUUID())
-          .jobExecution(new JobExecution()
+              .jobExecution(new JobExecution().id(expectedId).status(FAIL))
+              .build());
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(UUID.randomUUID())
-              .status(IN_PROGRESS))
-          .build());
-      jobExecutionEntityCqlRepository.save(JobExecutionEntity.builder()
-          .id(UUID.randomUUID())
-          .jobExecution(new JobExecution()
+              .jobExecution(new JobExecution().id(UUID.randomUUID()).status(IN_PROGRESS))
+              .build());
+      jobExecutionEntityCqlRepository.save(
+          JobExecutionEntity.builder()
               .id(UUID.randomUUID())
-              .status(FAIL)
-              .completedDate(new Date()))
-          .build());
+              .jobExecution(
+                  new JobExecution().id(UUID.randomUUID()).status(FAIL).completedDate(new Date()))
+              .build());
 
       var res = jobExecutionEntityCqlRepository.getFailedExecutionsWithoutCompletedDate();
 
