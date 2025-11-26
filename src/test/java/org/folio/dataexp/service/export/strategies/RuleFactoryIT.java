@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.assertj.core.util.Lists;
@@ -48,10 +49,9 @@ import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.processor.rule.Rule;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Optional;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 class RuleFactoryIT extends BaseDataExportInitializerIT {
   private static final String DEFAULT_MAPPING_PROFILE_ID = "25d81cbe-9686-11ea-bb37-0242ac130002";
@@ -1021,7 +1021,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     assertTrue(rules.stream().noneMatch(rule -> "999".equals(rule.getField())));
   }
 
-    @Test
+  @Test
   void shouldReturnEmptyWhenTransformationDisabled() throws TransformationRuleException {
     // TestMate-1dfb07e8b9f2a2c06dd19cb997c33f7f
     // given
@@ -1030,14 +1030,16 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     transformation.setFieldId("instance.metadata.updateddate");
     transformation.setRecordType(RecordTypes.INSTANCE);
     // when
-    Optional<Rule> resultRule = ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
+    Optional<Rule> resultRule =
+        ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
     // then
     assertTrue(resultRule.isEmpty());
   }
 
-    @ParameterizedTest
+  @ParameterizedTest
   @EnumSource(value = RecordTypes.class, names = "INSTANCE", mode = EnumSource.Mode.EXCLUDE)
-  void shouldReturnEmptyWhenRecordTypeIsNotInstance(RecordTypes recordType) throws TransformationRuleException {
+  void shouldReturnEmptyWhenRecordTypeIsNotInstance(RecordTypes recordType)
+      throws TransformationRuleException {
     // TestMate-24966dcec68c6c828e71838ac1cc4b97
     // given
     var transformation = new Transformations();
@@ -1045,13 +1047,15 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     transformation.setFieldId("some.field.id");
     transformation.setRecordType(recordType);
     // when
-    Optional<Rule> resultRule = ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
+    Optional<Rule> resultRule =
+        ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
     // then
     assertTrue(resultRule.isEmpty());
   }
 
-    @Test
-  void shouldReturnCombinedRuleWhenFieldIdMatchesCombinedBuilderKey() throws TransformationRuleException {
+  @Test
+  void shouldReturnCombinedRuleWhenFieldIdMatchesCombinedBuilderKey()
+      throws TransformationRuleException {
     // TestMate-da0ddb1f2f4195b6e61b248b41998f5f
     // given
     var transformation = new Transformations();
@@ -1059,7 +1063,8 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     transformation.setFieldId("instance.electronic.access.uri");
     transformation.setRecordType(RecordTypes.INSTANCE);
     // when
-    Optional<Rule> resultRule = ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
+    Optional<Rule> resultRule =
+        ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
     // then
     assertTrue(resultRule.isPresent());
     var rule = resultRule.get();
@@ -1067,7 +1072,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     assertTrue(rule.getDataSources().stream().anyMatch(ds -> "u".equals(ds.getSubfield())));
   }
 
-    @Test
+  @Test
   void shouldReturnDefaultRuleWhenNoSpecialBuilderMatches() throws TransformationRuleException {
     // TestMate-d7627bed2afb20d231aa29f5fe6f25f1
     // given
@@ -1079,7 +1084,8 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     transformation.setPath("$.instance.metadata.updatedDate");
     transformation.setTransformation(EMPTY);
     // when
-    Optional<Rule> resultRule = ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
+    Optional<Rule> resultRule =
+        ruleFactory.createDefaultByTransformations(transformation, defaultRulesFromConfigFile);
     // then
     assertTrue(resultRule.isPresent());
     var rule = resultRule.get();
