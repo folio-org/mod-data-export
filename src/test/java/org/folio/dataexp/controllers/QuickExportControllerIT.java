@@ -17,8 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class QuickExportControllerIT extends BaseDataExportInitializerIT {
 
-  @MockitoBean
-  private QuickExportService quickExportService;
+  @MockitoBean private QuickExportService quickExportService;
 
   @ParameterizedTest
   @SneakyThrows
@@ -29,10 +28,11 @@ class QuickExportControllerIT extends BaseDataExportInitializerIT {
     quickExportRequest.setType(QuickExportRequest.TypeEnum.UUID);
     quickExportRequest.setUuids(List.of(UUID.randomUUID()));
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/quick-export")
-        .headers(defaultHeaders())
-        .content(asJsonString(quickExportRequest)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/quick-export")
+                .headers(defaultHeaders())
+                .content(asJsonString(quickExportRequest)))
         .andExpect(status().isOk());
 
     verify(quickExportService).postQuickExport(isA(QuickExportRequest.class));

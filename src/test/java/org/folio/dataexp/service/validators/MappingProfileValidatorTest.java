@@ -30,8 +30,9 @@ class MappingProfileValidatorTest {
     mappingProfile.setTransformations(List.of(transformation));
 
     var validator = new MappingProfileValidator();
-    assertThrows(MappingProfileTransformationPatternException.class, () ->
-        validator.validate(mappingProfile));
+    assertThrows(
+        MappingProfileTransformationPatternException.class,
+        () -> validator.validate(mappingProfile));
   }
 
   @Test
@@ -44,16 +45,19 @@ class MappingProfileValidatorTest {
     var validator = new MappingProfileValidator();
 
     mappingProfile.setFieldsSuppression("90");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
-        validator.validate(mappingProfile));
+    assertThrows(
+        MappingProfileFieldsSuppressionPatternException.class,
+        () -> validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression("9000");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
-        validator.validate(mappingProfile));
+    assertThrows(
+        MappingProfileFieldsSuppressionPatternException.class,
+        () -> validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression("aab, 900");
-    assertThrows(MappingProfileFieldsSuppressionPatternException.class, () ->
-        validator.validate(mappingProfile));
+    assertThrows(
+        MappingProfileFieldsSuppressionPatternException.class,
+        () -> validator.validate(mappingProfile));
   }
 
   @Test
@@ -67,8 +71,8 @@ class MappingProfileValidatorTest {
     mappingProfile.recordTypes(List.of(RecordTypes.ITEM));
 
     mappingProfile.setFieldsSuppression("900");
-    assertThrows(MappingProfileFieldsSuppressionException.class, () ->
-        validator.validate(mappingProfile));
+    assertThrows(
+        MappingProfileFieldsSuppressionException.class, () -> validator.validate(mappingProfile));
 
     mappingProfile.setFieldsSuppression(StringUtils.EMPTY);
     assertDoesNotThrow(() -> validator.validate(mappingProfile));

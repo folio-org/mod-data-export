@@ -19,8 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class JobExecutionsControllerIT extends BaseDataExportInitializerIT {
 
-  @MockitoBean
-  private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  @MockitoBean private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
 
   @Test
   @SneakyThrows
@@ -28,26 +27,27 @@ class JobExecutionsControllerIT extends BaseDataExportInitializerIT {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
 
-
-    var entity = JobExecutionEntity.builder().id(jobExecution.getId()).jobExecution(jobExecution)
-        .build();
+    var entity =
+        JobExecutionEntity.builder().id(jobExecution.getId()).jobExecution(jobExecution).build();
     PageImpl<JobExecutionEntity> page = new PageImpl<>(List.of(entity));
 
     when(jobExecutionEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
         .thenReturn(page);
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .get("/data-export/job-executions?query=query")
-        .headers(defaultHeaders()))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/data-export/job-executions?query=query")
+                .headers(defaultHeaders()))
         .andExpect(status().isOk());
   }
 
   @Test
   @SneakyThrows
   void deleteJobExecutionByIdTest() {
-    mockMvc.perform(MockMvcRequestBuilders
-        .delete("/data-export/job-executions/" + UUID.randomUUID())
-        .headers(defaultHeaders()))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.delete("/data-export/job-executions/" + UUID.randomUUID())
+                .headers(defaultHeaders()))
         .andExpect(status().isNoContent());
   }
 }

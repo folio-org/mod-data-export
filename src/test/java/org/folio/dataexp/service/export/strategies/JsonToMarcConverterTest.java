@@ -14,7 +14,8 @@ class JsonToMarcConverterTest {
   @SneakyThrows
   void convertJsonRecordToMarcRecordTest() {
     var variableField = new DataFieldImpl("tag", 'a', 'b');
-    var json = """
+    var json =
+        """
         {
             "fields": [{
                     "001": "ho00000000009"
@@ -26,9 +27,8 @@ class JsonToMarcConverterTest {
 
     var expected =
         "00067cy  a22000494  4500001001400000tag000300014\u001Eho00000000009\u001Eab\u001E\u001D";
-    var actual = convertor.convertJsonRecordToMarcRecord(json, List.of(variableField),
-        new MappingProfile());
+    var actual =
+        convertor.convertJsonRecordToMarcRecord(json, List.of(variableField), new MappingProfile());
     assertEquals(expected, actual);
   }
-
 }

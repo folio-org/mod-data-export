@@ -46,37 +46,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HoldingsItemsResolverServiceTest {
 
-  @Mock
-  private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  @Mock
-  private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
-  @Mock
-  private ItemEntityTenantRepository itemEntityTenantRepository;
-  @Mock
-  private ConsortiaService consortiaService;
-  @Mock
-  private SearchConsortiumHoldings searchConsortiumHoldings;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private UserService userService;
-  @Mock
-  private ErrorLogService errorLogService;
-  @Mock
-  private EntityManager entityManager;
-  @Mock
-  private PermissionsValidator permissionsValidator;
+  @Mock private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  @Mock private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
+  @Mock private ItemEntityTenantRepository itemEntityTenantRepository;
+  @Mock private ConsortiaService consortiaService;
+  @Mock private SearchConsortiumHoldings searchConsortiumHoldings;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private UserService userService;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private EntityManager entityManager;
+  @Mock private PermissionsValidator permissionsValidator;
 
-  @InjectMocks
-  private HoldingsItemsResolverService holdingsItemsResolverService;
+  @InjectMocks private HoldingsItemsResolverService holdingsItemsResolverService;
 
   @Test
   void retrieveHoldingsAndItemsByInstanceIdForLocalTenantTest() {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId)
-        .instanceId(instanceId).build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(
         List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
@@ -85,8 +74,8 @@ class HoldingsItemsResolverServiceTest {
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId))
         .thenReturn(List.of(holdingRecordEntity));
     var item = "{'barcode' : 'itemBarcode'}";
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId)
-        .jsonb(item).build();
+    var itemEntity =
+        ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId).jsonb(item).build();
     when(itemEntityTenantRepository.findByHoldingsRecordIdIn(anyString(), anySet()))
         .thenReturn(List.of(itemEntity));
     doNothing().when(entityManager).clear();
@@ -94,8 +83,8 @@ class HoldingsItemsResolverServiceTest {
     var instanceJson = new JSONObject();
 
     var instanceHrid = "instHrid";
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson,
-        instanceId, instanceHrid, mappingProfile, UUID.randomUUID());
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instanceJson, instanceId, instanceHrid, mappingProfile, UUID.randomUUID());
 
     var holdingJson = (JSONObject) ((JSONArray) instanceJson.get(HOLDINGS_KEY)).get(0);
     assertEquals("instHrid", holdingJson.getAsString(INSTANCE_HRID_KEY));
@@ -115,8 +104,8 @@ class HoldingsItemsResolverServiceTest {
     var holdingId1 = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
 
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS,
-        RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var consortiumHolding1 = new ConsortiumHolding();
     consortiumHolding1.setInstanceId(instanceId.toString());
@@ -140,36 +129,43 @@ class HoldingsItemsResolverServiceTest {
     consortiumHolding4.setTenantId("member4");
 
     var consortiumHoldings = new ConsortiumHoldingCollection();
-    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2,
-        consortiumHolding3, consortiumHolding4));
+    consortiumHoldings.setHoldings(
+        List.of(consortiumHolding1, consortiumHolding2, consortiumHolding3, consortiumHolding4));
 
     HashMap<String, Collection<String>> okapiHeaders = new HashMap<>();
     okapiHeaders.put("header", List.of("value"));
 
     when(folioExecutionContext.getTenantId()).thenReturn("central");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
-    when(consortiaService.isCurrentTenantCentralTenant("central"))
-        .thenReturn(true);
+    when(consortiaService.isCurrentTenantCentralTenant("central")).thenReturn(true);
     when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class)))
         .thenReturn(List.of("member1", "member2"));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
     var holding1 = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingRecordEntity1 = HoldingsRecordEntity.builder().jsonb(holding1).id(holdingId1)
-        .instanceId(instanceId).build();
+    var holdingRecordEntity1 =
+        HoldingsRecordEntity.builder()
+            .jsonb(holding1)
+            .id(holdingId1)
+            .instanceId(instanceId)
+            .build();
     when(holdingsRecordEntityTenantRepository.findByIdIn("member1", Set.of(holdingId1)))
         .thenReturn(List.of(holdingRecordEntity1));
     var holding2 = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576'}";
-    var holdingRecordEntity2 = HoldingsRecordEntity.builder().jsonb(holding2).id(holdingId2)
-        .instanceId(instanceId).build();
+    var holdingRecordEntity2 =
+        HoldingsRecordEntity.builder()
+            .jsonb(holding2)
+            .id(holdingId2)
+            .instanceId(instanceId)
+            .build();
     when(holdingsRecordEntityTenantRepository.findByIdIn("member2", Set.of(holdingId2)))
         .thenReturn(List.of(holdingRecordEntity2));
     var item = "{'barcode' : 'itemBarcode'}";
-    var itemEntity = ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId1)
-        .jsonb(item).build();
-    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member1",
-        Set.of(holdingId1))).thenReturn(List.of(itemEntity));
-    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2",
-        Set.of(holdingId2))).thenReturn(List.of());
+    var itemEntity =
+        ItemEntity.builder().id(UUID.randomUUID()).holdingsRecordId(holdingId1).jsonb(item).build();
+    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member1", Set.of(holdingId1)))
+        .thenReturn(List.of(itemEntity));
+    when(itemEntityTenantRepository.findByHoldingsRecordIdIn("member2", Set.of(holdingId2)))
+        .thenReturn(List.of());
     when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
     doNothing().when(entityManager).clear();
     when(permissionsValidator.isInstanceViewPermissionExists(any(String.class))).thenReturn(true);
@@ -178,14 +174,16 @@ class HoldingsItemsResolverServiceTest {
 
     var instanceHrid = "instHrid";
     var jobExecutionId = UUID.randomUUID();
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId,
-        instanceHrid, mappingProfile, jobExecutionId);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instanceJson, instanceId, instanceHrid, mappingProfile, jobExecutionId);
 
     var holdings = (JSONArray) instanceJson.get(HOLDINGS_KEY);
     assertEquals(2, holdings.size());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        ErrorCode.ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(), List.of(instanceId.toString(),
-        user.getUsername(), "member3,member4"), jobExecutionId);
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_MESSAGE_INSTANCE_NO_AFFILIATION.getCode(),
+            List.of(instanceId.toString(), user.getUsername(), "member3,member4"),
+            jobExecutionId);
   }
 
   @Test
@@ -198,8 +196,8 @@ class HoldingsItemsResolverServiceTest {
     var holdingId1 = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
 
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS,
-        RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var consortiumHolding1 = new ConsortiumHolding();
     consortiumHolding1.setInstanceId(instanceId.toString());
@@ -217,41 +215,42 @@ class HoldingsItemsResolverServiceTest {
     consortiumHolding3.setTenantId("member3");
 
     var consortiumHoldings = new ConsortiumHoldingCollection();
-    consortiumHoldings.setHoldings(List.of(consortiumHolding1, consortiumHolding2,
-        consortiumHolding3));
+    consortiumHoldings.setHoldings(
+        List.of(consortiumHolding1, consortiumHolding2, consortiumHolding3));
 
     when(folioExecutionContext.getTenantId()).thenReturn("central");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.fromString(user.getId()));
-    when(consortiaService.isCurrentTenantCentralTenant("central"))
-        .thenReturn(true);
+    when(consortiaService.isCurrentTenantCentralTenant("central")).thenReturn(true);
     when(consortiaService.getAffiliatedTenants(isA(String.class), isA(String.class)))
         .thenReturn(List.of("member1", "member2", "member3"));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
     when(userService.getUserName("central", user.getId())).thenReturn(user.getUsername());
     var holding1 = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingRecordEntity1 = HoldingsRecordEntity.builder().jsonb(holding1).id(holdingId1)
-        .instanceId(instanceId).build();
+    var holdingRecordEntity1 =
+        HoldingsRecordEntity.builder()
+            .jsonb(holding1)
+            .id(holdingId1)
+            .instanceId(instanceId)
+            .build();
     when(holdingsRecordEntityTenantRepository.findByIdIn("member1", Set.of(holdingId1)))
         .thenReturn(List.of(holdingRecordEntity1));
-    when(permissionsValidator.isInstanceViewPermissionExists("member1"))
-        .thenReturn(true);
-    when(permissionsValidator.isInstanceViewPermissionExists("member2"))
-        .thenReturn(false);
-    when(permissionsValidator.isInstanceViewPermissionExists("member3"))
-        .thenReturn(false);
+    when(permissionsValidator.isInstanceViewPermissionExists("member1")).thenReturn(true);
+    when(permissionsValidator.isInstanceViewPermissionExists("member2")).thenReturn(false);
+    when(permissionsValidator.isInstanceViewPermissionExists("member3")).thenReturn(false);
 
     var instanceJson = new JSONObject();
 
     var instanceHrid = "instHrid";
     var jobExecutionId = UUID.randomUUID();
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instanceJson, instanceId,
-        instanceHrid, mappingProfile, jobExecutionId);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instanceJson, instanceId, instanceHrid, mappingProfile, jobExecutionId);
 
     var holdings = (JSONArray) instanceJson.get(HOLDINGS_KEY);
     assertEquals(1, holdings.size());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        ErrorCode.ERROR_INSTANCE_NO_PERMISSION.getCode(), List.of(instanceId.toString(),
-        user.getUsername(), "member2,member3"), jobExecutionId);
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_INSTANCE_NO_PERMISSION.getCode(),
+            List.of(instanceId.toString(), user.getUsername(), "member2,member3"),
+            jobExecutionId);
   }
 }
-

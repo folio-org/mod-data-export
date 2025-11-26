@@ -1,6 +1,5 @@
 package org.folio.dataexp.service.validators;
 
-import static org.folio.dataexp.BaseDataExportInitializerIT.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -11,7 +10,6 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.service.logs.ErrorLogService;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -20,15 +18,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DataExportRequestValidatorTest {
 
-  @Mock
-  private ErrorLogService errorLogService;
+  @Mock private ErrorLogService errorLogService;
 
   @Test
   void validateHoldingExportRequestTest() {
     when(errorLogService.saveGeneralErrorWithMessageValues(
-        "error.uploadedFile.invalidExtension",
-        List.of("Only csv format is supported for holdings export"), null))
-          .thenReturn(new ErrorLog());
+            "error.uploadedFile.invalidExtension",
+            List.of("Only csv format is supported for holdings export"),
+            null))
+        .thenReturn(new ErrorLog());
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.cql");
@@ -40,7 +38,8 @@ class DataExportRequestValidatorTest {
     exportRequest.setJobProfileId(UUID.randomUUID());
 
     var validator = new DataExportRequestValidator(errorLogService);
-    assertThrows(DataExportRequestValidationException.class, () ->
-        validator.validate(exportRequest, fileDefinition, "uuid"));
+    assertThrows(
+        DataExportRequestValidationException.class,
+        () -> validator.validate(exportRequest, fileDefinition, "uuid"));
   }
 }

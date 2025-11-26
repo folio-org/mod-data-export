@@ -19,14 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PermissionsProviderTest {
 
-  @Mock
-  private UserPermissionsService userPermissionsService;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private FolioModuleMetadata folioModuleMetadata;
-  @InjectMocks
-  private PermissionsProvider permissionsProvider;
+  @Mock private UserPermissionsService userPermissionsService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
+  @InjectMocks private PermissionsProvider permissionsProvider;
 
   @Test
   void getUserPermissionsTest() {
@@ -34,8 +30,9 @@ class PermissionsProviderTest {
     when(folioExecutionContext.getOkapiHeaders())
         .thenReturn(Map.of(XOkapiHeaders.TENANT, List.of("college")));
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    var userPerms = permissionsProvider.getUserPermissions("college",
-        folioExecutionContext.getUserId().toString());
+    var userPerms =
+        permissionsProvider.getUserPermissions(
+            "college", folioExecutionContext.getUserId().toString());
     assertEquals("some permission", userPerms.get(0));
   }
 }

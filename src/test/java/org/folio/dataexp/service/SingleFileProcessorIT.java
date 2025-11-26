@@ -27,13 +27,11 @@ class SingleFileProcessorIT extends BaseDataExportInitializerIT {
 
   @MockitoBean
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @MockitoBean
-  private ExportExecutor exportExecutor;
-  @MockitoBean
-  private JobExecutionService jobExecutionService;
 
-  @Autowired
-  private SingleFileProcessor singleFileProcessor;
+  @MockitoBean private ExportExecutor exportExecutor;
+  @MockitoBean private JobExecutionService jobExecutionService;
+
+  @Autowired private SingleFileProcessor singleFileProcessor;
 
   @Test
   @SneakyThrows
@@ -41,18 +39,20 @@ class SingleFileProcessorIT extends BaseDataExportInitializerIT {
     var jobExecutionId = UUID.randomUUID();
     var parent = String.format("mod-data-export/download/%s/", jobExecutionId);
     var fileLocation = parent + "download.mrc";
-    var exportEntity = JobExecutionExportFilesEntity.builder()
-        .id(UUID.randomUUID())
-        .fileLocation(fileLocation).build();
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(UUID.randomUUID())
+            .fileLocation(fileLocation)
+            .build();
 
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
         .thenReturn(List.of(exportEntity));
 
-    singleFileProcessor.exportBySingleFile(jobExecutionId, new ExportRequest(),
-        new CommonExportStatistic());
+    singleFileProcessor.exportBySingleFile(
+        jobExecutionId, new ExportRequest(), new CommonExportStatistic());
 
-    verify(exportExecutor).export(eq(exportEntity), isA(ExportRequest.class),
-        isA(CommonExportStatistic.class));
+    verify(exportExecutor)
+        .export(eq(exportEntity), isA(ExportRequest.class), isA(CommonExportStatistic.class));
   }
 
   @Test
