@@ -9,7 +9,7 @@
     lines="48,109"/>
   <suppress checks="LineLength"
     files="RuleFactoryIT.java"
-    lines="143,223,252,275,306,365,750,868,905"/>
+    lines="141,223,252,276,308,368,795,921,957"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"
