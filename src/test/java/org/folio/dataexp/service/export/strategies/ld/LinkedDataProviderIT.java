@@ -27,31 +27,21 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class LinkedDataProviderIT extends BaseDataExportInitializerIT {
 
-  @MockitoBean
-  private QueryClient queryClient;
+  @MockitoBean private QueryClient queryClient;
 
-  @Autowired
-  private LinkedDataProvider linkedDataProvider;
+  @Autowired private LinkedDataProvider linkedDataProvider;
 
   @ParameterizedTest
   @MethodSource("providedResources")
   void getLinkedDataResourcesTest(List<TestResource> resources) {
-    when(queryClient.getContents(any(ContentsRequest.class))).thenReturn(
-        resources.stream()
-          .map(TestResource::getResource)
-          .toList());
-    var validCount = resources.stream()
-        .filter(r -> r.isValid())
-        .count();
-    var expected = resources.stream()
-        .filter(r -> r.isValid())
-        .map(TestResource::toDto)
-        .toList();
+    when(queryClient.getContents(any(ContentsRequest.class)))
+        .thenReturn(resources.stream().map(TestResource::getResource).toList());
+    var validCount = resources.stream().filter(r -> r.isValid()).count();
+    var expected = resources.stream().filter(r -> r.isValid()).map(TestResource::toDto).toList();
 
-    var results = linkedDataProvider.getLinkedDataResources(
-        resources.stream()
-          .map(TestResource::getId)
-          .collect(Collectors.toSet()));
+    var results =
+        linkedDataProvider.getLinkedDataResources(
+            resources.stream().map(TestResource::getId).collect(Collectors.toSet()));
 
     assertEquals(validCount, results.size());
     assertTrue(results.containsAll(expected));
@@ -85,13 +75,9 @@ class LinkedDataProviderIT extends BaseDataExportInitializerIT {
       resource.setId(id);
       resource.setValid(i < validCount);
       if (i < validCount) {
-        resource.setResource(
-            Map.of("inventory_id", id.toString(),
-                   "resource_subgraph", column));
+        resource.setResource(Map.of("inventory_id", id.toString(), "resource_subgraph", column));
       } else {
-        resource.setResource(
-            Map.of("inventory_id", id.toString(),
-                   "not_the_right_field", column));
+        resource.setResource(Map.of("inventory_id", id.toString(), "not_the_right_field", column));
       }
       list.add(i, resource);
     }
@@ -100,9 +86,8 @@ class LinkedDataProviderIT extends BaseDataExportInitializerIT {
 
   private static Stream<Arguments> providedResources() {
     return Stream.of(
-      Arguments.of(generateResources(3, 3)),
-      Arguments.of(generateResources(3, 2)),
-      Arguments.of(generateResources(3, 0))
-    );
+        Arguments.of(generateResources(3, 3)),
+        Arguments.of(generateResources(3, 2)),
+        Arguments.of(generateResources(3, 0)));
   }
 }

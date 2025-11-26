@@ -28,14 +28,12 @@ import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 
 /**
- * Utility class for loading and converting reference data responses from JSON files
- * into maps of {@link JsonObjectWrapper} keyed by their IDs.
+ * Utility class for loading and converting reference data responses from JSON files into maps of
+ * {@link JsonObjectWrapper} keyed by their IDs.
  *
- * <p>This class provides static methods to load various types of reference data used in tests,
- * such as identifier types, contributor name types, material types, instance types, and more.
- * Each method reads a corresponding mock JSON file and converts the data into a map for use
- * in tests.
- * </p>
+ * <p>This class provides static methods to load various types of reference data used in tests, such
+ * as identifier types, contributor name types, material types, instance types, and more. Each
+ * method reads a corresponding mock JSON file and converts the data into a map for use in tests.
  */
 public class ReferenceDataResponseUtil {
   private static ObjectMapper mapper = new ObjectMapper();
@@ -47,12 +45,15 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getIdentifierTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_identifier_types_response.json"),
-        IdentifierTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_identifier_types_response.json"),
+            IdentifierTypes.class);
     return collection.getIdentifierTypes().stream()
-        .collect(Collectors.toMap(IdentifierType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                IdentifierType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -62,12 +63,15 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getContributorNameTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_contributor_name_types_response.json"),
-        ContributorNameTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_contributor_name_types_response.json"),
+            ContributorNameTypes.class);
     return collection.getContributorNameTypes().stream()
-        .collect(Collectors.toMap(ContributorNameType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                ContributorNameType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -77,11 +81,14 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getMaterialTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_material_types_response.json"), MaterialTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_material_types_response.json"),
+            MaterialTypes.class);
     return collection.getMtypes().stream()
-        .collect(Collectors.toMap(MaterialType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(MaterialType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -91,11 +98,14 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getInstanceTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_instance_types_response.json"), InstanceTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_instance_types_response.json"),
+            InstanceTypes.class);
     return collection.getInstanceTypes().stream()
-      .collect(Collectors.toMap(InstanceType::getId,
-          ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(InstanceType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -106,12 +116,16 @@ public class ReferenceDataResponseUtil {
    */
   public static Map<String, JsonObjectWrapper> getElectronicAccessRelationships()
       throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_electronic_access_relationships_response.json"),
-        ElectronicAccessRelationships.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_electronic_access_relationships_response.json"),
+            ElectronicAccessRelationships.class);
     return collection.getElectronicAccessRelationships().stream()
-        .collect(Collectors.toMap(ElectronicAccessRelationship::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                ElectronicAccessRelationship::getId,
+                ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -121,12 +135,15 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getAlternativeTitleTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_alternative_titles_response.json"),
-        Alternativetitletypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_alternative_titles_response.json"),
+            Alternativetitletypes.class);
     return collection.getAlternativeTitleTypes().stream()
-        .collect(Collectors.toMap(Alternativetitletype::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                Alternativetitletype::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -136,11 +153,15 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getModeOfIssuance() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_mode_of_issuance_response.json"), IssuanceModes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_mode_of_issuance_response.json"),
+            IssuanceModes.class);
     return collection.getIssuanceModes().stream()
-        .collect(Collectors.toMap(ModeOfIssuance::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                ModeOfIssuance::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -150,11 +171,13 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getLoanTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_loan_types_response.json"), LoanTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_loan_types_response.json"),
+            LoanTypes.class);
     return collection.getLoantypes().stream()
-        .collect(Collectors.toMap(LoanType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(Collectors.toMap(LoanType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -164,11 +187,15 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getHoldingNoteTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_holding_note_types_response.json"), HoldingsNoteTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_holding_note_types_response.json"),
+            HoldingsNoteTypes.class);
     return collection.getHoldingsNoteTypes().stream()
-        .collect(Collectors.toMap(HoldingsNoteType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(
+                HoldingsNoteType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**
@@ -178,11 +205,14 @@ public class ReferenceDataResponseUtil {
    * @throws IOException if the file cannot be read
    */
   public static Map<String, JsonObjectWrapper> getItemNoteTypes() throws IOException {
-    var collection = mapper.readValue(ReferenceDataResponseUtil.class.getResourceAsStream(
-        "/mockdata/inventory/get_item_note_types_response.json"), ItemNoteTypes.class);
+    var collection =
+        mapper.readValue(
+            ReferenceDataResponseUtil.class.getResourceAsStream(
+                "/mockdata/inventory/get_item_note_types_response.json"),
+            ItemNoteTypes.class);
     return collection.getItemNoteTypes().stream()
-        .collect(Collectors.toMap(ItemNoteType::getId,
-            ReferenceDataResponseUtil::toJsonObjectWrapper));
+        .collect(
+            Collectors.toMap(ItemNoteType::getId, ReferenceDataResponseUtil::toJsonObjectWrapper));
   }
 
   /**

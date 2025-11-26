@@ -18,24 +18,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SingleFileProcessorAsyncTest {
 
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private ExportExecutor exportExecutor;
-  @InjectMocks
-  private SingleFileProcessorAsync singleFileProcessorAsync;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private ExportExecutor exportExecutor;
+  @InjectMocks private SingleFileProcessorAsync singleFileProcessorAsync;
 
   @Test
   void executeExportTest() {
     var fileLocation = "mod-data-export/download/download.mrc";
-    var exportEntity = JobExecutionExportFilesEntity.builder()
-        .id(UUID.randomUUID())
-        .fileLocation(fileLocation).build();
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(UUID.randomUUID())
+            .fileLocation(fileLocation)
+            .build();
     var commonFails = new CommonExportStatistic();
 
     singleFileProcessorAsync.executeExport(exportEntity, new ExportRequest(), commonFails);
 
-    verify(exportExecutor).exportAsynch(eq(exportEntity), isA(ExportRequest.class),
-        eq(commonFails));
+    verify(exportExecutor)
+        .exportAsynch(eq(exportEntity), isA(ExportRequest.class), eq(commonFails));
   }
 }

@@ -26,13 +26,10 @@ class FilesUploadServiceTest {
 
   private static final String UPLOADED_FILE_PATH = "src/test/resources/upload.csv";
 
-  @Mock
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Mock
-  private FolioS3Client s3Client;
+  @Mock private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Mock private FolioS3Client s3Client;
 
-  @InjectMocks
-  private FilesUploadServiceImpl fileUploadService;
+  @InjectMocks private FilesUploadServiceImpl fileUploadService;
 
   @Test
   @SneakyThrows
@@ -45,8 +42,8 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     fileDefinition.setMetadata(new Metadata());
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     var resource = new PathResource(UPLOADED_FILE_PATH);
 
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
@@ -56,8 +53,7 @@ class FilesUploadServiceTest {
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
-    verify(fileDefinitionEntityRepository, times(2))
-        .save(isA(FileDefinitionEntity.class));
+    verify(fileDefinitionEntityRepository, times(2)).save(isA(FileDefinitionEntity.class));
     verify(s3Client).write(isA(String.class), isA(InputStream.class));
   }
 
@@ -72,8 +68,8 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     fileDefinition.setMetadata(new Metadata());
 
-    var fileDefinitionEntity = FileDefinitionEntity.builder().fileDefinition(fileDefinition)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
 
@@ -82,6 +78,5 @@ class FilesUploadServiceTest {
     assertEquals(FileDefinition.StatusEnum.ERROR, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
-
   }
 }

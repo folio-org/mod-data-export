@@ -21,15 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class UserPermissionsServiceTest {
 
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private OkapiUserPermissionsClient okapiUserPermissionsClient;
-  @Mock
-  private EurekaUserPermissionsClient eurekaUserPermissionsClient;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private OkapiUserPermissionsClient okapiUserPermissionsClient;
+  @Mock private EurekaUserPermissionsClient eurekaUserPermissionsClient;
 
-  @InjectMocks
-  private UserPermissionsService userPermissionsService;
+  @InjectMocks private UserPermissionsService userPermissionsService;
 
   @Test
   void getPermissionsTest() {

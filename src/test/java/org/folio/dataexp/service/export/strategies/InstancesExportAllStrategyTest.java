@@ -51,35 +51,21 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class InstancesExportAllStrategyTest {
 
-  @Mock
-  private AuditInstanceEntityRepository auditInstanceEntityRepository;
-  @Mock
-  private InstanceEntityRepository instanceEntityRepository;
-  @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Mock
-  private ErrorLogService errorLogService;
-  @Mock
-  private LocalStorageWriter localStorageWriter;
-  @Mock
-  private HoldingsItemsResolverService holdingsItemsResolver;
-  @Mock
-  private JsonToMarcConverter jsonToMarcConverter;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private ConsortiaService consortiaService;
-  @Mock
-  private ReferenceDataProvider referenceDataProvider;
-  @Mock
-  private RuleFactory ruleFactory;
-  @Mock
-  private RuleHandler ruleHandler;
-  @Mock
-  private RuleProcessor ruleProcessor;
+  @Mock private AuditInstanceEntityRepository auditInstanceEntityRepository;
+  @Mock private InstanceEntityRepository instanceEntityRepository;
+  @Mock private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private LocalStorageWriter localStorageWriter;
+  @Mock private HoldingsItemsResolverService holdingsItemsResolver;
+  @Mock private JsonToMarcConverter jsonToMarcConverter;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private ConsortiaService consortiaService;
+  @Mock private ReferenceDataProvider referenceDataProvider;
+  @Mock private RuleFactory ruleFactory;
+  @Mock private RuleHandler ruleHandler;
+  @Mock private RuleProcessor ruleProcessor;
 
-  @InjectMocks
-  private InstancesExportAllStrategy instancesExportAllStrategy;
+  @InjectMocks private InstancesExportAllStrategy instancesExportAllStrategy;
 
   @BeforeEach
   void setUp() {
@@ -89,8 +75,8 @@ class InstancesExportAllStrategyTest {
 
   @Test
   void getIdentifierMessageTest() {
-    var auditInstanceEntity = AuditInstanceEntity.builder()
-        .id(UUID.randomUUID()).hrid("123").title("title").build();
+    var auditInstanceEntity =
+        AuditInstanceEntity.builder().id(UUID.randomUUID()).hrid("123").title("title").build();
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
     when(auditInstanceEntityRepository.findByIdIn(anySet()))
@@ -101,22 +87,24 @@ class InstancesExportAllStrategyTest {
     assertTrue(opt.isPresent());
     assertEquals("Instance with HRID : 123", opt.get().getIdentifierHridMessage());
 
-    assertEquals(auditInstanceEntity.getId().toString(), opt.get().getAssociatedJsonObject()
-        .getAsString("id"));
+    assertEquals(
+        auditInstanceEntity.getId().toString(),
+        opt.get().getAssociatedJsonObject().getAsString("id"));
     assertEquals("title", opt.get().getAssociatedJsonObject().getAsString("title"));
     assertEquals("123", opt.get().getAssociatedJsonObject().getAsString("hrid"));
   }
 
   @Test
   void getIdentifierMessageIfInstanceDoesNotExistTest() {
-    var instanceId  = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+    var instanceId = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
     when(auditInstanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
 
     var opt = instancesExportAllStrategy.getIdentifiers(instanceId);
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e",
+    assertEquals(
+        "Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e",
         opt.get().getIdentifierHridMessage());
   }
 
@@ -124,24 +112,28 @@ class InstancesExportAllStrategyTest {
   void saveConvertJsonRecordToMarcRecordErrorIfErrorRecordTooLongAndInstanceDeletedTest() {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
 
-    var auditInstanceEntity = AuditInstanceEntity.builder()
-        .id(UUID.randomUUID()).hrid("123").title("title").build();
+    var auditInstanceEntity =
+        AuditInstanceEntity.builder().id(UUID.randomUUID()).hrid("123").title("title").build();
     var jobExecutionId = UUID.randomUUID();
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID())
-        .build();
-    var errorMessage = "Record is too long to be a valid MARC binary record, it's length would "
-        + "be 113937 which is more thatn 99999 bytes 2024";
+    var marcRecord =
+        MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID()).build();
+    var errorMessage =
+        "Record is too long to be a valid MARC binary record, it's length would "
+            + "be 113937 which is more thatn 99999 bytes 2024";
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
     when(auditInstanceEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(auditInstanceEntity));
 
-    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord,
-        jobExecutionId, new IOException(errorMessage));
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class),
-        eq(errorMessage), eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
-        isA(UUID.class));
+    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class),
+            eq(errorMessage),
+            eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            isA(UUID.class));
   }
 
   @Test
@@ -149,46 +141,66 @@ class InstancesExportAllStrategyTest {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
     instancesExportAllStrategy.setInstanceEntityRepository(instanceEntityRepository);
 
-    ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter",
-        jsonToMarcConverter);
+    ReflectionTestUtils.setField(
+        instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
 
-    var auditInstanceEntity = AuditInstanceEntity.builder()
-        .id(UUID.randomUUID()).hrid("123").title("title").build();
+    var auditInstanceEntity =
+        AuditInstanceEntity.builder().id(UUID.randomUUID()).hrid("123").title("title").build();
     var jobExecutionId = UUID.randomUUID();
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
-    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId)).thenReturn(
-        new JobExecutionEntity().withJobExecution(new JobExecution().progress(
-            new JobExecutionProgress())));
+    when(jobExecutionEntityRepository.getReferenceById(jobExecutionId))
+        .thenReturn(
+            new JobExecutionEntity()
+                .withJobExecution(new JobExecution().progress(new JobExecutionProgress())));
     when(auditInstanceEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(auditInstanceEntity));
 
     var externalIds = Collections.asSet(instanceId);
-    var statistic = new ExportStrategyStatistic(
-        new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionId));
-    var marcRecordDuplicate = MarcRecordEntity.builder().externalId(instanceId)
-        .id(UUID.randomUUID()).build();
-    var marcRecord = MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID())
-        .deleted(true).build();
-    instancesExportAllStrategy.createAndSaveMarcFromJsonRecord(externalIds, statistic,
-        new MappingProfile(), jobExecutionId, Set.of(instanceId),
-        List.of(marcRecord, marcRecordDuplicate), localStorageWriter);
+    var statistic =
+        new ExportStrategyStatistic(
+            new ExportedRecordsListener(jobExecutionEntityRepository, 1, jobExecutionId));
+    var marcRecordDuplicate =
+        MarcRecordEntity.builder().externalId(instanceId).id(UUID.randomUUID()).build();
+    var marcRecord =
+        MarcRecordEntity.builder()
+            .externalId(instanceId)
+            .id(UUID.randomUUID())
+            .deleted(true)
+            .build();
+    instancesExportAllStrategy.createAndSaveMarcFromJsonRecord(
+        externalIds,
+        statistic,
+        new MappingProfile(),
+        jobExecutionId,
+        Set.of(instanceId),
+        List.of(marcRecord, marcRecordDuplicate),
+        localStorageWriter);
     var expectedErrorMessage =
-        format("Instance with HRID : 123 has following SRS records associated: %s, %s",
+        format(
+            "Instance with HRID : 123 has following SRS records associated: %s, %s",
             marcRecord.getId(), marcRecordDuplicate.getId());
-    verify(errorLogService).saveWithAffectedRecord(any(), eq(expectedErrorMessage),
-        eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()), eq(jobExecutionId));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            any(),
+            eq(expectedErrorMessage),
+            eq(ErrorCode.ERROR_DUPLICATE_SRS_RECORD.getCode()),
+            eq(jobExecutionId));
   }
 
   @Test
   void saveInstanceTooLongErrorsIfInstanceDeletedTest() {
     instancesExportAllStrategy.setErrorLogService(errorLogService);
 
-    ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter",
-        jsonToMarcConverter);
-    var auditInstanceEntity = AuditInstanceEntity.builder()
-        .id(UUID.randomUUID()).hrid("123").title(generateTooLongString()).build();
+    ReflectionTestUtils.setField(
+        instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
+    var auditInstanceEntity =
+        AuditInstanceEntity.builder()
+            .id(UUID.randomUUID())
+            .hrid("123")
+            .title(generateTooLongString())
+            .build();
 
     var instanceWithHoldingsAndItems = new JSONObject();
     var jsonInstance = new JSONObject();
@@ -201,15 +213,22 @@ class InstancesExportAllStrategyTest {
     when(ruleProcessor.process(any(), any(), any(), any(), any())).thenThrow(new MarcException());
 
     var jobExecutionId = UUID.randomUUID();
-    instancesExportAllStrategy.getGeneratedMarc(new GeneratedMarcResult(jobExecutionId),
-        instancesWithHoldingsAndItems, new MappingProfile(), jobExecutionId);
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class),
-        eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class),
-        isA(MarcException.class));
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        eq(ERROR_DELETED_TOO_LONG_INSTANCE.getCode()),
-        eq(List.of(auditInstanceEntity.getId().toString())),
-        isA(UUID.class));
+    instancesExportAllStrategy.getGeneratedMarc(
+        new GeneratedMarcResult(jobExecutionId),
+        instancesWithHoldingsAndItems,
+        new MappingProfile(),
+        jobExecutionId);
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class),
+            eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            isA(UUID.class),
+            isA(MarcException.class));
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            eq(ERROR_DELETED_TOO_LONG_INSTANCE.getCode()),
+            eq(List.of(auditInstanceEntity.getId().toString())),
+            isA(UUID.class));
   }
 
   @Test
@@ -224,17 +243,20 @@ class InstancesExportAllStrategyTest {
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var errorMessage =
         "Record is too long to be a valid MARC binary record, it's length would be 113937 which"
-        + " is more than 99999 bytes 2024";
+            + " is more than 99999 bytes 2024";
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
 
-    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId,
-        new IOException(errorMessage));
+    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
 
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), eq(errorMessage),
-        eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()), isA(UUID.class));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class),
+            eq(errorMessage),
+            eq(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            isA(UUID.class));
   }
-
 
   @Test
   void saveConvertJsonRecordToMarcRecordErrorIfNotErrorRecordTooLongTest() {
@@ -245,8 +267,8 @@ class InstancesExportAllStrategyTest {
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var errorMessage = "error message";
 
-    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId,
-        new IOException(errorMessage));
+    instancesExportAllStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
 
     var expectedErrorMessage =
         "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";

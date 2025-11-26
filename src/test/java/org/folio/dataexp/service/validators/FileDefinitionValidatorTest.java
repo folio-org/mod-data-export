@@ -18,16 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FileDefinitionValidatorTest {
 
-  @Mock
-  private ErrorLogService errorLogService;
+  @Mock private ErrorLogService errorLogService;
 
   @Test
   void validateFileSizeTest() {
     when(errorLogService.saveGeneralErrorWithMessageValues(
-        "error.fileIsTooLarge",
-        List.of("500001"),
-        null))
-          .thenReturn(new ErrorLog());
+            "error.fileIsTooLarge", List.of("500001"), null))
+        .thenReturn(new ErrorLog());
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
     fileDefinition.fileName("upload.csv");
@@ -40,9 +37,8 @@ class FileDefinitionValidatorTest {
   @Test
   void validateFileExtensionTest() {
     when(errorLogService.saveGeneralErrorWithMessageValues(
-        "error.uploadedFile.invalidExtension",
-        List.of("upload.txt"), null))
-            .thenReturn(new ErrorLog());
+            "error.uploadedFile.invalidExtension", List.of("upload.txt"), null))
+        .thenReturn(new ErrorLog());
     var validator = new FileDefinitionValidator(errorLogService);
     var fileDefinition = new FileDefinition();
     fileDefinition.setId(UUID.randomUUID());
