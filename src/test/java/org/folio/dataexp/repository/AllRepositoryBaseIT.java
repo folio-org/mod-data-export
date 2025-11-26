@@ -7,7 +7,6 @@ import org.folio.dataexp.BaseDataExportInitializerIT;
  * Abstract base class for repository tests that provides common constants and initialization.
  *
  * <p>Defines minimum and maximum UUID values and a default export batch size for use in tests.
- * </p>
  */
 public abstract class AllRepositoryBaseIT extends BaseDataExportInitializerIT {
 

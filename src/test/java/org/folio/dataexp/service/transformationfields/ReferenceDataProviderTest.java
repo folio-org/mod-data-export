@@ -21,16 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ReferenceDataProviderTest {
 
-  @Mock
-  private ReferenceDataService referenceDataService;
-  @Mock
-  private ConsortiaService consortiaService;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private FolioModuleMetadata folioModuleMetadata;
-  @InjectMocks
-  private ReferenceDataProvider referenceDataProvider;
+  @Mock private ReferenceDataService referenceDataService;
+  @Mock private ConsortiaService consortiaService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
+  @InjectMocks private ReferenceDataProvider referenceDataProvider;
 
   @Test
   void getReferenceForCentralAndUsersTenantsTest() {
@@ -51,8 +46,8 @@ class ReferenceDataProviderTest {
     var central = "central";
     var userId = UUID.randomUUID().toString();
     var userTenants = List.of("member");
-    when(referenceDataService.getLocations()).thenReturn(locationsCentralReferenceData,
-        locationsMemberReferenceData);
+    when(referenceDataService.getLocations())
+        .thenReturn(locationsCentralReferenceData, locationsMemberReferenceData);
     when(consortiaService.getAffiliatedTenants(central, userId)).thenReturn(userTenants);
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(okapiHeaders);
 

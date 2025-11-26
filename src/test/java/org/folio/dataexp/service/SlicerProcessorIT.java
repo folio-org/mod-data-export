@@ -35,20 +35,16 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
 
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload_for_slicer.cql";
 
-  @Autowired
-  private FolioS3Client s3Client;
-  @Autowired
-  private InputFileProcessor inputFileProcessor;
-  @Autowired
-  private SlicerProcessor slicerProcessor;
-  @Autowired
-  private ExportIdEntityRepository exportIdEntityRepository;
+  @Autowired private FolioS3Client s3Client;
+  @Autowired private InputFileProcessor inputFileProcessor;
+  @Autowired private SlicerProcessor slicerProcessor;
+  @Autowired private ExportIdEntityRepository exportIdEntityRepository;
+
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @Autowired
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @MockitoBean
-  private SearchClient searchClient;
+
+  @Autowired private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @MockitoBean private SearchClient searchClient;
 
   @Test
   @SneakyThrows
@@ -65,27 +61,32 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
 
     s3Client.createBucketIfNotExists();
 
-    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(),
-        fileDefinition.getFileName());
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
     when(searchClient.submitIdsJob(any(IdsJobPayload.class)))
-        .thenReturn(new IdsJob().withId(UUID.randomUUID())
-        .withStatus(IdsJob.Status.COMPLETED));
-    when(searchClient.getJobStatus(anyString())).thenReturn(new IdsJob().withId(UUID.randomUUID())
-        .withStatus(IdsJob.Status.COMPLETED));
-    var resourceIds = new ResourceIds().withIds(List.of(
-      new ResourceIds.Id().withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd")),
-      new ResourceIds.Id().withId(UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd"))))
-          .withTotalRecords(2);
+        .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));
+    when(searchClient.getJobStatus(anyString()))
+        .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));
+    var resourceIds =
+        new ResourceIds()
+            .withIds(
+                List.of(
+                    new ResourceIds.Id()
+                        .withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd")),
+                    new ResourceIds.Id()
+                        .withId(UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd"))))
+            .withTotalRecords(2);
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(),
-          ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(
+          fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
 
       var exportRequest = new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(false);
       slicerProcessor.sliceInstancesIds(fileDefinition, 1, exportRequest);
@@ -95,13 +96,14 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
 
       var joExecutionExportFilesEntity = exportFiles.get(0);
       var expectedFileLocation =
-          String.format("mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-"
-              + "0abcdd0e9acd_011e1aea-111d-4d1d-957d-0abcdd0e9acd.mrc",
+          String.format(
+              "mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-"
+                  + "0abcdd0e9acd_011e1aea-111d-4d1d-957d-0abcdd0e9acd.mrc",
               fileDefinition.getJobExecutionId());
       var expectedFromUuid = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
 
-      assertEquals(fileDefinition.getJobExecutionId(),
-          joExecutionExportFilesEntity.getJobExecutionId());
+      assertEquals(
+          fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
       assertEquals(expectedFileLocation, joExecutionExportFilesEntity.getFileLocation());
       assertEquals(expectedFromUuid, joExecutionExportFilesEntity.getFromId());
       var expectedToUuid = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
@@ -110,15 +112,17 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
       joExecutionExportFilesEntity = exportFiles.get(1);
-      expectedFileLocation = String.format(
-          "mod-data-export/download/%s/upload_for_slicer_011e1aea-222d-4d1d-957d-0abcdd0e9acd_"
-          + "011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc", fileDefinition.getJobExecutionId());
+      expectedFileLocation =
+          String.format(
+              "mod-data-export/download/%s/upload_for_slicer_011e1aea-222d-4d1d-957d-0abcdd0e9acd_"
+                  + "011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc",
+              fileDefinition.getJobExecutionId());
       expectedFromUuid = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
       expectedToUuid = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
       expectedStatus = JobExecutionExportFilesStatus.SCHEDULED;
 
-      assertEquals(fileDefinition.getJobExecutionId(),
-          joExecutionExportFilesEntity.getJobExecutionId());
+      assertEquals(
+          fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
       assertEquals(expectedFileLocation, joExecutionExportFilesEntity.getFileLocation());
       assertEquals(expectedFromUuid, joExecutionExportFilesEntity.getFromId());
       assertEquals(expectedToUuid, joExecutionExportFilesEntity.getToId());
@@ -133,25 +137,32 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
       assertEquals(1, exportFiles.size());
 
       joExecutionExportFilesEntity = exportFiles.get(0);
-      expectedFileLocation = String.format(
-          "mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-0abcdd0e9acd_"
-          + "011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc",
-          fileDefinition.getJobExecutionId());
+      expectedFileLocation =
+          String.format(
+              "mod-data-export/download/%s/upload_for_slicer_011e1aea-111d-4d1d-957d-0abcdd0e9acd_"
+                  + "011e1aea-222d-4d1d-957d-0abcdd0e9acd.mrc",
+              fileDefinition.getJobExecutionId());
       expectedFromUuid = UUID.fromString("011e1aea-111d-4d1d-957d-0abcdd0e9acd");
       expectedToUuid = UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd");
       expectedStatus = JobExecutionExportFilesStatus.SCHEDULED;
 
-      assertEquals(fileDefinition.getJobExecutionId(),
-          joExecutionExportFilesEntity.getJobExecutionId());
+      assertEquals(
+          fileDefinition.getJobExecutionId(), joExecutionExportFilesEntity.getJobExecutionId());
       assertEquals(expectedFileLocation, joExecutionExportFilesEntity.getFileLocation());
       assertEquals(expectedFromUuid, joExecutionExportFilesEntity.getFromId());
       assertEquals(expectedToUuid, joExecutionExportFilesEntity.getToId());
       assertEquals(expectedStatus, joExecutionExportFilesEntity.getStatus());
 
-      assertEquals(2, exportIdEntityRepository.getExportIds(
-          fileDefinition.getJobExecutionId(), expectedFromUuid, expectedToUuid,
-          PageRequest.of(0, 10))
-          .getContent().size());
+      assertEquals(
+          2,
+          exportIdEntityRepository
+              .getExportIds(
+                  fileDefinition.getJobExecutionId(),
+                  expectedFromUuid,
+                  expectedToUuid,
+                  PageRequest.of(0, 10))
+              .getContent()
+              .size());
     }
   }
 }

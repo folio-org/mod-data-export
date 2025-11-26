@@ -14,8 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class DataExportAuthorityDeletedControllerIT extends BaseDataExportInitializerIT {
 
-  @MockitoBean
-  private ExportAuthorityDeletedService exportAuthorityDeletedService;
+  @MockitoBean private ExportAuthorityDeletedService exportAuthorityDeletedService;
 
   @Test
   @SneakyThrows
@@ -24,10 +23,11 @@ class DataExportAuthorityDeletedControllerIT extends BaseDataExportInitializerIT
     request.setLimit(10);
     request.setOffset(0);
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/export-authority-deleted")
-        .headers(defaultHeaders())
-        .content(asJsonString(request)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/export-authority-deleted")
+                .headers(defaultHeaders())
+                .content(asJsonString(request)))
         .andExpect(status().isOk());
 
     verify(exportAuthorityDeletedService)

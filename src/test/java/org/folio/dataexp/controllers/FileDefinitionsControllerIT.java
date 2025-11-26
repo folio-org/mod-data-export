@@ -19,10 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class FileDefinitionsControllerIT extends BaseDataExportInitializerIT {
 
-  @MockitoBean
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @MockitoBean
-  private FileDefinitionsService fileDefinitionsService;
+  @MockitoBean private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @MockitoBean private FileDefinitionsService fileDefinitionsService;
 
   @Test
   @SneakyThrows
@@ -35,11 +33,12 @@ class FileDefinitionsControllerIT extends BaseDataExportInitializerIT {
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/file-definitions")
-        .headers(defaultHeaders())
-        .contentType(APPLICATION_JSON)
-        .content(asJsonString(fileDefinition)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/file-definitions")
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_JSON)
+                .content(asJsonString(fileDefinition)))
         .andExpect(status().isCreated());
   }
 
@@ -53,10 +52,12 @@ class FileDefinitionsControllerIT extends BaseDataExportInitializerIT {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinition.getId()))
         .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .get("/data-export/file-definitions/" + fileDefinition.getId().toString())
-        .headers(defaultHeaders())
-        .contentType(APPLICATION_JSON))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(
+                    "/data-export/file-definitions/" + fileDefinition.getId().toString())
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_JSON))
         .andExpect(status().isOk());
   }
 
@@ -70,12 +71,15 @@ class FileDefinitionsControllerIT extends BaseDataExportInitializerIT {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinition.getId()))
         .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/file-definitions/" + fileDefinition.getId().toString()
-            + "/upload")
-        .headers(defaultHeaders())
-        .contentType(APPLICATION_OCTET_STREAM_VALUE)
-        .content("uuid"))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(
+                    "/data-export/file-definitions/"
+                        + fileDefinition.getId().toString()
+                        + "/upload")
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_OCTET_STREAM_VALUE)
+                .content("uuid"))
         .andExpect(status().isOk());
   }
 }

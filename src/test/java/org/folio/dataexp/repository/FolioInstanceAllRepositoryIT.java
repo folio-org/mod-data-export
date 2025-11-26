@@ -9,38 +9,31 @@ import org.springframework.data.domain.PageRequest;
 
 class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
 
-  @Autowired
-  private FolioInstanceAllRepository instanceAllRepository;
+  @Autowired private FolioInstanceAllRepository instanceAllRepository;
 
   @Test
   void findFolioInstanceAllNonDeletedTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
-      var slice = instanceAllRepository.findFolioInstanceAllNonDeleted(
-          MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch)
-      );
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          instanceAllRepository.findFolioInstanceAllNonDeleted(
+              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
 
   @Test
   void findFolioInstanceAllNonDeletedNonSuppressedTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
-      var slice = instanceAllRepository.findFolioInstanceAllNonDeletedNonSuppressed(
-          MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch)
-      );
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          instanceAllRepository.findFolioInstanceAllNonDeletedNonSuppressed(
+              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
 
   @Test
   void findFolioInstanceAllDeletedNonSuppressedTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findFolioInstanceAllDeletedNonSuppressed();
       assertThat(list).hasSize(2);
     }
@@ -48,23 +41,19 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
 
   @Test
   void findMarcInstanceAllNonDeletedCustomInstanceProfileTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
-      var slice = instanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(
-          MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch)
-      );
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          instanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(
+              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice).hasSize(2);
     }
   }
 
   @Test
   void findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfileTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
-      var slice = instanceAllRepository
-          .findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var slice =
+          instanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(
               MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
       assertThat(slice).hasSize(1);
     }
@@ -72,9 +61,7 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
 
   @Test
   void findMarcInstanceAllDeletedForCustomInstanceProfileTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var list = instanceAllRepository.findMarcInstanceAllDeletedForCustomInstanceProfile();
       assertThat(list).hasSize(6);
     }
@@ -82,11 +69,9 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
 
   @Test
   void findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfileTest() {
-    try (
-        var context = new FolioExecutionContextSetter(folioExecutionContext)
-    ) {
-      var list = instanceAllRepository
-          .findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var list =
+          instanceAllRepository.findMarcInstanceAllDeletedNonSuppressedCustomInstanceProfile();
       assertThat(list).hasSize(3);
     }
   }

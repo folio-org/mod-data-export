@@ -33,11 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class S3ExportsUploaderTest {
 
   private static final String EXPORT_TEMP_STORAGE = "temp";
-  @Mock
-  private FolioS3Client s3Client;
+  @Mock private FolioS3Client s3Client;
 
-  @InjectMocks
-  private S3ExportsUploader s3ExportsUploader;
+  @InjectMocks private S3ExportsUploader s3ExportsUploader;
 
   @Test
   @SneakyThrows
@@ -47,8 +45,12 @@ class S3ExportsUploaderTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
 
-    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, Collections.emptyList(), initialFileName, "mrc"));
+    S3ExportsUploadException s3Exception =
+        assertThrows(
+            S3ExportsUploadException.class,
+            () ->
+                s3ExportsUploader.upload(
+                    jobExecution, Collections.emptyList(), initialFileName, "mrc"));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
   }
 
@@ -58,13 +60,13 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var initialFileName = "marc_export";
     var fileLocation = temDirLocation + initialFileName;
-    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
     writer.close();
@@ -87,23 +89,25 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var initialFileName = "marc_export";
-    var fileLocation = String.format("mod-data-export/download/%s/%s", jobExecution.getId(),
-        initialFileName);
-    var writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(
-        EXPORT_TEMP_STORAGE, fileLocation), OUTPUT_BUFFER_SIZE);
+    var fileLocation =
+        String.format("mod-data-export/download/%s/%s", jobExecution.getId(), initialFileName);
+    var writer =
+        new LocalStorageWriter(
+            S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation),
+            OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
     writer.close();
 
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
-    var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString()
-        + "/marc_export-200.mrc";
+    var expectedS3Path =
+        "mod-data-export/download/" + jobExecution.getId().toString() + "/marc_export-200.mrc";
     var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export), initialFileName, "mrc");
     assertEquals(expectedS3Path, s3Path);
 
@@ -119,19 +123,22 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var initialFileName = "marc_export";
     var fileLocation = temDirLocation + initialFileName;
-    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
     writer.close();
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
 
-    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, Collections.singletonList(export),
-          initialFileName, "mrc"));
+    S3ExportsUploadException s3Exception =
+        assertThrows(
+            S3ExportsUploadException.class,
+            () ->
+                s3ExportsUploader.upload(
+                    jobExecution, Collections.singletonList(export), initialFileName, "mrc"));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);
@@ -144,20 +151,20 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var exportFileName1 = "marc_export_sliced_1.mrc";
     var exportFileName2 = "marc_export_sliced_2.mrc";
     var fileLocation1 = temDirLocation + exportFileName1;
-    var writer =  new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
     writer.close();
 
     var fileLocation2 = temDirLocation + exportFileName2;
-    writer =  new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    writer = new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
     writer.write(marc);
     writer.close();
 
@@ -166,8 +173,8 @@ class S3ExportsUploaderTest {
 
     var expectedS3Path = temDirLocation + "marc_export-200.zip";
     var initialFileName = "marc_export";
-    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+    var s3Path =
+        s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName, "mrc");
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -183,35 +190,39 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(EXPORT_TEMP_STORAGE, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var exportFileName1 = "marc_export_sliced_1.mrc";
     var exportFileName2 = "marc_export_sliced_2.mrc";
-    var fileLocation1 = String.format("mod-data-export/download/%s/%s", jobExecution.getId(),
-        exportFileName1);
-    var writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(
-        EXPORT_TEMP_STORAGE, fileLocation1), OUTPUT_BUFFER_SIZE);
+    var fileLocation1 =
+        String.format("mod-data-export/download/%s/%s", jobExecution.getId(), exportFileName1);
+    var writer =
+        new LocalStorageWriter(
+            S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation1),
+            OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
     writer.close();
 
-    var fileLocation2 = String.format("mod-data-export/download/%s/%s", jobExecution.getId(),
-        exportFileName2);
-    writer =  new LocalStorageWriter(S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE,
-        fileLocation2), OUTPUT_BUFFER_SIZE);
+    var fileLocation2 =
+        String.format("mod-data-export/download/%s/%s", jobExecution.getId(), exportFileName2);
+    writer =
+        new LocalStorageWriter(
+            S3FilePathUtils.getLocalStorageWriterPath(EXPORT_TEMP_STORAGE, fileLocation2),
+            OUTPUT_BUFFER_SIZE);
     writer.write(marc);
     writer.close();
 
     var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
     var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
 
-    var expectedS3Path = "mod-data-export/download/" + jobExecution.getId().toString()
-        + "/marc_export-200.zip";
+    var expectedS3Path =
+        "mod-data-export/download/" + jobExecution.getId().toString() + "/marc_export-200.zip";
     var initialFileName = "marc_export";
-    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+    var s3Path =
+        s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName, "mrc");
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -226,20 +237,20 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var exportFileName1 = "marc_export_sliced_1.mrc";
     var exportFileName2 = "marc_export_sliced_2.mrc";
     var fileLocation1 = temDirLocation + exportFileName1;
-    var writer =  new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
     var marc = "marc";
     writer.write(marc);
     writer.close();
 
     var fileLocation2 = temDirLocation + exportFileName2;
-    writer =  new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    writer = new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
     writer.close();
 
     var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
@@ -247,8 +258,8 @@ class S3ExportsUploaderTest {
 
     var expectedS3Path = temDirLocation + "marc_export-200.mrc";
     var initialFileName = "marc_export";
-    var s3Path = s3ExportsUploader.upload(jobExecution, List.of(export1, export2),
-        initialFileName, "mrc");
+    var s3Path =
+        s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName, "mrc");
     assertEquals(expectedS3Path, s3Path);
 
     verify(s3Client).write(eq(expectedS3Path), isA(InputStream.class), isA(Long.class));
@@ -263,18 +274,18 @@ class S3ExportsUploaderTest {
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecution.getId());
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     Files.createDirectories(Path.of(temDirLocation));
 
     var exportFileName1 = "marc_export_sliced_1.mrc";
     var fileLocation1 = temDirLocation + exportFileName1;
-    var writer =  new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
     writer.close();
 
     var exportFileName2 = "marc_export_sliced_2.mrc";
     var fileLocation2 = temDirLocation + exportFileName2;
-    writer =  new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    writer = new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
     writer.close();
 
     var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
@@ -282,8 +293,10 @@ class S3ExportsUploaderTest {
 
     var initialFileName = "marc_export";
     var list = List.of(export1, export2);
-    S3ExportsUploadException s3Exception = assertThrows(S3ExportsUploadException.class, () ->
-        s3ExportsUploader.upload(jobExecution, list, initialFileName, "mrc"));
+    S3ExportsUploadException s3Exception =
+        assertThrows(
+            S3ExportsUploadException.class,
+            () -> s3ExportsUploader.upload(jobExecution, list, initialFileName, "mrc"));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);

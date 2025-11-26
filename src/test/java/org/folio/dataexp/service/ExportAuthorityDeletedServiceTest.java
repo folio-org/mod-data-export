@@ -26,18 +26,13 @@ import org.springframework.core.io.Resource;
 @ExtendWith(MockitoExtension.class)
 class ExportAuthorityDeletedServiceTest {
 
-  @Mock
-  private DataExportService dataExportService;
-  @Mock
-  private AuthorityClient authorityClient;
-  @Mock
-  private FileDefinitionsService fileDefinitionsService;
+  @Mock private DataExportService dataExportService;
+  @Mock private AuthorityClient authorityClient;
+  @Mock private FileDefinitionsService fileDefinitionsService;
 
-  @InjectMocks
-  private ExportAuthorityDeletedService exportAuthorityDeletedService;
+  @InjectMocks private ExportAuthorityDeletedService exportAuthorityDeletedService;
 
-  @Captor
-  private ArgumentCaptor<ExportRequest> exportRequestArgumentCaptor;
+  @Captor private ArgumentCaptor<ExportRequest> exportRequestArgumentCaptor;
 
   @Test
   @SneakyThrows
@@ -51,11 +46,14 @@ class ExportAuthorityDeletedServiceTest {
 
     when(authorityClient.getAuthorities(true, true, null, 2, 0))
         .thenReturn(new AuthorityCollection());
-    when(fileDefinitionsService.postFileDefinition(any(FileDefinition.class))).thenReturn(
-      new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId));
-    when(fileDefinitionsService.uploadFile(any(UUID.class), any(Resource.class))).thenReturn(
-      new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId)
-          .fileName(DELETED_AUTHORITIES_FILE_NAME));
+    when(fileDefinitionsService.postFileDefinition(any(FileDefinition.class)))
+        .thenReturn(new FileDefinition().id(fileDefinition.getId()).jobExecutionId(jobExecutionId));
+    when(fileDefinitionsService.uploadFile(any(UUID.class), any(Resource.class)))
+        .thenReturn(
+            new FileDefinition()
+                .id(fileDefinition.getId())
+                .jobExecutionId(jobExecutionId)
+                .fileName(DELETED_AUTHORITIES_FILE_NAME));
 
     var response = exportAuthorityDeletedService.postExportDeletedAuthority(request);
     assertEquals(jobExecutionId, response.getJobExecutionId());

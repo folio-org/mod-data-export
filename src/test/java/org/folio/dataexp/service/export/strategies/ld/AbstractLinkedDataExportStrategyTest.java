@@ -59,26 +59,16 @@ import org.springframework.data.domain.SliceImpl;
 @ExtendWith(MockitoExtension.class)
 class AbstractLinkedDataExportStrategyTest {
 
-  @Mock
-  private FolioS3Client s3Client;
-  @Mock
-  private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @Mock
-  private ExportIdEntityRepository exportIdEntityRepository;
-  @Mock
-  private MappingProfileEntityRepository mappingProfileEntityRepository;
-  @Mock
-  private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Mock
-  private JobExecutionService jobExecutionService;
-  @Mock
-  private LocalStorageWriter localStorageWriter;
-  @Mock
-  private ErrorLogService errorLogService;
-  @Mock
-  private LinkedDataConverter linkedDataConverter;
+  @Mock private FolioS3Client s3Client;
+  @Mock private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
+  @Mock private ExportIdEntityRepository exportIdEntityRepository;
+  @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock private JobProfileEntityRepository jobProfileEntityRepository;
+  @Mock private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Mock private JobExecutionService jobExecutionService;
+  @Mock private LocalStorageWriter localStorageWriter;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private LinkedDataConverter linkedDataConverter;
 
   @InjectMocks
   private AbstractLinkedDataExportStrategy exportStrategy = new LdTestExportStrategy(1, 5);
@@ -97,22 +87,22 @@ class AbstractLinkedDataExportStrategyTest {
 
   private List<LinkedDataResource> generateLinkedData(int count) {
     var linkedDataResources = new ArrayList<LinkedDataResource>();
-    IntStream.range(0, count).forEach(index -> {
-      var exportId = UUID.randomUUID();
-      var resource = new LinkedDataResource();
-      resource.setInventoryId(exportId.toString());
-      resource.setResource("{}");
-      linkedDataResources.add(resource);
-    });
+    IntStream.range(0, count)
+        .forEach(
+            index -> {
+              var exportId = UUID.randomUUID();
+              var resource = new LinkedDataResource();
+              resource.setInventoryId(exportId.toString());
+              resource.setResource("{}");
+              linkedDataResources.add(resource);
+            });
     return linkedDataResources;
   }
 
   private TestPreparation prepare(int count, boolean include, boolean updateJob) {
     var jobProfileEntity = new JobProfileEntity();
-    var jobExecution = JobExecution.builder()
-            .progress(new JobExecutionProgress())
-            .id(UUID.randomUUID())
-            .build();
+    var jobExecution =
+        JobExecution.builder().progress(new JobExecutionProgress()).id(UUID.randomUUID()).build();
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
@@ -123,8 +113,7 @@ class AbstractLinkedDataExportStrategyTest {
 
     var linkedDataResources = generateLinkedData(count);
     if (include) {
-      ((LdTestExportStrategy) exportStrategy)
-          .setLinkedDataResources(linkedDataResources);
+      ((LdTestExportStrategy) exportStrategy).setLinkedDataResources(linkedDataResources);
     } else {
       ((LdTestExportStrategy) exportStrategy)
           .setLinkedDataResources(new ArrayList<LinkedDataResource>());
@@ -132,31 +121,40 @@ class AbstractLinkedDataExportStrategyTest {
 
     var fromId = UUID.randomUUID();
     var toId = UUID.randomUUID();
-    JobExecutionExportFilesEntity exportFilesEntity = new JobExecutionExportFilesEntity()
-        .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location")
-        .withId(UUID.randomUUID()).withJobExecutionId(jobExecution.getId())
-        .withFromId(fromId).withToId(toId)
-        .withStatus(JobExecutionExportFilesStatus.ACTIVE);
+    JobExecutionExportFilesEntity exportFilesEntity =
+        new JobExecutionExportFilesEntity()
+            .withFileLocation("/tmp/" + jobExecution.getId().toString() + "/location")
+            .withId(UUID.randomUUID())
+            .withJobExecutionId(jobExecution.getId())
+            .withFromId(fromId)
+            .withToId(toId)
+            .withStatus(JobExecutionExportFilesStatus.ACTIVE);
     var resourceIndex = new AtomicInteger(0);
     linkedDataResources.stream()
         .map(LinkedDataResource::getInventoryId)
-        .map(id -> {
-          return new ExportIdEntity()
-              .withJobExecutionId(exportFilesEntity.getJobExecutionId())
-              .withId(resourceIndex.get())
-              .withInstanceId(UUID.fromString(id));
-        })
-        .map(entity -> {
-          return new SliceImpl<>(
-              List.of(entity),
-              PageRequest.of(resourceIndex.get(), 1),
-              resourceIndex.get() + 1 != linkedDataResources.size()
-          );
-        })
-        .forEach(slice -> {
-          when(exportIdEntityRepository.getExportIds(jobExecution.getId(), fromId, toId,
-              PageRequest.of(resourceIndex.getAndIncrement(), 1))).thenReturn(slice);
-        });
+        .map(
+            id -> {
+              return new ExportIdEntity()
+                  .withJobExecutionId(exportFilesEntity.getJobExecutionId())
+                  .withId(resourceIndex.get())
+                  .withInstanceId(UUID.fromString(id));
+            })
+        .map(
+            entity -> {
+              return new SliceImpl<>(
+                  List.of(entity),
+                  PageRequest.of(resourceIndex.get(), 1),
+                  resourceIndex.get() + 1 != linkedDataResources.size());
+            })
+        .forEach(
+            slice -> {
+              when(exportIdEntityRepository.getExportIds(
+                      jobExecution.getId(),
+                      fromId,
+                      toId,
+                      PageRequest.of(resourceIndex.getAndIncrement(), 1)))
+                  .thenReturn(slice);
+            });
 
     when(jobExecutionService.getById(exportFilesEntity.getJobExecutionId()))
         .thenReturn(jobExecution);
@@ -188,36 +186,41 @@ class AbstractLinkedDataExportStrategyTest {
     var output = new ByteArrayOutputStream(2);
     output.write("{}".getBytes());
 
-    when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class),
-        isA(UUID.class))).thenReturn(1L);
-    when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class)))
-        .thenReturn(output);
+    when(exportIdEntityRepository.countExportIds(isA(UUID.class), isA(UUID.class), isA(UUID.class)))
+        .thenReturn(1L);
+    when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class))).thenReturn(output);
     doThrow(new LocalStorageWriterException("Cannot write")).when(localStorageWriter).close();
 
     var preparation = prepare(1, true, true);
-    var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
-        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
-            1, preparation.jobExecutionEntity.getId()));
+    var exportStatistic =
+        exportStrategy.saveOutputToLocalStorage(
+            preparation.exportFilesEntity,
+            new ExportRequest(),
+            new ExportedRecordsListener(
+                jobExecutionEntityRepository, 1, preparation.jobExecutionEntity.getId()));
 
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
-    verify(jobExecutionEntityRepository, times(1))
-        .save(isA(JobExecutionEntity.class));
-    verify(exportIdEntityRepository).countExportIds(
-        preparation.exportFilesEntity.getJobExecutionId(),
-        preparation.exportFilesEntity.getFromId(),
-        preparation.exportFilesEntity.getToId());
+    verify(jobExecutionEntityRepository, times(1)).save(isA(JobExecutionEntity.class));
+    verify(exportIdEntityRepository)
+        .countExportIds(
+            preparation.exportFilesEntity.getJobExecutionId(),
+            preparation.exportFilesEntity.getFromId(),
+            preparation.exportFilesEntity.getToId());
   }
 
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageWhenNoResults() {
     var preparation = prepare(1, false, false);
-    var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
-        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
-            1, preparation.jobExecutionEntity.getId()));
+    var exportStatistic =
+        exportStrategy.saveOutputToLocalStorage(
+            preparation.exportFilesEntity,
+            new ExportRequest(),
+            new ExportedRecordsListener(
+                jobExecutionEntityRepository, 1, preparation.jobExecutionEntity.getId()));
 
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
@@ -230,50 +233,52 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageConvertErrorTest() {
-    doThrow(JsonProcessingException.class).when(linkedDataConverter)
+    doThrow(JsonProcessingException.class)
+        .when(linkedDataConverter)
         .convertLdJsonToBibframe2Rdf(isA(String.class));
 
     var preparation = prepare(1, true, false);
-    var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
-        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
-            1, preparation.jobExecutionEntity.getId()));
+    var exportStatistic =
+        exportStrategy.saveOutputToLocalStorage(
+            preparation.exportFilesEntity,
+            new ExportRequest(),
+            new ExportedRecordsListener(
+                jobExecutionEntityRepository, 1, preparation.jobExecutionEntity.getId()));
 
     assertEquals(0, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(1, exportStatistic.getFailed());
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
-    verify(errorLogService, times(1))
-        .saveGeneralError(isA(String.class), isA(UUID.class));
-    verify(jobExecutionEntityRepository, never())
-        .save(isA(JobExecutionEntity.class));
+    verify(errorLogService, times(1)).saveGeneralError(isA(String.class), isA(UUID.class));
+    verify(jobExecutionEntityRepository, never()).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, never()).write(isA(String.class));
   }
 
   // Simulate a batch size of one with one batch handled per thread
   @SneakyThrows
   @ParameterizedTest
-  @ValueSource(ints = { 1, 2, 3, 10, 15, 100 })
+  @ValueSource(ints = {1, 2, 3, 10, 15, 100})
   void saveOutputToLocalStorageMultithreaded(int threads) {
     var output = new ByteArrayOutputStream(2);
     output.write("{}".getBytes());
-    when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class)))
-        .thenReturn(output);
+    when(linkedDataConverter.convertLdJsonToBibframe2Rdf(isA(String.class))).thenReturn(output);
     when(localStorageWriter.getReader())
         .thenReturn(Optional.of(new BufferedReader(new StringReader("{}"))));
-    when(localStorageWriter.getPath())
-        .thenReturn(Path.of("/tmp/irrelevant"));
+    when(localStorageWriter.getPath()).thenReturn(Path.of("/tmp/irrelevant"));
 
     var preparation = prepare(threads, true, true);
-    var exportStatistic = exportStrategy.saveOutputToLocalStorage(preparation.exportFilesEntity,
-        new ExportRequest(), new ExportedRecordsListener(jobExecutionEntityRepository,
-            1, preparation.jobExecutionEntity.getId()));
+    var exportStatistic =
+        exportStrategy.saveOutputToLocalStorage(
+            preparation.exportFilesEntity,
+            new ExportRequest(),
+            new ExportedRecordsListener(
+                jobExecutionEntityRepository, 1, preparation.jobExecutionEntity.getId()));
     assertEquals(threads, exportStatistic.getExported());
     assertEquals(0, exportStatistic.getDuplicatedSrs());
     assertEquals(0, exportStatistic.getFailed());
 
     assertEquals(JobExecutionExportFilesStatus.ACTIVE, preparation.exportFilesEntity.getStatus());
-    verify(jobExecutionEntityRepository, times(threads))
-        .save(isA(JobExecutionEntity.class));
+    verify(jobExecutionEntityRepository, times(threads)).save(isA(JobExecutionEntity.class));
     verify(localStorageWriter, times(threads + 1)).write(isA(String.class));
   }
 
@@ -283,21 +288,19 @@ class AbstractLinkedDataExportStrategyTest {
       super.setProcessSlicesThreadPoolSize(threadPool);
     }
 
-    @Setter
-    private List<LinkedDataResource> linkedDataResources = new ArrayList<>();
+    @Setter private List<LinkedDataResource> linkedDataResources = new ArrayList<>();
 
     @Override
     protected LocalStorageWriter createLocalStorageWriter(
-        JobExecutionExportFilesEntity exportFilesEntity,
-        Integer pageNumber) {
+        JobExecutionExportFilesEntity exportFilesEntity, Integer pageNumber) {
       return localStorageWriter;
     }
 
     @Override
     List<LinkedDataResource> getLinkedDataResources(Set<UUID> externalIds) {
       return this.linkedDataResources.stream()
-        .filter(resource -> externalIds.contains(UUID.fromString(resource.getInventoryId())))
-        .toList();
+          .filter(resource -> externalIds.contains(UUID.fromString(resource.getInventoryId())))
+          .toList();
     }
   }
 }

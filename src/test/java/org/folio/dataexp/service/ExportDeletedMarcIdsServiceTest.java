@@ -25,16 +25,12 @@ class ExportDeletedMarcIdsServiceTest {
 
   private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-  @Mock
-  private MarcDeletedIdsService marcDeletedIdsService;
-  @Mock
-  private DataExportService dataExportService;
+  @Mock private MarcDeletedIdsService marcDeletedIdsService;
+  @Mock private DataExportService dataExportService;
 
-  @InjectMocks
-  private ExportDeletedMarcIdsService exportDeletedMarcIdsService;
+  @InjectMocks private ExportDeletedMarcIdsService exportDeletedMarcIdsService;
 
-  @Captor
-  private ArgumentCaptor<ExportRequest> exportRequestArgumentCaptor;
+  @Captor private ArgumentCaptor<ExportRequest> exportRequestArgumentCaptor;
 
   @Test
   @SneakyThrows

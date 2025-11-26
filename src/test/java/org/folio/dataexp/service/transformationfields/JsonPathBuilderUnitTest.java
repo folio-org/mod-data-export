@@ -38,13 +38,13 @@ class JsonPathBuilderUnitTest {
   void shouldReturnDisplayNameKeyforInstanceAndIdIsIdentifiersWithReferenceDataBuiltById() {
     TransformationFieldsConfig transformationFieldsConfig = TransformationFieldsConfig.IDENTIFIERS;
     Map<String, JsonObjectWrapper> referenceDataEntry = new HashMap<>();
-    var value = new JsonObjectWrapper(mapper.readValue(LCCN_RESPONSE_AS_STRING,
-        new TypeReference<>() {}));
+    var value =
+        new JsonObjectWrapper(mapper.readValue(LCCN_RESPONSE_AS_STRING, new TypeReference<>() {}));
     referenceDataEntry.put(IDENTIFIER_TYPES_LCCN_ID, value);
 
     for (Map.Entry<String, JsonObjectWrapper> refData : referenceDataEntry.entrySet()) {
-      String jsonPath = jsonPathBuilder.build(RecordTypes.INSTANCE, transformationFieldsConfig,
-          refData);
+      String jsonPath =
+          jsonPathBuilder.build(RecordTypes.INSTANCE, transformationFieldsConfig, refData);
 
       assertNotEquals(transformationFieldsConfig.getPath(), jsonPath);
       assertEquals(IDENTIFIER_JSON_PATH_RESULT, jsonPath);
