@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Represents a job for processing IDs.
- */
+/** Represents a job for processing IDs. */
 @Data
 @With
 @NoArgsConstructor
@@ -19,10 +17,11 @@ public class IdsJob {
   private UUID id;
   private Status status;
 
-  /**
-   * Status of the job.
-   */
+  /** Status of the job. */
   public enum Status {
-    IN_PROGRESS, ERROR, COMPLETED, DEPRECATED
+    IN_PROGRESS,
+    ERROR,
+    COMPLETED,
+    DEPRECATED
   }
 }

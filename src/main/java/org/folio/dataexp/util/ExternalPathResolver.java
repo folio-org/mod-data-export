@@ -5,16 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Utility class for resolving external API paths used in the data export module.
- */
+/** Utility class for resolving external API paths used in the data export module. */
 public class ExternalPathResolver {
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
-  private ExternalPathResolver() {
-  }
+  /** Private constructor to prevent instantiation. */
+  private ExternalPathResolver() {}
 
   public static final String SRS = "srs";
   public static final String INSTANCE = "instance";
@@ -43,7 +38,6 @@ public class ExternalPathResolver {
   public static final String CONFIGURATIONS = "configurations";
   public static final String RECORD_BULK_IDS = "bulkIds";
   public static final String USER_TENANTS_ENDPOINT = "userTenants";
-
 
   private static final Map<String, String> EXTERNAL_APIS;
   private static final Map<String, String> EXTERNAL_APIS_WITH_PREFIX;
@@ -81,17 +75,18 @@ public class ExternalPathResolver {
     apis.put(USER_TENANTS_ENDPOINT, "/user-tenants");
 
     EXTERNAL_APIS = Collections.unmodifiableMap(apis);
-    EXTERNAL_APIS_WITH_PREFIX = Collections.unmodifiableMap(apis.entrySet()
-      .stream()
-      .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue())));
-    EXTERNAL_APIS_WITH_SUFFIX = Collections.unmodifiableMap(apis.entrySet()
-      .stream()
-      .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue() + "/%s")));
-    EXTERNAL_APIS_WITH_ID = Collections.unmodifiableMap(apis.entrySet()
-        .stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue()
-          + "/%s")));
-
+    EXTERNAL_APIS_WITH_PREFIX =
+        Collections.unmodifiableMap(
+            apis.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue())));
+    EXTERNAL_APIS_WITH_SUFFIX =
+        Collections.unmodifiableMap(
+            apis.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue() + "/%s")));
+    EXTERNAL_APIS_WITH_ID =
+        Collections.unmodifiableMap(
+            apis.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> "%s" + v.getValue() + "/%s")));
   }
 
   /**
@@ -133,5 +128,4 @@ public class ExternalPathResolver {
   public static String resourcesPathWithId(String field) {
     return EXTERNAL_APIS_WITH_ID.get(field);
   }
-
 }

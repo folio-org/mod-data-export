@@ -7,9 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-/**
- * Configuration class for setting up the TaskExecutor for export files.
- */
+/** Configuration class for setting up the TaskExecutor for export files. */
 @Configuration
 public class ExecutorConfiguration {
 
@@ -26,8 +24,8 @@ public class ExecutorConfiguration {
     var executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(maxPollSize);
     executor.setMaxPoolSize(maxPollSize);
-    executor.setTaskDecorator(FolioExecutionScopeExecutionContextManager
-        ::getRunnableWithCurrentFolioContext);
+    executor.setTaskDecorator(
+        FolioExecutionScopeExecutionContextManager::getRunnableWithCurrentFolioContext);
     executor.initialize();
     return executor;
   }

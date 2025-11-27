@@ -65,45 +65,26 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class HoldingsExportStrategyTest {
 
-  @Mock
-  private MarcRecordEntityRepository marcRecordEntityRepository;
-  @Mock
-  private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  @Mock
-  private InstanceEntityRepository instanceEntityRepository;
-  @Mock
-  private RuleProcessor ruleProcessor;
-  @Mock
-  private ItemEntityRepository itemEntityRepository;
-  @Mock
-  private RuleFactory ruleFactory;
-  @Mock
-  private EntityManager entityManager;
-  @Mock
-  private ReferenceDataProvider referenceDataProvider;
-  @Mock
-  private ErrorLogService errorLogService;
-  @Mock
-  private ConsortiaService consortiaService;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private ConsortiumSearchClient consortiumSearchClient;
-  @Mock
-  private MarcInstanceRecordRepository marcInstanceRecordRepository;
-  @Mock
-  private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
-  @Mock
-  private InstanceCentralTenantRepository instanceCentralTenantRepository;
-  @Spy
-  private RuleHandler ruleHandler;
-  @Mock
-  private PermissionsValidator permissionsValidator;
-  @Mock
-  private UserService userService;
+  @Mock private MarcRecordEntityRepository marcRecordEntityRepository;
+  @Mock private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  @Mock private InstanceEntityRepository instanceEntityRepository;
+  @Mock private RuleProcessor ruleProcessor;
+  @Mock private ItemEntityRepository itemEntityRepository;
+  @Mock private RuleFactory ruleFactory;
+  @Mock private EntityManager entityManager;
+  @Mock private ReferenceDataProvider referenceDataProvider;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private ConsortiaService consortiaService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private ConsortiumSearchClient consortiumSearchClient;
+  @Mock private MarcInstanceRecordRepository marcInstanceRecordRepository;
+  @Mock private HoldingsRecordEntityTenantRepository holdingsRecordEntityTenantRepository;
+  @Mock private InstanceCentralTenantRepository instanceCentralTenantRepository;
+  @Spy private RuleHandler ruleHandler;
+  @Mock private PermissionsValidator permissionsValidator;
+  @Mock private UserService userService;
 
-  @InjectMocks
-  private HoldingsExportStrategy holdingsExportStrategy;
+  @InjectMocks private HoldingsExportStrategy holdingsExportStrategy;
 
   @BeforeEach
   void setUp() {
@@ -116,31 +97,30 @@ class HoldingsExportStrategyTest {
   @Test
   void getMarcRecordsTestIfDefaultMappingProfileTest() {
     when(consortiaService.getCentralTenantId(any())).thenReturn("centralTenant");
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(),
-        UUID.randomUUID());
-    verify(marcRecordEntityRepository).findByExternalIdInAndRecordTypeIsAndStateIn(anySet(),
-        isA(String.class), isA(Set.class));
+    holdingsExportStrategy.getMarcRecords(
+        new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    verify(marcRecordEntityRepository)
+        .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
   }
 
   @Test
   void getMarcRecordsTestIfRecordTypesSrsTest() {
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
-    holdingsExportStrategy.getMarcRecords(new HashSet<>(), mappingProfile, new ExportRequest(),
-        UUID.randomUUID());
-    verify(marcRecordEntityRepository,
-        times(0))
+    holdingsExportStrategy.getMarcRecords(
+        new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    verify(marcRecordEntityRepository, times(0))
         .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
   }
 
   @Test
   void getIdentifierMessageTest() {
     var holding = "{'hrid' : '123'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID())
-        .build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(holdingRecordEntity));
@@ -154,41 +134,49 @@ class HoldingsExportStrategyTest {
   @Test
   void getGeneratedMarcTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding)
-        .id(UUID.randomUUID()).build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(holdingRecordEntity));
-    holdingsExportStrategy.getGeneratedMarc(new HashSet<>(), new MappingProfile(),
-        new ExportRequest(), UUID.randomUUID(),
+    holdingsExportStrategy.getGeneratedMarc(
+        new HashSet<>(),
+        new MappingProfile(),
+        new ExportRequest(),
+        UUID.randomUUID(),
         new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
-    verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(),
-        anyList(), any());
+    verify(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
   }
 
   @Test
   void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID())
-        .build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(holdingRecordEntity));
-    doThrow(new MarcException("marc error")).when(ruleProcessor).process(isA(EntityReader.class),
-        isA(RecordWriter.class), any(), anyList(), any());
-    var generatedMarcResult = holdingsExportStrategy.getGeneratedMarc(new HashSet<>(),
-        new MappingProfile(), new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedRecordsListener(null, 1000, null)));
+    doThrow(new MarcException("marc error"))
+        .when(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+    var generatedMarcResult =
+        holdingsExportStrategy.getGeneratedMarc(
+            new HashSet<>(),
+            new MappingProfile(),
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, generatedMarcResult.getFailedIds().size());
-    var actualErrorMessage =
-        List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
+    var actualErrorMessage = List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(isA(String.class),
-        eq(actualErrorMessage), isA(UUID.class));
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            isA(String.class), eq(actualErrorMessage), isA(UUID.class));
   }
 
   @Test
@@ -198,8 +186,8 @@ class HoldingsExportStrategyTest {
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var item = "{'barcode' : 'itemBarcode'}";
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(holding).id(holdingId)
-        .instanceId(instanceId).build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
@@ -210,12 +198,15 @@ class HoldingsExportStrategyTest {
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
-    when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId))
-        .thenReturn(List.of(itemEntity));
+    when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
     doNothing().when(holdingsExportStrategy.entityManager).clear();
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, UUID.randomUUID());
+    var holdingsWithInstanceAndItems =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)),
+            generatedMarcResult,
+            mappingProfile,
+            UUID.randomUUID());
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 
@@ -234,8 +225,12 @@ class HoldingsExportStrategyTest {
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var holdingRecordEntity = HoldingsRecordEntity.builder().jsonb(invalidHoldingJson)
-        .id(holdingId).instanceId(instanceId).build();
+    var holdingRecordEntity =
+        HoldingsRecordEntity.builder()
+            .jsonb(invalidHoldingJson)
+            .id(holdingId)
+            .instanceId(instanceId)
+            .build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
@@ -247,22 +242,23 @@ class HoldingsExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     doNothing().when(holdingsExportStrategy.entityManager).clear();
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+    var holdingsWithInstanceAndItems =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
 
     assertEquals(0, holdingsWithInstanceAndItems.size());
     assertEquals(1, generatedMarcResult.getFailedIds().size());
 
-    verify(errorLogService).saveGeneralError(
-        "Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576",
-        jobExecutionId);
+    verify(errorLogService)
+        .saveGeneralError(
+            "Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576",
+            jobExecutionId);
   }
 
   @Test
   void getMarcRecordsTestIfCurrentTenantIsCentral() {
     var userId = UUID.randomUUID();
-    when(consortiaService.getCentralTenantId("centralTenant"))
-        .thenReturn("centralTenant");
+    when(consortiaService.getCentralTenantId("centralTenant")).thenReturn("centralTenant");
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(consortiaService.getAffiliatedTenants("centralTenant", userId.toString()))
@@ -286,11 +282,12 @@ class HoldingsExportStrategyTest {
     when(marcInstanceRecordRepository.findByExternalIdIn("memberB", Set.of(uuidB)))
         .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
     when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
     var ids = Set.of(uuidA, uuidB, uuidC);
-    var res = holdingsExportStrategy.getMarcRecords(ids, mappingProfile, new ExportRequest(),
-        UUID.randomUUID());
+    var res =
+        holdingsExportStrategy.getMarcRecords(
+            ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertThat(res).hasSize(3);
   }
 
@@ -299,8 +296,8 @@ class HoldingsExportStrategyTest {
     when(consortiaService.getCentralTenantId(any())).thenReturn("centralTenant");
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(consortiaService.getAffiliatedTenants(any(), any())).thenReturn(List.of("memberA",
-        "memberB"));
+    when(consortiaService.getAffiliatedTenants(any(), any()))
+        .thenReturn(List.of("memberA", "memberB"));
     Holdings holdingsA = new Holdings();
     holdingsA.setTenantId("memberA");
     Holdings holdingsB = new Holdings();
@@ -317,24 +314,44 @@ class HoldingsExportStrategyTest {
     var instId = UUID.randomUUID();
     when(instanceCentralTenantRepository.findInstancesByIdIn("centralTenant", Set.of(instId)))
         .thenReturn(
-            List.of(new InstanceEntity().withId(instId).withJsonb("{\n"
-                + "  \"id\": \"" + instId + "\",\n"
-                + "  \"hrid\": \"in00000000024\"\n"
-                + "}")));
+            List.of(
+                new InstanceEntity()
+                    .withId(instId)
+                    .withJsonb(
+                        "{\n"
+                            + "  \"id\": \""
+                            + instId
+                            + "\",\n"
+                            + "  \"hrid\": \"in00000000024\"\n"
+                            + "}")));
     when(holdingsRecordEntityTenantRepository.findByIdIn("memberB", Set.of(uuidB)))
         .thenReturn(
-            List.of(new HoldingsRecordEntity().withId(uuidC).withInstanceId(instId).withJsonb("{\n"
-                + "  \"id\": \"" + uuidB + "\",\n"
-                + "  \"hrid\": \"ho00000000009\",\n"
-                + "  \"instanceId\": \"" + instId + "\"\n"
-                + "}")));
+            List.of(
+                new HoldingsRecordEntity()
+                    .withId(uuidC)
+                    .withInstanceId(instId)
+                    .withJsonb(
+                        "{\n"
+                            + "  \"id\": \""
+                            + uuidB
+                            + "\",\n"
+                            + "  \"hrid\": \"ho00000000009\",\n"
+                            + "  \"instanceId\": \""
+                            + instId
+                            + "\"\n"
+                            + "}")));
     when(folioExecutionContext.getOkapiHeaders())
         .thenReturn(Map.of("x-okapi-token", List.of("token")));
     var ids = new HashSet<>(Set.of(uuidA, uuidB, uuidC));
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
-    var res = holdingsExportStrategy.getGeneratedMarc(ids, mappingProfile, new ExportRequest(),
-        UUID.randomUUID(), new ExportStrategyStatistic(null));
+    var res =
+        holdingsExportStrategy.getGeneratedMarc(
+            ids,
+            mappingProfile,
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(null));
     assertThat(res.getMarcRecords()).hasSize(1);
   }
 
@@ -357,20 +374,23 @@ class HoldingsExportStrategyTest {
     when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(holdings);
     when(consortiaService.getAffiliatedTenants("central", userId.toString()))
         .thenReturn(List.of("college"));
-    when(permissionsValidator.checkInstanceViewPermissions("college"))
-        .thenReturn(false);
+    when(permissionsValidator.checkInstanceViewPermissions("college")).thenReturn(false);
     doNothing().when(holdingsExportStrategy.entityManager).clear();
-    when(userService.getUserName("central", userId.toString()))
-        .thenReturn("central_admin");
+    when(userService.getUserName("central", userId.toString())).thenReturn("central_admin");
 
-    var holdingsWithInstanceAndItems = holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+    var holdingsWithInstanceAndItems =
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
 
     assertEquals(0, holdingsWithInstanceAndItems.size());
-    var msgValues = List.of(holdingId.toString(), userService.getUserName(
-        folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
-        "college");
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
+    var msgValues =
+        List.of(
+            holdingId.toString(),
+            userService.getUserName(
+                folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
+            "college");
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
   }
 }

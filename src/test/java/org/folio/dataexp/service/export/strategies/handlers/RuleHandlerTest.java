@@ -15,7 +15,7 @@ class RuleHandlerTest {
 
   @Test
   void preHandleTest() {
-    var jsonObject  = new JSONObject();
+    var jsonObject = new JSONObject();
     var dataSource = new DataSource();
     var ruleHandler = new RuleHandler();
 

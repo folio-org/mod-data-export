@@ -19,9 +19,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for managing file definitions and file uploads.
- */
+/** Service for managing file definitions and file uploads. */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -44,21 +42,19 @@ public class FileDefinitionsService {
     }
     log.info("Post file definition by id {}", fileDefinition.getId());
     fileDefinitionValidator.validate(fileDefinition);
-    var jobExecution = jobExecutionService.save(
-        new JobExecution().status(JobExecution.StatusEnum.NEW)
-    );
+    var jobExecution =
+        jobExecutionService.save(new JobExecution().status(JobExecution.StatusEnum.NEW));
     fileDefinition.setJobExecutionId(jobExecution.getId());
     fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
     var now = new Date();
-    fileDefinition.setMetadata(
-        new Metadata().createdDate(now).updatedDate(now)
-    );
-    var entity = FileDefinitionEntity.builder()
-        .id(fileDefinition.getId())
-        .creationDate(LocalDateTime.now())
-        .createdBy(folioExecutionContext.getUserId().toString())
-        .fileDefinition(fileDefinition)
-        .build();
+    fileDefinition.setMetadata(new Metadata().createdDate(now).updatedDate(now));
+    var entity =
+        FileDefinitionEntity.builder()
+            .id(fileDefinition.getId())
+            .creationDate(LocalDateTime.now())
+            .createdBy(folioExecutionContext.getUserId().toString())
+            .fileDefinition(fileDefinition)
+            .build();
     var saved = fileDefinitionEntityRepository.save(entity);
     return saved.getFileDefinition();
   }

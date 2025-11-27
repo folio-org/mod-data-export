@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- * Feign client for interacting with Okapi proxy endpoints for timers.
- */
+/** Feign client for interacting with Okapi proxy endpoints for timers. */
 @FeignClient(name = "okapi", configuration = FeignClientConfiguration.class)
 public interface OkapiClient {
   /**
@@ -23,7 +21,8 @@ public interface OkapiClient {
    * @param tenantId the tenant ID
    * @return a list of timer descriptors
    */
-  @GetMapping(value = "/proxy/tenants/{tenantId}/timers",
+  @GetMapping(
+      value = "/proxy/tenants/{tenantId}/timers",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<TimerDescriptor> getTimerDescriptors(URI uri, @PathVariable("tenantId") String tenantId);
 
@@ -35,6 +34,8 @@ public interface OkapiClient {
    * @param timerDescriptor the timer descriptor to update
    */
   @PatchMapping(value = "/proxy/tenants/{tenantId}/timers")
-  void updateTimer(URI uri, @PathVariable("tenantId") String tenantId,
+  void updateTimer(
+      URI uri,
+      @PathVariable("tenantId") String tenantId,
       @RequestBody TimerDescriptor timerDescriptor);
 }

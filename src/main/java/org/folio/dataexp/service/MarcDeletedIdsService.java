@@ -20,9 +20,7 @@ import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for retrieving deleted MARC record IDs and creating file definitions.
- */
+/** Service for retrieving deleted MARC record IDs and creating file definitions. */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -47,18 +45,20 @@ public class MarcDeletedIdsService {
     validateDates(from, to);
     if (isNull(from) && isNull(to)) {
       Date now = new Date();
-      Date previousDay = Date.from(
-          LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC"))
-              .minusDays(1)
-              .atZone(ZoneId.of("UTC"))
-              .toInstant());
+      Date previousDay =
+          Date.from(
+              LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC"))
+                  .minusDays(1)
+                  .atZone(ZoneId.of("UTC"))
+                  .toInstant());
       from = previousDay;
       to = previousDay;
       log.info("The previous day is used: {}", from.toInstant());
     }
     log.info("GET MARC deleted IDs with date from {}, date to {}", from, to);
-    var payload = new MarcRecordIdentifiersPayload()
-        .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
+    var payload =
+        new MarcRecordIdentifiersPayload()
+            .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
     List<String> marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
@@ -70,10 +70,9 @@ public class MarcDeletedIdsService {
     fileDefinition.setFileName(DELETED_MARC_IDS_FILE_NAME);
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     var fileContent = String.join(System.lineSeparator(), marcIds);
-    fileDefinition = fileDefinitionsService.uploadFile(
-        fileDefinition.getId(),
-        new ByteArrayResource(fileContent.getBytes())
-    );
+    fileDefinition =
+        fileDefinitionsService.uploadFile(
+            fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
   }
 
@@ -89,22 +88,19 @@ public class MarcDeletedIdsService {
 
     if (nonNull(from)) {
       if (nonNull(to)) {
-        searchExpression = format(
-            FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE,
-            DateFormatUtils.format(from, DATE_PATTERN),
-            DateFormatUtils.format(to, DATE_PATTERN)
-        );
+        searchExpression =
+            format(
+                FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE,
+                DateFormatUtils.format(from, DATE_PATTERN),
+                DateFormatUtils.format(to, DATE_PATTERN));
       } else {
-        searchExpression = format(
-            FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM,
-            DateFormatUtils.format(from, DATE_PATTERN)
-        );
+        searchExpression =
+            format(
+                FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN));
       }
     } else if (nonNull(to)) {
-      searchExpression = format(
-          FIELD_SEARCH_EXPRESSION_TEMPLATE_TO,
-          DateFormatUtils.format(to, DATE_PATTERN)
-      );
+      searchExpression =
+          format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN));
     }
 
     payload.setFieldsSearchExpression(searchExpression);
@@ -120,8 +116,7 @@ public class MarcDeletedIdsService {
   private void validateDates(Date from, Date until) {
     if (nonNull(from) && nonNull(until) && from.toInstant().isAfter(until.toInstant())) {
       throw new ExportDeletedDateRangeException(
-          "Invalid date range for payload: date 'from' cannot be after date 'to'."
-      );
+          "Invalid date range for payload: date 'from' cannot be after date 'to'.");
     }
   }
 }

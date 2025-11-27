@@ -1,8 +1,6 @@
 package org.folio.dataexp.domain.entity;
 
-/**
- * Status of job execution export files.
- */
+/** Status of job execution export files. */
 public enum JobExecutionExportFilesStatus {
   /** Export file is scheduled. */
   SCHEDULED,

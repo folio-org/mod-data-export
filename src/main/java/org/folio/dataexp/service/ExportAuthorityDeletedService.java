@@ -17,9 +17,7 @@ import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for exporting deleted authority records.
- */
+/** Service for exporting deleted authority records. */
 @Log4j2
 @RequiredArgsConstructor
 @Service
@@ -37,29 +35,22 @@ public class ExportAuthorityDeletedService {
    * @return Response containing job execution ID.
    */
   public ExportAuthorityDeletedResponse postExportDeletedAuthority(
-      ExportAuthorityDeletedRequest request
-  ) {
+      ExportAuthorityDeletedRequest request) {
     log.info("POST export deleted authorities");
     try {
-      var authorities = authorityClient.getAuthorities(
-          true,
-          true,
-          request.getQuery(),
-          request.getLimit(),
-          request.getOffset()
-      );
-      var fileDefinition = getFileDefinition(
-          authorities.getAuthorities().stream()
-              .map(Authority::getId)
-              .toList()
-      );
-      var exportRequest = ExportRequest.builder()
-          .fileDefinitionId(fileDefinition.getId())
-          .jobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID))
-          .all(false)
-          .quick(false)
-          .idType(ExportRequest.IdTypeEnum.AUTHORITY)
-          .build();
+      var authorities =
+          authorityClient.getAuthorities(
+              true, true, request.getQuery(), request.getLimit(), request.getOffset());
+      var fileDefinition =
+          getFileDefinition(authorities.getAuthorities().stream().map(Authority::getId).toList());
+      var exportRequest =
+          ExportRequest.builder()
+              .fileDefinitionId(fileDefinition.getId())
+              .jobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID))
+              .all(false)
+              .quick(false)
+              .idType(ExportRequest.IdTypeEnum.AUTHORITY)
+              .build();
       dataExportService.postDataExport(exportRequest);
       return ExportAuthorityDeletedResponse.builder()
           .jobExecutionId(fileDefinition.getJobExecutionId())
@@ -83,10 +74,9 @@ public class ExportAuthorityDeletedService {
     fileDefinition.setFileName(DELETED_AUTHORITIES_FILE_NAME);
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     var fileContent = String.join(System.lineSeparator(), authorityIds);
-    fileDefinition = fileDefinitionsService.uploadFile(
-        fileDefinition.getId(),
-        new ByteArrayResource(fileContent.getBytes())
-    );
+    fileDefinition =
+        fileDefinitionsService.uploadFile(
+            fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
   }
 }

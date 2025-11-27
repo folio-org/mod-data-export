@@ -18,29 +18,30 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class StorageCleanUpServiceTest extends BaseDataExportInitializer {
-  @Autowired
-  private StorageCleanUpService storageCleanUpService;
-  @Autowired
-  private FolioS3Client s3Client;
-  @Autowired
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired private StorageCleanUpService storageCleanUpService;
+  @Autowired private FolioS3Client s3Client;
+  @Autowired private FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
   @Test
   void shouldRemoveExpiredFileAndRelatedFileDefinition() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var fileDefinitionId = UUID.randomUUID();
       var fileName = "file.csv";
       var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinitionId, fileName);
 
-      fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
-          .id(fileDefinitionId)
-          .fileDefinition(new FileDefinition()
+      fileDefinitionEntityRepository.save(
+          FileDefinitionEntity.builder()
               .id(fileDefinitionId)
-              .sourcePath("path")
-              .fileName(fileName)
-              .metadata(new Metadata()
-                  .updatedDate(new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(25)))))
-          .build());
+              .fileDefinition(
+                  new FileDefinition()
+                      .id(fileDefinitionId)
+                      .sourcePath("path")
+                      .fileName(fileName)
+                      .metadata(
+                          new Metadata()
+                              .updatedDate(
+                                  new Date(new Date().getTime() - TimeUnit.HOURS.toMillis(25)))))
+              .build());
 
       s3Client.write(path, new ByteArrayInputStream("content".getBytes()));
       assertThat(s3Client.read(path)).hasBinaryContent("content".getBytes());

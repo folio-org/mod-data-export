@@ -44,51 +44,31 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 abstract class ServiceInitializer extends BaseDataExportInitializer {
 
-  @Autowired
-  protected DataExportTenantService dataExportTenantService;
-  @Autowired
-  protected ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
-  @Autowired
-  protected JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+  @Autowired protected DataExportTenantService dataExportTenantService;
+  @Autowired protected ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Autowired protected JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
+
   @Autowired
   protected JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
 
-  @MockitoBean
-  private UserClient userClient;
-  @MockitoBean
-  private AlternativeTitleTypesClient alternativeTitleTypesClient;
-  @MockitoBean
-  private CallNumberTypesClient callNumberTypesClient;
-  @MockitoBean
-  private ContributorNameTypesClient contributorNameTypesClient;
-  @MockitoBean
-  private ElectronicAccessRelationshipsClient electronicAccessRelationshipsClient;
-  @MockitoBean
-  private HoldingsNoteTypesClient holdingsNoteTypesClient;
-  @MockitoBean
-  private IdentifierTypesClient identifierTypesClient;
-  @MockitoBean
-  private InstanceFormatsClient instanceFormatsClient;
-  @MockitoBean
-  private InstanceTypesClient instanceTypesClient;
-  @MockitoBean
-  private ItemNoteTypesClient itemNoteTypesClient;
-  @MockitoBean
-  private LoanTypesClient loanTypesClient;
-  @MockitoBean
-  private LocationsClient locationsClient;
-  @MockitoBean
-  private LocationUnitsClient locationUnitsClient;
-  @MockitoBean
-  private MaterialTypesClient materialTypesClient;
-  @MockitoBean
-  private NatureOfContentTermsClient natureOfContentTermsClient;
-  @MockitoBean
-  private IssuanceModesClient issuanceModesClient;
-  @MockitoBean
-  private QueryClient queryClient;
-  @MockitoBean
-  protected ConsortiaService consortiaService;
+  @MockitoBean private UserClient userClient;
+  @MockitoBean private AlternativeTitleTypesClient alternativeTitleTypesClient;
+  @MockitoBean private CallNumberTypesClient callNumberTypesClient;
+  @MockitoBean private ContributorNameTypesClient contributorNameTypesClient;
+  @MockitoBean private ElectronicAccessRelationshipsClient electronicAccessRelationshipsClient;
+  @MockitoBean private HoldingsNoteTypesClient holdingsNoteTypesClient;
+  @MockitoBean private IdentifierTypesClient identifierTypesClient;
+  @MockitoBean private InstanceFormatsClient instanceFormatsClient;
+  @MockitoBean private InstanceTypesClient instanceTypesClient;
+  @MockitoBean private ItemNoteTypesClient itemNoteTypesClient;
+  @MockitoBean private LoanTypesClient loanTypesClient;
+  @MockitoBean private LocationsClient locationsClient;
+  @MockitoBean private LocationUnitsClient locationUnitsClient;
+  @MockitoBean private MaterialTypesClient materialTypesClient;
+  @MockitoBean private NatureOfContentTermsClient natureOfContentTermsClient;
+  @MockitoBean private IssuanceModesClient issuanceModesClient;
+  @MockitoBean private QueryClient queryClient;
+  @MockitoBean protected ConsortiaService consortiaService;
 
   protected void handleReferenceData() {
     var user = new User();

@@ -1,8 +1,6 @@
 package org.folio.dataexp.exception.export;
 
-/**
- * Exception thrown when a record download operation fails.
- */
+/** Exception thrown when a record download operation fails. */
 public class DownloadRecordException extends RuntimeException {
   /**
    * Constructs a new DownloadRecordException with the specified detail message.

@@ -5,14 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 
-/**
- * Listener for tracking the number of exported records and updating job execution progress.
- */
+/** Listener for tracking the number of exported records and updating job execution progress. */
 public class ExportedRecordsListener {
 
   private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Getter
-  private final AtomicInteger exportedCount = new AtomicInteger();
+  @Getter private final AtomicInteger exportedCount = new AtomicInteger();
   private int progressExportedUpdateStep;
   private UUID jobExecutionId;
 
@@ -26,21 +23,17 @@ public class ExportedRecordsListener {
   public ExportedRecordsListener(
       JobExecutionEntityRepository jobExecutionEntityRepository,
       int progressExportedUpdateStep,
-      UUID jobExecutionId
-  ) {
+      UUID jobExecutionId) {
     this.jobExecutionEntityRepository = jobExecutionEntityRepository;
     this.progressExportedUpdateStep = progressExportedUpdateStep;
     this.jobExecutionId = jobExecutionId;
   }
 
-  /**
-   * Increments the exported count and updates job execution progress if needed.
-   */
+  /** Increments the exported count and updates job execution progress if needed. */
   public synchronized void incrementExported() {
     var exported = exportedCount.incrementAndGet();
     if (exported % progressExportedUpdateStep == 0) {
-      var jobExecutionEntity =
-          jobExecutionEntityRepository.getReferenceById(jobExecutionId);
+      var jobExecutionEntity = jobExecutionEntityRepository.getReferenceById(jobExecutionId);
       var progress = jobExecutionEntity.getJobExecution().getProgress();
       progress.setExported(exported);
       jobExecutionEntityRepository.save(jobExecutionEntity);

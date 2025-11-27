@@ -3,9 +3,7 @@ package org.folio.dataexp.service.export.strategies.translation.builder;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.processor.translations.Translation;
 
-/**
- * Default implementation of TranslationBuilder.
- */
+/** Default implementation of TranslationBuilder. */
 public class DefaultTranslationBuilder implements TranslationBuilder {
 
   /**

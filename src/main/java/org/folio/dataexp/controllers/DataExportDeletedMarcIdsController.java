@@ -11,9 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for exporting deleted MARC IDs.
- */
+/** Controller for exporting deleted MARC IDs. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -30,12 +28,8 @@ public class DataExportDeletedMarcIdsController implements ExportDeletedApi {
    */
   @Override
   public ResponseEntity<ExportDeletedMarcIdsResponse> postExportDeletedMarcIds(
-      ExportDeletedMarcIdsRequest request
-  ) {
+      ExportDeletedMarcIdsRequest request) {
     var response = exportDeletedMarcIdsService.postExportDeletedMarcIds(request);
-    return new ResponseEntity<>(
-        response,
-        HttpStatus.OK
-    );
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }

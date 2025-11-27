@@ -6,9 +6,7 @@ import org.folio.dataexp.service.permissions.RequiredPermissionResolver;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Component;
 
-/**
- * Validator for checking user permissions related to instance view.
- */
+/** Validator for checking user permissions related to instance view. */
 @Component
 @RequiredArgsConstructor
 public class PermissionsValidator {
@@ -35,8 +33,9 @@ public class PermissionsValidator {
    */
   public boolean isInstanceViewPermissionExists(String tenantId) {
     var readPermissionForEntity = requiredPermissionResolver.getReadPermission();
-    var userPermissions = permissionsProvider.getUserPermissions(
-        tenantId, folioExecutionContext.getUserId().toString());
+    var userPermissions =
+        permissionsProvider.getUserPermissions(
+            tenantId, folioExecutionContext.getUserId().toString());
     return userPermissions.contains(readPermissionForEntity);
   }
 }

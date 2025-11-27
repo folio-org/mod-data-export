@@ -20,13 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FilesDownloadServiceTest {
 
-  @Mock
-  private JobExecutionService jobExecutionService;
-  @Mock
-  private FolioS3Client s3Client;
+  @Mock private JobExecutionService jobExecutionService;
+  @Mock private FolioS3Client s3Client;
 
-  @InjectMocks
-  private FileDownloadServiceImpl fileDownloadService;
+  @InjectMocks private FileDownloadServiceImpl fileDownloadService;
 
   @Test
   @SneakyThrows
@@ -37,9 +34,13 @@ class FilesDownloadServiceTest {
     var jobExecutionId = UUID.randomUUID();
     var exportFileId = UUID.randomUUID();
 
-    var jobExecution = new JobExecution().exportedFiles(Set.of(
-        new JobExecutionExportedFilesInner().fileId(exportFileId)
-            .fileName("file.mrc")));
+    var jobExecution =
+        new JobExecution()
+            .exportedFiles(
+                Set.of(
+                    new JobExecutionExportedFilesInner()
+                        .fileId(exportFileId)
+                        .fileName("file.mrc")));
 
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(s3Client.getPresignedUrl(any())).thenReturn(expectedPresignedUrl);

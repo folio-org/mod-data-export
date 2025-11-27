@@ -27,8 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class QuickExportServiceTest extends ServiceInitializer {
 
-  @Autowired
-  private QuickExportService quickExportService;
+  @Autowired private QuickExportService quickExportService;
 
   private static final String FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED =
       "011e1aea-222d-4d1d-957d-0abcdd0e9acd";
@@ -39,42 +38,46 @@ class QuickExportServiceTest extends ServiceInitializer {
   @ParameterizedTest
   @CsvSource({
     "INSTANCE," + FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED,
-    "AUTHORITY," + AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED})
+    "AUTHORITY," + AUTHORITY_RECORD_EXTERNAL_ID_NOT_DELETED
+  })
   void quickExportNoErrorsTest(String recordType, String expectedId) {
-    when(consortiaService.getCentralTenantId(folioExecutionContext.getTenantId()))
-        .thenReturn("");
+    when(consortiaService.getCentralTenantId(folioExecutionContext.getTenantId())).thenReturn("");
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       errorLogEntityCqlRepository.deleteAll();
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var quickExportRequest = new QuickExportRequest()
-          .uuids(List.of(UUID.fromString(expectedId)))
-          .recordType(QuickExportRequest.RecordTypeEnum.fromValue(recordType))
-          .type(QuickExportRequest.TypeEnum.UUID);
+      var quickExportRequest =
+          new QuickExportRequest()
+              .uuids(List.of(UUID.fromString(expectedId)))
+              .recordType(QuickExportRequest.RecordTypeEnum.fromValue(recordType))
+              .type(QuickExportRequest.TypeEnum.UUID);
       var response = quickExportService.postQuickExport(quickExportRequest);
 
       assertNotNull(response);
       assertThat(response.getJobExecutionHrId()).isPositive();
       assertThat(response.getJobExecutionId()).isInstanceOf(UUID.class);
 
-      await().atMost(4, SECONDS).untilAsserted(() -> {
-        var errors = errorLogEntityCqlRepository.findAll();
-        assertThat(errors).isEmpty();
-        var jobExecutions = jobExecutionEntityCqlRepository.findAll();
-        assertThat(jobExecutions).hasSize(1);
-        var jobExecution = jobExecutions.get(0);
+      await()
+          .atMost(4, SECONDS)
+          .untilAsserted(
+              () -> {
+                var errors = errorLogEntityCqlRepository.findAll();
+                assertThat(errors).isEmpty();
+                var jobExecutions = jobExecutionEntityCqlRepository.findAll();
+                assertThat(jobExecutions).hasSize(1);
+                var jobExecution = jobExecutions.get(0);
 
-        assertTrue(jobExecution.getJobExecution().getProgress().getTotal() > 0);
-        assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
+                assertTrue(jobExecution.getJobExecution().getProgress().getTotal() > 0);
+                assertEquals(JobExecution.StatusEnum.COMPLETED, jobExecution.getStatus());
 
-        var fileToExport = String.format("quick-export-%s.mrc", jobExecution.getJobExecution()
-            .getHrId());
-        var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
-        String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
+                var fileToExport =
+                    String.format("quick-export-%s.mrc", jobExecution.getJobExecution().getHrId());
+                var s3path = getPathToStoredFiles(jobExecution.getId(), fileToExport);
+                String outputMrcFile = Files.read(s3Client.read(s3path), Charset.defaultCharset());
 
-        assertThat(outputMrcFile).containsOnlyOnce(expectedId);
-        assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
-      });
+                assertThat(outputMrcFile).containsOnlyOnce(expectedId);
+                assertThat(StringUtils.countMatches(outputMrcFile, "999")).isEqualTo(1);
+              });
     }
   }
 
@@ -85,12 +88,14 @@ class QuickExportServiceTest extends ServiceInitializer {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       dataExportTenantService.loadReferenceData();
       handleReferenceData();
-      var quickExportRequest = new QuickExportRequest()
-          .uuids(List.of(UUID.fromString(FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED)))
-          .recordType(QuickExportRequest.RecordTypeEnum.ITEM)
-          .type(QuickExportRequest.TypeEnum.UUID);
-      assertThrows(DataExportRequestValidationException.class, () ->
-          quickExportService.postQuickExport(quickExportRequest));
+      var quickExportRequest =
+          new QuickExportRequest()
+              .uuids(List.of(UUID.fromString(FOLIO_INSTANCE_ID_NOT_DELETED_NOT_SUPPRESSED)))
+              .recordType(QuickExportRequest.RecordTypeEnum.ITEM)
+              .type(QuickExportRequest.TypeEnum.UUID);
+      assertThrows(
+          DataExportRequestValidationException.class,
+          () -> quickExportService.postQuickExport(quickExportRequest));
     }
   }
 }

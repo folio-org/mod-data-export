@@ -11,9 +11,7 @@ import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsResponse;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for exporting deleted MARC IDs.
- */
+/** Service for exporting deleted MARC IDs. */
 @Log4j2
 @RequiredArgsConstructor
 @Service
@@ -29,19 +27,18 @@ public class ExportDeletedMarcIdsService {
    * @return Response containing job execution ID.
    */
   public ExportDeletedMarcIdsResponse postExportDeletedMarcIds(
-      ExportDeletedMarcIdsRequest request
-  ) {
+      ExportDeletedMarcIdsRequest request) {
     log.info("POST export deleted MARC IDs");
-    var fileDefinition = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(
-        nonNull(request) ? request.getFrom() : null,
-        nonNull(request) ? request.getTo() : null
-    );
-    var exportRequest = ExportRequest.builder()
-        .fileDefinitionId(fileDefinition.getId())
-        .jobProfileId(UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID))
-        .all(false)
-        .quick(false)
-        .build();
+    var fileDefinition =
+        marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(
+            nonNull(request) ? request.getFrom() : null, nonNull(request) ? request.getTo() : null);
+    var exportRequest =
+        ExportRequest.builder()
+            .fileDefinitionId(fileDefinition.getId())
+            .jobProfileId(UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID))
+            .all(false)
+            .quick(false)
+            .build();
     dataExportService.postDataExport(exportRequest);
     return ExportDeletedMarcIdsResponse.builder()
         .jobExecutionId(fileDefinition.getJobExecutionId())

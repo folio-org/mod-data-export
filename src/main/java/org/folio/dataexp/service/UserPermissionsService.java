@@ -13,9 +13,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for retrieving user permissions from different platforms.
- */
+/** Service for retrieving user permissions from different platforms. */
 @RequiredArgsConstructor
 @Log4j2
 @Service
@@ -40,14 +38,13 @@ public class UserPermissionsService {
   public List<String> getPermissions() {
     if (StringUtils.equals(EUREKA_PLATFORM, platform)) {
       var desiredPermissions = getDesiredPermissions();
-      return eurekaUserPermissionsClient.getPermissions(
-          folioExecutionContext.getUserId().toString(),
-          desiredPermissions
-      ).getPermissions();
+      return eurekaUserPermissionsClient
+          .getPermissions(folioExecutionContext.getUserId().toString(), desiredPermissions)
+          .getPermissions();
     }
-    return okapiUserPermissionsClient.getPermissions(
-        folioExecutionContext.getUserId().toString()
-    ).getPermissionNames();
+    return okapiUserPermissionsClient
+        .getPermissions(folioExecutionContext.getUserId().toString())
+        .getPermissionNames();
   }
 
   /**

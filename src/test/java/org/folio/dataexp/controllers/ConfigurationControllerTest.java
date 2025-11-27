@@ -17,11 +17,12 @@ class ConfigurationControllerTest extends BaseDataExportInitializer {
   void postDataExportConfigurationTest() {
     var config = new Config().key("slice_size").value("50000");
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/configuration")
-        .headers(defaultHeaders())
-        .contentType(APPLICATION_JSON)
-        .content(asJsonString(config)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/configuration")
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_JSON)
+                .content(asJsonString(config)))
         .andExpect(status().isCreated())
         .andExpect(content().json("{\"key\":\"slice_size\",\"value\":\"50000\"}"));
   }

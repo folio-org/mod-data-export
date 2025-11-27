@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
-/**
- * Represents a collection of consortia entities.
- */
+/** Represents a collection of consortia entities. */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConsortiaCollection {

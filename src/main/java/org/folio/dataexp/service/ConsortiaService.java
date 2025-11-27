@@ -12,9 +12,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for working with consortia and tenant relationships.
- */
+/** Service for working with consortia and tenant relationships. */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -54,8 +52,9 @@ public class ConsortiaService {
     var consortia = consortiumClient.getConsortia();
     var consortiaList = consortia.getConsortia();
     if (!consortiaList.isEmpty()) {
-      var userTenants = consortiumClient.getConsortiaUserTenants(consortiaList.get(0)
-          .getId(), userId, Integer.MAX_VALUE);
+      var userTenants =
+          consortiumClient.getConsortiaUserTenants(
+              consortiaList.get(0).getId(), userId, Integer.MAX_VALUE);
       return userTenants.getUserTenants().stream().map(UserTenant::getTenantId).toList();
     }
     return new ArrayList<>();

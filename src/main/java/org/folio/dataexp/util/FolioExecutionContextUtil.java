@@ -11,9 +11,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.integration.XOkapiHeaders;
 
-/**
- * Utility class for working with FolioExecutionContext in a multi-tenant environment.
- */
+/** Utility class for working with FolioExecutionContext in a multi-tenant environment. */
 @Log4j2
 public class FolioExecutionContextUtil {
 
@@ -28,13 +26,12 @@ public class FolioExecutionContextUtil {
    * @return a new FolioExecutionContext for the given tenant
    * @throws IllegalStateException if Okapi headers are not provided
    */
-  public static FolioExecutionContext prepareContextForTenant(String tenantId,
-      FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
+  public static FolioExecutionContext prepareContextForTenant(
+      String tenantId, FolioModuleMetadata folioModuleMetadata, FolioExecutionContext context) {
     if (MapUtils.isNotEmpty(context.getOkapiHeaders())) {
       // create deep copy of headers in order to make switching context thread safe
-      var headersCopy = SerializationUtils.clone(
-          (HashMap<String, Collection<String>>) context.getAllHeaders()
-      );
+      var headersCopy =
+          SerializationUtils.clone((HashMap<String, Collection<String>>) context.getAllHeaders());
       headersCopy.put(XOkapiHeaders.TENANT, List.of(tenantId));
       log.info("FOLIO context initialized with tenant {}", tenantId);
       return new DefaultFolioExecutionContext(folioModuleMetadata, headersCopy);

@@ -12,9 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for mapping profile operations.
- */
+/** Controller for mapping profile operations. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -32,9 +30,7 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<Void> deleteMappingProfileById(UUID mappingProfileId) {
     mappingProfileService.deleteMappingProfileById(mappingProfileId);
-    return new ResponseEntity<>(
-        HttpStatus.NO_CONTENT
-    );
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -46,10 +42,7 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<MappingProfile> getMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileService.getMappingProfileById(mappingProfileId);
-    return new ResponseEntity<>(
-        mappingProfileEntity.getMappingProfile(),
-        HttpStatus.OK
-    );
+    return new ResponseEntity<>(mappingProfileEntity.getMappingProfile(), HttpStatus.OK);
   }
 
   /**
@@ -62,19 +55,9 @@ public class MappingProfileController implements MappingProfilesApi {
    */
   @Override
   public ResponseEntity<MappingProfileCollection> getMappingProfiles(
-      String query,
-      Integer offset,
-      Integer limit
-  ) {
-    var mappingProfileCollection = mappingProfileService.getMappingProfiles(
-        query,
-        offset,
-        limit
-    );
-    return new ResponseEntity<>(
-        mappingProfileCollection,
-        HttpStatus.OK
-    );
+      String query, Integer offset, Integer limit) {
+    var mappingProfileCollection = mappingProfileService.getMappingProfiles(query, offset, limit);
+    return new ResponseEntity<>(mappingProfileCollection, HttpStatus.OK);
   }
 
   /**
@@ -86,10 +69,7 @@ public class MappingProfileController implements MappingProfilesApi {
   @Override
   public ResponseEntity<MappingProfile> postMappingProfile(MappingProfile mappingProfile) {
     var saved = mappingProfileService.postMappingProfile(mappingProfile);
-    return new ResponseEntity<>(
-        saved,
-        HttpStatus.CREATED
-    );
+    return new ResponseEntity<>(saved, HttpStatus.CREATED);
   }
 
   /**
@@ -101,12 +81,8 @@ public class MappingProfileController implements MappingProfilesApi {
    */
   @Override
   public ResponseEntity<Void> putMappingProfile(
-      UUID mappingProfileId,
-      MappingProfile mappingProfile
-  ) {
+      UUID mappingProfileId, MappingProfile mappingProfile) {
     mappingProfileService.putMappingProfile(mappingProfileId, mappingProfile);
-    return new ResponseEntity<>(
-        HttpStatus.NO_CONTENT
-    );
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

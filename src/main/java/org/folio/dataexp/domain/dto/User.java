@@ -3,41 +3,27 @@ package org.folio.dataexp.domain.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-/**
- * DTO representing a user.
- */
+/** DTO representing a user. */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
-  /**
-   * User ID.
-   */
+  /** User ID. */
   private String id;
 
-  /**
-   * Username.
-   */
+  /** Username. */
   private String username;
 
-  /**
-   * Personal information.
-   */
+  /** Personal information. */
   private Personal personal;
 
-  /**
-   * DTO for personal information.
-   */
+  /** DTO for personal information. */
   @Data
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Personal {
-    /**
-     * Last name.
-     */
+    /** Last name. */
     private String lastName;
 
-    /**
-     * First name.
-     */
+    /** First name. */
     private String firstName;
   }
 }

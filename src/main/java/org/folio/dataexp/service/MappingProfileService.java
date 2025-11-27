@@ -18,9 +18,7 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for managing mapping profiles.
- */
+/** Service for managing mapping profiles. */
 @Service
 @RequiredArgsConstructor
 public class MappingProfileService {
@@ -67,13 +65,10 @@ public class MappingProfileService {
     if (StringUtils.isEmpty(query)) {
       query = "(cql.allRecords=1)";
     }
-    var mappingProfilesPage = mappingProfileEntityCqlRepository.findByCql(
-        query,
-        OffsetRequest.of(offset, limit)
-    );
-    var mappingProfiles = mappingProfilesPage.stream()
-        .map(MappingProfileEntity::getMappingProfile)
-        .toList();
+    var mappingProfilesPage =
+        mappingProfileEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
+    var mappingProfiles =
+        mappingProfilesPage.stream().map(MappingProfileEntity::getMappingProfile).toList();
     var mappingProfileCollection = new MappingProfileCollection();
     mappingProfileCollection.setMappingProfiles(mappingProfiles);
     mappingProfileCollection.setTotalRecords((int) mappingProfilesPage.getTotalElements());
@@ -108,9 +103,9 @@ public class MappingProfileService {
 
     mappingProfileValidator.validate(mappingProfile);
 
-    var saved = mappingProfileEntityRepository.save(
-        MappingProfileEntity.fromMappingProfile(mappingProfile)
-    );
+    var saved =
+        mappingProfileEntityRepository.save(
+            MappingProfileEntity.fromMappingProfile(mappingProfile));
     return saved.getMappingProfile();
   }
 
@@ -138,21 +133,20 @@ public class MappingProfileService {
 
     var metadataOfExistingMappingProfile = mappingProfileEntity.getMappingProfile().getMetadata();
 
-    var metadata = Metadata.builder()
-        .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
-        .updatedDate(new Date())
-        .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
-        .updatedByUserId(userId)
-        .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
-        .updatedByUsername(user.getUsername())
-        .build();
+    var metadata =
+        Metadata.builder()
+            .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
+            .updatedDate(new Date())
+            .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
+            .updatedByUserId(userId)
+            .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
+            .updatedByUsername(user.getUsername())
+            .build();
 
     mappingProfile.setMetadata(metadata);
 
     mappingProfileValidator.validate(mappingProfile);
 
-    mappingProfileEntityRepository.save(
-        MappingProfileEntity.fromMappingProfile(mappingProfile)
-    );
+    mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
   }
 }

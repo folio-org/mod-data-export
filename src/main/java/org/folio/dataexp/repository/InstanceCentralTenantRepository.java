@@ -11,14 +11,11 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.InstanceEntity;
 import org.springframework.stereotype.Repository;
 
-/**
- * Tenant-specific repository for {@link InstanceEntity}.
- */
+/** Tenant-specific repository for {@link InstanceEntity}. */
 @Repository
 public class InstanceCentralTenantRepository {
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   private static final String INSTANCE_QUERY =
       "SELECT id, jsonb FROM %s_mod_inventory_storage.instance WHERE id in :ids";

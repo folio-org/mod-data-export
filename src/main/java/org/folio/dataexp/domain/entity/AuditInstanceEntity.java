@@ -10,9 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Entity representing an audit instance.
- */
+/** Entity representing an audit instance. */
 @Data
 @Builder
 @With
@@ -22,19 +20,12 @@ import lombok.With;
 @Table(name = "v_audit_instance")
 public class AuditInstanceEntity {
 
-  /**
-   * Unique identifier of the audit instance.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the audit instance. */
+  @Id private UUID id;
 
-  /**
-   * Title of the audit instance.
-   */
+  /** Title of the audit instance. */
   private String title;
 
-  /**
-   * Human-readable ID of the audit instance.
-   */
+  /** Human-readable ID of the audit instance. */
   private String hrid;
 }

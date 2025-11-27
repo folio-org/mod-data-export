@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.marc4j.marc.VariableField;
 
-/**
- * Container for MARC fields and error messages.
- */
+/** Container for MARC fields and error messages. */
 @Getter
 @Setter
 public class MarcFields {

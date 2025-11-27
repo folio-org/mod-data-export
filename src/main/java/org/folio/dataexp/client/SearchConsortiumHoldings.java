@@ -8,9 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving consortium holdings by instance ID.
- */
+/** Feign client for retrieving consortium holdings by instance ID. */
 @FeignClient(name = "search/consortium/holdings")
 public interface SearchConsortiumHoldings {
 

@@ -7,9 +7,7 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.spring.cql.JpaCqlRepository;
 import org.springframework.data.jpa.repository.Query;
 
-/**
- * Repository for {@link JobExecutionEntity}.
- */
+/** Repository for {@link JobExecutionEntity}. */
 public interface JobExecutionEntityCqlRepository
     extends JpaCqlRepository<JobExecutionEntity, UUID> {
 
@@ -20,10 +18,10 @@ public interface JobExecutionEntityCqlRepository
    * @return list of expired job execution entities
    */
   @Query(
-      value = "SELECT * FROM job_executions WHERE jsonb ->> 'status' = 'IN_PROGRESS'"
-      + " AND to_timestamp(cast(jsonb ->> 'lastUpdatedDate' AS BIGINT) / 1000) <= ?1",
-      nativeQuery = true
-  )
+      value =
+          "SELECT * FROM job_executions WHERE jsonb ->> 'status' = 'IN_PROGRESS'"
+              + " AND to_timestamp(cast(jsonb ->> 'lastUpdatedDate' AS BIGINT) / 1000) <= ?1",
+      nativeQuery = true)
   List<JobExecutionEntity> getExpiredJobs(Date expirationDate);
 
   /**
@@ -32,9 +30,9 @@ public interface JobExecutionEntityCqlRepository
    * @return list of failed job execution entities
    */
   @Query(
-      value = "SELECT * FROM job_executions WHERE jsonb ->> 'status' = 'FAIL'"
-      + " AND jsonb ->> 'completedDate' IS NULL",
-      nativeQuery = true
-  )
+      value =
+          "SELECT * FROM job_executions WHERE jsonb ->> 'status' = 'FAIL'"
+              + " AND jsonb ->> 'completedDate' IS NULL",
+      nativeQuery = true)
   List<JobExecutionEntity> getFailedExecutionsWithoutCompletedDate();
 }

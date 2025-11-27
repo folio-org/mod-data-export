@@ -11,12 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class DataExportTenantServiceTest extends BaseDataExportInitializer {
 
-  @Autowired
-  private DataExportTenantService dataExportTenantService;
-  @Autowired
-  private JobProfileEntityRepository jobProfileEntityRepository;
-  @Autowired
-  private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Autowired private DataExportTenantService dataExportTenantService;
+  @Autowired private JobProfileEntityRepository jobProfileEntityRepository;
+  @Autowired private MappingProfileEntityRepository mappingProfileEntityRepository;
 
   @Test
   void loadReferenceDataTest() {

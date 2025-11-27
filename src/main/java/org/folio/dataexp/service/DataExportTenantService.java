@@ -20,9 +20,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for tenant initialization and reference/configuration data loading.
- */
+/** Service for tenant initialization and reference/configuration data loading. */
 @Service
 @Primary
 @Log4j2
@@ -33,8 +31,7 @@ public class DataExportTenantService extends TenantService {
           "default_authority_mapping_profile.json",
           "default_holdings_mapping_profile.json",
           "default_instance_mapping_profile.json",
-          "default_linked_data_mapping_profile.json"
-      );
+          "default_linked_data_mapping_profile.json");
 
   private static final List<String> JOB_PROFILES =
       List.of(
@@ -42,8 +39,7 @@ public class DataExportTenantService extends TenantService {
           "default_holdings_job_profile.json",
           "default_instance_job_profile.json",
           "default_linked_data_job_profile.json",
-          "default_deleted_authority_job_profile.json"
-      );
+          "default_deleted_authority_job_profile.json");
   public static final String TENANT_FOR_VIEWS = "myuniversity";
 
   private JobProfileEntityRepository jobProfileEntityRepository;
@@ -71,8 +67,7 @@ public class DataExportTenantService extends TenantService {
       MappingProfileEntityRepository mappingProfileEntityRepository,
       ConfigurationService configurationService,
       TimerService timerService,
-      ObjectMapper objectMapper
-  ) {
+      ObjectMapper objectMapper) {
     super(jdbcTemplate, context, folioSpringLiquibase);
     this.jobProfileEntityRepository = jobProfileEntityRepository;
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
@@ -81,9 +76,7 @@ public class DataExportTenantService extends TenantService {
     this.objectMapper = objectMapper;
   }
 
-  /**
-   * Loads reference data for the tenant, including mapping and job profiles.
-   */
+  /** Loads reference data for the tenant, including mapping and job profiles. */
   @Override
   public void loadReferenceData() {
     log.info("Start to load reference data");
@@ -106,23 +99,17 @@ public class DataExportTenantService extends TenantService {
     timerService.updateCleanUpFilesTimerIfRequired();
   }
 
-  /**
-   * Sets up the tenant value for views.
-   */
+  /** Sets up the tenant value for views. */
   private void setupTenantForViews() {
     var tenant = super.context.getTenantId();
     log.info("Tenant value for views is {}", tenant);
     System.setProperty(TENANT_FOR_VIEWS, tenant);
   }
 
-  /**
-   * Loads all mapping profiles from resource files.
-   */
+  /** Loads all mapping profiles from resource files. */
   private void loadMappingProfiles() {
     MAPPING_PROFILES.forEach(
-        mappingProfile ->
-            loadMappingProfile("/data/mapping-profiles/" + mappingProfile)
-    );
+        mappingProfile -> loadMappingProfile("/data/mapping-profiles/" + mappingProfile));
   }
 
   /**
@@ -131,31 +118,20 @@ public class DataExportTenantService extends TenantService {
    * @param mappingProfilePath Path to the mapping profile resource.
    */
   private void loadMappingProfile(String mappingProfilePath) {
-    try (
-        InputStream is =
-            DataExportTenantService.class.getResourceAsStream(mappingProfilePath)
-    ) {
+    try (InputStream is = DataExportTenantService.class.getResourceAsStream(mappingProfilePath)) {
       var mappingProfile = objectMapper.readValue(is, MappingProfile.class);
-      mappingProfileEntityRepository.save(
-          MappingProfileEntity.fromMappingProfile(mappingProfile)
-      );
+      mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
     } catch (Exception e) {
       log.error(
           "Error loading mapping profile {} : {}",
           FilenameUtils.getBaseName(mappingProfilePath),
-          e.getMessage()
-      );
+          e.getMessage());
     }
   }
 
-  /**
-   * Loads all job profiles from resource files.
-   */
+  /** Loads all job profiles from resource files. */
   private void loadJobProfiles() {
-    JOB_PROFILES.forEach(
-        jobProfile ->
-            loadJobProfile("/data/job-profiles/" + jobProfile)
-    );
+    JOB_PROFILES.forEach(jobProfile -> loadJobProfile("/data/job-profiles/" + jobProfile));
   }
 
   /**
@@ -164,46 +140,34 @@ public class DataExportTenantService extends TenantService {
    * @param jobProfilePath Path to the job profile resource.
    */
   private void loadJobProfile(String jobProfilePath) {
-    try (
-        InputStream is =
-            DataExportTenantService.class.getResourceAsStream(jobProfilePath)
-    ) {
+    try (InputStream is = DataExportTenantService.class.getResourceAsStream(jobProfilePath)) {
       var jobProfile = objectMapper.readValue(is, JobProfile.class);
-      jobProfileEntityRepository.save(
-          JobProfileEntity.fromJobProfile(jobProfile)
-      );
+      jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     } catch (Exception e) {
       log.error(
           "Error loading job profile {} : {}",
           FilenameUtils.getBaseName(jobProfilePath),
-          e.getMessage()
-      );
+          e.getMessage());
     }
   }
 
-  /**
-   * Loads configuration values for the tenant.
-   */
+  /** Loads configuration values for the tenant. */
   private void loadConfiguration() {
     setupDefaultSliceSizeValue();
   }
 
-  /**
-   * Sets up the default slice size configuration value.
-   */
+  /** Sets up the default slice size configuration value. */
   private void setupDefaultSliceSizeValue() {
     log.info("Loading default slice size value...");
-    var saved = configurationService.upsertConfiguration(
-        new Config()
-            .key(SlicerProcessor.SLICE_SIZE_KEY)
-            .value(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE))
-    );
+    var saved =
+        configurationService.upsertConfiguration(
+            new Config()
+                .key(SlicerProcessor.SLICE_SIZE_KEY)
+                .value(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE)));
     log.info("Loaded default slice size value: {}", saved.getValue());
   }
 
-  /**
-   * Sets up the inventory record link configuration entry.
-   */
+  /** Sets up the inventory record link configuration entry. */
   private void setupConfigEntryInventoryRecordLink() {
     log.info("Loading inventory record link value...");
     var inventoryRecordLinkConfig =

@@ -4,9 +4,7 @@ import java.util.UUID;
 import org.folio.dataexp.domain.dto.FileDownload;
 import org.folio.dataexp.domain.dto.JobExecution;
 
-/**
- * Service interface for file downloading functionality.
- */
+/** Service interface for file downloading functionality. */
 public interface FileDownloadService {
 
   /**
@@ -17,5 +15,4 @@ public interface FileDownloadService {
    * @return {@link FileDownload} containing download information
    */
   FileDownload getFileDownload(UUID jobExecutionId, UUID exportFileId);
-
 }

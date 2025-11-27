@@ -1,8 +1,6 @@
 package org.folio.dataexp.exception.mapping.profile;
 
-/**
- * Exception thrown when mapping profile transformation is empty.
- */
+/** Exception thrown when mapping profile transformation is empty. */
 public class MappingProfileTransformationEmptyException extends RuntimeException {
   /**
    * Constructs a new MappingProfileTransformationEmptyException with the specified detail message.

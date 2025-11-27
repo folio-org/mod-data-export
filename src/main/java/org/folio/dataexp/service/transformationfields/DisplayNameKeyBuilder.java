@@ -4,9 +4,7 @@ import java.util.StringJoiner;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.springframework.stereotype.Component;
 
-/**
- * Builder for display name keys for transformation fields.
- */
+/** Builder for display name keys for transformation fields. */
 @Component
 public class DisplayNameKeyBuilder {
 
@@ -22,8 +20,8 @@ public class DisplayNameKeyBuilder {
    */
   public String build(RecordTypes recordType, String fieldConfigId) {
     return new StringJoiner(DOT_DELIMITER)
-      .add(recordType.toString().toLowerCase())
-      .add(fieldConfigId)
-      .toString();
+        .add(recordType.toString().toLowerCase())
+        .add(fieldConfigId)
+        .toString();
   }
 }

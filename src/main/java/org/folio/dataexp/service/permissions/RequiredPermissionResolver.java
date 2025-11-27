@@ -4,9 +4,7 @@ import static org.folio.dataexp.util.Constants.INVENTORY_VIEW_PERMISSION;
 
 import org.springframework.stereotype.Component;
 
-/**
- * Resolver for required permissions for reading inventory.
- */
+/** Resolver for required permissions for reading inventory. */
 @Component
 public class RequiredPermissionResolver {
 

@@ -6,8 +6,8 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.springframework.core.io.Resource;
 
 /**
- * Service interface for file uploading functionality.
- * Provides lifecycle methods for file uploading.
+ * Service interface for file uploading functionality. Provides lifecycle methods for file
+ * uploading.
  */
 public interface FilesUploadService {
 
@@ -15,7 +15,7 @@ public interface FilesUploadService {
    * Saves given file data to the storage.
    *
    * @param fileDefinitionId id of {@link FileDefinition}
-   * @param resource         file to upload
+   * @param resource file to upload
    * @return {@link FileDefinition}
    * @throws IOException if file upload fails
    */

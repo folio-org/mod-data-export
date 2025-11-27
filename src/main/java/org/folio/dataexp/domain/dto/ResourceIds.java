@@ -8,9 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * DTO for resource IDs and total records.
- */
+/** DTO for resource IDs and total records. */
 @Data
 @With
 @AllArgsConstructor
@@ -18,28 +16,20 @@ import lombok.With;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResourceIds {
 
-  /**
-   * List of resource IDs.
-   */
+  /** List of resource IDs. */
   private List<Id> ids;
 
-  /**
-   * Total number of records.
-   */
+  /** Total number of records. */
   private Integer totalRecords;
 
-  /**
-   * DTO for a single resource ID.
-   */
+  /** DTO for a single resource ID. */
   @Data
   @With
   @AllArgsConstructor
   @NoArgsConstructor
   @JsonIgnoreProperties(ignoreUnknown = true)
   public static class Id {
-    /**
-     * Resource UUID.
-     */
+    /** Resource UUID. */
     private UUID id;
   }
 }

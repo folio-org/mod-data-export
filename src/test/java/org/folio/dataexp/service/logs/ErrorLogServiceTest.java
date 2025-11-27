@@ -33,14 +33,10 @@ class ErrorLogServiceTest {
 
   private static final String LONG_MARC_RECORD_MESSAGE =
       "Record is too long to be a valid MARC binary record";
-  @Mock
-  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Mock
-  private ConfigurationService configurationService;
-  @InjectMocks
-  private ErrorLogService errorLogService;
+  @Mock private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private ConfigurationService configurationService;
+  @InjectMocks private ErrorLogService errorLogService;
 
   @Test
   void getErrorLogsByQueryTest() {
@@ -136,8 +132,7 @@ class ErrorLogServiceTest {
 
     var jobExecutionId = UUID.randomUUID();
     errorLogService.saveCommonExportFailsErrors(commonFails, 3, jobExecutionId);
-    verify(errorLogEntityCqlRepository, times(3))
-        .save(isA(ErrorLogEntity.class));
+    verify(errorLogEntityCqlRepository, times(3)).save(isA(ErrorLogEntity.class));
   }
 
   @Test
@@ -154,8 +149,7 @@ class ErrorLogServiceTest {
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(),
-        errorLog.getErrorMessageCode());
+    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), errorLog.getErrorMessageCode());
   }
 
   @Test
@@ -166,15 +160,18 @@ class ErrorLogServiceTest {
     when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
         .thenReturn(new ErrorLogEntity());
 
-    errorLogService.saveWithAffectedRecord(new JSONObject(),
-        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId,
+    errorLogService.saveWithAffectedRecord(
+        new JSONObject(),
+        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+        jobExecutionId,
         new MarcException());
     ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
     verify(errorLogEntityCqlRepository).save(captor.capture());
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+    assertEquals(
+        ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
         errorLog.getErrorMessageCode());
   }
 
@@ -186,14 +183,18 @@ class ErrorLogServiceTest {
     when(errorLogEntityCqlRepository.save(isA(ErrorLogEntity.class)))
         .thenReturn(new ErrorLogEntity());
 
-    errorLogService.saveWithAffectedRecord(new JSONObject(), LONG_MARC_RECORD_MESSAGE,
-        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(), jobExecutionId);
+    errorLogService.saveWithAffectedRecord(
+        new JSONObject(),
+        LONG_MARC_RECORD_MESSAGE,
+        ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+        jobExecutionId);
     ArgumentCaptor<ErrorLogEntity> captor = ArgumentCaptor.forClass(ErrorLogEntity.class);
     verify(errorLogEntityCqlRepository).save(captor.capture());
 
     var errorLogEntity = captor.getValue();
     var errorLog = errorLogEntity.getErrorLog();
-    assertEquals(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
+    assertEquals(
+        ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
         errorLog.getErrorMessageCode());
     assertEquals(LONG_MARC_RECORD_MESSAGE, errorLog.getErrorMessageValues().get(0));
   }

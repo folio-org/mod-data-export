@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minidev.json.JSONObject;
 
-/**
- * Stores reference data mapped by key.
- */
+/** Stores reference data mapped by key. */
 public class ReferenceData {
 
   private final Map<String, Map<String, JSONObject>> referenceDataMap = new HashMap<>();

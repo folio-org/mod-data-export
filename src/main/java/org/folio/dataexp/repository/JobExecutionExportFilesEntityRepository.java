@@ -5,9 +5,7 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- * Repository for {@link JobExecutionExportFilesEntity}.
- */
+/** Repository for {@link JobExecutionExportFilesEntity}. */
 public interface JobExecutionExportFilesEntityRepository
     extends JpaRepository<JobExecutionExportFilesEntity, UUID> {
 

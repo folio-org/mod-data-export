@@ -28,8 +28,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
 /**
- * Abstract base class for Linked Data export strategies, providing common logic
- * that all implementations can use while providing their own retrievel mechanism.
+ * Abstract base class for Linked Data export strategies, providing common logic that all
+ * implementations can use while providing their own retrievel mechanism.
  */
 @Log4j2
 @Getter
@@ -47,10 +47,10 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
   }
 
   /**
-   * Processes slices of export IDs for the export file entity. This implementation
-   * takes a multithreaded approach. It is generic enough that it can be moved to the
-   * superclass along with createAndSaveSliceRecords, replacing similar single-threaded
-   * implementations in other strategies when determined to be appropriate.
+   * Processes slices of export IDs for the export file entity. This implementation takes a
+   * multithreaded approach. It is generic enough that it can be moved to the superclass along with
+   * createAndSaveSliceRecords, replacing similar single-threaded implementations in other
+   * strategies when determined to be appropriate.
    */
   @Override
   protected void processSlices(
@@ -58,8 +58,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
       ExportRequest exportRequest,
-      LocalStorageWriter localStorageWriter
-  ) {
+      LocalStorageWriter localStorageWriter) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var tasks = new ArrayList<CompletableFuture<ExportSliceResult>>();
     var page = 0;
@@ -74,28 +73,28 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
     try (var executor = Executors.newFixedThreadPool(processSlicesThreadPoolSize)) {
       do {
         final var taskId = page;
-        slice = exportIdEntityRepository.getExportIds(
-            jobExecutionId,
-            exportFilesEntity.getFromId(),
-            exportFilesEntity.getToId(),
-            PageRequest.of(taskId, exportIdsBatch)
-        );
+        slice =
+            exportIdEntityRepository.getExportIds(
+                jobExecutionId,
+                exportFilesEntity.getFromId(),
+                exportFilesEntity.getToId(),
+                PageRequest.of(taskId, exportIdsBatch));
         log.debug("Slice size: {}", slice.getSize());
-        var exportIds = slice.getContent().stream()
-            .map(ExportIdEntity::getInstanceId)
-            .collect(Collectors.toSet());
+        var exportIds =
+            slice.getContent().stream()
+                .map(ExportIdEntity::getInstanceId)
+                .collect(Collectors.toSet());
         tasks.add(
-            CompletableFuture.supplyAsync(() ->
-              createAndSaveSliceRecords(
-                  exportIds,
-                  exportStatistic,
-                  mappingProfile,
-                  exportFilesEntity,
-                  exportRequest,
-                  taskId
-              ),
-              executor)
-        );
+            CompletableFuture.supplyAsync(
+                () ->
+                    createAndSaveSliceRecords(
+                        exportIds,
+                        exportStatistic,
+                        mappingProfile,
+                        exportFilesEntity,
+                        exportRequest,
+                        taskId),
+                executor));
         page++;
       } while (slice.hasNext());
     }
@@ -106,16 +105,17 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
 
     tasks.stream()
         .map(CompletableFuture::join)
-        .forEach(sliceResult -> {
-          copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
-          exportStatistic.aggregate(sliceResult.getStatistic());
-        });
+        .forEach(
+            sliceResult -> {
+              copySliceResultToFinal(sliceResult, localStorageWriter, jobExecutionId);
+              exportStatistic.aggregate(sliceResult.getStatistic());
+            });
   }
-  
+
   /**
-   * Wrap actual create-and-save strategies with boilerplate writer, statistic, and
-   * return object setup. This is generic enough to be part of the abstract export
-   * strategy once multithreading is considered to be mature enough for general use.
+   * Wrap actual create-and-save strategies with boilerplate writer, statistic, and return object
+   * setup. This is generic enough to be part of the abstract export strategy once multithreading is
+   * considered to be mature enough for general use.
    */
   protected ExportSliceResult createAndSaveSliceRecords(
       Set<UUID> externalIds,
@@ -123,43 +123,26 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       MappingProfile mappingProfile,
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
-      int pageNumber
-  ) {
+      int pageNumber) {
     log.debug("begin createAndSaveSliceRecords for {}", pageNumber);
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var writer = createLocalStorageWriter(exportFilesEntity, Integer.valueOf(pageNumber));
     var sliceStatistic = new ExportStrategyStatistic(exportStatistic.getExportedRecordsListener());
     createAndSaveRecords(
-        externalIds,
-        sliceStatistic,
-        mappingProfile,
-        jobExecutionId,
-        exportRequest,
-        writer
-    );
+        externalIds, sliceStatistic, mappingProfile, jobExecutionId, exportRequest, writer);
     try {
       writer.close();
     } catch (Exception e) {
-      log.error(
-          SAVE_ERROR,
-          "createAndSaveSliceRecords",
-          writer.getPath(),
-          jobExecutionId
-      );
+      log.error(SAVE_ERROR, "createAndSaveSliceRecords", writer.getPath(), jobExecutionId);
       sliceStatistic.failAll();
     }
     log.debug("complete createAndSaveSliceRecords for {}", pageNumber);
     return new ExportSliceResult(writer.getPath(), writer.getReader(), sliceStatistic);
   }
 
-  /**
-   * Consolidate slice results into a final output file.
-   */
+  /** Consolidate slice results into a final output file. */
   private void copySliceResultToFinal(
-      ExportSliceResult sliceResult,
-      LocalStorageWriter finalOutput,
-      UUID jobExecutionId
-  ) {
+      ExportSliceResult sliceResult, LocalStorageWriter finalOutput, UUID jobExecutionId) {
     try {
       if (sliceResult.getStatistic().getExported() > 0) {
         var readerOpt = sliceResult.getReader();
@@ -175,23 +158,18 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
         }
       }
     } catch (Exception e) {
-      log.error(
-          SAVE_ERROR,
-          "copySliceResultToFinal",
-          sliceResult.getOutputFile(),
-          jobExecutionId
-      );
+      log.error(SAVE_ERROR, "copySliceResultToFinal", sliceResult.getOutputFile(), jobExecutionId);
       sliceResult.getStatistic().failAll();
     }
   }
 
   /**
-   * Process the whole set of export IDs in slices, where each slice is turned into a
-   * set and the real work of retrieving, converting, and writing is done for each set.
-   * Note that the analogous MARC-generating processing tracks duplication errors, but
-   * due to the way the only Linked Data implementation (so far) works, the input will
-   * always be a set of UUIDs, and the retrieval mechanism should never respond with
-   * more than one matching resource, so duplicate errors aren't tracked here.
+   * Process the whole set of export IDs in slices, where each slice is turned into a set and the
+   * real work of retrieving, converting, and writing is done for each set. Note that the analogous
+   * MARC-generating processing tracks duplication errors, but due to the way the only Linked Data
+   * implementation (so far) works, the input will always be a set of UUIDs, and the retrieval
+   * mechanism should never respond with more than one matching resource, so duplicate errors aren't
+   * tracked here.
    */
   @Override
   protected void createAndSaveRecords(
@@ -200,8 +178,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       MappingProfile mappingProfile,
       UUID jobExecutionId,
       ExportRequest exportRequest,
-      LocalStorageWriter writer
-  ) {
+      LocalStorageWriter writer) {
     createAndSaveLinkedData(externalIds, exportStatistic, jobExecutionId, writer);
   }
 
@@ -217,8 +194,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       Set<UUID> externalIds,
       ExportStrategyStatistic exportStatistic,
       UUID jobExecutionId,
-      LocalStorageWriter localStorageWriter
-  ) {
+      LocalStorageWriter localStorageWriter) {
     log.debug("getting linked data");
     var resources = getLinkedDataResources(externalIds);
     log.debug("received {} resources", resources.size());
@@ -235,27 +211,21 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
       exportStatistic.incrementExported();
     }
     if (resources.size() < externalIds.size()) {
-      var resultUuids = resources.stream()
-          .map(LinkedDataResource::getInventoryId)
-          .map(UUID::fromString)
-          .collect(Collectors.toSet());
+      var resultUuids =
+          resources.stream()
+              .map(LinkedDataResource::getInventoryId)
+              .map(UUID::fromString)
+              .collect(Collectors.toSet());
       externalIds.removeAll(resultUuids);
       exportStatistic.addNotExistIdsAll(externalIds.stream().toList());
     }
   }
 
-  /**
-   * Add a conversion error to this job's execution record.
-   */
+  /** Add a conversion error to this job's execution record. */
   private void saveConvertLinkedDataResourceError(
-      LinkedDataResource resource,
-      UUID jobExecutionId,
-      Exception e
-  ) {
-    var errorMessage = String.format(
-        ERROR_CONVERTING_LD_TO_BIBFRAME.getDescription(),
-        resource.getInventoryId()
-    );
+      LinkedDataResource resource, UUID jobExecutionId, Exception e) {
+    var errorMessage =
+        String.format(ERROR_CONVERTING_LD_TO_BIBFRAME.getDescription(), resource.getInventoryId());
     log.error("{} : {}", errorMessage, e.getMessage());
     errorLogService.saveGeneralError(errorMessage, jobExecutionId);
   }

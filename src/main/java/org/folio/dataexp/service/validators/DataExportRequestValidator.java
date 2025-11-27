@@ -15,9 +15,7 @@ import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.util.ErrorCode;
 import org.springframework.stereotype.Component;
 
-/**
- * Validator for export requests, including file definitions and mapping profiles.
- */
+/** Validator for export requests, including file definitions and mapping profiles. */
 @Component
 @RequiredArgsConstructor
 public class DataExportRequestValidator {
@@ -25,23 +23,22 @@ public class DataExportRequestValidator {
   private final ErrorLogService errorLogService;
 
   /**
-   * Validates the export request, file definition, and mapping profile.
-   * Throws {@link DataExportRequestValidationException} if validation fails.
+   * Validates the export request, file definition, and mapping profile. Throws {@link
+   * DataExportRequestValidationException} if validation fails.
    *
    * @param exportRequest the export request
    * @param fileDefinition the file definition
    * @param mappingProfileId the mapping profile ID
    */
-  public void validate(ExportRequest exportRequest, FileDefinition fileDefinition,
-      String mappingProfileId) {
+  public void validate(
+      ExportRequest exportRequest, FileDefinition fileDefinition, String mappingProfileId) {
     String errorMsg = "";
     if (exportRequest.getIdType() == ExportRequest.IdTypeEnum.HOLDING) {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
         errorLogService.saveGeneralErrorWithMessageValues(
             ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(),
             Collections.singletonList(
-                ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE
-                    .getDescription()),
+                ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription()),
             fileDefinition.getJobExecutionId());
         errorMsg = "Only csv format is supported for holdings export";
       }
@@ -50,8 +47,7 @@ public class DataExportRequestValidator {
       errorLogService.saveGeneralErrorWithMessageValues(
           ErrorCode.ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED.getCode(),
           Collections.singletonList(
-              ErrorCode.ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED
-                  .getDescription()),
+              ErrorCode.ERROR_ONLY_DEFAULT_AUTHORITY_JOB_PROFILE_IS_SUPPORTED.getDescription()),
           fileDefinition.getJobExecutionId());
       errorMsg =
           "For exporting authority records only the default authority job profile is supported";

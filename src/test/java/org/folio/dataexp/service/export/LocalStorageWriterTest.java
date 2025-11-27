@@ -20,12 +20,12 @@ class LocalStorageWriterTest {
   @SneakyThrows
   void writeTest() {
     var jobExecutionId = UUID.randomUUID();
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecutionId);
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecutionId);
     Files.createDirectories(Path.of(temDirLocation));
     var fileLocation = temDirLocation + "marc.mrc";
 
-    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
     writer.write("data");
     writer.close();
     var file = new File(fileLocation);
@@ -39,12 +39,12 @@ class LocalStorageWriterTest {
   void writeIfExceptionTest() {
     String invalidData = null;
     var jobExecutionId = UUID.randomUUID();
-    var temDirLocation  = S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY,
-        jobExecutionId);
+    var temDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecutionId);
     Files.createDirectories(Path.of(temDirLocation));
     var fileLocation = temDirLocation + "marc.mrc";
 
-    var writer =  new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    var writer = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
 
     writer.write(invalidData);
     writer.close();

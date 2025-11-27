@@ -19,24 +19,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PermissionsValidatorTest {
 
-  @Mock
-  private PermissionsProvider permissionsProvider;
-  @Mock
-  private RequiredPermissionResolver requiredPermissionResolver;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @InjectMocks
-  private PermissionsValidator permissionsValidator;
+  @Mock private PermissionsProvider permissionsProvider;
+  @Mock private RequiredPermissionResolver requiredPermissionResolver;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @InjectMocks private PermissionsValidator permissionsValidator;
 
   @Test
   @SneakyThrows
   void checkInstanceViewPermissions_whenNoPermissionTest() {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(permissionsProvider
-        .getUserPermissions("college", folioExecutionContext.getUserId().toString()))
-            .thenReturn(List.of("bulk-edit.item.get"));
-    when(requiredPermissionResolver.getReadPermission())
-        .thenReturn("ui-inventory.instance.view");
+    when(permissionsProvider.getUserPermissions(
+            "college", folioExecutionContext.getUserId().toString()))
+        .thenReturn(List.of("bulk-edit.item.get"));
+    when(requiredPermissionResolver.getReadPermission()).thenReturn("ui-inventory.instance.view");
     assertFalse(permissionsValidator.checkInstanceViewPermissions("college"));
   }
 
@@ -44,11 +39,10 @@ class PermissionsValidatorTest {
   @SneakyThrows
   void checkInstanceViewPermissions_whenPermissionExistsTest() {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(permissionsProvider
-        .getUserPermissions("college", folioExecutionContext.getUserId().toString()))
-            .thenReturn(List.of("ui-inventory.instance.view"));
-    when(requiredPermissionResolver.getReadPermission())
-        .thenReturn("ui-inventory.instance.view");
+    when(permissionsProvider.getUserPermissions(
+            "college", folioExecutionContext.getUserId().toString()))
+        .thenReturn(List.of("ui-inventory.instance.view"));
+    when(requiredPermissionResolver.getReadPermission()).thenReturn("ui-inventory.instance.view");
     assertDoesNotThrow(() -> permissionsValidator.checkInstanceViewPermissions("college"));
   }
 }

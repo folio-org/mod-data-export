@@ -11,9 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/**
- * Repository for {@link ExportIdEntity}.
- */
+/** Repository for {@link ExportIdEntity}. */
 public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, Integer> {
 
   /**
@@ -31,10 +29,7 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    * @param jobExecutionId job execution UUID
    * @return list of export ID entities
    */
-  List<ExportIdEntity> findByInstanceIdInAndJobExecutionIdIs(
-      Set<UUID> ids,
-      UUID jobExecutionId
-  );
+  List<ExportIdEntity> findByInstanceIdInAndJobExecutionIdIs(Set<UUID> ids, UUID jobExecutionId);
 
   /**
    * Finds export IDs by job execution ID and instance ID range.
@@ -45,12 +40,9 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    * @param page pageable
    * @return slice of export ID entities
    */
-  Slice<ExportIdEntity> findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(
-      UUID jobExecutionId,
-      UUID fromId,
-      UUID toId,
-      Pageable page
-  );
+  Slice<ExportIdEntity>
+      findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(
+          UUID jobExecutionId, UUID fromId, UUID toId, Pageable page);
 
   /**
    * Counts export IDs by job execution ID and instance ID range.
@@ -61,10 +53,7 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    * @return count of export IDs
    */
   long countByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqual(
-      UUID jobExecutionId,
-      UUID fromId,
-      UUID toId
-  );
+      UUID jobExecutionId, UUID fromId, UUID toId);
 
   /**
    * Deletes export IDs with job execution ID.
@@ -84,11 +73,11 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    */
   @Modifying
   @Query(
-      value = "INSERT INTO job_executions_export_ids (job_execution_id, instance_id)"
-      + " VALUES (?1, ?2)"
-      + " ON CONFLICT DO NOTHING",
-      nativeQuery = true
-  )
+      value =
+          "INSERT INTO job_executions_export_ids (job_execution_id, instance_id)"
+              + " VALUES (?1, ?2)"
+              + " ON CONFLICT DO NOTHING",
+      nativeQuery = true)
   void insertExportId(UUID jobExecutionId, UUID instanceId);
 
   /**
@@ -101,17 +90,9 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    * @return slice of export ID entities
    */
   default Slice<ExportIdEntity> getExportIds(
-      UUID jobExecutionId,
-      UUID fromId,
-      UUID toId,
-      Pageable page
-  ) {
+      UUID jobExecutionId, UUID fromId, UUID toId, Pageable page) {
     return findByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqualOrderByInstanceIdAsc(
-        jobExecutionId,
-        fromId,
-        toId,
-        page
-    );
+        jobExecutionId, fromId, toId, page);
   }
 
   /**
@@ -124,9 +105,6 @@ public interface ExportIdEntityRepository extends JpaRepository<ExportIdEntity, 
    */
   default long countExportIds(UUID jobExecutionId, UUID fromId, UUID toId) {
     return countByJobExecutionIdIsAndInstanceIdGreaterThanEqualAndInstanceIdLessThanEqual(
-        jobExecutionId,
-        fromId,
-        toId
-    );
+        jobExecutionId, fromId, toId);
   }
 }

@@ -9,9 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * DTO representing user permissions.
- */
+/** DTO representing user permissions. */
 @Data
 @With
 @Builder(toBuilder = true)
@@ -19,16 +17,12 @@ import lombok.With;
 @AllArgsConstructor
 public class UserPermissions {
 
-  /**
-   * List of permission names.
-   */
+  /** List of permission names. */
   @JsonProperty("permissionNames")
   @Builder.Default
   private List<String> permissionNames = new ArrayList<>();
 
-  /**
-   * List of permissions.
-   */
+  /** List of permissions. */
   @JsonProperty("permissions")
   @Builder.Default
   private List<String> permissions = new ArrayList<>();

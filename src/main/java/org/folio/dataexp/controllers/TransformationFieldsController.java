@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for transformation fields operations.
- */
+/** Controller for transformation fields operations. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -28,8 +26,6 @@ public class TransformationFieldsController implements TransformationFieldsApi {
   @Override
   public ResponseEntity<TransformationFieldCollection> getTransformationFields() {
     return new ResponseEntity<>(
-        transformationFieldsService.getTransformationFields(),
-        HttpStatus.OK
-    );
+        transformationFieldsService.getTransformationFields(), HttpStatus.OK);
   }
 }

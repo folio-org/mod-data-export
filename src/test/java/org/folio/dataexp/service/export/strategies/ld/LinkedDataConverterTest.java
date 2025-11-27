@@ -10,25 +10,28 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class LinkedDataConverterTest extends BaseDataExportInitializer {
-  @Autowired
-  LinkedDataConverter linkedDataConverter;
+  @Autowired LinkedDataConverter linkedDataConverter;
 
   // Rather than test conversion accuracy, just make sure the
   // wiring is correct given faulty input, as opposed to failing
   // to run at all due to miswiring.
   @Test
   void convertLdJsonToBibframe2RdfExceptionTest() {
-    assertThrows(JsonProcessingException.class, () ->
-        linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
+    assertThrows(
+        JsonProcessingException.class, () -> linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
   }
 
   @SneakyThrows
   @Test
   void convertLdJsonToBibframe2RdfHostnameTest() {
-    var resource = linkedDataConverter.convertLdJsonToBibframe2Rdf("""
+    var resource =
+        linkedDataConverter
+            .convertLdJsonToBibframe2Rdf(
+                """
       {
         "id": "12345"
-      }""").toString();
+      }""")
+            .toString();
     System.out.println(resource);
     assertTrue(resource.contains("http://localhost/linked-data-editor/resources/12345"));
   }

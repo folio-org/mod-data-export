@@ -12,9 +12,7 @@ import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuration class for export-related beans such as rules and processors.
- */
+/** Configuration class for export-related beans such as rules and processors. */
 @Configuration
 @Log4j2
 public class ExportConfiguration {
@@ -41,8 +39,9 @@ public class ExportConfiguration {
   public List<Rule> defaultRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_RULES)) {
-      List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory()
-          .constructCollectionType(List.class, Rule.class));
+      List<Rule> defaultRules =
+          mapper.readValue(
+              is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default rules for export");
@@ -60,8 +59,9 @@ public class ExportConfiguration {
   public List<Rule> defaultHoldingsRulesFromConfigFile() throws IOException {
     var mapper = new ObjectMapper();
     try (InputStream is = ExportConfiguration.class.getResourceAsStream(DEFAULT_HOLDINGS_RULES)) {
-      List<Rule> defaultRules = mapper.readValue(is, mapper.getTypeFactory()
-          .constructCollectionType(List.class, Rule.class));
+      List<Rule> defaultRules =
+          mapper.readValue(
+              is, mapper.getTypeFactory().constructCollectionType(List.class, Rule.class));
       return ImmutableList.copyOf(defaultRules);
     } catch (IOException e) {
       log.error("Failed to fetch default holdings rules for export");

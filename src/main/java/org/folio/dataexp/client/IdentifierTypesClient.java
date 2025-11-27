@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving identifier types.
- */
+/** Feign client for retrieving identifier types. */
 @FeignClient(name = "identifier-types")
 public interface IdentifierTypesClient {
   /**

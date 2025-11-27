@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
-/**
- * Represents a collection of authority records.
- */
+/** Represents a collection of authority records. */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuthorityCollection {

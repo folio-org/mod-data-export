@@ -15,9 +15,7 @@ import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Processor for slicing export files into batches for export operations.
- */
+/** Processor for slicing export files into batches for export operations. */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -44,8 +42,8 @@ public class SlicerProcessor {
    * @param fileDefinition The file definition.
    * @param exportRequest The export request.
    */
-  public void sliceInstancesIds(FileDefinition fileDefinition, ExportRequest exportRequest,
-      String outputFormat) {
+  public void sliceInstancesIds(
+      FileDefinition fileDefinition, ExportRequest exportRequest, String outputFormat) {
     var sliceSize = configurationService.getValue(SLICE_SIZE_KEY);
     sliceInstancesIds(fileDefinition, Integer.parseInt(sliceSize), exportRequest, outputFormat);
   }
@@ -57,19 +55,17 @@ public class SlicerProcessor {
    * @param sliceSize The slice size.
    * @param exportRequest The export request.
    */
-  public void sliceInstancesIds(FileDefinition fileDefinition, int sliceSize,
-      ExportRequest exportRequest, String outputFormat) {
+  public void sliceInstancesIds(
+      FileDefinition fileDefinition,
+      int sliceSize,
+      ExportRequest exportRequest,
+      String outputFormat) {
     var fileName = createFileNameWithPlaceHolder(fileDefinition.getFileName(), outputFormat);
-    var pathLocation = getPathToStoredFiles(
-        fileDefinition.getJobExecutionId().toString(),
-        fileName
-    );
-    try (
-        Connection connection = jdbcTemplate.getDataSource().getConnection();
-        CallableStatement callableStatement = connection.prepareCall(
-            selectProcedure(exportRequest)
-        )
-    ) {
+    var pathLocation =
+        getPathToStoredFiles(fileDefinition.getJobExecutionId().toString(), fileName);
+    try (Connection connection = jdbcTemplate.getDataSource().getConnection();
+        CallableStatement callableStatement =
+            connection.prepareCall(selectProcedure(exportRequest))) {
       callableStatement.setString(1, fileDefinition.getJobExecutionId().toString());
       callableStatement.setString(2, pathLocation);
       callableStatement.setInt(3, sliceSize);
@@ -77,10 +73,9 @@ public class SlicerProcessor {
     } catch (SQLException sqlException) {
       log.error(
           "Exception for slice_instances_ids procedure call for"
-          + " fileDefinitionId {} with message {}",
+              + " fileDefinitionId {} with message {}",
           fileDefinition.getId(),
-          sqlException.getMessage()
-      );
+          sqlException.getMessage());
       throw new DataExportException(sqlException.getMessage());
     }
   }

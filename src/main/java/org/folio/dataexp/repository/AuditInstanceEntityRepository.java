@@ -6,9 +6,7 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.AuditInstanceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- * Repository for {@link AuditInstanceEntity}.
- */
+/** Repository for {@link AuditInstanceEntity}. */
 public interface AuditInstanceEntityRepository extends JpaRepository<AuditInstanceEntity, UUID> {
   /**
    * Finds audit instances by a set of IDs.

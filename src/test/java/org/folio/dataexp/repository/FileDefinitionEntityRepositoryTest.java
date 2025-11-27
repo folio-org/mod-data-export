@@ -14,36 +14,43 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class FileDefinitionEntityRepositoryTest extends BaseDataExportInitializer {
-  @Autowired
-  FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired FileDefinitionEntityRepository fileDefinitionEntityRepository;
 
   @Test
   void shouldGetExpiredFileDefinitions() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var expectedId = UUID.randomUUID();
       var expirationDate = new Date(new Date().getTime() - HOURS.toMillis(1));
-      fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
-          .id(expectedId)
-          .fileDefinition(new FileDefinition()
+      fileDefinitionEntityRepository.save(
+          FileDefinitionEntity.builder()
               .id(expectedId)
-              .sourcePath("path")
-              .metadata(new Metadata().updatedDate(new Date(new Date().getTime()
-                  - HOURS.toMillis(2)))))
-          .build());
-      fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
-          .id(UUID.randomUUID())
-          .fileDefinition(new FileDefinition()
+              .fileDefinition(
+                  new FileDefinition()
+                      .id(expectedId)
+                      .sourcePath("path")
+                      .metadata(
+                          new Metadata()
+                              .updatedDate(new Date(new Date().getTime() - HOURS.toMillis(2)))))
+              .build());
+      fileDefinitionEntityRepository.save(
+          FileDefinitionEntity.builder()
               .id(UUID.randomUUID())
-              .metadata(new Metadata().updatedDate(new Date(new Date().getTime()
-                  - HOURS.toMillis(2)))))
-          .build());
-      fileDefinitionEntityRepository.save(FileDefinitionEntity.builder()
-          .id(UUID.randomUUID())
-          .fileDefinition(new FileDefinition()
+              .fileDefinition(
+                  new FileDefinition()
+                      .id(UUID.randomUUID())
+                      .metadata(
+                          new Metadata()
+                              .updatedDate(new Date(new Date().getTime() - HOURS.toMillis(2)))))
+              .build());
+      fileDefinitionEntityRepository.save(
+          FileDefinitionEntity.builder()
               .id(UUID.randomUUID())
-              .sourcePath("path2")
-              .metadata(new Metadata().updatedDate(new Date())))
-          .build());
+              .fileDefinition(
+                  new FileDefinition()
+                      .id(UUID.randomUUID())
+                      .sourcePath("path2")
+                      .metadata(new Metadata().updatedDate(new Date())))
+              .build());
 
       var res = fileDefinitionEntityRepository.getExpiredEntities(expirationDate);
 

@@ -65,46 +65,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
 
-  @Mock
-  private ConsortiaService consortiaService;
-  @Mock
-  private InstanceCentralTenantRepository instanceCentralTenantRepository;
-  @Mock
-  private MarcInstanceRecordRepository marcInstanceRecordRepository;
-  @Mock
-  private MarcRecordEntityRepository marcRecordEntityRepository;
-  @Mock
-  private InstanceEntityRepository instanceEntityRepository;
-  @Mock
-  private InstanceWithHridEntityRepository instanceWithHridEntityRepository;
-  @Mock
-  private RuleProcessor ruleProcessor;
-  @Mock
-  private RuleFactory ruleFactory;
-  @Mock
-  private ReferenceDataProvider referenceDataProvider;
-  @Mock
-  private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
-  @Mock
-  private ItemEntityRepository itemEntityRepository;
-  @Mock
-  private MappingProfileEntityRepository mappingProfileEntityRepository;
-  @Mock
-  private EntityManager entityManager;
-  @Mock
-  private ErrorLogService errorLogService;
-  @Mock
-  private HoldingsItemsResolverService holdingsItemsResolverService;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @Spy
-  private RuleHandler ruleHandler;
+  @Mock private ConsortiaService consortiaService;
+  @Mock private InstanceCentralTenantRepository instanceCentralTenantRepository;
+  @Mock private MarcInstanceRecordRepository marcInstanceRecordRepository;
+  @Mock private MarcRecordEntityRepository marcRecordEntityRepository;
+  @Mock private InstanceEntityRepository instanceEntityRepository;
+  @Mock private InstanceWithHridEntityRepository instanceWithHridEntityRepository;
+  @Mock private RuleProcessor ruleProcessor;
+  @Mock private RuleFactory ruleFactory;
+  @Mock private ReferenceDataProvider referenceDataProvider;
+  @Mock private HoldingsRecordEntityRepository holdingsRecordEntityRepository;
+  @Mock private ItemEntityRepository itemEntityRepository;
+  @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock private EntityManager entityManager;
+  @Mock private ErrorLogService errorLogService;
+  @Mock private HoldingsItemsResolverService holdingsItemsResolverService;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Spy private RuleHandler ruleHandler;
 
-  @Captor
-  private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
+  @Captor private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
 
-  @InjectMocks
-  private InstancesExportStrategy instancesExportStrategy;
+  @InjectMocks private InstancesExportStrategy instancesExportStrategy;
 
   @BeforeEach
   void setUp() {
@@ -117,48 +98,52 @@ class InstancesExportStrategyTest {
 
   @Test
   void getMarcRecordsTest() {
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
 
     var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(anySet(),
-        anyString(), anySet())).thenReturn(new ArrayList<>(List.of(marcRecord)));
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            anySet(), anyString(), anySet()))
+        .thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
         .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids),
-        mappingProfile, new ExportRequest(), UUID.randomUUID());
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
 
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
 
-    actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids),
-        mappingProfile, new ExportRequest(), UUID.randomUUID());
+    actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
   }
 
   @Test
   void getMarcRecordsIfMappingProfileNotDefaultAndRecordsTypeNotSrsTest() {
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     var marcRecord = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
 
-    var actualMarcRecords = instancesExportStrategy.getMarcRecords(new HashSet<>(ids),
-        mappingProfile, new ExportRequest(), UUID.randomUUID());
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(0, actualMarcRecords.size());
   }
 
   @Test
   void getIdentifierMessageTest() {
     var instance = "{'id' : 'uuid', 'title' : 'title', 'hrid' : '123'}";
-    var instanceRecordEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID())
-        .build();
+    var instanceRecordEntity =
+        InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceRecordEntity));
 
@@ -174,32 +159,35 @@ class InstancesExportStrategyTest {
 
   @Test
   void getIdentifierMessageIfInstanceDoesNotExistTest() {
-    var instanceId  = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
+    var instanceId = UUID.fromString("b9d26945-9757-4855-ae6e-fd5d2f7d778e");
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of());
 
     var opt = instancesExportStrategy.getIdentifiers(instanceId);
 
     assertTrue(opt.isPresent());
-    assertEquals("Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e",
+    assertEquals(
+        "Instance with ID : b9d26945-9757-4855-ae6e-fd5d2f7d778e",
         opt.get().getIdentifierHridMessage());
   }
 
   @Test
   void getGeneratedMarcTest() throws TransformationRuleException {
     var transformation = new Transformations();
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setTransformations(List.of(transformation));
-    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM,
-        RecordTypes.HOLDINGS));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
 
-    var defaultMappingProfile =  new MappingProfile();
+    var defaultMappingProfile = new MappingProfile();
     defaultMappingProfile.setDefault(true);
     defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
     defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
-    var defaultMappingProfileEntity = MappingProfileEntity.builder()
-        .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+    var defaultMappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(defaultMappingProfile)
+            .id(defaultMappingProfile.getId())
+            .build();
 
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
@@ -210,14 +198,17 @@ class InstancesExportStrategyTest {
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId()))
         .thenReturn(defaultMappingProfileEntity);
     doNothing().when(instancesExportStrategy.entityManager).clear();
-    instancesExportStrategy.getGeneratedMarc(new HashSet<>(), mappingProfile, new ExportRequest(),
-        UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedRecordsListener(null, 1000, null)));
+    instancesExportStrategy.getGeneratedMarc(
+        new HashSet<>(),
+        mappingProfile,
+        new ExportRequest(),
+        UUID.randomUUID(),
+        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
 
-    verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class),
-        any(), anyList(), any());
+    verify(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
 
     var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
@@ -231,17 +222,20 @@ class InstancesExportStrategyTest {
   @Test
   void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
     var transformation = new Transformations();
-    var mappingProfile =  new MappingProfile();
+    var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(false);
     mappingProfile.setTransformations(List.of(transformation));
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS, RecordTypes.ITEM, RecordTypes.HOLDINGS));
 
-    var defaultMappingProfile =  new MappingProfile();
+    var defaultMappingProfile = new MappingProfile();
     defaultMappingProfile.setDefault(true);
     defaultMappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
     defaultMappingProfile.setId(UUID.fromString(DEFAULT_INSTANCE_MAPPING_PROFILE_ID));
-    var defaultMappingProfileEntity = MappingProfileEntity.builder()
-        .mappingProfile(defaultMappingProfile).id(defaultMappingProfile.getId()).build();
+    var defaultMappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(defaultMappingProfile)
+            .id(defaultMappingProfile.getId())
+            .build();
 
     var instance = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(UUID.randomUUID()).build();
@@ -251,19 +245,25 @@ class InstancesExportStrategyTest {
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(mappingProfileEntityRepository.getReferenceById(defaultMappingProfile.getId()))
         .thenReturn(defaultMappingProfileEntity);
-    doThrow(new MarcException()).when(ruleProcessor).process(isA(EntityReader.class),
-        isA(RecordWriter.class), any(), anyList(), any());
+    doThrow(new MarcException())
+        .when(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
 
-    var generatedMarcResult = instancesExportStrategy.getGeneratedMarc(new HashSet<>(),
-        mappingProfile, new ExportRequest(), UUID.randomUUID(), new ExportStrategyStatistic(
-            new ExportedRecordsListener(null, 1000, null)));
+    var generatedMarcResult =
+        instancesExportStrategy.getGeneratedMarc(
+            new HashSet<>(),
+            mappingProfile,
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, generatedMarcResult.getFailedIds().size());
     verify(ruleFactory).getRules(mappingProfileArgumentCaptor.capture());
-    verify(ruleProcessor).process(isA(EntityReader.class), isA(RecordWriter.class), any(),
-        anyList(), any());
+    verify(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), any(),
-        isA(MarcException.class));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class), isA(String.class), any(), isA(MarcException.class));
 
     var actualMappingProfile = mappingProfileArgumentCaptor.getValue();
     assertTrue(actualMappingProfile.getDefault());
@@ -279,8 +279,8 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS,
-        RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
@@ -288,13 +288,17 @@ class InstancesExportStrategyTest {
     doNothing().when(instancesExportStrategy.entityManager).clear();
 
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
-    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(
-        new HashSet<>(Set.of(instanceId, notExistId)),
-        generatedMarcResult, mappingProfile);
+    var instancesWithHoldingsAndItems =
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
-    verify(holdingsItemsResolverService).retrieveHoldingsAndItemsByInstanceId(
-        isA(JSONObject.class), eq(instanceId), isA(String.class), isA(MappingProfile.class),
-        isA(UUID.class));
+    verify(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
 
     assertEquals(1, instancesWithHoldingsAndItems.size());
 
@@ -314,8 +318,8 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS,
-        RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
@@ -324,17 +328,22 @@ class InstancesExportStrategyTest {
     var instanceFromCentralTenant =
         "{'id' : '0eaa0eef-0000-0c0e-af00-000000ebc576', 'hrid' : 'instCentralHrid'}";
     var notExistId = UUID.fromString("0eaa0eef-0000-0c0e-af00-000000ebc576");
-    var instanceEntityFromCentralTenant = InstanceEntity.builder().jsonb(instanceFromCentralTenant)
-        .id(notExistId).build();
-    when(instanceCentralTenantRepository.findInstancesByIdIn("central",
-        Set.of(notExistId))).thenReturn(List.of(instanceEntityFromCentralTenant));
+    var instanceEntityFromCentralTenant =
+        InstanceEntity.builder().jsonb(instanceFromCentralTenant).id(notExistId).build();
+    when(instanceCentralTenantRepository.findInstancesByIdIn("central", Set.of(notExistId)))
+        .thenReturn(List.of(instanceEntityFromCentralTenant));
 
-    var instancesWithHoldingsAndItems = instancesExportStrategy.getInstancesWithHoldingsAndItems(
-        new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
+    var instancesWithHoldingsAndItems =
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId, notExistId)), generatedMarcResult, mappingProfile);
 
     verify(holdingsItemsResolverService)
-        .retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class),
-            eq(instanceId), isA(String.class), isA(MappingProfile.class), isA(UUID.class));
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
     assertEquals(2, instancesWithHoldingsAndItems.size());
 
     var jsonObject = instancesWithHoldingsAndItems.get(0);
@@ -356,8 +365,8 @@ class InstancesExportStrategyTest {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var instanceEntity = InstanceEntity.builder().jsonb(invalidInstanceJson).id(instanceId).build();
     var mappingProfile = new MappingProfile();
-    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS,
-        RecordTypes.ITEM));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
 
     var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
 
@@ -365,15 +374,16 @@ class InstancesExportStrategyTest {
     doNothing().when(instancesExportStrategy.entityManager).clear();
 
     var instancesWithHoldingsAndItems =
-        instancesExportStrategy.getInstancesWithHoldingsAndItems(new HashSet<>(Set.of(instanceId)),
-        generatedMarcResult, mappingProfile);
+        instancesExportStrategy.getInstancesWithHoldingsAndItems(
+            new HashSet<>(Set.of(instanceId)), generatedMarcResult, mappingProfile);
 
     assertEquals(0, instancesWithHoldingsAndItems.size());
     assertEquals(1, generatedMarcResult.getFailedIds().size());
 
-    verify(errorLogService).saveGeneralError(
-        "Error converting to json instance by id 1eaa1eef-1633-4c7e-af09-796315ebc576",
-        jobExecutionId);
+    verify(errorLogService)
+        .saveGeneralError(
+            "Error converting to json instance by id 1eaa1eef-1633-4c7e-af09-796315ebc576",
+            jobExecutionId);
   }
 
   @Test
@@ -382,26 +392,36 @@ class InstancesExportStrategyTest {
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
     var instanceId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
-    var instanceHridEntity = InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid")
-        .build();
+    var instanceHridEntity =
+        InstanceWithHridEntity.builder().id(instanceId).hrid("instanceHrid").build();
     var variableField = new DataFieldImpl("tag", 'a', 'b');
 
     when(instanceWithHridEntityRepository.findByIdIn(anySet()))
         .thenReturn(List.of(instanceHridEntity));
     when(holdingsItemsResolverService.isNeedUpdateWithHoldingsOrItems(isA(MappingProfile.class)))
         .thenReturn(true);
-    doNothing().when(holdingsItemsResolverService)
-        .retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId),
-            isA(String.class), isA(MappingProfile.class), isA(UUID.class));
+    doNothing()
+        .when(holdingsItemsResolverService)
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
     when(ruleProcessor.processFields(any(), any(), any(), anyList(), any()))
         .thenReturn(List.of(variableField));
 
-    var marcFieldsByExternalId = instancesExportStrategy.getAdditionalMarcFieldsByExternalId(
-        List.of(marcRecord), mappingProfile, UUID.randomUUID());
+    var marcFieldsByExternalId =
+        instancesExportStrategy.getAdditionalMarcFieldsByExternalId(
+            List.of(marcRecord), mappingProfile, UUID.randomUUID());
 
     verify(holdingsItemsResolverService)
-        .retrieveHoldingsAndItemsByInstanceId(isA(JSONObject.class), eq(instanceId),
-            isA(String.class), isA(MappingProfile.class), isA(UUID.class));
+        .retrieveHoldingsAndItemsByInstanceId(
+            isA(JSONObject.class),
+            eq(instanceId),
+            isA(String.class),
+            isA(MappingProfile.class),
+            isA(UUID.class));
     assertNotNull(marcFieldsByExternalId);
 
     var actualMarcField = marcFieldsByExternalId.get(instanceId);
@@ -421,8 +441,8 @@ class InstancesExportStrategyTest {
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
 
-    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId,
-        new IOException(errorMessage));
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
 
     var expectedErrorMessage =
         "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
@@ -439,13 +459,14 @@ class InstancesExportStrategyTest {
     var marcRecord = MarcRecordEntity.builder().externalId(instanceId).build();
     var errorMessage =
         "Record is too long to be a valid MARC binary record, it's length would be 113937 which"
-        + " is more than 99999 bytes 2024";
+            + " is more than 99999 bytes 2024";
 
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
 
-    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId,
-        new IOException(errorMessage));
-    verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class),
-        isA(String.class), isA(UUID.class));
+    instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(
+        marcRecord, jobExecutionId, new IOException(errorMessage));
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
   }
 }

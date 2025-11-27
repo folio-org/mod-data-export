@@ -29,9 +29,7 @@ import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Handles uploading exported files to S3 storage, including MARC, JSON, and ZIP files.
- */
+/** Handles uploading exported files to S3 storage, including MARC, JSON, and ZIP files. */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -54,7 +52,9 @@ public class S3ExportsUploader {
    * @param initialFileName initial file name
    * @return S3 path of the uploaded file
    */
-  public String upload(JobExecution jobExecution, List<JobExecutionExportFilesEntity> exports,
+  public String upload(
+      JobExecution jobExecution,
+      List<JobExecutionExportFilesEntity> exports,
       String initialFileName) {
     if (exports.isEmpty()) {
       throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
@@ -62,23 +62,28 @@ public class S3ExportsUploader {
     try {
       String uploadedPath;
       if (exports.size() > 1) {
-        var filesToExport = exports.stream()
-            .map(e -> new File(S3FilePathUtils.getLocalStorageWriterPath(
-                exportTmpStorage, e.getFileLocation())))
-            .filter(f -> f.length() > 0)
-            .toList();
+        var filesToExport =
+            exports.stream()
+                .map(
+                    e ->
+                        new File(
+                            S3FilePathUtils.getLocalStorageWriterPath(
+                                exportTmpStorage, e.getFileLocation())))
+                .filter(f -> f.length() > 0)
+                .toList();
         if (filesToExport.size() > 1) {
           uploadedPath = uploadZip(jobExecution, filesToExport, initialFileName);
         } else if (filesToExport.size() == 1) {
-          uploadedPath = uploadSingleFile(jobExecution, filesToExport.get(0),
-              initialFileName);
+          uploadedPath = uploadSingleFile(jobExecution, filesToExport.get(0), initialFileName);
         } else {
           removeTempDirForJobExecution(jobExecution.getId());
           throw new S3ExportsUploadException(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE);
         }
       } else {
-        var fileToExport = new File(S3FilePathUtils.getLocalStorageWriterPath(
-            exportTmpStorage, exports.get(0).getFileLocation()));
+        var fileToExport =
+            new File(
+                S3FilePathUtils.getLocalStorageWriterPath(
+                    exportTmpStorage, exports.get(0).getFileLocation()));
         uploadedPath = uploadSingleFile(jobExecution, fileToExport, initialFileName);
       }
       return uploadedPath;
@@ -117,8 +122,8 @@ public class S3ExportsUploader {
   private String uploadSingleFile(JobExecution jobExecution, File fileToUpload, String fileName)
       throws IOException {
     var fileSuffix = FilenameUtils.getExtension(fileToUpload.getName());
-    var s3Name = String.format(Constants.FILE_NAME_FORMAT, fileName, jobExecution.getHrId(),
-        fileSuffix);
+    var s3Name =
+        String.format(Constants.FILE_NAME_FORMAT, fileName, jobExecution.getHrId(), fileSuffix);
     var s3path = getPathToStoredFiles(jobExecution.getId(), s3Name);
     if (fileToUpload.length() > 0) {
       try (var inputStream = new BufferedInputStream(new FileInputStream(fileToUpload))) {
@@ -146,22 +151,26 @@ public class S3ExportsUploader {
   private String uploadZip(JobExecution jobExecution, List<File> exports, String fileName)
       throws IOException {
     var zipFileName = String.format("%s-%s.zip", fileName, jobExecution.getHrId());
-    var zipDirPath = S3FilePathUtils.getTempDirForJobExecutionId(
-        exportTmpStorage, jobExecution.getId()) + "zip/";
+    var zipDirPath =
+        S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecution.getId())
+            + "zip/";
     Files.createDirectories(Path.of(zipDirPath));
     var zipFilePath = zipDirPath + zipFileName;
     var zip = Files.createFile(Path.of(zipFilePath)).toFile();
     try (var fileOutputStream = new FileOutputStream(zip);
-         var zipOutputStream = new ZipOutputStream(fileOutputStream)) {
+        var zipOutputStream = new ZipOutputStream(fileOutputStream)) {
       var countExportsFiles = 0;
       for (var exportFile : exports) {
         countExportsFiles++;
-        try (InputStream inputStream = new BufferedInputStream(
-            new FileInputStream(exportFile))) {
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(exportFile))) {
           var fileSuffix = FilenameUtils.getExtension(exportFile.getName());
-          var zipEntryName = String.format(
-              Constants.FILE_NAME_FORMAT, fileName, jobExecution.getHrId(), countExportsFiles,
-              fileSuffix);
+          var zipEntryName =
+              String.format(
+                  Constants.FILE_NAME_FORMAT,
+                  fileName,
+                  jobExecution.getHrId(),
+                  countExportsFiles,
+                  fileSuffix);
           log.info(exportFile.getPath() + " add to zip as " + zipEntryName);
           ZipEntry zipEntry = new ZipEntry(zipEntryName);
           zipOutputStream.putNextEntry(zipEntry);

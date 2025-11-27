@@ -11,17 +11,14 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.springframework.stereotype.Repository;
 
-/**
- * Tenant-specific repository for {@link HoldingsRecordEntity}.
- */
+/** Tenant-specific repository for {@link HoldingsRecordEntity}. */
 @Repository
 public class HoldingsRecordEntityTenantRepository {
 
   private static final String HOLDINGS_QUERY =
       "SELECT id, jsonb, instance_id FROM %s_mod_data_export.v_holdings_record WHERE id in :ids";
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   /**
    * Finds holdings by a set of IDs for a specific tenant.

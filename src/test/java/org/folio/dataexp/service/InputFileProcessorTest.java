@@ -40,18 +40,12 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       "src/test/resources/upload_duplicated.csv";
   private static final String UPLOADED_FILE_PATH_CQL = "src/test/resources/upload.cql";
 
-  @Autowired
-  private FolioS3Client s3Client;
-  @Autowired
-  private InputFileProcessor inputFileProcessor;
-  @Autowired
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Autowired
-  private ExportIdEntityRepository exportIdEntityRepository;
-  @MockitoBean
-  private ErrorLogService errorLogService;
-  @MockitoBean
-  private SearchClient searchClient;
+  @Autowired private FolioS3Client s3Client;
+  @Autowired private InputFileProcessor inputFileProcessor;
+  @Autowired private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Autowired private ExportIdEntityRepository exportIdEntityRepository;
+  @MockitoBean private ErrorLogService errorLogService;
+  @MockitoBean private SearchClient searchClient;
 
   @Test
   @SneakyThrows
@@ -64,8 +58,9 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(),
-        fileDefinition.getFileName());
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -75,8 +70,8 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(),
-          ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(
+          fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
     }
@@ -93,8 +88,9 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(),
-        fileDefinition.getFileName());
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_WITH_UTF8_BOM_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -104,8 +100,8 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(),
-          ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(
+          fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var total = exportIdEntityRepository.count();
       assertEquals(2, total);
     }
@@ -122,8 +118,9 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(),
-        fileDefinition.getFileName());
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -133,14 +130,17 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(),
-          ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(
+          fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
 
       var total = exportIdEntityRepository.count();
       assertEquals(1, total);
 
-      verify(errorLogService).saveGeneralErrorWithMessageValues(ERROR_DUPLICATED_IDS.getCode(),
-          List.of("019e8aea-212d-4d1d-957d-0abcdd0e9acd", "3"), jobExecution.getId());
+      verify(errorLogService)
+          .saveGeneralErrorWithMessageValues(
+              ERROR_DUPLICATED_IDS.getCode(),
+              List.of("019e8aea-212d-4d1d-957d-0abcdd0e9acd", "3"),
+              jobExecution.getId());
     }
   }
 
@@ -155,18 +155,22 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
 
     s3Client.createBucketIfNotExists();
 
-    var path = S3FilePathUtils.getPathToUploadedFiles(fileDefinition.getId(),
-        fileDefinition.getFileName());
+    var path =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
 
     when(searchClient.submitIdsJob(any(IdsJobPayload.class)))
-        .thenReturn(new IdsJob().withId(UUID.randomUUID())
-        .withStatus(IdsJob.Status.COMPLETED));
-    when(searchClient.getJobStatus(anyString())).thenReturn(new IdsJob().withId(UUID.randomUUID())
-        .withStatus(IdsJob.Status.COMPLETED));
-    var resourceIds = new ResourceIds().withIds(List.of(
-      new ResourceIds.Id().withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"))))
-          .withTotalRecords(1);
+        .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));
+    when(searchClient.getJobStatus(anyString()))
+        .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));
+    var resourceIds =
+        new ResourceIds()
+            .withIds(
+                List.of(
+                    new ResourceIds.Id()
+                        .withId(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"))))
+            .withTotalRecords(1);
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
@@ -175,17 +179,20 @@ class InputFileProcessorTest extends BaseDataExportInitializer {
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
       s3Client.write(path, resource.getInputStream());
-      inputFileProcessor.readFile(fileDefinition, new CommonExportStatistic(),
-          ExportRequest.IdTypeEnum.INSTANCE);
+      inputFileProcessor.readFile(
+          fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
       var exportIds = exportIdEntityRepository.findAll();
 
       assertEquals(1, exportIds.size());
       assertEquals(fileDefinition.getJobExecutionId(), exportIds.get(0).getJobExecutionId());
-      assertEquals(UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"),
+      assertEquals(
+          UUID.fromString("011e1aea-222d-4d1d-957d-0abcdd0e9acd"),
           exportIds.get(0).getInstanceId());
 
-      jobExecution = jobExecutionEntityRepository.getReferenceById(jobExecutionEntity.getId())
-          .getJobExecution();
+      jobExecution =
+          jobExecutionEntityRepository
+              .getReferenceById(jobExecutionEntity.getId())
+              .getJobExecution();
       assertEquals(1, jobExecution.getProgress().getTotal());
     }
   }

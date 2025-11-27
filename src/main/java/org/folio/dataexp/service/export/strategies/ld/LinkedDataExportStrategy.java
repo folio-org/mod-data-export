@@ -8,9 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.springframework.stereotype.Component;
 
-/**
- * Concrete implementation of abstract Linked Data strategy, using the LinkedDataProvider.
- */
+/** Concrete implementation of abstract Linked Data strategy, using the LinkedDataProvider. */
 @Log4j2
 @Component
 @RequiredArgsConstructor

@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving alternative title types.
- */
+/** Feign client for retrieving alternative title types. */
 @FeignClient(name = "alternative-title-types")
 public interface AlternativeTitleTypesClient {
   /**

@@ -10,9 +10,7 @@ import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.folio.rdf4ld.service.Rdf4LdService;
 import org.springframework.stereotype.Component;
 
-/**
- * Converter for Linked Data resources.
- */
+/** Converter for Linked Data resources. */
 @Log4j2
 @Component
 @RequiredArgsConstructor
