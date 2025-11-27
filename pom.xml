@@ -566,7 +566,6 @@
               <style>GOOGLE</style>
             </googleJavaFormat>
             <removeUnusedImports/>
-            <formatAnnotations/>
           </java>
         </configuration>
         <executions>
