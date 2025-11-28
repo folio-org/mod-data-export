@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving user permissions from Eureka.
- */
+/** Feign client for retrieving user permissions from Eureka. */
 @FeignClient(name = "users-keycloak/users", configuration = FeignClientConfiguration.class)
 public interface EurekaUserPermissionsClient {
 
@@ -23,6 +21,6 @@ public interface EurekaUserPermissionsClient {
    * @return the user permissions
    */
   @GetMapping(value = "/{userId}/permissions", produces = MediaType.APPLICATION_JSON_VALUE)
-  UserPermissions getPermissions(@PathVariable String userId,
-      @RequestParam List<String> desiredPermissions);
+  UserPermissions getPermissions(
+      @PathVariable String userId, @RequestParam List<String> desiredPermissions);
 }

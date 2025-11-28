@@ -15,10 +15,7 @@ import lombok.With;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.hibernate.annotations.Type;
 
-
-/**
- * Entity representing a file definition.
- */
+/** Entity representing a file definition. */
 @Data
 @Builder
 @With
@@ -28,26 +25,17 @@ import org.hibernate.annotations.Type;
 @Table(name = "file_definitions")
 public class FileDefinitionEntity {
 
-  /**
-   * Unique identifier of the file definition.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the file definition. */
+  @Id private UUID id;
 
-  /**
-   * File definition details stored as JSONB.
-   */
+  /** File definition details stored as JSONB. */
   @Type(JsonBinaryType.class)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private FileDefinition fileDefinition;
 
-  /**
-   * Date when the file definition was created.
-   */
+  /** Date when the file definition was created. */
   private LocalDateTime creationDate;
 
-  /**
-   * User who created the file definition.
-   */
+  /** User who created the file definition. */
   private String createdBy;
 }

@@ -23,16 +23,17 @@ class FieldIdBuilderUnitTest {
 
   @Test
   void shouldReturnCorrectFieldId_whenBuildWithReferenceData() {
-    String fieldIdValue = fieldIdBuilder.build(RecordTypes.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID,
-        REFERENCE_DATA_CONTROL_NUMBER_NAME);
+    String fieldIdValue =
+        fieldIdBuilder.build(
+            RecordTypes.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, REFERENCE_DATA_CONTROL_NUMBER_NAME);
 
     assertEquals(FIELD_ID_CONTROL_NUMBER_RESULT_WITH_REF_DATA, fieldIdValue);
   }
 
   @Test
   void shouldReturnCorrectFieldId_whenBuildWithEmptyReferenceData() {
-    String fieldIdValue = fieldIdBuilder.build(RecordTypes.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID,
-        StringUtils.EMPTY);
+    String fieldIdValue =
+        fieldIdBuilder.build(RecordTypes.INSTANCE, FIELD_CONFIG_IDENTIFIER_ID, StringUtils.EMPTY);
 
     assertEquals(FIELD_ID_CONTROL_NUMBER_RESULT, fieldIdValue);
   }

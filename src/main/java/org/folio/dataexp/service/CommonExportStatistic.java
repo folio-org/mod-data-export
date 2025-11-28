@@ -11,44 +11,27 @@ import lombok.Getter;
 import lombok.Setter;
 import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 
-/**
- * Holds statistics and state for a common export operation, such as invalid or duplicate UUIDs.
- */
+/** Holds statistics and state for a common export operation, such as invalid or duplicate UUIDs. */
 public class CommonExportStatistic {
-  /**
-   * Indicates if reading the input file failed.
-   */
-  @Getter
-  @Setter
-  private boolean isFailedToReadInputFile = true;
+  /** Indicates if reading the input file failed. */
+  @Getter @Setter private boolean isFailedToReadInputFile = true;
 
-  /**
-   * Set of UUIDs that do not exist.
-   */
+  /** Set of UUIDs that do not exist. */
   @Getter
   private final Set<String> notExistUuid = Collections.synchronizedSet(new LinkedHashSet<>());
 
-  /**
-   * List of IDs with invalid UUID format.
-   */
-  @Getter
-  private final List<String> invalidUuidFormat = new LinkedList<>();
+  /** List of IDs with invalid UUID format. */
+  @Getter private final List<String> invalidUuidFormat = new LinkedList<>();
 
-  /**
-   * Amount of duplicated UUIDs.
-   */
+  /** Amount of duplicated UUIDs. */
   private AtomicInteger duplicatedUuidAmount = new AtomicInteger(0);
 
   public int getDuplicatedUuidAmount() {
     return duplicatedUuidAmount.get();
   }
 
-  /**
-   * Listener for exported records.
-   */
-  @Getter
-  @Setter
-  private ExportedRecordsListener exportedRecordsListener;
+  /** Listener for exported records. */
+  @Getter @Setter private ExportedRecordsListener exportedRecordsListener;
 
   /**
    * Adds a list of UUIDs to the set of non-existent UUIDs.
@@ -56,9 +39,7 @@ public class CommonExportStatistic {
    * @param ids List of UUIDs to add.
    */
   public void addToNotExistUuidAll(List<UUID> ids) {
-    var idsToString = ids.stream()
-        .map(UUID::toString)
-        .toList();
+    var idsToString = ids.stream().map(UUID::toString).toList();
     notExistUuid.addAll(idsToString);
   }
 
@@ -80,9 +61,7 @@ public class CommonExportStatistic {
     duplicatedUuidAmount.addAndGet(count);
   }
 
-  /**
-   * Increments the duplicated UUID amount by one.
-   */
+  /** Increments the duplicated UUID amount by one. */
   public void incrementDuplicatedUuid() {
     duplicatedUuidAmount.incrementAndGet();
   }

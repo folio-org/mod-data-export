@@ -44,18 +44,12 @@ class TransformationFieldsServiceTest {
   private static final String TRANSFORMATION_FIELDS_MOCK_PATH =
       "src/test/resources/mockdata/expectedTransformationFields.json";
 
-  @Mock
-  private JsonPathBuilder pathBuilder;
-  @Mock
-  private FieldIdBuilder fieldIdBuilder;
-  @Mock
-  private DisplayNameKeyBuilder displayNameKeyBuilder;
-  @Mock
-  private ReferenceDataProvider referenceDataProvider;
-  @Mock
-  private FolioExecutionContext folioExecutionContext;
-  @InjectMocks
-  private TransformationFieldsService transformationFieldsService;
+  @Mock private JsonPathBuilder pathBuilder;
+  @Mock private FieldIdBuilder fieldIdBuilder;
+  @Mock private DisplayNameKeyBuilder displayNameKeyBuilder;
+  @Mock private ReferenceDataProvider referenceDataProvider;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @InjectMocks private TransformationFieldsService transformationFieldsService;
 
   @Test
   @SneakyThrows
@@ -67,13 +61,18 @@ class TransformationFieldsServiceTest {
 
     assertThat(res.getTransformationFields()).isNotEmpty();
     var mapper = new ObjectMapper();
-    var fieldsCollection = mapper.readValue(new FileInputStream(TRANSFORMATION_FIELDS_MOCK_PATH),
-        TransformationFieldCollection.class);
-    var expectedFields = fieldsCollection.getTransformationFields().stream()
-        .collect(Collectors.toMap(TransformationField::getFieldId, Function.identity()));
-    res.getTransformationFields().forEach(transformationField ->
-        checkIfActualFieldEqualToExpected(expectedFields.get(transformationField.getFieldId()),
-            transformationField));
+    var fieldsCollection =
+        mapper.readValue(
+            new FileInputStream(TRANSFORMATION_FIELDS_MOCK_PATH),
+            TransformationFieldCollection.class);
+    var expectedFields =
+        fieldsCollection.getTransformationFields().stream()
+            .collect(Collectors.toMap(TransformationField::getFieldId, Function.identity()));
+    res.getTransformationFields()
+        .forEach(
+            transformationField ->
+                checkIfActualFieldEqualToExpected(
+                    expectedFields.get(transformationField.getFieldId()), transformationField));
   }
 
   private void mocReferenceData() throws IOException {
@@ -85,25 +84,27 @@ class TransformationFieldsServiceTest {
     map.put(ISSUANCE_MODES, ReferenceDataResponseUtil.getModeOfIssuance());
     map.put(MATERIAL_TYPES, ReferenceDataResponseUtil.getMaterialTypes());
     map.put(LOAN_TYPES, ReferenceDataResponseUtil.getLoanTypes());
-    map.put(ELECTRONIC_ACCESS_RELATIONSHIPS,
+    map.put(
+        ELECTRONIC_ACCESS_RELATIONSHIPS,
         ReferenceDataResponseUtil.getElectronicAccessRelationships());
     map.put(HOLDING_NOTE_TYPES, ReferenceDataResponseUtil.getHoldingNoteTypes());
     map.put(ITEM_NOTE_TYPES, ReferenceDataResponseUtil.getItemNoteTypes());
     when(referenceDataProvider.getReferenceDataForTransformationFields(isA(String.class)))
         .thenReturn(new ReferenceDataWrapperImpl(map));
 
-    doCallRealMethod().when(pathBuilder).build(any(RecordTypes.class),
-        any(TransformationFieldsConfig.class));
-    doCallRealMethod().when(pathBuilder).build(any(RecordTypes.class),
-        any(TransformationFieldsConfig.class), any());
+    doCallRealMethod()
+        .when(pathBuilder)
+        .build(any(RecordTypes.class), any(TransformationFieldsConfig.class));
+    doCallRealMethod()
+        .when(pathBuilder)
+        .build(any(RecordTypes.class), any(TransformationFieldsConfig.class), any());
     doCallRealMethod().when(displayNameKeyBuilder).build(any(RecordTypes.class), anyString());
     doCallRealMethod().when(fieldIdBuilder).build(any(RecordTypes.class), anyString());
-    doCallRealMethod().when(fieldIdBuilder).build(any(RecordTypes.class), anyString(),
-        anyString());
+    doCallRealMethod().when(fieldIdBuilder).build(any(RecordTypes.class), anyString(), anyString());
   }
 
-  void checkIfActualFieldEqualToExpected(TransformationField expectedField,
-      TransformationField actualField) {
+  void checkIfActualFieldEqualToExpected(
+      TransformationField expectedField, TransformationField actualField) {
     assertEquals(expectedField.getFieldId(), actualField.getFieldId());
     assertEquals(expectedField.getDisplayNameKey(), actualField.getDisplayNameKey());
     assertEquals(expectedField.getPath(), actualField.getPath());

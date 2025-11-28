@@ -7,9 +7,7 @@ import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service for batch inserting export IDs.
- */
+/** Service for batch inserting export IDs. */
 @Component
 @RequiredArgsConstructor
 public class InsertExportIdService {
@@ -24,8 +22,8 @@ public class InsertExportIdService {
   @Transactional
   public void saveBatch(List<ExportIdEntity> exportIds) {
     for (var exportId : exportIds) {
-      exportIdEntityRepository.insertExportId(exportId.getJobExecutionId(),
-          exportId.getInstanceId());
+      exportIdEntityRepository.insertExportId(
+          exportId.getJobExecutionId(), exportId.getInstanceId());
     }
   }
 }

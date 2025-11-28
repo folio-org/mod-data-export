@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-/**
- * Feign client for searching consortium holdings.
- */
+/** Feign client for searching consortium holdings. */
 @FeignClient(name = "search/consortium")
 public interface ConsortiumSearchClient {
 

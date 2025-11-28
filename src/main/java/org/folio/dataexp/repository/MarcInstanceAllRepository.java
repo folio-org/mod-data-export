@@ -8,11 +8,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
-/**
- * Repository for {@link MarcRecordEntity} MARC instances.
- */
-public interface MarcInstanceAllRepository
-    extends Repository<MarcRecordEntity, UUID> {
+/** Repository for {@link MarcRecordEntity} MARC instances. */
+public interface MarcInstanceAllRepository extends Repository<MarcRecordEntity, UUID> {
 
   /**
    * Finds all non-deleted MARC instances.
@@ -24,16 +21,11 @@ public interface MarcInstanceAllRepository
    */
   @Query(
       value =
-      "SELECT * FROM v_marc_instance_all_non_deleted"
-        + " WHERE external_id BETWEEN ?1 AND ?2"
-        + " ORDER BY id ASC",
-      nativeQuery = true
-  )
-  Slice<MarcRecordEntity> findMarcInstanceAllNonDeleted(
-      UUID fromId,
-      UUID toId,
-      Pageable page
-  );
+          "SELECT * FROM v_marc_instance_all_non_deleted"
+              + " WHERE external_id BETWEEN ?1 AND ?2"
+              + " ORDER BY id ASC",
+      nativeQuery = true)
+  Slice<MarcRecordEntity> findMarcInstanceAllNonDeleted(UUID fromId, UUID toId, Pageable page);
 
   /**
    * Finds all non-deleted, non-suppressed MARC instances.
@@ -45,26 +37,19 @@ public interface MarcInstanceAllRepository
    */
   @Query(
       value =
-      "SELECT * FROM v_marc_instance_all_non_deleted_non_suppressed"
-        + " WHERE external_id BETWEEN ?1 AND ?2"
-        + " ORDER BY id ASC",
-      nativeQuery = true
-  )
+          "SELECT * FROM v_marc_instance_all_non_deleted_non_suppressed"
+              + " WHERE external_id BETWEEN ?1 AND ?2"
+              + " ORDER BY id ASC",
+      nativeQuery = true)
   Slice<MarcRecordEntity> findMarcInstanceAllNonDeletedNonSuppressed(
-      UUID fromId,
-      UUID toId,
-      Pageable page
-  );
+      UUID fromId, UUID toId, Pageable page);
 
   /**
    * Finds all deleted MARC instances.
    *
    * @return list of MarcRecordEntity
    */
-  @Query(
-      value = "SELECT * FROM v_instance_all_marc_deleted ORDER BY id ASC",
-      nativeQuery = true
-  )
+  @Query(value = "SELECT * FROM v_instance_all_marc_deleted ORDER BY id ASC", nativeQuery = true)
   List<MarcRecordEntity> findMarcInstanceAllDeleted();
 
   /**
@@ -74,7 +59,6 @@ public interface MarcInstanceAllRepository
    */
   @Query(
       value = "SELECT * FROM v_instance_all_marc_deleted_not_suppressed ORDER BY id ASC",
-      nativeQuery = true
-  )
+      nativeQuery = true)
   List<MarcRecordEntity> findMarcInstanceAllDeletedNonSuppressed();
 }

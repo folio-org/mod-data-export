@@ -33,20 +33,18 @@ class MarcDeletedIdsServiceTest {
 
   private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-  @Mock
-  private SourceStorageClient sourceStorageClient;
-  @Mock
-  private FileDefinitionsService fileDefinitionsService;
-  @Captor
-  private ArgumentCaptor<MarcRecordIdentifiersPayload> payloadArgumentCaptor;
-  @InjectMocks
-  private MarcDeletedIdsService marcDeletedIdsService;
+  @Mock private SourceStorageClient sourceStorageClient;
+  @Mock private FileDefinitionsService fileDefinitionsService;
+  @Captor private ArgumentCaptor<MarcRecordIdentifiersPayload> payloadArgumentCaptor;
+  @InjectMocks private MarcDeletedIdsService marcDeletedIdsService;
 
   @Test
   void shouldReturnOneRecord() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
-        .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID()
-            .toString())).withTotalCount(1));
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(UUID.randomUUID().toString()))
+                .withTotalCount(1));
     var fileDefinition = new FileDefinition().size(1).id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
@@ -61,8 +59,10 @@ class MarcDeletedIdsServiceTest {
   @SneakyThrows
   void shouldHavePayloadWithDateRangeIfDateRangeIsUsed() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
-        .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID()
-            .toString())).withTotalCount(1));
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(UUID.randomUUID().toString()))
+                .withTotalCount(1));
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
@@ -70,8 +70,8 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
 
     var date = new SimpleDateFormat(DATE_PATTERN);
-    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(date.parse("20240424"),
-        date.parse("20240424"));
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(
+        date.parse("20240424"), date.parse("20240424"));
     verify(sourceStorageClient).getMarcRecordsIdentifiers(payloadArgumentCaptor.capture());
 
     var payload = payloadArgumentCaptor.getValue();
@@ -83,8 +83,10 @@ class MarcDeletedIdsServiceTest {
   @SneakyThrows
   void shouldHavePayloadWithFromDateIfDateFromIsUsed() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
-        .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID()
-            .toString())).withTotalCount(1));
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(UUID.randomUUID().toString()))
+                .withTotalCount(1));
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
@@ -104,8 +106,10 @@ class MarcDeletedIdsServiceTest {
   @SneakyThrows
   void shouldHavePayloadWithToDateIfDateToIsUsed() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
-        .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID()
-            .toString())).withTotalCount(1));
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(UUID.randomUUID().toString()))
+                .withTotalCount(1));
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
@@ -124,8 +128,10 @@ class MarcDeletedIdsServiceTest {
   @Test
   void shouldHavePayloadWithPreviousDayIfDateIsNotUsed() {
     when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
-        .thenReturn(new MarcRecordsIdentifiersResponse().withRecords(List.of(UUID.randomUUID()
-            .toString())).withTotalCount(1));
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse()
+                .withRecords(List.of(UUID.randomUUID().toString()))
+                .withTotalCount(1));
     var fileDefinition = new FileDefinition().id(UUID.randomUUID());
     when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
         .thenReturn(fileDefinition);
@@ -137,10 +143,10 @@ class MarcDeletedIdsServiceTest {
 
     var payload = payloadArgumentCaptor.getValue();
     assertThat(payload.getLeaderSearchExpression()).isEqualTo("p_05 = 'd'");
-    var previousDay = LocalDate.now().minusDays(1).format(DateTimeFormatter
-        .ofPattern(DATE_PATTERN));
-    assertThat(payload.getFieldsSearchExpression()).isEqualTo("005.date in '"
-        + previousDay + "-" + previousDay + "'");
+    var previousDay =
+        LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern(DATE_PATTERN));
+    assertThat(payload.getFieldsSearchExpression())
+        .isEqualTo("005.date in '" + previousDay + "-" + previousDay + "'");
   }
 
   @Test
@@ -149,7 +155,8 @@ class MarcDeletedIdsServiceTest {
     var from = dateFormat.parse("2024-04-24");
     var to = dateFormat.parse("2024-04-23");
 
-    assertThrows(ExportDeletedDateRangeException.class, () ->
-        marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(from, to));
+    assertThrows(
+        ExportDeletedDateRangeException.class,
+        () -> marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(from, to));
   }
 }

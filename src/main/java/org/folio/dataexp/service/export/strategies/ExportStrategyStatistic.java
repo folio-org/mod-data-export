@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Data;
 
-/**
- * Holds statistics for export operations, such as exported, failed, and duplicated records.
- */
+/** Holds statistics for export operations, such as exported, failed, and duplicated records. */
 @Data
 public class ExportStrategyStatistic {
   private int exported;
@@ -25,32 +23,24 @@ public class ExportStrategyStatistic {
     this.exportedRecordsListener = exportedRecordsListener;
   }
 
-  /**
-   * Increments the exported count and updates the listener.
-   */
+  /** Increments the exported count and updates the listener. */
   public void incrementExported() {
     this.exported = this.exported + 1;
     exportedRecordsListener.incrementExported();
   }
 
-  /**
-   * Removes exported count and updates the listener.
-   */
+  /** Removes exported count and updates the listener. */
   public void removeExported() {
     this.exported = 0;
     exportedRecordsListener.removeExported(exported);
   }
 
-  /**
-   * Increments the failed count.
-   */
+  /** Increments the failed count. */
   public void incrementFailed() {
     this.failed = this.failed + 1;
   }
 
-  /**
-   * Increments the duplicated SRS count.
-   */
+  /** Increments the duplicated SRS count. */
   public void incrementDuplicatedSrs() {
     this.duplicatedSrs = this.duplicatedSrs + 1;
   }

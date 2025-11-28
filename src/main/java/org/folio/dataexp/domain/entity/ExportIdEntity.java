@@ -12,9 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Entity representing export IDs for job executions.
- */
+/** Entity representing export IDs for job executions. */
 @Data
 @Builder
 @With
@@ -24,20 +22,14 @@ import lombok.With;
 @Table(name = "job_executions_export_ids")
 public class ExportIdEntity {
 
-  /**
-   * Unique identifier for the export ID entry.
-   */
+  /** Unique identifier for the export ID entry. */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
 
-  /**
-   * Job execution ID.
-   */
+  /** Job execution ID. */
   private UUID jobExecutionId;
 
-  /**
-   * Instance ID.
-   */
+  /** Instance ID. */
   private UUID instanceId;
 }

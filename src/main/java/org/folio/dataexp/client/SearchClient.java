@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- * Feign client for submitting and retrieving search jobs and resource IDs.
- */
+/** Feign client for submitting and retrieving search jobs and resource IDs. */
 @FeignClient(name = "search/resources/jobs")
 public interface SearchClient {
 

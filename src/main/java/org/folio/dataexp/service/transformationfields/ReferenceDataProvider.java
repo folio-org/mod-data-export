@@ -32,9 +32,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-/**
- * Provides reference data for transformation fields, with caching and multi-tenant support.
- */
+/** Provides reference data for transformation fields, with caching and multi-tenant support. */
 @Component
 @RequiredArgsConstructor
 public class ReferenceDataProvider {
@@ -44,8 +42,8 @@ public class ReferenceDataProvider {
   private final FolioModuleMetadata folioModuleMetadata;
 
   /**
-   * Returns reference data required for generating transformation fields.
-   * Caches data for the given tenant.
+   * Returns reference data required for generating transformation fields. Caches data for the given
+   * tenant.
    *
    * @param tenantId the tenant ID
    * @return reference data wrapper
@@ -56,9 +54,7 @@ public class ReferenceDataProvider {
     map.put(ALTERNATIVE_TITLE_TYPES, referenceDataService.getAlternativeTitleTypes());
     map.put(CONTRIBUTOR_NAME_TYPES, referenceDataService.getContributorNameTypes());
     map.put(
-        ELECTRONIC_ACCESS_RELATIONSHIPS,
-        referenceDataService.getElectronicAccessRelationships()
-    );
+        ELECTRONIC_ACCESS_RELATIONSHIPS, referenceDataService.getElectronicAccessRelationships());
     map.put(INSTANCE_TYPES, referenceDataService.getInstanceTypes());
     map.put(IDENTIFIER_TYPES, referenceDataService.getIdentifierTypes());
     map.put(ISSUANCE_MODES, referenceDataService.getIssuanceModes());
@@ -90,17 +86,15 @@ public class ReferenceDataProvider {
     map.put(INSTANCE_TYPES, referenceDataService.getInstanceTypes());
     map.put(INSTANCE_FORMATS, referenceDataService.getInstanceFormats());
     map.put(
-        ELECTRONIC_ACCESS_RELATIONSHIPS,
-        referenceDataService.getElectronicAccessRelationships()
-    );
+        ELECTRONIC_ACCESS_RELATIONSHIPS, referenceDataService.getElectronicAccessRelationships());
     map.put(ISSUANCE_MODES, referenceDataService.getIssuanceModes());
     map.put(CALL_NUMBER_TYPES, referenceDataService.getCallNumberTypes());
     return new ReferenceDataWrapperImpl(map);
   }
 
   /**
-   * Returns reference data for central tenant and affiliated user tenants.
-   * Caches data for the central tenant and user ID.
+   * Returns reference data for central tenant and affiliated user tenants. Caches data for the
+   * central tenant and user ID.
    *
    * @param centralTenant the central tenant ID
    * @param userId the user ID
@@ -111,74 +105,37 @@ public class ReferenceDataProvider {
     var userTenants = consortiaService.getAffiliatedTenants(centralTenant, userId);
     var referenceData = getReference(centralTenant);
     for (var userTenant : userTenants) {
-      try (
-          var ignored = new FolioExecutionContextSetter(
-              prepareContextForTenant(
-                  userTenant, folioModuleMetadata, folioExecutionContext
-              )
-          )
-      ) {
+      try (var ignored =
+          new FolioExecutionContextSetter(
+              prepareContextForTenant(userTenant, folioModuleMetadata, folioExecutionContext))) {
         var userTenantReferenceData = getReference(userTenant);
         putIfNotExist(
             referenceData.get(ALTERNATIVE_TITLE_TYPES),
-            userTenantReferenceData.get(ALTERNATIVE_TITLE_TYPES)
-        );
+            userTenantReferenceData.get(ALTERNATIVE_TITLE_TYPES));
+        putIfNotExist(referenceData.get(CONTENT_TERMS), userTenantReferenceData.get(CONTENT_TERMS));
         putIfNotExist(
-            referenceData.get(CONTENT_TERMS),
-            userTenantReferenceData.get(CONTENT_TERMS)
-        );
-        putIfNotExist(
-            referenceData.get(IDENTIFIER_TYPES),
-            userTenantReferenceData.get(IDENTIFIER_TYPES)
-        );
+            referenceData.get(IDENTIFIER_TYPES), userTenantReferenceData.get(IDENTIFIER_TYPES));
         putIfNotExist(
             referenceData.get(CONTRIBUTOR_NAME_TYPES),
-            userTenantReferenceData.get(CONTRIBUTOR_NAME_TYPES)
-        );
+            userTenantReferenceData.get(CONTRIBUTOR_NAME_TYPES));
+        putIfNotExist(referenceData.get(LOCATIONS), userTenantReferenceData.get(LOCATIONS));
+        putIfNotExist(referenceData.get(LOAN_TYPES), userTenantReferenceData.get(LOAN_TYPES));
+        putIfNotExist(referenceData.get(LIBRARIES), userTenantReferenceData.get(LIBRARIES));
+        putIfNotExist(referenceData.get(CAMPUSES), userTenantReferenceData.get(CAMPUSES));
+        putIfNotExist(referenceData.get(INSTITUTIONS), userTenantReferenceData.get(INSTITUTIONS));
         putIfNotExist(
-            referenceData.get(LOCATIONS),
-            userTenantReferenceData.get(LOCATIONS)
-        );
+            referenceData.get(MATERIAL_TYPES), userTenantReferenceData.get(MATERIAL_TYPES));
         putIfNotExist(
-            referenceData.get(LOAN_TYPES),
-            userTenantReferenceData.get(LOAN_TYPES)
-        );
+            referenceData.get(INSTANCE_TYPES), userTenantReferenceData.get(INSTANCE_TYPES));
         putIfNotExist(
-            referenceData.get(LIBRARIES),
-            userTenantReferenceData.get(LIBRARIES)
-        );
-        putIfNotExist(
-            referenceData.get(CAMPUSES),
-            userTenantReferenceData.get(CAMPUSES)
-        );
-        putIfNotExist(
-            referenceData.get(INSTITUTIONS),
-            userTenantReferenceData.get(INSTITUTIONS)
-        );
-        putIfNotExist(
-            referenceData.get(MATERIAL_TYPES),
-            userTenantReferenceData.get(MATERIAL_TYPES)
-        );
-        putIfNotExist(
-            referenceData.get(INSTANCE_TYPES),
-            userTenantReferenceData.get(INSTANCE_TYPES)
-        );
-        putIfNotExist(
-            referenceData.get(INSTANCE_FORMATS),
-            userTenantReferenceData.get(INSTANCE_FORMATS)
-        );
+            referenceData.get(INSTANCE_FORMATS), userTenantReferenceData.get(INSTANCE_FORMATS));
         putIfNotExist(
             referenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS),
-            userTenantReferenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS)
-        );
+            userTenantReferenceData.get(ELECTRONIC_ACCESS_RELATIONSHIPS));
         putIfNotExist(
-            referenceData.get(ISSUANCE_MODES),
-            userTenantReferenceData.get(ISSUANCE_MODES)
-        );
+            referenceData.get(ISSUANCE_MODES), userTenantReferenceData.get(ISSUANCE_MODES));
         putIfNotExist(
-            referenceData.get(CALL_NUMBER_TYPES),
-            userTenantReferenceData.get(CALL_NUMBER_TYPES)
-        );
+            referenceData.get(CALL_NUMBER_TYPES), userTenantReferenceData.get(CALL_NUMBER_TYPES));
       }
     }
     return referenceData;
@@ -191,9 +148,7 @@ public class ReferenceDataProvider {
    * @param source the source map
    */
   private void putIfNotExist(
-        Map<String, JsonObjectWrapper> target,
-        Map<String, JsonObjectWrapper> source
-  ) {
+      Map<String, JsonObjectWrapper> target, Map<String, JsonObjectWrapper> source) {
     var tmp = new HashMap<>(source);
     tmp.keySet().removeAll(target.keySet());
     target.putAll(tmp);

@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuration class for setting up the Folio S3 client.
- */
+/** Configuration class for setting up the Folio S3 client. */
 @Configuration
 public class FolioS3Configuration {
   @Value("${application.remote-files-storage.endpoint}")
@@ -37,13 +35,14 @@ public class FolioS3Configuration {
    */
   @Bean
   public FolioS3Client folioS3Client() {
-    return S3ClientFactory.getS3Client(S3ClientProperties.builder()
-      .endpoint(endpoint)
-      .secretKey(secretKey)
-      .accessKey(accessKey)
-      .bucket(bucket)
-      .awsSdk(awsSdk)
-      .region(region)
-      .build());
+    return S3ClientFactory.getS3Client(
+        S3ClientProperties.builder()
+            .endpoint(endpoint)
+            .secretKey(secretKey)
+            .accessKey(accessKey)
+            .bucket(bucket)
+            .awsSdk(awsSdk)
+            .region(region)
+            .build());
   }
 }

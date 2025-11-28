@@ -9,9 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Entity representing a configuration key-value pair.
- */
+/** Entity representing a configuration key-value pair. */
 @Data
 @Builder
 @With
@@ -21,14 +19,9 @@ import lombok.With;
 @Table(name = "config_data")
 public class ConfigurationEntity {
 
-  /**
-   * Configuration key.
-   */
-  @Id
-  private String key;
+  /** Configuration key. */
+  @Id private String key;
 
-  /**
-   * Configuration value.
-   */
+  /** Configuration value. */
   private String value;
 }

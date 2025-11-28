@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 
-/**
- * Holds the result of generated MARC records, including failed and not existing IDs.
- */
+/** Holds the result of generated MARC records, including failed and not existing IDs. */
 @Getter
 public class GeneratedMarcResult {
   private UUID jobExecutionId;

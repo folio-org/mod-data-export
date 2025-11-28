@@ -29,9 +29,7 @@ import org.folio.dataexp.repository.MarcAuthorityRecordRepository;
 import org.folio.dataexp.service.ConsortiaService;
 import org.springframework.stereotype.Component;
 
-/**
- * Export strategy for MARC Authority records.
- */
+/** Export strategy for MARC Authority records. */
 @Log4j2
 @Component
 @RequiredArgsConstructor
@@ -55,8 +53,11 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    * @return list of MarcRecordEntity
    */
   @Override
-  List<MarcRecordEntity> getMarcRecords(Set<UUID> externalIds, MappingProfile mappingProfile,
-      ExportRequest exportRequest, UUID jobExecutionId) {
+  List<MarcRecordEntity> getMarcRecords(
+      Set<UUID> externalIds,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      UUID jobExecutionId) {
     if (Boolean.TRUE.equals(mappingProfile.getDefault())) {
       List<MarcRecordEntity> marcAuthorities = new ArrayList<>(getMarcAuthorities(externalIds));
       log.info("Total marc authorities: {}", marcAuthorities.size());
@@ -69,47 +70,33 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
           new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
       log.info("Marc authorities after removing: {}", marcAuthorities.size());
       entityManager.clear();
-      var foundIds = marcAuthorities.stream()
-          .map(MarcRecordEntity::getExternalId)
-          .collect(Collectors.toSet());
+      var foundIds =
+          marcAuthorities.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
       log.info(
           "Number of authority records found from local tenant: {}, not found: {}",
           foundIds.size(),
-          externalIds.size()
-      );
+          externalIds.size());
       if (!externalIds.isEmpty()) {
-        var centralTenantId = consortiaService.getCentralTenantId(
-            folioExecutionContext.getTenantId()
-        );
+        var centralTenantId =
+            consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
-          var authoritiesFromCentralTenant = marcAuthorityRecordRepository
-              .findNonDeletedByExternalIdIn(
-                  centralTenantId,
-                  externalIds
-              );
+          var authoritiesFromCentralTenant =
+              marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(
+                  centralTenantId, externalIds);
           log.info(
               "Number of authority records found from central tenant: {}",
-              authoritiesFromCentralTenant.size()
-          );
+              authoritiesFromCentralTenant.size());
           handleDeleted(
-              authoritiesFromCentralTenant,
-              jobExecutionId,
-              exportRequest,
-              alreadySavedErrors
-          );
+              authoritiesFromCentralTenant, jobExecutionId, exportRequest, alreadySavedErrors);
           entityManager.clear();
           marcAuthorities.addAll(authoritiesFromCentralTenant);
-          log.info(
-              "Total number of authority records found: {}",
-              marcAuthorities.size()
-          );
+          log.info("Total number of authority records found: {}", marcAuthorities.size());
         } else {
           log.error(
               "Central tenant id not found: {}, authorities that cannot be found: {}",
               centralTenantId,
-              externalIds
-          );
+              externalIds);
         }
       }
       log.debug("Final authority records: {}", marcAuthorities);
@@ -126,8 +113,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    */
   protected List<MarcRecordEntity> getMarcAuthorities(Set<UUID> externalIds) {
     return marcAuthorityRecordRepository.findNonDeletedByExternalIdIn(
-      folioExecutionContext.getTenantId(),
-      externalIds);
+        folioExecutionContext.getTenantId(), externalIds);
   }
 
   /**
@@ -142,8 +128,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
     if (marcAuthorities.isEmpty()) {
       log.error("getMarcRecord:: Couldn't find authority in db for ID: {}", recordId);
       throw new DownloadRecordException(
-          "Couldn't find authority in db for ID: %s".formatted(recordId)
-      );
+          "Couldn't find authority in db for ID: %s".formatted(recordId));
     }
     marcAuthorities = new ArrayList<>(handleDuplicatedDeletedAndUseLastGeneration(marcAuthorities));
     return marcAuthorities.getFirst();
@@ -156,45 +141,36 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    */
   @Override
   public MappingProfile getDefaultMappingProfile() {
-    return getMappingProfileEntityRepository().getReferenceById(
-        UUID.fromString(DEFAULT_AUTTHORITY_PROFILE_ID)
-    ).getMappingProfile();
+    return getMappingProfileEntityRepository()
+        .getReferenceById(UUID.fromString(DEFAULT_AUTTHORITY_PROFILE_ID))
+        .getMappingProfile();
   }
 
   private void handleDeleted(
       List<MarcRecordEntity> marcAuthorities,
       UUID jobExecutionId,
       ExportRequest exportRequest,
-      Set<String> alreadySavedErrors
-  ) {
+      Set<String> alreadySavedErrors) {
     var iterator = marcAuthorities.iterator();
-    var errorsForDeletedProfile = !errorLogEntityCqlRepository
-        .getByJobExecutionIdAndErrorCodes(
-            jobExecutionId,
-            ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode()
-        )
-        .isEmpty();
-    var errorsForNonDeletedProfile = !errorLogEntityCqlRepository
-        .getByJobExecutionIdAndErrorCodes(
-            jobExecutionId,
-            ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode()
-        )
-        .isEmpty();
+    var errorsForDeletedProfile =
+        !errorLogEntityCqlRepository
+            .getByJobExecutionIdAndErrorCodes(
+                jobExecutionId, ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode())
+            .isEmpty();
+    var errorsForNonDeletedProfile =
+        !errorLogEntityCqlRepository
+            .getByJobExecutionIdAndErrorCodes(
+                jobExecutionId, ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode())
+            .isEmpty();
     while (iterator.hasNext()) {
       var rec = iterator.next();
       if (rec.getState().equals("DELETED")) {
         String msg;
         if (!isDeletedJobProfile(exportRequest.getJobProfileId())) {
-          msg = format(
-              ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(),
-              rec.getExternalId()
-          );
+          msg = format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(), rec.getExternalId());
           if (!alreadySavedErrors.contains(msg)) {
             errorLogService.saveGeneralErrorWithMessageValues(
-                ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(),
-                List.of(msg),
-                jobExecutionId
-            );
+                ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(), List.of(msg), jobExecutionId);
             alreadySavedErrors.add(msg);
           }
           log.error(msg);
@@ -203,24 +179,18 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
             errorLogService.saveGeneralErrorWithMessageValues(
                 ERROR_MESSAGE_PROFILE_USED_ONLY_FOR_NON_DELETED.getCode(),
                 List.of(msg),
-                jobExecutionId
-            );
+                jobExecutionId);
             errorsForNonDeletedProfile = true;
           }
           log.error(msg);
           iterator.remove();
         }
-      } else if (
-          rec.getState().equals("ACTUAL")
-          && isDeletedJobProfile(exportRequest.getJobProfileId())
-      ) {
+      } else if (rec.getState().equals("ACTUAL")
+          && isDeletedJobProfile(exportRequest.getJobProfileId())) {
         var msg = ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
         if (!errorsForDeletedProfile) {
           errorLogService.saveGeneralErrorWithMessageValues(
-              ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-              List.of(msg),
-              jobExecutionId
-          );
+              ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(), List.of(msg), jobExecutionId);
           errorsForDeletedProfile = true;
         }
         log.error(msg);
@@ -230,15 +200,11 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
   }
 
   private List<MarcRecordEntity> handleDuplicatedDeletedAndUseLastGeneration(
-      List<MarcRecordEntity> marcAuthorities
-  ) {
+      List<MarcRecordEntity> marcAuthorities) {
     return marcAuthorities.stream()
         .collect(
             groupingBy(
-                MarcRecordEntity::getExternalId,
-                maxBy(comparing(MarcRecordEntity::getGeneration))
-            )
-        )
+                MarcRecordEntity::getExternalId, maxBy(comparing(MarcRecordEntity::getGeneration))))
         .values()
         .stream()
         .flatMap(Optional::stream)
@@ -246,8 +212,8 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
   }
 
   /**
-   * Gets generated MARC records for the given IDs, mapping profile, export request,
-   * and job execution ID.
+   * Gets generated MARC records for the given IDs, mapping profile, export request, and job
+   * execution ID.
    *
    * @param ids set of IDs
    * @param mappingProfile mapping profile
@@ -257,14 +223,18 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    * @return GeneratedMarcResult
    */
   @Override
-  GeneratedMarcResult getGeneratedMarc(Set<UUID> ids, MappingProfile mappingProfile,
-      ExportRequest exportRequest, UUID jobExecutionId,
+  GeneratedMarcResult getGeneratedMarc(
+      Set<UUID> ids,
+      MappingProfile mappingProfile,
+      ExportRequest exportRequest,
+      UUID jobExecutionId,
       ExportStrategyStatistic exportStatistic) {
     var result = new GeneratedMarcResult(jobExecutionId);
-    ids.forEach(id -> {
-      result.addIdToFailed(id);
-      result.addIdToNotExist(id);
-    });
+    ids.forEach(
+        id -> {
+          result.addIdToFailed(id);
+          result.addIdToNotExist(id);
+        });
     return result;
   }
 
@@ -283,10 +253,7 @@ public class AuthorityExportStrategy extends AbstractMarcExportStrategy {
    */
   @Override
   public Map<UUID, MarcFields> getAdditionalMarcFieldsByExternalId(
-      List<MarcRecordEntity> marcRecords,
-      MappingProfile mappingProfile,
-      UUID jobExecutionId
-  ) {
+      List<MarcRecordEntity> marcRecords, MappingProfile mappingProfile, UUID jobExecutionId) {
     return new HashMap<>();
   }
 }

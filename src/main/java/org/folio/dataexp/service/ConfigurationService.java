@@ -9,9 +9,7 @@ import org.folio.dataexp.repository.ConfigurationRepository;
 import org.folio.dataexp.service.validators.ConfigurationValidator;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for managing configuration values in the data export module.
- */
+/** Service for managing configuration values in the data export module. */
 @RequiredArgsConstructor
 @Log4j2
 @Service
@@ -19,6 +17,7 @@ public class ConfigurationService {
 
   /** Key for inventory record link configuration. */
   public static final String INVENTORY_RECORD_LINK_KEY = "inventory_record_link";
+
   private static final String QUERY_BY_FOLIO_HOST = "code=\"FOLIO_HOST\"";
 
   private final ConfigurationRepository configurationRepository;
@@ -34,9 +33,8 @@ public class ConfigurationService {
   public Config upsertConfiguration(Config config) {
     log.info("Upserting configuration by id {}", config.getKey());
     configurationValidator.validate(config);
-    var entity = ConfigurationEntity.builder()
-        .key(config.getKey())
-        .value(config.getValue()).build();
+    var entity =
+        ConfigurationEntity.builder().key(config.getKey()).value(config.getValue()).build();
     var saved = configurationRepository.save(entity);
     log.info("Upserted successfully: {}", saved.getValue());
     return new Config().key(saved.getKey()).value(saved.getValue());
@@ -49,20 +47,18 @@ public class ConfigurationService {
    */
   public Config produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote() {
     log.info("Producing the inventory record link.");
-    ConfigurationEntry entryFromRemote = configurationEntryService
-        .retrieveSingleConfigurationEntryByQuery(QUERY_BY_FOLIO_HOST);
+    ConfigurationEntry entryFromRemote =
+        configurationEntryService.retrieveSingleConfigurationEntryByQuery(QUERY_BY_FOLIO_HOST);
     var folioHostValueFromRemote = entryFromRemote.getValue();
-    var inventoryRecordLinkValue = String.join(
-        "",
-        (folioHostValueFromRemote.endsWith("/") ? folioHostValueFromRemote
-            : folioHostValueFromRemote.concat("/")),
-        "inventory/view/"
-    );
+    var inventoryRecordLinkValue =
+        String.join(
+            "",
+            (folioHostValueFromRemote.endsWith("/")
+                ? folioHostValueFromRemote
+                : folioHostValueFromRemote.concat("/")),
+            "inventory/view/");
 
-    return Config.builder()
-      .key(INVENTORY_RECORD_LINK_KEY)
-      .value(inventoryRecordLinkValue)
-      .build();
+    return Config.builder().key(INVENTORY_RECORD_LINK_KEY).value(inventoryRecordLinkValue).build();
   }
 
   /**

@@ -18,9 +18,7 @@ import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for handling quick export operations.
- */
+/** Service for handling quick export operations. */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -38,18 +36,12 @@ public class QuickExportService {
    * @return QuickExportResponse containing job execution details.
    */
   public QuickExportResponse postQuickExport(QuickExportRequest quickExportRequest) {
-    var fileDefinition = new FileDefinition()
-        .id(UUID.randomUUID())
-        .size(0)
-        .fileName("quick-export.csv");
+    var fileDefinition =
+        new FileDefinition().id(UUID.randomUUID()).size(0).fileName("quick-export.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
-    log.info(
-        "Post quick export for job profile {}",
-        quickExportRequest.getJobProfileId()
-    );
+    log.info("Post quick export for job profile {}", quickExportRequest.getJobProfileId());
     dataExportService.postDataExport(
-        getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition)
-    );
+        getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     return QuickExportResponse.builder()
         .jobExecutionId(fileDefinition.getJobExecutionId())
@@ -65,22 +57,17 @@ public class QuickExportService {
    * @return The constructed ExportRequest.
    */
   private ExportRequest getExportRequestFromQuickExportRequest(
-      QuickExportRequest quickExportRequest,
-      FileDefinition fileDefinition
-  ) {
+      QuickExportRequest quickExportRequest, FileDefinition fileDefinition) {
     var exportRequest = new ExportRequest();
     saveBatch(quickExportRequest, fileDefinition);
     exportRequest.setJobProfileId(getDefaultJobProfileId(quickExportRequest));
     exportRequest.setRecordType(
-        ExportRequest.RecordTypeEnum.fromValue(quickExportRequest.getRecordType().getValue())
-    );
+        ExportRequest.RecordTypeEnum.fromValue(quickExportRequest.getRecordType().getValue()));
     exportRequest.setFileDefinitionId(fileDefinition.getId());
     exportRequest.setQuick(true);
     exportRequest.setIdType(
         ExportRequest.IdTypeEnum.fromValue(
-            quickExportRequest.getRecordType().getValue().toLowerCase()
-        )
-    );
+            quickExportRequest.getRecordType().getValue().toLowerCase()));
     return exportRequest;
   }
 
@@ -90,26 +77,23 @@ public class QuickExportService {
    * @param quickExportRequest The quick export request.
    * @param fileDefinition The file definition.
    */
-  private void saveBatch(
-      QuickExportRequest quickExportRequest,
-      FileDefinition fileDefinition
-  ) {
+  private void saveBatch(QuickExportRequest quickExportRequest, FileDefinition fileDefinition) {
     var uuids = quickExportRequest.getUuids();
     if (nonNull(uuids)) {
       var batch = new ArrayList<ExportIdEntity>();
-      uuids.forEach(instanceId -> {
-        var entity = ExportIdEntity.builder()
-            .jobExecutionId(fileDefinition.getJobExecutionId())
-            .instanceId(instanceId)
-            .build();
-        batch.add(entity);
-      });
+      uuids.forEach(
+          instanceId -> {
+            var entity =
+                ExportIdEntity.builder()
+                    .jobExecutionId(fileDefinition.getJobExecutionId())
+                    .instanceId(instanceId)
+                    .build();
+            batch.add(entity);
+          });
       exportIdEntityRepository.saveAll(batch);
     } else {
       log.error(
-          "Nothing to export for fileDefinitionId {}: no uuids provided.",
-          fileDefinition.getId()
-      );
+          "Nothing to export for fileDefinitionId {}: no uuids provided.", fileDefinition.getId());
     }
   }
 
@@ -134,12 +118,10 @@ public class QuickExportService {
       default -> {
         log.error(
             "No default job profile found by the following recordType: {}",
-            quickExportRequest.getRecordType()
-        );
+            quickExportRequest.getRecordType());
         throw new DataExportRequestValidationException(
             "No default job profile found by the following recordType: "
-                + quickExportRequest.getRecordType()
-        );
+                + quickExportRequest.getRecordType());
       }
     };
   }

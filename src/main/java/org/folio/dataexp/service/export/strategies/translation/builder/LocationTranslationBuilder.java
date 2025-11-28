@@ -7,9 +7,7 @@ import java.util.Map;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.processor.translations.Translation;
 
-/**
- * TranslationBuilder implementation for location-based translations.
- */
+/** TranslationBuilder implementation for location-based translations. */
 public class LocationTranslationBuilder implements TranslationBuilder {
 
   public static final String LIBRARIES = "loclibs";

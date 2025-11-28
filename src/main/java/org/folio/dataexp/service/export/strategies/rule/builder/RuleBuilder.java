@@ -6,9 +6,7 @@ import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.processor.rule.Rule;
 
-/**
- * Interface for building transformation rules.
- */
+/** Interface for building transformation rules. */
 public interface RuleBuilder {
 
   /**
@@ -21,5 +19,4 @@ public interface RuleBuilder {
    */
   Optional<Rule> build(Collection<Rule> rules, Transformations mappingTransformation)
       throws TransformationRuleException;
-
 }

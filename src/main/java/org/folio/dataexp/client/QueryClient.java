@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for interacting with FQM query endpoints.
- */
+/** Feign client for interacting with FQM query endpoints. */
 @FeignClient(name = "query")
 public interface QueryClient {
   /**
@@ -57,10 +55,7 @@ public interface QueryClient {
    */
   @GetMapping("/{queryId}?includeResults=true")
   QueryDetails getQuery(
-      @RequestHeader UUID queryId,
-      @RequestParam Integer offset,
-      @RequestParam Integer limit
-  );
+      @RequestHeader UUID queryId, @RequestParam Integer offset, @RequestParam Integer limit);
 
   /**
    * Retrieve the query result's set of IDs only, in sorted order.
@@ -72,8 +67,5 @@ public interface QueryClient {
    */
   @GetMapping("/{queryId}/sortedIds")
   List<List<String>> getSortedIds(
-      @RequestHeader UUID queryId,
-      @RequestParam Integer offset,
-      @RequestParam Integer limit
-  );
+      @RequestHeader UUID queryId, @RequestParam Integer offset, @RequestParam Integer limit);
 }

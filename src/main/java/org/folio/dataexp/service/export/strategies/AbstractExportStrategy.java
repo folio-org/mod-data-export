@@ -21,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * Abstract base class for all export strategies, providing common logic for
- * exporting any record types.
+ * Abstract base class for all export strategies, providing common logic for exporting any record
+ * types.
  */
 @Log4j2
 @Getter
@@ -50,7 +50,6 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
     this.exportTmpStorage = exportTmpStorage;
   }
 
-
   /**
    * Saves records to local storage for the given export file entity.
    *
@@ -63,19 +62,13 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   public ExportStrategyStatistic saveOutputToLocalStorage(
       JobExecutionExportFilesEntity exportFilesEntity,
       ExportRequest exportRequest,
-      ExportedRecordsListener exportedRecordsListener
-  ) {
+      ExportedRecordsListener exportedRecordsListener) {
     var jobExecutionId = exportFilesEntity.getJobExecutionId();
     var exportStatistic = new ExportStrategyStatistic(exportedRecordsListener);
     var mappingProfile = getMappingProfile(exportFilesEntity.getJobExecutionId());
     var localStorageWriter = createLocalStorageWriter(exportFilesEntity);
     processSlices(
-        exportFilesEntity,
-        exportStatistic,
-        mappingProfile,
-        exportRequest,
-        localStorageWriter
-    );
+        exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
     try {
       localStorageWriter.close();
     } catch (Exception e) {
@@ -83,15 +76,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
           SAVE_ERROR,
           "saveOutputToLocalStorage",
           exportFilesEntity.getFileLocation(),
-          jobExecutionId
-      );
+          jobExecutionId);
       exportStatistic.setDuplicatedSrs(0);
       exportStatistic.removeExported();
-      long countFailed = exportIdEntityRepository.countExportIds(
-          jobExecutionId,
-          exportFilesEntity.getFromId(),
-          exportFilesEntity.getToId()
-      );
+      long countFailed =
+          exportIdEntityRepository.countExportIds(
+              jobExecutionId, exportFilesEntity.getFromId(), exportFilesEntity.getToId());
       exportStatistic.setFailed((int) countFailed);
     }
     return exportStatistic;
@@ -105,9 +95,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    */
   @Override
   public void setStatusBaseExportStatistic(
-      JobExecutionExportFilesEntity exportFilesEntity,
-      ExportStrategyStatistic exportStatistic
-  ) {
+      JobExecutionExportFilesEntity exportFilesEntity, ExportStrategyStatistic exportStatistic) {
     if (isCompleted(exportStatistic)) {
       exportFilesEntity.setStatus(JobExecutionExportFilesStatus.COMPLETED);
     }
@@ -137,7 +125,7 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
    * @param exportFilesEntity the export file entity
    * @param exportStatistic the export statistics
    * @param mappingProfile mapping profile to use
-   * @param exportRequest  the export request
+   * @param exportRequest the export request
    * @param localStorageWriter writes to local storage
    */
   protected abstract void processSlices(
@@ -145,14 +133,12 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       ExportStrategyStatistic exportStatistic,
       MappingProfile mappingProfile,
       ExportRequest exportRequest,
-      LocalStorageWriter localStorageWriter
-  );
+      LocalStorageWriter localStorageWriter);
 
   /**
-   * Per-strategy implementation of retrieving and writing records to disk within
-   * one thread out of a multithreaded approach. Writes and statistics gathering
-   * are done on each thread independently of the others and returned for later
-   * final aggregation.
+   * Per-strategy implementation of retrieving and writing records to disk within one thread out of
+   * a multithreaded approach. Writes and statistics gathering are done on each thread independently
+   * of the others and returned for later final aggregation.
    *
    * @param externalIds set of input IDs
    * @param exportStatistic main job statistics
@@ -167,40 +153,26 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
       MappingProfile mappingProfile,
       UUID jobExecutionId,
       ExportRequest exportRequest,
-      LocalStorageWriter writer
-  );
+      LocalStorageWriter writer);
 
-  /**
-   * Creates a LocalStorageWriter for the given export file entity.
-   */
+  /** Creates a LocalStorageWriter for the given export file entity. */
   protected LocalStorageWriter createLocalStorageWriter(
-      JobExecutionExportFilesEntity exportFilesEntity
-  ) {
+      JobExecutionExportFilesEntity exportFilesEntity) {
     return createLocalStorageWriter(exportFilesEntity, null);
   }
 
-  /**
-   * Creates a LocalStorageWriter for the given export file entity and sliced page number.
-   */
+  /** Creates a LocalStorageWriter for the given export file entity and sliced page number. */
   protected LocalStorageWriter createLocalStorageWriter(
-      JobExecutionExportFilesEntity exportFilesEntity,
-      Integer pageNumber
-  ) {
+      JobExecutionExportFilesEntity exportFilesEntity, Integer pageNumber) {
     var fileName = exportFilesEntity.getFileLocation();
     if (pageNumber != null) {
       fileName = "%s-%d".formatted(exportFilesEntity.getFileLocation(), pageNumber);
     }
     return new LocalStorageWriter(
-        S3FilePathUtils.getLocalStorageWriterPath(
-            exportTmpStorage, fileName
-        ),
-        OUTPUT_BUFFER_SIZE
-    );
+        S3FilePathUtils.getLocalStorageWriterPath(exportTmpStorage, fileName), OUTPUT_BUFFER_SIZE);
   }
 
-  /**
-   * Gets the mapping profile for a job execution.
-   */
+  /** Gets the mapping profile for a job execution. */
   private MappingProfile getMappingProfile(UUID jobExecutionId) {
     var jobExecution = jobExecutionService.getById(jobExecutionId);
     var jobProfile = jobProfileEntityRepository.getReferenceById(jobExecution.getJobProfileId());
@@ -215,14 +187,14 @@ public abstract class AbstractExportStrategy implements ExportStrategy {
   }
 
   @Autowired
-  private void setJobProfileEntityRepository(JobProfileEntityRepository
-      jobProfileEntityRepository) {
+  private void setJobProfileEntityRepository(
+      JobProfileEntityRepository jobProfileEntityRepository) {
     this.jobProfileEntityRepository = jobProfileEntityRepository;
   }
 
   @Autowired
-  protected void setMappingProfileEntityRepository(MappingProfileEntityRepository
-        mappingProfileEntityRepository) {
+  protected void setMappingProfileEntityRepository(
+      MappingProfileEntityRepository mappingProfileEntityRepository) {
     this.mappingProfileEntityRepository = mappingProfileEntityRepository;
   }
 

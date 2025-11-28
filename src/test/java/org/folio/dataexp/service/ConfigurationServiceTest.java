@@ -12,11 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class ConfigurationServiceTest extends BaseDataExportInitializer {
 
-  @Autowired
-  private ConfigurationService configurationService;
+  @Autowired private ConfigurationService configurationService;
 
-  @Autowired
-  private ConfigurationRepository configurationRepository;
+  @Autowired private ConfigurationRepository configurationRepository;
 
   @AfterEach
   void eachConfigTearDown() {
@@ -27,7 +25,7 @@ class ConfigurationServiceTest extends BaseDataExportInitializer {
 
   @Test
   void upsertConfigurationTestInsert() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var config = new Config().key("config1").value("1");
       var inserted = configurationService.upsertConfiguration(config);
       assertEquals(config, inserted);
@@ -39,7 +37,7 @@ class ConfigurationServiceTest extends BaseDataExportInitializer {
 
   @Test
   void upsertConfigurationTestUpdate() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       configurationService.upsertConfiguration(new Config().key("config1").value("1"));
       configurationService.upsertConfiguration(new Config().key("config1").value("2"));
       var configEntity = configurationRepository.getReferenceById("config1");
@@ -51,7 +49,7 @@ class ConfigurationServiceTest extends BaseDataExportInitializer {
 
   @Test
   void getValueTest() {
-    try (var context =  new FolioExecutionContextSetter(folioExecutionContext)) {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       configurationService.upsertConfiguration(new Config().key("config1").value("1"));
       configurationService.upsertConfiguration(new Config().key("config2").value("2"));
       assertEquals("1", configurationService.getValue("config1"));

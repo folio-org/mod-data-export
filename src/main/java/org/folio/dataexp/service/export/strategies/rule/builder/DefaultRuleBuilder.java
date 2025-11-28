@@ -8,9 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.processor.rule.Rule;
 
-/**
- * Default implementation of RuleBuilder for building rules based on field ID.
- */
+/** Default implementation of RuleBuilder for building rules based on field ID. */
 @Log4j2
 public class DefaultRuleBuilder implements RuleBuilder {
 
@@ -34,9 +32,11 @@ public class DefaultRuleBuilder implements RuleBuilder {
    * @return an Optional containing the Rule if present
    */
   protected Optional<Rule> build(Collection<Rule> rules, String fieldId) {
-    Optional<Rule> rule = rules.stream()
-        .filter(defaultRule -> nonNull(defaultRule.getId()) && defaultRule.getId().equals(fieldId))
-        .findFirst();
+    Optional<Rule> rule =
+        rules.stream()
+            .filter(
+                defaultRule -> nonNull(defaultRule.getId()) && defaultRule.getId().equals(fieldId))
+            .findFirst();
     if (rule.isPresent()) {
       return rule;
     } else {

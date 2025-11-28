@@ -38,14 +38,11 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   private static final UUID LOCAL_MARC_AUTHORITY_DELETED_UUID_2 =
       UUID.fromString("45090b0f-9da3-40f1-ab17-33d6a1e3abae");
 
-  @Autowired
-  private AuthorityExportStrategy authorityExportStrategy;
+  @Autowired private AuthorityExportStrategy authorityExportStrategy;
 
-  @Autowired
-  private ErrorLogService errorLogService;
+  @Autowired private ErrorLogService errorLogService;
 
-  @MockitoBean
-  private ConsortiaClient consortiaClient;
+  @MockitoBean private ConsortiaClient consortiaClient;
 
   @Test
   void shouldReturnOneLocalRecord() {
@@ -54,8 +51,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       localAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(localAuthorityIds, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE),  UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              localAuthorityIds,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE),
+              UUID.randomUUID());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -71,8 +72,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(CENTRAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
-        new ExportRequest().jobProfileId(UUID.randomUUID()), UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              centralAuthorityIds,
+              mappingProfile,
+              new ExportRequest().jobProfileId(UUID.randomUUID()),
+              UUID.randomUUID());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(CENTRAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -89,8 +94,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE), UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              centralAuthorityIds,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE),
+              UUID.randomUUID());
 
       assertThat(marcRecords).hasSize(2);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -108,8 +117,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(notFoundUuid);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
-        new ExportRequest().jobProfileId(UUID.randomUUID()), UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              centralAuthorityIds,
+              mappingProfile,
+              new ExportRequest().jobProfileId(UUID.randomUUID()),
+              UUID.randomUUID());
 
       assertThat(marcRecords).isEmpty();
     }
@@ -126,8 +139,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       centralAuthorityIds.add(LOCAL_AUTHORITY_UUID);
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
-      var marcRecords = authorityExportStrategy.getMarcRecords(centralAuthorityIds, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE), UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              centralAuthorityIds,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE),
+              UUID.randomUUID());
 
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_UUID, marcRecords.get(0).getId());
@@ -137,11 +154,13 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   @Test
   void shouldReturnErrorResultForGetGeneratedMarcIfMarcsDoNotExist() {
     var notExistUuid = UUID.randomUUID();
-    var marcRecords = authorityExportStrategy.getGeneratedMarc(Set.of(notExistUuid),
-        new MappingProfile(),
-        new ExportRequest(),
-        UUID.randomUUID(),
-        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+    var marcRecords =
+        authorityExportStrategy.getGeneratedMarc(
+            Set.of(notExistUuid),
+            new MappingProfile(),
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, marcRecords.getNotExistIds().size());
     assertEquals(1, marcRecords.getFailedIds().size());
   }
@@ -156,8 +175,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       var deletedAuthorities = new HashSet<UUID>();
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_1);
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_2);
-      var marcRecords = authorityExportStrategy.getMarcRecords(deletedAuthorities, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE), UUID.randomUUID());
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              deletedAuthorities,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE),
+              UUID.randomUUID());
       assertThat(marcRecords).hasSize(2);
     }
   }
@@ -173,17 +196,22 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_1);
       deletedAuthorities.add(LOCAL_AUTHORITY_UUID);
       var jobExecutionId = UUID.randomUUID();
-      var marcRecords = authorityExportStrategy.getMarcRecords(deletedAuthorities, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE), jobExecutionId);
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              deletedAuthorities,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE),
+              jobExecutionId);
       assertThat(marcRecords).hasSize(1);
       assertEquals(LOCAL_MARC_AUTHORITY_DELETED_UUID_1, marcRecords.get(0).getExternalId());
       var errors = errorLogService.getByQuery(format("(jobExecutionId==%s)", jobExecutionId));
       assertThat(errors).hasSize(1);
       var error = errors.get(0);
-      assertEquals(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription(),
+      assertEquals(
+          ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription(),
           error.getErrorMessageValues().get(0));
-      assertEquals(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-          error.getErrorMessageCode());
+      assertEquals(
+          ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(), error.getErrorMessageCode());
     }
   }
 
@@ -197,16 +225,21 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       mappingProfile.setDefault(true);
       var deletedAuthorities = new HashSet<UUID>();
       deletedAuthorities.add(LOCAL_AUTHORITY_UUID);
-      var marcRecords = authorityExportStrategy.getMarcRecords(deletedAuthorities, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE), jobExecutionId);
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              deletedAuthorities,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE),
+              jobExecutionId);
       assertThat(marcRecords).isEmpty();
       var errors = errorLogService.getByQuery(format("(jobExecutionId==%s)", jobExecutionId));
       assertThat(errors).hasSize(1);
       var error = errors.get(0);
-      assertEquals(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription(),
+      assertEquals(
+          ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription(),
           error.getErrorMessageValues().get(0));
-      assertEquals(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
-          error.getErrorMessageCode());
+      assertEquals(
+          ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(), error.getErrorMessageCode());
     }
   }
 
@@ -221,14 +254,21 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       deletedAuthorities.add(LOCAL_AUTHORITY_UUID);
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_1);
       var jobExecutionId = UUID.randomUUID();
-      var marcRecords = authorityExportStrategy.getMarcRecords(deletedAuthorities, mappingProfile,
-        new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE), jobExecutionId);
+      var marcRecords =
+          authorityExportStrategy.getMarcRecords(
+              deletedAuthorities,
+              mappingProfile,
+              new ExportRequest().jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE),
+              jobExecutionId);
       assertThat(marcRecords).hasSize(1);
       var errors = errorLogService.getByQuery(format("(jobExecutionId==%s)", jobExecutionId));
       assertThat(errors).hasSize(2);
       var error = errors.get(0);
-      assertEquals(format(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(),
-          LOCAL_MARC_AUTHORITY_DELETED_UUID_1), error.getErrorMessageValues().get(0));
+      assertEquals(
+          format(
+              ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getDescription(),
+              LOCAL_MARC_AUTHORITY_DELETED_UUID_1),
+          error.getErrorMessageValues().get(0));
       assertEquals(ERROR_MESSAGE_UUID_IS_SET_TO_DELETION.getCode(), error.getErrorMessageCode());
     }
   }

@@ -1,8 +1,6 @@
 package org.folio.dataexp.exception.file.definition;
 
-/**
- * Exception thrown when a file size is invalid.
- */
+/** Exception thrown when a file size is invalid. */
 public class FileSizeException extends RuntimeException {
   /**
    * Constructs a new FileSizeException with the specified detail message.

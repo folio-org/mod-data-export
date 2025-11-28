@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving call number types.
- */
+/** Feign client for retrieving call number types. */
 @FeignClient(name = "call-number-types")
 public interface CallNumberTypesClient {
   /**

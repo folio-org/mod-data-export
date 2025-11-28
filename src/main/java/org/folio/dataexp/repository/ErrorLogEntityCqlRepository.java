@@ -6,9 +6,7 @@ import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.spring.cql.JpaCqlRepository;
 import org.springframework.data.jpa.repository.Query;
 
-/**
- * Repository for {@link ErrorLogEntity}.
- */
+/** Repository for {@link ErrorLogEntity}. */
 public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEntity, UUID> {
 
   /**
@@ -19,14 +17,12 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    * @return list of error log entities
    */
   @Query(
-      value = "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1"
-      + " AND jsonb ->> 'errorMessageCode' SIMILAR TO ?2",
-      nativeQuery = true
-  )
+      value =
+          "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1"
+              + " AND jsonb ->> 'errorMessageCode' SIMILAR TO ?2",
+      nativeQuery = true)
   List<ErrorLogEntity> getByJobExecutionIdAndErrorCodes(
-      UUID jobExecutionId,
-      String errorCodesString
-  );
+      UUID jobExecutionId, String errorCodesString);
 
   /**
    * Gets error logs by job execution ID and error code.
@@ -36,14 +32,11 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    * @return list of error log entities
    */
   @Query(
-      value = "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1"
-      + " AND jsonb ->> 'errorMessageCode' = ?2",
-      nativeQuery = true
-  )
-  List<ErrorLogEntity> getByJobExecutionIdAndErrorCode(
-      UUID jobExecutionId,
-      String errorCode
-  );
+      value =
+          "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1"
+              + " AND jsonb ->> 'errorMessageCode' = ?2",
+      nativeQuery = true)
+  List<ErrorLogEntity> getByJobExecutionIdAndErrorCode(UUID jobExecutionId, String errorCode);
 
   /**
    * Gets all error logs by job execution ID.
@@ -53,8 +46,7 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    */
   @Query(
       value = "SELECT * FROM error_logs WHERE cast(jsonb ->> 'jobExecutionId' AS uuid) = ?1",
-      nativeQuery = true
-  )
+      nativeQuery = true)
   List<ErrorLogEntity> getAllByJobExecutionId(UUID jobExecutionId);
 
   /**
@@ -64,5 +56,4 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    * @return count of error logs
    */
   long countByJobExecutionId(UUID jobExecutionId);
-
 }

@@ -15,9 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Service for cleaning up expired files and file definitions from storage.
- */
+/** Service for cleaning up expired files and file definitions from storage. */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,27 +29,22 @@ public class StorageCleanUpService {
   @Value("${application.clean-up-files-delay}")
   private String cleanUpFilesDelay;
 
-  /**
-   * Removes expired files and file definitions from storage.
-   */
+  /** Removes expired files and file definitions from storage. */
   public void cleanExpiredFilesAndFileDefinitions() {
-    var expirationDate = new Date(
-        new Date().getTime()
-          - HOURS.toMillis(getExpirationPeriod(cleanUpFilesDelay))
-    );
+    var expirationDate =
+        new Date(new Date().getTime() - HOURS.toMillis(getExpirationPeriod(cleanUpFilesDelay)));
     var expiredFileDefinitions = fileDefinitionEntityRepository.getExpiredEntities(expirationDate);
-    log.info("Removing files and file definitions, number of file definitions to clean up: {}",
+    log.info(
+        "Removing files and file definitions, number of file definitions to clean up: {}",
         expiredFileDefinitions.size());
-    expiredFileDefinitions.forEach(fileDefinitionEntity -> {
-      var fileDefinition = fileDefinitionEntity.getFileDefinition();
-      storageClient.remove(
-          S3FilePathUtils.getPathToUploadedFiles(
-              fileDefinition.getId(),
-              fileDefinition.getFileName()
-          )
-      );
-      fileDefinitionEntityRepository.delete(fileDefinitionEntity);
-    });
+    expiredFileDefinitions.forEach(
+        fileDefinitionEntity -> {
+          var fileDefinition = fileDefinitionEntity.getFileDefinition();
+          storageClient.remove(
+              S3FilePathUtils.getPathToUploadedFiles(
+                  fileDefinition.getId(), fileDefinition.getFileName()));
+          fileDefinitionEntityRepository.delete(fileDefinitionEntity);
+        });
   }
 
   /**

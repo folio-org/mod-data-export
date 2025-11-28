@@ -74,12 +74,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * and MinIO containers, configuration of the Spring application context, and utility methods for
  * tenant setup and HTTP header management. It also provides access to common repositories and
  * services required for testing data export functionality.
- * </p>
  *
  * <p>Subclasses can use the provided MockMvc, S3 client, and repositories for test setup and
  * assertions. The class ensures a clean state before and after each test and provides static
  * helpers for JSON serialization and Okapi header creation.
- * </p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -90,9 +88,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class BaseDataExportInitializer {
 
-  protected static final String TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNl"
-      + "cl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5Mywid"
-      + "GVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
+  protected static final String TOKEN =
+      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWt1X2FkbWluIiwidXNl"
+          + "cl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5Mywid"
+          + "GVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "diku";
   protected static final UUID DEFAULT_HOLDINGS_JOB_PROFILE =
       UUID.fromString("5e9835fc-0e51-44c8-8a47-f7b8fce35da7");
@@ -113,18 +112,20 @@ public class BaseDataExportInitializer {
 
   static {
     postgresDBContainer =
-        new PostgreSQLContainer<>(Objects.toString(
-          System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
+        new PostgreSQLContainer<>(
+            Objects.toString(System.getenv("TESTCONTAINERS_POSTGRES_IMAGE"), "postgres:16-alpine"));
     postgresDBContainer.start();
-    s3 = new GenericContainer<>("minio/minio:latest")
-      .withEnv("MINIO_ACCESS_KEY", S3_ACCESS_KEY)
-      .withEnv("MINIO_SECRET_KEY", S3_SECRET_KEY)
-      .withCommand("server /data")
-      .withExposedPorts(S3_PORT)
-      .waitingFor(new HttpWaitStrategy().forPath("/minio/health/ready")
-        .forPort(S3_PORT)
-        .withStartupTimeout(Duration.ofSeconds(10))
-      );
+    s3 =
+        new GenericContainer<>("minio/minio:latest")
+            .withEnv("MINIO_ACCESS_KEY", S3_ACCESS_KEY)
+            .withEnv("MINIO_SECRET_KEY", S3_SECRET_KEY)
+            .withCommand("server /data")
+            .withExposedPorts(S3_PORT)
+            .waitingFor(
+                new HttpWaitStrategy()
+                    .forPath("/minio/health/ready")
+                    .forPort(S3_PORT)
+                    .withStartupTimeout(Duration.ofSeconds(10)));
     s3.start();
     MINIO_ENDPOINT = format("http://%s:%s", s3.getHost(), s3.getFirstMappedPort());
 
@@ -136,8 +137,12 @@ public class BaseDataExportInitializer {
   }
 
   private static void createDataAndTablesForViews() throws IOException {
-    var dataSource =  new SingleConnectionDataSource(postgresDBContainer.getJdbcUrl(),
-        postgresDBContainer.getUsername(), postgresDBContainer.getPassword(), true);
+    var dataSource =
+        new SingleConnectionDataSource(
+            postgresDBContainer.getJdbcUrl(),
+            postgresDBContainer.getUsername(),
+            postgresDBContainer.getPassword(),
+            true);
     var jdbcTemplate = new JdbcTemplate(dataSource);
     runSqlScript("/init_public_schema.sql", jdbcTemplate);
     runSqlScript("/init_mod_inventory_storage.sql", jdbcTemplate);
@@ -155,50 +160,44 @@ public class BaseDataExportInitializer {
   public static LocalDateTimeDeserializer localDateTimeDeserializer =
       new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
 
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-      .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-      .registerModule(new JavaTimeModule().addDeserializer(LocalDateTime.class,
-          localDateTimeDeserializer))
-      .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-      .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+  public static final ObjectMapper OBJECT_MAPPER =
+      new ObjectMapper()
+          .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
+          .registerModule(
+              new JavaTimeModule().addDeserializer(LocalDateTime.class, localDateTimeDeserializer))
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
-  @Autowired
-  protected MockMvc mockMvc;
-  @Autowired
-  private FolioModuleMetadata folioModuleMetadata;
-  @Autowired
-  private JobExecutionEntityRepository jobExecutionEntityRepository;
-  @Autowired
-  private FileDefinitionEntityRepository fileDefinitionEntityRepository;
-  @Autowired
-  private ExportIdEntityRepository exportIdEntityRepository;
+  @Autowired protected MockMvc mockMvc;
+  @Autowired private FolioModuleMetadata folioModuleMetadata;
+  @Autowired private JobExecutionEntityRepository jobExecutionEntityRepository;
+  @Autowired private FileDefinitionEntityRepository fileDefinitionEntityRepository;
+  @Autowired private ExportIdEntityRepository exportIdEntityRepository;
+
   @Autowired
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
-  @Autowired
-  protected FolioS3Client s3Client;
-  @Autowired
-  private ConfigurationEntryService configurationEntryService;
-  @Autowired
-  private ConfigurationService configurationService;
-  @Autowired
-  private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
-  @MockitoBean
-  private ConfigurationEntryClient configurationEntryClient;
+  @Autowired protected FolioS3Client s3Client;
+  @Autowired private ConfigurationEntryService configurationEntryService;
+  @Autowired private ConfigurationService configurationService;
+  @Autowired private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+
+  @MockitoBean private ConfigurationEntryClient configurationEntryClient;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
   public FolioExecutionContext folioExecutionContext;
 
   /**
-   * Static class used to initialize the Spring application context with custom properties
-   * for integration tests, such as database and S3 storage configuration.
+   * Static class used to initialize the Spring application context with custom properties for
+   * integration tests, such as database and S3 storage configuration.
    */
   public static class Initializer
       implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(ConfigurableApplicationContext context) {
-      TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context,
+      TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
+          context,
           "spring.datasource.url=" + postgresDBContainer.getJdbcUrl(),
           "spring.datasource.username=" + postgresDBContainer.getUsername(),
           "spring.datasource.password=" + postgresDBContainer.getPassword(),
@@ -212,8 +211,8 @@ public class BaseDataExportInitializer {
   }
 
   @BeforeAll
-  static void beforeAll(@Autowired MockMvc mockMvc,
-      @Autowired ConfigurationEntryClient configurationEntryClient) {
+  static void beforeAll(
+      @Autowired MockMvc mockMvc, @Autowired ConfigurationEntryClient configurationEntryClient) {
     when(configurationEntryClient.getConfigurationEntryCollectionByQuery(any(String.class)))
         .thenReturn(getConfigurationEntryCollection());
     setUpTenant(mockMvc);
@@ -227,11 +226,12 @@ public class BaseDataExportInitializer {
     okapiHeaders.put(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
 
     var localHeaders =
-        okapiHeaders.entrySet()
-          .stream()
-          .filter(e -> e.getKey().startsWith(XOkapiHeaders.OKAPI_HEADERS_PREFIX))
-          .collect(Collectors.toMap(Map.Entry::getKey, e ->
-              (Collection<String>) List.of(String.valueOf(e.getValue()))));
+        okapiHeaders.entrySet().stream()
+            .filter(e -> e.getKey().startsWith(XOkapiHeaders.OKAPI_HEADERS_PREFIX))
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> (Collection<String>) List.of(String.valueOf(e.getValue()))));
 
     folioExecutionContext = new DefaultFolioExecutionContext(folioModuleMetadata, localHeaders);
     s3Client.createBucketIfNotExists();
@@ -255,10 +255,13 @@ public class BaseDataExportInitializer {
    */
   @SneakyThrows
   protected static void setUpTenant(MockMvc mockMvc) {
-    mockMvc.perform(post("/_/tenant")
-      .content(asJsonString(new TenantAttributes().moduleTo("mod-data-export")))
-      .headers(defaultHeaders())
-      .contentType(APPLICATION_JSON)).andExpect(status().isNoContent());
+    mockMvc
+        .perform(
+            post("/_/tenant")
+                .content(asJsonString(new TenantAttributes().moduleTo("mod-data-export")))
+                .headers(defaultHeaders())
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isNoContent());
   }
 
   /**
@@ -289,7 +292,8 @@ public class BaseDataExportInitializer {
   }
 
   private static ConfigurationEntryCollection getConfigurationEntryCollection() {
-    ConfigurationEntry ce = ConfigurationEntry.builder()
+    ConfigurationEntry ce =
+        ConfigurationEntry.builder()
             .id(UUID.randomUUID().toString())
             .module("TEST_1")
             .configName("FOLIO host")
@@ -298,7 +302,9 @@ public class BaseDataExportInitializer {
             .value("http://localhost:9130")
             .build();
 
-    return ConfigurationEntryCollection.builder().totalRecords(1).configs(Collections
-        .singletonList(ce)).build();
+    return ConfigurationEntryCollection.builder()
+        .totalRecords(1)
+        .configs(Collections.singletonList(ce))
+        .build();
   }
 }

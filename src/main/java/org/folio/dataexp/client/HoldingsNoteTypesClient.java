@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving holdings note types.
- */
+/** Feign client for retrieving holdings note types. */
 @FeignClient(name = "holdings-note-types")
 public interface HoldingsNoteTypesClient {
   /**

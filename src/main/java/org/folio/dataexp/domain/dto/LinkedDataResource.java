@@ -4,20 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO for FQM contents results for Linked Data entity types.
- */
+/** DTO for FQM contents results for Linked Data entity types. */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class LinkedDataResource {
-  /**
-   * Inventory UUID.
-   */
+  /** Inventory UUID. */
   private String inventoryId;
 
-  /**
-   * Resource subgraph internal Linked Data JSON.
-   */
+  /** Resource subgraph internal Linked Data JSON. */
   private String resource;
 }

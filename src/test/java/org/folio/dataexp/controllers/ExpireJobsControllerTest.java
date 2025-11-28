@@ -11,9 +11,8 @@ class ExpireJobsControllerTest extends BaseDataExportInitializer {
   @Test
   @SneakyThrows
   void postCleanUpFiles() {
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/expire-jobs")
-        .headers(defaultHeaders()))
+    mockMvc
+        .perform(MockMvcRequestBuilders.post("/data-export/expire-jobs").headers(defaultHeaders()))
         .andExpect(status().isNoContent());
   }
 }

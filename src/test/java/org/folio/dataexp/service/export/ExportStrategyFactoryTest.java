@@ -31,122 +31,63 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ExportStrategyFactoryTest {
 
-  @Mock
-  private HoldingsExportStrategy holdingsExportStrategy;
-  @Mock
-  private InstancesExportStrategy instancesExportStrategy;
-  @Mock
-  private AuthorityExportStrategy authorityExportStrategy;
-  @Mock
-  private HoldingsExportAllStrategy holdingsExportAllStrategy;
-  @Mock
-  private InstancesExportAllStrategy instancesExportAllStrategy;
-  @Mock
-  private AuthorityExportAllStrategy authorityExportAllStrategy;
-  @Mock
-  private LinkedDataExportStrategy linkedDataExportStrategy;
-  @Mock
-  private JobProfileEntityRepository jobProfileEntityRepository;
-  @Mock
-  private MappingProfileEntityRepository mappingProfileEntityRepository;
+  @Mock private HoldingsExportStrategy holdingsExportStrategy;
+  @Mock private InstancesExportStrategy instancesExportStrategy;
+  @Mock private AuthorityExportStrategy authorityExportStrategy;
+  @Mock private HoldingsExportAllStrategy holdingsExportAllStrategy;
+  @Mock private InstancesExportAllStrategy instancesExportAllStrategy;
+  @Mock private AuthorityExportAllStrategy authorityExportAllStrategy;
+  @Mock private LinkedDataExportStrategy linkedDataExportStrategy;
+  @Mock private JobProfileEntityRepository jobProfileEntityRepository;
+  @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
 
-  @InjectMocks
-  private ExportStrategyFactory exportStrategyFactory;
+  @InjectMocks private ExportStrategyFactory exportStrategyFactory;
 
   static Stream<Arguments> exportStrategyArguments() {
     return Stream.of(
-      Arguments.of(
-        true,
-        RecordTypes.INSTANCE,
-        null,
-        false,
-        InstancesExportStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.INSTANCE,
-        null,
-        true,
-        InstancesExportAllStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.HOLDINGS,
-        null,
-        false,
-        HoldingsExportStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.HOLDINGS,
-        null,
-        true,
-        HoldingsExportAllStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.AUTHORITY,
-        null,
-        false,
-        AuthorityExportStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.AUTHORITY,
-        null,
-        true,
-        AuthorityExportAllStrategy.class
-      ),
-      Arguments.of(
-        true,
-        RecordTypes.LINKED_DATA,
-        null,
-        false,
-        LinkedDataExportStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.INSTANCE,
-        ExportRequest.IdTypeEnum.INSTANCE,
-        false,
-        InstancesExportStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.INSTANCE,
-        ExportRequest.IdTypeEnum.INSTANCE,
-        true,
-        InstancesExportAllStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.HOLDINGS,
-        ExportRequest.IdTypeEnum.HOLDING,
-        false,
-        HoldingsExportStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.HOLDINGS,
-        ExportRequest.IdTypeEnum.HOLDING,
-        true,
-        HoldingsExportAllStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.AUTHORITY,
-        ExportRequest.IdTypeEnum.AUTHORITY,
-        false,
-        AuthorityExportStrategy.class
-      ),
-      Arguments.of(
-        false,
-        RecordTypes.AUTHORITY,
-        ExportRequest.IdTypeEnum.AUTHORITY,
-        true,
-        AuthorityExportAllStrategy.class
-      )
-    );
+        Arguments.of(true, RecordTypes.INSTANCE, null, false, InstancesExportStrategy.class),
+        Arguments.of(true, RecordTypes.INSTANCE, null, true, InstancesExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.HOLDINGS, null, false, HoldingsExportStrategy.class),
+        Arguments.of(true, RecordTypes.HOLDINGS, null, true, HoldingsExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.AUTHORITY, null, false, AuthorityExportStrategy.class),
+        Arguments.of(true, RecordTypes.AUTHORITY, null, true, AuthorityExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.LINKED_DATA, null, false, LinkedDataExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.INSTANCE,
+            ExportRequest.IdTypeEnum.INSTANCE,
+            false,
+            InstancesExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.INSTANCE,
+            ExportRequest.IdTypeEnum.INSTANCE,
+            true,
+            InstancesExportAllStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.HOLDINGS,
+            ExportRequest.IdTypeEnum.HOLDING,
+            false,
+            HoldingsExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.HOLDINGS,
+            ExportRequest.IdTypeEnum.HOLDING,
+            true,
+            HoldingsExportAllStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.AUTHORITY,
+            ExportRequest.IdTypeEnum.AUTHORITY,
+            false,
+            AuthorityExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.AUTHORITY,
+            ExportRequest.IdTypeEnum.AUTHORITY,
+            true,
+            AuthorityExportAllStrategy.class));
   }
 
   @ParameterizedTest
@@ -156,32 +97,33 @@ class ExportStrategyFactoryTest {
       RecordTypes recordType,
       ExportRequest.IdTypeEnum idType,
       boolean exportAll,
-      Class<?> strategyClass
-  ) {
+      Class<?> strategyClass) {
     UUID jobProfileId = UUID.randomUUID();
     UUID mappingProfileId = UUID.randomUUID();
-    var jobProfile = new JobProfile()
-        .id(jobProfileId)
-        .mappingProfileId(mappingProfileId)
-        ._default(defaultProfiles);
-    var jobProfileEntity = new JobProfileEntity()
-        .withId(jobProfileId)
-        .withMappingProfileId(mappingProfileId)
-        .withJobProfile(jobProfile);
-    when(jobProfileEntityRepository.getReferenceById(jobProfileId))
-        .thenReturn(jobProfileEntity);
-    var mappingProfile = new MappingProfile()
-        .id(mappingProfileId)
-        .addRecordTypesItem(recordType)
-        ._default(defaultProfiles);
-    var mappingProfileEntity = new MappingProfileEntity()
-        .withId(mappingProfileId)
-        .withMappingProfile(mappingProfile)
-        .withRecordTypes(recordType.toString());
+    var jobProfile =
+        new JobProfile()
+            .id(jobProfileId)
+            .mappingProfileId(mappingProfileId)
+            ._default(defaultProfiles);
+    var jobProfileEntity =
+        new JobProfileEntity()
+            .withId(jobProfileId)
+            .withMappingProfileId(mappingProfileId)
+            .withJobProfile(jobProfile);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    var mappingProfile =
+        new MappingProfile()
+            .id(mappingProfileId)
+            .addRecordTypesItem(recordType)
+            ._default(defaultProfiles);
+    var mappingProfileEntity =
+        new MappingProfileEntity()
+            .withId(mappingProfileId)
+            .withMappingProfile(mappingProfile)
+            .withRecordTypes(recordType.toString());
     when(mappingProfileEntityRepository.getReferenceById(mappingProfileId))
         .thenReturn(mappingProfileEntity);
-    var exportRequest = new ExportRequest()
-        .jobProfileId(jobProfileId);
+    var exportRequest = new ExportRequest().jobProfileId(jobProfileId);
     if (idType != null) {
       exportRequest.setIdType(idType);
     }

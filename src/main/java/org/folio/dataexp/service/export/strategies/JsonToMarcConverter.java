@@ -17,54 +17,38 @@ import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.SortedMarcFactoryImpl;
 import org.springframework.stereotype.Component;
 
-/**
- * Converter for transforming JSON records to MARC records.
- */
+/** Converter for transforming JSON records to MARC records. */
 @Log4j2
 @Component
 public class JsonToMarcConverter {
 
-  /**
-   * Converts a JSON record to a MARC record string.
-   */
+  /** Converts a JSON record to a MARC record string. */
   public String convertJsonRecordToMarcRecord(
-      String jsonRecord,
-      List<VariableField> additionalFields,
-      MappingProfile mappingProfile
-  ) throws IOException {
-    return convertJsonRecordToMarcRecord(
-        jsonRecord,
-        additionalFields,
-        mappingProfile,
-        true
-    ).toString();
+      String jsonRecord, List<VariableField> additionalFields, MappingProfile mappingProfile)
+      throws IOException {
+    return convertJsonRecordToMarcRecord(jsonRecord, additionalFields, mappingProfile, true)
+        .toString();
   }
 
-  /**
-   * Converts a JSON record to a MARC record as a ByteArrayOutputStream.
-   */
+  /** Converts a JSON record to a MARC record as a ByteArrayOutputStream. */
   public ByteArrayOutputStream convertJsonRecordToMarcRecord(
       String jsonRecord,
       List<VariableField> additionalFields,
       MappingProfile mappingProfile,
-      boolean isUtf
-  ) throws IOException {
+      boolean isUtf)
+      throws IOException {
     var byteArrayInputStream =
         new ByteArrayInputStream(jsonRecord.getBytes(StandardCharsets.UTF_8));
     var byteArrayOutputStream = new ByteArrayOutputStream();
-    try (byteArrayInputStream; byteArrayOutputStream) {
+    try (byteArrayInputStream;
+        byteArrayOutputStream) {
       var marcJsonReader = new MarcJsonReader(byteArrayInputStream);
       var marcStreamWriter =
           new MarcStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8.name());
       if (!isUtf) {
         marcStreamWriter.setConverter(new UnicodeToAnsel());
       }
-      writeMarc(
-          marcJsonReader,
-          marcStreamWriter,
-          additionalFields,
-          mappingProfile
-      );
+      writeMarc(marcJsonReader, marcStreamWriter, additionalFields, mappingProfile);
       return byteArrayOutputStream;
     } catch (IOException e) {
       log.error(e.getMessage());
@@ -76,8 +60,7 @@ public class JsonToMarcConverter {
       MarcJsonReader marcJsonReader,
       MarcStreamWriter marcStreamWriter,
       List<VariableField> marcFields,
-      MappingProfile mappingProfile
-  ) {
+      MappingProfile mappingProfile) {
     var suppressProcessor = new MarcSuppressProcessor(mappingProfile);
     try {
       while (marcJsonReader.hasNext()) {
@@ -94,10 +77,7 @@ public class JsonToMarcConverter {
     }
   }
 
-  private Record appendAdditionalFields(
-      Record marcRecord,
-      List<VariableField> marcFields
-  ) {
+  private Record appendAdditionalFields(Record marcRecord, List<VariableField> marcFields) {
     SortedMarcFactoryImpl sortedMarcFactory = new SortedMarcFactoryImpl();
     var sortedRecord = sortedMarcFactory.newRecord();
     sortedRecord.setLeader(marcRecord.getLeader());

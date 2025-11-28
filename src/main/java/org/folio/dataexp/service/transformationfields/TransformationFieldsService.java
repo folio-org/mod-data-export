@@ -25,9 +25,7 @@ import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.spring.FolioExecutionContext;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for building and validating transformation fields for export.
- */
+/** Service for building and validating transformation fields for export. */
 @Service
 @RequiredArgsConstructor
 public class TransformationFieldsService {
@@ -48,18 +46,19 @@ public class TransformationFieldsService {
    */
   public TransformationFieldCollection getTransformationFields() {
     List<TransformationField> transformationFields = new ArrayList<>();
-    var referenceData = referenceDataProvider
-        .getReferenceDataForTransformationFields(folioExecutionContext.getTenantId());
-    transformationFields.addAll(buildTransformationFields(INSTANCE, INSTANCE_FIELDS_CONFIGS,
-        referenceData));
-    transformationFields.addAll(buildTransformationFields(HOLDINGS, HOLDINGS_FIELDS_CONFIGS,
-        referenceData));
-    transformationFields.addAll(buildTransformationFields(ITEM, ITEM_FIELDS_CONFIGS,
-        referenceData));
+    var referenceData =
+        referenceDataProvider.getReferenceDataForTransformationFields(
+            folioExecutionContext.getTenantId());
+    transformationFields.addAll(
+        buildTransformationFields(INSTANCE, INSTANCE_FIELDS_CONFIGS, referenceData));
+    transformationFields.addAll(
+        buildTransformationFields(HOLDINGS, HOLDINGS_FIELDS_CONFIGS, referenceData));
+    transformationFields.addAll(
+        buildTransformationFields(ITEM, ITEM_FIELDS_CONFIGS, referenceData));
     transformationFields.sort(Comparator.comparing(TransformationField::getFieldId));
     return new TransformationFieldCollection()
-      .transformationFields(transformationFields)
-      .totalRecords(transformationFields.size());
+        .transformationFields(transformationFields)
+        .totalRecords(transformationFields.size());
   }
 
   /**
@@ -69,10 +68,11 @@ public class TransformationFieldsService {
    * @throws TransformationValidationException if an item transformation is empty
    */
   public void validateTransformations(List<Transformations> transformations) {
-    var invalidTransformation = transformations.stream()
-        .filter(elem -> StringUtils.isEmpty(elem.getTransformation()))
-        .filter(elem -> ITEM.equals(elem.getRecordType()))
-        .findFirst();
+    var invalidTransformation =
+        transformations.stream()
+            .filter(elem -> StringUtils.isEmpty(elem.getTransformation()))
+            .filter(elem -> ITEM.equals(elem.getRecordType()))
+            .findFirst();
     if (invalidTransformation.isPresent()) {
       throw new TransformationValidationException(ITEM_EMPTY_TRANSFORMATION_ERROR_MESSAGE);
     }
@@ -86,18 +86,20 @@ public class TransformationFieldsService {
    * @param wrapper reference data wrapper
    * @return list of transformation fields
    */
-  private List<TransformationField> buildTransformationFields(RecordTypes recordType,
-      Set<TransformationFieldsConfig> transformationFieldsConfigs, ReferenceDataWrapper wrapper) {
+  private List<TransformationField> buildTransformationFields(
+      RecordTypes recordType,
+      Set<TransformationFieldsConfig> transformationFieldsConfigs,
+      ReferenceDataWrapper wrapper) {
     List<TransformationField> transformationFields = new ArrayList<>();
     for (TransformationFieldsConfig transformationFieldsConfig : transformationFieldsConfigs) {
       if (transformationFieldsConfig.isReferenceData()) {
         List<TransformationField> fieldNamesWithReferenceData =
-            buildTransformationFieldsByReferenceData(recordType, transformationFieldsConfig,
-              wrapper);
+            buildTransformationFieldsByReferenceData(
+                recordType, transformationFieldsConfig, wrapper);
         transformationFields.addAll(fieldNamesWithReferenceData);
       } else {
-        transformationFields.add(buildSimpleTransformationFields(recordType,
-            transformationFieldsConfig));
+        transformationFields.add(
+            buildSimpleTransformationFields(recordType, transformationFieldsConfig));
       }
     }
     return transformationFields;
@@ -110,16 +112,18 @@ public class TransformationFieldsService {
    * @param transformationFieldsConfig the transformation field config
    * @return TransformationField
    */
-  private TransformationField buildSimpleTransformationFields(RecordTypes recordType,
-      TransformationFieldsConfig transformationFieldsConfig) {
+  private TransformationField buildSimpleTransformationFields(
+      RecordTypes recordType, TransformationFieldsConfig transformationFieldsConfig) {
     return new TransformationField()
         .recordType(recordType)
         .path(pathBuilder.build(recordType, transformationFieldsConfig))
-        .displayNameKey(displayNameKeyBuilder.build(recordType,
-            transformationFieldsConfig.getFieldId()))
+        .displayNameKey(
+            displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()))
         .fieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId()))
-        .metadataParameters(isEmpty(transformationFieldsConfig.getMetadataParameters()) ? null :
-          transformationFieldsConfig.getMetadataParameters());
+        .metadataParameters(
+            isEmpty(transformationFieldsConfig.getMetadataParameters())
+                ? null
+                : transformationFieldsConfig.getMetadataParameters());
   }
 
   /**
@@ -132,23 +136,28 @@ public class TransformationFieldsService {
    */
   private List<TransformationField> buildTransformationFieldsByReferenceData(
       RecordTypes recordType,
-      TransformationFieldsConfig transformationFieldsConfig, ReferenceDataWrapper wrapper) {
+      TransformationFieldsConfig transformationFieldsConfig,
+      ReferenceDataWrapper wrapper) {
     var referenceDataEntries = wrapper.get(transformationFieldsConfig.getReferenceDataKey());
     List<TransformationField> subTransformationFields = new ArrayList<>();
-    for (Map.Entry<String, JsonObjectWrapper> referenceDataEntry
-        : referenceDataEntries.entrySet()) {
-      var referenceDataValue = referenceDataEntry.getValue().getMap().get(REFERENCE_DATA_NAME_KEY)
-          .toString();
-      var transformationField = new TransformationField()
-          .recordType(recordType)
-          .path(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry))
-          .fieldId(fieldIdBuilder.build(recordType, transformationFieldsConfig.getFieldId(),
-              referenceDataValue))
-          .displayNameKey(displayNameKeyBuilder.build(recordType,
-              transformationFieldsConfig.getFieldId()))
-          .referenceDataValue(referenceDataValue)
-          .metadataParameters(isEmpty(transformationFieldsConfig.getMetadataParameters())
-            ? null : transformationFieldsConfig.getMetadataParameters());
+    for (Map.Entry<String, JsonObjectWrapper> referenceDataEntry :
+        referenceDataEntries.entrySet()) {
+      var referenceDataValue =
+          referenceDataEntry.getValue().getMap().get(REFERENCE_DATA_NAME_KEY).toString();
+      var transformationField =
+          new TransformationField()
+              .recordType(recordType)
+              .path(pathBuilder.build(recordType, transformationFieldsConfig, referenceDataEntry))
+              .fieldId(
+                  fieldIdBuilder.build(
+                      recordType, transformationFieldsConfig.getFieldId(), referenceDataValue))
+              .displayNameKey(
+                  displayNameKeyBuilder.build(recordType, transformationFieldsConfig.getFieldId()))
+              .referenceDataValue(referenceDataValue)
+              .metadataParameters(
+                  isEmpty(transformationFieldsConfig.getMetadataParameters())
+                      ? null
+                      : transformationFieldsConfig.getMetadataParameters());
       subTransformationFields.add(transformationField);
     }
     return subTransformationFields;

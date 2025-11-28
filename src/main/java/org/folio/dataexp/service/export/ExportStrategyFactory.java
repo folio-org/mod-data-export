@@ -18,9 +18,7 @@ import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.export.strategies.ld.LinkedDataExportStrategy;
 import org.springframework.stereotype.Component;
 
-/**
- * Factory for selecting the appropriate export strategy based on request or record type.
- */
+/** Factory for selecting the appropriate export strategy based on request or record type. */
 @Component
 @AllArgsConstructor
 public class ExportStrategyFactory {
@@ -76,71 +74,59 @@ public class ExportStrategyFactory {
     };
   }
 
-  /**
-   * Extract the mapping profile from the job profile associated with the export request.
-   */
+  /** Extract the mapping profile from the job profile associated with the export request. */
   private MappingProfileEntity getMappingProfileEntity(ExportRequest exportRequest) {
-    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(
-        exportRequest.getJobProfileId());
+    var jobProfileEntity =
+        jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var mappingProfileId = jobProfileEntity.getJobProfile().getMappingProfileId();
     return mappingProfileEntityRepository.getReferenceById(mappingProfileId);
   }
 
-  /**
-   * Determine if a mapping proflie is in the set of default mapping profiles.
-   */
+  /** Determine if a mapping proflie is in the set of default mapping profiles. */
   private boolean isDefaultMappingProfile(MappingProfileEntity mappingProfileEntity) {
     return mappingProfileEntity.getMappingProfile().getDefault().booleanValue();
   }
 
-  /**
-   * Evalute if an export request relates to holdings.
-   */
-  private boolean isHolding(ExportRequest exportRequest,
-      MappingProfileEntity mappingProfileEntity) {
-    var isHoldingProfile = isDefaultProfileRecordType(mappingProfileEntity,
-        RecordTypes.HOLDINGS);
-    var isHoldingRequest = isCustomProfileIdType(exportRequest, mappingProfileEntity,
-        ExportRequest.IdTypeEnum.HOLDING);
+  /** Evalute if an export request relates to holdings. */
+  private boolean isHolding(
+      ExportRequest exportRequest, MappingProfileEntity mappingProfileEntity) {
+    var isHoldingProfile = isDefaultProfileRecordType(mappingProfileEntity, RecordTypes.HOLDINGS);
+    var isHoldingRequest =
+        isCustomProfileIdType(
+            exportRequest, mappingProfileEntity, ExportRequest.IdTypeEnum.HOLDING);
     return isHoldingProfile || isHoldingRequest;
   }
 
-  /**
-   * Evalute if an export request relates to authorities.
-   */
-  private boolean isAuthority(ExportRequest exportRequest,
-      MappingProfileEntity mappingProfileEntity) {
-    var isAuthorityProfile = isDefaultProfileRecordType(mappingProfileEntity,
-        RecordTypes.AUTHORITY);
-    var isAuthorityRequest = isCustomProfileIdType(exportRequest, mappingProfileEntity,
-        ExportRequest.IdTypeEnum.AUTHORITY);
+  /** Evalute if an export request relates to authorities. */
+  private boolean isAuthority(
+      ExportRequest exportRequest, MappingProfileEntity mappingProfileEntity) {
+    var isAuthorityProfile =
+        isDefaultProfileRecordType(mappingProfileEntity, RecordTypes.AUTHORITY);
+    var isAuthorityRequest =
+        isCustomProfileIdType(
+            exportRequest, mappingProfileEntity, ExportRequest.IdTypeEnum.AUTHORITY);
     return isAuthorityProfile || isAuthorityRequest;
   }
 
-  /**
-   * Evalute if an export request relates to Linked Data.
-   */
+  /** Evalute if an export request relates to Linked Data. */
   private boolean isLinkedData(MappingProfileEntity mappingProfileEntity) {
     // Linked Data is not currently available as a custom mapping profile option, otherwise
     // additional input about the record type would be necessary from the user.
     return isDefaultProfileRecordType(mappingProfileEntity, RecordTypes.LINKED_DATA);
   }
 
-  /**
-   * Evalute if a default mapping profile and if it relates to the given record type.
-   */
-  private boolean isDefaultProfileRecordType(MappingProfileEntity mappingProfileEntity,
-      RecordTypes type) {
+  /** Evalute if a default mapping profile and if it relates to the given record type. */
+  private boolean isDefaultProfileRecordType(
+      MappingProfileEntity mappingProfileEntity, RecordTypes type) {
     return isDefaultMappingProfile(mappingProfileEntity)
         && mappingProfileEntity.getMappingProfile().getRecordTypes().contains(type);
   }
 
-  /**
-   * Evaluate if a custom mapping profile and if it that relates to the given ID type.
-   */
-  private boolean isCustomProfileIdType(ExportRequest exportRequest,
-      MappingProfileEntity mappingProfileEntity, ExportRequest.IdTypeEnum type) {
-    return !isDefaultMappingProfile(mappingProfileEntity)
-        && exportRequest.getIdType() == type;
+  /** Evaluate if a custom mapping profile and if it that relates to the given ID type. */
+  private boolean isCustomProfileIdType(
+      ExportRequest exportRequest,
+      MappingProfileEntity mappingProfileEntity,
+      ExportRequest.IdTypeEnum type) {
+    return !isDefaultMappingProfile(mappingProfileEntity) && exportRequest.getIdType() == type;
   }
 }

@@ -9,9 +9,7 @@ import java.util.Arrays;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.springframework.stereotype.Component;
 
-/**
- * Builder for field IDs for transformation fields.
- */
+/** Builder for field IDs for transformation fields. */
 @Component
 public class FieldIdBuilder {
 
@@ -26,8 +24,8 @@ public class FieldIdBuilder {
    * @return the field ID
    */
   public String build(RecordTypes recordType, String fieldConfigId) {
-    return join(DOT_DELIMITER, recordType.toString().toLowerCase(),
-        getFormattedName(fieldConfigId));
+    return join(
+        DOT_DELIMITER, recordType.toString().toLowerCase(), getFormattedName(fieldConfigId));
   }
 
   /**

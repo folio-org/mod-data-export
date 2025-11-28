@@ -6,9 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * DTO for job payload containing query and entity type.
- */
+/** DTO for job payload containing query and entity type. */
 @Data
 @With
 @AllArgsConstructor
@@ -16,31 +14,19 @@ import lombok.With;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IdsJobPayload {
 
-  /**
-   * CQL query string.
-   */
+  /** CQL query string. */
   private String query;
 
-  /**
-   * Type of entity for the job.
-   */
+  /** Type of entity for the job. */
   private EntityType entityType;
 
-  /**
-   * Supported entity types.
-   */
+  /** Supported entity types. */
   public enum EntityType {
-    /**
-     * Instance entity type.
-     */
+    /** Instance entity type. */
     INSTANCE,
-    /**
-     * Holdings entity type.
-     */
+    /** Holdings entity type. */
     HOLDINGS,
-    /**
-     * Authority entity type.
-     */
+    /** Authority entity type. */
     AUTHORITY
   }
 }

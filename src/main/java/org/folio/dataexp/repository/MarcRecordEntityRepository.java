@@ -6,11 +6,8 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.springframework.data.repository.Repository;
 
-/**
- * Repository for {@link MarcRecordEntity}.
- */
-public interface MarcRecordEntityRepository
-    extends Repository<MarcRecordEntity, UUID> {
+/** Repository for {@link MarcRecordEntity}. */
+public interface MarcRecordEntityRepository extends Repository<MarcRecordEntity, UUID> {
 
   /**
    * Finds MARC records by external IDs, record type, and states.
@@ -21,8 +18,5 @@ public interface MarcRecordEntityRepository
    * @return list of MarcRecordEntity
    */
   List<MarcRecordEntity> findByExternalIdInAndRecordTypeIsAndStateIn(
-      Set<UUID> ids,
-      String recordType,
-      Set<String> states
-  );
+      Set<UUID> ids, String recordType, Set<String> states);
 }

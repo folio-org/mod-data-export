@@ -6,10 +6,22 @@
   <!-- line length -->
   <suppress checks="LineLength"
     files="ExportIdEntityRepository.java"
-    lines="48,109"/>
+    lines="44,94"/>
   <suppress checks="LineLength"
     files="RuleFactoryTest.java"
-    lines="143,223,252,275,306,365,750,868,905"/>
+    lines="141,276,368,795,921,957"/>
+  <suppress checks="LineLength"
+    files="FileDefinitionEntityRepository.java"
+    lines="22"/>
+  <suppress checks="LineLength"
+    files="ErrorCode.java"
+    lines="138,142"/>
+  <suppress checks="LineLength"
+    files="TransformationFieldsConfig.java"
+    lines="54"/>
+  <suppress checks="LineLength"
+    files="RuleFactoryTest.java"
+    lines="223,252"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"

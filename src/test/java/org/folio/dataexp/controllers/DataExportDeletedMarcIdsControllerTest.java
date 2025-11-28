@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class DataExportDeletedMarcIdsControllerTest extends BaseDataExportInitializer {
 
-  @MockitoBean
-  private ExportDeletedMarcIdsService exportDeletedMarcIdsService;
+  @MockitoBean private ExportDeletedMarcIdsService exportDeletedMarcIdsService;
 
   @Test
   @SneakyThrows
@@ -25,10 +24,11 @@ class DataExportDeletedMarcIdsControllerTest extends BaseDataExportInitializer {
     request.setFrom(new Date());
     request.setTo(new Date());
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/export-deleted")
-        .headers(defaultHeaders())
-        .content(asJsonString(request)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/export-deleted")
+                .headers(defaultHeaders())
+                .content(asJsonString(request)))
         .andExpect(status().isOk());
 
     verify(exportDeletedMarcIdsService)

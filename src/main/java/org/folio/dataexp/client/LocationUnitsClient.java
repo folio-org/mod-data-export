@@ -9,9 +9,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving location units such as campuses, institutions, and libraries.
- */
+/** Feign client for retrieving location units such as campuses, institutions, and libraries. */
 @FeignClient(name = "location-units")
 public interface LocationUnitsClient {
   /**

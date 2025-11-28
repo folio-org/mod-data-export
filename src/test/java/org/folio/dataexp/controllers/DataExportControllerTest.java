@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 class DataExportControllerTest extends BaseDataExportInitializer {
 
-  @MockitoBean
-  private DataExportService dataExportService;
+  @MockitoBean private DataExportService dataExportService;
 
   @Test
   @SneakyThrows
@@ -26,10 +25,11 @@ class DataExportControllerTest extends BaseDataExportInitializer {
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
-    mockMvc.perform(MockMvcRequestBuilders
-        .post("/data-export/export")
-        .headers(defaultHeaders())
-        .content(asJsonString(exportRequest)))
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/data-export/export")
+                .headers(defaultHeaders())
+                .content(asJsonString(exportRequest)))
         .andExpect(status().isNoContent());
 
     verify(dataExportService).postDataExport(isA(ExportRequest.class));

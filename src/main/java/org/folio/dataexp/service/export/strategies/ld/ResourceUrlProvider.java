@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
- * Provide a means to supply the host portion of a resource URL.
- * This is not stored in the graph, and this class is named as it
- * is so the export converter can find it and use it to generate URLs.
+ * Provide a means to supply the host portion of a resource URL. This is not stored in the graph,
+ * and this class is named as it is so the export converter can find it and use it to generate URLs.
  */
 @Service
 @RequiredArgsConstructor
