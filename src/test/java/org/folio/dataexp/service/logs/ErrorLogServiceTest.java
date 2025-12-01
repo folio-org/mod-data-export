@@ -88,9 +88,9 @@ class ErrorLogServiceTest {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     errorLogService.save(errorLog);
 
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), any(), isA(java.util.Date.class),
-            isA(String.class), any());
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class), any(), isA(java.util.Date.class), isA(String.class), any());
   }
 
   @Test
@@ -100,9 +100,9 @@ class ErrorLogServiceTest {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     errorLogService.save(errorLog);
 
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), any(), isA(java.util.Date.class),
-            isA(String.class), any());
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class), any(), isA(java.util.Date.class), isA(String.class), any());
   }
 
   @Test
@@ -117,9 +117,9 @@ class ErrorLogServiceTest {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     errorLogService.saveGeneralError("errorCode", UUID.randomUUID());
 
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), any(), isA(java.util.Date.class),
-            isA(String.class), isA(UUID.class));
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class), any(), isA(java.util.Date.class), isA(String.class), isA(UUID.class));
   }
 
   @Test
@@ -137,15 +137,17 @@ class ErrorLogServiceTest {
     var jobExecutionId = UUID.randomUUID();
     errorLogService.saveCommonExportFailsErrors(commonFails, 3, jobExecutionId);
     verify(errorLogEntityCqlRepository, times(3))
-            .insertIfNotExists(
-                    isA(UUID.class), isA(String.class), isA(java.util.Date.class),
-                    isA(String.class), isA(UUID.class));
+        .insertIfNotExists(
+            isA(UUID.class),
+            isA(String.class),
+            isA(java.util.Date.class),
+            isA(String.class),
+            isA(UUID.class));
   }
 
   @Test
   @SneakyThrows
   void saveFailedToReadInputFileErrorTest() {
-    var jobExecutionId = UUID.randomUUID();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
@@ -153,24 +155,27 @@ class ErrorLogServiceTest {
     var expectedErrorLog = new ErrorLog();
     expectedErrorLog.setErrorMessageCode(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode());
     when(objectMapper.readValue(any(String.class), eq(ErrorLog.class)))
-            .thenReturn(expectedErrorLog);
+        .thenReturn(expectedErrorLog);
     when(objectMapper.writeValueAsString(isA(ErrorLog.class))).thenReturn("jsonString");
 
+    var jobExecutionId = UUID.randomUUID();
     errorLogService.saveFailedToReadInputFileError(jobExecutionId);
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), captor.capture(), isA(java.util.Date.class),
-            isA(String.class), isA(UUID.class));
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            captor.capture(),
+            isA(java.util.Date.class),
+            isA(String.class),
+            isA(UUID.class));
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
-    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(),
-            errorLog.getErrorMessageCode());
+    assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), errorLog.getErrorMessageCode());
   }
 
   @Test
   @SneakyThrows
   void saveWithAffectedRecordMarcExceptionErrorTest() {
-    var jobExecutionId = UUID.randomUUID();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
@@ -178,18 +183,23 @@ class ErrorLogServiceTest {
     var expectedErrorLog = new ErrorLog();
     expectedErrorLog.setErrorMessageCode(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode());
     when(objectMapper.readValue(any(String.class), eq(ErrorLog.class)))
-            .thenReturn(expectedErrorLog);
+        .thenReturn(expectedErrorLog);
     when(objectMapper.writeValueAsString(isA(ErrorLog.class))).thenReturn("jsonString");
 
+    var jobExecutionId = UUID.randomUUID();
     errorLogService.saveWithAffectedRecord(
         new JSONObject(),
         ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
         jobExecutionId,
         new MarcException());
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), captor.capture(), isA(java.util.Date.class),
-            isA(String.class), isA(UUID.class));
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            captor.capture(),
+            isA(java.util.Date.class),
+            isA(String.class),
+            isA(UUID.class));
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
     assertEquals(
@@ -200,7 +210,6 @@ class ErrorLogServiceTest {
   @Test
   @SneakyThrows
   void saveWithAffectedRecordErrorTest() {
-    var jobExecutionId = UUID.randomUUID();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
@@ -209,18 +218,23 @@ class ErrorLogServiceTest {
     expectedErrorLog.setErrorMessageCode(ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode());
     expectedErrorLog.setErrorMessageValues(List.of(LONG_MARC_RECORD_MESSAGE));
     when(objectMapper.readValue(any(String.class), eq(ErrorLog.class)))
-            .thenReturn(expectedErrorLog);
+        .thenReturn(expectedErrorLog);
     when(objectMapper.writeValueAsString(isA(ErrorLog.class))).thenReturn("jsonString");
 
+    var jobExecutionId = UUID.randomUUID();
     errorLogService.saveWithAffectedRecord(
         new JSONObject(),
         LONG_MARC_RECORD_MESSAGE,
         ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode(),
         jobExecutionId);
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-            isA(UUID.class), captor.capture(), isA(java.util.Date.class),
-            isA(String.class), isA(UUID.class));
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            captor.capture(),
+            isA(java.util.Date.class),
+            isA(String.class),
+            isA(UUID.class));
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
     assertEquals(
