@@ -56,10 +56,16 @@ public class ErrorLogService {
    */
   public ErrorLogCollection getErrorLogsByQuery(String query, int offset, int limit) {
     query = isEmpty(query) ? QUERY_CQL_ALL_RECORDS : query;
-    var errorLogEntityPage =
-        errorLogEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
+    var errorLogEntityPage = errorLogEntityCqlRepository.findByCql(
+        query,
+        OffsetRequest.of(offset, limit)
+    );
     return new ErrorLogCollection()
-        .errorLogs(errorLogEntityPage.stream().map(ErrorLogEntity::getErrorLog).toList())
+        .errorLogs(
+            errorLogEntityPage.stream()
+                .map(ErrorLogEntity::getErrorLog)
+                .toList()
+        )
         .totalRecords((int) errorLogEntityPage.getTotalElements());
   }
 
@@ -70,9 +76,10 @@ public class ErrorLogService {
    * @return list of ErrorLog
    */
   public List<ErrorLog> getByQuery(String query) {
-    return errorLogEntityCqlRepository
-        .findByCql(query, OffsetRequest.of(0, Integer.MAX_VALUE))
-        .stream()
+    return errorLogEntityCqlRepository.findByCql(
+            query,
+            OffsetRequest.of(0, Integer.MAX_VALUE)
+        ).stream()
         .map(ErrorLogEntity::getErrorLog)
         .toList();
   }
@@ -88,15 +95,15 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
     }
     errorLog.setCreatedDate(new Date());
-    return errorLogEntityCqlRepository
-        .save(
+    return errorLogEntityCqlRepository.save(
             ErrorLogEntity.builder()
                 .id(errorLog.getId())
                 .errorLog(errorLog)
                 .creationDate(errorLog.getCreatedDate())
                 .createdBy(folioExecutionContext.getUserId().toString())
                 .jobExecutionId(errorLog.getJobExecutionId())
-                .build())
+                .build()
+        )
         .getErrorLog();
   }
 
@@ -141,9 +148,12 @@ public class ErrorLogService {
    * @return the saved ErrorLog
    */
   public ErrorLog saveGeneralErrorWithMessageValues(
-      String errorMessageCode, List<String> errorMessageValues, UUID jobExecutionId) {
-    var errorLog =
-        getGeneralErrorLog(errorMessageCode, jobExecutionId).errorMessageValues(errorMessageValues);
+      String errorMessageCode,
+      List<String> errorMessageValues,
+      UUID jobExecutionId
+  ) {
+    var errorLog = getGeneralErrorLog(errorMessageCode, jobExecutionId)
+        .errorMessageValues(errorMessageValues);
     return save(errorLog);
   }
 
@@ -155,7 +165,10 @@ public class ErrorLogService {
    * @param jobExecutionId the job execution UUID
    */
   public void saveCommonExportFailsErrors(
-      CommonExportStatistic commonExportStatistic, int totalErrors, UUID jobExecutionId) {
+      CommonExportStatistic commonExportStatistic,
+      int totalErrors,
+      UUID jobExecutionId
+  ) {
     if (!commonExportStatistic.getInvalidUuidFormat().isEmpty()) {
       var errorLog = new ErrorLog();
       errorLog.setId(UUID.randomUUID());
@@ -217,7 +230,8 @@ public class ErrorLogService {
       JSONObject instance,
       String errorMessageCode,
       UUID jobExecutionId,
-      MarcException marcException) {
+      MarcException marcException
+  ) {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
@@ -225,33 +239,35 @@ public class ErrorLogService {
         instance.containsKey(DELETED_KEY) && (boolean) instance.get(DELETED_KEY)
             ? EMPTY
             : getInventoryRecordLink() + instId;
-    AffectedRecord affectedRecord =
-        new AffectedRecord()
-            .id(instId)
-            .hrid(hrId)
-            .title(title)
-            .recordType(RecordTypes.INSTANCE)
-            .inventoryRecordLink(inventoryLink);
+    AffectedRecord affectedRecord = new AffectedRecord()
+        .id(instId)
+        .hrid(hrId)
+        .title(title)
+        .recordType(RecordTypes.INSTANCE)
+        .inventoryRecordLink(inventoryLink);
     if (instId == null) {
       affectedRecord.setId(
           "UUID cannot be determined because record is invalid: field '999' or subfield 'i'"
-              + " not found");
+          + " not found"
+      );
     }
     if (hrId == null) {
-      affectedRecord.setHrid("HRID cannot be determined because record is invalid: UUID not found");
+      affectedRecord.setHrid(
+          "HRID cannot be determined because record is invalid: UUID not found"
+      );
     }
     if (title == null) {
       affectedRecord.setTitle(
-          "Title cannot be determined because record is invalid: UUID not found");
+          "Title cannot be determined because record is invalid: UUID not found"
+      );
     }
-    var errorLog =
-        new ErrorLog()
-            .errorMessageCode(errorMessageCode)
-            .errorMessageValues(Collections.singletonList(marcException.getMessage()))
-            .logLevel(ErrorLog.LogLevelEnum.ERROR)
-            .jobExecutionId(jobExecutionId)
-            .affectedRecord(affectedRecord)
-            .createdDate(new Date());
+    var errorLog = new ErrorLog()
+        .errorMessageCode(errorMessageCode)
+        .errorMessageValues(Collections.singletonList(marcException.getMessage()))
+        .logLevel(ErrorLog.LogLevelEnum.ERROR)
+        .jobExecutionId(jobExecutionId)
+        .affectedRecord(affectedRecord)
+        .createdDate(new Date());
     return save(errorLog);
   }
 
@@ -265,13 +281,17 @@ public class ErrorLogService {
    * @return the saved ErrorLog
    */
   public ErrorLog saveWithAffectedRecord(
-      JSONObject instance, String errorMessage, String errorMessageCode, UUID jobExecutionId) {
+      JSONObject instance,
+      String errorMessage,
+      String errorMessageCode,
+      UUID jobExecutionId
+  ) {
     String instId = instance.getAsString(ID);
     String hrId = instance.getAsString(HRID);
     String title = instance.getAsString(TITLE);
     String generalEndOfErrorMsg =
         " cannot be determined because instance record is not found or invalid, but still"
-            + " contains more than 1 SRS record";
+        + " contains more than 1 SRS record";
     if (instId == null) {
       instId = "UUID" + generalEndOfErrorMsg;
     }
@@ -283,23 +303,21 @@ public class ErrorLogService {
     }
     String inventoryLink =
         instance.containsKey(DELETED_KEY) && (boolean) instance.get(DELETED_KEY)
-            ? EMPTY
-            : getInventoryRecordLink() + instId;
-    var affectedRecord =
-        new AffectedRecord()
-            .id(instId)
-            .hrid(hrId)
-            .title(title)
-            .recordType(RecordTypes.INSTANCE)
-            .inventoryRecordLink(inventoryLink);
-    var errorLog =
-        new ErrorLog()
-            .errorMessageCode(errorMessageCode)
-            .errorMessageValues(Collections.singletonList(errorMessage))
-            .logLevel(ErrorLog.LogLevelEnum.ERROR)
-            .jobExecutionId(jobExecutionId)
-            .affectedRecord(affectedRecord)
-            .createdDate(new Date());
+          ? EMPTY
+          : getInventoryRecordLink() + instId;
+    var affectedRecord = new AffectedRecord()
+        .id(instId)
+        .hrid(hrId)
+        .title(title)
+        .recordType(RecordTypes.INSTANCE)
+        .inventoryRecordLink(inventoryLink);
+    var errorLog = new ErrorLog()
+        .errorMessageCode(errorMessageCode)
+        .errorMessageValues(Collections.singletonList(errorMessage))
+        .logLevel(ErrorLog.LogLevelEnum.ERROR)
+        .jobExecutionId(jobExecutionId)
+        .affectedRecord(affectedRecord)
+        .createdDate(new Date());
     return save(errorLog);
   }
 
@@ -309,20 +327,31 @@ public class ErrorLogService {
    * @param jobExecutionId the job execution UUID
    * @param notFoundUuids collection of not found UUIDs
    */
-  public void populateUuidsNotFoundErrorLog(UUID jobExecutionId, Collection<String> notFoundUuids) {
-    var errorLogs =
-        errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
-            jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
-    var newUuids =
-        Collections.singletonList(
-            String.join(COMMA_SEPARATOR, notFoundUuids).replace("[", EMPTY).replace("]", EMPTY));
+  public void populateUuidsNotFoundErrorLog(
+      UUID jobExecutionId,
+      Collection<String> notFoundUuids
+  ) {
+    var errorLogs = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
+        jobExecutionId,
+        SOME_UUIDS_NOT_FOUND.getCode()
+    );
+    var newUuids = Collections.singletonList(
+        String.join(COMMA_SEPARATOR, notFoundUuids)
+            .replace("[", EMPTY)
+            .replace("]", EMPTY)
+    );
     if (errorLogs.isEmpty()) {
-      saveGeneralErrorWithMessageValues(SOME_UUIDS_NOT_FOUND.getCode(), newUuids, jobExecutionId);
+      saveGeneralErrorWithMessageValues(
+          SOME_UUIDS_NOT_FOUND.getCode(),
+          newUuids,
+          jobExecutionId
+      );
     } else {
       var errorLog = errorLogs.get(0).getErrorLog();
       var savedUuids = errorLog.getErrorMessageValues().get(0);
       errorLog.setErrorMessageValues(
-          Collections.singletonList(savedUuids + COMMA_SEPARATOR + newUuids));
+          Collections.singletonList(savedUuids + COMMA_SEPARATOR + newUuids)
+      );
       update(errorLog);
     }
   }
@@ -333,15 +362,20 @@ public class ErrorLogService {
    * @param jobExecutionId the job execution UUID
    * @param numberOfNotFoundUuids number of not found UUIDs
    */
-  public void populateUuidsNotFoundNumberErrorLog(UUID jobExecutionId, int numberOfNotFoundUuids) {
-    var errorLogs =
-        errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
-            jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+  public void populateUuidsNotFoundNumberErrorLog(
+      UUID jobExecutionId,
+      int numberOfNotFoundUuids
+  ) {
+    var errorLogs = errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
+        jobExecutionId,
+        SOME_UUIDS_NOT_FOUND.getCode()
+    );
     if (errorLogs.isEmpty()) {
       saveGeneralErrorWithMessageValues(
           SOME_RECORDS_FAILED.getCode(),
           Collections.singletonList(String.valueOf(numberOfNotFoundUuids)),
-          jobExecutionId);
+          jobExecutionId
+      );
     } else {
       var errorLog = errorLogs.get(0).getErrorLog();
       var errorMessageValues = errorLog.getErrorMessageValues();
@@ -349,7 +383,8 @@ public class ErrorLogService {
       int updatedNumberOfNotFoundUuids =
           Integer.parseInt(errorMessageValues.get(0)) + numberOfNotFoundUuids;
       errorLog.setErrorMessageValues(
-          Collections.singletonList(String.valueOf(updatedNumberOfNotFoundUuids)));
+          Collections.singletonList(String.valueOf(updatedNumberOfNotFoundUuids))
+      );
       update(errorLog);
     }
   }
@@ -361,14 +396,19 @@ public class ErrorLogService {
    * @param jobExecutionId the job execution UUID
    * @return true if errors are present, false otherwise
    */
-  public Boolean isErrorsByErrorCodePresent(List<String> errorCodes, UUID jobExecutionId) {
-    var errorCodesString =
-        errorCodes.size() > 1
-            ? "%(" + String.join("|", errorCodes) + ")%"
-            : "%" + errorCodes.get(0) + "%";
+  public Boolean isErrorsByErrorCodePresent(
+      List<String> errorCodes,
+      UUID jobExecutionId
+  ) {
+    var errorCodesString = errorCodes.size() > 1
+        ? "%(" + String.join("|", errorCodes) + ")%"
+        : "%" + errorCodes.get(0) + "%";
     return isNotEmpty(
         errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(
-            jobExecutionId, errorCodesString));
+            jobExecutionId,
+            errorCodesString
+        )
+    );
   }
 
   /**
