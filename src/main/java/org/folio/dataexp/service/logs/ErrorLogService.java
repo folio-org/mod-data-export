@@ -9,15 +9,14 @@ import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static software.amazon.awssdk.utils.StringUtils.isEmpty;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
@@ -92,17 +91,17 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
     }
     errorLog.setCreatedDate(new Date());
-      try {
-          errorLogEntityCqlRepository.insertIfNotExists(
-              errorLog.getId(),
-              objectMapper.writeValueAsString(errorLog),
-              errorLog.getCreatedDate(),
-              folioExecutionContext.getUserId().toString(),
-              errorLog.getJobExecutionId());
-      } catch (JsonProcessingException e) {
-          log.error(e.getMessage());
-      }
-      return errorLog;
+    try {
+      errorLogEntityCqlRepository.insertIfNotExists(
+          errorLog.getId(),
+          objectMapper.writeValueAsString(errorLog),
+          errorLog.getCreatedDate(),
+          folioExecutionContext.getUserId().toString(),
+          errorLog.getJobExecutionId());
+    } catch (JsonProcessingException e) {
+      log.error("Error log was not inserted: {}", e.getMessage());
+    }
+    return errorLog;
   }
 
   /**

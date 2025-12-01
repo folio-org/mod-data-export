@@ -44,11 +44,7 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
               + " ON CONFLICT DO NOTHING",
       nativeQuery = true)
   void insertIfNotExists(
-      UUID id,
-      String jsonb,
-      java.util.Date creationDate,
-      String createdBy,
-      UUID jobExecutionId);
+      UUID id, String jsonb, java.util.Date creationDate, String createdBy, UUID jobExecutionId);
 
   /**
    * Gets error logs by job execution ID and error code.
