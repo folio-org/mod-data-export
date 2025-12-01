@@ -2,7 +2,6 @@ package org.folio.dataexp.repository;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.spring.cql.JpaCqlRepository;
@@ -27,15 +26,29 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
   List<ErrorLogEntity> getByJobExecutionIdAndErrorCodes(
       UUID jobExecutionId, String errorCodesString);
 
+  /**
+   * Inserts an error log if it does not already exist.
+   *
+   * @param id error log UUID
+   * @param errorLog error log DTO
+   * @param creationDate creation date
+   * @param createdBy creator
+   * @param jobExecutionId job execution UUID
+   * @return inserted error log entity or null if it already exists
+   */
   @Modifying
   @Query(
-    value = "INSERT INTO error_logs (id, jsonb, creation_date, created_by, job_execution_id)"
-      + " VALUES (?1, ?2, ?3, ?4, ?5)"
-      + " ON CONFLICT ON INDEX error_logs_unique_idx DO NOTHING",
-    nativeQuery = true
-  )
-  ErrorLogEntity insertIfNotExists(UUID id, ErrorLog errorLog, java.util.Date creationDate,
-                                   String createdBy, UUID jobExecutionId);
+      value =
+          "INSERT INTO error_logs (id, jsonb, creation_date, created_by, job_execution_id)"
+              + " VALUES (?1, ?2, ?3, ?4, ?5)"
+              + " ON CONFLICT ON INDEX error_logs_unique_idx DO NOTHING",
+      nativeQuery = true)
+  ErrorLogEntity insertIfNotExists(
+      UUID id,
+      ErrorLog errorLog,
+      java.util.Date creationDate,
+      String createdBy,
+      UUID jobExecutionId);
 
   /**
    * Gets error logs by job execution ID and error code.
