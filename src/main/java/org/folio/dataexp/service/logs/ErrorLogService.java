@@ -15,6 +15,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
@@ -45,6 +48,7 @@ public class ErrorLogService {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final FolioExecutionContext folioExecutionContext;
   private final ConfigurationService configurationService;
+  private final ObjectMapper objectMapper;
 
   /**
    * Retrieves error logs by CQL query, offset, and limit.
@@ -88,13 +92,17 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
     }
     errorLog.setCreatedDate(new Date());
-    errorLogEntityCqlRepository.insertIfNotExists(
-        errorLog.getId(),
-        errorLog,
-        errorLog.getCreatedDate(),
-        folioExecutionContext.getUserId().toString(),
-        errorLog.getJobExecutionId());
-    return errorLog;
+      try {
+          errorLogEntityCqlRepository.insertIfNotExists(
+              errorLog.getId(),
+              objectMapper.writeValueAsString(errorLog),
+              errorLog.getCreatedDate(),
+              folioExecutionContext.getUserId().toString(),
+              errorLog.getJobExecutionId());
+      } catch (JsonProcessingException e) {
+          log.error(e.getMessage());
+      }
+      return errorLog;
   }
 
   /**
