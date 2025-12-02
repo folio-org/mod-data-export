@@ -9,6 +9,8 @@ import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static software.amazon.awssdk.utils.StringUtils.isEmpty;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +47,7 @@ public class ErrorLogService {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final FolioExecutionContext folioExecutionContext;
   private final ConfigurationService configurationService;
+  private final ObjectMapper objectMapper;
 
   /**
    * Retrieves error logs by CQL query, offset, and limit.
@@ -88,16 +91,17 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
     }
     errorLog.setCreatedDate(new Date());
-    return errorLogEntityCqlRepository
-        .save(
-            ErrorLogEntity.builder()
-                .id(errorLog.getId())
-                .errorLog(errorLog)
-                .creationDate(errorLog.getCreatedDate())
-                .createdBy(folioExecutionContext.getUserId().toString())
-                .jobExecutionId(errorLog.getJobExecutionId())
-                .build())
-        .getErrorLog();
+    try {
+      errorLogEntityCqlRepository.insertIfNotExists(
+          errorLog.getId(),
+          objectMapper.writeValueAsString(errorLog),
+          errorLog.getCreatedDate(),
+          folioExecutionContext.getUserId().toString(),
+          errorLog.getJobExecutionId());
+    } catch (JsonProcessingException e) {
+      log.error("Error log was not inserted: {}", e.getMessage());
+    }
+    return errorLog;
   }
 
   /**
