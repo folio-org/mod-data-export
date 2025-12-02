@@ -150,8 +150,7 @@ public abstract class AbstractLinkedDataExportStrategy extends AbstractExportStr
           var reader = readerOpt.get();
           String line;
           while ((line = reader.readLine()) != null) {
-            finalOutput.write(line);
-            finalOutput.write(System.lineSeparator());
+            finalOutput.write(line + System.lineSeparator());
           }
           Files.deleteIfExists(sliceResult.getOutputFile());
         } else {
