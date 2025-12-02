@@ -6,7 +6,7 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-/** For multithreaded exports, report each thread's indpendent work back to the main thread. */
+/** For multithreaded exports, report each thread's independent work back to the main thread. */
 @Data
 @AllArgsConstructor
 public class ExportSliceResult {
