@@ -1,5 +1,14 @@
 ## v5.3.0 Unreleased
 
+## 12/11/2025 v5.2.3 Released
+
+This release contains story to update endpoint.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.2.2...v5.2.3)
+
+### Stories
+* [MDEXP-861](https://folio-org.atlassian.net/browse/MDEXP-861) Update GET /data-export/download-record/{recordId} endpoint to suppress 999ff field
+
 ## 06/16/2025 v5.2.2 Released
 
 This release contains only cleanup logs
