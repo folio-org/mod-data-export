@@ -117,7 +117,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
   }
 
   private void processDeletedInstances(List<MarcRecordEntity> marcInstances) {
-    if (consortiaService.isMemberTenant(folioExecutionContext.getTenantId())) {
+    if (!consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
       var deletedInstanceIds =
           marcInstances.stream()
               .filter(this::isDeleted)
