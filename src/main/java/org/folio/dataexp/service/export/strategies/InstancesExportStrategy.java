@@ -118,20 +118,21 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   private void processDeletedInstances(List<MarcRecordEntity> marcInstances) {
     if (consortiaService.isMemberTenant(folioExecutionContext.getTenantId())) {
-      var deletedInstanceIds = marcInstances.stream()
-          .filter(this::isDeleted)
-          .map(MarcRecordEntity::getId)
-          .collect(Collectors.toSet());
+      var deletedInstanceIds =
+          marcInstances.stream()
+              .filter(this::isDeleted)
+              .map(MarcRecordEntity::getId)
+              .collect(Collectors.toSet());
       if (!deletedInstanceIds.isEmpty()) {
         var centralTenantId =
             consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         try (var ignored =
-          new FolioExecutionContextSetter(
-              prepareContextForTenant(centralTenantId, folioModuleMetadata,
-                  folioExecutionContext))) {
+            new FolioExecutionContextSetter(
+                prepareContextForTenant(
+                    centralTenantId, folioModuleMetadata, folioExecutionContext))) {
           var sharedInstances =
-            marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-              deletedInstanceIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
+              marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+                  deletedInstanceIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
           combineLists(marcInstances, sharedInstances);
         }
       }
@@ -146,8 +147,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   private void combineLists(List<MarcRecordEntity> dest, List<MarcRecordEntity> source) {
     if (!source.isEmpty()) {
-      var lookup = source.stream()
-          .collect(Collectors.toMap(MarcRecordEntity::getId, e -> e));
+      var lookup = source.stream().collect(Collectors.toMap(MarcRecordEntity::getId, e -> e));
       for (int i = 0; i < dest.size(); i++) {
         var replacement = lookup.get(dest.get(i).getId());
         if (replacement != null) {

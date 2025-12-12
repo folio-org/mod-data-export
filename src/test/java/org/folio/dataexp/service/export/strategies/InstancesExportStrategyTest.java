@@ -483,34 +483,29 @@ class InstancesExportStrategyTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
 
-    var marcRecord = MarcRecordEntity.builder()
-        .externalId(UUID.randomUUID())
-        .state(STATE_DELETED)
-        .build();
-    var sharedMarcRecord = MarcRecordEntity.builder()
-        .externalId(UUID.randomUUID())
-        .state(STATE_ACTUAL)
-        .build();
-    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
-    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
-
-    Map<String, Collection<String>> headers = new HashMap<>();
-    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
-    when(folioExecutionContext.getOkapiHeaders())
-        .thenReturn(headers);
-    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    var marcRecord =
+        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_DELETED).build();
+    var sharedMarcRecord =
+        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_ACTUAL).build();
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-      anySet(), anyString(), anySet()))
+            anySet(), anyString(), anySet()))
         .thenReturn(new ArrayList<>(List.of(marcRecord)))
         .thenReturn(new ArrayList<>(List.of(sharedMarcRecord)));
+    Map<String, Collection<String>> headers = new HashMap<>();
+    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+
     when(consortiaService.isMemberTenant(anyString())).thenReturn(true);
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
-      .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+        .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
     var actualMarcRecords =
-      instancesExportStrategy.getMarcRecords(
-        new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertEquals(2, actualMarcRecords.size());
     assertEquals(STATE_ACTUAL, actualMarcRecords.getFirst().getState());
   }
