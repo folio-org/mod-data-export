@@ -7,7 +7,11 @@ import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
+import static org.folio.dataexp.util.Constants.LEADER_STATUS_DELETED;
+import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
+import static org.folio.dataexp.util.Constants.STATE_DELETED;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_INSTANCE;
+import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,6 +48,7 @@ import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
 import org.marc4j.MarcException;
@@ -92,7 +97,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
         || mappingProfile.getRecordTypes().contains(RecordTypes.SRS)) {
       var marcInstances =
           marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-              externalIds, INSTANCE_MARC_TYPE, Set.of("ACTUAL", "DELETED"));
+              externalIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
+      processDeletedInstances(marcInstances);
       var foundIds =
           marcInstances.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
       externalIds.removeAll(foundIds);
@@ -108,6 +114,47 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       return marcInstances;
     }
     return new ArrayList<>();
+  }
+
+  private void processDeletedInstances(List<MarcRecordEntity> marcInstances) {
+    if (consortiaService.isMemberTenant(folioExecutionContext.getTenantId())) {
+      var deletedInstanceIds = marcInstances.stream()
+          .filter(this::isDeleted)
+          .map(MarcRecordEntity::getId)
+          .collect(Collectors.toSet());
+      if (!deletedInstanceIds.isEmpty()) {
+        var centralTenantId =
+            consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+        try (var ignored =
+          new FolioExecutionContextSetter(
+              prepareContextForTenant(centralTenantId, folioModuleMetadata,
+                  folioExecutionContext))) {
+          var sharedInstances =
+            marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+              deletedInstanceIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
+          combineLists(marcInstances, sharedInstances);
+        }
+      }
+    }
+  }
+
+  private boolean isDeleted(MarcRecordEntity entity) {
+    return STATE_DELETED.equals(entity.getState())
+        || (STATE_ACTUAL.equals(entity.getState())
+            && LEADER_STATUS_DELETED == entity.getLeaderRecordStatus());
+  }
+
+  private void combineLists(List<MarcRecordEntity> dest, List<MarcRecordEntity> source) {
+    if (!source.isEmpty()) {
+      var lookup = source.stream()
+          .collect(Collectors.toMap(MarcRecordEntity::getId, e -> e));
+      for (int i = 0; i < dest.size(); i++) {
+        var replacement = lookup.get(dest.get(i).getId());
+        if (replacement != null) {
+          dest.set(i, replacement);
+        }
+      }
+    }
   }
 
   /**

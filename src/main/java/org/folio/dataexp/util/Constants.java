@@ -56,4 +56,9 @@ public class Constants {
 
   /** Standard file path pattern: original filename, specifier, and suffix. */
   public static final String FILE_NAME_FORMAT = "%s-%s.%s";
+
+  public static final String STATE_ACTUAL = "ACTUAL";
+  public static final String STATE_DELETED = "DELETED";
+  public static final char LEADER_STATUS_DELETED = 'd';
+
 }

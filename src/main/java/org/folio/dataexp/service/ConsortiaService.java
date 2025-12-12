@@ -81,4 +81,14 @@ public class ConsortiaService {
   public boolean isCurrentTenantCentralTenant(String currentTenantId) {
     return getCentralTenantId(currentTenantId).equals(context.getTenantId());
   }
+
+  /**
+   * Checks if the current tenant is member tenant.
+   *
+   * @param currentTenantId The current tenant ID.
+   * @return True if current tenant is member, false otherwise.
+   */
+  public boolean isMemberTenant(String currentTenantId) {
+    return !isCurrentTenantCentralTenant(currentTenantId);
+  }
 }
