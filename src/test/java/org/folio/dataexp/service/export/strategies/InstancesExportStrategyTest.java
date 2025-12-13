@@ -3,6 +3,8 @@ package org.folio.dataexp.service.export.strategies;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
+import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
+import static org.folio.dataexp.util.Constants.STATE_DELETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,8 +22,11 @@ import static org.mockito.Mockito.when;
 import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minidev.json.JSONObject;
@@ -49,6 +54,8 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,6 +88,7 @@ class InstancesExportStrategyTest {
   @Mock private ErrorLogService errorLogService;
   @Mock private HoldingsItemsResolverService holdingsItemsResolverService;
   @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private FolioModuleMetadata folioModuleMetadata;
   @Spy private RuleHandler ruleHandler;
 
   @Captor private ArgumentCaptor<MappingProfile> mappingProfileArgumentCaptor;
@@ -468,5 +476,37 @@ class InstancesExportStrategyTest {
     verify(errorLogService)
         .saveWithAffectedRecord(
             isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
+  }
+
+  @Test
+  void shouldGetInstancesFromCentralTenantWheInstancesDeletedInMemberTenant() {
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(true);
+
+    var marcRecord =
+        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_DELETED).build();
+    var sharedMarcRecord =
+        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_ACTUAL).build();
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+            anySet(), anyString(), anySet()))
+        .thenReturn(new ArrayList<>(List.of(marcRecord)))
+        .thenReturn(new ArrayList<>(List.of(sharedMarcRecord)));
+    Map<String, Collection<String>> headers = new HashMap<>();
+    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
+    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+
+    when(consortiaService.isCurrentTenantCentralTenant(anyString())).thenReturn(false);
+    when(consortiaService.getCentralTenantId(any())).thenReturn("central");
+    var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
+    when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
+        .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
+
+    var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());
+    var actualMarcRecords =
+        instancesExportStrategy.getMarcRecords(
+            new HashSet<>(ids), mappingProfile, new ExportRequest(), UUID.randomUUID());
+    assertEquals(2, actualMarcRecords.size());
+    assertEquals(STATE_ACTUAL, actualMarcRecords.getFirst().getState());
   }
 }
