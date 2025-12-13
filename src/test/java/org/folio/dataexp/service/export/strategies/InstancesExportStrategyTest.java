@@ -496,7 +496,7 @@ class InstancesExportStrategyTest {
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(folioExecutionContext.getTenantId()).thenReturn("member");
 
-    when(consortiaService.isMemberTenant(anyString())).thenReturn(true);
+    when(consortiaService.isCurrentTenantCentralTenant(anyString())).thenReturn(false);
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
     when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
