@@ -147,9 +147,10 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   private void combineLists(List<MarcRecordEntity> dest, List<MarcRecordEntity> source) {
     if (!source.isEmpty()) {
-      var lookup = source.stream().collect(Collectors.toMap(MarcRecordEntity::getId, e -> e));
+      var lookup = source.stream()
+          .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
       for (int i = 0; i < dest.size(); i++) {
-        var replacement = lookup.get(dest.get(i).getId());
+        var replacement = lookup.get(dest.get(i).getExternalId());
         if (replacement != null) {
           dest.set(i, replacement);
         }
