@@ -48,6 +48,7 @@ import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.reader.JPathSyntaxEntityReader;
+import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.folio.writer.RecordWriter;
 import org.folio.writer.impl.MarcRecordWriter;
@@ -75,6 +76,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
   private final ReferenceDataProvider referenceDataProvider;
   private final InstanceWithHridEntityRepository instanceWithHridEntityRepository;
   private final HoldingsItemsResolverService holdingsItemsResolver;
+  private final FolioModuleMetadata folioModuleMetadata;
 
   protected final MarcRecordEntityRepository marcRecordEntityRepository;
 
