@@ -34,7 +34,6 @@ import org.folio.dataexp.repository.MarcAuthorityRecordAllRepository;
 import org.folio.dataexp.service.export.LocalStorageWriter;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -51,7 +50,6 @@ public abstract class AbstractMarcExportStrategy extends AbstractExportStrategy 
   protected InstanceEntityRepository instanceEntityRepository;
   protected MarcAuthorityRecordAllRepository marcAuthorityRecordAllRepository;
   protected FolioExecutionContext folioExecutionContext;
-  protected FolioModuleMetadata folioModuleMetadata;
 
   @PersistenceContext protected EntityManager entityManager;
 
