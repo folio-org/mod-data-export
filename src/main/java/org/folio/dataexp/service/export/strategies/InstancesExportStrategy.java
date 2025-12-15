@@ -125,6 +125,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
               .filter(this::isDeleted)
               .map(MarcRecordEntity::getId)
               .collect(Collectors.toSet());
+      log.info("Deleted records: {}", deletedInstanceIds);
       if (!deletedInstanceIds.isEmpty()) {
         var centralTenantId =
             consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
@@ -135,7 +136,6 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
           var sharedInstances =
               marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
                   deletedInstanceIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
-          log.info("Found instance: {}", sharedInstances.getFirst());
           combineLists(marcInstances, sharedInstances);
         }
       }
