@@ -123,9 +123,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       var deletedInstanceIds =
           marcInstances.stream()
               .filter(this::isDeleted)
-              .map(MarcRecordEntity::getId)
+              .map(MarcRecordEntity::getExternalId)
               .collect(Collectors.toSet());
-      log.info("Deleted records: {}", deletedInstanceIds);
       if (!deletedInstanceIds.isEmpty()) {
         var centralTenantId =
             consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
