@@ -483,10 +483,11 @@ class InstancesExportStrategyTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
 
+    var externalId = UUID.randomUUID();
     var marcRecord =
-        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_DELETED).build();
+        MarcRecordEntity.builder().externalId(externalId).state(STATE_DELETED).build();
     var sharedMarcRecord =
-        MarcRecordEntity.builder().externalId(UUID.randomUUID()).state(STATE_ACTUAL).build();
+        MarcRecordEntity.builder().externalId(externalId).state(STATE_ACTUAL).build();
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             anySet(), anyString(), anySet()))
         .thenReturn(new ArrayList<>(List.of(marcRecord)))

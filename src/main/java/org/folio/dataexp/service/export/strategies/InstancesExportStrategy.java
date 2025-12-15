@@ -123,7 +123,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
       var deletedInstanceIds =
           marcInstances.stream()
               .filter(this::isDeleted)
-              .map(MarcRecordEntity::getId)
+              .map(MarcRecordEntity::getExternalId)
               .collect(Collectors.toSet());
       if (!deletedInstanceIds.isEmpty()) {
         var centralTenantId =
@@ -149,9 +149,10 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   private void combineLists(List<MarcRecordEntity> dest, List<MarcRecordEntity> source) {
     if (!source.isEmpty()) {
-      var lookup = source.stream().collect(Collectors.toMap(MarcRecordEntity::getId, e -> e));
+      var lookup = source.stream()
+          .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
       for (int i = 0; i < dest.size(); i++) {
-        var replacement = lookup.get(dest.get(i).getId());
+        var replacement = lookup.get(dest.get(i).getExternalId());
         if (replacement != null) {
           dest.set(i, replacement);
         }
