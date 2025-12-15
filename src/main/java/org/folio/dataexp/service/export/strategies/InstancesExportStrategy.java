@@ -135,6 +135,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
           var sharedInstances =
               marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
                   deletedInstanceIds, INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL, STATE_DELETED));
+          log.info("Found instance: {}", sharedInstances.getFirst());
           combineLists(marcInstances, sharedInstances);
         }
       }
