@@ -117,7 +117,7 @@ class InstancesExportStrategyTest {
             anySet(), anyString(), anySet()))
         .thenReturn(new ArrayList<>(List.of(marcRecord)));
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
-    when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
+    when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(eq("central"), anySet()))
         .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
     var actualMarcRecords =
@@ -479,13 +479,12 @@ class InstancesExportStrategyTest {
   }
 
   @Test
-  void shouldGetInstancesFromCentralTenantWheInstancesDeletedInMemberTenant() {
+  void shouldGetInstancesFromCentralTenantWhenInstancesDeletedInMemberTenant() {
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
 
     var externalId = UUID.randomUUID();
-    var marcRecord =
-        MarcRecordEntity.builder().externalId(externalId).state(STATE_DELETED).build();
+    var marcRecord = MarcRecordEntity.builder().externalId(externalId).state(STATE_DELETED).build();
     var sharedMarcRecord =
         MarcRecordEntity.builder().externalId(externalId).state(STATE_ACTUAL).build();
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
@@ -500,7 +499,7 @@ class InstancesExportStrategyTest {
     when(consortiaService.isCurrentTenantCentralTenant(anyString())).thenReturn(false);
     when(consortiaService.getCentralTenantId(any())).thenReturn("central");
     var recordFromCentralTenant = MarcRecordEntity.builder().externalId(UUID.randomUUID()).build();
-    when(marcInstanceRecordRepository.findByExternalIdIn(eq("central"), anySet()))
+    when(marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(eq("central"), anySet()))
         .thenReturn(new ArrayList<>(List.of(recordFromCentralTenant)));
 
     var ids = Set.of(marcRecord.getExternalId(), recordFromCentralTenant.getExternalId());

@@ -109,7 +109,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
             consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
         if (StringUtils.isNotEmpty(centralTenantId)) {
           var marcInstancesFromCentralTenant =
-              marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, externalIds);
+              marcInstanceRecordRepository.findActualAndDeletedByExternalIdIn(
+                  centralTenantId, externalIds);
           marcInstances.addAll(marcInstancesFromCentralTenant);
         }
       }
@@ -126,7 +127,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
               .map(MarcRecordEntity::getExternalId)
               .collect(Collectors.toSet());
       var centralTenantId =
-        consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+          consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (!deletedInstanceIds.isEmpty() && StringUtils.isNotEmpty(centralTenantId)) {
         try (var ignored =
             new FolioExecutionContextSetter(
@@ -149,8 +150,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
 
   private void combineLists(List<MarcRecordEntity> dest, List<MarcRecordEntity> source) {
     if (!source.isEmpty()) {
-      var lookup = source.stream()
-          .collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
+      var lookup =
+          source.stream().collect(Collectors.toMap(MarcRecordEntity::getExternalId, e -> e));
       for (int i = 0; i < dest.size(); i++) {
         var replacement = lookup.get(dest.get(i).getExternalId());
         if (replacement != null) {
