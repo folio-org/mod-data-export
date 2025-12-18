@@ -354,10 +354,12 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
           consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (StringUtils.isNotEmpty(centralTenantId)) {
         try (var ignored =
-            new FolioExecutionContextSetter(prepareContextForTenant(
-                centralTenantId, folioModuleMetadata, folioExecutionContext))) {
-          instances = marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-              Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+            new FolioExecutionContextSetter(
+                prepareContextForTenant(
+                    centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+          instances =
+              marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+                  Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
         }
       }
     }
