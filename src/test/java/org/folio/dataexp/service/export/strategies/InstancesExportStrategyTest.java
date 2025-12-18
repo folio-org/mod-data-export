@@ -5,6 +5,7 @@ import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPIN
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.strategies.InstancesExportStrategy.INSTANCE_MARC_TYPE;
+import static org.folio.dataexp.util.Constants.MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID;
 import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
 import static org.folio.dataexp.util.Constants.STATE_DELETED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,8 +101,11 @@ class InstancesExportStrategyTest {
 
   @InjectMocks private InstancesExportStrategy instancesExportStrategy;
 
+  private Map<String, Collection<String>> headers = new HashMap<>();
+
   @BeforeEach
   void setUp() {
+    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
     instancesExportStrategy.errorLogService = errorLogService;
     instancesExportStrategy.entityManager = entityManager;
     instancesExportStrategy.folioExecutionContext = folioExecutionContext;
@@ -496,8 +500,6 @@ class InstancesExportStrategyTest {
             anySet(), anyString(), anySet()))
         .thenReturn(new ArrayList<>(List.of(marcRecord)))
         .thenReturn(new ArrayList<>(List.of(sharedMarcRecord)));
-    Map<String, Collection<String>> headers = new HashMap<>();
-    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(folioExecutionContext.getTenantId()).thenReturn("member");
 
@@ -521,8 +523,6 @@ class InstancesExportStrategyTest {
     var consortiumEntity =
         new MarcRecordEntity().withExternalId(externalId).withState(STATE_ACTUAL);
 
-    Map<String, Collection<String>> headers = new HashMap<>();
-    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
@@ -541,8 +541,6 @@ class InstancesExportStrategyTest {
   void getMarcRecordShouldShouldTrowWhenInstanceWasNotFound() {
     var externalId = UUID.randomUUID();
 
-    Map<String, Collection<String>> headers = new HashMap<>();
-    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
     when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
@@ -555,7 +553,7 @@ class InstancesExportStrategyTest {
         assertThrows(
             DownloadRecordException.class, () -> instancesExportStrategy.getMarcRecord(externalId));
 
-    var expectedMessage = "Couldn't find instance in db for ID: %s".formatted(externalId);
+    var expectedMessage = MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID.formatted(externalId);
     assertEquals(expectedMessage, throwable.getMessage());
   }
 }
