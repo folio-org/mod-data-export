@@ -523,10 +523,10 @@ class InstancesExportStrategyTest {
     var consortiumEntity =
         new MarcRecordEntity().withExternalId(externalId).withState(STATE_ACTUAL);
 
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
-        .thenReturn(Collections.emptyList())
+        .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
         .thenReturn(Collections.singletonList(consortiumEntity));
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(consortiaService.getCentralTenantId("member")).thenReturn("central");
@@ -541,10 +541,10 @@ class InstancesExportStrategyTest {
   void getMarcRecordShouldShouldTrowWhenInstanceWasNotFound() {
     var externalId = UUID.randomUUID();
 
-    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
-        .thenReturn(Collections.emptyList())
+        .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
         .thenReturn(Collections.emptyList());
     when(folioExecutionContext.getTenantId()).thenReturn("member");
     when(consortiaService.getCentralTenantId("member")).thenReturn("central");
