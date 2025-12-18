@@ -59,7 +59,7 @@
     <lib-linked-data-rdf4ld.version>1.0.0-SNAPSHOT</lib-linked-data-rdf4ld.version>
 
     <!-- Test dependencies versions -->
-    <testcontainer.version>1.21.3</testcontainer.version>
+    <testcontainer.version>1.21.4</testcontainer.version>
     <wiremock.version>2.35.2</wiremock.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
 
