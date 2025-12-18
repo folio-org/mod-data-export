@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.springframework.data.repository.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Repository for {@link MarcRecordEntity}. */
 public interface MarcRecordEntityRepository extends Repository<MarcRecordEntity, UUID> {
@@ -17,6 +18,7 @@ public interface MarcRecordEntityRepository extends Repository<MarcRecordEntity,
    * @param states set of states
    * @return list of MarcRecordEntity
    */
+  @Transactional
   List<MarcRecordEntity> findByExternalIdInAndRecordTypeIsAndStateIn(
       Set<UUID> ids, String recordType, Set<String> states);
 }
