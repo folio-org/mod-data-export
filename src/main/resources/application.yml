@@ -25,7 +25,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         enable_lazy_load_no_trans: true
-    show-sql: true
+    show-sql: false
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/changelog-master.xml
