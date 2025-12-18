@@ -349,7 +349,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
   public MarcRecordEntity getMarcRecord(final UUID recordId) {
     var instances =
         marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-            Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+            Set.of(recordId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL));
+    log.info("Local tenant: found: {}", instances);
     if (instances.isEmpty()) {
       var centralTenantId =
           consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
@@ -360,7 +361,8 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
                     centralTenantId, folioModuleMetadata, folioExecutionContext))) {
           instances =
               marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
-                  Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+                  Set.of(recordId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL));
+          log.info("Central tenant: found: {}", instances);
         }
       }
     }
