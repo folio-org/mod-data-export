@@ -358,6 +358,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
             new FolioExecutionContextSetter(
                 prepareContextForTenant(
                     centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+          entityManager.clear();
           instances =
               marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
                   Set.of(recordId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL));
