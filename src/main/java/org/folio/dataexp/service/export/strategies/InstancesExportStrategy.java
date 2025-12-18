@@ -350,11 +350,23 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
         marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
     if (instances.isEmpty()) {
+      var centralTenantId =
+          consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+      if (StringUtils.isNotEmpty(centralTenantId)) {
+        try (var ignored =
+            new FolioExecutionContextSetter(prepareContextForTenant(
+                centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+          instances = marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+              Set.of(recordId), INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+        }
+      }
+    }
+    if (instances.isEmpty()) {
       log.error("getMarcRecord:: Couldn't find instance in db for ID: {}", recordId);
       throw new DownloadRecordException(
           "Couldn't find instance in db for ID: %s".formatted(recordId));
     }
-    return instances.get(0);
+    return instances.getFirst();
   }
 
   /**
