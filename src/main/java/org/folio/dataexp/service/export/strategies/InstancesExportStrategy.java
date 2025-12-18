@@ -351,6 +351,7 @@ public class InstancesExportStrategy extends AbstractMarcExportStrategy {
         marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
             Set.of(recordId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL));
     if (instances.isEmpty()) {
+      entityManager.clear();
       var centralTenantId =
           consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
       if (StringUtils.isNotEmpty(centralTenantId)) {
