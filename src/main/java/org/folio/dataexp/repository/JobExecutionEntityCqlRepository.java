@@ -35,4 +35,13 @@ public interface JobExecutionEntityCqlRepository
               + " AND jsonb ->> 'completedDate' IS NULL",
       nativeQuery = true)
   List<JobExecutionEntity> getFailedExecutionsWithoutCompletedDate();
+
+  /**
+   * Gets all job executions by job profile ID.
+   *
+   * @param jobProfileId job profile UUID
+   * @return list of job execution entities
+   */
+  @Query(value = "SELECT * FROM job_executions WHERE jobprofileid = ?1", nativeQuery = true)
+  List<JobExecutionEntity> getAllByJobProfileId(UUID jobProfileId);
 }

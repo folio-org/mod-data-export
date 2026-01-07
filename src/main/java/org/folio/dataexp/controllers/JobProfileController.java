@@ -19,6 +19,7 @@ import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.rest.resource.JobProfilesApi;
+import org.folio.dataexp.service.JobProfileService;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,7 @@ public class JobProfileController implements JobProfilesApi {
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
   private final UserClient userClient;
+  private final JobProfileService jobProfileService;
 
   /**
    * Deletes a job profile by its ID.
@@ -46,11 +48,7 @@ public class JobProfileController implements JobProfilesApi {
    */
   @Override
   public ResponseEntity<Void> deleteJobProfileById(UUID jobProfileId) {
-    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
-      throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
-    }
-    jobProfileEntityRepository.deleteById(jobProfileId);
+    jobProfileService.deleteJobProfileById(jobProfileId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 

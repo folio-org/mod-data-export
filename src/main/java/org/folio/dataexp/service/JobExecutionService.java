@@ -8,6 +8,7 @@ import static org.folio.dataexp.domain.dto.JobExecution.StatusEnum.FAIL;
 import static org.folio.dataexp.util.ErrorCode.ERROR_JOB_IS_EXPIRED;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -49,6 +50,20 @@ public class JobExecutionService {
   }
 
   /**
+   * Saves a list of JobExecutions to the repository.
+   *
+   * @param jobExecutions The list of JobExecutions to save.
+   * @return The list of saved JobExecutions.
+   */
+  public List<JobExecution> saveAll(List<JobExecution> jobExecutions) {
+    return jobExecutionEntityCqlRepository
+        .saveAll(jobExecutions.stream().map(JobExecutionEntity::fromJobExecution).toList())
+        .stream()
+        .map(JobExecutionEntity::getJobExecution)
+        .toList();
+  }
+
+  /**
    * Gets the next HRID value.
    *
    * @return The next HRID integer.
@@ -74,6 +89,18 @@ public class JobExecutionService {
               updateErrorLogIfJobIsExpired(jobExecution.getId());
               save(jobExecution);
             });
+  }
+
+  /**
+   * Retrieves all JobExecutions associated with a specific JobProfile ID.
+   *
+   * @param jobProfileId The JobProfile UUID.
+   * @return A list of JobExecutions.
+   */
+  public List<JobExecution> getAllByJobProfileId(UUID jobProfileId) {
+    return jobExecutionEntityCqlRepository.getAllByJobProfileId(jobProfileId).stream()
+        .map(JobExecutionEntity::getJobExecution)
+        .toList();
   }
 
   /** Sets the completed date for failed executions that do not have it set. */
