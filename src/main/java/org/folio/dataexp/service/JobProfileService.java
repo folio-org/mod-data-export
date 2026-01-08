@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class JobProfileService {
   private final JobProfileEntityRepository jobProfileEntityRepository;
   private final FolioS3Client s3Client;
   private final JobExecutionService jobExecutionService;
+  private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   /**
    * Deletes a job profile by its ID after checking if it is not a default or locked profile. Also
@@ -37,6 +39,7 @@ public class JobProfileService {
     }
     if (!jobProfileEntity.isLocked()) {
       deleteExportedFilesAndDisableLink(jobProfileId);
+      deleteAssociatedErrors(jobProfileId);
       jobProfileEntityRepository.deleteById(jobProfileId);
     } else {
       throw new LockedJobProfileException(
@@ -47,7 +50,7 @@ public class JobProfileService {
   /**
    * Deletes exported files associated with job executions linked to the specified job profile ID
    * from S3 and disables the links to those files. Also, it removes the job profile ID reference
-   * from the job executions and appends '(deleted)' to the end of job profile name.
+   * from the job executions.
    *
    * @param jobProfileId the UUID of the job profile whose associated exported files are to be
    *     deleted and links disabled
@@ -57,7 +60,6 @@ public class JobProfileService {
     jobExecutionsWithDeletedProfile.forEach(
         jobExecution -> {
           jobExecution.setJobProfileId(null);
-          jobExecution.setJobProfileName(jobExecution.getJobProfileName() + " (deleted)");
           jobExecution
               .getExportedFiles()
               .forEach(
@@ -68,5 +70,11 @@ public class JobProfileService {
                   });
         });
     jobExecutionService.saveAll(jobExecutionsWithDeletedProfile);
+  }
+
+  private void deleteAssociatedErrors(UUID jobProfileId) {
+    var deletedErrors = errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId);
+    log.info(
+        "Deleted {} error logs associated with job profile ID: {}", deletedErrors, jobProfileId);
   }
 }

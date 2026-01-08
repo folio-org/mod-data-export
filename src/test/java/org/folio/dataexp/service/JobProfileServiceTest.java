@@ -21,6 +21,7 @@ import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
+import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,13 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Unit tests for {@link JobProfileService}.
- *
- * <p>This test class covers all methods and scenarios in the JobProfileService, including: -
- * Successful deletion of job profiles - Exception handling for default and locked profiles -
- * Exported file deletion and link disabling - Job execution updates after profile deletion
- */
 @ExtendWith(MockitoExtension.class)
 class JobProfileServiceTest {
 
@@ -47,6 +41,7 @@ class JobProfileServiceTest {
   @Mock private FolioS3Client s3Client;
 
   @Mock private JobExecutionService jobExecutionService;
+  @Mock private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @InjectMocks private JobProfileService jobProfileService;
 
@@ -158,14 +153,14 @@ class JobProfileServiceTest {
     // Verify first job execution
     JobExecution savedExecution1 = savedExecutions.getFirst();
     assertThat(savedExecution1.getJobProfileId()).isNull();
-    assertThat(savedExecution1.getJobProfileName()).isEqualTo("Profile Name (deleted)");
+    assertThat(savedExecution1.getJobProfileName()).isEqualTo("Profile Name");
     assertThat(savedExecution1.getExportedFiles()).hasSize(2);
     savedExecution1.getExportedFiles().forEach(file -> assertThat(file.getFileId()).isNull());
 
     // Verify second job execution
     JobExecution savedExecution2 = savedExecutions.get(1);
     assertThat(savedExecution2.getJobProfileId()).isNull();
-    assertThat(savedExecution2.getJobProfileName()).isEqualTo("Profile Name (deleted)");
+    assertThat(savedExecution2.getJobProfileName()).isEqualTo("Profile Name");
     assertThat(savedExecution2.getExportedFiles()).hasSize(1);
     savedExecution2.getExportedFiles().forEach(file -> assertThat(file.getFileId()).isNull());
   }
@@ -192,7 +187,7 @@ class JobProfileServiceTest {
     List<JobExecution> savedExecutions = jobExecutionListCaptor.getValue();
     assertThat(savedExecutions).hasSize(1);
     assertThat(savedExecutions.getFirst().getJobProfileId()).isNull();
-    assertThat(savedExecutions.getFirst().getJobProfileName()).isEqualTo("Test Profile (deleted)");
+    assertThat(savedExecutions.getFirst().getJobProfileName()).isEqualTo("Test Profile");
   }
 
   @Test
@@ -229,7 +224,7 @@ class JobProfileServiceTest {
     // Then
     verify(jobExecutionService).saveAll(jobExecutionListCaptor.capture());
     List<JobExecution> savedExecutions = jobExecutionListCaptor.getValue();
-    assertThat(savedExecutions.getFirst().getJobProfileName()).isEqualTo("null (deleted)");
+    assertThat(savedExecutions.getFirst().getJobProfileName()).isEqualTo(null);
   }
 
   @Test
@@ -324,16 +319,138 @@ class JobProfileServiceTest {
         .allMatch(file -> file.getFileId() == null);
   }
 
+  @Test
+  void shouldDeleteAssociatedErrors_whenJobProfileIsDeleted() {
+    // Given
+    long deletedErrorCount = 5L;
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
+        .thenReturn(Collections.emptyList());
+    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
+        .thenReturn(deletedErrorCount);
+
+    // When
+    jobProfileService.deleteJobProfileById(jobProfileId);
+
+    // Then
+    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    verify(jobProfileEntityRepository).deleteById(jobProfileId);
+  }
+
+  @Test
+  void shouldHandleNoAssociatedErrors_whenDeletingJobProfile() {
+    // Given
+    long deletedErrorCount = 0L;
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
+        .thenReturn(Collections.emptyList());
+    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
+        .thenReturn(deletedErrorCount);
+
+    // When
+    jobProfileService.deleteJobProfileById(jobProfileId);
+
+    // Then
+    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    verify(jobProfileEntityRepository).deleteById(jobProfileId);
+  }
+
+  @Test
+  void shouldDeleteAssociatedErrors_beforeDeletingJobProfile() {
+    // Given
+    long deletedErrorCount = 10L;
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
+        .thenReturn(Collections.emptyList());
+    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
+        .thenReturn(deletedErrorCount);
+
+    // When
+    jobProfileService.deleteJobProfileById(jobProfileId);
+
+    // Then
+    var inOrder =
+        org.mockito.Mockito.inOrder(
+            errorLogEntityCqlRepository, jobProfileEntityRepository, jobExecutionService);
+    inOrder.verify(jobExecutionService).getAllByJobProfileId(jobProfileId);
+    inOrder.verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    inOrder.verify(jobProfileEntityRepository).deleteById(jobProfileId);
+  }
+
+  @Test
+  void shouldNotDeleteAssociatedErrors_whenJobProfileIsDefault() {
+    // Given
+    jobProfile.setDefault(TRUE);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.deleteJobProfileById(jobProfileId))
+        .isInstanceOf(DefaultJobProfileException.class);
+
+    verify(errorLogEntityCqlRepository, never()).deleteByJobProfileId(any());
+    verify(jobProfileEntityRepository, never()).deleteById(any());
+  }
+
+  @Test
+  void shouldNotDeleteAssociatedErrors_whenJobProfileIsLocked() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.deleteJobProfileById(jobProfileId))
+        .isInstanceOf(LockedJobProfileException.class);
+
+    verify(errorLogEntityCqlRepository, never()).deleteByJobProfileId(any());
+    verify(jobProfileEntityRepository, never()).deleteById(any());
+  }
+
+  @Test
+  void shouldDeleteAssociatedErrorsWithJobExecutionsAndFiles() {
+    // Given
+    UUID jobExecutionId = UUID.randomUUID();
+    String fileName = "export.mrc";
+
+    JobExecution jobExecution = createJobExecution(jobExecutionId, "Test Profile", jobProfileId);
+    jobExecution.setExportedFiles(createExportedFiles(fileName));
+    List<JobExecution> jobExecutions = List.of(jobExecution);
+    long deletedErrorCount = 3L;
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(jobExecutionService.getAllByJobProfileId(jobProfileId)).thenReturn(jobExecutions);
+    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
+        .thenReturn(deletedErrorCount);
+
+    // When
+    jobProfileService.deleteJobProfileById(jobProfileId);
+
+    // Then
+    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    verify(s3Client).remove(any(String.class));
+    verify(jobExecutionService).saveAll(any());
+    verify(jobProfileEntityRepository).deleteById(jobProfileId);
+  }
+
+  @Test
+  void shouldDeleteLargeNumberOfAssociatedErrors_whenJobProfileIsDeleted() {
+    // Given
+    long deletedErrorCount = 1000L;
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
+        .thenReturn(Collections.emptyList());
+    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
+        .thenReturn(deletedErrorCount);
+
+    // When
+    jobProfileService.deleteJobProfileById(jobProfileId);
+
+    // Then
+    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    verify(jobProfileEntityRepository).deleteById(jobProfileId);
+  }
+
   // Helper methods
 
-  /**
-   * Creates a JobExecution instance with the given parameters.
-   *
-   * @param id the job execution ID
-   * @param profileName the job profile name
-   * @param profileId the job profile ID
-   * @return a JobExecution instance
-   */
   private JobExecution createJobExecution(UUID id, String profileName, UUID profileId) {
     JobExecution jobExecution = new JobExecution();
     jobExecution.setId(id);
@@ -343,12 +460,6 @@ class JobProfileServiceTest {
     return jobExecution;
   }
 
-  /**
-   * Creates a set of JobExecutionExportedFilesInner instances with the given file names.
-   *
-   * @param fileNames the file names
-   * @return a set of JobExecutionExportedFilesInner instances
-   */
   private Set<JobExecutionExportedFilesInner> createExportedFiles(String... fileNames) {
     Set<JobExecutionExportedFilesInner> files = new HashSet<>();
     for (String fileName : fileNames) {
