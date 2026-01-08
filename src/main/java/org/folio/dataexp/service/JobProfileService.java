@@ -38,8 +38,8 @@ public class JobProfileService {
       throw new DefaultJobProfileException("Deletion of default job profile is forbidden");
     }
     if (!jobProfileEntity.isLocked()) {
-      deleteExportedFilesAndDisableLink(jobProfileId);
       deleteAssociatedErrors(jobProfileId);
+      deleteExportedFilesAndDisableLink(jobProfileId);
       jobProfileEntityRepository.deleteById(jobProfileId);
     } else {
       throw new LockedJobProfileException(
