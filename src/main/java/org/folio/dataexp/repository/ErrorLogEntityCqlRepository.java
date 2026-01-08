@@ -41,7 +41,7 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
       value =
           "INSERT INTO error_logs (id, jsonb, creation_date, created_by,"
               + "job_execution_id, jobprofileid)"
-              + " VALUES (?, ?::jsonb, ?, ?, ?)"
+              + " VALUES (?, ?::jsonb, ?, ?, ?, ?)"
               + " ON CONFLICT DO NOTHING",
       nativeQuery = true)
   void insertIfNotExists(
