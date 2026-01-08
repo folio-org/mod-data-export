@@ -27,6 +27,8 @@ import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -224,7 +226,7 @@ class JobProfileServiceTest {
     // Then
     verify(jobExecutionService).saveAll(jobExecutionListCaptor.capture());
     List<JobExecution> savedExecutions = jobExecutionListCaptor.getValue();
-    assertThat(savedExecutions.getFirst().getJobProfileName()).isEqualTo(null);
+    assertThat(savedExecutions.getFirst().getJobProfileName()).isNull();
   }
 
   @Test
@@ -249,8 +251,9 @@ class JobProfileServiceTest {
     verify(s3Client).remove(pathCaptor.capture());
 
     String capturedPath = pathCaptor.getValue();
-    assertThat(capturedPath).contains(jobExecutionId.toString());
-    assertThat(capturedPath).contains(fileName);
+    assertThat(capturedPath)
+        .contains(jobExecutionId.toString())
+        .contains(fileName);
   }
 
   @Test
@@ -319,28 +322,10 @@ class JobProfileServiceTest {
         .allMatch(file -> file.getFileId() == null);
   }
 
-  @Test
-  void shouldDeleteAssociatedErrors_whenJobProfileIsDeleted() {
+  @ParameterizedTest
+  @CsvSource({"0", "5", "1000"})
+  void shouldDeleteAssociatedErrors_withVariousErrorCounts(long deletedErrorCount) {
     // Given
-    long deletedErrorCount = 5L;
-    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
-    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
-        .thenReturn(Collections.emptyList());
-    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
-        .thenReturn(deletedErrorCount);
-
-    // When
-    jobProfileService.deleteJobProfileById(jobProfileId);
-
-    // Then
-    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
-    verify(jobProfileEntityRepository).deleteById(jobProfileId);
-  }
-
-  @Test
-  void shouldHandleNoAssociatedErrors_whenDeletingJobProfile() {
-    // Given
-    long deletedErrorCount = 0L;
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(jobExecutionService.getAllByJobProfileId(jobProfileId))
         .thenReturn(Collections.emptyList());
@@ -428,24 +413,6 @@ class JobProfileServiceTest {
     verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
     verify(s3Client).remove(any(String.class));
     verify(jobExecutionService).saveAll(any());
-    verify(jobProfileEntityRepository).deleteById(jobProfileId);
-  }
-
-  @Test
-  void shouldDeleteLargeNumberOfAssociatedErrors_whenJobProfileIsDeleted() {
-    // Given
-    long deletedErrorCount = 1000L;
-    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
-    when(jobExecutionService.getAllByJobProfileId(jobProfileId))
-        .thenReturn(Collections.emptyList());
-    when(errorLogEntityCqlRepository.deleteByJobProfileId(jobProfileId))
-        .thenReturn(deletedErrorCount);
-
-    // When
-    jobProfileService.deleteJobProfileById(jobProfileId);
-
-    // Then
-    verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
     verify(jobProfileEntityRepository).deleteById(jobProfileId);
   }
 
