@@ -91,5 +91,7 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    * @param jobProfileId job profile UUID
    * @return number of deleted error logs
    */
+  @Modifying
+  @Transactional
   long deleteByJobProfileId(UUID jobProfileId);
 }
