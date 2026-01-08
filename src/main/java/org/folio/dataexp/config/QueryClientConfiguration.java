@@ -1,11 +1,11 @@
 package org.folio.dataexp.config;
 
 import feign.Retryer;
+import feign.codec.ErrorDecoder;
+import org.folio.dataexp.util.FqmErrorDecoder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /** Additional configuration for the FQM Feign client, adding a retryer. */
-@Configuration
 public class QueryClientConfiguration {
   
   /**
@@ -20,4 +20,8 @@ public class QueryClientConfiguration {
     return new Retryer.Default(5000, 30000, 7);
   }
 
+  @Bean
+  public ErrorDecoder errorDecoder() {
+    return new FqmErrorDecoder();
+  }
 }
