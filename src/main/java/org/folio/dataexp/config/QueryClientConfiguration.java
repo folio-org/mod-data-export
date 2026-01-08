@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Bean;
 /** Additional configuration for the FQM Feign client, adding a retryer. */
 public class QueryClientConfiguration {
 
-  @Value("${application.feign-query-cilent-retry.initial-wait-time}")
+  @Value("${application.feign-query-client-retry.initial-wait-time}")
   private int initialWaitTime;
 
-  @Value("${application.feign-query-cilent-retry.max-wait-time}")
+  @Value("${application.feign-query-client-retry.max-wait-time}")
   private int maxWaitTime;
 
-  @Value("${application.feign-query-cilent-retry.max-attempts}")
+  @Value("${application.feign-query-client-retry.max-attempts}")
   private int maxAttempts;
 
   /**
