@@ -5,6 +5,7 @@ import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 
+/** Provide alternate to default Feign retryable error decoding */
 public class FqmErrorDecoder implements ErrorDecoder {
 
   @Override

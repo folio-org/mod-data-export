@@ -20,6 +20,12 @@ public class QueryClientConfiguration {
     return new Retryer.Default(5000, 30000, 7);
   }
 
+  /**
+   * Use a custom error decoder to interpret additional HTTP error codes as
+   * retryable beyond the default for HTTP 503.
+   *
+   * @return Feign error decoder
+   */
   @Bean
   public ErrorDecoder errorDecoder() {
     return new FqmErrorDecoder();
