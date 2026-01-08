@@ -251,9 +251,7 @@ class JobProfileServiceTest {
     verify(s3Client).remove(pathCaptor.capture());
 
     String capturedPath = pathCaptor.getValue();
-    assertThat(capturedPath)
-        .contains(jobExecutionId.toString())
-        .contains(fileName);
+    assertThat(capturedPath).contains(jobExecutionId.toString()).contains(fileName);
   }
 
   @Test
@@ -357,8 +355,8 @@ class JobProfileServiceTest {
     var inOrder =
         org.mockito.Mockito.inOrder(
             errorLogEntityCqlRepository, jobProfileEntityRepository, jobExecutionService);
-    inOrder.verify(jobExecutionService).getAllByJobProfileId(jobProfileId);
     inOrder.verify(errorLogEntityCqlRepository).deleteByJobProfileId(jobProfileId);
+    inOrder.verify(jobExecutionService).getAllByJobProfileId(jobProfileId);
     inOrder.verify(jobProfileEntityRepository).deleteById(jobProfileId);
   }
 

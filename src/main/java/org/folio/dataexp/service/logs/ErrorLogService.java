@@ -28,6 +28,7 @@ import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.ConfigurationService;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -48,6 +49,7 @@ public class ErrorLogService {
   private final FolioExecutionContext folioExecutionContext;
   private final ConfigurationService configurationService;
   private final ObjectMapper objectMapper;
+  private final JobExecutionService jobExecutionService;
 
   /**
    * Retrieves error logs by CQL query, offset, and limit.
@@ -97,7 +99,8 @@ public class ErrorLogService {
           objectMapper.writeValueAsString(errorLog),
           errorLog.getCreatedDate(),
           folioExecutionContext.getUserId().toString(),
-          errorLog.getJobExecutionId());
+          errorLog.getJobExecutionId(),
+          jobExecutionService.getById(errorLog.getJobExecutionId()).getJobProfileId());
     } catch (JsonProcessingException e) {
       log.error("Error log was not inserted: {}", e.getMessage());
     }
