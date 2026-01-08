@@ -48,6 +48,16 @@ public class JobProfileService {
   }
 
   /**
+   * Checks if a job profile exists by its ID.
+   *
+   * @param jobProfileId the UUID of the job profile to check
+   * @return true if the job profile exists, false otherwise
+   */
+  public boolean jobProfileExists(UUID jobProfileId) {
+    return jobProfileEntityRepository.existsById(jobProfileId);
+  }
+
+  /**
    * Deletes exported files associated with job executions linked to the specified job profile ID
    * from S3 and disables the links to those files. Also, it removes the job profile ID reference
    * from the job executions.
