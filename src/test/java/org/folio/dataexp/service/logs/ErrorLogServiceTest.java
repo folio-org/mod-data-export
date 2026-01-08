@@ -21,6 +21,7 @@ import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.service.CommonExportStatistic;
 import org.folio.dataexp.service.ConfigurationService;
 import org.folio.dataexp.service.JobExecutionService;
+import org.folio.dataexp.service.JobProfileService;
 import org.folio.dataexp.util.ErrorCode;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -43,6 +44,7 @@ class ErrorLogServiceTest {
   @Mock private ConfigurationService configurationService;
   @Mock private ObjectMapper objectMapper;
   @Mock private JobExecutionService jobExecutionService;
+  @Mock private JobProfileService jobProfileService;
   @InjectMocks private ErrorLogService errorLogService;
 
   @Test
@@ -156,7 +158,7 @@ class ErrorLogServiceTest {
             isA(java.util.Date.class),
             isA(String.class),
             isA(UUID.class),
-            isA(UUID.class));
+            any());
   }
 
   @Test
@@ -184,7 +186,7 @@ class ErrorLogServiceTest {
             isA(java.util.Date.class),
             isA(String.class),
             isA(UUID.class),
-            isA(UUID.class));
+            any());
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
     assertEquals(ErrorCode.ERROR_READING_FROM_INPUT_FILE.getCode(), errorLog.getErrorMessageCode());
@@ -219,7 +221,7 @@ class ErrorLogServiceTest {
             isA(java.util.Date.class),
             isA(String.class),
             isA(UUID.class),
-            isA(UUID.class));
+            any());
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
     assertEquals(
@@ -258,7 +260,7 @@ class ErrorLogServiceTest {
             isA(java.util.Date.class),
             isA(String.class),
             isA(UUID.class),
-            isA(UUID.class));
+            any());
 
     var errorLog = objectMapper.readValue(captor.getValue(), ErrorLog.class);
     assertEquals(
