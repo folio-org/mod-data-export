@@ -67,6 +67,10 @@ public class JobProfileEntity {
   @Column(name = "mappingprofileid")
   private UUID mappingProfileId;
 
+  /** Indicates whether the job profile is locked. */
+  @Column(nullable = false)
+  private boolean locked;
+
   /** Creates a JobProfileEntity from a JobProfile DTO. */
   public static JobProfileEntity fromJobProfile(JobProfile jobProfile) {
     if (isNull(jobProfile.getId())) {

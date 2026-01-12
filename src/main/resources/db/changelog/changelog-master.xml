@@ -21,4 +21,5 @@
     <include file="changes/delete_enum_types.xml" relativeToChangelogFile="true"/>
     <include file="changes/refactored_slice_holdings_all_ids.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_unique_error_idx.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_locked_to_job_profile.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

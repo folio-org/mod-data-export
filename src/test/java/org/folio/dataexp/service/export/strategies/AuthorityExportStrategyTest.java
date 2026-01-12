@@ -17,6 +17,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.UserTenant;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
+import org.folio.dataexp.service.JobExecutionService;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   @Autowired private ErrorLogService errorLogService;
 
   @MockitoBean private ConsortiaClient consortiaClient;
+  @MockitoBean private JobExecutionService jobExecutionService;
 
   @Test
   void shouldReturnOneLocalRecord() {
@@ -196,6 +198,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_1);
       deletedAuthorities.add(LOCAL_AUTHORITY_UUID);
       var jobExecutionId = UUID.randomUUID();
+
+      when(jobExecutionService.getById(jobExecutionId))
+          .thenReturn(
+              new org.folio.dataexp.domain.dto.JobExecution()
+                  .id(jobExecutionId)
+                  .jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE));
       var marcRecords =
           authorityExportStrategy.getMarcRecords(
               deletedAuthorities,
@@ -219,8 +227,13 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
   void shouldExportNothingIfJobProfileIsDeletedAndRecordIsActual() {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       handleCentralTenant();
-
       var jobExecutionId = UUID.randomUUID();
+      when(jobExecutionService.getById(jobExecutionId))
+          .thenReturn(
+              new org.folio.dataexp.domain.dto.JobExecution()
+                  .id(jobExecutionId)
+                  .jobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE));
+
       var mappingProfile = new MappingProfile();
       mappingProfile.setDefault(true);
       var deletedAuthorities = new HashSet<UUID>();
@@ -234,10 +247,10 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       assertThat(marcRecords).isEmpty();
       var errors = errorLogService.getByQuery(format("(jobExecutionId==%s)", jobExecutionId));
       assertThat(errors).hasSize(1);
-      var error = errors.get(0);
+      var error = errors.getFirst();
       assertEquals(
           ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription(),
-          error.getErrorMessageValues().get(0));
+          error.getErrorMessageValues().getFirst());
       assertEquals(
           ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(), error.getErrorMessageCode());
     }
@@ -254,6 +267,12 @@ class AuthorityExportStrategyTest extends BaseDataExportInitializer {
       deletedAuthorities.add(LOCAL_AUTHORITY_UUID);
       deletedAuthorities.add(LOCAL_MARC_AUTHORITY_DELETED_UUID_1);
       var jobExecutionId = UUID.randomUUID();
+
+      when(jobExecutionService.getById(jobExecutionId))
+          .thenReturn(
+              new org.folio.dataexp.domain.dto.JobExecution()
+                  .id(jobExecutionId)
+                  .jobProfileId(DEFAULT_AUTHORITY_JOB_PROFILE));
       var marcRecords =
           authorityExportStrategy.getMarcRecords(
               deletedAuthorities,

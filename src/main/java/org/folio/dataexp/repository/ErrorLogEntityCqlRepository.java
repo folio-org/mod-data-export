@@ -39,12 +39,18 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
   @Transactional
   @Query(
       value =
-          "INSERT INTO error_logs (id, jsonb, creation_date, created_by, job_execution_id)"
-              + " VALUES (?, ?::jsonb, ?, ?, ?)"
+          "INSERT INTO error_logs (id, jsonb, creation_date, created_by,"
+              + "job_execution_id, jobprofileid)"
+              + " VALUES (?, ?::jsonb, ?, ?, ?, ?)"
               + " ON CONFLICT DO NOTHING",
       nativeQuery = true)
   void insertIfNotExists(
-      UUID id, String jsonb, java.util.Date creationDate, String createdBy, UUID jobExecutionId);
+      UUID id,
+      String jsonb,
+      java.util.Date creationDate,
+      String createdBy,
+      UUID jobExecutionId,
+      UUID jobProfileId);
 
   /**
    * Gets error logs by job execution ID and error code.
@@ -78,4 +84,14 @@ public interface ErrorLogEntityCqlRepository extends JpaCqlRepository<ErrorLogEn
    * @return count of error logs
    */
   long countByJobExecutionId(UUID jobExecutionId);
+
+  /**
+   * Deletes error logs by job profile ID.
+   *
+   * @param jobProfileId job profile UUID
+   * @return number of deleted error logs
+   */
+  @Modifying
+  @Transactional
+  long deleteByJobProfileId(UUID jobProfileId);
 }
