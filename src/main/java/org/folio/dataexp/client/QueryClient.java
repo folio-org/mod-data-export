@@ -3,6 +3,7 @@ package org.folio.dataexp.client;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.folio.dataexp.config.QueryClientConfiguration;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /** Feign client for interacting with FQM query endpoints. */
-@FeignClient(name = "query")
+@FeignClient(name = "query", configuration = QueryClientConfiguration.class)
 public interface QueryClient {
   /**
    * Start an asynchronous FQL query.
