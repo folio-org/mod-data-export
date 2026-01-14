@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.logs;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.folio.dataexp.service.ConfigurationService.INVENTORY_RECORD_LINK_KEY;
@@ -95,9 +96,12 @@ public class ErrorLogService {
       errorLog.setId(UUID.randomUUID());
     }
     errorLog.setCreatedDate(new Date());
-    var jobProfileId = jobExecutionService.getById(errorLog.getJobExecutionId()).getJobProfileId();
-    if (!jobProfileService.jobProfileExists(jobProfileId)) {
-      jobProfileId = null;
+    UUID jobProfileId = null;
+    if (nonNull(errorLog.getJobExecutionId())) {
+      jobProfileId = jobExecutionService.getById(errorLog.getJobExecutionId()).getJobProfileId();
+      if (!jobProfileService.jobProfileExists(jobProfileId)) {
+        jobProfileId = null;
+      }
     }
     try {
       errorLogEntityCqlRepository.insertIfNotExists(

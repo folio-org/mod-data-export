@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.s3.client.FolioS3Client;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,7 @@ class JobProfileServiceTest {
 
   @Mock private JobExecutionService jobExecutionService;
   @Mock private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Mock private FolioExecutionContext folioExecutionContext;
 
   @InjectMocks private JobProfileService jobProfileService;
 
@@ -433,5 +436,325 @@ class JobProfileServiceTest {
       files.add(file);
     }
     return files;
+  }
+
+  // Tests for lockProfile method
+
+  @Test
+  void shouldLockProfileSuccessfully_whenProfileIsNotLocked() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    jobProfileEntity.setLocked(false);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    verify(jobProfileEntityRepository).getReferenceById(jobProfileId);
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.isLocked()).as("Profile should be locked").isTrue();
+    assertThat(savedEntity.getLockedBy())
+        .as("LockedBy should be set to current user")
+        .isEqualTo(userId);
+    assertThat(savedEntity.getLockedAt())
+        .as("LockedAt should be set")
+        .isNotNull()
+        .isBeforeOrEqualTo(LocalDateTime.now());
+  }
+
+  @Test
+  void shouldThrowLockedJobProfileException_whenProfileIsAlreadyLocked() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedAt(LocalDateTime.now().minusHours(1));
+    jobProfileEntity.setLockedBy(UUID.randomUUID());
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.lockProfile(jobProfileId))
+        .isInstanceOf(LockedJobProfileException.class)
+        .hasMessage("Profile is already locked.");
+
+    verify(jobProfileEntityRepository).getReferenceById(jobProfileId);
+    verify(jobProfileEntityRepository, never()).save(any());
+    verify(folioExecutionContext, never()).getUserId();
+  }
+
+  @Test
+  void shouldSetCorrectLockDetails_whenLockingProfile() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    LocalDateTime beforeLock = LocalDateTime.now();
+    jobProfileEntity.setLocked(false);
+    jobProfileEntity.setLockedBy(null);
+    jobProfileEntity.setLockedAt(null);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    LocalDateTime afterLock = LocalDateTime.now();
+
+    assertThat(savedEntity.isLocked()).isTrue();
+    assertThat(savedEntity.getLockedBy()).isEqualTo(userId);
+    assertThat(savedEntity.getLockedAt()).isAfterOrEqualTo(beforeLock).isBeforeOrEqualTo(afterLock);
+  }
+
+  @Test
+  void shouldLockNonDefaultProfile_successfully() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    jobProfile.setDefault(FALSE);
+    jobProfileEntity.setLocked(false);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
+  }
+
+  @Test
+  void shouldLockDefaultProfile_successfully() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    jobProfile.setDefault(TRUE);
+    jobProfileEntity.setLocked(false);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
+  }
+
+  // Tests for unlockProfile method
+
+  @Test
+  void shouldUnlockProfileSuccessfully_whenProfileIsLockedAndNotDefault() {
+    // Given
+    jobProfile.setDefault(FALSE);
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedAt(LocalDateTime.now().minusHours(1));
+    jobProfileEntity.setLockedBy(UUID.randomUUID());
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When
+    jobProfileService.unlockProfile(jobProfileId);
+
+    // Then
+    verify(jobProfileEntityRepository).getReferenceById(jobProfileId);
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.isLocked()).as("Profile should be unlocked").isFalse();
+    assertThat(savedEntity.getLockedBy()).as("LockedBy should be cleared").isNull();
+    assertThat(savedEntity.getLockedAt()).as("LockedAt should be cleared").isNull();
+  }
+
+  @Test
+  void shouldThrowLockedJobProfileException_whenUnlockingAlreadyUnlockedProfile() {
+    // Given
+    jobProfile.setDefault(FALSE);
+    jobProfileEntity.setLocked(false);
+    jobProfileEntity.setLockedBy(null);
+    jobProfileEntity.setLockedAt(null);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.unlockProfile(jobProfileId))
+        .isInstanceOf(LockedJobProfileException.class)
+        .hasMessage("Profile is already unlocked.");
+
+    verify(jobProfileEntityRepository).getReferenceById(jobProfileId);
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowLockedJobProfileException_whenUnlockingDefaultProfile() {
+    // Given
+    jobProfile.setDefault(TRUE);
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedAt(LocalDateTime.now().minusHours(1));
+    jobProfileEntity.setLockedBy(UUID.randomUUID());
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.unlockProfile(jobProfileId))
+        .isInstanceOf(LockedJobProfileException.class)
+        .hasMessage("Default job profile cannot be unlocked.");
+
+    verify(jobProfileEntityRepository).getReferenceById(jobProfileId);
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldClearAllLockDetails_whenUnlockingProfile() {
+    // Given
+    jobProfile.setDefault(FALSE);
+    UUID originalLockedBy = UUID.randomUUID();
+    LocalDateTime originalLockedAt = LocalDateTime.now().minusHours(2);
+
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedBy(originalLockedBy);
+    jobProfileEntity.setLockedAt(originalLockedAt);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When
+    jobProfileService.unlockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.isLocked()).isFalse();
+    assertThat(savedEntity.getLockedBy()).isNull();
+    assertThat(savedEntity.getLockedAt()).isNull();
+  }
+
+  @Test
+  void shouldUnlockProfile_whenDefaultIsNullAndProfileIsLocked() {
+    // Given
+    jobProfile.setDefault(null);
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedBy(UUID.randomUUID());
+    jobProfileEntity.setLockedAt(LocalDateTime.now().minusHours(1));
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When
+    jobProfileService.unlockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.isLocked()).isFalse();
+    assertThat(savedEntity.getLockedBy()).isNull();
+    assertThat(savedEntity.getLockedAt()).isNull();
+  }
+
+  @Test
+  void shouldNotCheckDefaultFlag_whenLockingProfile() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    jobProfile.setDefault(TRUE); // Default profile
+    jobProfileEntity.setLocked(false);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.isLocked()).isTrue();
+  }
+
+  @Test
+  void shouldPreserveLockDetailsWhenTryingToLockAlreadyLockedProfile() {
+    // Given
+    UUID originalLockedBy = UUID.randomUUID();
+    LocalDateTime originalLockedAt = LocalDateTime.now().minusDays(1);
+
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedBy(originalLockedBy);
+    jobProfileEntity.setLockedAt(originalLockedAt);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.lockProfile(jobProfileId))
+        .isInstanceOf(LockedJobProfileException.class);
+
+    // Verify entity was not modified
+    assertThat(jobProfileEntity.isLocked()).isTrue();
+    assertThat(jobProfileEntity.getLockedBy()).isEqualTo(originalLockedBy);
+    assertThat(jobProfileEntity.getLockedAt()).isEqualTo(originalLockedAt);
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldPreserveProfileDataWhenLockingProfile() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    String originalName = "Original Profile Name";
+    String originalDescription = "Original Description";
+
+    jobProfile.setName(originalName);
+    jobProfile.setDescription(originalDescription);
+    jobProfileEntity.setLocked(false);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+
+    // When
+    jobProfileService.lockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.getJobProfile().getName()).isEqualTo(originalName);
+    assertThat(savedEntity.getJobProfile().getDescription()).isEqualTo(originalDescription);
+  }
+
+  @Test
+  void shouldPreserveProfileDataWhenUnlockingProfile() {
+    // Given
+    String originalName = "Original Profile Name";
+    String originalDescription = "Original Description";
+
+    jobProfile.setDefault(FALSE);
+    jobProfile.setName(originalName);
+    jobProfile.setDescription(originalDescription);
+    jobProfileEntity.setLocked(true);
+    jobProfileEntity.setLockedBy(UUID.randomUUID());
+    jobProfileEntity.setLockedAt(LocalDateTime.now().minusHours(1));
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When
+    jobProfileService.unlockProfile(jobProfileId);
+
+    // Then
+    ArgumentCaptor<JobProfileEntity> entityCaptor = ArgumentCaptor.forClass(JobProfileEntity.class);
+    verify(jobProfileEntityRepository).save(entityCaptor.capture());
+
+    JobProfileEntity savedEntity = entityCaptor.getValue();
+    assertThat(savedEntity.getJobProfile().getName()).isEqualTo(originalName);
+    assertThat(savedEntity.getJobProfile().getDescription()).isEqualTo(originalDescription);
   }
 }

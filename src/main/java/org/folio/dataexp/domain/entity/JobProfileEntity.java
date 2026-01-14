@@ -71,6 +71,10 @@ public class JobProfileEntity {
   @Column(nullable = false)
   private boolean locked;
 
+  private UUID lockedBy;
+
+  private LocalDateTime lockedAt;
+
   /** Creates a JobProfileEntity from a JobProfile DTO. */
   public static JobProfileEntity fromJobProfile(JobProfile jobProfile) {
     if (isNull(jobProfile.getId())) {
