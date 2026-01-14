@@ -91,7 +91,6 @@ class ErrorLogServiceTest {
     var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(jobExecutionService.getById(any())).thenReturn(new JobExecution());
     errorLogService.save(errorLog);
 
     verify(errorLogEntityCqlRepository)
@@ -104,7 +103,6 @@ class ErrorLogServiceTest {
     var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    when(jobExecutionService.getById(any())).thenReturn(new JobExecution());
     errorLogService.save(errorLog);
 
     verify(errorLogEntityCqlRepository)
