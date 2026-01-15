@@ -85,4 +85,28 @@ public class MappingProfileController implements MappingProfilesApi {
     mappingProfileService.putMappingProfile(mappingProfileId, mappingProfile);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
+
+  /**
+   * Locks a mapping profile by its ID.
+   *
+   * @param mappingProfileId mapping profile UUID
+   * @return response entity with no content status
+   */
+  @Override
+  public ResponseEntity<MappingProfile> postLockMappingProfile(UUID mappingProfileId) {
+    mappingProfileService.lockMappingProfile(mappingProfileId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Unlocks a mapping profile by its ID.
+   *
+   * @param mappingProfileId mapping profile UUID
+   * @return response entity with no content status
+   */
+  @Override
+  public ResponseEntity<MappingProfile> postUnlockMappingProfile(UUID mappingProfileId) {
+    mappingProfileService.unlockMappingProfile(mappingProfileId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }
