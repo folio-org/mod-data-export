@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-  <changeSet id="add_locked_by_at_to_job_profile" author="Firebird">
+  <changeSet id="add_locked_by_at_to_job_profile" author="Firebird" runOnChange="true">
     <sqlFile path="add_locked_by_at_to_job_profile.sql" relativeToChangelogFile="true" />
   </changeSet>
 
