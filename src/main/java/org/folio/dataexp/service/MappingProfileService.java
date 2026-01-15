@@ -1,5 +1,8 @@
 package org.folio.dataexp.service;
 
+import static java.lang.Boolean.TRUE;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,7 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockedMappingProfileException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.MappingProfileValidator;
@@ -37,7 +41,7 @@ public class MappingProfileService {
    */
   public void deleteMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
+    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Deletion of default mapping profile is forbidden");
     }
     mappingProfileEntityRepository.deleteById(mappingProfileId);
@@ -118,7 +122,7 @@ public class MappingProfileService {
    */
   public void putMappingProfile(UUID mappingProfileId, MappingProfile mappingProfile) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
+    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     }
 
@@ -148,5 +152,43 @@ public class MappingProfileService {
     mappingProfileValidator.validate(mappingProfile);
 
     mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
+  }
+
+  /**
+   * Locks a mapping profile by its ID.
+   *
+   * @param mapProfileId the UUID of the mapping profile to lock
+   * @throws LockedMappingProfileException if the mapping profile is already locked
+   */
+  public void lockMappingProfile(UUID mapProfileId) {
+    var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mapProfileId);
+    if (mappingProfileEntity.isLocked()) {
+      throw new LockedMappingProfileException("Profile is already locked.");
+    }
+    mappingProfileEntity.setLocked(true);
+    mappingProfileEntity.setLockedAt(LocalDateTime.now());
+    mappingProfileEntity.setLockedBy(folioExecutionContext.getUserId());
+    mappingProfileEntityRepository.save(mappingProfileEntity);
+  }
+
+  /**
+   * Unlocks a mapping profile by its ID.
+   *
+   * @param mapProfileId the UUID of the job profile to unlock
+   * @throws LockedMappingProfileException if the mapping profile is already unlocked or is a
+   *     default profile
+   */
+  public void unlockMappingProfile(UUID mapProfileId) {
+    var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mapProfileId);
+    if (!mappingProfileEntity.isLocked()) {
+      throw new LockedMappingProfileException("Profile is already unlocked.");
+    }
+    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
+      throw new LockedMappingProfileException("Default mapping profile cannot be unlocked.");
+    }
+    mappingProfileEntity.setLocked(false);
+    mappingProfileEntity.setLockedAt(null);
+    mappingProfileEntity.setLockedBy(null);
+    mappingProfileEntityRepository.save(mappingProfileEntity);
   }
 }
