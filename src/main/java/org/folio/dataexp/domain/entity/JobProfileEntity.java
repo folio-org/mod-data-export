@@ -100,6 +100,9 @@ public class JobProfileEntity {
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
         .mappingProfileId(jobProfile.getMappingProfileId())
+        .locked(jobProfile.getLocked())
+        .lockedBy(jobProfile.getLockedBy())
+        .lockedAt(jobProfile.getLockedAt().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
         .build();
   }
 }
