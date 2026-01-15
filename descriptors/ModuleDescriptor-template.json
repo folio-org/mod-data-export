@@ -409,6 +409,28 @@
         },
         {
           "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}/lock",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.lock.execute"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}/unlock",
+          "permissionsRequired": [
+            "data-export.mapping-profiles.item.unlock.execute"
+          ],
+          "modulePermissions": [
+          ]
+        },
+        {
+          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export/transformation-fields",
@@ -681,6 +703,16 @@
       "permissionName": "data-export.expire-jobs.post",
       "displayName": "Data Export - call to expire hung jobs",
       "description": "Entry point to stop freezing job executions"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.item.lock.execute",
+      "displayName": "Data Export - lock mapping profile",
+      "description": "To lock mapping profile"
+    },
+    {
+      "permissionName": "data-export.mapping-profiles.item.unlock.execute",
+      "displayName": "Data Export - unlock mapping profile",
+      "description": "To unlock mapping profile"
     },
     {
       "permissionName": "data-export.logs.collection.get",
