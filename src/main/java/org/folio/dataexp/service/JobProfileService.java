@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.Objects.isNull;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 
 import java.time.LocalDateTime;
@@ -166,6 +167,9 @@ public class JobProfileService {
    * @return true if the job profile exists, false otherwise
    */
   public boolean jobProfileExists(UUID jobProfileId) {
+    if (isNull(jobProfileId)) {
+      return false;
+    }
     return jobProfileEntityRepository.existsById(jobProfileId);
   }
 

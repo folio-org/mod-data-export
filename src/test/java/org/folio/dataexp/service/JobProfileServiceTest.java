@@ -417,6 +417,53 @@ class JobProfileServiceTest {
     verify(jobProfileEntityRepository).deleteById(jobProfileId);
   }
 
+  @Test
+  void shouldReturnTrue_whenJobProfileExists() {
+    // Given
+    UUID existingJobProfileId = UUID.randomUUID();
+    when(jobProfileEntityRepository.existsById(existingJobProfileId)).thenReturn(true);
+
+    // When
+    boolean result = jobProfileService.jobProfileExists(existingJobProfileId);
+
+    // Then
+    assertThat(result).isTrue();
+    verify(jobProfileEntityRepository).existsById(existingJobProfileId);
+  }
+
+  @Test
+  void shouldReturnFalse_whenJobProfileDoesNotExist() {
+    // Given
+    UUID nonExistingJobProfileId = UUID.randomUUID();
+    when(jobProfileEntityRepository.existsById(nonExistingJobProfileId)).thenReturn(false);
+
+    // When
+    boolean result = jobProfileService.jobProfileExists(nonExistingJobProfileId);
+
+    // Then
+    assertThat(result).isFalse();
+    verify(jobProfileEntityRepository).existsById(nonExistingJobProfileId);
+  }
+
+  @Test
+  void shouldReturnFalse_whenJobProfileIdIsNull() {
+    // When
+    boolean result = jobProfileService.jobProfileExists(null);
+
+    // Then
+    assertThat(result).isFalse();
+    verify(jobProfileEntityRepository, never()).existsById(any());
+  }
+
+  @Test
+  void shouldNotInvokeRepository_whenJobProfileIdIsNull() {
+    // When
+    jobProfileService.jobProfileExists(null);
+
+    // Then
+    verify(jobProfileEntityRepository, never()).existsById(any());
+  }
+
   // Helper methods
 
   private JobExecution createJobExecution(UUID id, String profileName, UUID profileId) {
