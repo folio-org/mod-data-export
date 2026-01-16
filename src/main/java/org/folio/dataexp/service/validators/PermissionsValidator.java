@@ -46,6 +46,9 @@ public class PermissionsValidator {
    */
   public boolean checkLockJobProfilePermission() {
     var lockPermission = requiredPermissionResolver.getLockJobProfilePermission();
+    if (lockPermission == null) {
+      return false;
+    }
     var userPermissions =
         permissionsProvider.getUserPermissions(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
@@ -59,6 +62,9 @@ public class PermissionsValidator {
    */
   public boolean checkUnlockJobProfilePermission() {
     var unlockPermission = requiredPermissionResolver.getUnlockJobProfilePermission();
+    if (unlockPermission == null) {
+      return false;
+    }
     var userPermissions =
         permissionsProvider.getUserPermissions(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());

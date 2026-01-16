@@ -177,8 +177,8 @@ public class JobProfileService {
   }
 
   private void updateLock(JobProfileEntity jobProfileEntity, JobProfile jobProfile) {
-    var existingLockStatus = jobProfileEntity.isLocked();
-    var newLockStatus = jobProfile.getLocked();
+    boolean existingLockStatus = jobProfileEntity.isLocked();
+    boolean newLockStatus = Boolean.TRUE.equals(jobProfile.getLocked());
     if (existingLockStatus != newLockStatus) {
       if (newLockStatus) {
         lockProfile(jobProfile);
