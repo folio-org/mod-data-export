@@ -102,7 +102,10 @@ public class JobProfileEntity {
         .mappingProfileId(jobProfile.getMappingProfileId())
         .locked(jobProfile.getLocked())
         .lockedBy(jobProfile.getLockedBy())
-        .lockedAt(jobProfile.getLockedAt().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        .lockedAt(
+            ofNullable(jobProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
         .build();
   }
 }

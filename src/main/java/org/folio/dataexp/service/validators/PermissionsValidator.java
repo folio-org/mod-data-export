@@ -38,4 +38,30 @@ public class PermissionsValidator {
             tenantId, folioExecutionContext.getUserId().toString());
     return userPermissions.contains(readPermissionForEntity);
   }
+
+  /**
+   * Checks if the user has permission to lock job profiles for the given tenant.
+   *
+   * @return true if permission exists, false otherwise
+   */
+  public boolean checkLockJobProfilePermission() {
+    var lockPermission = requiredPermissionResolver.getLockJobProfilePermission();
+    var userPermissions =
+        permissionsProvider.getUserPermissions(
+            folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    return userPermissions.contains(lockPermission);
+  }
+
+  /**
+   * Checks if the user has permission to unlock job profiles for the given tenant.
+   *
+   * @return true if permission exists, false otherwise
+   */
+  public boolean checkUnlockJobProfilePermission() {
+    var unlockPermission = requiredPermissionResolver.getUnlockJobProfilePermission();
+    var userPermissions =
+        permissionsProvider.getUserPermissions(
+            folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    return userPermissions.contains(unlockPermission);
+  }
 }

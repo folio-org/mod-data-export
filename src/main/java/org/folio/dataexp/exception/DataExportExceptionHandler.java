@@ -11,7 +11,8 @@ import org.folio.dataexp.exception.file.definition.FileExtensionException;
 import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
-import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfilePermissionException;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
@@ -228,8 +229,20 @@ public class DataExportExceptionHandler {
    * @param e the exception
    * @return response entity with error message and status
    */
-  @ExceptionHandler(LockedJobProfileException.class)
-  public ResponseEntity<String> handleLockedJobProfileException(final LockedJobProfileException e) {
+  @ExceptionHandler(LockJobProfileException.class)
+  public ResponseEntity<String> handleLockJobProfileException(final LockJobProfileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
+   * Handles lock job profile permission exceptions.
+   *
+   * @param e the exception
+   * @return response entity with error message and status
+   */
+  @ExceptionHandler(LockJobProfilePermissionException.class)
+  public ResponseEntity<String> handleLockJobProfilePermissionException(
+      final LockJobProfilePermissionException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
   }
 }

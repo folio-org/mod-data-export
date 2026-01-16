@@ -48,6 +48,14 @@ public class Constants {
   /** Permission string for viewing inventory instances. */
   public static final String INVENTORY_VIEW_PERMISSION = "ui-inventory.instance.view";
 
+  /** Permission for locking a job profile. */
+  public static final String LOCK_JOB_PROFILE_PERMISSION =
+      "data-export.job-profiles.item.lock.execute";
+
+  /** Permission for unlocking a job profile. */
+  public static final String UNLOCK_JOB_PROFILE_PERMISSION =
+      "data-export.job-profiles.item.unlock.execute";
+
   /** File suffix for MARC records. */
   public static final String MARC_FILE_SUFFIX = "mrc";
 

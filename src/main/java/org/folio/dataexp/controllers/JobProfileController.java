@@ -84,28 +84,4 @@ public class JobProfileController implements JobProfilesApi {
     jobProfileService.putJobProfile(jobProfileId, jobProfile);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
-
-  /**
-   * Locks a job profile by its ID.
-   *
-   * @param jobProfileId job profile UUID
-   * @return response entity with no content status
-   */
-  @Override
-  public ResponseEntity<JobProfile> postLockJobProfile(UUID jobProfileId) {
-    jobProfileService.lockProfile(jobProfileId);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  /**
-   * Unlocks a job profile by its ID.
-   *
-   * @param jobProfileId job profile UUID
-   * @return response entity with no content status
-   */
-  @Override
-  public ResponseEntity<JobProfile> postUnlockJobProfile(UUID jobProfileId) {
-    jobProfileService.unlockProfile(jobProfileId);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
 }

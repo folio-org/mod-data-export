@@ -4,7 +4,6 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static org.folio.dataexp.util.S3FilePathUtils.getPathToStoredFiles;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -19,10 +18,12 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
-import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfilePermissionException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
@@ -41,6 +42,7 @@ public class JobProfileService {
   private final ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   private final JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
   private final FolioExecutionContext folioExecutionContext;
+  private final PermissionsValidator permissionsValidator;
 
   /**
    * Retrieves a job profile by its ID.
@@ -134,6 +136,7 @@ public class JobProfileService {
             .build();
 
     jobProfile.setMetadata(metadata);
+    updateLock(jobProfileEntity, jobProfile);
     jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
   }
 
@@ -143,7 +146,7 @@ public class JobProfileService {
    *
    * @param jobProfileId the UUID of the job profile to be deleted
    * @throws DefaultJobProfileException if the job profile is marked as default
-   * @throws LockedJobProfileException if the job profile is locked
+   * @throws LockJobProfileException if the job profile is locked
    */
   public void deleteJobProfileById(UUID jobProfileId) {
     var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
@@ -155,7 +158,7 @@ public class JobProfileService {
       deleteExportedFilesAndDisableLink(jobProfileId);
       jobProfileEntityRepository.deleteById(jobProfileId);
     } else {
-      throw new LockedJobProfileException(
+      throw new LockJobProfileException(
           "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
     }
   }
@@ -173,42 +176,38 @@ public class JobProfileService {
     return jobProfileEntityRepository.existsById(jobProfileId);
   }
 
-  /**
-   * Locks a job profile by its ID.
-   *
-   * @param jobProfileId the UUID of the job profile to lock
-   * @throws LockedJobProfileException if the job profile is already locked
-   */
-  public void lockProfile(UUID jobProfileId) {
-    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (jobProfileEntity.isLocked()) {
-      throw new LockedJobProfileException("Profile is already locked.");
+  private void updateLock(JobProfileEntity jobProfileEntity, JobProfile jobProfile) {
+    var existingLockStatus = jobProfileEntity.isLocked();
+    var newLockStatus = jobProfile.getLocked();
+    if (existingLockStatus != newLockStatus) {
+      if (newLockStatus) {
+        lockProfile(jobProfile);
+      } else {
+        unlockProfile(jobProfile);
+      }
     }
-    jobProfileEntity.setLocked(true);
-    jobProfileEntity.setLockedAt(LocalDateTime.now());
-    jobProfileEntity.setLockedBy(folioExecutionContext.getUserId());
-    jobProfileEntityRepository.save(jobProfileEntity);
   }
 
-  /**
-   * Unlocks a job profile by its ID.
-   *
-   * @param jobProfileId the UUID of the job profile to unlock
-   * @throws LockedJobProfileException if the job profile is already unlocked or is a default
-   *     profile
-   */
-  public void unlockProfile(UUID jobProfileId) {
-    var jobProfileEntity = jobProfileEntityRepository.getReferenceById(jobProfileId);
-    if (!jobProfileEntity.isLocked()) {
-      throw new LockedJobProfileException("Profile is already unlocked.");
+  private void lockProfile(JobProfile jobProfile) {
+    if (permissionsValidator.checkLockJobProfilePermission()) {
+      jobProfile.setLocked(true);
+      jobProfile.setLockedAt(new Date());
+      jobProfile.setLockedBy(folioExecutionContext.getUserId());
+    } else {
+      throw new LockJobProfilePermissionException(
+          "You do not have permission to lock this profile.");
     }
-    if (TRUE.equals(jobProfileEntity.getJobProfile().getDefault())) {
-      throw new LockedJobProfileException("Default job profile cannot be unlocked.");
+  }
+
+  private void unlockProfile(JobProfile jobProfile) {
+    if (permissionsValidator.checkUnlockJobProfilePermission()) {
+      jobProfile.setLocked(false);
+      jobProfile.setLockedAt(null);
+      jobProfile.setLockedBy(null);
+    } else {
+      throw new LockJobProfilePermissionException(
+          "You do not have permission to unlock this profile.");
     }
-    jobProfileEntity.setLocked(false);
-    jobProfileEntity.setLockedAt(null);
-    jobProfileEntity.setLockedBy(null);
-    jobProfileEntityRepository.save(jobProfileEntity);
   }
 
   /**
