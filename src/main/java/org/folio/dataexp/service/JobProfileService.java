@@ -200,7 +200,7 @@ public class JobProfileService {
   }
 
   private void unlockProfile(JobProfile jobProfile) {
-    if (permissionsValidator.checkUnlockJobProfilePermission()) {
+    if (permissionsValidator.checkLockJobProfilePermission()) {
       jobProfile.setLocked(false);
       jobProfile.setLockedAt(null);
       jobProfile.setLockedBy(null);

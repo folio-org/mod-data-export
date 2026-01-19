@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.validators;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.folio.dataexp.service.permissions.PermissionsProvider;
 import org.folio.dataexp.service.permissions.RequiredPermissionResolver;
 import org.folio.spring.FolioExecutionContext;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 /** Validator for checking user permissions related to instance view. */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PermissionsValidator {
 
   private final PermissionsProvider permissionsProvider;
@@ -40,7 +42,7 @@ public class PermissionsValidator {
   }
 
   /**
-   * Checks if the user has permission to lock job profiles for the given tenant.
+   * Checks if the user has permission to lock/unlock job profiles for the given tenant.
    *
    * @return true if permission exists, false otherwise
    */
@@ -52,22 +54,7 @@ public class PermissionsValidator {
     var userPermissions =
         permissionsProvider.getUserPermissions(
             folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    log.info("userPermissions: {}", userPermissions);
     return userPermissions.contains(lockPermission);
-  }
-
-  /**
-   * Checks if the user has permission to unlock job profiles for the given tenant.
-   *
-   * @return true if permission exists, false otherwise
-   */
-  public boolean checkUnlockJobProfilePermission() {
-    var unlockPermission = requiredPermissionResolver.getUnlockJobProfilePermission();
-    if (unlockPermission == null) {
-      return false;
-    }
-    var userPermissions =
-        permissionsProvider.getUserPermissions(
-            folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
-    return userPermissions.contains(unlockPermission);
   }
 }

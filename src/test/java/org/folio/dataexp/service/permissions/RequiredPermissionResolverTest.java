@@ -23,8 +23,6 @@ class RequiredPermissionResolverTest {
     assertEquals("ui-inventory.instance.view", requiredPermissionResolver.getReadPermission());
   }
 
-  // ========== Tests for getLockJobProfilePermission ==========
-
   @Test
   void shouldReturnCorrectPermission_whenGetLockJobProfilePermission() {
     // When
@@ -32,16 +30,5 @@ class RequiredPermissionResolverTest {
 
     // Then
     assertThat(permission).isEqualTo("data-export.job-profiles.item.lock.execute");
-  }
-
-  // ========== Tests for getUnlockJobProfilePermission ==========
-
-  @Test
-  void shouldReturnCorrectPermission_whenGetUnlockJobProfilePermission() {
-    // When
-    String permission = requiredPermissionResolver.getUnlockJobProfilePermission();
-
-    // Then
-    assertThat(permission).isEqualTo("data-export.job-profiles.item.unlock.execute");
   }
 }

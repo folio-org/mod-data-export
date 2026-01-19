@@ -722,11 +722,6 @@
       "description": "To lock job profile"
     },
     {
-      "permissionName": "data-export.job-profiles.item.unlock.execute",
-      "displayName": "Data Export - permission to unlock job profile",
-      "description": "To unlock job profile"
-    },
-    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -761,8 +756,7 @@
         "data-export.download-record.item.get",
         "perms.users.get",
         "permissions.users.item.get",
-        "data-export.job-profiles.item.lock.execute",
-        "data-export.job-profiles.item.unlock.execute"
+        "data-export.job-profiles.item.lock.execute"
       ],
       "visible": false
     }

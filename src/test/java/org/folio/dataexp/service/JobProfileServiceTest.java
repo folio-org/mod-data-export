@@ -540,7 +540,7 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-    when(permissionsValidator.checkUnlockJobProfilePermission()).thenReturn(true);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
     when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -548,7 +548,7 @@ class JobProfileServiceTest {
     jobProfileService.putJobProfile(jobProfileId, updatedProfile);
 
     // Then
-    verify(permissionsValidator).checkUnlockJobProfilePermission();
+    verify(permissionsValidator).checkLockJobProfilePermission();
     verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
 
     JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
@@ -577,7 +577,7 @@ class JobProfileServiceTest {
 
     // Then
     verify(permissionsValidator, never()).checkLockJobProfilePermission();
-    verify(permissionsValidator, never()).checkUnlockJobProfilePermission();
+    verify(permissionsValidator, never()).checkLockJobProfilePermission();
   }
 
   @Test
@@ -617,7 +617,7 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-    when(permissionsValidator.checkUnlockJobProfilePermission()).thenReturn(false);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(false);
 
     // When & Then
     assertThatThrownBy(() -> jobProfileService.putJobProfile(jobProfileId, updatedProfile))
@@ -672,7 +672,7 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-    when(permissionsValidator.checkUnlockJobProfilePermission()).thenReturn(true);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
     when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -762,7 +762,6 @@ class JobProfileServiceTest {
 
     // Then
     verify(permissionsValidator).checkLockJobProfilePermission();
-    verify(permissionsValidator, never()).checkUnlockJobProfilePermission();
     verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
   }
 
@@ -781,7 +780,7 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(userClient.getUserById(userId.toString())).thenReturn(user);
-    when(permissionsValidator.checkUnlockJobProfilePermission()).thenReturn(true);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
     when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -789,8 +788,7 @@ class JobProfileServiceTest {
     jobProfileService.putJobProfile(jobProfileId, updatedProfile);
 
     // Then
-    verify(permissionsValidator, never()).checkLockJobProfilePermission();
-    verify(permissionsValidator).checkUnlockJobProfilePermission();
+    verify(permissionsValidator).checkLockJobProfilePermission();
     verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
   }
 
@@ -871,7 +869,7 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
     when(folioExecutionContext.getUserId()).thenReturn(currentUserId);
     when(userClient.getUserById(currentUserId.toString())).thenReturn(user);
-    when(permissionsValidator.checkUnlockJobProfilePermission()).thenReturn(true);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
     when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
