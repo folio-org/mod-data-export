@@ -2,7 +2,7 @@ ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS locked BOOLEAN NOT NULL DE
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS locked_by UUID;
 ALTER TABLE mapping_profiles ADD COLUMN IF NOT EXISTS locked_at TIMESTAMP;
 
-DATE mapping_profiles SET locked = true, locked_by = '00000000-0000-0000-0000-000000000000',
+UPDATE mapping_profiles SET locked = true, locked_by = '00000000-0000-0000-0000-000000000000',
                         locked_at = NOW(),
                         jsonb = jsonb_set(
                             jsonb_set(
