@@ -12,7 +12,8 @@ import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.exception.file.definition.UploadFileException;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
-import org.folio.dataexp.exception.mapping.profile.LockedMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockMappingProfilePermissionException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileFieldsSuppressionPatternException;
 import org.folio.dataexp.exception.mapping.profile.MappingProfileTransformationEmptyException;
@@ -228,9 +229,21 @@ public class DataExportExceptionHandler {
    * @param e the exception
    * @return response entity with error message and status
    */
-  @ExceptionHandler(LockedMappingProfileException.class)
+  @ExceptionHandler(LockMappingProfileException.class)
   public ResponseEntity<String> handleLockedMappingProfileException(
-      final LockedMappingProfileException e) {
+      final LockMappingProfileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  /**
+   * Handles lock mapping profile permission exceptions.
+   *
+   * @param e the exception
+   * @return response entity with error message and status
+   */
+  @ExceptionHandler(LockMappingProfilePermissionException.class)
+  public ResponseEntity<String> handleLockMappingProfilePermissionException(
+      final LockMappingProfilePermissionException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
   }
 }

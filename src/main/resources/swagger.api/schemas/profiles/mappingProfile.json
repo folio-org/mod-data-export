@@ -61,6 +61,21 @@
       "type": "boolean",
       "default": false
     },
+    "locked": {
+      "description": "True if locked, false if unlocked",
+      "type": "boolean",
+      "default": false
+    },
+    "lockedBy": {
+      "description": "UUID of the user who locked the mapping profile",
+      "type": "string",
+      "format": "uuid"
+    },
+    "lockedAt": {
+      "description": "Date and time when mapping profile was locked",
+      "type": "string",
+      "format": "date-time"
+    },
     "metadata": {
       "description": "Metadata provided by the server",
       "type": "object",

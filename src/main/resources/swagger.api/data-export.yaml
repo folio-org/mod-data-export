@@ -435,69 +435,6 @@ paths:
           content:
             text/plain:
               example: "Internal server error"
-
-  /mapping-profiles/{mappingProfileId}/lock:
-    post:
-      description: API for locking mapping profiles
-      operationId: postLockMappingProfile
-      parameters:
-        - name: mappingProfileId
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/uuid"
-      responses:
-        '201':
-          description: Locked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mappingProfile'
-              example:
-                $ref: 'examples/profiles/mappingProfile.json'
-        '409':
-          description: When mapping profile is already locked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors'
-        '500':
-          description: Internal server errors, e.g. due to misconfiguration
-          content:
-            text/plain:
-              example: "Internal server error"
-
-  /mapping-profiles/{mappingProfileId}/unlock:
-    post:
-      description: API for unlocking mapping profiles
-      operationId: postUnlockMappingProfile
-      parameters:
-        - name: mappingProfileId
-          in: path
-          required: true
-          schema:
-            $ref: "#/components/schemas/uuid"
-      responses:
-        '201':
-          description: Unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/mappingProfile'
-              example:
-                $ref: 'examples/profiles/mappingProfile.json'
-        '409':
-          description: When mapping profile is already unlocked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors'
-        '500':
-          description: Internal server errors, e.g. due to misconfiguration
-          content:
-            text/plain:
-              example: "Internal server error"
-
   /logs:
     get:
       description: APIs supporting Error logs

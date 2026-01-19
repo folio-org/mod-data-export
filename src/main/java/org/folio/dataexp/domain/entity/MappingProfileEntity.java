@@ -109,6 +109,12 @@ public class MappingProfileEntity {
         .updatedByUserId(metadata.getUpdatedByUserId())
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
+        .locked(mappingProfile.getLocked())
+        .lockedBy(mappingProfile.getLockedBy())
+        .lockedAt(
+            ofNullable(mappingProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
         .build();
   }
 

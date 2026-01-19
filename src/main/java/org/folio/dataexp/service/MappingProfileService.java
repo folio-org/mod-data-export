@@ -2,7 +2,6 @@ package org.folio.dataexp.service;
 
 import static java.lang.Boolean.TRUE;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +13,11 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
-import org.folio.dataexp.exception.mapping.profile.LockedMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockMappingProfilePermissionException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.MappingProfileValidator;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
@@ -32,6 +32,7 @@ public class MappingProfileService {
   private final MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
   private final UserClient userClient;
   private final MappingProfileValidator mappingProfileValidator;
+  private final PermissionsValidator permissionsValidator;
 
   /**
    * Deletes a mapping profile by its ID.
@@ -148,47 +149,44 @@ public class MappingProfileService {
             .build();
 
     mappingProfile.setMetadata(metadata);
-
+    updateLock(mappingProfileEntity, mappingProfile);
     mappingProfileValidator.validate(mappingProfile);
 
     mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
   }
 
-  /**
-   * Locks a mapping profile by its ID.
-   *
-   * @param mapProfileId the UUID of the mapping profile to lock
-   * @throws LockedMappingProfileException if the mapping profile is already locked
-   */
-  public void lockMappingProfile(UUID mapProfileId) {
-    var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mapProfileId);
-    if (mappingProfileEntity.isLocked()) {
-      throw new LockedMappingProfileException("Profile is already locked.");
+  private void updateLock(
+      MappingProfileEntity mappingProfileEntity, MappingProfile mappingProfile) {
+    boolean existingLockStatus = mappingProfileEntity.isLocked();
+    boolean newLockStatus = Boolean.TRUE.equals(mappingProfile.getLocked());
+    if (existingLockStatus != newLockStatus) {
+      if (newLockStatus) {
+        lockProfile(mappingProfile);
+      } else {
+        unlockProfile(mappingProfile);
+      }
     }
-    mappingProfileEntity.setLocked(true);
-    mappingProfileEntity.setLockedAt(LocalDateTime.now());
-    mappingProfileEntity.setLockedBy(folioExecutionContext.getUserId());
-    mappingProfileEntityRepository.save(mappingProfileEntity);
   }
 
-  /**
-   * Unlocks a mapping profile by its ID.
-   *
-   * @param mapProfileId the UUID of the job profile to unlock
-   * @throws LockedMappingProfileException if the mapping profile is already unlocked or is a
-   *     default profile
-   */
-  public void unlockMappingProfile(UUID mapProfileId) {
-    var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mapProfileId);
-    if (!mappingProfileEntity.isLocked()) {
-      throw new LockedMappingProfileException("Profile is already unlocked.");
+  private void lockProfile(MappingProfile mappingProfile) {
+    if (permissionsValidator.checkLockMappingProfilePermission()) {
+      mappingProfile.setLocked(true);
+      mappingProfile.setLockedAt(new Date());
+      mappingProfile.setLockedBy(folioExecutionContext.getUserId());
+    } else {
+      throw new LockMappingProfilePermissionException(
+          "You do not have permission to lock this profile.");
     }
-    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
-      throw new LockedMappingProfileException("Default mapping profile cannot be unlocked.");
+  }
+
+  private void unlockProfile(MappingProfile mappingProfile) {
+    if (permissionsValidator.checkLockMappingProfilePermission()) {
+      mappingProfile.setLocked(false);
+      mappingProfile.setLockedAt(null);
+      mappingProfile.setLockedBy(null);
+    } else {
+      throw new LockMappingProfilePermissionException(
+          "You do not have permission to unlock this profile.");
     }
-    mappingProfileEntity.setLocked(false);
-    mappingProfileEntity.setLockedAt(null);
-    mappingProfileEntity.setLockedBy(null);
-    mappingProfileEntityRepository.save(mappingProfileEntity);
   }
 }
