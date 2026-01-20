@@ -7,6 +7,8 @@ import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
+import static org.folio.dataexp.util.Constants.MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID;
+import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
 import static org.folio.dataexp.util.ErrorCode.ERROR_CONVERTING_TO_JSON_INSTANCE;
 
 import lombok.AllArgsConstructor;
@@ -186,12 +188,21 @@ public class InstancesExportStrategy extends AbstractExportStrategy {
   @Override
   public MarcRecordEntity getMarcRecord(final UUID recordId) {
     var instances = marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(Set.of(recordId),
-      INSTANCE_MARC_TYPE, Set.of("ACTUAL"));
+      INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL));
+    if (instances.isEmpty()) {
+      var centralTenantId =
+        consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+      if (StringUtils.isNotEmpty(centralTenantId)) {
+        instances =
+          marcInstanceRecordRepository.findByExternalIdIn(centralTenantId, Set.of(recordId));
+      }
+    }
     if (instances.isEmpty()) {
       log.error("getMarcRecord:: Couldn't find instance in db for ID: {}", recordId);
-      throw new DownloadRecordException("Couldn't find instance in db for ID: %s".formatted(recordId));
+      throw new DownloadRecordException(
+        MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID.formatted(recordId));
     }
-    return instances.get(0);
+    return instances.getFirst();
   }
 
   @Override
