@@ -640,7 +640,10 @@
     {
       "permissionName": "data-export.job-profiles.item.put",
       "displayName": "Data Export - update existing job profile by id",
-      "description": "Entry point to update Job Profile"
+      "description": "Entry point to update Job Profile",
+      "subPermissions": [
+        "data-export.job-profiles.item.lock.execute"
+      ]
     },
     {
       "permissionName": "data-export.job-profiles.item.delete",
@@ -761,8 +764,7 @@
         "data-export.export-authority-deleted.post",
         "data-export.download-record.item.get",
         "perms.users.get",
-        "permissions.users.item.get",
-        "data-export.job-profiles.item.lock.execute"
+        "permissions.users.item.get"
       ],
       "visible": false
     }

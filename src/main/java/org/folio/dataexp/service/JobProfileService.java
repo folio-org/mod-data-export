@@ -97,6 +97,10 @@ public class JobProfileService {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
+    if (jobProfile.getLocked()) {
+      lockProfile(jobProfile);
+    }
+
     var saved = jobProfileEntityRepository.save(JobProfileEntity.fromJobProfile(jobProfile));
     return saved.getJobProfile();
   }
