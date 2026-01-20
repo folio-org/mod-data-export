@@ -332,6 +332,9 @@
           "permissionsRequired": [
             "data-export.job-profiles.item.put"
           ],
+          "permissionsDesired": [
+            "data-export.job-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
