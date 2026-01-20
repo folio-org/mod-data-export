@@ -11,6 +11,7 @@ import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.domain.entity.MarcRecordEntity;
 import org.folio.dataexp.exception.TransformationRuleException;
+import org.folio.dataexp.exception.export.DownloadRecordException;
 import org.folio.dataexp.repository.HoldingsRecordEntityRepository;
 import org.folio.dataexp.repository.InstanceCentralTenantRepository;
 import org.folio.dataexp.repository.InstanceEntityRepository;
@@ -26,6 +27,7 @@ import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
 import org.folio.reader.EntityReader;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.integration.XOkapiHeaders;
 import org.folio.writer.RecordWriter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,18 +42,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.folio.dataexp.service.export.strategies.InstancesExportStrategy.INSTANCE_MARC_TYPE;
+import static org.folio.dataexp.util.Constants.MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID;
+import static org.folio.dataexp.util.Constants.STATE_ACTUAL;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -106,9 +106,11 @@ class InstancesExportStrategyTest {
 
   @InjectMocks
   private InstancesExportStrategy instancesExportStrategy;
+  private Map<String, Collection<String>> headers = new HashMap<>();
 
   @BeforeEach
   void setUp() {
+    headers.put(XOkapiHeaders.TENANT, List.of("TENANT"));
     instancesExportStrategy.errorLogService = errorLogService;
     instancesExportStrategy.entityManager = entityManager;
     instancesExportStrategy.folioExecutionContext = folioExecutionContext;
@@ -396,5 +398,45 @@ class InstancesExportStrategyTest {
 
     instancesExportStrategy.saveConvertJsonRecordToMarcRecordError(marcRecord, jobExecutionId, new IOException(errorMessage));
     verify(errorLogService).saveWithAffectedRecord(isA(JSONObject.class), isA(String.class), isA(String.class), isA(UUID.class));
+  }
+
+  @Test
+  void getMarcRecordShouldSearchInstanceInCentralTenantWhenNotFoundInMember() {
+    var externalId = UUID.randomUUID();
+    var consortiumEntity =
+      new MarcRecordEntity().withExternalId(externalId).withState(STATE_ACTUAL);
+
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+      Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
+      .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
+      .thenReturn(Collections.singletonList(consortiumEntity));
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+
+    var res = instancesExportStrategy.getMarcRecord(externalId);
+
+    verify(consortiaService).getCentralTenantId(anyString());
+    assertThat(res.getState()).isEqualTo(STATE_ACTUAL);
+  }
+
+  @Test
+  void getMarcRecordShouldShouldTrowWhenInstanceWasNotFound() {
+    var externalId = UUID.randomUUID();
+
+    when(marcRecordEntityRepository.findByExternalIdInAndRecordTypeIsAndStateIn(
+      Set.of(externalId), INSTANCE_MARC_TYPE, Set.of(STATE_ACTUAL)))
+      .thenReturn(Collections.emptyList());
+    when(marcInstanceRecordRepository.findByExternalIdIn("central", Set.of(externalId)))
+      .thenReturn(Collections.emptyList());
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(consortiaService.getCentralTenantId("member")).thenReturn("central");
+
+    var throwable =
+      assertThrows(
+        DownloadRecordException.class, () -> instancesExportStrategy.getMarcRecord(externalId));
+
+    var expectedMessage = MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID.formatted(externalId);
+    assertEquals(expectedMessage, throwable.getMessage());
   }
 }

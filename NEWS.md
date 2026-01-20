@@ -1,4 +1,13 @@
-## v5.3.0 Unreleased
+## v5.4.0 Unreleased
+
+## 01/20/2026 v5.3.0 Released
+
+This release contains story to download shared instances on ECS.
+
+[Full Changelog](https://github.com/folio-org/mod-data-export/compare/v5.2.3...v5.3.0)
+
+### Stories
+* [MDEXP-878](https://folio-org.atlassian.net/browse/MDEXP-878) ECS: Downloading shared instances from member tenants
 
 ## 12/11/2025 v5.2.3 Released
 

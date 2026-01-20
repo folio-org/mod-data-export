@@ -17,4 +17,7 @@ public class Constants {
   public static final String DELETED_MARC_IDS_FILE_NAME = "deleted-marc-bib-records.csv";
   public static final String DELETED_AUTHORITIES_FILE_NAME = "deleted-authority-records.csv";
   public static final String INVENTORY_VIEW_PERMISSION = "ui-inventory.instance.view";
+  public static final String MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID =
+    "Couldn't find instance in db for ID: %s";
+  public static final String STATE_ACTUAL = "ACTUAL";
 }
