@@ -356,7 +356,9 @@
           ],
           "pathPattern": "/data-export/mapping-profiles",
           "permissionsRequired": [
-            "data-export.mapping-profiles.item.post",
+            "data-export.mapping-profiles.item.post"
+          ],
+          "permissionsDesired": [
             "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [
@@ -391,7 +393,9 @@
           ],
           "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
-            "data-export.mapping-profiles.item.put",
+            "data-export.mapping-profiles.item.put"
+          ],
+          "permissionsDesired": [
             "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [

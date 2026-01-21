@@ -100,9 +100,9 @@ class HoldingsExportStrategyTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
     holdingsExportStrategy.getMarcRecords(
-      new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
+        new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
     verify(marcRecordEntityRepository)
-      .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
+        .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
   }
 
   @Test
@@ -111,19 +111,19 @@ class HoldingsExportStrategyTest {
     mappingProfile.setDefault(false);
     mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
     holdingsExportStrategy.getMarcRecords(
-      new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
+        new HashSet<>(), mappingProfile, new ExportRequest(), UUID.randomUUID());
     verify(marcRecordEntityRepository, times(0))
-      .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
+        .findByExternalIdInAndRecordTypeIsAndStateIn(anySet(), isA(String.class), isA(Set.class));
   }
 
   @Test
   void getIdentifierMessageTest() {
     var holding = "{'hrid' : '123'}";
     var holdingRecordEntity =
-      HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
-      .thenReturn(List.of(holdingRecordEntity));
+        .thenReturn(List.of(holdingRecordEntity));
 
     var opt = holdingsExportStrategy.getIdentifiers(UUID.randomUUID());
 
@@ -135,20 +135,20 @@ class HoldingsExportStrategyTest {
   void getGeneratedMarcTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingRecordEntity =
-      HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
-      .thenReturn(List.of(holdingRecordEntity));
+        .thenReturn(List.of(holdingRecordEntity));
     holdingsExportStrategy.getGeneratedMarc(
-      new HashSet<>(),
-      new MappingProfile(),
-      new ExportRequest(),
-      UUID.randomUUID(),
-      new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+        new HashSet<>(),
+        new MappingProfile(),
+        new ExportRequest(),
+        UUID.randomUUID(),
+        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
 
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleProcessor)
-      .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
   }
 
@@ -156,27 +156,27 @@ class HoldingsExportStrategyTest {
   void getGeneratedMarcIfMarcExceptionTest() throws TransformationRuleException {
     var holding = "{'id' : '0eaa7eef-9633-4c7e-af09-796315ebc576'}";
     var holdingRecordEntity =
-      HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
+        HoldingsRecordEntity.builder().jsonb(holding).id(UUID.randomUUID()).build();
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
-      .thenReturn(List.of(holdingRecordEntity));
+        .thenReturn(List.of(holdingRecordEntity));
     doThrow(new MarcException("marc error"))
-      .when(ruleProcessor)
-      .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
+        .when(ruleProcessor)
+        .process(isA(EntityReader.class), isA(RecordWriter.class), any(), anyList(), any());
     var generatedMarcResult =
-      holdingsExportStrategy.getGeneratedMarc(
-        new HashSet<>(),
-        new MappingProfile(),
-        new ExportRequest(),
-        UUID.randomUUID(),
-        new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
+        holdingsExportStrategy.getGeneratedMarc(
+            new HashSet<>(),
+            new MappingProfile(),
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(new ExportedRecordsListener(null, 1000, null)));
     assertEquals(1, generatedMarcResult.getFailedIds().size());
     var actualErrorMessage = List.of("marc error for holding 0eaa7eef-9633-4c7e-af09-796315ebc576");
     verify(ruleFactory).getRules(isA(MappingProfile.class));
     verify(ruleHandler).preHandle(isA(JSONObject.class), anyList());
     verify(errorLogService)
-      .saveGeneralErrorWithMessageValues(
-        isA(String.class), eq(actualErrorMessage), isA(UUID.class));
+        .saveGeneralErrorWithMessageValues(
+            isA(String.class), eq(actualErrorMessage), isA(UUID.class));
   }
 
   @Test
@@ -187,7 +187,7 @@ class HoldingsExportStrategyTest {
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var item = "{'barcode' : 'itemBarcode'}";
     var holdingRecordEntity =
-      HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
+        HoldingsRecordEntity.builder().jsonb(holding).id(holdingId).instanceId(instanceId).build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
@@ -196,17 +196,17 @@ class HoldingsExportStrategyTest {
     var generatedMarcResult = new GeneratedMarcResult(UUID.randomUUID());
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
-      .thenReturn(List.of(holdingRecordEntity));
+        .thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     when(itemEntityRepository.findByHoldingsRecordIdIs(holdingId)).thenReturn(List.of(itemEntity));
     doNothing().when(holdingsExportStrategy.entityManager).clear();
 
     var holdingsWithInstanceAndItems =
-      holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)),
-        generatedMarcResult,
-        mappingProfile,
-        UUID.randomUUID());
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)),
+            generatedMarcResult,
+            mappingProfile,
+            UUID.randomUUID());
 
     assertEquals(1, holdingsWithInstanceAndItems.size());
 
@@ -226,11 +226,11 @@ class HoldingsExportStrategyTest {
     var instance = "{'id' : '1eaa1eef-1633-4c7e-af09-796315ebc576', 'hrid' : 'instHrid'}";
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var holdingRecordEntity =
-      HoldingsRecordEntity.builder()
-        .jsonb(invalidHoldingJson)
-        .id(holdingId)
-        .instanceId(instanceId)
-        .build();
+        HoldingsRecordEntity.builder()
+            .jsonb(invalidHoldingJson)
+            .id(holdingId)
+            .instanceId(instanceId)
+            .build();
     var instanceEntity = InstanceEntity.builder().jsonb(instance).id(instanceId).build();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
@@ -238,21 +238,21 @@ class HoldingsExportStrategyTest {
     var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
 
     when(holdingsRecordEntityRepository.findByIdIn(anySet()))
-      .thenReturn(List.of(holdingRecordEntity));
+        .thenReturn(List.of(holdingRecordEntity));
     when(instanceEntityRepository.findByIdIn(anySet())).thenReturn(List.of(instanceEntity));
     doNothing().when(holdingsExportStrategy.entityManager).clear();
 
     var holdingsWithInstanceAndItems =
-      holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
 
     assertEquals(0, holdingsWithInstanceAndItems.size());
     assertEquals(1, generatedMarcResult.getFailedIds().size());
 
     verify(errorLogService)
-      .saveGeneralError(
-        "Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576",
-        jobExecutionId);
+        .saveGeneralError(
+            "Error converting to json holding by id 0eaa7eef-9633-4c7e-af09-796315ebc576",
+            jobExecutionId);
   }
 
   @Test
@@ -262,7 +262,7 @@ class HoldingsExportStrategyTest {
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(consortiaService.getAffiliatedTenants("centralTenant", userId.toString()))
-      .thenReturn(List.of("memberA", "memberB"));
+        .thenReturn(List.of("memberA", "memberB"));
     Holdings holdingsA = new Holdings();
     holdingsA.setTenantId("memberA");
     Holdings holdingsB = new Holdings();
@@ -276,18 +276,18 @@ class HoldingsExportStrategyTest {
     var uuidC = UUID.randomUUID();
     when(consortiumSearchClient.getHoldingsById(uuidC.toString())).thenReturn(holdingsC);
     when(marcInstanceRecordRepository.findByExternalIdIn("centralTenant", Set.of(uuidC)))
-      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidC)));
+        .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidC)));
     when(marcInstanceRecordRepository.findByExternalIdIn("memberA", Set.of(uuidA)))
-      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
+        .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidA)));
     when(marcInstanceRecordRepository.findByExternalIdIn("memberB", Set.of(uuidB)))
-      .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
+        .thenReturn(List.of(new MarcRecordEntity().withExternalId(uuidB)));
     when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
     var ids = Set.of(uuidA, uuidB, uuidC);
     var res =
-      holdingsExportStrategy.getMarcRecords(
-        ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
+        holdingsExportStrategy.getMarcRecords(
+            ids, mappingProfile, new ExportRequest(), UUID.randomUUID());
     assertThat(res).hasSize(3);
   }
 
@@ -297,7 +297,7 @@ class HoldingsExportStrategyTest {
     when(folioExecutionContext.getTenantId()).thenReturn("centralTenant");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(consortiaService.getAffiliatedTenants(any(), any()))
-      .thenReturn(List.of("memberA", "memberB"));
+        .thenReturn(List.of("memberA", "memberB"));
     Holdings holdingsA = new Holdings();
     holdingsA.setTenantId("memberA");
     Holdings holdingsB = new Holdings();
@@ -313,45 +313,45 @@ class HoldingsExportStrategyTest {
     when(permissionsValidator.checkInstanceViewPermissions(any(String.class))).thenReturn(true);
     var instId = UUID.randomUUID();
     when(instanceCentralTenantRepository.findInstancesByIdIn("centralTenant", Set.of(instId)))
-      .thenReturn(
-        List.of(
-          new InstanceEntity()
-            .withId(instId)
-            .withJsonb(
-              "{\n"
-                + "  \"id\": \""
-                + instId
-                + "\",\n"
-                + "  \"hrid\": \"in00000000024\"\n"
-                + "}")));
+        .thenReturn(
+            List.of(
+                new InstanceEntity()
+                    .withId(instId)
+                    .withJsonb(
+                        "{\n"
+                            + "  \"id\": \""
+                            + instId
+                            + "\",\n"
+                            + "  \"hrid\": \"in00000000024\"\n"
+                            + "}")));
     when(holdingsRecordEntityTenantRepository.findByIdIn("memberB", Set.of(uuidB)))
-      .thenReturn(
-        List.of(
-          new HoldingsRecordEntity()
-            .withId(uuidC)
-            .withInstanceId(instId)
-            .withJsonb(
-              "{\n"
-                + "  \"id\": \""
-                + uuidB
-                + "\",\n"
-                + "  \"hrid\": \"ho00000000009\",\n"
-                + "  \"instanceId\": \""
-                + instId
-                + "\"\n"
-                + "}")));
+        .thenReturn(
+            List.of(
+                new HoldingsRecordEntity()
+                    .withId(uuidC)
+                    .withInstanceId(instId)
+                    .withJsonb(
+                        "{\n"
+                            + "  \"id\": \""
+                            + uuidB
+                            + "\",\n"
+                            + "  \"hrid\": \"ho00000000009\",\n"
+                            + "  \"instanceId\": \""
+                            + instId
+                            + "\"\n"
+                            + "}")));
     when(folioExecutionContext.getOkapiHeaders())
-      .thenReturn(Map.of("x-okapi-token", List.of("token")));
+        .thenReturn(Map.of("x-okapi-token", List.of("token")));
     var ids = new HashSet<>(Set.of(uuidA, uuidB, uuidC));
     var mappingProfile = new MappingProfile();
     mappingProfile.setDefault(true);
     var res =
-      holdingsExportStrategy.getGeneratedMarc(
-        ids,
-        mappingProfile,
-        new ExportRequest(),
-        UUID.randomUUID(),
-        new ExportStrategyStatistic(null));
+        holdingsExportStrategy.getGeneratedMarc(
+            ids,
+            mappingProfile,
+            new ExportRequest(),
+            UUID.randomUUID(),
+            new ExportStrategyStatistic(null));
     assertThat(res.getMarcRecords()).hasSize(1);
   }
 
@@ -373,24 +373,24 @@ class HoldingsExportStrategyTest {
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     when(consortiumSearchClient.getHoldingsById(holdingId.toString())).thenReturn(holdings);
     when(consortiaService.getAffiliatedTenants("central", userId.toString()))
-      .thenReturn(List.of("college"));
+        .thenReturn(List.of("college"));
     when(permissionsValidator.checkInstanceViewPermissions("college")).thenReturn(false);
     doNothing().when(holdingsExportStrategy.entityManager).clear();
     when(userService.getUserName("central", userId.toString())).thenReturn("central_admin");
 
     var holdingsWithInstanceAndItems =
-      holdingsExportStrategy.getHoldingsWithInstanceAndItems(
-        new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
+        holdingsExportStrategy.getHoldingsWithInstanceAndItems(
+            new HashSet<>(Set.of(holdingId)), generatedMarcResult, mappingProfile, jobExecutionId);
 
     assertEquals(0, holdingsWithInstanceAndItems.size());
     var msgValues =
-      List.of(
-        holdingId.toString(),
-        userService.getUserName(
-          folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
-        "college");
+        List.of(
+            holdingId.toString(),
+            userService.getUserName(
+                folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString()),
+            "college");
     verify(errorLogService)
-      .saveGeneralErrorWithMessageValues(
-        ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
+        .saveGeneralErrorWithMessageValues(
+            ERROR_HOLDINGS_NO_PERMISSION.getCode(), msgValues, jobExecutionId);
   }
 }
