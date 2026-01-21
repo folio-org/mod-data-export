@@ -97,7 +97,7 @@ public class JobProfileService {
     metaData.updatedByUsername(user.getUsername());
     jobProfile.setMetadata(metaData);
 
-    if (jobProfile.getLocked()) {
+    if (TRUE.equals(jobProfile.getLocked())) {
       lockProfile(jobProfile);
     }
 
