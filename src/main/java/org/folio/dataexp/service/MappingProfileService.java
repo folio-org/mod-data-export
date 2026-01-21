@@ -106,6 +106,10 @@ public class MappingProfileService {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
+    if (mappingProfile.getLocked()) {
+      lockProfile(mappingProfile);
+    }
+
     mappingProfileValidator.validate(mappingProfile);
 
     var saved =
