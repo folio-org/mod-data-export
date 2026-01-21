@@ -106,7 +106,7 @@ public class MappingProfileService {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
-    if (mappingProfile.getLocked()) {
+    if (TRUE.equals(mappingProfile.getLocked())) {
       lockProfile(mappingProfile);
     }
 
