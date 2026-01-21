@@ -415,17 +415,6 @@
         },
         {
           "methods": [
-            "POST"
-          ],
-          "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}/lock",
-          "permissionsRequired": [
-            "data-export.mapping-profiles.item.lock.execute"
-          ],
-          "modulePermissions": [
-          ]
-        },
-        {
-          "methods": [
             "GET"
           ],
           "pathPattern": "/data-export/transformation-fields",
