@@ -33,16 +33,7 @@ class PermissionsValidatorTest {
   @Mock private FolioExecutionContext folioExecutionContext;
   @InjectMocks private PermissionsValidator permissionsValidator;
 
-  private static final String TENANT_ID = "college";
   private static final String LOCK_PERMISSION = "data-export.job-profile.lock";
-  private static final String READ_PERMISSION = "ui-inventory.instance.view";
-  private UUID userId;
-
-  @BeforeEach
-  void setUp() {
-    userId = UUID.randomUUID();
-  }
-
   private UUID userId;
 
   @BeforeEach

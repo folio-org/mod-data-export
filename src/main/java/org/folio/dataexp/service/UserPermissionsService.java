@@ -55,6 +55,7 @@ public class UserPermissionsService {
    * @return list of desired permission names
    */
   private List<String> getDesiredPermissions() {
-    return List.of(INVENTORY_VIEW_PERMISSION, LOCK_JOB_PROFILE_PERMISSION, LOCK_MAPPING_PROFILE_PERMISSION);
+    return List.of(
+        INVENTORY_VIEW_PERMISSION, LOCK_JOB_PROFILE_PERMISSION, LOCK_MAPPING_PROFILE_PERMISSION);
   }
 }
