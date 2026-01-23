@@ -1,13 +1,13 @@
 package org.folio.dataexp.exception.job.profile;
 
 /** Exception thrown when attempting to modify a locked job profile. */
-public class LockedJobProfileException extends RuntimeException {
+public class LockJobProfileException extends RuntimeException {
   /**
-   * Constructs a new LockedJobProfileException with the specified detail message.
+   * Constructs a new LockJobProfileException with the specified detail message.
    *
    * @param message the detail message
    */
-  public LockedJobProfileException(String message) {
+  public LockJobProfileException(String message) {
     super(message);
   }
 }

@@ -71,6 +71,10 @@ public class JobProfileEntity {
   @Column(nullable = false)
   private boolean locked;
 
+  private UUID lockedBy;
+
+  private LocalDateTime lockedAt;
+
   /** Creates a JobProfileEntity from a JobProfile DTO. */
   public static JobProfileEntity fromJobProfile(JobProfile jobProfile) {
     if (isNull(jobProfile.getId())) {
@@ -96,6 +100,12 @@ public class JobProfileEntity {
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
         .mappingProfileId(jobProfile.getMappingProfileId())
+        .locked(jobProfile.getLocked())
+        .lockedBy(jobProfile.getLockedBy())
+        .lockedAt(
+            ofNullable(jobProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
         .build();
   }
 }

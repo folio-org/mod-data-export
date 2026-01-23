@@ -11,19 +11,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.Metadata;
+import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
-import org.folio.dataexp.exception.job.profile.LockedJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfileException;
+import org.folio.dataexp.exception.job.profile.LockJobProfilePermissionException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.s3.client.FolioS3Client;
+import org.folio.spring.FolioExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,27 +51,53 @@ class JobProfileServiceTest {
 
   @Mock private JobExecutionService jobExecutionService;
   @Mock private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
+  @Mock private FolioExecutionContext folioExecutionContext;
+  @Mock private UserClient userClient;
+  @Mock private PermissionsValidator permissionsValidator;
 
   @InjectMocks private JobProfileService jobProfileService;
 
   @Captor private ArgumentCaptor<List<JobExecution>> jobExecutionListCaptor;
+  @Captor private ArgumentCaptor<JobProfileEntity> jobProfileEntityCaptor;
 
   private UUID jobProfileId;
   private JobProfileEntity jobProfileEntity;
   private JobProfile jobProfile;
+  private UUID userId;
+  private User user;
 
   @BeforeEach
   void setUp() {
     jobProfileId = UUID.randomUUID();
+    userId = UUID.randomUUID();
+
     jobProfile = new JobProfile();
     jobProfile.setId(jobProfileId);
     jobProfile.setName("Test Profile");
     jobProfile.setDefault(FALSE);
+    jobProfile.setLocked(FALSE);
+
+    var metadata = new Metadata();
+    metadata.setCreatedDate(new Date());
+    metadata.setUpdatedDate(new Date());
+    metadata.setCreatedByUserId(userId.toString());
+    metadata.setUpdatedByUserId(userId.toString());
+    metadata.setCreatedByUsername("testuser");
+    metadata.setUpdatedByUsername("testuser");
+    jobProfile.setMetadata(metadata);
 
     jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(jobProfileId);
     jobProfileEntity.setJobProfile(jobProfile);
     jobProfileEntity.setLocked(false);
+
+    user = new User();
+    user.setId(userId.toString());
+    user.setUsername("testuser");
+    var personal = new User.Personal();
+    personal.setFirstName("Test");
+    personal.setLastName("User");
+    user.setPersonal(personal);
   }
 
   @Test
@@ -113,7 +146,7 @@ class JobProfileServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> jobProfileService.deleteJobProfileById(jobProfileId))
-        .isInstanceOf(LockedJobProfileException.class)
+        .isInstanceOf(LockJobProfileException.class)
         .hasMessage(
             "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
 
@@ -382,7 +415,7 @@ class JobProfileServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> jobProfileService.deleteJobProfileById(jobProfileId))
-        .isInstanceOf(LockedJobProfileException.class);
+        .isInstanceOf(LockJobProfileException.class);
 
     verify(errorLogEntityCqlRepository, never()).deleteByJobProfileId(any());
     verify(jobProfileEntityRepository, never()).deleteById(any());
@@ -459,6 +492,397 @@ class JobProfileServiceTest {
 
     // Then
     verify(jobProfileEntityRepository, never()).existsById(any());
+  }
+
+  // ========== Tests for putJobProfile with updateLock, lockProfile, and unlockProfile ==========
+
+  @Test
+  void shouldLockProfile_whenLockStatusChangesFromFalseToTrue() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(TRUE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+    assertThat(savedProfile.getLocked()).isTrue();
+    assertThat(savedProfile.getLockedAt()).isNotNull();
+    assertThat(savedProfile.getLockedBy()).isEqualTo(userId);
+  }
+
+  @Test
+  void shouldUnlockProfile_whenLockStatusChangesFromTrueToFalse() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    jobProfile.setLocked(true);
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+    assertThat(savedProfile.getLocked()).isFalse();
+    assertThat(savedProfile.getLockedAt()).isNull();
+    assertThat(savedProfile.getLockedBy()).isNull();
+  }
+
+  @Test
+  void shouldNotChangeLock_whenLockStatusRemainsUnchanged() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(permissionsValidator, never()).checkLockJobProfilePermission();
+    verify(permissionsValidator, never()).checkLockJobProfilePermission();
+  }
+
+  @Test
+  void shouldThrowLockJobProfilePermissionException_whenUserHasNoLockPermission() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(TRUE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(false);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.putJobProfile(jobProfileId, updatedProfile))
+        .isInstanceOf(LockJobProfilePermissionException.class)
+        .hasMessage("You do not have permission to lock this profile.");
+
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldThrowLockJobProfilePermissionException_whenUserHasNoUnlockPermission() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    jobProfile.setLocked(true);
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(false);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.putJobProfile(jobProfileId, updatedProfile))
+        .isInstanceOf(LockJobProfilePermissionException.class)
+        .hasMessage("You do not have permission to unlock this profile.");
+
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldSetLockedAtAndLockedBy_whenLockingProfile() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(TRUE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+
+    assertThat(savedProfile.getLocked()).isTrue();
+    assertThat(savedProfile.getLockedAt()).isNotNull().isInstanceOf(Date.class);
+    assertThat(savedProfile.getLockedBy()).isEqualTo(userId);
+  }
+
+  @Test
+  void shouldClearLockedAtAndLockedBy_whenUnlockingProfile() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    jobProfile.setLocked(true);
+    jobProfile.setLockedAt(new Date());
+    jobProfile.setLockedBy(UUID.randomUUID());
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+
+    assertThat(savedProfile.getLocked()).isFalse();
+    assertThat(savedProfile.getLockedAt()).isNull();
+    assertThat(savedProfile.getLockedBy()).isNull();
+  }
+
+  @Test
+  void shouldUpdateMetadataCorrectly_whenUpdatingProfile() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+    Metadata metadata = savedProfile.getMetadata();
+
+    assertThat(metadata.getCreatedDate()).isEqualTo(jobProfile.getMetadata().getCreatedDate());
+    assertThat(metadata.getUpdatedDate()).isNotNull();
+    assertThat(metadata.getCreatedByUserId())
+        .isEqualTo(jobProfile.getMetadata().getCreatedByUserId());
+    assertThat(metadata.getUpdatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getCreatedByUsername())
+        .isEqualTo(jobProfile.getMetadata().getCreatedByUsername());
+    assertThat(metadata.getUpdatedByUsername()).isEqualTo("testuser");
+  }
+
+  @Test
+  void shouldThrowDefaultJobProfileException_whenAttemptingToEditDefaultProfile() {
+    // Given
+    jobProfile.setDefault(TRUE);
+    jobProfileEntity.setJobProfile(jobProfile);
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.putJobProfile(jobProfileId, updatedProfile))
+        .isInstanceOf(DefaultJobProfileException.class)
+        .hasMessage("Editing of default job profile is forbidden");
+
+    verify(jobProfileEntityRepository, never()).save(any());
+  }
+
+  @Test
+  void shouldLockNonDefaultProfile_whenChangingFromUnlockedToLocked() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Test Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(TRUE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
+  }
+
+  @Test
+  void shouldUnlockNonDefaultProfile_whenChangingFromLockedToUnlocked() {
+    // Given
+    jobProfileEntity.setLocked(true);
+    jobProfile.setLocked(true);
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Test Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(any(JobProfileEntity.class));
+  }
+
+  @Test
+  void shouldPreserveUserInfo_whenUpdatingProfile() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Updated Profile");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+
+    assertThat(savedProfile.getUserInfo()).isNotNull();
+    assertThat(savedProfile.getUserInfo().getFirstName()).isEqualTo("Test");
+    assertThat(savedProfile.getUserInfo().getLastName()).isEqualTo("User");
+    assertThat(savedProfile.getUserInfo().getUserName()).isEqualTo("testuser");
+  }
+
+  @Test
+  void shouldHandleLockingWhenCurrentUserHasPermission() {
+    // Given
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Profile to Lock");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(TRUE);
+
+    UUID currentUserId = UUID.randomUUID();
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(currentUserId);
+    when(userClient.getUserById(currentUserId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+
+    assertThat(savedProfile.getLocked()).isTrue();
+    assertThat(savedProfile.getLockedBy()).isEqualTo(currentUserId);
+  }
+
+  @Test
+  void shouldHandleUnlockingWhenCurrentUserHasPermission() {
+    // Given
+    UUID originalLockingUserId = UUID.randomUUID();
+    jobProfileEntity.setLocked(true);
+    jobProfile.setLocked(true);
+    jobProfile.setLockedBy(originalLockingUserId);
+    jobProfile.setLockedAt(new Date());
+
+    JobProfile updatedProfile = new JobProfile();
+    updatedProfile.setId(jobProfileId);
+    updatedProfile.setName("Profile to Unlock");
+    updatedProfile.setDefault(FALSE);
+    updatedProfile.setLocked(FALSE);
+
+    UUID currentUserId = UUID.randomUUID();
+
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    when(folioExecutionContext.getUserId()).thenReturn(currentUserId);
+    when(userClient.getUserById(currentUserId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    // When
+    jobProfileService.putJobProfile(jobProfileId, updatedProfile);
+
+    // Then
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile savedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+
+    assertThat(savedProfile.getLocked()).isFalse();
+    assertThat(savedProfile.getLockedBy()).isNull();
+    assertThat(savedProfile.getLockedAt()).isNull();
   }
 
   // Helper methods

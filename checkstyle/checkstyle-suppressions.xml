@@ -28,4 +28,8 @@
     files="DownloadRecordTest.java"/>
   <suppress checks="IllegalTokenText"
     files="JsonToMarcConverterTest.java"/>
+
+  <!-- illegal declaration usage distance -->
+  <suppress checks="VariableDeclarationUsageDistance"
+            files="JobProfileServiceTest.java"/>
 </suppressions>

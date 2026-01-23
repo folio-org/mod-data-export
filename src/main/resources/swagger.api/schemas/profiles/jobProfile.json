@@ -42,6 +42,21 @@
       "type": "object",
       "$ref": "protocol.json"
     },
+    "locked": {
+      "description": "True if locked, false if unlocked",
+      "type": "boolean",
+      "default": false
+    },
+    "lockedBy": {
+      "description": "UUID of the user who locked the job profile",
+      "type": "string",
+      "format": "uuid"
+    },
+    "lockedAt": {
+      "description": "Date and time when job profile was locked",
+      "type": "string",
+      "format": "date-time"
+    },
     "metadata": {
       "description": "Metadata provided by the server",
       "type": "object",
