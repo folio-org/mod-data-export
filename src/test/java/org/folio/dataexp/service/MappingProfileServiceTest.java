@@ -93,23 +93,23 @@ class MappingProfileServiceTest {
 
   @Test
   void deleteMappingProfileByIdTest() {
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(false);
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(false);
 
     user = new User();
     user.setPersonal(new User.Personal());
     user.setUsername("testuser");
-    mappingProfile.setName("mappingProfile");
+    profile.setName("mappingProfile");
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .build();
 
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
-    mappingProfileService.deleteMappingProfileById(mappingProfile.getId());
+    mappingProfileService.deleteMappingProfileById(profile.getId());
 
     verify(mappingProfileEntityRepository).deleteById(isA(UUID.class));
   }
@@ -117,19 +117,19 @@ class MappingProfileServiceTest {
   @Test
   @SneakyThrows
   void getMappingProfileByIdTest() {
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(true);
-    mappingProfile.setName("mappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(true);
+    profile.setName("mappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
-    mappingProfileService.getMappingProfileById(mappingProfile.getId());
+    mappingProfileService.getMappingProfileById(profile.getId());
 
     verify(mappingProfileEntityRepository).getReferenceById(isA(UUID.class));
   }
@@ -137,15 +137,15 @@ class MappingProfileServiceTest {
   @Test
   @SneakyThrows
   void getMappingProfiles() {
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(true);
-    mappingProfile.setName("mappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(true);
+    profile.setName("mappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .build();
     PageImpl<MappingProfileEntity> page = new PageImpl<>(List.of(entity));
 
@@ -166,24 +166,24 @@ class MappingProfileServiceTest {
     transformation.setPath("$.holdings[*].callNumber");
     transformation.setRecordType(RecordTypes.HOLDINGS);
     transformation.setTransformation("900  $a");
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(true);
-    mappingProfile.setName("mappingProfile");
-    mappingProfile.setTransformations(List.of(transformation));
-    var user = new User();
-    user.setPersonal(new User.Personal());
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(true);
+    profile.setName("mappingProfile");
+    profile.setTransformations(List.of(transformation));
+    var userDto = new User();
+    userDto.setPersonal(new User.Personal());
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .build();
 
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
-    when(userClient.getUserById(isA(String.class))).thenReturn(user);
+    when(userClient.getUserById(isA(String.class))).thenReturn(userDto);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
-    mappingProfileService.postMappingProfile(mappingProfile);
+    mappingProfileService.postMappingProfile(profile);
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
     verify(mappingProfileValidator).validate(isA(MappingProfile.class));
@@ -191,25 +191,25 @@ class MappingProfileServiceTest {
 
   @Test
   void putMappingProfileTest() {
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(false);
-    mappingProfile.setName("mappingProfile");
-    mappingProfile.setMetadata(new Metadata().createdDate(new Date()));
-    var user = new User();
-    user.setPersonal(new User.Personal());
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(false);
+    profile.setName("mappingProfile");
+    profile.setMetadata(new Metadata().createdDate(new Date()));
+    var userDto = new User();
+    userDto.setPersonal(new User.Personal());
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
-    when(userClient.getUserById(isA(String.class))).thenReturn(user);
+    when(userClient.getUserById(isA(String.class))).thenReturn(userDto);
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
 
-    mappingProfileService.putMappingProfile(mappingProfile.getId(), mappingProfile);
+    mappingProfileService.putMappingProfile(profile.getId(), profile);
 
     verify(mappingProfileEntityRepository).save(isA(MappingProfileEntity.class));
     verify(mappingProfileValidator).validate(isA(MappingProfile.class));
