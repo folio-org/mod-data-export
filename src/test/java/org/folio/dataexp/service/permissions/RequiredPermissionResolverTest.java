@@ -31,4 +31,13 @@ class RequiredPermissionResolverTest {
     // Then
     assertThat(permission).isEqualTo("data-export.job-profiles.item.lock.execute");
   }
+
+  @Test
+  void shouldReturnCorrectPermission_whenGetLockMappingProfilePermission() {
+    // When
+    String permission = requiredPermissionResolver.getLockMappingProfilePermission();
+
+    // Then
+    assertThat(permission).isEqualTo("data-export.mapping-profiles.item.lock.execute");
+  }
 }

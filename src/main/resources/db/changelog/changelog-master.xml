@@ -23,4 +23,5 @@
     <include file="changes/add_unique_error_idx.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_locked_to_job_profile.xml" relativeToChangelogFile="true"/>
     <include file="changes/add_locked_by_at_to_job_profile.xml" relativeToChangelogFile="true"/>
+    <include file="changes/add_locked_by_at_to_mapping_profile.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
