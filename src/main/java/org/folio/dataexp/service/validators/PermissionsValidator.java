@@ -57,7 +57,7 @@ public class PermissionsValidator {
     log.info("userPermissions: {}", userPermissions);
     return userPermissions.contains(lockPermission);
   }
-    
+
   /**
    * Checks if the user has permission to lock/unlock mapping profiles for the given tenant.
    *

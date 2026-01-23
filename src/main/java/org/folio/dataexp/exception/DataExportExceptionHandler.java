@@ -235,20 +235,20 @@ public class DataExportExceptionHandler {
   public ResponseEntity<String> handleLockJobProfileException(final LockJobProfileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
-    
+
   /**
    * Handles lock job profile permission exceptions.
    *
    * @param e the exception
    * @return response entity with error message and status
-   */  
+   */
   @ExceptionHandler(LockJobProfilePermissionException.class)
   public ResponseEntity<String> handleLockJobProfilePermissionException(
       final LockJobProfilePermissionException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
   }
-  
-   /**
+
+  /**
    * Handles locked mapping profile exceptions.
    *
    * @param e the exception
@@ -258,9 +258,9 @@ public class DataExportExceptionHandler {
   public ResponseEntity<String> handleLockedMappingProfileException(
       final LockMappingProfileException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-  } 
-  
-    /**
+  }
+
+  /**
    * Handles lock mapping profile permission exceptions.
    *
    * @param e the exception
@@ -269,6 +269,6 @@ public class DataExportExceptionHandler {
   @ExceptionHandler(LockMappingProfilePermissionException.class)
   public ResponseEntity<String> handleLockMappingProfilePermissionException(
       final LockMappingProfilePermissionException e) {
-  return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-  } 
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+  }
 }
