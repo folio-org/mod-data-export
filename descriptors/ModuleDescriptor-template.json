@@ -358,6 +358,9 @@
           "permissionsRequired": [
             "data-export.mapping-profiles.item.post"
           ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -391,6 +394,9 @@
           "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.put"
+          ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [
             "users.item.get"
@@ -683,6 +689,11 @@
       "description": "Entry point to stop freezing job executions"
     },
     {
+      "permissionName": "data-export.mapping-profiles.item.lock.execute",
+      "displayName": "Data Export - lock mapping profile",
+      "description": "To lock mapping profile"
+    },
+    {
       "permissionName": "data-export.logs.collection.get",
       "displayName": "Data Export - get error logs collection",
       "description": "Entry point to get error logs by job execution id"
@@ -762,7 +773,8 @@
         "data-export.download-record.item.get",
         "perms.users.get",
         "permissions.users.item.get",
-        "data-export.job-profiles.item.lock.execute"
+        "data-export.job-profiles.item.lock.execute",
+        "data-export.mapping-profiles.item.lock.execute"
       ],
       "visible": false
     }
