@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import static org.folio.dataexp.util.Constants.INVENTORY_VIEW_PERMISSION;
 import static org.folio.dataexp.util.Constants.LOCK_MAPPING_PROFILE_PERMISSION;
+import static org.folio.dataexp.util.Constants.LOCK_JOB_PROFILE_PERMISSION;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,6 @@ public class UserPermissionsService {
    * @return list of desired permission names
    */
   private List<String> getDesiredPermissions() {
-    return List.of(INVENTORY_VIEW_PERMISSION, LOCK_MAPPING_PROFILE_PERMISSION);
+    return List.of(INVENTORY_VIEW_PERMISSION, LOCK_JOB_PROFILE_PERMISSION, LOCK_MAPPING_PROFILE_PERMISSION);
   }
 }
