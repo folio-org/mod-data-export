@@ -674,9 +674,9 @@
       "description": "Entry point to delete Mapping Profile by id"
     },
     {
-     "permissionName": "data-export.mapping-profiles.collection.get",
-     "displayName": "Data Export - create get mapping profiles collection",
-     "description": "Entry point to get Mapping Profiles collection"
+    "permissionName": "data-export.mapping-profiles.collection.get",
+    "displayName": "Data Export - create get mapping profiles collection",
+    "description": "Entry point to get Mapping Profiles collection"
     },
     {
       "permissionName": "data-export.transformation-fields.collection.get",
