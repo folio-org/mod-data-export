@@ -52,6 +52,10 @@ public class Constants {
   public static final String LOCK_JOB_PROFILE_PERMISSION =
       "data-export.job-profiles.item.lock.execute";
 
+  /** Permission for locking a mapping profile. */
+  public static final String LOCK_MAPPING_PROFILE_PERMISSION =
+      "data-export.mapping-profiles.item.lock.execute";
+
   /** File suffix for MARC records. */
   public static final String MARC_FILE_SUFFIX = "mrc";
 

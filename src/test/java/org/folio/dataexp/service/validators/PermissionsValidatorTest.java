@@ -23,6 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PermissionsValidatorTest {
 
+  private static final String TENANT_ID = "college";
+  private static final String LOCK_MAPPING_PROFILE_PERMISSION =
+      "data-export.mapping-profiles.item.lock.execute";
+  private static final String READ_PERMISSION = "ui-inventory.instance.view";
+
   @Mock private PermissionsProvider permissionsProvider;
   @Mock private RequiredPermissionResolver requiredPermissionResolver;
   @Mock private FolioExecutionContext folioExecutionContext;
@@ -31,6 +36,13 @@ class PermissionsValidatorTest {
   private static final String TENANT_ID = "college";
   private static final String LOCK_PERMISSION = "data-export.job-profile.lock";
   private static final String READ_PERMISSION = "ui-inventory.instance.view";
+  private UUID userId;
+
+  @BeforeEach
+  void setUp() {
+    userId = UUID.randomUUID();
+  }
+
   private UUID userId;
 
   @BeforeEach
@@ -191,6 +203,160 @@ class PermissionsValidatorTest {
 
     // When
     boolean result = permissionsValidator.checkLockJobProfilePermission();
+
+    // Then
+    assertThat(result).isTrue();
+    verify(permissionsProvider).getUserPermissions(TENANT_ID, newUserId.toString());
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(List.of(READ_PERMISSION));
+    when(requiredPermissionResolver.getReadPermission()).thenReturn(READ_PERMISSION);
+    assertDoesNotThrow(() -> permissionsValidator.checkInstanceViewPermissions(TENANT_ID));
+  }
+
+  // ========== Tests for checkLockMappingProfilePermission ==========
+
+  @Test
+  void shouldReturnTrue_whenUserHasLockMappingProfilePermission() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(List.of(LOCK_MAPPING_PROFILE_PERMISSION));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isTrue();
+    verify(requiredPermissionResolver).getLockMappingProfilePermission();
+    verify(permissionsProvider).getUserPermissions(TENANT_ID, userId.toString());
+  }
+
+  @Test
+  void shouldReturnFalse_whenUserDoesNotHaveLockMappingProfilePermission() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(List.of("some.other.permission"));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isFalse();
+    verify(requiredPermissionResolver).getLockMappingProfilePermission();
+    verify(permissionsProvider).getUserPermissions(TENANT_ID, userId.toString());
+  }
+
+  @Test
+  void shouldReturnFalse_whenUserHasEmptyPermissionsList_forLockMappingProfile() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(Collections.emptyList());
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isFalse();
+    verify(requiredPermissionResolver).getLockMappingProfilePermission();
+    verify(permissionsProvider).getUserPermissions(TENANT_ID, userId.toString());
+  }
+
+  @Test
+  void shouldReturnTrue_whenUserHasMultiplePermissions_includingLockMappingProfile() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(List.of("permission1", LOCK_MAPPING_PROFILE_PERMISSION, "permission2"));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isTrue();
+    verify(requiredPermissionResolver).getLockMappingProfilePermission();
+    verify(permissionsProvider).getUserPermissions(TENANT_ID, userId.toString());
+  }
+
+  @Test
+  void shouldUseCorrectTenantId_whenCheckingLockMappingProfilePermission() {
+    // Given
+    String customTenantId = "custom-tenant";
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(customTenantId);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(customTenantId, userId.toString()))
+        .thenReturn(List.of(LOCK_MAPPING_PROFILE_PERMISSION));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isTrue();
+    verify(permissionsProvider).getUserPermissions(customTenantId, userId.toString());
+  }
+
+  @Test
+  void shouldReturnFalse_whenLockMappingProfilePermissionIsNull() {
+    // Given
+    when(requiredPermissionResolver.getLockMappingProfilePermission()).thenReturn(null);
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isFalse();
+    verify(requiredPermissionResolver).getLockMappingProfilePermission();
+  }
+
+  @Test
+  void shouldReturnFalse_whenUserHasSimilarButNotExactLockMappingProfilePermission() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, userId.toString()))
+        .thenReturn(
+            List.of(
+                "data-export.mapping-profiles.item.lock.execute.extra",
+                "data-export.mapping-profiles"));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
+
+    // Then
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  void shouldUseDifferentUserId_whenContextChangesForLockMappingProfile() {
+    // Given
+    UUID newUserId = UUID.randomUUID();
+    when(folioExecutionContext.getUserId()).thenReturn(newUserId);
+    when(folioExecutionContext.getTenantId()).thenReturn(TENANT_ID);
+    when(requiredPermissionResolver.getLockMappingProfilePermission())
+        .thenReturn(LOCK_MAPPING_PROFILE_PERMISSION);
+    when(permissionsProvider.getUserPermissions(TENANT_ID, newUserId.toString()))
+        .thenReturn(List.of(LOCK_MAPPING_PROFILE_PERMISSION));
+
+    // When
+    boolean result = permissionsValidator.checkLockMappingProfilePermission();
 
     // Then
     assertThat(result).isTrue();

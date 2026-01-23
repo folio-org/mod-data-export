@@ -57,4 +57,21 @@ public class PermissionsValidator {
     log.info("userPermissions: {}", userPermissions);
     return userPermissions.contains(lockPermission);
   }
+
+  /**
+   * Checks if the user has permission to lock/unlock mapping profiles for the given tenant.
+   *
+   * @return true if permission exists, false otherwise
+   */
+  public boolean checkLockMappingProfilePermission() {
+    var lockPermission = requiredPermissionResolver.getLockMappingProfilePermission();
+    if (lockPermission == null) {
+      return false;
+    }
+    var userPermissions =
+        permissionsProvider.getUserPermissions(
+            folioExecutionContext.getTenantId(), folioExecutionContext.getUserId().toString());
+    log.info("userPermissions: {}", userPermissions);
+    return userPermissions.contains(lockPermission);
+  }
 }
