@@ -148,7 +148,8 @@ class MappingProfileServiceTest {
         .thenReturn(entity);
 
     // When & Then
-    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
+    UUID profileId = mappingProfile.getId();
+    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(profileId))
         .isInstanceOf(DefaultMappingProfileException.class)
         .hasMessage("Deletion of default mapping profile is forbidden");
 
@@ -160,28 +161,29 @@ class MappingProfileServiceTest {
   @Test
   void deleteMappingProfileById_shouldThrowLockMappingProfileException_whenProfileIsLocked() {
     // Given
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(false);
-    mappingProfile.setName("lockedMappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(false);
+    profile.setName("lockedMappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .locked(true)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
 
     // When & Then
-    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
+    UUID profileId = profile.getId();
+    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(profileId))
         .isInstanceOf(LockMappingProfileException.class)
         .hasMessage(
             "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
 
-    verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
+    verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService, never()).getJobProfiles(any(), any(), any(), any());
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
@@ -189,15 +191,15 @@ class MappingProfileServiceTest {
   @Test
   void deleteById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToJobProfiles() {
     // Given
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(false);
-    mappingProfile.setName("linkedMappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(false);
+    profile.setName("linkedMappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .locked(false)
             .build();
 
@@ -216,38 +218,39 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile1, jobProfile2));
     jobProfileCollection.setTotalRecords(2);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE))
+            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
-    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
+    UUID profileId = profile.getId();
+    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(profileId))
         .isInstanceOf(LockMappingProfileException.class)
         .hasMessageContaining("Cannot delete mapping profile linked to job profiles:")
         .hasMessageContaining(jobProfile1Id.toString())
         .hasMessageContaining(jobProfile2Id.toString());
 
-    verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
+    verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
+            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
   @Test
   void deleteById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToSingleJobProfile() {
     // Given
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(false);
-    mappingProfile.setName("linkedMappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(false);
+    profile.setName("linkedMappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .locked(false)
             .build();
 
@@ -260,22 +263,23 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile));
     jobProfileCollection.setTotalRecords(1);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE))
+            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
-    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
+    UUID profileId = profile.getId();
+    assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(profileId))
         .isInstanceOf(LockMappingProfileException.class)
         .hasMessageContaining("Cannot delete mapping profile linked to job profiles:")
         .hasMessageContaining(jobProfileId.toString());
 
-    verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
+    verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
+            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
