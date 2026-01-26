@@ -56,9 +56,9 @@ public class MappingProfileService {
               null, "(mappingProfileId=%s)".formatted(mappingProfileId), 0, Integer.MAX_VALUE);
       if (linkedJobProfiles.getTotalRecords() > 0) {
         throw new LockMappingProfileException(
-          "Cannot delete mapping profile linked to job profiles: %s.".formatted(
-            linkedJobProfiles.getJobProfiles().stream().map(JobProfile::getId).toList()
-          ));
+            "Cannot delete mapping profile linked to job profiles: %s."
+                .formatted(
+                    linkedJobProfiles.getJobProfiles().stream().map(JobProfile::getId).toList()));
       }
       mappingProfileEntityRepository.deleteById(mappingProfileId);
     } else {

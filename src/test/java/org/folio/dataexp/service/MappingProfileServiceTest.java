@@ -99,7 +99,7 @@ class MappingProfileServiceTest {
   // ========== Tests for deleteMappingProfileById method ==========
 
   @Test
-  void deleteMappingProfileById_shouldSuccessfullyDelete_whenProfileIsNotDefaultAndNotLockedAndHasNoLinkedJobProfiles() {
+  void deleteById_shouldSuccessDelete_whenIsNotDefaultAndNotLockedAndHasNoLinkedJobProfiles() {
     // Given
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -117,7 +117,8 @@ class MappingProfileServiceTest {
     emptyJobProfileCollection.setJobProfiles(List.of());
     emptyJobProfileCollection.setTotalRecords(0);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+        .thenReturn(entity);
     when(jobProfileService.getJobProfiles(any(), any(), any(), any()))
         .thenReturn(emptyJobProfileCollection);
 
@@ -126,8 +127,9 @@ class MappingProfileServiceTest {
 
     // Then
     verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
-    verify(jobProfileService).getJobProfiles(
-        null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
+    verify(jobProfileService)
+        .getJobProfiles(
+            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository).deleteById(mappingProfile.getId());
   }
 
@@ -146,7 +148,8 @@ class MappingProfileServiceTest {
             .locked(false)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+        .thenReturn(entity);
 
     // When & Then
     assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
@@ -173,12 +176,14 @@ class MappingProfileServiceTest {
             .locked(true)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+        .thenReturn(entity);
 
     // When & Then
     assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(mappingProfile.getId()))
         .isInstanceOf(LockMappingProfileException.class)
-        .hasMessage("This profile is locked. Please unlock the profile to proceed with editing/deletion.");
+        .hasMessage(
+            "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
 
     verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
     verify(jobProfileService, never()).getJobProfiles(any(), any(), any(), any());
@@ -186,7 +191,7 @@ class MappingProfileServiceTest {
   }
 
   @Test
-  void deleteMappingProfileById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToJobProfiles() {
+  void deleteById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToJobProfiles() {
     // Given
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -215,7 +220,8 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile1, jobProfile2));
     jobProfileCollection.setTotalRecords(2);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+        .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
             null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
@@ -228,13 +234,14 @@ class MappingProfileServiceTest {
         .hasMessageContaining(jobProfile2Id.toString());
 
     verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
-    verify(jobProfileService).getJobProfiles(
-        null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
+    verify(jobProfileService)
+        .getJobProfiles(
+            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
   @Test
-  void deleteMappingProfileById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToSingleJobProfile() {
+  void deleteById_shouldThrowLockMappingProfileException_whenProfileIsLinkedToSingleJobProfile() {
     // Given
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -257,7 +264,8 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile));
     jobProfileCollection.setTotalRecords(1);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId())).thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+        .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
             null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
@@ -269,8 +277,9 @@ class MappingProfileServiceTest {
         .hasMessageContaining(jobProfileId.toString());
 
     verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
-    verify(jobProfileService).getJobProfiles(
-        null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
+    verify(jobProfileService)
+        .getJobProfiles(
+            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
