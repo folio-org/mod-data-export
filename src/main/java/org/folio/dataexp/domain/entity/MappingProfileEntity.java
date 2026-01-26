@@ -72,6 +72,14 @@ public class MappingProfileEntity {
   /** Last name of the user who updated the mapping profile. */
   private String updatedByLastName;
 
+  /** Indicates whether the mapping profile is locked. */
+  @Column(nullable = false)
+  private boolean locked;
+
+  private UUID lockedBy;
+
+  private LocalDateTime lockedAt;
+
   /** Creates a MappingProfileEntity from a MappingProfile DTO. */
   public static MappingProfileEntity fromMappingProfile(MappingProfile mappingProfile) {
     if (isNull(mappingProfile.getId())) {
@@ -101,6 +109,12 @@ public class MappingProfileEntity {
         .updatedByUserId(metadata.getUpdatedByUserId())
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
+        .locked(mappingProfile.getLocked())
+        .lockedBy(mappingProfile.getLockedBy())
+        .lockedAt(
+            ofNullable(mappingProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
         .build();
   }
 

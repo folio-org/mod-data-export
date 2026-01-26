@@ -1,5 +1,7 @@
 package org.folio.dataexp.service;
 
+import static java.lang.Boolean.TRUE;
+
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +13,11 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockMappingProfilePermissionException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.MappingProfileValidator;
+import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ public class MappingProfileService {
   private final MappingProfileEntityCqlRepository mappingProfileEntityCqlRepository;
   private final UserClient userClient;
   private final MappingProfileValidator mappingProfileValidator;
+  private final PermissionsValidator permissionsValidator;
 
   /**
    * Deletes a mapping profile by its ID.
@@ -37,7 +42,7 @@ public class MappingProfileService {
    */
   public void deleteMappingProfileById(UUID mappingProfileId) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
+    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Deletion of default mapping profile is forbidden");
     }
     mappingProfileEntityRepository.deleteById(mappingProfileId);
@@ -101,6 +106,10 @@ public class MappingProfileService {
     metaData.updatedByUsername(user.getUsername());
     mappingProfile.setMetadata(metaData);
 
+    if (TRUE.equals(mappingProfile.getLocked())) {
+      lockProfile(mappingProfile);
+    }
+
     mappingProfileValidator.validate(mappingProfile);
 
     var saved =
@@ -118,7 +127,7 @@ public class MappingProfileService {
    */
   public void putMappingProfile(UUID mappingProfileId, MappingProfile mappingProfile) {
     var mappingProfileEntity = mappingProfileEntityRepository.getReferenceById(mappingProfileId);
-    if (Boolean.TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
+    if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Editing of default mapping profile is forbidden");
     }
 
@@ -144,9 +153,44 @@ public class MappingProfileService {
             .build();
 
     mappingProfile.setMetadata(metadata);
-
+    updateLock(mappingProfileEntity, mappingProfile);
     mappingProfileValidator.validate(mappingProfile);
 
     mappingProfileEntityRepository.save(MappingProfileEntity.fromMappingProfile(mappingProfile));
+  }
+
+  private void updateLock(
+      MappingProfileEntity mappingProfileEntity, MappingProfile mappingProfile) {
+    boolean existingLockStatus = mappingProfileEntity.isLocked();
+    boolean newLockStatus = Boolean.TRUE.equals(mappingProfile.getLocked());
+    if (existingLockStatus != newLockStatus) {
+      if (newLockStatus) {
+        lockProfile(mappingProfile);
+      } else {
+        unlockProfile(mappingProfile);
+      }
+    }
+  }
+
+  private void lockProfile(MappingProfile mappingProfile) {
+    if (permissionsValidator.checkLockMappingProfilePermission()) {
+      mappingProfile.setLocked(true);
+      mappingProfile.setLockedAt(new Date());
+      mappingProfile.setLockedBy(folioExecutionContext.getUserId());
+    } else {
+      throw new LockMappingProfilePermissionException(
+          "You do not have permission to lock this profile.");
+    }
+  }
+
+  private void unlockProfile(MappingProfile mappingProfile) {
+    if (permissionsValidator.checkLockMappingProfilePermission()) {
+      mappingProfile.setLocked(false);
+      mappingProfile.setLockedAt(null);
+      mappingProfile.setLockedBy(null);
+    } else {
+      throw new LockMappingProfilePermissionException(
+          "You do not have permission to unlock this profile.");
+    }
   }
 }

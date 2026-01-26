@@ -31,5 +31,7 @@
 
   <!-- illegal declaration usage distance -->
   <suppress checks="VariableDeclarationUsageDistance"
+            files="MappingProfileServiceTest.java"/>
+  <suppress checks="VariableDeclarationUsageDistance"
             files="JobProfileServiceTest.java"/>
 </suppressions>
