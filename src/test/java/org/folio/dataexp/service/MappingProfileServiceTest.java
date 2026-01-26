@@ -132,28 +132,28 @@ class MappingProfileServiceTest {
   @Test
   void deleteMappingProfileById_shouldThrowDefaultMappingProfileException_whenProfileIsDefault() {
     // Given
-    var mappingProfile = new MappingProfile();
-    mappingProfile.setId(UUID.randomUUID());
-    mappingProfile.setDefault(true);
-    mappingProfile.setName("defaultMappingProfile");
+    var profile = new MappingProfile();
+    profile.setId(UUID.randomUUID());
+    profile.setDefault(true);
+    profile.setName("defaultMappingProfile");
 
     var entity =
         MappingProfileEntity.builder()
-            .id(mappingProfile.getId())
-            .mappingProfile(mappingProfile)
+            .id(profile.getId())
+            .mappingProfile(profile)
             .locked(false)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
 
     // When & Then
-    UUID profileId = mappingProfile.getId();
+    UUID profileId = profile.getId();
     assertThatThrownBy(() -> mappingProfileService.deleteMappingProfileById(profileId))
         .isInstanceOf(DefaultMappingProfileException.class)
         .hasMessage("Deletion of default mapping profile is forbidden");
 
-    verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
+    verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService, never()).getJobProfiles(any(), any(), any(), any());
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
