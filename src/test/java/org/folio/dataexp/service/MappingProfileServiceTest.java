@@ -108,17 +108,13 @@ class MappingProfileServiceTest {
     user.setPersonal(new User.Personal());
     user.setUsername("testuser");
     profile.setName("mappingProfile");
-    var entity =
-        MappingProfileEntity.builder()
-            .id(profile.getId())
-            .mappingProfile(profile)
-            .build();
+    var entity = MappingProfileEntity.builder().id(profile.getId()).mappingProfile(profile).build();
 
     var emptyJobProfileCollection = new JobProfileCollection();
     emptyJobProfileCollection.setJobProfiles(List.of());
     emptyJobProfileCollection.setTotalRecords(0);
 
-    when(mappingProfileEntityRepository.getReferenceById(mappingProfile.getId()))
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
     when(jobProfileService.getJobProfiles(any(), any(), any(), any()))
         .thenReturn(emptyJobProfileCollection);
@@ -126,11 +122,11 @@ class MappingProfileServiceTest {
     mappingProfileService.deleteMappingProfileById(profile.getId());
 
     // Then
-    verify(mappingProfileEntityRepository).getReferenceById(mappingProfile.getId());
+    verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(mappingProfile.getId()), 0, Integer.MAX_VALUE);
-    verify(mappingProfileEntityRepository).deleteById(mappingProfile.getId());
+            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
+    verify(mappingProfileEntityRepository).deleteById(profile.getId());
   }
 
   @Test
@@ -293,11 +289,7 @@ class MappingProfileServiceTest {
     profile.setDefault(true);
     profile.setName("mappingProfile");
 
-    var entity =
-        MappingProfileEntity.builder()
-            .id(profile.getId())
-            .mappingProfile(profile)
-            .build();
+    var entity = MappingProfileEntity.builder().id(profile.getId()).mappingProfile(profile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
 
     mappingProfileService.getMappingProfileById(profile.getId());
@@ -313,11 +305,7 @@ class MappingProfileServiceTest {
     profile.setDefault(true);
     profile.setName("mappingProfile");
 
-    var entity =
-        MappingProfileEntity.builder()
-            .id(profile.getId())
-            .mappingProfile(profile)
-            .build();
+    var entity = MappingProfileEntity.builder().id(profile.getId()).mappingProfile(profile).build();
     PageImpl<MappingProfileEntity> page = new PageImpl<>(List.of(entity));
 
     when(mappingProfileEntityCqlRepository.findByCql(isA(String.class), isA(OffsetRequest.class)))
@@ -344,11 +332,7 @@ class MappingProfileServiceTest {
     profile.setTransformations(List.of(transformation));
     var userDto = new User();
     userDto.setPersonal(new User.Personal());
-    var entity =
-        MappingProfileEntity.builder()
-            .id(profile.getId())
-            .mappingProfile(profile)
-            .build();
+    var entity = MappingProfileEntity.builder().id(profile.getId()).mappingProfile(profile).build();
 
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(userDto);
@@ -370,11 +354,7 @@ class MappingProfileServiceTest {
     var userDto = new User();
     userDto.setPersonal(new User.Personal());
 
-    var entity =
-        MappingProfileEntity.builder()
-            .id(profile.getId())
-            .mappingProfile(profile)
-            .build();
+    var entity = MappingProfileEntity.builder().id(profile.getId()).mappingProfile(profile).build();
     when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(entity);
     when(mappingProfileEntityRepository.save(isA(MappingProfileEntity.class))).thenReturn(entity);
     when(userClient.getUserById(isA(String.class))).thenReturn(userDto);
