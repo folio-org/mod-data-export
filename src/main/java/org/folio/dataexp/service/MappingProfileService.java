@@ -1,6 +1,7 @@
 package org.folio.dataexp.service;
 
 import static java.lang.Boolean.TRUE;
+import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 
 import java.util.Date;
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class MappingProfileService {
     if (!mappingProfileEntity.isLocked()) {
       var linkedJobProfiles =
           jobProfileService.getJobProfiles(
-              null, "(mappingProfileId=%s)".formatted(mappingProfileId), 0, Integer.MAX_VALUE);
+              null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(mappingProfileId), 0, Integer.MAX_VALUE);
       if (linkedJobProfiles.getTotalRecords() > 0) {
         throw new LockMappingProfileException(
             "Cannot delete mapping profile linked to job profiles: %s."

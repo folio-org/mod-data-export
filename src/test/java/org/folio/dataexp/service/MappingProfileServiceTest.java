@@ -4,6 +4,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -125,7 +126,7 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository).deleteById(profile.getId());
   }
 
@@ -221,7 +222,7 @@ class MappingProfileServiceTest {
     when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE))
+            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
@@ -235,7 +236,7 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
@@ -266,7 +267,7 @@ class MappingProfileServiceTest {
     when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
         .thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE))
+            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
@@ -279,7 +280,7 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, "(mappingProfileId=%s)".formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
