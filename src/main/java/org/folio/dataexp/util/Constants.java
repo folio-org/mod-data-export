@@ -7,6 +7,7 @@ import lombok.experimental.UtilityClass;
 public class Constants {
   /** CQL query for selecting all records. */
   public static final String QUERY_CQL_ALL_RECORDS = "(cql.allRecords=1)";
+  public static final String QUERY_CQL_JOB_PROFILE_BY_MAPPING = "(mappingProfileId=%s)";
 
   /** Error code for invalid uploaded file extension. */
   public static final String INVALID_EXTENSION_ERROR_CODE = "error.uploadedFile.invalidExtension";
@@ -48,13 +49,13 @@ public class Constants {
   /** Permission string for viewing inventory instances. */
   public static final String INVENTORY_VIEW_PERMISSION = "ui-inventory.instance.view";
 
-  /** Permission for locking a mapping profile. */
-  public static final String LOCK_MAPPING_PROFILE_PERMISSION =
-      "data-export.mapping-profiles.item.lock.execute";
-
   /** Permission for locking a job profile. */
   public static final String LOCK_JOB_PROFILE_PERMISSION =
       "data-export.job-profiles.item.lock.execute";
+
+  /** Permission for locking a mapping profile. */
+  public static final String LOCK_MAPPING_PROFILE_PERMISSION =
+      "data-export.mapping-profiles.item.lock.execute";
 
   /** File suffix for MARC records. */
   public static final String MARC_FILE_SUFFIX = "mrc";

@@ -20,8 +20,6 @@ class RequiredPermissionResolverTest {
 
   @Test
   void getReadPermissionTest() {
-    assertEquals(
-        "ui-inventory.instance.view", new RequiredPermissionResolver().getReadPermission());
     assertEquals("ui-inventory.instance.view", requiredPermissionResolver.getReadPermission());
   }
 
@@ -32,6 +30,9 @@ class RequiredPermissionResolverTest {
 
     // Then
     assertThat(permission).isEqualTo("data-export.job-profiles.item.lock.execute");
+    assertEquals(
+        "ui-inventory.instance.view", new RequiredPermissionResolver().getReadPermission());
+    assertEquals("ui-inventory.instance.view", requiredPermissionResolver.getReadPermission());
   }
 
   @Test

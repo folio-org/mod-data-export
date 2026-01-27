@@ -162,6 +162,7 @@ public class JobProfileService {
       deleteExportedFilesAndDisableLink(jobProfileId);
       jobProfileEntityRepository.deleteById(jobProfileId);
     } else {
+      log.error("Attempt to delete a locked job profile with ID: {}", jobProfileId);
       throw new LockJobProfileException(
           "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
     }

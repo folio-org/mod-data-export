@@ -1,18 +1,22 @@
 package org.folio.dataexp.service;
 
 import static java.lang.Boolean.TRUE;
+import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 
 import java.util.Date;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.client.UserClient;
+import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
+import org.folio.dataexp.exception.mapping.profile.LockMappingProfileException;
 import org.folio.dataexp.exception.mapping.profile.LockMappingProfilePermissionException;
 import org.folio.dataexp.repository.MappingProfileEntityCqlRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 /** Service for managing mapping profiles. */
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class MappingProfileService {
 
   private final FolioExecutionContext folioExecutionContext;
@@ -33,6 +38,7 @@ public class MappingProfileService {
   private final UserClient userClient;
   private final MappingProfileValidator mappingProfileValidator;
   private final PermissionsValidator permissionsValidator;
+  private final JobProfileService jobProfileService;
 
   /**
    * Deletes a mapping profile by its ID.
@@ -45,7 +51,22 @@ public class MappingProfileService {
     if (TRUE.equals(mappingProfileEntity.getMappingProfile().getDefault())) {
       throw new DefaultMappingProfileException("Deletion of default mapping profile is forbidden");
     }
-    mappingProfileEntityRepository.deleteById(mappingProfileId);
+    if (!mappingProfileEntity.isLocked()) {
+      var linkedJobProfiles =
+          jobProfileService.getJobProfiles(
+              null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(mappingProfileId), 0, Integer.MAX_VALUE);
+      if (linkedJobProfiles.getTotalRecords() > 0) {
+        throw new LockMappingProfileException(
+            "Cannot delete mapping profile linked to job profiles: %s."
+                .formatted(
+                    linkedJobProfiles.getJobProfiles().stream().map(JobProfile::getId).toList()));
+      }
+      mappingProfileEntityRepository.deleteById(mappingProfileId);
+    } else {
+      log.error("Attempt to delete locked mapping profile with id: {}", mappingProfileId);
+      throw new LockMappingProfileException(
+          "This profile is locked. Please unlock the profile to proceed with editing/deletion.");
+    }
   }
 
   /**
