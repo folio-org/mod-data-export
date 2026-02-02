@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.3</version>
+    <version>4.0.2</version>
     <relativePath /> <!-- lookup parent from repository -->
   </parent>
 
@@ -40,21 +40,21 @@
     <argLine />
     <data-export.yaml.file>${project.basedir}/src/main/resources/swagger.api/data-export.yaml</data-export.yaml.file>
 
-    <folio-spring-base.version>9.0.0</folio-spring-base.version>
-    <folio-spring-cql.version>9.0.0</folio-spring-cql.version>
+    <folio-spring-base.version>9.1.0</folio-spring-base.version>
+    <folio-spring-cql.version>9.1.0</folio-spring-cql.version>
     <generate-marc-utils-version>1.11.0-SNAPSHOT</generate-marc-utils-version>
-    <apache-commons-collections.version>4.4</apache-commons-collections.version>
-    <feign-jackson.version>12.1</feign-jackson.version>
-    <aws-sdk-java.version>2.25.12</aws-sdk-java.version>
-    <hypersistence-utils-hibernate-63.version>3.7.3</hypersistence-utils-hibernate-63.version>
-    <folio-s3-client.version>2.3.0</folio-s3-client.version>
+    <apache-commons-collections.version>4.5.0</apache-commons-collections.version>
+    <feign-jackson.version>13.6</feign-jackson.version>
+    <aws-sdk-java.version>2.41.19</aws-sdk-java.version>
+    <hypersistence-utils-hibernate-63.version>3.15.1</hypersistence-utils-hibernate-63.version>
+    <folio-s3-client.version>2.4.0</folio-s3-client.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <marc4j.version>2.9.2</marc4j.version>
-    <mapstruct.version>1.5.3.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
     <lombok.mapstruct-binding.version>0.2.0</lombok.mapstruct-binding.version>
-    <awaitility.version>4.2.0</awaitility.version>
-    <json-smart.version>2.5.2</json-smart.version>
-    <json-path.version>2.9.0</json-path.version>
+    <awaitility.version>4.3.0</awaitility.version>
+    <json-smart.version>2.6.0</json-smart.version>
+    <json-path.version>2.10.0</json-path.version>
     <lib-fqm-query-processor.version>4.0.2</lib-fqm-query-processor.version>
     <lib-linked-data-rdf4ld.version>1.0.0-SNAPSHOT</lib-linked-data-rdf4ld.version>
 
@@ -529,7 +529,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>11.0.1</version>
+            <version>13.1.0</version>
           </dependency>
         </dependencies>
         <executions>
