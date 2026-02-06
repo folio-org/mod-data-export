@@ -7,6 +7,7 @@ import lombok.experimental.UtilityClass;
 public class Constants {
   /** CQL query for selecting all records. */
   public static final String QUERY_CQL_ALL_RECORDS = "(cql.allRecords=1)";
+
   public static final String QUERY_CQL_JOB_PROFILE_BY_MAPPING = "(mappingProfileId=%s)";
 
   /** Error code for invalid uploaded file extension. */

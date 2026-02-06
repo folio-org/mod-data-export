@@ -115,8 +115,7 @@ class MappingProfileServiceTest {
     emptyJobProfileCollection.setJobProfiles(List.of());
     emptyJobProfileCollection.setTotalRecords(0);
 
-    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
-        .thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId())).thenReturn(entity);
     when(jobProfileService.getJobProfiles(any(), any(), any(), any()))
         .thenReturn(emptyJobProfileCollection);
 
@@ -126,7 +125,10 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null,
+            QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()),
+            0,
+            Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository).deleteById(profile.getId());
   }
 
@@ -145,8 +147,7 @@ class MappingProfileServiceTest {
             .locked(false)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
-        .thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId())).thenReturn(entity);
 
     // When & Then
     UUID profileId = profile.getId();
@@ -174,8 +175,7 @@ class MappingProfileServiceTest {
             .locked(true)
             .build();
 
-    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
-        .thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId())).thenReturn(entity);
 
     // When & Then
     UUID profileId = profile.getId();
@@ -219,10 +219,12 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile1, jobProfile2));
     jobProfileCollection.setTotalRecords(2);
 
-    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
-        .thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId())).thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE))
+            null,
+            QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()),
+            0,
+            Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
@@ -236,7 +238,10 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null,
+            QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()),
+            0,
+            Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
@@ -264,10 +269,12 @@ class MappingProfileServiceTest {
     jobProfileCollection.setJobProfiles(List.of(jobProfile));
     jobProfileCollection.setTotalRecords(1);
 
-    when(mappingProfileEntityRepository.getReferenceById(profile.getId()))
-        .thenReturn(entity);
+    when(mappingProfileEntityRepository.getReferenceById(profile.getId())).thenReturn(entity);
     when(jobProfileService.getJobProfiles(
-            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE))
+            null,
+            QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()),
+            0,
+            Integer.MAX_VALUE))
         .thenReturn(jobProfileCollection);
 
     // When & Then
@@ -280,7 +287,10 @@ class MappingProfileServiceTest {
     verify(mappingProfileEntityRepository).getReferenceById(profile.getId());
     verify(jobProfileService)
         .getJobProfiles(
-            null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()), 0, Integer.MAX_VALUE);
+            null,
+            QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(profile.getId()),
+            0,
+            Integer.MAX_VALUE);
     verify(mappingProfileEntityRepository, never()).deleteById(any());
   }
 
