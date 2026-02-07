@@ -5,9 +5,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
+import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,9 @@ import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +38,9 @@ public class MarcDeletedIdsService {
 
   private final SourceStorageClient sourceStorageClient;
   private final FileDefinitionsService fileDefinitionsService;
+  private final ConsortiaService consortiaService;
+  private final FolioExecutionContext folioExecutionContext;
+  private final FolioModuleMetadata folioModuleMetadata;
 
   /**
    * Gets a FileDefinition for deleted MARC IDs within a date range.
@@ -61,8 +69,24 @@ public class MarcDeletedIdsService {
             .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
-    List<String> marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+    List<String> marcIds =
+        new ArrayList<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords());
     log.info("Found deleted MARC IDs: {}", marcIds.size());
+
+    if (!consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      var centralTenantId =
+          consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+      try (var ignored =
+          new FolioExecutionContextSetter(
+              prepareContextForTenant(
+                  centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+        payload =
+            new MarcRecordIdentifiersPayload()
+                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
+        var centralMarcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+        marcIds.removeIf(id -> !centralMarcIds.contains(id));
+      }
+    }
 
     var fileDefinition = new FileDefinition();
     fileDefinition.setSize(marcIds.size());
