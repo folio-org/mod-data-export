@@ -35,6 +35,7 @@ public class MarcDeletedIdsService {
   private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
   private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
   private static final String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
+  private static final String LEADER_SEARCH_EXPRESSION_NOT_DELETED = "p_05 not= 'd'";
 
   private final SourceStorageClient sourceStorageClient;
   private final FileDefinitionsService fileDefinitionsService;
@@ -82,9 +83,9 @@ public class MarcDeletedIdsService {
                   centralTenantId, folioModuleMetadata, folioExecutionContext))) {
         payload =
             new MarcRecordIdentifiersPayload()
-                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
+                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED);
         var centralMarcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
-        marcIds.removeIf(id -> !centralMarcIds.contains(id));
+        marcIds.removeIf(centralMarcIds::contains);
       }
     }
 

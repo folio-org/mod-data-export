@@ -204,6 +204,6 @@ class MarcDeletedIdsServiceTest {
     marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
 
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
-    assertThat(id2).isEqualTo(resourceArgumentCaptor.getValue().getContentAsString(UTF_8));
+    assertThat(id1).isEqualTo(resourceArgumentCaptor.getValue().getContentAsString(UTF_8));
   }
 }
