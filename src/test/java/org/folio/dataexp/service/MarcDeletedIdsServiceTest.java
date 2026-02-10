@@ -67,7 +67,6 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
-    //    when(folioExecutionContext.getOkapiHeaders()).thenReturn(headers);
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     var res = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
