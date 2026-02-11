@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializer;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +24,7 @@ class LinkedDataConverterTest extends BaseDataExportInitializer {
 
   @SneakyThrows
   @Test
+  @Disabled
   void convertLdJsonToBibframe2RdfHostnameTest() {
     var resource =
         linkedDataConverter

@@ -54,7 +54,10 @@ public class MappingProfileService {
     if (!mappingProfileEntity.isLocked()) {
       var linkedJobProfiles =
           jobProfileService.getJobProfiles(
-              null, QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(mappingProfileId), 0, Integer.MAX_VALUE);
+              null,
+              QUERY_CQL_JOB_PROFILE_BY_MAPPING.formatted(mappingProfileId),
+              0,
+              Integer.MAX_VALUE);
       if (linkedJobProfiles.getTotalRecords() > 0) {
         throw new LockMappingProfileException(
             "Cannot delete mapping profile linked to job profiles: %s."
