@@ -29,7 +29,10 @@ class LinkedDataConverterTest extends BaseDataExportInitializer {
             .convertLdJsonToBibframe2Rdf(
                 """
       {
-        "id": "12345"
+        "id": "12345",
+        "types": [
+          "http://bibfra.me/vocab/lite/Instance"
+        ]
       }""")
             .toString();
     System.out.println(resource);
