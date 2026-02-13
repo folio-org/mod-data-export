@@ -16,7 +16,7 @@ class MarcInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           marcInstanceAllRepository.findMarcInstanceAllNonDeleted(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(5);
     }
   }
@@ -26,7 +26,7 @@ class MarcInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           marcInstanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressed(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(3);
     }
   }

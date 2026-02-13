@@ -12,5 +12,5 @@ public abstract class AllRepositoryBaseIT extends BaseDataExportInitializerIT {
 
   protected static final UUID MIN_UUID = UUID.fromString("00000000-0000-0000-0000-00000000");
   protected static final UUID MAX_UUID = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffff");
-  protected static final int exportIdsBatch = 5000;
+  protected static final int EXPORT_IDS_BATCH = 5000;
 }

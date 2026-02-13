@@ -16,7 +16,7 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           instanceAllRepository.findFolioInstanceAllNonDeleted(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
@@ -26,7 +26,7 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           instanceAllRepository.findFolioInstanceAllNonDeletedNonSuppressed(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
@@ -44,7 +44,7 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           instanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice).hasSize(2);
     }
   }
@@ -54,7 +54,7 @@ class FolioInstanceAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           instanceAllRepository.findMarcInstanceAllNonDeletedNonSuppressedForCustomInstanceProfile(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice).hasSize(1);
     }
   }

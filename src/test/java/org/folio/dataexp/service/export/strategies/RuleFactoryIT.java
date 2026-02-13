@@ -2,6 +2,35 @@ package org.folio.dataexp.service.export.strategies;
 
 import static java.util.Collections.singletonList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_FIELD_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_PREFIX_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_PREFIX_FIELD_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_SUFFIX_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.CALLNUMBER_SUFFIX_FIELD_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.EFFECTIVE_LOCATION_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.EFFECTIVE_LOCATION_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.MATERIAL_TYPE_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.MATERIAL_TYPE_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.ONE_WORD_LOCATION_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_CAMPUS_CODE_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_CAMPUS_NAME_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_CODE_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_INSTITUTION_CODE_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_INSTITUTION_NAME_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_LIBRARY_CODE_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_LIBRARY_NAME_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.PERMANENT_LOCATION_PATH;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.SET_LOCATION_FUNCTION;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.SET_MATERIAL_TYPE_FUNCTION;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.TEMPORARY_LOCATION_FIELD_ID;
+import static org.folio.dataexp.service.export.strategies.TransformationConstants.TEMPORARY_LOCATION_PATH;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.CAMPUSES;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.INSTITUTIONS;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.LIBRARIES;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.assertj.core.util.Lists;
 import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -54,7 +84,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   @Autowired private List<Rule> defaultHoldingsRulesFromConfigFile;
 
   @Test
-  void returnDefaultRules_whenMappingProfileIsNull() throws TransformationRuleException {
+  void shouldReturnDefaultRules_whenMappingProfileIsNull() throws TransformationRuleException {
     // when
     List<Rule> rules = ruleFactory.create(null);
 
@@ -63,7 +93,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnDefaultRules_whenMappingProfileIsDefault() throws TransformationRuleException {
+  void shouldReturnDefaultRules_whenMappingProfileIsDefault() throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
@@ -77,7 +107,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnDefaultRules_whenMappingProfileTransformationsIsEmpty()
+  void shouldReturnDefaultRules_whenMappingProfileTransformationsIsEmpty()
       throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
@@ -92,7 +122,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnDefaultHoldingRules_whenMappingProfileTransformationsIsEmptyForHoldingRecordType()
+  void shouldReturnDefaultHoldingRulesWhenMappingProfileTransformationsIsEmptyHoldingRecordType()
       throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
@@ -107,8 +137,9 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnDefaultRules_whenTransformationsEmptyForHoldingAndInstance()
-      throws TransformationRuleException {
+  void
+      shouldReturnDefaultInstanceAndHoldingRulesWhenMappingProfileTransformationsIsEmptyHoldingAndInstanceRecordTypes()
+          throws TransformationRuleException {
     // given
     MappingProfile mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.randomUUID());
@@ -126,7 +157,8 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnEmptyRules_whenTransformationsDisabled() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsIsNotEnabled()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(false);
@@ -145,7 +177,8 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnEmptyRules_whenTransformationPathIsEmpty() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsPathIsEmpty()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -165,7 +198,8 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnEmptyRules_whenTransformationFieldIdIsEmpty() throws TransformationRuleException {
+  void shouldReturnEmptyRules_whenMappingProfileTransformationsFieldIdIsEmpty()
+      throws TransformationRuleException {
     // given
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
@@ -185,8 +219,9 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
-  void returnDefaultRule_whenTransformationValueEmptyAndFieldIdMatchesDefault()
-      throws TransformationRuleException {
+  void
+      shouldReturnDefaultRule_whenTransformationsValueIsEmpty_andTransformationIdEqualsDefaultRuleId()
+          throws TransformationRuleException {
     // given
     var existDefaultRuleId = "instance.metadata.updateddate";
     Transformations transformations = new Transformations();
@@ -213,8 +248,744 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   }
 
   @Test
+  void
+      shouldReturnRulesWithOneTransformationRule_whenMappingProfileTransformationsContainsValueWithoutSubfield()
+          throws TransformationRuleException {
+    // given
+    Transformations transformations = new Transformations();
+    transformations.setEnabled(true);
+    transformations.setPath(TRANSFORMATIONS_PATH_1);
+    transformations.setFieldId(FIELD_ID_1);
+    transformations.setRecordType(RecordTypes.HOLDINGS);
+    transformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(transformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+  }
+
+  @Test
+  void
+      shouldReturnRulesWithTwoTransformationRules_whenMappingProfileTransformationsContainsValueWithoutSubfield()
+          throws TransformationRuleException {
+    // given
+    Transformations transformations1 = new Transformations();
+    transformations1.setEnabled(true);
+    transformations1.setPath(TRANSFORMATIONS_PATH_1);
+    transformations1.setFieldId(FIELD_ID_1);
+    transformations1.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    transformations1.setRecordType(RecordTypes.ITEM);
+    Transformations transformations2 = new Transformations();
+    transformations2.setEnabled(true);
+    transformations2.setPath(TRANSFORMATIONS_PATH_2);
+    transformations2.setFieldId(FIELD_ID_2);
+    transformations2.setTransformation(TRANSFORMATION_FIELD_VALUE_2);
+    transformations2.setRecordType(RecordTypes.ITEM);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(transformations1, transformations2));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(2, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(1).getDataSources().get(0).getFrom());
+  }
+
+  @Test
+  void
+      shouldReturnRulesWithOneTransformationRule_whenTransformationsValueWithSubfieldAndIndicators()
+          throws TransformationRuleException {
+    // given
+    Transformations transformations = new Transformations();
+    transformations.setEnabled(true);
+    transformations.setPath(TRANSFORMATIONS_PATH_1);
+    transformations.setFieldId(FIELD_ID_1);
+    transformations.setTransformation(TRANSFORMATION_FIELD_VALUE_SET_SUBFIELD);
+    transformations.setRecordType(RecordTypes.ITEM);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(transformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(SUBFIELD_A, rules.get(0).getDataSources().get(0).getSubfield());
+    assertEquals(FIRST_INDICATOR, rules.get(0).getDataSources().get(1).getIndicator());
+    assertEquals(
+        SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(1).getTranslation().getFunction());
+    assertEquals(
+        SPACE, rules.get(0).getDataSources().get(1).getTranslation().getParameter(VALUE_PARAMETER));
+    assertEquals(SECOND_INDICATOR, rules.get(0).getDataSources().get(2).getIndicator());
+    assertEquals(
+        SET_VALUE_FUNCTION, rules.get(0).getDataSources().get(2).getTranslation().getFunction());
+    assertEquals(
+        SPACE, rules.get(0).getDataSources().get(2).getTranslation().getParameter(VALUE_PARAMETER));
+  }
+
+  @Test
+  void shouldReturnTransformationRulesetPermanentLocationTranslation()
+      throws TransformationRuleException {
+    // given
+    Transformations permanentLocationTransformations = new Transformations();
+    permanentLocationTransformations.setEnabled(true);
+    permanentLocationTransformations.setFieldId(PERMANENT_LOCATION_FIELD_ID);
+    permanentLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    permanentLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    permanentLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(permanentLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void
+      shouldNotReturnTransformationRulesetPermanentLocationTranslation_whenPermanentLocationEqualsTemporaryLocation()
+          throws TransformationRuleException {
+    // given
+    Transformations permanentLocationTransformations = new Transformations();
+    permanentLocationTransformations.setEnabled(true);
+    permanentLocationTransformations.setFieldId(PERMANENT_LOCATION_FIELD_ID);
+    permanentLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    permanentLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    permanentLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(TEMPORARY_LOCATION_FIELD_ID);
+    temporaryLocationTransformations.setPath(TEMPORARY_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(
+        Lists.newArrayList(permanentLocationTransformations, temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnTransformationRulesetTemporaryLocationTranslation()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(TEMPORARY_LOCATION_FIELD_ID);
+    temporaryLocationTransformations.setPath(TEMPORARY_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TEMPORARY_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForCodeField()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_CODE_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryName()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_LIBRARY_NAME_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        LIBRARIES,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        LIBRARY_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForLibraryCode()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_LIBRARY_CODE_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        LIBRARIES,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        LIBRARY_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnTransformationRulesetEffectiveLocationTranslation()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(EFFECTIVE_LOCATION_FIELD_ID);
+    temporaryLocationTransformations.setPath(EFFECTIVE_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.ITEM);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(EFFECTIVE_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForCampusName()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_CAMPUS_NAME_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        CAMPUSES,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        CAMPUS_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForCampusCode()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_CAMPUS_CODE_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        CAMPUSES,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        CAMPUS_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionName()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_INSTITUTION_NAME_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        NAME_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        INSTITUTIONS,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        INSTITUTION_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnPermanentLocationRulesetTranslationForInstitutionCode()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(PERMANENT_LOCATION_INSTITUTION_CODE_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertEquals(
+        CODE_FIELD, rules.get(0).getDataSources().get(0).getTranslation().getParameter(FIELD_KEY));
+    assertEquals(
+        INSTITUTIONS,
+        rules.get(0).getDataSources().get(0).getTranslation().getParameter(REFERENCE_DATA_KEY));
+    assertEquals(
+        INSTITUTION_ID_FIELD,
+        rules
+            .get(0)
+            .getDataSources()
+            .get(0)
+            .getTranslation()
+            .getParameter(REFERENCE_DATA_ID_FIELD_KEY));
+  }
+
+  @Test
+  void shouldReturnRulesetDefaultTranslationWhenFieldIdContainsOneWord()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(ONE_WORD_LOCATION_FIELD_ID);
+    temporaryLocationTransformations.setPath(PERMANENT_LOCATION_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.HOLDINGS);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(PERMANENT_LOCATION_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_LOCATION_FUNCTION, rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+    assertNull(rules.get(0).getDataSources().get(0).getTranslation().getParameters());
+  }
+
+  @Test
+  void shouldReturnTransformationRulesetMaterialTypeTranslation()
+      throws TransformationRuleException {
+    // given
+    Transformations temporaryLocationTransformations = new Transformations();
+    temporaryLocationTransformations.setEnabled(true);
+    temporaryLocationTransformations.setFieldId(MATERIAL_TYPE_FIELD_ID);
+    temporaryLocationTransformations.setPath(MATERIAL_TYPE_PATH);
+    temporaryLocationTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    temporaryLocationTransformations.setRecordType(RecordTypes.ITEM);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(Lists.newArrayList(temporaryLocationTransformations));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(MATERIAL_TYPE_PATH, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        SET_MATERIAL_TYPE_FUNCTION,
+        rules.get(0).getDataSources().get(0).getTranslation().getFunction());
+  }
+
+  @Test
+  void shouldReturnSingleRuleWhenTransformationHasMultipleSubFieldssetSameFieldId()
+      throws TransformationRuleException {
+    // given
+    Transformations transformation1 = new Transformations();
+    transformation1.setEnabled(true);
+    transformation1.setFieldId(CALLNUMBER_FIELD_ID);
+    transformation1.setPath(CALLNUMBER_FIELD_PATH);
+    transformation1.setTransformation("900ff$a");
+    transformation1.setRecordType(RecordTypes.ITEM);
+    Transformations transformation2 = new Transformations();
+    transformation2.setEnabled(true);
+    transformation2.setFieldId(CALLNUMBER_PREFIX_FIELD_ID);
+    transformation2.setPath(CALLNUMBER_PREFIX_FIELD_PATH);
+    transformation2.setTransformation("900ff$b");
+    transformation2.setRecordType(RecordTypes.ITEM);
+    Transformations transformation3 = new Transformations();
+    transformation3.setEnabled(true);
+    transformation3.setFieldId(CALLNUMBER_SUFFIX_FIELD_ID);
+    transformation3.setPath(CALLNUMBER_SUFFIX_FIELD_PATH);
+    transformation3.setTransformation("900ff$c");
+    transformation3.setRecordType(RecordTypes.ITEM);
+    List<Transformations> transformations =
+        Lists.newArrayList(transformation1, transformation2, transformation3);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(transformations);
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).toList();
+    assertEquals(1, ruleList.size());
+    // 3 data sources for subfields $a, $b, $c and 2 for indicators
+    assertEquals(5, ruleList.get(0).getDataSources().size());
+  }
+
+  @Test
+  void
+      shouldReturnDifferentRulesWhenTransformationHasMultipleSubFieldssetSameFieldIdButDifferentIndicators()
+          throws TransformationRuleException {
+    // given
+    Transformations transformation1 = new Transformations();
+    transformation1.setEnabled(true);
+    transformation1.setFieldId(CALLNUMBER_FIELD_ID);
+    transformation1.setPath(CALLNUMBER_FIELD_PATH);
+    transformation1.setTransformation("900ff$a");
+    transformation1.setRecordType(RecordTypes.ITEM);
+    Transformations transformation2 = new Transformations();
+    transformation2.setEnabled(true);
+    transformation2.setFieldId(CALLNUMBER_PREFIX_FIELD_ID);
+    transformation2.setPath(CALLNUMBER_PREFIX_FIELD_PATH);
+    transformation2.setTransformation("900  $b");
+    transformation2.setRecordType(RecordTypes.ITEM);
+    Transformations transformation3 = new Transformations();
+    transformation3.setEnabled(true);
+    transformation3.setFieldId(CALLNUMBER_SUFFIX_FIELD_ID);
+    transformation3.setPath(CALLNUMBER_SUFFIX_FIELD_PATH);
+    transformation3.setTransformation("90011$c");
+    transformation3.setRecordType(RecordTypes.ITEM);
+    List<Transformations> transformations =
+        Lists.newArrayList(transformation1, transformation2, transformation3);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(transformations);
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    List<Rule> ruleList = rules.stream().filter(rule -> rule.getField().equals("900")).toList();
+    assertEquals(3, ruleList.size());
+    // 3 data sources for subfields $a, $b, $c and 2 for indicators
+    assertEquals(3, ruleList.get(0).getDataSources().size());
+    // the first field's indicators are used
+    assertEquals(
+        2,
+        ruleList.get(0).getDataSources().stream()
+            .filter(
+                ds ->
+                    ds.getIndicator() != null
+                        && ds.getTranslation().getParameter("value").equals("f"))
+            .count());
+  }
+
+  @Test
+  void shouldReturnCombinedRule_whenTransformationIsEmpty_andDefaultRuleHasMultipleSubfields()
+      throws TransformationRuleException {
+    // given
+    Transformations transformation = new Transformations();
+    transformation.setEnabled(true);
+    transformation.setFieldId("instance.electronic.access.linktext.related.resource");
+    transformation.setPath(
+        "$.instance.electronicAccess[?(@.relationshipId=='"
+            + "5bfe1b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
+    transformation.setTransformation(EMPTY);
+    transformation.setRecordType(RecordTypes.INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(transformations);
+    mappingProfile.setRecordTypes(singletonList(RecordTypes.INSTANCE));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(1, rules.size());
+    assertEquals("856", rules.get(0).getField());
+    assertEquals(
+        "$.instance.electronicAccess[?(@.relationshipId=='5bfe1"
+            + "b7b-f151-4501-8cfa-23b321d5cd1e')].linkText",
+        rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals("y", rules.get(0).getDataSources().get(0).getSubfield());
+    assertEquals("1", rules.get(0).getDataSources().get(1).getIndicator());
+    assertEquals("2", rules.get(0).getDataSources().get(2).getIndicator());
+  }
+
+  @Test
+  void shouldNotReturnCombinedRule_whenDefaultRulesDontContainTransformationField()
+      throws TransformationRuleException {
+    // given
+    Transformations transformation = new Transformations();
+    transformation.setEnabled(true);
+    transformation.setFieldId("instance.electronic.access.linktext.related.resource");
+    transformation.setPath(
+        "$.instance.electronicAccess[?(@.relationshipId=='5bfe1"
+            + "b7b-f151-4501-8cfa-23b321d5cd1e')].linkText");
+    transformation.setTransformation(EMPTY);
+    transformation.setRecordType(RecordTypes.INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(transformations);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(0, rules.size());
+  }
+
+  @Test
+  void shouldNotReturnCombinedRule_whenEmptyTransformationFieldDoesntMatchDefaultSubfieldRuleId()
+      throws TransformationRuleException {
+    // given
+    Transformations transformation = new Transformations();
+    transformation.setEnabled(true);
+    transformation.setFieldId("instance.electronic.access.nonexistingsubfield");
+    transformation.setPath("$.instance.electronicAccess.nonexistingsubfield");
+    transformation.setTransformation(EMPTY);
+    transformation.setRecordType(RecordTypes.INSTANCE);
+    List<Transformations> transformations = Lists.newArrayList(transformation);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.randomUUID());
+    mappingProfile.setTransformations(transformations);
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    assertEquals(0, rules.size());
+  }
+
+  @Test
+  void
+      shouldReturnDefaultRuleWithHoldingsAndItemRules_whenMappingProfileIsDefault_andContainsHoldingsAndItemTransformations()
+          throws TransformationRuleException {
+    // given
+    Transformations holdingsTransformations = new Transformations();
+    holdingsTransformations.setEnabled(true);
+    holdingsTransformations.setPath(TRANSFORMATIONS_PATH_1);
+    holdingsTransformations.setFieldId(FIELD_ID_1);
+    holdingsTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    holdingsTransformations.setRecordType(RecordTypes.HOLDINGS);
+    Transformations itemTransformations = new Transformations();
+    itemTransformations.setEnabled(true);
+    itemTransformations.setPath(TRANSFORMATIONS_PATH_2);
+    itemTransformations.setFieldId(FIELD_ID_2);
+    itemTransformations.setTransformation(TRANSFORMATION_FIELD_VALUE_2);
+    itemTransformations.setRecordType(RecordTypes.ITEM);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
+    mappingProfile.setTransformations(List.of(holdingsTransformations, itemTransformations));
+    mappingProfile.setRecordTypes(
+        List.of(RecordTypes.INSTANCE, RecordTypes.HOLDINGS, RecordTypes.ITEM));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+
+    // then
+    int transformationRulesAmount = 2;
+    assertEquals(defaultRulesFromConfigFile.size() + transformationRulesAmount, rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_2, rules.get(1).getField());
+    assertEquals(TRANSFORMATIONS_PATH_2, rules.get(1).getDataSources().get(0).getFrom());
+    assertTrue(rules.containsAll(defaultRulesFromConfigFile));
+  }
+
+  @Test
+  void
+      shouldReturnDefaultRuleWithItemRulesWithMetadata_whenMappingProfileIsDefault_andContainsItemTransformationsWithMetadata()
+          throws TransformationRuleException {
+    // given
+    Transformations itemTransformation = new Transformations();
+    itemTransformation.setEnabled(true);
+    itemTransformation.setPath(TRANSFORMATIONS_PATH_1);
+    itemTransformation.setFieldId(FIELD_ID_1);
+    itemTransformation.setTransformation(TRANSFORMATION_FIELD_VALUE_1);
+    itemTransformation.setRecordType(RecordTypes.ITEM);
+    itemTransformation.setMetadataParameters(METADATA);
+    MappingProfile mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString(DEFAULT_MAPPING_PROFILE_ID));
+    mappingProfile.setTransformations(List.of(itemTransformation));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.ITEM));
+
+    // when
+    List<Rule> rules = ruleFactory.create(mappingProfile);
+    // then
+    int transformationRulesAmount = 1;
+    assertEquals(transformationRulesAmount + defaultRulesFromConfigFile.size(), rules.size());
+    assertEquals(TRANSFORMATION_FIELD_VALUE_1, rules.get(0).getField());
+    assertEquals(TRANSFORMATIONS_PATH_1, rules.get(0).getDataSources().get(0).getFrom());
+    assertEquals(
+        METADATA_CREATED_DATE_VALUE,
+        rules.get(0).getMetadata().getData().get(METADATA_CREATED_DATE).getFrom());
+
+    assertTrue(rules.containsAll(defaultRulesFromConfigFile));
+  }
+
+  @Test
   @SneakyThrows
-  void suppressListedFields() {
+  void shouldSuppressListedFields() {
     assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "008".equals(rule.getField())));
     assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "020".equals(rule.getField())));
     assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "856".equals(rule.getField())));
@@ -233,7 +1004,7 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
 
   @Test
   @SneakyThrows
-  void suppress999Field() {
+  void shouldSuppress999ff() {
     var mappingProfile =
         MappingProfile.builder()
             .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))

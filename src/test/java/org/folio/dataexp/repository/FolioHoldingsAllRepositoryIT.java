@@ -16,7 +16,7 @@ class FolioHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           folioHoldingsAllRepository.findFolioHoldingsAllNonDeleted(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(3);
     }
   }
@@ -26,7 +26,7 @@ class FolioHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           folioHoldingsAllRepository.findFolioHoldingsAllNonDeletedNonSuppressed(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(2);
     }
   }
@@ -52,7 +52,7 @@ class FolioHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           folioHoldingsAllRepository.findMarcHoldingsAllNonDeletedCustomHoldingsProfile(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(3);
     }
   }
@@ -63,7 +63,7 @@ class FolioHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
       var slice =
           folioHoldingsAllRepository
               .findMarcHoldingsAllNonDeletedNonSuppressedCustomHoldingsProfile(
-                  MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+                  MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(2);
     }
   }

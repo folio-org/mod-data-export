@@ -16,7 +16,7 @@ class MarcHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           marcHoldingsAllRepository.findMarcHoldingsAllNonDeleted(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(6);
     }
   }
@@ -26,7 +26,7 @@ class MarcHoldingsAllRepositoryIT extends AllRepositoryBaseIT {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var slice =
           marcHoldingsAllRepository.findMarcHoldingsAllNonDeletedNonSuppressed(
-              MIN_UUID, MAX_UUID, PageRequest.of(0, exportIdsBatch));
+              MIN_UUID, MAX_UUID, PageRequest.of(0, EXPORT_IDS_BATCH));
       assertThat(slice.getContent()).hasSize(4);
     }
   }
