@@ -30,8 +30,8 @@ import static org.folio.dataexp.service.export.strategies.TransformationConstant
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.CAMPUSES;
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.INSTITUTIONS;
 import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.LIBRARIES;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
