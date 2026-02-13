@@ -8,7 +8,7 @@
     files="ExportIdEntityRepository.java"
     lines="44,94"/>
   <suppress checks="LineLength"
-    files="RuleFactoryTest.java"
+    files="RuleFactoryIT.java"
     lines="141,276,368,795,921,957"/>
   <suppress checks="LineLength"
     files="FileDefinitionEntityRepository.java"
@@ -20,12 +20,12 @@
     files="TransformationFieldsConfig.java"
     lines="54"/>
   <suppress checks="LineLength"
-    files="RuleFactoryTest.java"
+    files="RuleFactoryIT.java"
     lines="223,252"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"
-    files="DownloadRecordTest.java"/>
+    files="DownloadRecordIT.java"/>
   <suppress checks="IllegalTokenText"
     files="JsonToMarcConverterTest.java"/>
 
