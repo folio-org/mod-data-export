@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving authority records.
- */
+/** Feign client for retrieving authority records. */
 @FeignClient(name = "authority-storage/authorities")
 public interface AuthorityClient {
 
@@ -24,6 +22,10 @@ public interface AuthorityClient {
    * @return a collection of authorities
    */
   @GetMapping(produces = APPLICATION_JSON_VALUE)
-  AuthorityCollection getAuthorities(@RequestParam boolean idOnly, @RequestParam boolean deleted,
-      @RequestParam String query, @RequestParam long limit, @RequestParam long offset);
+  AuthorityCollection getAuthorities(
+      @RequestParam boolean idOnly,
+      @RequestParam boolean deleted,
+      @RequestParam String query,
+      @RequestParam long limit,
+      @RequestParam long offset);
 }

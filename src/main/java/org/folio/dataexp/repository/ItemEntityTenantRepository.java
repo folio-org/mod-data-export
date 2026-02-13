@@ -11,18 +11,15 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.springframework.stereotype.Repository;
 
-/**
- * Tenant-specific repository for {@link ItemEntity}.
- */
+/** Tenant-specific repository for {@link ItemEntity}. */
 @Repository
 public class ItemEntityTenantRepository {
 
   private static final String ITEMS_QUERY =
       "SELECT id, jsonb, holdings_record_id FROM %s_mod_data_export.v_item"
-      + " WHERE holdings_record_id in :ids";
+          + " WHERE holdings_record_id in :ids";
 
-  @PersistenceContext
-  private EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   /**
    * Finds items by a set of holdings record IDs for a specific tenant.

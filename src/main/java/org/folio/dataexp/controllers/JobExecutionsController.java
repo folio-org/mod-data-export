@@ -18,9 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for job execution operations.
- */
+/** Controller for job execution operations. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -40,29 +38,18 @@ public class JobExecutionsController implements JobExecutionsApi {
    */
   @Override
   public ResponseEntity<JobExecutionCollection> getJobExecutionsByQuery(
-      String query,
-      Integer offset,
-      Integer limit
-  ) {
+      String query, Integer offset, Integer limit) {
     if (StringUtils.isEmpty(query)) {
       query = QUERY_CQL_ALL_RECORDS;
     }
-    var jobExecutionsEntityPage = jobExecutionEntityCqlRepository.findByCql(
-        query,
-        OffsetRequest.of(offset, limit)
-    );
-    var jobExecutions = jobExecutionsEntityPage.stream()
-        .map(JobExecutionEntity::getJobExecution)
-        .toList();
+    var jobExecutionsEntityPage =
+        jobExecutionEntityCqlRepository.findByCql(query, OffsetRequest.of(offset, limit));
+    var jobExecutions =
+        jobExecutionsEntityPage.stream().map(JobExecutionEntity::getJobExecution).toList();
     var jobExecutionCollection = new JobExecutionCollection();
     jobExecutionCollection.setJobExecutions(jobExecutions);
-    jobExecutionCollection.setTotalRecords(
-        (int) jobExecutionsEntityPage.getTotalElements()
-    );
-    return new ResponseEntity<>(
-        jobExecutionCollection,
-        HttpStatus.OK
-    );
+    jobExecutionCollection.setTotalRecords((int) jobExecutionsEntityPage.getTotalElements());
+    return new ResponseEntity<>(jobExecutionCollection, HttpStatus.OK);
   }
 
   /**
@@ -74,9 +61,7 @@ public class JobExecutionsController implements JobExecutionsApi {
   @Override
   public ResponseEntity<Void> deleteJobExecutionById(UUID jobExecutionId) {
     jobExecutionEntityCqlRepository.deleteById(jobExecutionId);
-    return new ResponseEntity<>(
-        HttpStatus.NO_CONTENT
-    );
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   /**
@@ -88,13 +73,8 @@ public class JobExecutionsController implements JobExecutionsApi {
    */
   @Override
   public ResponseEntity<FileDownload> getLinkToDownloadFiles(
-      UUID jobExecutionId,
-      UUID exportFileId
-  ) {
+      UUID jobExecutionId, UUID exportFileId) {
     var fileDownload = filesDownloadService.getFileDownload(jobExecutionId, exportFileId);
-    return new ResponseEntity<>(
-        fileDownload,
-        HttpStatus.OK
-    );
+    return new ResponseEntity<>(fileDownload, HttpStatus.OK);
   }
 }

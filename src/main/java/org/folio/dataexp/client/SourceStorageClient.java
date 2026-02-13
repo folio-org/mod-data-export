@@ -8,10 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-/**
- * Feign client for retrieving MARC record identifiers from source storage.
- */
+/** Feign client for retrieving MARC record identifiers from source storage. */
 @FeignClient(name = "source-storage/stream/marc-record-identifiers")
 public interface SourceStorageClient {
 
@@ -23,7 +20,5 @@ public interface SourceStorageClient {
    */
   @PostMapping(produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
   MarcRecordsIdentifiersResponse getMarcRecordsIdentifiers(
-      @RequestBody MarcRecordIdentifiersPayload marcRecordIdentifiersPayload
-  );
-
+      @RequestBody MarcRecordIdentifiersPayload marcRecordIdentifiersPayload);
 }

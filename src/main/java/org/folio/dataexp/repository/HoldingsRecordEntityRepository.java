@@ -6,9 +6,7 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.HoldingsRecordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/**
- * Repository for {@link HoldingsRecordEntity}.
- */
+/** Repository for {@link HoldingsRecordEntity}. */
 public interface HoldingsRecordEntityRepository extends JpaRepository<HoldingsRecordEntity, UUID> {
 
   /**

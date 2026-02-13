@@ -6,16 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
-/**
- * DTO representing a collection of user tenants.
- */
+/** DTO representing a collection of user tenants. */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserTenantCollection {
 
-  /**
-   * List of user tenants.
-   */
+  /** List of user tenants. */
   @JsonProperty("userTenants")
   private List<UserTenant> userTenants = new ArrayList<>();
 }

@@ -9,9 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for expiring job executions.
- */
+/** Controller for expiring job executions. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -27,8 +25,6 @@ public class ExpireJobsController implements ExpireJobsApi {
   @Override
   public ResponseEntity<Void> postExpireJobExecution() {
     jobExecutionService.expireJobExecutions();
-    return new ResponseEntity<>(
-        HttpStatus.NO_CONTENT
-    );
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

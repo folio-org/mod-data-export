@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving nature of content terms.
- */
+/** Feign client for retrieving nature of content terms. */
 @FeignClient(name = "nature-of-content-terms")
 public interface NatureOfContentTermsClient {
   /**

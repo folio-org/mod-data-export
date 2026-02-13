@@ -5,9 +5,7 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.springframework.stereotype.Component;
 
-/**
- * Builder for JSON paths for transformation fields.
- */
+/** Builder for JSON paths for transformation fields. */
 @Component
 public class JsonPathBuilder {
 
@@ -18,10 +16,11 @@ public class JsonPathBuilder {
    * @param transformationFieldsConfig the transformation field config
    * @return the JSON path
    */
-  public String build(RecordTypes recordType,
-      TransformationFieldsConfig transformationFieldsConfig) {
-    return transformationFieldsConfig.getPath().replace("{recordType}",
-        getFormattedRecordType(recordType));
+  public String build(
+      RecordTypes recordType, TransformationFieldsConfig transformationFieldsConfig) {
+    return transformationFieldsConfig
+        .getPath()
+        .replace("{recordType}", getFormattedRecordType(recordType));
   }
 
   /**
@@ -32,11 +31,12 @@ public class JsonPathBuilder {
    * @param referenceDataEntry the reference data entry
    * @return the JSON path
    */
-  public String build(RecordTypes recordType,
+  public String build(
+      RecordTypes recordType,
       TransformationFieldsConfig transformationFieldsConfig,
       Map.Entry<String, JsonObjectWrapper> referenceDataEntry) {
-    return build(recordType, transformationFieldsConfig).replace("{id}",
-        referenceDataEntry.getKey());
+    return build(recordType, transformationFieldsConfig)
+        .replace("{id}", referenceDataEntry.getKey());
   }
 
   /**

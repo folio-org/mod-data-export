@@ -5,9 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 
-/**
- * Feign client for retrieving user tenant collections in a consortium.
- */
+/** Feign client for retrieving user tenant collections in a consortium. */
 @FeignClient(name = "user-tenants")
 public interface ConsortiaClient {
 

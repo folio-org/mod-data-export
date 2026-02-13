@@ -15,9 +15,7 @@ import lombok.With;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.hibernate.annotations.Type;
 
-/**
- * Entity representing an error log entry.
- */
+/** Entity representing an error log entry. */
 @Data
 @Builder
 @With
@@ -27,37 +25,24 @@ import org.hibernate.annotations.Type;
 @Table(name = "error_logs")
 public class ErrorLogEntity {
 
-  /**
-   * Unique identifier of the error log.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the error log. */
+  @Id private UUID id;
 
-  /**
-   * Error log details stored as JSONB.
-   */
+  /** Error log details stored as JSONB. */
   @Type(JsonBinaryType.class)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private ErrorLog errorLog;
 
-  /**
-   * Date when the error log was created.
-   */
+  /** Date when the error log was created. */
   private Date creationDate;
 
-  /**
-   * User who created the error log.
-   */
+  /** User who created the error log. */
   private String createdBy;
 
-  /**
-   * Job execution ID associated with the error log.
-   */
+  /** Job execution ID associated with the error log. */
   private UUID jobExecutionId;
 
-  /**
-   * Job profile ID associated with the error log.
-   */
+  /** Job profile ID associated with the error log. */
   @Column(name = "jobprofileid")
   private UUID jobProfileId;
 }

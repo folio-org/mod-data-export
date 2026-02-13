@@ -12,9 +12,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-/**
- * Provider for user permissions, supporting multi-tenant context.
- */
+/** Provider for user permissions, supporting multi-tenant context. */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -33,8 +31,9 @@ public class PermissionsProvider {
    */
   @Cacheable(cacheNames = "userPermissions")
   public List<String> getUserPermissions(String tenantId, String userId) {
-    try (var ignored = new FolioExecutionContextSetter(prepareContextForTenant(tenantId,
-        folioModuleMetadata, folioExecutionContext))) {
+    try (var ignored =
+        new FolioExecutionContextSetter(
+            prepareContextForTenant(tenantId, folioModuleMetadata, folioExecutionContext))) {
       log.info("getUserPermissions:: user {} tenant {}", userId, tenantId);
 
       return userPermissionsService.getPermissions();

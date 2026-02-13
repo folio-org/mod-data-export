@@ -6,9 +6,7 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.ItemEntity;
 import org.springframework.data.repository.Repository;
 
-/**
- * Repository for {@link ItemEntity}.
- */
+/** Repository for {@link ItemEntity}. */
 public interface ItemEntityRepository extends Repository<ItemEntity, UUID> {
 
   /**

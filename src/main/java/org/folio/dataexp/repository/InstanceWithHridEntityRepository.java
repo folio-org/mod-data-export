@@ -6,11 +6,8 @@ import java.util.UUID;
 import org.folio.dataexp.domain.entity.InstanceWithHridEntity;
 import org.springframework.data.repository.Repository;
 
-/**
- * Repository for {@link InstanceWithHridEntity}.
- */
-public interface InstanceWithHridEntityRepository
-    extends Repository<InstanceWithHridEntity, UUID> {
+/** Repository for {@link InstanceWithHridEntity}. */
+public interface InstanceWithHridEntityRepository extends Repository<InstanceWithHridEntity, UUID> {
 
   /**
    * Finds instances with HRID by a set of IDs.

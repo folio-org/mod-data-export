@@ -10,9 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Entity representing an instance with HRID.
- */
+/** Entity representing an instance with HRID. */
 @Data
 @Builder
 @With
@@ -22,14 +20,9 @@ import lombok.With;
 @Table(name = "v_instance_hrid")
 public class InstanceWithHridEntity {
 
-  /**
-   * Unique identifier of the instance.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the instance. */
+  @Id private UUID id;
 
-  /**
-   * Human-readable ID of the instance.
-   */
+  /** Human-readable ID of the instance. */
   private String hrid;
 }

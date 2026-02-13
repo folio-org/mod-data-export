@@ -14,9 +14,7 @@ import org.folio.dataexp.exception.file.definition.FileSizeException;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.springframework.stereotype.Component;
 
-/**
- * Validator for file definitions, including file size and extension.
- */
+/** Validator for file definitions, including file size and extension. */
 @Component
 @Log4j2
 @AllArgsConstructor
@@ -29,16 +27,17 @@ public class FileDefinitionValidator {
   private final ErrorLogService errorLogService;
 
   /**
-   * Validates the given file definition.
-   * Throws {@link FileSizeException} or {@link FileExtensionException} if validation fails.
+   * Validates the given file definition. Throws {@link FileSizeException} or {@link
+   * FileExtensionException} if validation fails.
    *
    * @param fileDefinition the file definition to validate
    */
   public void validate(FileDefinition fileDefinition) {
     if (Objects.nonNull(fileDefinition.getSize()) && fileDefinition.getSize() > MAX_FILE_SIZE) {
-      var errorMessage = String.format(
-          "File size is too large: '%d'. Please use file with size less than %d.",
-          fileDefinition.getSize(), MAX_FILE_SIZE);
+      var errorMessage =
+          String.format(
+              "File size is too large: '%d'. Please use file with size less than %d.",
+              fileDefinition.getSize(), MAX_FILE_SIZE);
       log.error(errorMessage);
       errorLogService.saveGeneralErrorWithMessageValues(
           ERROR_FILE_BEING_UPLOADED_IS_TOO_LARGE.getCode(),
@@ -50,8 +49,8 @@ public class FileDefinitionValidator {
       log.error("Size of uploading file is null.");
     }
     if (isNotValidFileNameExtension(fileDefinition.getFileName())) {
-      var errorMessage = String.format(
-          "Incorrect file extension of %s", fileDefinition.getFileName());
+      var errorMessage =
+          String.format("Incorrect file extension of %s", fileDefinition.getFileName());
       log.error(errorMessage);
       errorLogService.saveGeneralErrorWithMessageValues(
           INVALID_UPLOADED_FILE_EXTENSION.getCode(),

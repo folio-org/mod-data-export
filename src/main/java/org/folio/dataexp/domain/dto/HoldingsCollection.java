@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Data;
 
-/**
- * Represents a collection of holdings.
- */
+/** Represents a collection of holdings. */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HoldingsCollection {

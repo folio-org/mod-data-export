@@ -7,9 +7,7 @@ import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-/**
- * Repository for {@link FileDefinitionEntity}.
- */
+/** Repository for {@link FileDefinitionEntity}. */
 public interface FileDefinitionEntityRepository extends JpaRepository<FileDefinitionEntity, UUID> {
 
   /**
@@ -19,10 +17,10 @@ public interface FileDefinitionEntityRepository extends JpaRepository<FileDefini
    * @return list of expired file definition entities
    */
   @Query(
-      value = "SELECT * FROM file_definitions WHERE jsonb ->> 'sourcePath' IS NOT NULL"
-      + " AND to_timestamp(cast(jsonb -> 'metadata' ->> 'updatedDate' AS BIGINT) / 1000) <= ?1",
-      nativeQuery = true
-  )
+      value =
+          "SELECT * FROM file_definitions WHERE jsonb ->> 'sourcePath' IS NOT NULL"
+              + " AND to_timestamp(cast(jsonb -> 'metadata' ->> 'updatedDate' AS BIGINT) / 1000) <= ?1",
+      nativeQuery = true)
   List<FileDefinitionEntity> getExpiredEntities(Date expirationDate);
 
   /**
@@ -33,7 +31,6 @@ public interface FileDefinitionEntityRepository extends JpaRepository<FileDefini
    */
   @Query(
       value = "SELECT * FROM file_definitions WHERE jsonb ->> 'jobExecutionId' = ?1",
-      nativeQuery = true
-  )
+      nativeQuery = true)
   List<FileDefinitionEntity> getFileDefinitionByJobExecutionId(String jobExecutionId);
 }

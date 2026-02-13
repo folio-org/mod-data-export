@@ -10,9 +10,7 @@ import org.folio.dataexp.domain.dto.LinkedDataResource;
 import org.folio.dataexp.service.QueryService;
 import org.springframework.stereotype.Component;
 
-/**
- * Retrieve Linked Data resources.
- */
+/** Retrieve Linked Data resources. */
 @Component
 @RequiredArgsConstructor
 public class LinkedDataProvider {
@@ -33,11 +31,10 @@ public class LinkedDataProvider {
    * @return list of matching Linked Data export resource JSON as String
    */
   public List<LinkedDataResource> getLinkedDataResources(Set<UUID> ids) {
-    return queryService.getEntities(ids, LINKED_DATA_RESOURCE, RESOURCE_FIELDS)
-      .stream()
-      .filter(this::containsRequiredKeys)
-      .map(this::createLinkedDataResource)
-      .toList();
+    return queryService.getEntities(ids, LINKED_DATA_RESOURCE, RESOURCE_FIELDS).stream()
+        .filter(this::containsRequiredKeys)
+        .map(this::createLinkedDataResource)
+        .toList();
   }
 
   private boolean containsRequiredKeys(Map<String, Object> resource) {

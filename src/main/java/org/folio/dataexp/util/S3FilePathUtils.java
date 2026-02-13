@@ -3,27 +3,25 @@ package org.folio.dataexp.util;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Utility class for building S3 file paths for data export and upload operations.
- */
+/** Utility class for building S3 file paths for data export and upload operations. */
 public class S3FilePathUtils {
 
   /** Template for temporary export directory by job execution ID. */
   private static final String TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID =
       "mod-data-export/download/%s/";
+
   /** Template for sliced file location path. */
   private static final String SLICED_FILE_LOCATION_PATH =
       TEMP_DIR_FOR_EXPORTS_BY_JOB_EXECUTION_ID + "%s";
+
   /** Template for uploaded file path. */
   private static final String PATTERN_TO_SAVE_FILE = "mod-data-export/upload/%s/%s";
+
   /** Template for record location path. */
   public static final String RECORD_LOCATION_PATH = "mod-data-export/download/%s/%s";
 
-  /**
-   * Private constructor to prevent instantiation.
-   */
-  private S3FilePathUtils() {
-  }
+  /** Private constructor to prevent instantiation. */
+  private S3FilePathUtils() {}
 
   /**
    * Returns the path to stored files for a given job execution ID and file name.
@@ -107,5 +105,19 @@ public class S3FilePathUtils {
    */
   public static String getPathToStoredRecord(String dirName, String fileName) {
     return String.format(RECORD_LOCATION_PATH, dirName, fileName);
+  }
+
+  /**
+   * Returns the file suffix based on the output format.
+   *
+   * @param outputFormat string form of MappingProfile.OutputFormatEnum
+   * @return file suffix
+   */
+  public static String getFileSuffixFromOutputFormat(String outputFormat) {
+    return switch (outputFormat) {
+      case "LINKED_DATA" -> Constants.LINKED_DATA_FILE_SUFFIX;
+      case "MARC" -> Constants.MARC_FILE_SUFFIX;
+      default -> Constants.MARC_FILE_SUFFIX;
+    };
   }
 }

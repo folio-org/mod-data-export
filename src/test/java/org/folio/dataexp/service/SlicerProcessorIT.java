@@ -16,6 +16,7 @@ import org.folio.dataexp.domain.dto.IdsJob;
 import org.folio.dataexp.domain.dto.IdsJobPayload;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
+import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.ResourceIds;
 import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
@@ -89,7 +90,8 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
           fileDefinition, new CommonExportStatistic(), ExportRequest.IdTypeEnum.INSTANCE);
 
       var exportRequest = new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(false);
-      slicerProcessor.sliceInstancesIds(fileDefinition, 1, exportRequest);
+      slicerProcessor.sliceInstancesIds(
+          fileDefinition, 1, exportRequest, MappingProfile.OutputFormatEnum.MARC.toString());
       var exportFiles = jobExecutionExportFilesEntityRepository.findAll();
 
       assertEquals(2, exportFiles.size());
@@ -132,7 +134,8 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
       exportFiles = jobExecutionExportFilesEntityRepository.findAll();
       assertEquals(0, exportFiles.size());
 
-      slicerProcessor.sliceInstancesIds(fileDefinition, 2, exportRequest);
+      slicerProcessor.sliceInstancesIds(
+          fileDefinition, 2, exportRequest, MappingProfile.OutputFormatEnum.MARC.toString());
       exportFiles = jobExecutionExportFilesEntityRepository.findAll();
       assertEquals(1, exportFiles.size());
 

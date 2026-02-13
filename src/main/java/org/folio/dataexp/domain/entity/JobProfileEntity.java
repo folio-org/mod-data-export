@@ -21,9 +21,7 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
-/**
- * Entity representing a job profile.
- */
+/** Entity representing a job profile. */
 @Data
 @Builder
 @With
@@ -33,68 +31,51 @@ import org.hibernate.annotations.Type;
 @Table(name = "job_profiles")
 public class JobProfileEntity {
 
-  /**
-   * Unique identifier of the job profile.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the job profile. */
+  @Id private UUID id;
 
-  /**
-   * Job profile details stored as JSONB.
-   */
+  /** Job profile details stored as JSONB. */
   @Type(JsonBinaryType.class)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobProfile jobProfile;
 
-  /**
-   * Date when the job profile was created.
-   */
+  /** Date when the job profile was created. */
   private LocalDateTime creationDate;
 
-  /**
-   * User ID who created the job profile.
-   */
+  /** User ID who created the job profile. */
   private String createdBy;
 
-  /**
-   * Name of the job profile.
-   */
+  /** Name of the job profile. */
   private String name;
 
-  /**
-   * Description of the job profile.
-   */
+  /** Description of the job profile. */
   private String description;
 
-  /**
-   * Date when the job profile was updated.
-   */
+  /** Date when the job profile was updated. */
   private LocalDateTime updatedDate;
 
-  /**
-   * User ID who updated the job profile.
-   */
+  /** User ID who updated the job profile. */
   private String updatedByUserId;
 
-  /**
-   * First name of the user who updated the job profile.
-   */
+  /** First name of the user who updated the job profile. */
   private String updatedByFirstName;
 
-  /**
-   * Last name of the user who updated the job profile.
-   */
+  /** Last name of the user who updated the job profile. */
   private String updatedByLastName;
 
-  /**
-   * Mapping profile ID associated with the job profile.
-   */
+  /** Mapping profile ID associated with the job profile. */
   @Column(name = "mappingprofileid")
   private UUID mappingProfileId;
 
-  /**
-   * Creates a JobProfileEntity from a JobProfile DTO.
-   */
+  /** Indicates whether the job profile is locked. */
+  @Column(nullable = false)
+  private boolean locked;
+
+  private UUID lockedBy;
+
+  private LocalDateTime lockedAt;
+
+  /** Creates a JobProfileEntity from a JobProfile DTO. */
   public static JobProfileEntity fromJobProfile(JobProfile jobProfile) {
     if (isNull(jobProfile.getId())) {
       jobProfile.setId(UUID.randomUUID());
@@ -102,19 +83,29 @@ public class JobProfileEntity {
     var metadata = ofNullable(jobProfile.getMetadata()).orElse(new Metadata());
     var userInfo = ofNullable(jobProfile.getUserInfo()).orElse(new UserInfo());
     return JobProfileEntity.builder()
-      .id(jobProfile.getId())
-      .jobProfile(jobProfile)
-      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate()
-        .toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
-      .createdBy(metadata.getCreatedByUserId())
-      .name(jobProfile.getName())
-      .description(jobProfile.getDescription())
-      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate()
-        .toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
-      .updatedByUserId(metadata.getUpdatedByUserId())
-      .updatedByFirstName(userInfo.getFirstName())
-      .updatedByLastName(userInfo.getLastName())
-      .mappingProfileId(jobProfile.getMappingProfileId())
-      .build();
+        .id(jobProfile.getId())
+        .jobProfile(jobProfile)
+        .creationDate(
+            isNull(metadata.getCreatedDate())
+                ? null
+                : metadata.getCreatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        .createdBy(metadata.getCreatedByUserId())
+        .name(jobProfile.getName())
+        .description(jobProfile.getDescription())
+        .updatedDate(
+            isNull(metadata.getUpdatedDate())
+                ? null
+                : metadata.getUpdatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        .updatedByUserId(metadata.getUpdatedByUserId())
+        .updatedByFirstName(userInfo.getFirstName())
+        .updatedByLastName(userInfo.getLastName())
+        .mappingProfileId(jobProfile.getMappingProfileId())
+        .locked(jobProfile.getLocked())
+        .lockedBy(jobProfile.getLockedBy())
+        .lockedAt(
+            ofNullable(jobProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
+        .build();
   }
 }

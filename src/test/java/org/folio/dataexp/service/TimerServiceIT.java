@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.Collections;
-import org.folio.dataexp.BaseDataExportInitializerIT;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.folio.dataexp.client.OkapiClient;
 import org.folio.dataexp.domain.dto.RoutingEntry;
 import org.folio.dataexp.domain.dto.TimerDescriptor;
@@ -20,7 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestPropertySource(properties = "application.clean-up-files-delay=10")
-class TimerServiceIT extends BaseDataExportInitializerIT {
+class TimerServiceTest extends BaseDataExportInitializer {
   @Autowired private TimerService timerService;
   @MockitoBean private OkapiClient okapiClient;
 

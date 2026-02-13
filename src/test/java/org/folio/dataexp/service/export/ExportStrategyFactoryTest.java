@@ -1,9 +1,18 @@
 package org.folio.dataexp.service.export;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
+import java.util.UUID;
+import java.util.stream.Stream;
 import org.folio.dataexp.domain.dto.ExportRequest;
-import org.folio.dataexp.domain.dto.ExportRequest.RecordTypeEnum;
+import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
+import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.export.strategies.AuthorityExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.AuthorityExportStrategy;
 import org.folio.dataexp.service.export.strategies.HoldingsExportAllStrategy;
@@ -11,8 +20,10 @@ import org.folio.dataexp.service.export.strategies.HoldingsExportStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportAllStrategy;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.export.strategies.ld.LinkedDataExportStrategy;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,46 +38,101 @@ class ExportStrategyFactoryTest {
   @Mock private InstancesExportAllStrategy instancesExportAllStrategy;
   @Mock private AuthorityExportAllStrategy authorityExportAllStrategy;
   @Mock private LinkedDataExportStrategy linkedDataExportStrategy;
+  @Mock private JobProfileEntityRepository jobProfileEntityRepository;
+  @Mock private MappingProfileEntityRepository mappingProfileEntityRepository;
 
   @InjectMocks private ExportStrategyFactory exportStrategyFactory;
 
-  @Test
-  void getExportStrategyTest() {
-    var strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING));
-    assertTrue(strategy instanceof HoldingsExportStrategy);
+  static Stream<Arguments> exportStrategyArguments() {
+    return Stream.of(
+        Arguments.of(true, RecordTypes.INSTANCE, null, false, InstancesExportStrategy.class),
+        Arguments.of(true, RecordTypes.INSTANCE, null, true, InstancesExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.HOLDINGS, null, false, HoldingsExportStrategy.class),
+        Arguments.of(true, RecordTypes.HOLDINGS, null, true, HoldingsExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.AUTHORITY, null, false, AuthorityExportStrategy.class),
+        Arguments.of(true, RecordTypes.AUTHORITY, null, true, AuthorityExportAllStrategy.class),
+        Arguments.of(true, RecordTypes.LINKED_DATA, null, false, LinkedDataExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.INSTANCE,
+            ExportRequest.IdTypeEnum.INSTANCE,
+            false,
+            InstancesExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.INSTANCE,
+            ExportRequest.IdTypeEnum.INSTANCE,
+            true,
+            InstancesExportAllStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.HOLDINGS,
+            ExportRequest.IdTypeEnum.HOLDING,
+            false,
+            HoldingsExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.HOLDINGS,
+            ExportRequest.IdTypeEnum.HOLDING,
+            true,
+            HoldingsExportAllStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.AUTHORITY,
+            ExportRequest.IdTypeEnum.AUTHORITY,
+            false,
+            AuthorityExportStrategy.class),
+        Arguments.of(
+            false,
+            RecordTypes.AUTHORITY,
+            ExportRequest.IdTypeEnum.AUTHORITY,
+            true,
+            AuthorityExportAllStrategy.class));
+  }
 
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE));
-    assertTrue(strategy instanceof InstancesExportStrategy);
+  @ParameterizedTest
+  @MethodSource("exportStrategyArguments")
+  void getExportStrategyTest(
+      boolean defaultProfiles,
+      RecordTypes recordType,
+      ExportRequest.IdTypeEnum idType,
+      boolean exportAll,
+      Class<?> strategyClass) {
+    UUID jobProfileId = UUID.randomUUID();
+    UUID mappingProfileId = UUID.randomUUID();
+    var jobProfile =
+        new JobProfile()
+            .id(jobProfileId)
+            .mappingProfileId(mappingProfileId)
+            ._default(defaultProfiles);
+    var jobProfileEntity =
+        new JobProfileEntity()
+            .withId(jobProfileId)
+            .withMappingProfileId(mappingProfileId)
+            .withJobProfile(jobProfile);
+    when(jobProfileEntityRepository.getReferenceById(jobProfileId)).thenReturn(jobProfileEntity);
+    var mappingProfile =
+        new MappingProfile()
+            .id(mappingProfileId)
+            .addRecordTypesItem(recordType)
+            ._default(defaultProfiles);
+    var mappingProfileEntity =
+        new MappingProfileEntity()
+            .withId(mappingProfileId)
+            .withMappingProfile(mappingProfile)
+            .withRecordTypes(recordType.toString());
+    when(mappingProfileEntityRepository.getReferenceById(mappingProfileId))
+        .thenReturn(mappingProfileEntity);
+    var exportRequest = new ExportRequest().jobProfileId(jobProfileId);
+    if (idType != null) {
+      exportRequest.setIdType(idType);
+    }
+    if (exportAll) {
+      exportRequest.setAll(true);
+    }
 
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY));
-    assertTrue(strategy instanceof AuthorityExportStrategy);
+    var strategy = exportStrategyFactory.getExportStrategy(exportRequest);
 
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.HOLDING).all(true));
-    assertTrue(strategy instanceof HoldingsExportAllStrategy);
-
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.INSTANCE).all(true));
-    assertTrue(strategy instanceof InstancesExportAllStrategy);
-
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest().idType(ExportRequest.IdTypeEnum.AUTHORITY).all(true));
-    assertTrue(strategy instanceof AuthorityExportAllStrategy);
-
-    strategy =
-        exportStrategyFactory.getExportStrategy(
-            new ExportRequest()
-                .idType(ExportRequest.IdTypeEnum.INSTANCE)
-                .recordType(RecordTypeEnum.LINKED_DATA));
-    assertTrue(strategy instanceof LinkedDataExportStrategy);
+    assertTrue(strategyClass.isInstance(strategy));
   }
 }

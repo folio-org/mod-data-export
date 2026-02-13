@@ -1,5 +1,6 @@
 package org.folio.dataexp.service.validators;
 
+import static org.folio.dataexp.BaseDataExportInitializer.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +39,33 @@ class DataExportRequestValidatorTest {
     exportRequest.setJobProfileId(UUID.randomUUID());
 
     var validator = new DataExportRequestValidator(errorLogService);
+    assertThrows(
+        DataExportRequestValidationException.class,
+        () -> validator.validate(exportRequest, fileDefinition, "uuid"));
+  }
+
+  @Test
+  void validateAuthorityDeletedProfileExportRequestTest() {
+    when(errorLogService.saveGeneralErrorWithMessageValues(
+            "error.onlyForSetToDeletion",
+            List.of("This profile can only be used to export authority records set for deletion"),
+            null))
+        .thenReturn(new ErrorLog());
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(UUID.randomUUID());
+
+    fileDefinition.setSize(500_000);
+
+    var exportRequest = new ExportRequest();
+    exportRequest.setIdType(ExportRequest.IdTypeEnum.INSTANCE);
+    exportRequest.setJobProfileId(DEFAULT_DELETED_AUTHORITY_JOB_PROFILE);
+
+    var validator = new DataExportRequestValidator(errorLogService);
+    assertThrows(
+        DataExportRequestValidationException.class,
+        () -> validator.validate(exportRequest, fileDefinition, "uuid"));
+
+    exportRequest.setIdType(ExportRequest.IdTypeEnum.HOLDING);
     assertThrows(
         DataExportRequestValidationException.class,
         () -> validator.validate(exportRequest, fileDefinition, "uuid"));

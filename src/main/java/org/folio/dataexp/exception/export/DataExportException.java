@@ -1,8 +1,6 @@
 package org.folio.dataexp.exception.export;
 
-/**
- * Exception thrown when a data export operation fails.
- */
+/** Exception thrown when a data export operation fails. */
 public class DataExportException extends RuntimeException {
   /**
    * Constructs a new DataExportException with the specified detail message.

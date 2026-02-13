@@ -75,6 +75,10 @@ application:
     max-pool-size: ${EXPORT_FILES_MAX_POOL_SIZE:5}
   export-tmp-storage: ${EXPORT_TMP_STORAGE:}
   process-slices-thread-pool-size: ${PROCESS_SLICES_THREAD_POOL_SIZE:10}
+  feign-query-client-retry:
+    initial-wait-time: ${FEIGN_QUERY_CLIENT_RETRY_INITIAL_WAIT_TIME:5000}
+    max-wait-time: ${FEIGN_QUERY_CLIENT_RETRY_MAX_WAIT_TIME:30000}
+    max-attempts: ${FEIGN_QUERY_CLIENT_RETRY_MAX_ATTEMPTS:7}
   remote-files-storage:
     endpoint: ${S3_URL:http://localhost:9000/}
     region: ${S3_REGION:}

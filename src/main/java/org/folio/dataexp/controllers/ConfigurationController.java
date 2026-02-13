@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for data export configuration operations.
- */
+/** Controller for data export configuration operations. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -30,9 +28,6 @@ public class ConfigurationController implements ConfigurationApi {
   @Override
   public ResponseEntity<Config> postDataExportConfiguration(Config config) {
     var saved = configurationService.upsertConfiguration(config);
-    return new ResponseEntity<>(
-        saved,
-        HttpStatus.CREATED
-    );
+    return new ResponseEntity<>(saved, HttpStatus.CREATED);
   }
 }

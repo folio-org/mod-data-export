@@ -3,6 +3,7 @@ package org.folio.dataexp.client;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.folio.dataexp.config.QueryClientConfiguration;
 import org.folio.querytool.domain.dto.ContentsRequest;
 import org.folio.querytool.domain.dto.QueryDetails;
 import org.folio.querytool.domain.dto.QueryIdentifier;
@@ -14,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for interacting with FQM query endpoints.
- */
-@FeignClient(name = "query")
+/** Feign client for interacting with FQM query endpoints. */
+@FeignClient(name = "query", configuration = QueryClientConfiguration.class)
 public interface QueryClient {
   /**
    * Start an asynchronous FQL query.
@@ -57,10 +56,7 @@ public interface QueryClient {
    */
   @GetMapping("/{queryId}?includeResults=true")
   QueryDetails getQuery(
-      @RequestHeader UUID queryId,
-      @RequestParam Integer offset,
-      @RequestParam Integer limit
-  );
+      @RequestHeader UUID queryId, @RequestParam Integer offset, @RequestParam Integer limit);
 
   /**
    * Retrieve the query result's set of IDs only, in sorted order.
@@ -72,8 +68,5 @@ public interface QueryClient {
    */
   @GetMapping("/{queryId}/sortedIds")
   List<List<String>> getSortedIds(
-      @RequestHeader UUID queryId,
-      @RequestParam Integer offset,
-      @RequestParam Integer limit
-  );
+      @RequestHeader UUID queryId, @RequestParam Integer offset, @RequestParam Integer limit);
 }

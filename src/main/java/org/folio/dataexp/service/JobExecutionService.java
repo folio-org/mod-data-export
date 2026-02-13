@@ -8,6 +8,7 @@ import static org.folio.dataexp.domain.dto.JobExecution.StatusEnum.FAIL;
 import static org.folio.dataexp.util.ErrorCode.ERROR_JOB_IS_EXPIRED;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -18,9 +19,7 @@ import org.folio.dataexp.repository.JobExecutionEntityCqlRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for managing job executions and their lifecycle.
- */
+/** Service for managing job executions and their lifecycle. */
 @Service
 @RequiredArgsConstructor
 public class JobExecutionService {
@@ -51,6 +50,20 @@ public class JobExecutionService {
   }
 
   /**
+   * Saves a list of JobExecutions to the repository.
+   *
+   * @param jobExecutions The list of JobExecutions to save.
+   * @return The list of saved JobExecutions.
+   */
+  public List<JobExecution> saveAll(List<JobExecution> jobExecutions) {
+    return jobExecutionEntityCqlRepository
+        .saveAll(jobExecutions.stream().map(JobExecutionEntity::fromJobExecution).toList())
+        .stream()
+        .map(JobExecutionEntity::getJobExecution)
+        .toList();
+  }
+
+  /**
    * Gets the next HRID value.
    *
    * @return The next HRID integer.
@@ -59,42 +72,51 @@ public class JobExecutionService {
     return jobExecutionEntityRepository.getHrid();
   }
 
-  /**
-   * Expires job executions that are older than the configured expiration time.
-   */
+  /** Expires job executions that are older than the configured expiration time. */
   public void expireJobExecutions() {
     setCompletedDateForFailedExecutionsIfRequired();
-    var expirationDate = new Date(
-        new Date().getTime() - HOURS.toMillis(1)
-    );
-    jobExecutionEntityCqlRepository.getExpiredJobs(expirationDate)
-        .forEach(jobExecutionEntity -> {
-          var jobExecution = jobExecutionEntity.getJobExecution();
-          jobExecution.setStatus(FAIL);
-          if (nonNull(jobExecution.getProgress())) {
-            jobExecution.setProgress(
-                new JobExecutionProgress().exported(0).total(0).failed(0)
-            );
-          }
-          jobExecution.setCompletedDate(new Date());
-          updateErrorLogIfJobIsExpired(jobExecution.getId());
-          save(jobExecution);
-        });
+    var expirationDate = new Date(new Date().getTime() - HOURS.toMillis(1));
+    jobExecutionEntityCqlRepository
+        .getExpiredJobs(expirationDate)
+        .forEach(
+            jobExecutionEntity -> {
+              var jobExecution = jobExecutionEntity.getJobExecution();
+              jobExecution.setStatus(FAIL);
+              if (nonNull(jobExecution.getProgress())) {
+                jobExecution.setProgress(new JobExecutionProgress().exported(0).total(0).failed(0));
+              }
+              jobExecution.setCompletedDate(new Date());
+              updateErrorLogIfJobIsExpired(jobExecution.getId());
+              save(jobExecution);
+            });
   }
 
   /**
-   * Sets the completed date for failed executions that do not have it set.
+   * Retrieves all JobExecutions associated with a specific JobProfile ID.
+   *
+   * @param jobProfileId The JobProfile UUID.
+   * @return A list of JobExecutions.
    */
+  public List<JobExecution> getAllByJobProfileId(UUID jobProfileId) {
+    return jobExecutionEntityCqlRepository.getAllByJobProfileId(jobProfileId).stream()
+        .map(JobExecutionEntity::getJobExecution)
+        .toList();
+  }
+
+  /** Sets the completed date for failed executions that do not have it set. */
   void setCompletedDateForFailedExecutionsIfRequired() {
-    jobExecutionEntityCqlRepository.getFailedExecutionsWithoutCompletedDate()
-        .forEach(jobExecutionEntity -> {
-          var jobExecution = jobExecutionEntity.getJobExecution();
-          var completedDate = isNull(jobExecution.getLastUpdatedDate())
-              ? new Date()
-              : jobExecution.getLastUpdatedDate();
-          jobExecution.setCompletedDate(completedDate);
-          save(jobExecution);
-        });
+    jobExecutionEntityCqlRepository
+        .getFailedExecutionsWithoutCompletedDate()
+        .forEach(
+            jobExecutionEntity -> {
+              var jobExecution = jobExecutionEntity.getJobExecution();
+              var completedDate =
+                  isNull(jobExecution.getLastUpdatedDate())
+                      ? new Date()
+                      : jobExecution.getLastUpdatedDate();
+              jobExecution.setCompletedDate(completedDate);
+              save(jobExecution);
+            });
   }
 
   /**
@@ -106,14 +128,14 @@ public class JobExecutionService {
     var logEntities = errorLogEntityCqlRepository.getAllByJobExecutionId(jobExecutionId);
     if (!logEntities.isEmpty()) {
       var firstEntity = logEntities.get(0);
-      var updatedLog = firstEntity.getErrorLog()
-          .errorMessageCode(ERROR_JOB_IS_EXPIRED.getCode())
-          .errorMessageValues(singletonList(ERROR_JOB_IS_EXPIRED.getDescription()));
+      var updatedLog =
+          firstEntity
+              .getErrorLog()
+              .errorMessageCode(ERROR_JOB_IS_EXPIRED.getCode())
+              .errorMessageValues(singletonList(ERROR_JOB_IS_EXPIRED.getDescription()));
       errorLogEntityCqlRepository.save(firstEntity.withErrorLog(updatedLog));
       // remove all the rest logs to have only 1 reason: job is expired
-      logEntities.stream()
-          .skip(1)
-          .forEach(errorLogEntityCqlRepository::delete);
+      logEntities.stream().skip(1).forEach(errorLogEntityCqlRepository::delete);
     }
   }
 }

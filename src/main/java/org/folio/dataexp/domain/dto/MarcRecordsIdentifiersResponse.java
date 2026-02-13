@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * DTO for MARC records identifiers response.
- */
+/** DTO for MARC records identifiers response. */
 @Data
 @With
 @AllArgsConstructor
@@ -17,14 +15,9 @@ import lombok.With;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MarcRecordsIdentifiersResponse {
 
-  /**
-   * List of record identifiers.
-   */
+  /** List of record identifiers. */
   private List<String> records;
 
-  /**
-   * Total count of records.
-   */
+  /** Total count of records. */
   private int totalCount;
 }
-

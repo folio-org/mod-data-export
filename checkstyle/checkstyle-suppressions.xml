@@ -6,14 +6,32 @@
   <!-- line length -->
   <suppress checks="LineLength"
     files="ExportIdEntityRepository.java"
-    lines="48,109"/>
+    lines="44,94"/>
   <suppress checks="LineLength"
-    files="RuleFactoryIT.java"
-    lines="141,223,252,276,308,368,795,921,957"/>
+    files="RuleFactoryTest.java"
+    lines="141,276,368,795,921,957"/>
+  <suppress checks="LineLength"
+    files="FileDefinitionEntityRepository.java"
+    lines="22"/>
+  <suppress checks="LineLength"
+    files="ErrorCode.java"
+    lines="138,142"/>
+  <suppress checks="LineLength"
+    files="TransformationFieldsConfig.java"
+    lines="54"/>
+  <suppress checks="LineLength"
+    files="RuleFactoryTest.java"
+    lines="223,252"/>
 
   <!-- illegal token text -->
   <suppress checks="IllegalTokenText"
-    files="DownloadRecordIT.java"/>
+    files="DownloadRecordTest.java"/>
   <suppress checks="IllegalTokenText"
     files="JsonToMarcConverterTest.java"/>
+
+  <!-- illegal declaration usage distance -->
+  <suppress checks="VariableDeclarationUsageDistance"
+            files="MappingProfileServiceTest.java"/>
+  <suppress checks="VariableDeclarationUsageDistance"
+            files="JobProfileServiceTest.java"/>
 </suppressions>

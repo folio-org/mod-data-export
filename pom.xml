@@ -12,7 +12,7 @@
   <groupId>org.folio</groupId>
   <artifactId>mod-data-export</artifactId>
   <name>mod-data-export</name>
-  <version>5.3.0-SNAPSHOT</version>
+  <version>5.4.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -59,7 +59,7 @@
     <lib-linked-data-rdf4ld.version>1.0.0-SNAPSHOT</lib-linked-data-rdf4ld.version>
 
     <!-- Test dependencies versions -->
-    <testcontainer.version>1.21.3</testcontainer.version>
+    <testcontainer.version>1.21.4</testcontainer.version>
     <wiremock.version>2.35.2</wiremock.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
 
@@ -73,6 +73,7 @@
     <maven-release-plugin.version>3.0.0-M7</maven-release-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <maven-spotless-plugin.version>3.1.0</maven-spotless-plugin.version>
   </properties>
 
   <dependencies>
@@ -599,6 +600,28 @@
           <suppressionsLocation>checkstyle/checkstyle-suppressions.xml</suppressionsLocation>
           <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${maven-spotless-plugin.version}</version>
+        <configuration>
+          <java>
+            <googleJavaFormat>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+            <removeUnusedImports/>
+          </java>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>apply</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
       </plugin>
 
     </plugins>

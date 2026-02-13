@@ -23,9 +23,7 @@ import org.marc4j.marc.DataField;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for downloading MARC records by ID.
- */
+/** Service for downloading MARC records by ID. */
 @Service
 @AllArgsConstructor
 @Log4j2
@@ -51,23 +49,21 @@ public class DownloadRecordService {
       boolean isUtf,
       final String formatPostfix,
       final IdType idType,
-      boolean suppress999ff
-  ) {
+      boolean suppress999ff) {
     log.info(
         "processRecordDownload:: start downloading record with id: {}, "
-                + "isUtf: {}, suppress999ff: {}",
+            + "isUtf: {}, suppress999ff: {}",
         recordId,
         isUtf,
-        suppress999ff
-    );
+        suppress999ff);
     var dirName = recordId.toString() + formatPostfix;
     InputStream marcFileContent = getContentIfFileExists(dirName);
     if (marcFileContent == null) {
       byte[] marcFileContentBytes = generateRecordFileContentBytes(recordId, isUtf, idType);
       uploadMarcFile(dirName, marcFileContentBytes);
       if (suppress999ff) {
-        var inputStreamWithRemoved999ff = remove999ffField(isUtf,
-                new ByteArrayInputStream(marcFileContentBytes));
+        var inputStreamWithRemoved999ff =
+            remove999ffField(isUtf, new ByteArrayInputStream(marcFileContentBytes));
         return new InputStreamResource(inputStreamWithRemoved999ff);
       }
       return new InputStreamResource(new ByteArrayInputStream(marcFileContentBytes));
@@ -98,25 +94,17 @@ public class DownloadRecordService {
    * @return Byte array of the MARC file content.
    */
   private byte[] generateRecordFileContentBytes(
-      final UUID recordId,
-      boolean isUtf,
-      final IdType idType
-  ) {
+      final UUID recordId, boolean isUtf, final IdType idType) {
     var exportStrategy = exportStrategyFactory.getExportStrategy(idType);
     var marcRecord = exportStrategy.getMarcRecord(recordId);
     var mappingProfile = exportStrategy.getDefaultMappingProfile();
     try {
-      return jsonToMarcConverter.convertJsonRecordToMarcRecord(
-          marcRecord.getContent(),
-          List.of(),
-          mappingProfile,
-          isUtf
-      ).toByteArray();
+      return jsonToMarcConverter
+          .convertJsonRecordToMarcRecord(marcRecord.getContent(), List.of(), mappingProfile, isUtf)
+          .toByteArray();
     } catch (IOException e) {
       log.error(
-          "generateRecordFileContent :: Error generating content for record with ID: {}",
-          recordId
-      );
+          "generateRecordFileContent :: Error generating content for record with ID: {}", recordId);
       throw new DownloadRecordException(e.getMessage());
     }
   }
@@ -131,10 +119,7 @@ public class DownloadRecordService {
     try {
       s3Uploader.uploadSingleRecordById(dirName, marcFileContentBytes);
     } catch (IOException e) {
-      log.error(
-          "uploadMarcFile:: Error while upload marc file to remote storage {}",
-          dirName
-      );
+      log.error("uploadMarcFile:: Error while upload marc file to remote storage {}", dirName);
       throw new DownloadRecordException(e.getMessage());
     }
   }
@@ -148,9 +133,15 @@ public class DownloadRecordService {
       MarcReader marcReader = new MarcStreamReader(marcFileContent);
       while (marcReader.hasNext()) {
         var marcRecord = marcReader.next();
-        var fieldToRemove = marcRecord.getVariableFields().stream()
-                .filter(vf -> vf instanceof DataField df && df.getTag().equals("999")
-                && df.getIndicator1() == 'f' && df.getIndicator2() == 'f').findFirst();
+        var fieldToRemove =
+            marcRecord.getVariableFields().stream()
+                .filter(
+                    vf ->
+                        vf instanceof DataField df
+                            && df.getTag().equals("999")
+                            && df.getIndicator1() == 'f'
+                            && df.getIndicator2() == 'f')
+                .findFirst();
         fieldToRemove.ifPresent(marcRecord::removeVariableField);
         marcWriter.write(marcRecord);
       }

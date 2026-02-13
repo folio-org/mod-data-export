@@ -12,9 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 
-/**
- * Entity representing export files for a job execution.
- */
+/** Entity representing export files for a job execution. */
 @Data
 @Builder
 @With
@@ -24,35 +22,22 @@ import lombok.With;
 @Table(name = "job_execution_export_files")
 public class JobExecutionExportFilesEntity {
 
-  /**
-   * Unique identifier of the export file entry.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the export file entry. */
+  @Id private UUID id;
 
-  /**
-   * Job execution ID.
-   */
+  /** Job execution ID. */
   private UUID jobExecutionId;
 
-  /**
-   * Location of the exported file.
-   */
+  /** Location of the exported file. */
   private String fileLocation;
 
-  /**
-   * Start ID for the export range.
-   */
+  /** Start ID for the export range. */
   private UUID fromId;
 
-  /**
-   * End ID for the export range.
-   */
+  /** End ID for the export range. */
   private UUID toId;
 
-  /**
-   * Status of the export file.
-   */
+  /** Status of the export file. */
   @Enumerated(EnumType.STRING)
   private JobExecutionExportFilesStatus status;
 }

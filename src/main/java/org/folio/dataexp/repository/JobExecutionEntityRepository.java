@@ -5,9 +5,7 @@ import org.folio.dataexp.domain.entity.JobExecutionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-/**
- * Repository for {@link JobExecutionEntity}.
- */
+/** Repository for {@link JobExecutionEntity}. */
 public interface JobExecutionEntityRepository extends JpaRepository<JobExecutionEntity, UUID> {
 
   /**

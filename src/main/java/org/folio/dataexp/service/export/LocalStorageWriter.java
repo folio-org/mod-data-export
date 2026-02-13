@@ -12,9 +12,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.exception.export.LocalStorageWriterException;
 
-/**
- * Writer for local storage files, used for temporary export file creation.
- */
+/** Writer for local storage files, used for temporary export file creation. */
 public class LocalStorageWriter extends StringWriter {
   private final File tmp;
   private final Path path;
@@ -29,8 +27,7 @@ public class LocalStorageWriter extends StringWriter {
   public LocalStorageWriter(String path, int size) {
     try {
       this.path = Path.of(path);
-      this.tmp = Files.createFile(this.path)
-          .toFile();
+      this.tmp = Files.createFile(this.path).toFile();
       this.writer = new BufferedWriter(new FileWriter(this.tmp), size);
     } catch (Exception ex) {
       throw new LocalStorageWriterException(
@@ -38,9 +35,7 @@ public class LocalStorageWriter extends StringWriter {
     }
   }
 
-  /**
-   * Return reader for output file.
-   */
+  /** Return reader for output file. */
   public Optional<BufferedReader> getReader() {
     try {
       return Optional.of(Files.newBufferedReader(this.path));
@@ -49,9 +44,7 @@ public class LocalStorageWriter extends StringWriter {
     }
   }
 
-  /**
-   * Return path to output file.
-   */
+  /** Return path to output file. */
   public Path getPath() {
     return this.path;
   }
@@ -74,9 +67,7 @@ public class LocalStorageWriter extends StringWriter {
     }
   }
 
-  /**
-   * Closes the writer and file.
-   */
+  /** Closes the writer and file. */
   @Override
   public void close() {
     try {
@@ -84,8 +75,7 @@ public class LocalStorageWriter extends StringWriter {
         writer.close();
       }
     } catch (Exception ex) {
-      throw new LocalStorageWriterException(
-          "Error while close(): " + ex.getMessage());
+      throw new LocalStorageWriterException("Error while close(): " + ex.getMessage());
     }
   }
 
@@ -99,8 +89,7 @@ public class LocalStorageWriter extends StringWriter {
       close();
       Files.deleteIfExists(tmp.toPath());
     } catch (IOException ex) {
-      throw new LocalStorageWriterException(
-          "Error in deleting file: " + ex.getMessage());
+      throw new LocalStorageWriterException("Error in deleting file: " + ex.getMessage());
     }
   }
 }

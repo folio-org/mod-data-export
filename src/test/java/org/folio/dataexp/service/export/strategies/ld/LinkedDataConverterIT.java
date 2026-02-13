@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseDataExportInitializerIT;
+import org.folio.dataexp.BaseDataExportInitializer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class LinkedDataConverterIT extends BaseDataExportInitializerIT {
+class LinkedDataConverterTest extends BaseDataExportInitializer {
   @Autowired LinkedDataConverter linkedDataConverter;
 
   // Rather than test conversion accuracy, just make sure the
@@ -29,7 +29,10 @@ class LinkedDataConverterIT extends BaseDataExportInitializerIT {
             .convertLdJsonToBibframe2Rdf(
                 """
       {
-        "id": "12345"
+        "id": "12345",
+        "types": [
+          "http://bibfra.me/vocab/lite/Instance"
+        ]
       }""")
             .toString();
     System.out.println(resource);

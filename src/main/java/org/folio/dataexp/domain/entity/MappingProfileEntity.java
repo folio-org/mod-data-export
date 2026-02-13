@@ -24,9 +24,7 @@ import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
 import org.hibernate.annotations.Type;
 
-/**
- * Entity representing a mapping profile.
- */
+/** Entity representing a mapping profile. */
 @Data
 @Builder
 @With
@@ -36,72 +34,53 @@ import org.hibernate.annotations.Type;
 @Table(name = "mapping_profiles")
 public class MappingProfileEntity {
 
-  /**
-   * Unique identifier of the mapping profile.
-   */
-  @Id
-  private UUID id;
+  /** Unique identifier of the mapping profile. */
+  @Id private UUID id;
 
-  /**
-   * Mapping profile details stored as JSONB.
-   */
+  /** Mapping profile details stored as JSONB. */
   @Type(JsonBinaryType.class)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private MappingProfile mappingProfile;
 
-  /**
-   * Date when the mapping profile was created.
-   */
+  /** Date when the mapping profile was created. */
   private LocalDateTime creationDate;
 
-  /**
-   * User ID who created the mapping profile.
-   */
+  /** User ID who created the mapping profile. */
   private String createdBy;
 
-  /**
-   * Name of the mapping profile.
-   */
+  /** Name of the mapping profile. */
   private String name;
 
-  /**
-   * Description of the mapping profile.
-   */
+  /** Description of the mapping profile. */
   private String description;
 
-  /**
-   * Record types associated with the mapping profile.
-   */
+  /** Record types associated with the mapping profile. */
   private String recordTypes;
 
-  /**
-   * Output format of the mapping profile.
-   */
+  /** Output format of the mapping profile. */
   private String format;
 
-  /**
-   * Date when the mapping profile was updated.
-   */
+  /** Date when the mapping profile was updated. */
   private LocalDateTime updatedDate;
 
-  /**
-   * User ID who updated the mapping profile.
-   */
+  /** User ID who updated the mapping profile. */
   private String updatedByUserId;
 
-  /**
-   * First name of the user who updated the mapping profile.
-   */
+  /** First name of the user who updated the mapping profile. */
   private String updatedByFirstName;
 
-  /**
-   * Last name of the user who updated the mapping profile.
-   */
+  /** Last name of the user who updated the mapping profile. */
   private String updatedByLastName;
 
-  /**
-   * Creates a MappingProfileEntity from a MappingProfile DTO.
-   */
+  /** Indicates whether the mapping profile is locked. */
+  @Column(nullable = false)
+  private boolean locked;
+
+  private UUID lockedBy;
+
+  private LocalDateTime lockedAt;
+
+  /** Creates a MappingProfileEntity from a MappingProfile DTO. */
   public static MappingProfileEntity fromMappingProfile(MappingProfile mappingProfile) {
     if (isNull(mappingProfile.getId())) {
       mappingProfile.setId(UUID.randomUUID());
@@ -109,30 +88,40 @@ public class MappingProfileEntity {
     var metadata = ofNullable(mappingProfile.getMetadata()).orElse(new Metadata());
     var userInfo = ofNullable(mappingProfile.getUserInfo()).orElse(new UserInfo());
     return MappingProfileEntity.builder()
-      .id(mappingProfile.getId())
-      .mappingProfile(mappingProfile)
-      .creationDate(isNull(metadata.getCreatedDate()) ? null : metadata.getCreatedDate()
-        .toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
-      .createdBy(metadata.getCreatedByUserId())
-      .name(mappingProfile.getName())
-      .description(mappingProfile.getDescription())
-      .recordTypes(recordTypesToString(mappingProfile.getRecordTypes()))
-      .format(isNull(mappingProfile.getOutputFormat()) ? null : mappingProfile.getOutputFormat()
-        .getValue())
-      .updatedDate(isNull(metadata.getUpdatedDate()) ? null : metadata.getUpdatedDate().toInstant()
-        .atZone(ZoneOffset.UTC).toLocalDateTime())
-      .updatedByUserId(metadata.getUpdatedByUserId())
-      .updatedByFirstName(userInfo.getFirstName())
-      .updatedByLastName(userInfo.getLastName())
-      .build();
+        .id(mappingProfile.getId())
+        .mappingProfile(mappingProfile)
+        .creationDate(
+            isNull(metadata.getCreatedDate())
+                ? null
+                : metadata.getCreatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        .createdBy(metadata.getCreatedByUserId())
+        .name(mappingProfile.getName())
+        .description(mappingProfile.getDescription())
+        .recordTypes(recordTypesToString(mappingProfile.getRecordTypes()))
+        .format(
+            isNull(mappingProfile.getOutputFormat())
+                ? null
+                : mappingProfile.getOutputFormat().getValue())
+        .updatedDate(
+            isNull(metadata.getUpdatedDate())
+                ? null
+                : metadata.getUpdatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        .updatedByUserId(metadata.getUpdatedByUserId())
+        .updatedByFirstName(userInfo.getFirstName())
+        .updatedByLastName(userInfo.getLastName())
+        .locked(mappingProfile.getLocked())
+        .lockedBy(mappingProfile.getLockedBy())
+        .lockedAt(
+            ofNullable(mappingProfile.getLockedAt())
+                .map(instant -> instant.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                .orElse(null))
+        .build();
   }
 
-  /**
-   * Converts a list of RecordTypes to a comma-separated string.
-   */
+  /** Converts a list of RecordTypes to a comma-separated string. */
   private static String recordTypesToString(List<RecordTypes> recordTypes) {
-    return isNull(recordTypes) ? null : recordTypes.stream()
-      .map(RecordTypes::getValue)
-      .collect(Collectors.joining(","));
+    return isNull(recordTypes)
+        ? null
+        : recordTypes.stream().map(RecordTypes::getValue).collect(Collectors.joining(","));
   }
 }

@@ -5,9 +5,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.folio.dataexp.util.Constants.DELETED_MARC_IDS_FILE_NAME;
+import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +19,13 @@ import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.MarcRecordIdentifiersPayload;
 import org.folio.dataexp.exception.export.ExportDeletedDateRangeException;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for retrieving deleted MARC record IDs and creating file definitions.
- */
+/** Service for retrieving deleted MARC record IDs and creating file definitions. */
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -32,9 +35,13 @@ public class MarcDeletedIdsService {
   private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_TO = "005.date to '%s'";
   private static final String FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE = "005.date in '%s-%s'";
   private static final String LEADER_SEARCH_EXPRESSION_DELETED = "p_05 = 'd'";
+  private static final String LEADER_SEARCH_EXPRESSION_NOT_DELETED = "p_05 not= 'd'";
 
   private final SourceStorageClient sourceStorageClient;
   private final FileDefinitionsService fileDefinitionsService;
+  private final ConsortiaService consortiaService;
+  private final FolioExecutionContext folioExecutionContext;
+  private final FolioModuleMetadata folioModuleMetadata;
 
   /**
    * Gets a FileDefinition for deleted MARC IDs within a date range.
@@ -47,22 +54,41 @@ public class MarcDeletedIdsService {
     validateDates(from, to);
     if (isNull(from) && isNull(to)) {
       Date now = new Date();
-      Date previousDay = Date.from(
-          LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC"))
-              .minusDays(1)
-              .atZone(ZoneId.of("UTC"))
-              .toInstant());
+      Date previousDay =
+          Date.from(
+              LocalDateTime.ofInstant(now.toInstant(), ZoneId.of("UTC"))
+                  .minusDays(1)
+                  .atZone(ZoneId.of("UTC"))
+                  .toInstant());
       from = previousDay;
       to = previousDay;
       log.info("The previous day is used: {}", from.toInstant());
     }
     log.info("GET MARC deleted IDs with date from {}, date to {}", from, to);
-    var payload = new MarcRecordIdentifiersPayload()
-        .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
+    var payload =
+        new MarcRecordIdentifiersPayload()
+            .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_DELETED);
     enrichWithDate(payload, from, to);
 
-    List<String> marcIds = sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+    List<String> marcIds =
+        new ArrayList<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords());
     log.info("Found deleted MARC IDs: {}", marcIds.size());
+
+    if (!consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
+      var centralTenantId =
+          consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+      try (var ignored =
+          new FolioExecutionContextSetter(
+              prepareContextForTenant(
+                  centralTenantId, folioModuleMetadata, folioExecutionContext))) {
+        payload =
+            new MarcRecordIdentifiersPayload()
+                .withLeaderSearchExpression(LEADER_SEARCH_EXPRESSION_NOT_DELETED);
+        var nonDeletedSharedIds =
+            sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords();
+        marcIds.removeIf(nonDeletedSharedIds::contains);
+      }
+    }
 
     var fileDefinition = new FileDefinition();
     fileDefinition.setSize(marcIds.size());
@@ -70,10 +96,9 @@ public class MarcDeletedIdsService {
     fileDefinition.setFileName(DELETED_MARC_IDS_FILE_NAME);
     fileDefinition = fileDefinitionsService.postFileDefinition(fileDefinition);
     var fileContent = String.join(System.lineSeparator(), marcIds);
-    fileDefinition = fileDefinitionsService.uploadFile(
-        fileDefinition.getId(),
-        new ByteArrayResource(fileContent.getBytes())
-    );
+    fileDefinition =
+        fileDefinitionsService.uploadFile(
+            fileDefinition.getId(), new ByteArrayResource(fileContent.getBytes()));
     return fileDefinition;
   }
 
@@ -89,22 +114,19 @@ public class MarcDeletedIdsService {
 
     if (nonNull(from)) {
       if (nonNull(to)) {
-        searchExpression = format(
-            FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE,
-            DateFormatUtils.format(from, DATE_PATTERN),
-            DateFormatUtils.format(to, DATE_PATTERN)
-        );
+        searchExpression =
+            format(
+                FIELD_SEARCH_EXPRESSION_TEMPLATE_IN_RANGE,
+                DateFormatUtils.format(from, DATE_PATTERN),
+                DateFormatUtils.format(to, DATE_PATTERN));
       } else {
-        searchExpression = format(
-            FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM,
-            DateFormatUtils.format(from, DATE_PATTERN)
-        );
+        searchExpression =
+            format(
+                FIELD_SEARCH_EXPRESSION_TEMPLATE_FROM, DateFormatUtils.format(from, DATE_PATTERN));
       }
     } else if (nonNull(to)) {
-      searchExpression = format(
-          FIELD_SEARCH_EXPRESSION_TEMPLATE_TO,
-          DateFormatUtils.format(to, DATE_PATTERN)
-      );
+      searchExpression =
+          format(FIELD_SEARCH_EXPRESSION_TEMPLATE_TO, DateFormatUtils.format(to, DATE_PATTERN));
     }
 
     payload.setFieldsSearchExpression(searchExpression);
@@ -120,8 +142,7 @@ public class MarcDeletedIdsService {
   private void validateDates(Date from, Date until) {
     if (nonNull(from) && nonNull(until) && from.toInstant().isAfter(until.toInstant())) {
       throw new ExportDeletedDateRangeException(
-          "Invalid date range for payload: date 'from' cannot be after date 'to'."
-      );
+          "Invalid date range for payload: date 'from' cannot be after date 'to'.");
     }
   }
 }

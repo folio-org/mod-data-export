@@ -14,9 +14,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for handling export-all operations.
- */
+/** Service for handling export-all operations. */
 @Log4j2
 @RequiredArgsConstructor
 @Service
@@ -31,13 +29,15 @@ public class DataExportAllService {
    * @param exportAllRequest The export-all request.
    */
   public void postDataExportAll(ExportAllRequest exportAllRequest) {
-    var fileDefinition = new FileDefinition().id(UUID.randomUUID()).size(0)
-        .fileName(exportAllRequest.getIdType() + "-all.csv");
+    var fileDefinition =
+        new FileDefinition()
+            .id(UUID.randomUUID())
+            .size(0)
+            .fileName(exportAllRequest.getIdType() + "-all.csv");
     fileDefinitionsService.postFileDefinition(fileDefinition);
-    log.info("Post data export all for job profile {}",
-        exportAllRequest.getJobProfileId());
-    dataExportService.postDataExport(getExportRequestFromExportAllRequest(exportAllRequest,
-        fileDefinition));
+    log.info("Post data export all for job profile {}", exportAllRequest.getJobProfileId());
+    dataExportService.postDataExport(
+        getExportRequestFromExportAllRequest(exportAllRequest, fileDefinition));
   }
 
   /**
@@ -47,8 +47,8 @@ public class DataExportAllService {
    * @param fileDefinition The file definition.
    * @return The constructed ExportRequest.
    */
-  private ExportRequest getExportRequestFromExportAllRequest(ExportAllRequest exportAllRequest,
-      FileDefinition fileDefinition) {
+  private ExportRequest getExportRequestFromExportAllRequest(
+      ExportAllRequest exportAllRequest, FileDefinition fileDefinition) {
     var exportRequest = new ExportRequest();
     exportRequest.setIdType(ExportRequest.IdTypeEnum.valueOf(exportAllRequest.getIdType().name()));
     exportRequest.setJobProfileId(getJobProfileId(exportAllRequest));

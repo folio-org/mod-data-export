@@ -33,14 +33,13 @@ import org.folio.dataexp.domain.entity.ExportIdEntity;
 import org.folio.dataexp.exception.export.DataExportException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.Constants;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Processor for reading and handling input files for export operations.
- */
+/** Processor for reading and handling input files for export operations. */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -51,6 +50,7 @@ public class InputFileProcessor {
 
   @Value("#{ T(Integer).parseInt('${application.wait-search-ids-time}')}")
   private int waitSearchIdsTimeSeconds;
+
   private final ExportIdEntityRepository exportIdEntityRepository;
   private final FolioS3Client s3Client;
   private final SearchClient searchClient;
@@ -65,7 +65,9 @@ public class InputFileProcessor {
    * @param commonExportStatistic Export statistics.
    * @param idType The type of ID.
    */
-  public void readFile(FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic,
+  public void readFile(
+      FileDefinition fileDefinition,
+      CommonExportStatistic commonExportStatistic,
       ExportRequest.IdTypeEnum idType) {
     try {
       if (fileDefinition.getUploadFormat() == FileDefinition.UploadFormatEnum.CQL) {
@@ -85,7 +87,8 @@ public class InputFileProcessor {
    * @return InputStream of the MARC file, or null if not found.
    */
   public InputStream readMarcFile(String dirName) {
-    var pathToRead = getPathToStoredRecord(dirName, "%s.mrc".formatted(dirName));
+    var pathToRead =
+        getPathToStoredRecord(dirName, "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX));
     if (s3Client.list(pathToRead).isEmpty()) {
       return null;
     }
@@ -98,15 +101,16 @@ public class InputFileProcessor {
    * @param fileDefinition The file definition.
    * @param commonExportStatistic Export statistics.
    */
-  private void readCsvFile(FileDefinition fileDefinition,
-      CommonExportStatistic commonExportStatistic) {
+  private void readCsvFile(
+      FileDefinition fileDefinition, CommonExportStatistic commonExportStatistic) {
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
     var progress = jobExecution.getProgress();
-    var pathToRead = S3FilePathUtils.getPathToUploadedFiles(
-        fileDefinition.getId(), fileDefinition.getFileName());
+    var pathToRead =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
 
     try (InputStream is = s3Client.read(pathToRead);
-         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
       progress.setTotal((int) reader.lines().count());
       jobExecutionService.save(jobExecution);
     } catch (Exception e) {
@@ -118,36 +122,40 @@ public class InputFileProcessor {
     var duplicatedIds = new HashMap<UUID, Integer>();
     var countOfRead = new AtomicInteger();
     try (InputStream is = s3Client.read(pathToRead);
-         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-      reader.lines().forEach(id -> {
-        countOfRead.incrementAndGet();
-        commonExportStatistic.setFailedToReadInputFile(false);
-        var instanceId = id.replace("\"", StringUtils.EMPTY);
-        instanceId = StringUtils.stripStart(instanceId, "\uFEFF");
-        try {
-          var entity = ExportIdEntity.builder()
-              .jobExecutionId(fileDefinition.getJobExecutionId())
-              .instanceId(UUID.fromString(instanceId))
-              .build();
-          if (!readIds.contains(entity.getInstanceId())) {
-            batch.add(entity);
-            readIds.add(entity.getInstanceId());
-          } else {
-            commonExportStatistic.incrementDuplicatedUuid();
-            var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 1) + 1;
-            duplicatedIds.put(entity.getInstanceId(), countDuplicated);
-          }
-        } catch (Exception e) {
-          log.error("Error converting {} to uuid", instanceId);
-          commonExportStatistic.addToInvalidUuidFormat(instanceId);
-        }
-        if (batch.size() == BATCH_SIZE_TO_SAVE) {
-          insertExportIdService.saveBatch(batch);
-          progress.setReadIds(countOfRead.get());
-          jobExecutionService.save(jobExecution);
-          batch.clear();
-        }
-      });
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+      reader
+          .lines()
+          .forEach(
+              id -> {
+                countOfRead.incrementAndGet();
+                commonExportStatistic.setFailedToReadInputFile(false);
+                var instanceId = id.replace("\"", StringUtils.EMPTY);
+                instanceId = StringUtils.stripStart(instanceId, "\uFEFF");
+                try {
+                  var entity =
+                      ExportIdEntity.builder()
+                          .jobExecutionId(fileDefinition.getJobExecutionId())
+                          .instanceId(UUID.fromString(instanceId))
+                          .build();
+                  if (!readIds.contains(entity.getInstanceId())) {
+                    batch.add(entity);
+                    readIds.add(entity.getInstanceId());
+                  } else {
+                    commonExportStatistic.incrementDuplicatedUuid();
+                    var countDuplicated = duplicatedIds.getOrDefault(entity.getInstanceId(), 1) + 1;
+                    duplicatedIds.put(entity.getInstanceId(), countDuplicated);
+                  }
+                } catch (Exception e) {
+                  log.error("Error converting {} to uuid", instanceId);
+                  commonExportStatistic.addToInvalidUuidFormat(instanceId);
+                }
+                if (batch.size() == BATCH_SIZE_TO_SAVE) {
+                  insertExportIdService.saveBatch(batch);
+                  progress.setReadIds(countOfRead.get());
+                  jobExecutionService.save(jobExecution);
+                  batch.clear();
+                }
+              });
       readIds.clear();
       for (var entry : duplicatedIds.entrySet()) {
         errorLogService.saveGeneralErrorWithMessageValues(
@@ -166,8 +174,7 @@ public class InputFileProcessor {
 
     int totalExportsIds =
         (int) exportIdEntityRepository.countByJobExecutionId(jobExecution.getId());
-    int duplicated = getDuplicatedNumber(
-        countOfRead.get(), totalExportsIds, commonExportStatistic);
+    int duplicated = getDuplicatedNumber(countOfRead.get(), totalExportsIds, commonExportStatistic);
     commonExportStatistic.incrementDuplicatedUuid(duplicated);
   }
 
@@ -179,9 +186,11 @@ public class InputFileProcessor {
    * @param commonExportStatistic Export statistics.
    * @return Number of duplicated IDs.
    */
-  private int getDuplicatedNumber(int countOfRead, int totalExportsIds,
-      CommonExportStatistic commonExportStatistic) {
-    return countOfRead - totalExportsIds - commonExportStatistic.getDuplicatedUuidAmount()
+  private int getDuplicatedNumber(
+      int countOfRead, int totalExportsIds, CommonExportStatistic commonExportStatistic) {
+    return countOfRead
+        - totalExportsIds
+        - commonExportStatistic.getDuplicatedUuidAmount()
         - commonExportStatistic.getInvalidUuidFormat().size();
   }
 
@@ -194,33 +203,41 @@ public class InputFileProcessor {
    */
   private void readCqlFile(FileDefinition fileDefinition, ExportRequest.IdTypeEnum idType)
       throws IOException {
-    var pathToRead = S3FilePathUtils.getPathToUploadedFiles(
-        fileDefinition.getId(), fileDefinition.getFileName());
+    var pathToRead =
+        S3FilePathUtils.getPathToUploadedFiles(
+            fileDefinition.getId(), fileDefinition.getFileName());
     String cql;
     try (InputStream is = s3Client.read(pathToRead)) {
       cql = IOUtils.toString(is, StandardCharsets.UTF_8);
     }
     if (Objects.nonNull(cql)) {
       try {
-        var idsJobPayload = new IdsJobPayload()
-            .withEntityType(IdsJobPayload.EntityType.valueOf(idType.name()))
-            .withQuery(cql);
+        var idsJobPayload =
+            new IdsJobPayload()
+                .withEntityType(IdsJobPayload.EntityType.valueOf(idType.name()))
+                .withQuery(cql);
         var idsJob = searchClient.submitIdsJob(idsJobPayload);
-        await().with().pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
+        await()
+            .with()
+            .pollInterval(SEARCH_POLL_INTERVAL_SECONDS, SECONDS)
             .atMost(waitSearchIdsTimeSeconds, SECONDS)
-            .until(() -> getJobSearchStatus(idsJob.getId().toString())
-                != IdsJob.Status.IN_PROGRESS);
+            .until(
+                () -> getJobSearchStatus(idsJob.getId().toString()) != IdsJob.Status.IN_PROGRESS);
         var jobStatus = getJobSearchStatus(idsJob.getId().toString());
         if (jobStatus == IdsJob.Status.COMPLETED) {
           var resourceIds = searchClient.getResourceIds(idsJob.getId().toString());
-          log.info("CQL totalRecords: {} for file definition id: {}",
-              resourceIds.getTotalRecords(), fileDefinition.getId());
-          List<ExportIdEntity> entities = resourceIds.getIds()
-              .stream()
-              .map(id -> new ExportIdEntity()
-                  .withJobExecutionId(fileDefinition.getJobExecutionId())
-                  .withInstanceId(id.getId()))
-              .toList();
+          log.info(
+              "CQL totalRecords: {} for file definition id: {}",
+              resourceIds.getTotalRecords(),
+              fileDefinition.getId());
+          List<ExportIdEntity> entities =
+              resourceIds.getIds().stream()
+                  .map(
+                      id ->
+                          new ExportIdEntity()
+                              .withJobExecutionId(fileDefinition.getJobExecutionId())
+                              .withInstanceId(id.getId()))
+                  .toList();
           var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
           var progress = jobExecution.getProgress();
           progress.setTotal(entities.size());
@@ -238,11 +255,15 @@ public class InputFileProcessor {
               Collections.singletonList(fileDefinition.getFileName()),
               fileDefinition.getJobExecutionId());
         }
-        log.info("IdsJob.Status from mod-search: {}, file definition id: {}",
-            jobStatus, fileDefinition.getId());
+        log.info(
+            "IdsJob.Status from mod-search: {}, file definition id: {}",
+            jobStatus,
+            fileDefinition.getId());
       } catch (Exception exc) {
-        log.error("Error occurred while CQL export: {}, file definition id: {}",
-            exc.getMessage(), fileDefinition.getId());
+        log.error(
+            "Error occurred while CQL export: {}, file definition id: {}",
+            exc.getMessage(),
+            fileDefinition.getId());
       }
     }
   }

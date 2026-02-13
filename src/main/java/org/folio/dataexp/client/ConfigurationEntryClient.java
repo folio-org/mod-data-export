@@ -6,9 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving configuration entries.
- */
+/** Feign client for retrieving configuration entries. */
 @FeignClient(name = "configurations")
 public interface ConfigurationEntryClient {
 

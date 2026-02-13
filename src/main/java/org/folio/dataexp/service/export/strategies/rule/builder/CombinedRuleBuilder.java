@@ -14,9 +14,7 @@ import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Metadata;
 import org.folio.processor.rule.Rule;
 
-/**
- * Builder for combining transformation rules with default rules.
- */
+/** Builder for combining transformation rules with default rules. */
 @Log4j2
 public class CombinedRuleBuilder extends DefaultRuleBuilder {
 
@@ -47,8 +45,8 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
     if (defaultRuleOptional.isPresent()) {
       Rule defaultRule = defaultRuleOptional.get();
       List<DataSource> defaultDataSources = defaultRule.getDataSources();
-      Optional<DataSource> subfieldDataSource = getDataSourceByDefaultSubfield(defaultDataSources,
-          mappingTransformation.getFieldId());
+      Optional<DataSource> subfieldDataSource =
+          getDataSourceByDefaultSubfield(defaultDataSources, mappingTransformation.getFieldId());
       if (subfieldDataSource.isPresent()) {
         Rule rule = new Rule();
         rule.setField(defaultRule.getField());
@@ -64,11 +62,14 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
         rule.setDataSources(transformationDataSources);
         return Optional.of(rule);
       } else {
-        log.error("Default rule for the field with id {} doesn't contains necessary"
-            + "subfield data source", mappingTransformation.getFieldId());
+        log.error(
+            "Default rule for the field with id {} doesn't contains necessary"
+                + "subfield data source",
+            mappingTransformation.getFieldId());
       }
     } else {
-      log.error("Field with id {} doesn't have mapping in default rules",
+      log.error(
+          "Field with id {} doesn't have mapping in default rules",
           mappingTransformation.getFieldId());
     }
     return Optional.empty();
@@ -82,8 +83,7 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
    */
   private void setMetadata(Rule defaultRule, Rule rule) {
     Map<String, String> metadata = new HashMap<>();
-    for (Map.Entry<String, Metadata.Entry> entry : defaultRule.getMetadata().getData()
-        .entrySet()) {
+    for (Map.Entry<String, Metadata.Entry> entry : defaultRule.getMetadata().getData().entrySet()) {
       metadata.put(entry.getKey(), entry.getValue().getFrom());
     }
     rule.setMetadata(metadata);
@@ -96,14 +96,13 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
    * @param transformationFieldId transformation field ID
    * @return an Optional containing the DataSource if found
    */
-  private Optional<DataSource> getDataSourceByDefaultSubfield(List<DataSource> defaultDataSources,
-      String transformationFieldId) {
-    String transformationFieldKey = Splitter.on(".").splitToList(transformationFieldId)
-        .get(transformationFieldKeyIndex);
+  private Optional<DataSource> getDataSourceByDefaultSubfield(
+      List<DataSource> defaultDataSources, String transformationFieldId) {
+    String transformationFieldKey =
+        Splitter.on(".").splitToList(transformationFieldId).get(transformationFieldKeyIndex);
     return defaultDataSources.stream()
-      .filter(dataSource -> dataSource.getFrom().toLowerCase()
-        .contains(transformationFieldKey))
-      .findFirst();
+        .filter(dataSource -> dataSource.getFrom().toLowerCase().contains(transformationFieldKey))
+        .findFirst();
   }
 
   /**
@@ -112,13 +111,12 @@ public class CombinedRuleBuilder extends DefaultRuleBuilder {
    * @param defaultDataSources list of default data sources
    * @param transformationDataSources list of transformation data sources
    */
-  private void setIndicatorDataSources(List<DataSource> defaultDataSources,
-      List<DataSource> transformationDataSources) {
+  private void setIndicatorDataSources(
+      List<DataSource> defaultDataSources, List<DataSource> transformationDataSources) {
     for (DataSource defaultDataSource : defaultDataSources) {
       if (StringUtils.isNotEmpty(defaultDataSource.getIndicator())) {
         transformationDataSources.add(defaultDataSource);
       }
     }
   }
-
 }

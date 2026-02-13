@@ -55,6 +55,38 @@
     }
   },
   {
+    "id": "holdings.temporary.location",
+    "field": "852",
+    "description": "Holdings temporary location",
+    "dataSources": [
+      {
+        "from": "$.holdings[*].temporaryLocationId",
+        "subfield": "c",
+        "translation": {
+          "function": "set_holdings_temporary_location"
+        }
+      },
+      {
+        "indicator": "1",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      },
+      {
+        "indicator": "2",
+        "translation": {
+          "function": "set_value",
+          "parameters": {
+            "value": " "
+          }
+        }
+      }
+    ]
+  },
+  {
     "id": "holdings.holdingsstatements.statement",
     "field": "866",
     "description": "Holdings statement",

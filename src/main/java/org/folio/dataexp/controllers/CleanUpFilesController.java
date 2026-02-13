@@ -9,9 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Controller for cleaning up expired files and file definitions.
- */
+/** Controller for cleaning up expired files and file definitions. */
 @RestController
 @RequiredArgsConstructor
 @Log4j2
@@ -27,8 +25,6 @@ public class CleanUpFilesController implements CleanUpFilesApi {
   @Override
   public ResponseEntity<Void> postCleanUpFiles() {
     storageCleanUpService.cleanExpiredFilesAndFileDefinitions();
-    return new ResponseEntity<>(
-        HttpStatus.NO_CONTENT
-    );
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

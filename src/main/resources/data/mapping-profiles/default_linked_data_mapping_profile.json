@@ -4,7 +4,7 @@
   "default" : true,
   "description": "Default mapping profile for the Linked Data instance resource",
   "recordTypes": [
-    "INSTANCE"
+    "LINKED_DATA"
   ],
   "outputFormat": "LINKED_DATA",
   "userInfo": {

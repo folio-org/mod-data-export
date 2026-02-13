@@ -12,9 +12,8 @@ import org.springframework.stereotype.Component;
 /**
  * Handles pre/post processing logic for mapping rules in the data export process.
  *
- * <p>This class provides methods to transform item rules from starred to indexed versions,
- * and to add data sources for each indexed rule.
- * </p>
+ * <p>This class provides methods to transform item rules from starred to indexed versions, and to
+ * add data sources for each indexed rule.
  */
 @Component
 public class RuleHandler {
@@ -23,12 +22,11 @@ public class RuleHandler {
   /**
    * Adds new rules to the incoming original rules.
    *
-   * <p>This method turns rules for items from the starred version {@code "$.holdings[*]..."}
-   * to the indexed version {@code "$.holdings[0]..."}, {@code "$.holdings[1]..."}, etc.,
-   * and adds a data source with sub-field '3' for each newly created indexed rule.
-   * </p>
+   * <p>This method turns rules for items from the starred version {@code "$.holdings[*]..."} to the
+   * indexed version {@code "$.holdings[0]..."}, {@code "$.holdings[1]..."}, etc., and adds a data
+   * source with sub-field '3' for each newly created indexed rule.
    *
-   * @param instance      JSON object containing instances, holdings, and items
+   * @param instance JSON object containing instances, holdings, and items
    * @param originalRules original mapping rules
    * @return final list of rules with indexed holdings
    */
@@ -54,10 +52,10 @@ public class RuleHandler {
   }
 
   /**
-   * Creates a new indexed rule from the given starred rule and adds a data source for the
-   * holding HRID.
+   * Creates a new indexed rule from the given starred rule and adds a data source for the holding
+   * HRID.
    *
-   * @param starredRule  original starred rule
+   * @param starredRule original starred rule
    * @param holdingIndex index of the holding to index the rule
    * @return indexed rule with updated data sources
    */
@@ -65,8 +63,8 @@ public class RuleHandler {
     Rule indexedRule = starredRule.copy();
     for (DataSource dataSource : indexedRule.getDataSources()) {
       if (dataSource.getFrom() != null) {
-        dataSource.setFrom(dataSource.getFrom().replace("$.holdings[*]",
-            "$.holdings[" + holdingIndex + "]"));
+        dataSource.setFrom(
+            dataSource.getFrom().replace("$.holdings[*]", "$.holdings[" + holdingIndex + "]"));
       }
     }
     DataSource holdingHridDataSource = new DataSource();

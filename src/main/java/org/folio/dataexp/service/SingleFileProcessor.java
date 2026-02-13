@@ -20,9 +20,7 @@ import org.folio.dataexp.util.S3FilePathUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/**
- * Processor for exporting records by single file.
- */
+/** Processor for exporting records by single file. */
 @Component
 @RequiredArgsConstructor
 @Log4j2
@@ -55,7 +53,9 @@ public class SingleFileProcessor {
    * @param exportRequest The export request.
    * @param commonExportStatistic Export statistics.
    */
-  public void exportBySingleFile(UUID jobExecutionId, ExportRequest exportRequest,
+  public void exportBySingleFile(
+      UUID jobExecutionId,
+      ExportRequest exportRequest,
       CommonExportStatistic commonExportStatistic) {
     var exports = jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId);
     if (exports.isEmpty()) {
@@ -75,32 +75,24 @@ public class SingleFileProcessor {
         errorLogService.saveFailedToReadInputFileError(jobExecutionId);
       } else {
         errorLogService.saveCommonExportFailsErrors(
-            commonExportStatistic,
-            totalFailed,
-            jobExecutionId
-        );
+            commonExportStatistic, totalFailed, jobExecutionId);
       }
       return;
     }
     try {
       Files.createDirectories(
-          Path.of(S3FilePathUtils.getTempDirForJobExecutionId(
-              exportTmpStorage,
-              jobExecutionId
-          ))
-      );
+          Path.of(S3FilePathUtils.getTempDirForJobExecutionId(exportTmpStorage, jobExecutionId)));
     } catch (IOException e) {
       throw new DataExportException(
-          "Can not create temp directory for job execution " + jobExecutionId
-      );
+          "Can not create temp directory for job execution " + jobExecutionId);
     }
     var exportIterator = exports.iterator();
 
-    var exportStrategyStatisticListener = new ExportedRecordsListener(
-        jobExecutionEntityRepository,
-        getProgressExportUpdateStep(exportRequest),
-        jobExecutionId
-    );
+    var exportStrategyStatisticListener =
+        new ExportedRecordsListener(
+            jobExecutionEntityRepository,
+            getProgressExportUpdateStep(exportRequest),
+            jobExecutionId);
     commonExportStatistic.setExportedRecordsListener(exportStrategyStatisticListener);
     while (exportIterator.hasNext()) {
       var export = exportIterator.next();
@@ -118,9 +110,7 @@ public class SingleFileProcessor {
   private int getProgressExportUpdateStep(ExportRequest exportRequest) {
     if (exportRequest.getAll()) {
       return Math.max(
-          exportIdsBatch * PROGRESS_EXPORT_ALL_STEP_INCREMENT,
-          MIN_PROGRESS_EXPORT_STEP
-      );
+          exportIdsBatch * PROGRESS_EXPORT_ALL_STEP_INCREMENT, MIN_PROGRESS_EXPORT_STEP);
     }
     return Math.max(exportIdsBatch, MIN_PROGRESS_EXPORT_STEP);
   }
@@ -132,7 +122,9 @@ public class SingleFileProcessor {
    * @param exportRequest The export request.
    * @param commonExportStatistic Export statistics.
    */
-  public void executeExport(JobExecutionExportFilesEntity export, ExportRequest exportRequest,
+  public void executeExport(
+      JobExecutionExportFilesEntity export,
+      ExportRequest exportRequest,
       CommonExportStatistic commonExportStatistic) {
     exportExecutor.export(export, exportRequest, commonExportStatistic);
   }

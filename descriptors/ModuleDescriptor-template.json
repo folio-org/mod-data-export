@@ -31,7 +31,7 @@
       "version": "1.2"
     },
     {
-     "id": "contributor-name-types",
+      "id": "contributor-name-types",
       "version": "1.2"
     },
     {
@@ -295,6 +295,9 @@
           "permissionsRequired": [
             "data-export.job-profiles.item.post"
           ],
+          "permissionsDesired": [
+            "data-export.job-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -329,6 +332,9 @@
           "permissionsRequired": [
             "data-export.job-profiles.item.put"
           ],
+          "permissionsDesired": [
+            "data-export.job-profiles.item.lock.execute"
+          ],
           "modulePermissions": [
             "users.item.get"
           ]
@@ -351,6 +357,9 @@
           "pathPattern": "/data-export/mapping-profiles",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.post"
+          ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [
             "users.item.get"
@@ -385,6 +394,9 @@
           "pathPattern": "/data-export/mapping-profiles/{mappingProfileId}",
           "permissionsRequired": [
             "data-export.mapping-profiles.item.put"
+          ],
+          "permissionsDesired": [
+            "data-export.mapping-profiles.item.lock.execute"
           ],
           "modulePermissions": [
             "users.item.get"
@@ -495,7 +507,8 @@
             "data-export.export-deleted.post"
           ],
           "modulePermissions": [
-            "user-tenants.collection.get"
+            "user-tenants.collection.get",
+            "consortia.user-tenants.collection.get"
           ]
         },
         {
@@ -677,6 +690,11 @@
       "description": "Entry point to stop freezing job executions"
     },
     {
+      "permissionName": "data-export.mapping-profiles.item.lock.execute",
+      "displayName": "Data Export - lock mapping profile",
+      "description": "To lock mapping profile"
+    },
+    {
       "permissionName": "data-export.logs.collection.get",
       "displayName": "Data Export - get error logs collection",
       "description": "Entry point to get error logs by job execution id"
@@ -717,6 +735,11 @@
       "description": "Entry point to download single record file in the specified format"
     },
     {
+      "permissionName": "data-export.job-profiles.item.lock.execute",
+      "displayName": "Data Export - permission to lock job profile",
+      "description": "To lock job profile"
+    },
+    {
       "permissionName": "data-export.all",
       "displayName": "Data Export - all permissions",
       "description": "Entire set of permissions needed to use the Data Export",
@@ -750,7 +773,9 @@
         "data-export.export-authority-deleted.post",
         "data-export.download-record.item.get",
         "perms.users.get",
-        "permissions.users.item.get"
+        "permissions.users.item.get",
+        "data-export.job-profiles.item.lock.execute",
+        "data-export.mapping-profiles.item.lock.execute"
       ],
       "visible": false
     }

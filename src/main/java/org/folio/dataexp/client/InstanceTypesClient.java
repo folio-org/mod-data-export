@@ -7,9 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Feign client for retrieving instance types.
- */
+/** Feign client for retrieving instance types. */
 @FeignClient(name = "instance-types")
 public interface InstanceTypesClient {
   /**
