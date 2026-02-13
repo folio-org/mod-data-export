@@ -21,6 +21,7 @@ import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.MappingProfile.OutputFormatEnum;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
@@ -1127,12 +1128,14 @@ class DataExportAllServiceIT extends BaseServiceInitializerIT {
             .id(CUSTOM_INSTANCE_MAPPING_PROFILE_ID)
             .name("Custom Instance Mapping Profile")
             ._default(false)
-            .recordTypes(List.of(RecordTypes.INSTANCE));
+            .recordTypes(List.of(RecordTypes.INSTANCE))
+            .outputFormat(OutputFormatEnum.MARC);
     mappingProfileEntityRepository.save(
         new MappingProfileEntity()
             .withMappingProfile(customInstanceMappingProfile)
             .withId(customInstanceMappingProfile.getId())
-            .withName(customInstanceMappingProfile.getName()));
+            .withName(customInstanceMappingProfile.getName())
+            .withFormat(OutputFormatEnum.MARC.toString()));
     var customInstanceJobProfile =
         new JobProfile()
             .id(CUSTOM_INSTANCE_JOB_PROFILE_ID)
@@ -1153,12 +1156,14 @@ class DataExportAllServiceIT extends BaseServiceInitializerIT {
             .id(CUSTOM_HOLDINGS_MAPPING_PROFILE_ID)
             .name("Custom Holdings Mapping Profile")
             ._default(false)
-            .recordTypes(List.of(org.folio.dataexp.domain.dto.RecordTypes.HOLDINGS));
+            .recordTypes(List.of(org.folio.dataexp.domain.dto.RecordTypes.HOLDINGS))
+            .outputFormat(OutputFormatEnum.MARC);
     mappingProfileEntityRepository.save(
         new MappingProfileEntity()
             .withMappingProfile(customHoldingsMappingProfile)
             .withId(customHoldingsMappingProfile.getId())
-            .withName(customHoldingsMappingProfile.getName()));
+            .withName(customHoldingsMappingProfile.getName())
+            .withFormat(OutputFormatEnum.MARC.toString()));
     var customHoldingsJobProfile =
         new JobProfile()
             .id(CUSTOM_HOLDINGS_JOB_PROFILE_ID)

@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.domain.dto.TransformationField;
 import org.folio.dataexp.domain.dto.TransformationFieldCollection;
 import org.folio.dataexp.service.transformationfields.TransformationFieldsService;
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-class TransformationFieldsControllerTest extends BaseDataExportInitializer {
+class TransformationFieldsControllerIT extends BaseDataExportInitializerIT {
   @MockitoBean private TransformationFieldsService service;
 
   @Test

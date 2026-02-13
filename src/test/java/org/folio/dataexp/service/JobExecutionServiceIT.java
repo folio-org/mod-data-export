@@ -10,7 +10,7 @@ import static org.folio.dataexp.util.ErrorCode.ERROR_JOB_IS_EXPIRED;
 
 import java.util.Date;
 import java.util.UUID;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
@@ -21,7 +21,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class JobExecutionServiceTest extends BaseDataExportInitializer {
+class JobExecutionServiceIT extends BaseDataExportInitializerIT {
   @Autowired private JobExecutionEntityCqlRepository jobExecutionEntityCqlRepository;
   @Autowired private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
   @Autowired private JobExecutionService jobExecutionService;

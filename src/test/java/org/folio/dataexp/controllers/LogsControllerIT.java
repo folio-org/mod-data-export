@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.UUID;
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-class LogsControllerTest extends BaseDataExportInitializer {
+class LogsControllerIT extends BaseDataExportInitializerIT {
   @MockitoBean private ErrorLogEntityCqlRepository repository;
 
   @Test

@@ -1,9 +1,11 @@
 package org.folio.dataexp.service;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -39,6 +41,8 @@ class DownloadRecordIT extends BaseDataExportInitializerIT {
 
   @MockitoBean private MappingProfileEntityRepository mappingProfileEntityRepository;
 
+  @MockitoBean private ConsortiaService consortiaService;
+
   private static final String AUTHORITY_ID = "4a090b0f-9da3-40f1-ab17-33d6a1e3abae";
   private static final String INSTANCE_ID = "71717177-f243-4e4a-bf1c-9e1e62b3171d";
   private static final String MISSING_RECORD_ID = "17eed93e-f9e2-4cb2-a52b-e9155acfc119";
@@ -64,6 +68,7 @@ class DownloadRecordIT extends BaseDataExportInitializerIT {
       IdType idType, String recordId, boolean isUtf, String postfix, String fileContent) {
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
       var uuid = UUID.fromString(MISSING_RECORD_ID);
+      when(consortiaService.getCentralTenantId(anyString())).thenReturn(EMPTY);
       Exception exception =
           assertThrows(
               DownloadRecordException.class,

@@ -3,7 +3,7 @@ package org.folio.dataexp.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
 import org.folio.dataexp.client.ContributorNameTypesClient;
@@ -42,7 +42,7 @@ import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-abstract class ServiceInitializer extends BaseDataExportInitializer {
+abstract class BaseServiceInitializerIT extends BaseDataExportInitializerIT {
 
   @Autowired protected DataExportTenantService dataExportTenantService;
   @Autowired protected ErrorLogEntityCqlRepository errorLogEntityCqlRepository;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-class AuthorityExportStrategyTest extends BaseDataExportInitializer {
+class AuthorityExportStrategyIT extends BaseDataExportInitializerIT {
 
   private static final UUID LOCAL_AUTHORITY_UUID =
       UUID.fromString("4a090b0f-9da3-40f1-ab17-33d6a1e3abae");

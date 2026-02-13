@@ -6,7 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
@@ -17,7 +17,7 @@ import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class StorageCleanUpServiceTest extends BaseDataExportInitializer {
+class StorageCleanUpServiceIT extends BaseDataExportInitializerIT {
   @Autowired private StorageCleanUpService storageCleanUpService;
   @Autowired private FolioS3Client s3Client;
   @Autowired private FileDefinitionEntityRepository fileDefinitionEntityRepository;

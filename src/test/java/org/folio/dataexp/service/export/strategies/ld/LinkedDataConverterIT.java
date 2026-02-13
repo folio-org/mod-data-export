@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.SneakyThrows;
-import org.folio.dataexp.BaseDataExportInitializer;
+import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-class LinkedDataConverterTest extends BaseDataExportInitializer {
+class LinkedDataConverterIT extends BaseDataExportInitializerIT {
   @Autowired LinkedDataConverter linkedDataConverter;
 
   // Rather than test conversion accuracy, just make sure the

@@ -18,15 +18,20 @@ import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.MappingProfile.OutputFormatEnum;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
+import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.dataexp.service.validators.DataExportRequestValidator;
 import org.folio.spring.scope.FolioExecutionContextSetter;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -34,6 +39,7 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
 
   @MockitoBean private FileDefinitionEntityRepository fileDefinitionEntityRepository;
   @MockitoBean private JobProfileEntityRepository jobProfileEntityRepository;
+  @MockitoBean private MappingProfileEntityRepository mappingProfileEntityRepository;
   @MockitoBean private ExportIdEntityRepository exportIdEntityRepository;
   @MockitoBean private InputFileProcessor inputFileProcessor;
   @MockitoBean private SlicerProcessor slicerProcessor;
@@ -44,9 +50,10 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
 
   @Autowired private DataExportService dataExportService;
 
-  @Test
+  @ParameterizedTest
+  @CsvSource({"INSTANCE, MARC, mrc", "LINKED_DATA, LINKED_DATA, json"})
   @SneakyThrows
-  void postDataExport() {
+  void postDataExport(String recordType, String outputFormat, String fileSuffix) {
     var userId = UUID.randomUUID();
     var user = new User();
     user.setId(userId.toString());
@@ -56,7 +63,7 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
     user.setPersonal(personal);
 
     var exportRequest = new ExportRequest();
-    exportRequest.setRecordType(ExportRequest.RecordTypeEnum.INSTANCE);
+    exportRequest.setRecordType(ExportRequest.RecordTypeEnum.fromValue(recordType));
     exportRequest.setJobProfileId(UUID.randomUUID());
     exportRequest.setFileDefinitionId(UUID.randomUUID());
 
@@ -71,19 +78,37 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
             .id(fileDefinition.getId())
             .build();
 
+    var mappingProfile =
+        new MappingProfile()
+            .id(UUID.randomUUID())
+            .name("mappingProfileName")
+            .outputFormat(OutputFormatEnum.fromValue(outputFormat));
+    var mappingProfileEntity =
+        MappingProfileEntity.builder()
+            .mappingProfile(mappingProfile)
+            .id(mappingProfile.getId())
+            .format(outputFormat)
+            .build();
+
     var jobProfile =
         new JobProfile()
             .id(exportRequest.getJobProfileId())
             .name("jobProfileName")
-            .mappingProfileId(UUID.randomUUID());
+            .mappingProfileId(mappingProfile.getId());
     var jobProfileEntity =
-        JobProfileEntity.builder().jobProfile(jobProfile).id(jobProfile.getId()).build();
+        JobProfileEntity.builder()
+            .jobProfile(jobProfile)
+            .id(jobProfile.getId())
+            .mappingProfileId(mappingProfile.getId())
+            .build();
 
     var jobExecution = new JobExecution().id(fileDefinition.getId());
 
     when(fileDefinitionEntityRepository.getReferenceById(isA(UUID.class)))
         .thenReturn(fileDefinitionEntity);
     when(jobProfileEntityRepository.getReferenceById(isA(UUID.class))).thenReturn(jobProfileEntity);
+    when(mappingProfileEntityRepository.getReferenceById(isA(UUID.class)))
+        .thenReturn(mappingProfileEntity);
     when(jobExecutionService.getById(isA(UUID.class))).thenReturn(jobExecution);
     when(userClient.getUserById(isA(String.class))).thenReturn(user);
     when(jobExecutionService.getNextHrid()).thenReturn(200);
@@ -99,7 +124,8 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
                       eq(fileDefinition),
                       isA(CommonExportStatistic.class),
                       isA(ExportRequest.IdTypeEnum.class));
-              verify(slicerProcessor).sliceInstancesIds(fileDefinition, exportRequest);
+              verify(slicerProcessor)
+                  .sliceInstancesIds(fileDefinition, exportRequest, outputFormat);
               verify(singleFileProcessorAsync)
                   .exportBySingleFile(
                       eq(jobExecution.getId()),
@@ -114,7 +140,7 @@ class DataExportServiceIT extends BaseDataExportInitializerIT {
               var exportedFiles = jobExecution.getExportedFiles();
               JobExecutionExportedFilesInner inner =
                   (JobExecutionExportedFilesInner) exportedFiles.toArray()[0];
-              assertEquals("instance-200.mrc", inner.getFileName());
+              assertEquals("instance-200.%s".formatted(fileSuffix), inner.getFileName());
             });
   }
 }
