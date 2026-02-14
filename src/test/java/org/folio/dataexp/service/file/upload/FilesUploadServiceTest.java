@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.SneakyThrows;
-import org.folio.dataexp.TestMateGenerated;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
@@ -95,7 +95,7 @@ class FilesUploadServiceTest {
   }
 
   @ParameterizedTest
-  @TestMateGenerated(name = "TestMate-6c2d4068c3b484b9d051e4c5aabeeb20")
+  @TestMate(name = "TestMate-6c2d4068c3b484b9d051e4c5aabeeb20")
   @EnumSource(
       value = FileDefinition.StatusEnum.class,
       names = {"IN_PROGRESS", "COMPLETED", "ERROR"})
@@ -126,7 +126,7 @@ class FilesUploadServiceTest {
   }
 
   @Test
-  @TestMateGenerated(name = "TestMate-71a51c7182c153684de43d4b733f628b")
+  @TestMate(name = "TestMate-71a51c7182c153684de43d4b733f628b")
   @SneakyThrows
   void uploadFile_shouldUseNullInputStream_whenResourceIsNull() {
     // Given
@@ -158,7 +158,7 @@ class FilesUploadServiceTest {
   }
 
   @Test
-  @TestMateGenerated(name = "TestMate-a0e68b531504650ff5429c76d3d84bc9")
+  @TestMate(name = "TestMate-a0e68b531504650ff5429c76d3d84bc9")
   @SneakyThrows
   void uploadFile_shouldThrowIOException_whenS3WriteFails() {
     // Given

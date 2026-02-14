@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /** Marker-annotation for TestMate-generated tests. */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface TestMateGenerated {
+public @interface TestMate {
   /** Test name. */
   String name();
 }
