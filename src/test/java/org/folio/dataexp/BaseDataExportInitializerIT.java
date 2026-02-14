@@ -93,12 +93,6 @@ public class BaseDataExportInitializerIT {
           + "cl9pZCI6IjFkM2I1OGNiLTA3YjUtNWZjZC04YTJhLTNjZTA2YTBlYjkwZiIsImlhdCI6MTYxNjQyMDM5Mywid"
           + "GVuYW50IjoiZGlrdSJ9.2nvEYQBbJP1PewEgxixBWLHSX_eELiBEBpjufWiJZRs";
   protected static final String TENANT = "diku";
-  protected static final UUID DEFAULT_HOLDINGS_JOB_PROFILE =
-      UUID.fromString("5e9835fc-0e51-44c8-8a47-f7b8fce35da7");
-  protected static final UUID DEFAULT_AUTHORITY_JOB_PROFILE =
-      UUID.fromString("56944b1c-f3f9-475b-bed0-7387c33620ce");
-  public static final UUID DEFAULT_DELETED_AUTHORITY_JOB_PROFILE =
-      UUID.fromString("2c9be114-6d35-4408-adac-9ead35f51a27");
   public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
   public static final String S3_ACCESS_KEY = "minio-access-key";
   public static final String S3_SECRET_KEY = "minio-secret-key";

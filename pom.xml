@@ -60,6 +60,7 @@
 
     <!-- Test dependencies versions -->
     <testcontainer.version>1.21.4</testcontainer.version>
+    <testcontainers_core.version>2.0.3</testcontainers_core.version>
     <wiremock.version>2.35.2</wiremock.version>
     <mockito-inline.version>5.2.0</mockito-inline.version>
 
@@ -255,7 +256,7 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>${testcontainer.version}</version>
+      <version>${testcontainers_core.version}</version>
       <scope>test</scope>
     </dependency>
 

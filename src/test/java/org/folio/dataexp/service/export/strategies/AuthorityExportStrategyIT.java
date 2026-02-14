@@ -2,6 +2,8 @@ package org.folio.dataexp.service.export.strategies;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.Constants.DEFAULT_AUTHORITY_JOB_PROFILE;
+import static org.folio.dataexp.Constants.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_UUID_IS_SET_TO_DELETION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
