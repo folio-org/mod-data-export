@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DataExportRequestValidatorTest {
+class DataExportRequestValidatorIT {
 
   @Mock private ErrorLogService errorLogService;
 
