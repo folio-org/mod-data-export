@@ -3,6 +3,8 @@ package org.folio.dataexp.service;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.folio.dataexp.Constants.DEFAULT_AUTHORITY_JOB_PROFILE;
+import static org.folio.dataexp.Constants.DEFAULT_HOLDINGS_JOB_PROFILE;
 import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.Constants.DEFAULT_HOLDINGS_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.Constants.DEFAULT_INSTANCE_JOB_PROFILE_ID;

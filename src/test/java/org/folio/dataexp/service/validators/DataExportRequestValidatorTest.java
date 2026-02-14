@@ -1,6 +1,6 @@
 package org.folio.dataexp.service.validators;
 
-import static org.folio.dataexp.BaseDataExportInitializerIT.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
+import static org.folio.dataexp.Constants.DEFAULT_DELETED_AUTHORITY_JOB_PROFILE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DataExportRequestValidatorIT {
+class DataExportRequestValidatorTest {
 
   @Mock private ErrorLogService errorLogService;
 
