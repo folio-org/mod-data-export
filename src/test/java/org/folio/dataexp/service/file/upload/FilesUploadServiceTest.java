@@ -32,6 +32,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
+import java.io.IOException;
+import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
 class FilesUploadServiceTest {
@@ -44,6 +46,9 @@ class FilesUploadServiceTest {
   @InjectMocks private FilesUploadServiceImpl fileUploadService;
 
   @Captor private ArgumentCaptor<InputStream> inputStreamArgumentCaptor;
+
+    @Mock
+private Resource resource;
 
   @Test
   @SneakyThrows
@@ -183,5 +188,34 @@ class FilesUploadServiceTest {
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
     verify(s3Client).write(any(String.class), any(InputStream.class));
+  }
+
+    @Test
+  @SneakyThrows
+  void uploadFile_shouldPropagateIOException_whenS3ClientFails() {
+    // TestMate-0c30c384c88be9d1d4f081f2a0e77ebb
+    // Given
+    var fileDefinitionId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(fileDefinitionId);
+    fileDefinition.setFileName("io-error-test.csv");
+    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    fileDefinition.setMetadata(new Metadata());
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
+        .thenReturn(fileDefinitionEntity);
+    // Corrected mock: Throw IOException from resource.getInputStream()
+    when(resource.getInputStream()).thenThrow(new IOException("Failed to get input stream"));
+    // When & Then
+    assertThrows(
+        IOException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+    // Then
+    verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
+    // The save method is called once in startUploading to set status to IN_PROGRESS
+    verify(fileDefinitionEntityRepository).save(fileDefinitionEntity);
+    // s3Client.write is never called because getInputStream fails first
+    verify(s3Client, never()).write(any(String.class), any(InputStream.class));
+    assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
   }
 }
