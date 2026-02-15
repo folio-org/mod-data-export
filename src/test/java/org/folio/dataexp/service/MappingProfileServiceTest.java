@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
@@ -23,6 +25,7 @@ import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.domain.dto.User;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.exception.mapping.profile.DefaultMappingProfileException;
 import org.folio.dataexp.exception.mapping.profile.LockMappingProfileException;
@@ -926,5 +929,126 @@ class MappingProfileServiceTest {
     assertThat(savedProfile.getLocked()).isFalse();
     assertThat(savedProfile.getLockedBy()).isNull();
     assertThat(savedProfile.getLockedAt()).isNull();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-1bc610fb772a164c5d1cada56e3e53c0")
+  void postMappingProfileShouldSetUserInfoAndMetadataAndSave() {
+    // Given
+    var inputProfile = new MappingProfile();
+    inputProfile.setId(UUID.fromString("c85d533c-a043-465c-a532-d62101086611"));
+    inputProfile.setName("New Unlocked Profile");
+    inputProfile.setLocked(false);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    var savedEntity =
+        MappingProfileEntity.builder()
+            .id(inputProfile.getId())
+            .mappingProfile(inputProfile)
+            .build();
+    when(mappingProfileEntityRepository.save(any(MappingProfileEntity.class)))
+        .thenReturn(savedEntity);
+    // When
+    var resultProfile = mappingProfileService.postMappingProfile(inputProfile);
+    // Then
+    verify(folioExecutionContext).getUserId();
+    verify(userClient).getUserById(userId.toString());
+    verify(mappingProfileValidator).validate(inputProfile);
+    verify(mappingProfileEntityRepository).save(mappingProfileEntityCaptor.capture());
+    verify(permissionsValidator, never()).checkLockMappingProfilePermission();
+    MappingProfile capturedProfile = mappingProfileEntityCaptor.getValue().getMappingProfile();
+    UserInfo userInfo = capturedProfile.getUserInfo();
+    assertThat(userInfo.getFirstName()).isEqualTo(user.getPersonal().getFirstName());
+    assertThat(userInfo.getLastName()).isEqualTo(user.getPersonal().getLastName());
+    assertThat(userInfo.getUserName()).isEqualTo(user.getUsername());
+    Metadata metadata = capturedProfile.getMetadata();
+    assertThat(metadata.getCreatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getUpdatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getCreatedByUsername()).isEqualTo(user.getUsername());
+    assertThat(metadata.getUpdatedByUsername()).isEqualTo(user.getUsername());
+    assertThat(metadata.getCreatedDate()).isNotNull();
+    assertThat(metadata.getUpdatedDate()).isNotNull();
+    assertThat(resultProfile).isSameAs(inputProfile);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-d647906162622555358639d2fcb36028")
+  void postMappingProfileShouldLockProfileWhenLockedIsTrueAndPermissionExists() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    var inputProfile = new MappingProfile();
+    inputProfile.setId(UUID.fromString("c85d533c-a043-465c-a532-d62101086611"));
+    inputProfile.setName("New Locked Profile");
+    inputProfile.setLocked(true);
+    when(permissionsValidator.checkLockMappingProfilePermission()).thenReturn(true);
+    var savedEntity =
+        MappingProfileEntity.builder()
+            .id(inputProfile.getId())
+            .mappingProfile(inputProfile)
+            .build();
+    when(mappingProfileEntityRepository.save(any(MappingProfileEntity.class)))
+        .thenReturn(savedEntity);
+    // When
+    mappingProfileService.postMappingProfile(inputProfile);
+    // Then
+    verify(permissionsValidator).checkLockMappingProfilePermission();
+    verify(mappingProfileValidator).validate(any(MappingProfile.class));
+    verify(mappingProfileEntityRepository).save(mappingProfileEntityCaptor.capture());
+    MappingProfile capturedProfile = mappingProfileEntityCaptor.getValue().getMappingProfile();
+    assertThat(capturedProfile.getLocked()).isTrue();
+    assertThat(capturedProfile.getLockedBy()).isEqualTo(userId);
+    assertThat(capturedProfile.getLockedAt()).isNotNull();
+    UserInfo userInfo = capturedProfile.getUserInfo();
+    assertThat(userInfo.getFirstName()).isEqualTo(user.getPersonal().getFirstName());
+    assertThat(userInfo.getLastName()).isEqualTo(user.getPersonal().getLastName());
+    assertThat(userInfo.getUserName()).isEqualTo(user.getUsername());
+    Metadata metadata = capturedProfile.getMetadata();
+    assertThat(metadata.getCreatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getUpdatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getCreatedByUsername()).isEqualTo(user.getUsername());
+    assertThat(metadata.getUpdatedByUsername()).isEqualTo(user.getUsername());
+    assertThat(metadata.getCreatedDate()).isNotNull();
+    assertThat(metadata.getUpdatedDate()).isNotNull();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-d89db0c3c88d1b504512d8510d197a4b")
+  void postMappingProfileShouldThrowExceptionWhenLockingAndPermissionIsMissing() {
+    // Given
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockMappingProfilePermission()).thenReturn(false);
+    var inputProfile = new MappingProfile();
+    inputProfile.setName("Attempt to create locked profile");
+    inputProfile.setLocked(true);
+    // When & Then
+    assertThatThrownBy(() -> mappingProfileService.postMappingProfile(inputProfile))
+        .isInstanceOf(LockMappingProfilePermissionException.class)
+        .hasMessage("You do not have permission to lock this profile.");
+    verify(mappingProfileValidator, never()).validate(any(MappingProfile.class));
+    verify(mappingProfileEntityRepository, never()).save(any(MappingProfileEntity.class));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-b61cd42304b8016df0e96eb967f41d83")
+  void postMappingProfileShouldPropagateExceptionFromValidator() {
+    // Given
+    var inputProfile = new MappingProfile();
+    inputProfile.setLocked(false);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    doThrow(new IllegalArgumentException("Validation failed"))
+        .when(mappingProfileValidator)
+        .validate(any(MappingProfile.class));
+    // When & Then
+    assertThatThrownBy(() -> mappingProfileService.postMappingProfile(inputProfile))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Validation failed");
+    verify(folioExecutionContext).getUserId();
+    verify(userClient).getUserById(userId.toString());
+    verify(mappingProfileValidator).validate(inputProfile);
+    verify(mappingProfileEntityRepository, never()).save(any(MappingProfileEntity.class));
+    verify(permissionsValidator, never()).checkLockMappingProfilePermission();
   }
 }
