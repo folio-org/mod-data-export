@@ -62,12 +62,11 @@ class FilesUploadServiceTest {
 
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
 
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
 
-    fileUploadService.uploadFile(fileDefinitionId, resource);
+    fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH));
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
