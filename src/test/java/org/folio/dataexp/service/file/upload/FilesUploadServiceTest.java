@@ -112,14 +112,13 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(status);
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     // When & Then
     var exception =
         assertThrows(
             UploadFileException.class,
-            () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+            () -> fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH)));
     assertEquals(
         "File already uploaded for file definition with id : " + fileDefinitionId,
         exception.getMessage());
@@ -173,7 +172,6 @@ class FilesUploadServiceTest {
     fileDefinition.setMetadata(new Metadata());
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     doThrow(new S3ClientException("S3 write error"))
@@ -181,7 +179,7 @@ class FilesUploadServiceTest {
         .write(any(String.class), any(InputStream.class));
     // When & Then
     assertThrows(
-        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH)));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
