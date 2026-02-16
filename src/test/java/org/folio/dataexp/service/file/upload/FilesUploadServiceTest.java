@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -32,6 +33,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
 class FilesUploadServiceTest {
@@ -44,6 +46,8 @@ class FilesUploadServiceTest {
   @InjectMocks private FilesUploadServiceImpl fileUploadService;
 
   @Captor private ArgumentCaptor<InputStream> inputStreamArgumentCaptor;
+
+  @Mock private Resource resource;
 
   @Test
   @SneakyThrows
@@ -58,12 +62,11 @@ class FilesUploadServiceTest {
 
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
 
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
 
-    fileUploadService.uploadFile(fileDefinitionId, resource);
+    fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH));
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
@@ -109,14 +112,14 @@ class FilesUploadServiceTest {
     fileDefinition.setStatus(status);
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     // When & Then
+    var res = new PathResource(UPLOADED_FILE_PATH);
     var exception =
         assertThrows(
             UploadFileException.class,
-            () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+            () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(
         "File already uploaded for file definition with id : " + fileDefinitionId,
         exception.getMessage());
@@ -170,18 +173,46 @@ class FilesUploadServiceTest {
     fileDefinition.setMetadata(new Metadata());
     var fileDefinitionEntity =
         FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
-    var resource = new PathResource(UPLOADED_FILE_PATH);
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     doThrow(new S3ClientException("S3 write error"))
         .when(s3Client)
         .write(any(String.class), any(InputStream.class));
     // When & Then
+    var res = new PathResource(UPLOADED_FILE_PATH);
     assertThrows(
-        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
     verify(s3Client).write(any(String.class), any(InputStream.class));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-0c30c384c88be9d1d4f081f2a0e77ebb")
+  @SneakyThrows
+  void uploadFile_shouldPropagateIOException_whenS3ClientFails() {
+    // Given
+    var fileDefinitionId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(fileDefinitionId);
+    fileDefinition.setFileName("io-error-test.csv");
+    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    fileDefinition.setMetadata(new Metadata());
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
+        .thenReturn(fileDefinitionEntity);
+    // Corrected mock: Throw IOException from resource.getInputStream()
+    when(resource.getInputStream()).thenThrow(new IOException("Failed to get input stream"));
+    // When & Then
+    assertThrows(IOException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+    // Then
+    verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
+    // The save method is called once in startUploading to set status to IN_PROGRESS
+    verify(fileDefinitionEntityRepository).save(fileDefinitionEntity);
+    // s3Client.write is never called because getInputStream fails first
+    verify(s3Client, never()).write(any(String.class), any(InputStream.class));
+    assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
   }
 }
