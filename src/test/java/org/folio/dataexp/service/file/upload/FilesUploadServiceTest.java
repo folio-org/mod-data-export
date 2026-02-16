@@ -115,10 +115,11 @@ class FilesUploadServiceTest {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     // When & Then
+    var res = new PathResource(UPLOADED_FILE_PATH);
     var exception =
         assertThrows(
             UploadFileException.class,
-            () -> fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH)));
+            () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(
         "File already uploaded for file definition with id : " + fileDefinitionId,
         exception.getMessage());
@@ -178,8 +179,9 @@ class FilesUploadServiceTest {
         .when(s3Client)
         .write(any(String.class), any(InputStream.class));
     // When & Then
+    var res = new PathResource(UPLOADED_FILE_PATH);
     assertThrows(
-        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH)));
+        S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(fileDefinitionEntityRepository).save(isA(FileDefinitionEntity.class));
