@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
@@ -30,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.apache.commons.io.FileUtils;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.io.IOException;
 import org.junit.jupiter.api.io.TempDir;
 
 @ExtendWith(MockitoExtension.class)
@@ -330,10 +330,10 @@ class S3ExportsUploaderTest {
     assertFalse(temDir.exists());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-74dd7dd1ec3da45673b268277e467358")
   @SneakyThrows
   void upload_whenIOExceptionOccurs_shouldThrowS3ExportsUploadException(@TempDir Path tempDir) {
-    // TestMate-74dd7dd1ec3da45673b268277e467358
     // Given
     s3ExportsUploader.setExportTmpStorage(tempDir.toString());
     var jobExecution = new JobExecution();
@@ -353,12 +353,13 @@ class S3ExportsUploaderTest {
     // Simulate IOException by making the file unreadable
     assertTrue(fullPath.toFile().setReadable(false), "Failed to make file unreadable");
     // When & Then
+    var exportEntities = Collections.singletonList(exportEntity);
     var exception =
         assertThrows(
             S3ExportsUploadException.class,
             () ->
                 s3ExportsUploader.upload(
-                    jobExecution, Collections.singletonList(exportEntity), initialFileName));
+                    jobExecution, exportEntities, initialFileName));
     // The exception message for access denied can vary across operating systems.
     String message = exception.getMessage().toLowerCase();
     assertTrue(message.contains("access is denied") || message.contains("permission denied"));
