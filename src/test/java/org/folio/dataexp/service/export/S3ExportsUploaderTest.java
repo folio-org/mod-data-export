@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
@@ -28,6 +29,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.apache.commons.io.FileUtils;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.io.TempDir;
 
 @ExtendWith(MockitoExtension.class)
 class S3ExportsUploaderTest {
@@ -324,5 +328,45 @@ class S3ExportsUploaderTest {
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-74dd7dd1ec3da45673b268277e467358")
+  @SneakyThrows
+  void upload_whenIOExceptionOccurs_shouldThrowS3ExportsUploadException(@TempDir Path tempDir) {
+    // Given
+    s3ExportsUploader.setExportTmpStorage(tempDir.toString());
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.fromString("a0146319-9786-4632-91c8-a249929828ec"));
+    jobExecution.setHrId(200);
+    var initialFileName = "io-error-test";
+    var relativePath =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
+    var fileLocation = relativePath + initialFileName + ".mrc";
+    var fullPath = Path.of(S3FilePathUtils.getLocalStorageWriterPath(tempDir.toString(), fileLocation));
+    Files.createDirectories(fullPath.getParent());
+    Files.writeString(fullPath, "some content");
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .fileLocation(fileLocation)
+            .build();
+    // Simulate IOException by making the file unreadable
+    assertTrue(fullPath.toFile().setReadable(false), "Failed to make file unreadable");
+    // When & Then
+    var exportEntities = Collections.singletonList(exportEntity);
+    var exception =
+        assertThrows(
+            S3ExportsUploadException.class,
+            () ->
+                s3ExportsUploader.upload(
+                    jobExecution, exportEntities, initialFileName));
+    // The exception message for access denied can vary across operating systems.
+    String message = exception.getMessage().toLowerCase();
+    assertTrue(message.contains("access is denied") || message.contains("permission denied"));
+    // Restore permissions to allow cleanup
+    fullPath.toFile().setReadable(true);
+    // The method under test does not clean up the directory on this specific failure path,
+    // so we manually clean it up to not interfere with other tests.
+    FileUtils.deleteDirectory(fullPath.getParent().toFile());
   }
 }
