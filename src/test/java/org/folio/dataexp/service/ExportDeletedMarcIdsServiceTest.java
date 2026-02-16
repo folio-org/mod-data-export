@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ExportDeletedMarcIdsRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -56,9 +57,9 @@ class ExportDeletedMarcIdsServiceTest {
     assertThat(exportRequest.getJobProfileId()).isInstanceOf(UUID.class);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-ac8197c64029dbb2bb834f4eecee6f2f")
   void testPostExportDeletedMarcIdsWhenRequestIsNullShouldCallDependenciesWithNullDates() {
-    // TestMate-ac8197c64029dbb2bb834f4eecee6f2f
     // Given
     var fileDefinitionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
     var jobExecutionId = UUID.fromString("f0e9d8c7-b6a5-4321-fedc-ba9876543210");
