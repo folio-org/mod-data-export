@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.SneakyThrows;
@@ -32,7 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
-import java.io.IOException;
 import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,8 +47,7 @@ class FilesUploadServiceTest {
 
   @Captor private ArgumentCaptor<InputStream> inputStreamArgumentCaptor;
 
-    @Mock
-private Resource resource;
+  @Mock private Resource resource;
 
   @Test
   @SneakyThrows
@@ -190,10 +189,10 @@ private Resource resource;
     verify(s3Client).write(any(String.class), any(InputStream.class));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-0c30c384c88be9d1d4f081f2a0e77ebb")
   @SneakyThrows
   void uploadFile_shouldPropagateIOException_whenS3ClientFails() {
-    // TestMate-0c30c384c88be9d1d4f081f2a0e77ebb
     // Given
     var fileDefinitionId = UUID.fromString("33333333-3333-3333-3333-333333333333");
     var fileDefinition = new FileDefinition();
@@ -208,8 +207,7 @@ private Resource resource;
     // Corrected mock: Throw IOException from resource.getInputStream()
     when(resource.getInputStream()).thenThrow(new IOException("Failed to get input stream"));
     // When & Then
-    assertThrows(
-        IOException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
+    assertThrows(IOException.class, () -> fileUploadService.uploadFile(fileDefinitionId, resource));
     // Then
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     // The save method is called once in startUploading to set status to IN_PROGRESS
