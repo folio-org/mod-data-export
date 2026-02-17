@@ -1,17 +1,16 @@
 package org.folio.dataexp.domain.entity;
 
-import org.junit.jupiter.api.Test;
-import org.folio.dataexp.domain.dto.MappingProfile;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.folio.dataexp.TestMate;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.junit.jupiter.api.Test;
 
 class MappingProfileEntityTest {
 
   @Test
-  void fromMappingProfile() {}
-
-    @Test
+  @TestMate(name = "TestMate-d786d6d04e9a68c1acfa18e0a0562872")
   void testFromMappingProfileShouldGenerateIdWhenIdIsNull() {
-    // TestMate-d786d6d04e9a68c1acfa18e0a0562872
     // Given
     var mappingProfile = new MappingProfile();
     // When
