@@ -1,19 +1,27 @@
 package org.folio.dataexp.service.logs;
 
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
+import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
+import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ErrorLog;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
@@ -33,13 +41,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
-import static org.folio.dataexp.service.export.Constants.HRID_KEY;
-import static org.folio.dataexp.service.export.Constants.ID_KEY;
-import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import java.util.Date;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -274,33 +275,33 @@ class ErrorLogServiceTest {
     assertEquals(LONG_MARC_RECORD_MESSAGE, errorLog.getErrorMessageValues().getFirst());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-8f00eb0c345d8b7cac8469c9264c5fa3")
   @SneakyThrows
   void saveWithAffectedRecordShouldSetEmptyInventoryLinkForDeletedRecord() {
-    // TestMate-8f00eb0c345d8b7cac8469c9264c5fa3
     // Given
-    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
     var instanceId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
     var instanceHrid = "hrid_1";
     var instanceTitle = "title_1";
-    var errorMessageCode = "some_error_code";
-    var marcExceptionMessage = "marc_exception_message";
     var instance = new JSONObject();
     instance.put(ID_KEY, instanceId.toString());
     instance.put(HRID_KEY, instanceHrid);
     instance.put(TITLE_KEY, instanceTitle);
     instance.put(DELETED_KEY, true);
-    var marcException = new MarcException(marcExceptionMessage);
+    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(jobExecutionService.getById(jobExecutionId))
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(UUID.randomUUID()));
     var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     // Use a real ObjectMapper to serialize the captured object, ensuring valid JSON.
-    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenAnswer(invocation ->
-      new ObjectMapper().writeValueAsString(invocation.getArgument(0))
-    );
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture()))
+        .thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
     // When
-    errorLogService.saveWithAffectedRecord(instance, errorMessageCode, jobExecutionId, marcException);
+    var errorMessageCode = "some_error_code";
+    var marcExceptionMessage = "marc_exception_message";
+    var marcException = new MarcException(marcExceptionMessage);
+    errorLogService.saveWithAffectedRecord(
+        instance, errorMessageCode, jobExecutionId, marcException);
     // Then
     // We only need to verify the repository call happened; the object is captured for assertions.
     verify(errorLogEntityCqlRepository)
