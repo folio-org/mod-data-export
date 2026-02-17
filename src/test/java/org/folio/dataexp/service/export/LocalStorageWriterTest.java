@@ -11,6 +11,7 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -66,10 +67,10 @@ class LocalStorageWriterTest {
     FileUtils.deleteDirectory(new File(temDirLocation));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-d336844ac6915d74cfdbd10e27afbf4b")
   @SneakyThrows
   void closeShouldCloseWriterWhenFileExists(@TempDir Path tempDir) {
-    // TestMate-d336844ac6915d74cfdbd10e27afbf4b
     // Given
     String fileName = "test-file.mrc";
     Path filePath = tempDir.resolve(fileName);
@@ -86,10 +87,10 @@ class LocalStorageWriterTest {
     assertTrue(Files.size(filePath) > 0);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-1467af16f84d16c4f47ba1c056664101")
   @SneakyThrows
   void closeShouldDoNothingWhenFileDoesNotExist(@TempDir Path tempDir) {
-    // TestMate-1467af16f84d16c4f47ba1c056664101
     // Given
     String fileName = "test-file.mrc";
     Path filePath = tempDir.resolve(fileName);
@@ -104,10 +105,10 @@ class LocalStorageWriterTest {
     verify(bufferedWriterSpy, never()).close();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-12593f7e358bbbcb6cb0732ef84f02cd")
   @SneakyThrows
   void closeShouldThrowLocalStorageWriterExceptionWhenWriterFailsToClose(@TempDir Path tempDir) {
-    // TestMate-12593f7e358bbbcb6cb0732ef84f02cd
     // Given
     String fileName = "test-file.mrc";
     Path filePath = tempDir.resolve(fileName);
