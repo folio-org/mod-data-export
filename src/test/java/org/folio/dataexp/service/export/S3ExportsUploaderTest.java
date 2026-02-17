@@ -5,6 +5,7 @@ import static org.folio.dataexp.service.export.S3ExportsUploader.EMPTY_FILE_FOR_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -26,12 +28,10 @@ import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.apache.commons.io.FileUtils;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.io.TempDir;
 
 @ExtendWith(MockitoExtension.class)
 class S3ExportsUploaderTest {
@@ -343,13 +343,11 @@ class S3ExportsUploaderTest {
     var relativePath =
         S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
     var fileLocation = relativePath + initialFileName + ".mrc";
-    var fullPath = Path.of(S3FilePathUtils.getLocalStorageWriterPath(tempDir.toString(), fileLocation));
+    var fullPath =
+        Path.of(S3FilePathUtils.getLocalStorageWriterPath(tempDir.toString(), fileLocation));
     Files.createDirectories(fullPath.getParent());
     Files.writeString(fullPath, "some content");
-    var exportEntity =
-        JobExecutionExportFilesEntity.builder()
-            .fileLocation(fileLocation)
-            .build();
+    var exportEntity = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
     // Simulate IOException by making the file unreadable
     assertTrue(fullPath.toFile().setReadable(false), "Failed to make file unreadable");
     // When & Then
@@ -357,9 +355,7 @@ class S3ExportsUploaderTest {
     var exception =
         assertThrows(
             S3ExportsUploadException.class,
-            () ->
-                s3ExportsUploader.upload(
-                    jobExecution, exportEntities, initialFileName));
+            () -> s3ExportsUploader.upload(jobExecution, exportEntities, initialFileName));
     // The exception message for access denied can vary across operating systems.
     String message = exception.getMessage().toLowerCase();
     assertTrue(message.contains("access is denied") || message.contains("permission denied"));
