@@ -11,8 +11,20 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import org.folio.dataexp.exception.export.LocalStorageWriterException;
+import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.Mockito.never;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LocalStorageWriterTest {
 
@@ -53,5 +65,65 @@ class LocalStorageWriterTest {
     assertFalse(file.exists());
 
     FileUtils.deleteDirectory(new File(temDirLocation));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-d336844ac6915d74cfdbd10e27afbf4b")
+  @SneakyThrows
+  void closeShouldCloseWriterWhenFileExists(@TempDir Path tempDir) {
+    // Given
+    String fileName = "test-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    LocalStorageWriter localStorageWriter = spy(new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE));
+    localStorageWriter.write("test data");
+    BufferedWriter bufferedWriterSpy = spy((BufferedWriter) ReflectionTestUtils.getField(localStorageWriter, "writer"));
+    ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterSpy);
+    // When
+    localStorageWriter.close();
+    // Then
+    verify(bufferedWriterSpy).close();
+    assertTrue(Files.exists(filePath));
+    assertTrue(Files.size(filePath) > 0);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-1467af16f84d16c4f47ba1c056664101")
+  @SneakyThrows
+  void closeShouldDoNothingWhenFileDoesNotExist(@TempDir Path tempDir) {
+    // Given
+    String fileName = "test-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    LocalStorageWriter localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    BufferedWriter bufferedWriterSpy = spy((BufferedWriter) ReflectionTestUtils.getField(localStorageWriter, "writer"));
+    ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterSpy);
+    Files.delete(filePath);
+    // When
+    localStorageWriter.close();
+    // Then
+    verify(bufferedWriterSpy, never()).close();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-12593f7e358bbbcb6cb0732ef84f02cd")
+  @SneakyThrows
+  void closeShouldThrowLocalStorageWriterExceptionWhenWriterFailsToClose(@TempDir Path tempDir) {
+    // Given
+    String fileName = "test-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    LocalStorageWriter localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    BufferedWriter bufferedWriterSpy = spy((BufferedWriter) ReflectionTestUtils.getField(localStorageWriter, "writer"));
+    doThrow(new IOException("Simulated I/O error")).when(bufferedWriterSpy).close();
+    ReflectionTestUtils.setField(localStorageWriter, "writer", bufferedWriterSpy);
+    // When
+    var exception =
+        assertThrows(
+            LocalStorageWriterException.class,
+            localStorageWriter::close);
+    // Then
+    assertEquals("Error while close(): Simulated I/O error", exception.getMessage());
+    verify(bufferedWriterSpy).close();
   }
 }
