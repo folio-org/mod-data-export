@@ -74,6 +74,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.rule.Rule;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
@@ -555,5 +558,29 @@ class InstancesExportStrategyTest {
 
     var expectedMessage = MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID.formatted(externalId);
     assertEquals(expectedMessage, throwable.getMessage());
+  }
+
+    @Test
+  void testMapToMarcShouldReturnMarcStringOnSuccessfulProcessing() {
+    // TestMate-841146211b9ca7eeca81dc869415b8c6
+    // Given
+    var jsonObject = new JSONObject();
+    var instance = new JSONObject(Map.of("id", "instance-id-123"));
+    jsonObject.put("instance", instance);
+    List<Rule> initialRules = Collections.singletonList(new Rule());
+    List<Rule> preHandledRules = Collections.singletonList(new Rule());
+    var referenceDataWrapper = mock(ReferenceDataWrapper.class);
+    var expectedMarcString = "MARC_STRING_RESULT";
+    when(ruleHandler.preHandle(jsonObject, initialRules)).thenReturn(preHandledRules);
+    when(ruleProcessor.process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), eq(preHandledRules), any()))
+      .thenReturn(expectedMarcString);
+    // When
+    String actualMarcString = instancesExportStrategy.mapToMarc(jsonObject, initialRules, referenceDataWrapper);
+    // Then
+    assertEquals(expectedMarcString, actualMarcString);
+    verify(ruleHandler).preHandle(jsonObject, initialRules);
+    ArgumentCaptor<List<Rule>> rulesCaptor = ArgumentCaptor.forClass(List.class);
+    verify(ruleProcessor).process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), rulesCaptor.capture(), any());
+    assertEquals(preHandledRules, rulesCaptor.getValue());
   }
 }
