@@ -118,8 +118,7 @@ class FilesUploadServiceTest {
     var res = new PathResource(UPLOADED_FILE_PATH);
     var exception =
         assertThrows(
-            UploadFileException.class,
-            () -> fileUploadService.uploadFile(fileDefinitionId, res));
+            UploadFileException.class, () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(
         "File already uploaded for file definition with id : " + fileDefinitionId,
         exception.getMessage());
