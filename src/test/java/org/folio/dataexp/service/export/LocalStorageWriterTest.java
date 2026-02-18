@@ -129,4 +129,20 @@ class LocalStorageWriterTest {
     assertEquals("Error while close(): Simulated I/O error", exception.getMessage());
     verify(bufferedWriterSpy).close();
   }
+
+  @Test
+  @TestMate(name = "TestMate-90b1249644d2bedf44d9e529bb3fa43d")
+  @SneakyThrows
+  void testConstructorShouldCreateFileAndWriterSuccessfully(@TempDir Path tempDir) {
+    // Given
+    String fileName = "test-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    String fileLocation = filePath.toString();
+    // When
+    var localStorageWriter = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
+    // Then
+    assertTrue(Files.exists(filePath), "File should be created by the constructor.");
+    // Closing the writer to release resources, which is a good practice.
+    localStorageWriter.close();
+  }
 }
