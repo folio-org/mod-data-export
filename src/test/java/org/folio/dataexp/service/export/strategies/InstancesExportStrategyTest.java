@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -58,6 +60,8 @@ import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
 import org.folio.processor.RuleProcessor;
+import org.folio.processor.referencedata.ReferenceDataWrapper;
+import org.folio.processor.rule.Rule;
 import org.folio.reader.EntityReader;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -74,9 +78,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.processor.referencedata.ReferenceDataWrapper;
-import org.folio.processor.rule.Rule;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
@@ -560,9 +561,9 @@ class InstancesExportStrategyTest {
     assertEquals(expectedMessage, throwable.getMessage());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-841146211b9ca7eeca81dc869415b8c6")
   void testMapToMarcShouldReturnMarcStringOnSuccessfulProcessing() {
-    // TestMate-841146211b9ca7eeca81dc869415b8c6
     // Given
     var jsonObject = new JSONObject();
     var instance = new JSONObject(Map.of("id", "instance-id-123"));
@@ -572,15 +573,27 @@ class InstancesExportStrategyTest {
     var referenceDataWrapper = mock(ReferenceDataWrapper.class);
     var expectedMarcString = "MARC_STRING_RESULT";
     when(ruleHandler.preHandle(jsonObject, initialRules)).thenReturn(preHandledRules);
-    when(ruleProcessor.process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), eq(preHandledRules), any()))
-      .thenReturn(expectedMarcString);
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            eq(preHandledRules),
+            any()))
+        .thenReturn(expectedMarcString);
     // When
-    String actualMarcString = instancesExportStrategy.mapToMarc(jsonObject, initialRules, referenceDataWrapper);
+    String actualMarcString =
+        instancesExportStrategy.mapToMarc(jsonObject, initialRules, referenceDataWrapper);
     // Then
     assertEquals(expectedMarcString, actualMarcString);
     verify(ruleHandler).preHandle(jsonObject, initialRules);
     ArgumentCaptor<List<Rule>> rulesCaptor = ArgumentCaptor.forClass(List.class);
-    verify(ruleProcessor).process(any(EntityReader.class), any(RecordWriter.class), any(ReferenceDataWrapper.class), rulesCaptor.capture(), any());
+    verify(ruleProcessor)
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            rulesCaptor.capture(),
+            any());
     assertEquals(preHandledRules, rulesCaptor.getValue());
   }
 }
