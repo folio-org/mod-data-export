@@ -2,19 +2,18 @@ package org.folio.dataexp.domain.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.folio.dataexp.TestMate;
-import org.folio.dataexp.domain.dto.MappingProfile;
-import org.junit.jupiter.api.Test;
-import java.util.UUID;
-import java.time.ZoneOffset;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import org.folio.dataexp.TestMate;
+import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.MappingProfile.OutputFormatEnum;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
+import org.junit.jupiter.api.Test;
 
 class MappingProfileEntityTest {
 
@@ -31,10 +30,9 @@ class MappingProfileEntityTest {
     assertThat(resultEntity.getMappingProfile()).isSameAs(mappingProfile);
   }
 
-    @Test
-  @TestMate(name = "TestMate-e396263b4f6277c0b62153573c091937")
+  @Test
+  @TestMate(name = "TestMate-bf674c49cebce4dbdcea73a8790e807e")
   void testFromMappingProfileShouldUseExistingIdWhenIdIsNotNull() {
-    // TestMate-bf674c49cebce4dbdcea73a8790e807e
     // Given
     var existingId = UUID.fromString("c85d533c-a043-465c-a532-d62101086611");
     var mappingProfile = new MappingProfile();
@@ -47,10 +45,9 @@ class MappingProfileEntityTest {
     assertThat(resultEntity.getMappingProfile()).isSameAs(mappingProfile);
   }
 
-    @Test
-  @TestMate(name = "TestMate-65c36a61-739c-4a37-9293-27c9d9283733")
+  @Test
+  @TestMate(name = "TestMate-26e2e4fecdcf755a45ddee2a668ff842")
   void testFromMappingProfileShouldMapAllFieldsFromFullyPopulatedDto() {
-    // TestMate-26e2e4fecdcf755a45ddee2a668ff842
     // Given
     var createdByUserId = "user-created-id";
     var updatedByUserId = "user-updated-id";
@@ -98,10 +95,9 @@ class MappingProfileEntityTest {
     assertThat(resultEntity.getLockedAt()).isEqualTo(LocalDateTime.of(2023, 10, 23, 12, 0, 0));
   }
 
-    @Test
-  @TestMate(name = "TestMate-f4e9a6e1-92b0-4a87-8e6f-706d15f7f897")
+  @Test
+  @TestMate(name = "TestMate-56adb873962fd79ced725f36e5f56745")
   void testFromMappingProfileShouldHandleNullAndEmptyNestedObjectsGracefully() {
-    // TestMate-56adb873962fd79ced725f36e5f56745
     // Given
     var profileId = UUID.fromString("1f2a3b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c");
     var mappingProfile = new MappingProfile();
@@ -131,10 +127,9 @@ class MappingProfileEntityTest {
     assertThat(resultEntity.getLockedAt()).isNull();
   }
 
-    @Test
-  @TestMate(name = "TestMate-f1c0a1b2-c3d4-e5f6-a7b8-c9d0e1f2a3b4")
+  @Test
+  @TestMate(name = "TestMate-d3138899bc89c25a434e245ef25e8a9a")
   void testFromMappingProfileShouldHandlePartiallyPopulatedNestedObjects() {
-    // TestMate-d3138899bc89c25a434e245ef25e8a9a
     // Given
     var createdDate = Instant.parse("2023-01-01T10:00:00Z");
     var metadata = new Metadata();
