@@ -130,10 +130,10 @@ class LocalStorageWriterTest {
     verify(bufferedWriterSpy).close();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-90b1249644d2bedf44d9e529bb3fa43d")
   @SneakyThrows
   void testConstructorShouldCreateFileAndWriterSuccessfully(@TempDir Path tempDir) {
-    // TestMate-90b1249644d2bedf44d9e529bb3fa43d
     // Given
     String fileName = "test-file.mrc";
     Path filePath = tempDir.resolve(fileName);
