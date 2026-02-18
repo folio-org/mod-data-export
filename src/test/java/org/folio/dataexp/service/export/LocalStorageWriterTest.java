@@ -145,4 +145,65 @@ class LocalStorageWriterTest {
     // Closing the writer to release resources, which is a good practice.
     localStorageWriter.close();
   }
+
+    @Test
+  void testConstructorShouldThrowExceptionWhenPathIsInvalid() {
+    // TestMate-3dad27a304651703987cda0bf7d7e495
+    // Given
+    String invalidPath = "nonexistent_dir/test-file.mrc";
+    // When
+    var exception =
+        assertThrows(
+            LocalStorageWriterException.class,
+            () -> new LocalStorageWriter(invalidPath, OUTPUT_BUFFER_SIZE));
+    // Then
+    assertTrue(
+        exception.getMessage().startsWith("Files buffer cannot be created due to error: "),
+        "Exception message should indicate a file creation error.");
+  }
+
+    @Test
+  @SneakyThrows
+  void testConstructorShouldThrowExceptionWhenFileAlreadyExists(@TempDir Path tempDir) {
+    // TestMate-5a7cf4941c45955eddb5458d7cfadd55
+    // Given
+    String fileName = "existing-file.mrc";
+    Path filePath = tempDir.resolve(fileName);
+    Files.createFile(filePath);
+    String fileLocation = filePath.toString();
+    // When
+    var exception =
+        assertThrows(
+            LocalStorageWriterException.class,
+            () -> new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE));
+    // Then
+    assertTrue(
+        exception.getMessage().startsWith("Files buffer cannot be created due to error: "),
+        "Exception message should indicate a file creation error.");
+  }
+
+    @Test
+  @SneakyThrows
+  void testConstructorShouldThrowExceptionForReadOnlyDirectory(@TempDir Path tempDir) {
+    // TestMate-4f1f712c1d0b083a14e0d33077276a85
+    // Given
+    String fileName = "test-file.mrc";
+    String fileLocation = tempDir.resolve(fileName).toString();
+    File tempDirFile = tempDir.toFile();
+    tempDirFile.setWritable(false);
+    try {
+      // When
+      var exception =
+          assertThrows(
+              LocalStorageWriterException.class,
+              () -> new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE));
+      // Then
+      assertTrue(
+          exception.getMessage().startsWith("Files buffer cannot be created due to error: "),
+          "Exception message should indicate a file creation error due to permissions.");
+    } finally {
+      // Cleanup
+      tempDirFile.setWritable(true);
+    }
+  }
 }
