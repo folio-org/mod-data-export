@@ -146,9 +146,9 @@ class LocalStorageWriterTest {
     localStorageWriter.close();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-3dad27a304651703987cda0bf7d7e495")
   void testConstructorShouldThrowExceptionWhenPathIsInvalid() {
-    // TestMate-3dad27a304651703987cda0bf7d7e495
     // Given
     String invalidPath = "nonexistent_dir/test-file.mrc";
     // When
@@ -162,10 +162,10 @@ class LocalStorageWriterTest {
         "Exception message should indicate a file creation error.");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-5a7cf4941c45955eddb5458d7cfadd55")
   @SneakyThrows
   void testConstructorShouldThrowExceptionWhenFileAlreadyExists(@TempDir Path tempDir) {
-    // TestMate-5a7cf4941c45955eddb5458d7cfadd55
     // Given
     String fileName = "existing-file.mrc";
     Path filePath = tempDir.resolve(fileName);
@@ -182,10 +182,10 @@ class LocalStorageWriterTest {
         "Exception message should indicate a file creation error.");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-4f1f712c1d0b083a14e0d33077276a85")
   @SneakyThrows
   void testConstructorShouldThrowExceptionForReadOnlyDirectory(@TempDir Path tempDir) {
-    // TestMate-4f1f712c1d0b083a14e0d33077276a85
     // Given
     String fileName = "test-file.mrc";
     String fileLocation = tempDir.resolve(fileName).toString();
