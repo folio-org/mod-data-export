@@ -1,5 +1,6 @@
 package org.folio.dataexp.service;
 
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,9 +23,9 @@ class InsertExportIdServiceTest {
   @InjectMocks
   private InsertExportIdService insertExportIdService;
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-c8bc8d6138c4e7295ddc24f09f4c7d78")
   void saveBatchShouldNotCallInsertForEmptyList() {
-    // TestMate-c8bc8d6138c4e7295ddc24f09f4c7d78
     // Given
     List<ExportIdEntity> emptyList = Collections.emptyList();
     // When
