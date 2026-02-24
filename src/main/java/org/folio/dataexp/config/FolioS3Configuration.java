@@ -22,6 +22,9 @@ public class FolioS3Configuration {
   @Value("${application.remote-files-storage.bucket}")
   private String bucket;
 
+  @Value("${application.remote-files-storage.subPath}")
+  private String subPath;
+
   @Value("${application.remote-files-storage.region}")
   private String region;
 
@@ -41,6 +44,7 @@ public class FolioS3Configuration {
             .secretKey(secretKey)
             .accessKey(accessKey)
             .bucket(bucket)
+            .subPath(subPath)
             .awsSdk(awsSdk)
             .region(region)
             .build());

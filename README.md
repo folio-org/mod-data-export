@@ -163,9 +163,9 @@ This value should be `true` if AWS S3 is used.
 | S3_URL                                         | http://127.0.0.1:9000/     | S3 url                                     |
 | S3_REGION                                      | -                          | S3 region                                  |
 | S3_BUCKET                                      | -                          | S3 bucket                                  |
+| S3_SUB_PATH                                    | -                          | S3 object key prefix (subfolder)           |
 | S3_ACCESS_KEY_ID                               | -                          | S3 access key                              |
 | S3_SECRET_ACCESS_KEY                           | -                          | S3 secret key                              |
 | S3_IS_AWS                                      | false                      | Specify if AWS S3 is used as files storage |
 | EXPORT_TMP_STORAGE                             | -                          | Volume to store exports files              |
 | PLATFORM                                       | okapi                      | Specifies if okapi or eureka platform      |
-
