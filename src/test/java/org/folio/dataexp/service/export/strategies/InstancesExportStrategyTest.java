@@ -685,9 +685,9 @@ class InstancesExportStrategyTest {
             isA(MarcException.class));
     verify(errorLogService)
         .saveGeneralErrorWithMessageValues(
-            eq(ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode()),
-            eq(List.of(instanceId.toString())),
-            eq(jobExecutionId));
+            ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(),
+            List.of(instanceId.toString()),
+            jobExecutionId);
   }
 
   @Test
