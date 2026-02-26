@@ -1,6 +1,8 @@
 package org.folio.dataexp.service.file.upload;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -34,10 +37,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import java.io.ByteArrayInputStream;
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class FilesUploadServiceTest {
@@ -53,7 +52,7 @@ class FilesUploadServiceTest {
 
   @Mock private Resource resource;
 
-    @Captor private ArgumentCaptor<FileDefinitionEntity> fileDefinitionEntityCaptor;
+  @Captor private ArgumentCaptor<FileDefinitionEntity> fileDefinitionEntityCaptor;
 
   @Test
   @SneakyThrows
@@ -221,10 +220,10 @@ class FilesUploadServiceTest {
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-f0010d3396d94f6a965c56efc1a1bb21")
   @SneakyThrows
   void uploadFile_whenFileDefinitionIsNew_shouldSucceed() {
-    // TestMate-f0010d3396d94f6a965c56efc1a1bb21
     // Given
     var fileDefinitionId = UUID.fromString("0a34dfe4-9383-45b6-8a8f-365ec39b63c3");
     var fileName = "test-file.csv";
@@ -250,13 +249,13 @@ class FilesUploadServiceTest {
     // When
     var resultFileDefinition = fileUploadService.uploadFile(fileDefinitionId, resource);
     // Then
+    assertEquals(FileDefinition.StatusEnum.COMPLETED, resultFileDefinition.getStatus());
+    assertNotNull(resultFileDefinition.getSourcePath());
+    assertFalse(resultFileDefinition.getSourcePath().isEmpty());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
     verify(s3Client).write(any(String.class), any(InputStream.class));
     verify(fileDefinitionEntityRepository, times(2)).save(any(FileDefinitionEntity.class));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, statuses.get(0));
     assertEquals(FileDefinition.StatusEnum.COMPLETED, statuses.get(1));
-    assertEquals(FileDefinition.StatusEnum.COMPLETED, resultFileDefinition.getStatus());
-    assertNotNull(resultFileDefinition.getSourcePath());
-    assertFalse(resultFileDefinition.getSourcePath().isEmpty());
   }
 }
