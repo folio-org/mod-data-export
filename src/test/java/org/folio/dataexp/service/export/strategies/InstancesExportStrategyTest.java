@@ -2,7 +2,9 @@ package org.folio.dataexp.service.export.strategies;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.DEFAULT_INSTANCE_MAPPING_PROFILE_ID;
+import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
+import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_KEY;
 import static org.folio.dataexp.service.export.strategies.InstancesExportStrategy.INSTANCE_MARC_TYPE;
 import static org.folio.dataexp.util.Constants.MSG_TEMPLATE_COULD_NOT_FIND_INSTANCE_BY_ID;
@@ -21,6 +23,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +62,7 @@ import org.folio.dataexp.service.ConsortiaService;
 import org.folio.dataexp.service.export.strategies.handlers.RuleHandler;
 import org.folio.dataexp.service.logs.ErrorLogService;
 import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.util.ErrorCode;
 import org.folio.processor.RuleProcessor;
 import org.folio.processor.referencedata.ReferenceDataWrapper;
 import org.folio.processor.rule.Rule;
@@ -115,6 +119,14 @@ class InstancesExportStrategyTest {
     instancesExportStrategy.folioExecutionContext = folioExecutionContext;
     instancesExportStrategy.setInstanceEntityRepository(instanceEntityRepository);
     instancesExportStrategy.setMappingProfileEntityRepository(mappingProfileEntityRepository);
+  }
+
+  private JSONObject createInstanceJsonObject(UUID instanceId) {
+    var instanceJson = new JSONObject();
+    instanceJson.put("id", instanceId.toString());
+    var wrapper = new JSONObject();
+    wrapper.put(INSTANCE_KEY, instanceJson);
+    return wrapper;
   }
 
   @Test
@@ -595,5 +607,255 @@ class InstancesExportStrategyTest {
             rulesCaptor.capture(),
             any());
     assertEquals(preHandledRules, rulesCaptor.getValue());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-68fcd6830c237450604d94e78033d0b6")
+  void getGeneratedMarcShouldHandleTransformationRuleException()
+      throws TransformationRuleException {
+    // Given
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(new ArrayList<>());
+    var instancesWithHoldingsAndItems = List.of(new JSONObject());
+    var exceptionMessage = "Rule loading failed";
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenThrow(new TransformationRuleException(exceptionMessage));
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    assertThat(actualResult.getFailedIds()).isEmpty();
+    verify(errorLogService).saveGeneralError(exceptionMessage, jobExecutionId);
+    verify(ruleProcessor, never())
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-4b143260823dab546e8d870bb0e7227c")
+  void getGeneratedMarcShouldHandleDeletedInstanceWithMarcException()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.randomUUID();
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    instanceJson.put(DELETED_KEY, true);
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.ERROR_DELETED_TOO_LONG_INSTANCE.getCode(),
+            List.of(instanceId.toString()),
+            jobExecutionId);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-bf46c0e0482241ec3b5bd12514627f3c")
+  void getGeneratedMarcShouldProcessMultipleRecordsWithOneFailure()
+      throws TransformationRuleException {
+    // Given
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var instanceId1 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    var instanceId2 = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    var instanceId3 = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    var marcRecord1 = "MARC_RECORD_1";
+    var marcRecord3 = "MARC_RECORD_3";
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var mappingProfile = new MappingProfile();
+    var rules = Collections.singletonList(new Rule());
+    var referenceData = mock(ReferenceDataWrapper.class);
+    var jsonObject1 = createInstanceJsonObject(instanceId1);
+    var jsonObject2 = createInstanceJsonObject(instanceId2);
+    var jsonObject3 = createInstanceJsonObject(instanceId3);
+    var instancesWithHoldingsAndItems = List.of(jsonObject1, jsonObject2, jsonObject3);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString())).thenReturn(referenceData);
+    when(ruleFactory.getRules(any(MappingProfile.class))).thenReturn(rules);
+    // Simulate mapToMarc behavior by mocking its dependencies
+    when(ruleProcessor.process(
+            any(EntityReader.class), any(RecordWriter.class), eq(referenceData), eq(rules), any()))
+        .thenReturn(marcRecord1) // First call succeeds
+        .thenThrow(new MarcException("Simulated conversion failure")) // Second call fails
+        .thenReturn(marcRecord3); // Third call succeeds
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).hasSize(2).containsExactly(marcRecord1, marcRecord3);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId2);
+    var instanceJsonCaptor = ArgumentCaptor.forClass(JSONObject.class);
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            instanceJsonCaptor.capture(),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    assertThat(instanceJsonCaptor.getValue().getAsString("id")).isEqualTo(instanceId2.toString());
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-ddc0ab07e7d362837288a23dfeee311a")
+  void getGeneratedMarcShouldReturnEmptyResultForEmptyInputList()
+      throws TransformationRuleException {
+    // Given
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    var mappingProfile = new MappingProfile();
+    var instancesWithHoldingsAndItems = new ArrayList<JSONObject>();
+    var rules = Collections.singletonList(new Rule());
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class))).thenReturn(rules);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    assertThat(actualResult.getFailedIds()).isEmpty();
+    verify(ruleProcessor, never())
+        .process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any());
+    verify(errorLogService, never()).saveGeneralError(anyString(), any(UUID.class));
+    verify(errorLogService, never())
+        .saveWithAffectedRecord(
+            any(JSONObject.class), anyString(), any(UUID.class), any(MarcException.class));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-2b7d4d323ac1e7eee2e5f07b778a2533")
+  void getGeneratedMarcShouldNotLogDeletedErrorWhenFlagIsFalse()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.randomUUID();
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    instanceJson.put(DELETED_KEY, false);
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.randomUUID();
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-e468d6f373889f0870d4cee0bdefaf84")
+  void getGeneratedMarcShouldNotLogDeletedErrorWhenDeletedKeyIsMissing()
+      throws TransformationRuleException {
+    // Given
+    var instanceId = UUID.fromString("11111111-2222-3333-4444-555555555555");
+    var instanceJson = new JSONObject();
+    instanceJson.put(ID_KEY, instanceId.toString());
+    var instanceWithHoldingsAndItems = new JSONObject();
+    instanceWithHoldingsAndItems.put(INSTANCE_KEY, instanceJson);
+    var instancesWithHoldingsAndItems = List.of(instanceWithHoldingsAndItems);
+    when(folioExecutionContext.getTenantId()).thenReturn("test_tenant");
+    when(referenceDataProvider.getReference(anyString()))
+        .thenReturn(mock(ReferenceDataWrapper.class));
+    when(ruleFactory.getRules(any(MappingProfile.class)))
+        .thenReturn(Collections.singletonList(new Rule()));
+    when(ruleProcessor.process(
+            any(EntityReader.class),
+            any(RecordWriter.class),
+            any(ReferenceDataWrapper.class),
+            anyList(),
+            any()))
+        .thenThrow(new MarcException("Simulated MARC conversion failure"));
+    var mappingProfile = new MappingProfile();
+    var jobExecutionId = UUID.fromString("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+    var generatedMarcResult = new GeneratedMarcResult(jobExecutionId);
+    // When
+    var actualResult =
+        instancesExportStrategy.getGeneratedMarc(
+            generatedMarcResult, instancesWithHoldingsAndItems, mappingProfile, jobExecutionId);
+    // Then
+    assertThat(actualResult).isSameAs(generatedMarcResult);
+    assertThat(actualResult.getFailedIds()).hasSize(1).contains(instanceId);
+    assertThat(actualResult.getMarcRecords()).isEmpty();
+    verify(errorLogService)
+        .saveWithAffectedRecord(
+            eq(instanceJson),
+            eq(ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC.getCode()),
+            eq(jobExecutionId),
+            isA(MarcException.class));
+    verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
   }
 }
