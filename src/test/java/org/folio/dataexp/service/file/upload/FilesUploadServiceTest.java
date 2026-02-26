@@ -1,6 +1,8 @@
 package org.folio.dataexp.service.file.upload;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -48,6 +51,8 @@ class FilesUploadServiceTest {
   @Captor private ArgumentCaptor<InputStream> inputStreamArgumentCaptor;
 
   @Mock private Resource resource;
+
+  @Captor private ArgumentCaptor<FileDefinitionEntity> fileDefinitionEntityCaptor;
 
   @Test
   @SneakyThrows
@@ -213,5 +218,44 @@ class FilesUploadServiceTest {
     // s3Client.write is never called because getInputStream fails first
     verify(s3Client, never()).write(any(String.class), any(InputStream.class));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-f0010d3396d94f6a965c56efc1a1bb21")
+  @SneakyThrows
+  void uploadFile_whenFileDefinitionIsNew_shouldSucceed() {
+    // Given
+    var fileDefinitionId = UUID.fromString("0a34dfe4-9383-45b6-8a8f-365ec39b63c3");
+    var fileName = "test-file.csv";
+    var fileDefinition = new FileDefinition();
+    fileDefinition.setId(fileDefinitionId);
+    fileDefinition.setFileName(fileName);
+    fileDefinition.setStatus(FileDefinition.StatusEnum.NEW);
+    fileDefinition.setMetadata(new Metadata());
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().fileDefinition(fileDefinition).build();
+    when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
+        .thenReturn(fileDefinitionEntity);
+    when(resource.getInputStream()).thenReturn(new ByteArrayInputStream("test data".getBytes()));
+    final var statuses = new java.util.ArrayList<FileDefinition.StatusEnum>();
+    doAnswer(
+            invocation -> {
+              FileDefinitionEntity entity = invocation.getArgument(0);
+              statuses.add(entity.getFileDefinition().getStatus());
+              return null;
+            })
+        .when(fileDefinitionEntityRepository)
+        .save(any(FileDefinitionEntity.class));
+    // When
+    var resultFileDefinition = fileUploadService.uploadFile(fileDefinitionId, resource);
+    // Then
+    assertEquals(FileDefinition.StatusEnum.COMPLETED, resultFileDefinition.getStatus());
+    assertNotNull(resultFileDefinition.getSourcePath());
+    assertFalse(resultFileDefinition.getSourcePath().isEmpty());
+    verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
+    verify(s3Client).write(any(String.class), any(InputStream.class));
+    verify(fileDefinitionEntityRepository, times(2)).save(any(FileDefinitionEntity.class));
+    assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, statuses.get(0));
+    assertEquals(FileDefinition.StatusEnum.COMPLETED, statuses.get(1));
   }
 }
