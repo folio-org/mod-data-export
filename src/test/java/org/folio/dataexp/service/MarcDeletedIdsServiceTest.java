@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.util.Constants.DATE_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,6 +68,7 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
+    when(consortiaService.getCentralTenantId(null)).thenReturn("central");
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     var res = marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
@@ -86,6 +88,7 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
+    when(consortiaService.getCentralTenantId(null)).thenReturn("central");
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     var date = new SimpleDateFormat(DATE_PATTERN);
@@ -111,6 +114,7 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
+    when(consortiaService.getCentralTenantId(null)).thenReturn("central");
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     var date = new SimpleDateFormat(DATE_PATTERN);
@@ -135,6 +139,7 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
+    when(consortiaService.getCentralTenantId(null)).thenReturn("central");
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     var date = new SimpleDateFormat(DATE_PATTERN);
@@ -158,6 +163,7 @@ class MarcDeletedIdsServiceTest {
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(isA(UUID.class), isA(Resource.class)))
         .thenReturn(fileDefinition);
+    when(consortiaService.getCentralTenantId(null)).thenReturn("central");
     when(consortiaService.isCurrentTenantCentralTenant(null)).thenReturn(true);
 
     marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
@@ -204,5 +210,27 @@ class MarcDeletedIdsServiceTest {
 
     verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
     assertThat(id1).isEqualTo(resourceArgumentCaptor.getValue().getContentAsString(UTF_8));
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldNotCheckCentralTenantWhenNonEcs() {
+    var id1 = UUID.randomUUID().toString();
+    var id2 = UUID.randomUUID().toString();
+    when(sourceStorageClient.getMarcRecordsIdentifiers(isA(MarcRecordIdentifiersPayload.class)))
+        .thenReturn(
+            new MarcRecordsIdentifiersResponse().withRecords(List.of(id1, id2)).withTotalCount(2));
+    when(folioExecutionContext.getTenantId()).thenReturn("member");
+    when(consortiaService.getCentralTenantId("member")).thenReturn("");
+    var fileDefinition = new FileDefinition().id(UUID.randomUUID());
+    when(fileDefinitionsService.postFileDefinition(isA(FileDefinition.class)))
+        .thenReturn(fileDefinition);
+
+    marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(null, null);
+
+    verify(consortiaService, never()).isCurrentTenantCentralTenant("member");
+    verify(fileDefinitionsService).uploadFile(isA(UUID.class), resourceArgumentCaptor.capture());
+    assertThat(resourceArgumentCaptor.getValue().getContentAsString(UTF_8))
+        .isEqualTo(String.join(System.lineSeparator(), List.of(id1, id2)));
   }
 }
