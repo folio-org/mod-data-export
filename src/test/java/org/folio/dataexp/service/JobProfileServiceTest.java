@@ -41,6 +41,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.folio.dataexp.domain.dto.UserInfo;
 
 @ExtendWith(MockitoExtension.class)
 class JobProfileServiceTest {
@@ -883,6 +884,56 @@ class JobProfileServiceTest {
     assertThat(savedProfile.getLocked()).isFalse();
     assertThat(savedProfile.getLockedBy()).isNull();
     assertThat(savedProfile.getLockedAt()).isNull();
+  }
+
+    @Test
+  void postJobProfileShouldLockProfileWhenLockedIsTrueAndPermissionExists() {
+    // TestMate-029c7d5c8c6c036fad395b01ed77f442
+    // Given
+    jobProfile.setLocked(TRUE);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(
+            invocation -> {
+              JobProfileEntity entity = invocation.getArgument(0);
+              // Simulate DB saving and returning the saved entity
+              return entity;
+            });
+    // When
+    JobProfile savedProfile = jobProfileService.postJobProfile(jobProfile);
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile capturedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+    assertThat(savedProfile).isSameAs(capturedProfile);
+    assertThat(savedProfile.getLocked()).isTrue();
+    assertThat(savedProfile.getLockedBy()).isEqualTo(userId);
+    assertThat(savedProfile.getLockedAt()).isNotNull();
+    Metadata metadata = savedProfile.getMetadata();
+    assertThat(metadata.getCreatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getUpdatedByUserId()).isEqualTo(userId.toString());
+    UserInfo userInfo = savedProfile.getUserInfo();
+    assertThat(userInfo.getFirstName()).isEqualTo("Test");
+    assertThat(userInfo.getLastName()).isEqualTo("User");
+    assertThat(userInfo.getUserName()).isEqualTo("testuser");
+  }
+
+    @Test
+  void postJobProfileShouldThrowExceptionWhenLockingAndPermissionIsMissing() {
+    // TestMate-cb876ac745b745330a34d6ebf401dcba
+    // Given
+    jobProfile.setLocked(TRUE);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(false);
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.postJobProfile(jobProfile))
+        .isInstanceOf(LockJobProfilePermissionException.class)
+        .hasMessage("You do not have permission to lock this profile.");
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository, never()).save(any(JobProfileEntity.class));
   }
 
   // Helper methods
