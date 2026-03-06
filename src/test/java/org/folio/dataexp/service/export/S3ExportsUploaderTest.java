@@ -32,6 +32,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.io.ByteArrayInputStream;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import java.io.IOException;
+import org.folio.dataexp.util.Constants;
+import static org.folio.dataexp.util.Constants.MARC_FILE_SUFFIX;
 
 @ExtendWith(MockitoExtension.class)
 class S3ExportsUploaderTest {
@@ -364,5 +370,28 @@ class S3ExportsUploaderTest {
     // The method under test does not clean up the directory on this specific failure path,
     // so we manually clean it up to not interfere with other tests.
     FileUtils.deleteDirectory(fullPath.getParent().toFile());
+  }
+
+    @Test
+  @SneakyThrows
+  void uploadSingleRecordById_shouldPropagateIOException_whenS3ClientThrowsException() {
+    // TestMate-5a7df17447b9db32b8372f1e82b97c7b
+    // Given
+    var dirName = "failure-case";
+    var marcFileContentBytes = "some-marc-data".getBytes();
+    var s3FileName = "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX);
+    var expectedS3Path = S3FilePathUtils.getPathToStoredRecord(dirName, s3FileName);
+    var s3Exception = new RuntimeException("S3 write failed");
+    doThrow(s3Exception)
+        .when(s3Client)
+        .write(eq(expectedS3Path), any(InputStream.class));
+    // When & Then
+    var thrownException =
+        assertThrows(
+            RuntimeException.class,
+            () -> s3ExportsUploader.uploadSingleRecordById(dirName, marcFileContentBytes));
+    assertEquals("S3 write failed", thrownException.getMessage());
+    verify(s3Client)
+        .write(eq(expectedS3Path), any(InputStream.class));
   }
 }
