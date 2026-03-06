@@ -41,6 +41,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
+import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -319,5 +322,80 @@ class ErrorLogServiceTest {
     assertEquals(instanceHrid, affectedRecord.getHrid());
     assertEquals(instanceTitle, affectedRecord.getTitle());
     verify(configurationService, never()).getValue(anyString());
+  }
+
+    @Test
+  @SneakyThrows
+  void saveGeneralErrorWithMessageValuesTest() {
+    // TestMate-8df560da94786686fc4858ef57a9e5ec
+    // Given
+    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
+    var errorMessageCode = ErrorCode.SOME_UUIDS_NOT_FOUND.getCode();
+    var errorMessageValues = List.of("uuid1", "uuid2");
+    var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
+    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
+    when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
+    // When
+    errorLogService.saveGeneralErrorWithMessageValues(errorMessageCode, errorMessageValues, jobExecutionId);
+    // Then
+    verify(errorLogEntityCqlRepository).insertIfNotExists(
+        isA(UUID.class),
+        anyString(),
+        isA(Date.class),
+        eq(userId.toString()),
+        eq(jobExecutionId),
+        eq(jobProfileId));
+    var capturedErrorLog = errorLogCaptor.getValue();
+    assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
+    assertEquals(errorMessageCode, capturedErrorLog.getErrorMessageCode());
+    assertEquals(errorMessageValues, capturedErrorLog.getErrorMessageValues());
+    assertEquals(ErrorLog.LogLevelEnum.ERROR, capturedErrorLog.getLogLevel());
+  }
+
+    @Test
+  @SneakyThrows
+  void populateUuidsNotFoundErrorLogShouldCorrectlyFormatSingleUuid() {
+    // TestMate-1da6299af83636050ba587663941e69d
+    // Given
+    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
+    var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
+    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
+    var notFoundUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+    var notFoundUuids = List.of(notFoundUuid);
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
+            jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
+        .thenReturn(new ArrayList<>());
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(jobExecutionService.getById(jobExecutionId))
+        .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
+    when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    var errorLogCaptor = ArgumentCaptor.forClass(String.class);
+    when(objectMapper.writeValueAsString(any(ErrorLog.class))).thenAnswer(invocation -> {
+      var realObjectMapper = new ObjectMapper();
+      return realObjectMapper.writeValueAsString(invocation.getArgument(0));
+    });
+    // When
+    errorLogService.populateUuidsNotFoundErrorLog(jobExecutionId, notFoundUuids);
+    // Then
+    verify(errorLogEntityCqlRepository)
+        .getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            errorLogCaptor.capture(),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(jobProfileId));
+    var realObjectMapper = new ObjectMapper();
+    var capturedErrorLog = realObjectMapper.readValue(errorLogCaptor.getValue(), ErrorLog.class);
+    assertEquals(SOME_UUIDS_NOT_FOUND.getCode(), capturedErrorLog.getErrorMessageCode());
+    assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
+    assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
+    assertEquals(notFoundUuid, capturedErrorLog.getErrorMessageValues().get(0));
   }
 }
