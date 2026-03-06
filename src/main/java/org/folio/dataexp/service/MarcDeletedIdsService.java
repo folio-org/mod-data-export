@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.domain.dto.FileDefinition;
@@ -74,9 +75,10 @@ public class MarcDeletedIdsService {
         new ArrayList<>(sourceStorageClient.getMarcRecordsIdentifiers(payload).getRecords());
     log.info("Found deleted MARC IDs: {}", marcIds.size());
 
-    if (!consortiaService.isCurrentTenantCentralTenant(folioExecutionContext.getTenantId())) {
-      var centralTenantId =
-          consortiaService.getCentralTenantId(folioExecutionContext.getTenantId());
+    var currentTenantId = folioExecutionContext.getTenantId();
+    var centralTenantId = consortiaService.getCentralTenantId(currentTenantId);
+    if (StringUtils.isNotEmpty(centralTenantId)
+        && !consortiaService.isCurrentTenantCentralTenant(currentTenantId)) {
       try (var ignored =
           new FolioExecutionContextSetter(
               prepareContextForTenant(
