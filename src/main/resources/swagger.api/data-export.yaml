@@ -1062,6 +1062,8 @@ components:
       $ref: 'schemas/exportAuthorityDeletedRequest.json'
     exportAuthorityDeletedResponse:
       $ref: 'schemas/exportAuthorityDeletedResponse.json'
+    baseUrl:
+      $ref: 'schemas/baseUrl.json'
 
   parameters:
     trait_queryable:

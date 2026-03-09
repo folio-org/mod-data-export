@@ -2,6 +2,7 @@ package org.folio.dataexp.service.export.strategies.ld;
 
 import java.util.function.LongFunction;
 import lombok.RequiredArgsConstructor;
+import org.folio.dataexp.service.BaseUrlService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,11 +13,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ResourceUrlProvider implements LongFunction<String> {
 
+  private final BaseUrlService baseUrlService;
+
   private static final String URL_PATTERN = "%s/linked-data-editor/resources/%s";
 
   @Override
   public String apply(long id) {
-    // TODO: MDEXP-873 - replace placeholder with a mod-settings based implementation
-    return String.format(URL_PATTERN, "http://localhost", id);
+    var baseUrl = baseUrlService.getBaseUrl();
+    return String.format(URL_PATTERN, baseUrl, id);
   }
 }
