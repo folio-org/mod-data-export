@@ -24,11 +24,16 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
   private static final String FIRST_TENANT = "diku";
   private static final String SECOND_TENANT = "college";
 
-  @Autowired private BaseUrlService baseUrlService;
-  @Autowired private CacheManager cacheManager;
-  @Autowired private FolioModuleMetadata folioModuleMetadata;
-  @Autowired private FolioExecutionContext currentExecutionContext;
-  @MockitoBean private BaseUrlClient baseUrlClient;
+  @Autowired
+  private BaseUrlService baseUrlService;
+  @Autowired
+  private CacheManager cacheManager;
+  @Autowired
+  private FolioModuleMetadata folioModuleMetadata;
+  @Autowired
+  private FolioExecutionContext currentExecutionContext;
+  @MockitoBean
+  private BaseUrlClient baseUrlClient;
 
   @AfterEach
   void tearDown() {
@@ -43,14 +48,14 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
     stubBaseUrlClient(baseUrlClient);
 
     var firstTenantContext =
-        prepareContextForTenant(FIRST_TENANT, folioModuleMetadata, folioExecutionContext);
+      prepareContextForTenant(FIRST_TENANT, folioModuleMetadata, folioExecutionContext);
     try (var context = new FolioExecutionContextSetter(firstTenantContext)) {
       assertEquals("https://diku.example.org", baseUrlService.getBaseUrl());
       assertEquals("https://diku.example.org", baseUrlService.getBaseUrl());
     }
 
     var secondTenantContext =
-        prepareContextForTenant(SECOND_TENANT, folioModuleMetadata, folioExecutionContext);
+      prepareContextForTenant(SECOND_TENANT, folioModuleMetadata, folioExecutionContext);
     try (var context = new FolioExecutionContextSetter(secondTenantContext)) {
       assertEquals("https://college.example.org", baseUrlService.getBaseUrl());
       assertEquals("https://college.example.org", baseUrlService.getBaseUrl());
@@ -62,19 +67,14 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
     verify(baseUrlClient, times(2)).getBaseUrl();
 
     var baseUrlCache = (CaffeineCache) cacheManager.getCache("baseUrl");
-    assertEquals(2, baseUrlCache.getNativeCache().estimatedSize());
+    assertEquals(2, baseUrlCache.getNativeCache().asMap().size());
     assertEquals("https://diku.example.org", baseUrlCache.get("diku_base-url").get());
     assertEquals("https://college.example.org", baseUrlCache.get("college_base-url").get());
   }
 
   private void stubBaseUrlClient(BaseUrlClient baseUrlClient) {
-    var answer =
-        doAnswer(
-                ignored -> {
-                  var tenantId = currentExecutionContext.getTenantId();
-                  return new BaseUrl().baseUrl("https://" + tenantId + ".example.org");
-                })
-            .when(baseUrlClient);
-    answer.getBaseUrl();
+    doAnswer(x -> new BaseUrl().baseUrl("https://" + currentExecutionContext.getTenantId() + ".example.org"))
+      .when(baseUrlClient)
+      .getBaseUrl();
   }
 }
