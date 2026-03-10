@@ -25,4 +25,13 @@ class ResourceUrlProviderTest {
 
     assertEquals("http://folio.example/linked-data-editor/resources/12345", result);
   }
+
+  @Test
+  void applyNormalizesTrailingSlashFromBaseUrl() {
+    when(baseUrlService.getBaseUrl()).thenReturn("http://folio.example///");
+
+    var result = resourceUrlProvider.apply(12345L);
+
+    assertEquals("http://folio.example/linked-data-editor/resources/12345", result);
+  }
 }

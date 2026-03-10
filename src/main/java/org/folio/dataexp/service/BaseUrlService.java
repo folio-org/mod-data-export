@@ -1,7 +1,7 @@
 package org.folio.dataexp.service;
 
 import lombok.AllArgsConstructor;
-import org.folio.dataexp.client.BaseUrlClient;
+import org.folio.dataexp.client.SettingsBaseUrlClient;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class BaseUrlService {
-  private final BaseUrlClient baseUrlClient;
+  private final SettingsBaseUrlClient settingsBaseUrlClient;
 
   /**
    * Returns the base URL for the current tenant.
@@ -18,6 +18,6 @@ public class BaseUrlService {
    */
   @Cacheable(value = "baseUrl", key = "@folioExecutionContext.tenantId + '_base-url'")
   public String getBaseUrl() {
-    return baseUrlClient.getBaseUrl().getBaseUrl();
+    return settingsBaseUrlClient.getBaseUrl().getBaseUrl();
   }
 }

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 /** Feign client for fetching the tenant-specific FOLIO base URL. */
 @FeignClient(name = "base-url")
-public interface BaseUrlClient {
+public interface SettingsBaseUrlClient {
   /**
    * Fetches base URL from the base-url service.
    *

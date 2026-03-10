@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.folio.dataexp.BaseDataExportInitializerIT;
-import org.folio.dataexp.client.BaseUrlClient;
+import org.folio.dataexp.client.SettingsBaseUrlClient;
 import org.folio.dataexp.domain.dto.BaseUrl;
 import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
@@ -24,16 +24,11 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
   private static final String FIRST_TENANT = "diku";
   private static final String SECOND_TENANT = "college";
 
-  @Autowired
-  private BaseUrlService baseUrlService;
-  @Autowired
-  private CacheManager cacheManager;
-  @Autowired
-  private FolioModuleMetadata folioModuleMetadata;
-  @Autowired
-  private FolioExecutionContext currentExecutionContext;
-  @MockitoBean
-  private BaseUrlClient baseUrlClient;
+  @Autowired private BaseUrlService baseUrlService;
+  @Autowired private CacheManager cacheManager;
+  @Autowired private FolioModuleMetadata folioModuleMetadata;
+  @Autowired private FolioExecutionContext currentExecutionContext;
+  @MockitoBean private SettingsBaseUrlClient settingsBaseUrlClient;
 
   @AfterEach
   void tearDown() {
@@ -45,17 +40,17 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
 
   @Test
   void getBaseUrlCachesValuesPerTenant() {
-    stubBaseUrlClient(baseUrlClient);
+    stubBaseUrlClient(settingsBaseUrlClient);
 
     var firstTenantContext =
-      prepareContextForTenant(FIRST_TENANT, folioModuleMetadata, folioExecutionContext);
+        prepareContextForTenant(FIRST_TENANT, folioModuleMetadata, folioExecutionContext);
     try (var context = new FolioExecutionContextSetter(firstTenantContext)) {
       assertEquals("https://diku.example.org", baseUrlService.getBaseUrl());
       assertEquals("https://diku.example.org", baseUrlService.getBaseUrl());
     }
 
     var secondTenantContext =
-      prepareContextForTenant(SECOND_TENANT, folioModuleMetadata, folioExecutionContext);
+        prepareContextForTenant(SECOND_TENANT, folioModuleMetadata, folioExecutionContext);
     try (var context = new FolioExecutionContextSetter(secondTenantContext)) {
       assertEquals("https://college.example.org", baseUrlService.getBaseUrl());
       assertEquals("https://college.example.org", baseUrlService.getBaseUrl());
@@ -64,7 +59,7 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
     try (var context = new FolioExecutionContextSetter(firstTenantContext)) {
       assertEquals("https://diku.example.org", baseUrlService.getBaseUrl());
     }
-    verify(baseUrlClient, times(2)).getBaseUrl();
+    verify(settingsBaseUrlClient, times(2)).getBaseUrl();
 
     var baseUrlCache = (CaffeineCache) cacheManager.getCache("baseUrl");
     assertEquals(2, baseUrlCache.getNativeCache().asMap().size());
@@ -72,9 +67,12 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
     assertEquals("https://college.example.org", baseUrlCache.get("college_base-url").get());
   }
 
-  private void stubBaseUrlClient(BaseUrlClient baseUrlClient) {
-    doAnswer(x -> new BaseUrl().baseUrl("https://" + currentExecutionContext.getTenantId() + ".example.org"))
-      .when(baseUrlClient)
-      .getBaseUrl();
+  private void stubBaseUrlClient(SettingsBaseUrlClient settingsBaseUrlClient) {
+    doAnswer(
+            x ->
+                new BaseUrl()
+                    .baseUrl("https://" + currentExecutionContext.getTenantId() + ".example.org"))
+        .when(settingsBaseUrlClient)
+        .getBaseUrl();
   }
 }
