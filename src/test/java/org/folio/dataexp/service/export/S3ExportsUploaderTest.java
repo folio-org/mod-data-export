@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.exception.export.S3ExportsUploadException;
+import org.folio.dataexp.util.Constants;
 import org.folio.dataexp.util.S3FilePathUtils;
 import org.folio.s3.client.FolioS3Client;
 import org.junit.jupiter.api.Test;
@@ -32,12 +35,6 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.io.ByteArrayInputStream;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import java.io.IOException;
-import org.folio.dataexp.util.Constants;
-import static org.folio.dataexp.util.Constants.MARC_FILE_SUFFIX;
 
 @ExtendWith(MockitoExtension.class)
 class S3ExportsUploaderTest {
@@ -372,26 +369,23 @@ class S3ExportsUploaderTest {
     FileUtils.deleteDirectory(fullPath.getParent().toFile());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-5a7df17447b9db32b8372f1e82b97c7b")
   @SneakyThrows
   void uploadSingleRecordById_shouldPropagateIOException_whenS3ClientThrowsException() {
-    // TestMate-5a7df17447b9db32b8372f1e82b97c7b
     // Given
     var dirName = "failure-case";
     var marcFileContentBytes = "some-marc-data".getBytes();
     var s3FileName = "%s.%s".formatted(dirName, Constants.MARC_FILE_SUFFIX);
     var expectedS3Path = S3FilePathUtils.getPathToStoredRecord(dirName, s3FileName);
     var s3Exception = new RuntimeException("S3 write failed");
-    doThrow(s3Exception)
-        .when(s3Client)
-        .write(eq(expectedS3Path), any(InputStream.class));
+    doThrow(s3Exception).when(s3Client).write(eq(expectedS3Path), any(InputStream.class));
     // When & Then
     var thrownException =
         assertThrows(
             RuntimeException.class,
             () -> s3ExportsUploader.uploadSingleRecordById(dirName, marcFileContentBytes));
     assertEquals("S3 write failed", thrownException.getMessage());
-    verify(s3Client)
-        .write(eq(expectedS3Path), any(InputStream.class));
+    verify(s3Client).write(eq(expectedS3Path), any(InputStream.class));
   }
 }
