@@ -16,12 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.User;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockJobProfileException;
@@ -41,7 +43,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.dataexp.domain.dto.UserInfo;
 
 @ExtendWith(MockitoExtension.class)
 class JobProfileServiceTest {
@@ -886,9 +887,9 @@ class JobProfileServiceTest {
     assertThat(savedProfile.getLockedAt()).isNull();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-029c7d5c8c6c036fad395b01ed77f442")
   void postJobProfileShouldLockProfileWhenLockedIsTrueAndPermissionExists() {
-    // TestMate-029c7d5c8c6c036fad395b01ed77f442
     // Given
     jobProfile.setLocked(TRUE);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
@@ -897,9 +898,8 @@ class JobProfileServiceTest {
     when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
         .thenAnswer(
             invocation -> {
-              JobProfileEntity entity = invocation.getArgument(0);
               // Simulate DB saving and returning the saved entity
-              return entity;
+              return invocation.getArgument(0);
             });
     // When
     JobProfile savedProfile = jobProfileService.postJobProfile(jobProfile);
@@ -920,9 +920,9 @@ class JobProfileServiceTest {
     assertThat(userInfo.getUserName()).isEqualTo("testuser");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-cb876ac745b745330a34d6ebf401dcba")
   void postJobProfileShouldThrowExceptionWhenLockingAndPermissionIsMissing() {
-    // TestMate-cb876ac745b745330a34d6ebf401dcba
     // Given
     jobProfile.setLocked(TRUE);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
