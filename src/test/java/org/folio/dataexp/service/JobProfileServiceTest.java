@@ -16,12 +16,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.User;
+import org.folio.dataexp.domain.dto.UserInfo;
 import org.folio.dataexp.domain.entity.JobProfileEntity;
 import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockJobProfileException;
@@ -883,6 +885,55 @@ class JobProfileServiceTest {
     assertThat(savedProfile.getLocked()).isFalse();
     assertThat(savedProfile.getLockedBy()).isNull();
     assertThat(savedProfile.getLockedAt()).isNull();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-029c7d5c8c6c036fad395b01ed77f442")
+  void postJobProfileShouldLockProfileWhenLockedIsTrueAndPermissionExists() {
+    // Given
+    jobProfile.setLocked(TRUE);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(true);
+    when(jobProfileEntityRepository.save(any(JobProfileEntity.class)))
+        .thenAnswer(
+            invocation -> {
+              // Simulate DB saving and returning the saved entity
+              return invocation.getArgument(0);
+            });
+    // When
+    JobProfile savedProfile = jobProfileService.postJobProfile(jobProfile);
+    // Then
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository).save(jobProfileEntityCaptor.capture());
+    JobProfile capturedProfile = jobProfileEntityCaptor.getValue().getJobProfile();
+    assertThat(savedProfile).isSameAs(capturedProfile);
+    assertThat(savedProfile.getLocked()).isTrue();
+    assertThat(savedProfile.getLockedBy()).isEqualTo(userId);
+    assertThat(savedProfile.getLockedAt()).isNotNull();
+    Metadata metadata = savedProfile.getMetadata();
+    assertThat(metadata.getCreatedByUserId()).isEqualTo(userId.toString());
+    assertThat(metadata.getUpdatedByUserId()).isEqualTo(userId.toString());
+    UserInfo userInfo = savedProfile.getUserInfo();
+    assertThat(userInfo.getFirstName()).isEqualTo("Test");
+    assertThat(userInfo.getLastName()).isEqualTo("User");
+    assertThat(userInfo.getUserName()).isEqualTo("testuser");
+  }
+
+  @Test
+  @TestMate(name = "TestMate-cb876ac745b745330a34d6ebf401dcba")
+  void postJobProfileShouldThrowExceptionWhenLockingAndPermissionIsMissing() {
+    // Given
+    jobProfile.setLocked(TRUE);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(userClient.getUserById(userId.toString())).thenReturn(user);
+    when(permissionsValidator.checkLockJobProfilePermission()).thenReturn(false);
+    // When & Then
+    assertThatThrownBy(() -> jobProfileService.postJobProfile(jobProfile))
+        .isInstanceOf(LockJobProfilePermissionException.class)
+        .hasMessage("You do not have permission to lock this profile.");
+    verify(permissionsValidator).checkLockJobProfilePermission();
+    verify(jobProfileEntityRepository, never()).save(any(JobProfileEntity.class));
   }
 
   // Helper methods
