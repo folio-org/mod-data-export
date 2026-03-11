@@ -5,6 +5,7 @@ import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
+import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -41,9 +43,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
-import java.util.ArrayList;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -324,31 +323,35 @@ class ErrorLogServiceTest {
     verify(configurationService, never()).getValue(anyString());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-8df560da94786686fc4858ef57a9e5ec")
   @SneakyThrows
   void saveGeneralErrorWithMessageValuesTest() {
-    // TestMate-8df560da94786686fc4858ef57a9e5ec
     // Given
     var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
-    var errorMessageCode = ErrorCode.SOME_UUIDS_NOT_FOUND.getCode();
-    var errorMessageValues = List.of("uuid1", "uuid2");
     var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
     var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
     when(folioExecutionContext.getUserId()).thenReturn(userId);
-    when(jobExecutionService.getById(jobExecutionId)).thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
+    when(jobExecutionService.getById(jobExecutionId))
+        .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
     var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
-    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture()))
+        .thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
+    var errorMessageCode = ErrorCode.SOME_UUIDS_NOT_FOUND.getCode();
+    var errorMessageValues = List.of("uuid1", "uuid2");
     // When
-    errorLogService.saveGeneralErrorWithMessageValues(errorMessageCode, errorMessageValues, jobExecutionId);
+    errorLogService.saveGeneralErrorWithMessageValues(
+        errorMessageCode, errorMessageValues, jobExecutionId);
     // Then
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-        isA(UUID.class),
-        anyString(),
-        isA(Date.class),
-        eq(userId.toString()),
-        eq(jobExecutionId),
-        eq(jobProfileId));
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            anyString(),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(jobProfileId));
     var capturedErrorLog = errorLogCaptor.getValue();
     assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
     assertEquals(errorMessageCode, capturedErrorLog.getErrorMessageCode());
@@ -356,16 +359,14 @@ class ErrorLogServiceTest {
     assertEquals(ErrorLog.LogLevelEnum.ERROR, capturedErrorLog.getLogLevel());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-1da6299af83636050ba587663941e69d")
   @SneakyThrows
   void populateUuidsNotFoundErrorLogShouldCorrectlyFormatSingleUuid() {
-    // TestMate-1da6299af83636050ba587663941e69d
     // Given
     var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
     var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
     var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
-    var notFoundUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
-    var notFoundUuids = List.of(notFoundUuid);
     when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
             jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
         .thenReturn(new ArrayList<>());
@@ -373,11 +374,15 @@ class ErrorLogServiceTest {
     when(jobExecutionService.getById(jobExecutionId))
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    when(objectMapper.writeValueAsString(any(ErrorLog.class)))
+        .thenAnswer(
+            invocation -> {
+              var realObjectMapper = new ObjectMapper();
+              return realObjectMapper.writeValueAsString(invocation.getArgument(0));
+            });
+    var notFoundUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
+    var notFoundUuids = List.of(notFoundUuid);
     var errorLogCaptor = ArgumentCaptor.forClass(String.class);
-    when(objectMapper.writeValueAsString(any(ErrorLog.class))).thenAnswer(invocation -> {
-      var realObjectMapper = new ObjectMapper();
-      return realObjectMapper.writeValueAsString(invocation.getArgument(0));
-    });
     // When
     errorLogService.populateUuidsNotFoundErrorLog(jobExecutionId, notFoundUuids);
     // Then
