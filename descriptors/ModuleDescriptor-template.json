@@ -113,6 +113,10 @@
     {
       "id": "permissions",
       "version": "5.6"
+    },
+    {
+      "id": "base-url",
+      "version": "1.0"
     }
   ],
   "optional": [
@@ -179,7 +183,8 @@
             "consortium-search.holdings.item.get",
             "perms.users.get",
             "permissions.users.item.get",
-            "fqm.query.async.results.post"
+            "fqm.query.async.results.post",
+            "base-url.item.get"
           ]
         },
         {
