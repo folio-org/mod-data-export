@@ -1,6 +1,5 @@
 package org.folio.dataexp.util;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.folio.dataexp.domain.dto.Alternativetitletype;

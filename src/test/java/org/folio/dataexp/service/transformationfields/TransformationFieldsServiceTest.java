@@ -19,7 +19,6 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -75,7 +74,7 @@ class TransformationFieldsServiceTest {
                     expectedFields.get(transformationField.getFieldId()), transformationField));
   }
 
-  private void mocReferenceData() throws IOException {
+  private void mocReferenceData() {
     HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>();
     map.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     map.put(ALTERNATIVE_TITLE_TYPES, ReferenceDataResponseUtil.getAlternativeTitleTypes());

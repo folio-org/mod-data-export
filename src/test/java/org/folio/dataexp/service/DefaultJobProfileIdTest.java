@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
 import java.util.UUID;
-
 import org.folio.dataexp.domain.dto.ExportAllRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,11 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DefaultJobProfileIdTest {
 
-  @Mock
-  private FileDefinitionsService mockFileDefinitionService;
+  @Mock private FileDefinitionsService mockFileDefinitionService;
   @Mock private DataExportService mockDataExportService;
-  @InjectMocks
-  private DataExportAllService mockDataExportAllService;
+  @InjectMocks private DataExportAllService mockDataExportAllService;
 
   @ParameterizedTest
   @EnumSource(value = ExportAllRequest.IdTypeEnum.class)

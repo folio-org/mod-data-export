@@ -33,7 +33,10 @@ import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.client.UserClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 /**
@@ -366,6 +369,28 @@ public class HttpClientConfiguration {
   @Bean
   public SettingsBaseUrlClient settingsBaseUrlClient(HttpServiceProxyFactory factory) {
     return factory.createClient(SettingsBaseUrlClient.class);
+  }
+
+  /**
+   * Creates an {@link HttpServiceProxyFactory} bean with a custom {@link RestClient} that logs
+   * request URLs and sets the "Accept-Encoding" header to "identity".
+   *
+   * @param restClientBuilder the builder for creating the {@link RestClient}
+   * @return a configured {@link HttpServiceProxyFactory} instance
+   */
+  @Bean
+  public HttpServiceProxyFactory factory(RestClient.Builder restClientBuilder) {
+    var restClient =
+        restClientBuilder
+            .requestInterceptor(
+                (request, body, execution) -> {
+                  log.info("Request URL: {}", request.getURI());
+                  request.getHeaders().add(HttpHeaders.ACCEPT_ENCODING, "identity");
+                  return execution.execute(request, body);
+                })
+            .build();
+
+    return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restClient)).build();
   }
 
 }
