@@ -203,7 +203,7 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
                 MockMvcRequestBuilders.post("/data-export/mapping-profiles")
                     .headers(defaultHeaders())
                     .content(asJsonString(mappingProfile)))
-            .andExpect(status().isUnprocessableEntity())
+            .andExpect(status().isUnprocessableContent())
             .andReturn();
 
     var response = result.getResponse().getContentAsString();
@@ -212,14 +212,14 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
     var errors = mapper.readValue(response, Errors.class);
     assertEquals(2, errors.getErrors().size());
 
-    var error = errors.getErrors().get(0);
+    var error = errors.getErrors().getFirst();
 
     assertEquals(
         "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[0].transformation", error.getParameters().get(0).getKey());
-    assertEquals("902q $aaa", error.getParameters().get(0).getValue());
+    assertEquals("transformations[0].transformation", error.getParameters().getFirst().getKey());
+    assertEquals("902q $aaa", error.getParameters().getFirst().getValue());
 
     error = errors.getErrors().get(1);
 
@@ -227,8 +227,8 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
         "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
-    assertEquals("902q $bbb", error.getParameters().get(0).getValue());
+    assertEquals("transformations[1].transformation", error.getParameters().getFirst().getKey());
+    assertEquals("902q $bbb", error.getParameters().getFirst().getValue());
   }
 
   @Test
@@ -255,7 +255,7 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
                 MockMvcRequestBuilders.post("/data-export/mapping-profiles")
                     .headers(defaultHeaders())
                     .content(asJsonString(mappingProfile)))
-            .andExpect(status().isUnprocessableEntity())
+            .andExpect(status().isUnprocessableContent())
             .andReturn();
 
     var response = result.getResponse().getContentAsString();
@@ -296,7 +296,7 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
                 MockMvcRequestBuilders.post("/data-export/mapping-profiles")
                     .headers(defaultHeaders())
                     .content(asJsonString(mappingProfile)))
-            .andExpect(status().isUnprocessableEntity())
+            .andExpect(status().isUnprocessableContent())
             .andReturn();
 
     var response = result.getResponse().getContentAsString();
@@ -305,14 +305,14 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
     var errors = mapper.readValue(response, Errors.class);
     assertEquals(1, errors.getErrors().size());
 
-    var error = errors.getErrors().get(0);
+    var error = errors.getErrors().getFirst();
 
     assertEquals(
         "must match \\\"((\\d{3}[\\s\\da-zA-Z]{2}(\\$([a-zA-Z]|[\\d]{1,2}))?)|(^$))\\\"",
         error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("transformations[1].transformation", error.getParameters().get(0).getKey());
-    assertEquals("902q $bbb", error.getParameters().get(0).getValue());
+    assertEquals("transformations[1].transformation", error.getParameters().getFirst().getKey());
+    assertEquals("902q $bbb", error.getParameters().getFirst().getValue());
   }
 
   @Test
@@ -346,7 +346,7 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
                 MockMvcRequestBuilders.post("/data-export/mapping-profiles")
                     .headers(defaultHeaders())
                     .content(asJsonString(mappingProfile)))
-            .andExpect(status().isUnprocessableEntity())
+            .andExpect(status().isUnprocessableContent())
             .andReturn();
 
     var response = result.getResponse().getContentAsString();
@@ -355,12 +355,12 @@ class MappingProfileControllerIT extends BaseDataExportInitializerIT {
     var errors = mapper.readValue(response, Errors.class);
     assertEquals(1, errors.getErrors().size());
 
-    var error = errors.getErrors().get(0);
+    var error = errors.getErrors().getFirst();
 
     assertEquals("must match \\\"^\\d{3}$\\\"", error.getMessage());
     assertEquals(1, error.getParameters().size());
-    assertEquals("suppressionFields[1]", error.getParameters().get(0).getKey());
-    assertEquals("90", error.getParameters().get(0).getValue());
+    assertEquals("suppressionFields[1]", error.getParameters().getFirst().getKey());
+    assertEquals("90", error.getParameters().getFirst().getValue());
   }
 
   @Test

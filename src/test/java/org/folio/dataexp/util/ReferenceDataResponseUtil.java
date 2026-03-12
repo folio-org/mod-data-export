@@ -42,9 +42,8 @@ public class ReferenceDataResponseUtil {
    * Loads identifier types from the mock JSON file and returns them as a map.
    *
    * @return map of identifier type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getIdentifierTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getIdentifierTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -60,9 +59,8 @@ public class ReferenceDataResponseUtil {
    * Loads contributor name types from the mock JSON file and returns them as a map.
    *
    * @return map of contributor name type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getContributorNameTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getContributorNameTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -78,9 +76,8 @@ public class ReferenceDataResponseUtil {
    * Loads material types from the mock JSON file and returns them as a map.
    *
    * @return map of material type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getMaterialTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getMaterialTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -95,9 +92,8 @@ public class ReferenceDataResponseUtil {
    * Loads instance types from the mock JSON file and returns them as a map.
    *
    * @return map of instance type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getInstanceTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getInstanceTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -112,10 +108,8 @@ public class ReferenceDataResponseUtil {
    * Loads electronic access relationships from the mock JSON file and returns them as a map.
    *
    * @return map of electronic access relationship ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getElectronicAccessRelationships()
-      throws IOException {
+  public static Map<String, JsonObjectWrapper> getElectronicAccessRelationships() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -132,9 +126,8 @@ public class ReferenceDataResponseUtil {
    * Loads alternative title types from the mock JSON file and returns them as a map.
    *
    * @return map of alternative title type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getAlternativeTitleTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getAlternativeTitleTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -150,9 +143,8 @@ public class ReferenceDataResponseUtil {
    * Loads modes of issuance from the mock JSON file and returns them as a map.
    *
    * @return map of mode of issuance ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getModeOfIssuance() throws IOException {
+  public static Map<String, JsonObjectWrapper> getModeOfIssuance() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -168,9 +160,8 @@ public class ReferenceDataResponseUtil {
    * Loads loan types from the mock JSON file and returns them as a map.
    *
    * @return map of loan type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getLoanTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getLoanTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -184,9 +175,8 @@ public class ReferenceDataResponseUtil {
    * Loads holding note types from the mock JSON file and returns them as a map.
    *
    * @return map of holding note type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getHoldingNoteTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getHoldingNoteTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
@@ -202,9 +192,8 @@ public class ReferenceDataResponseUtil {
    * Loads item note types from the mock JSON file and returns them as a map.
    *
    * @return map of item note type ID to {@link JsonObjectWrapper}
-   * @throws IOException if the file cannot be read
    */
-  public static Map<String, JsonObjectWrapper> getItemNoteTypes() throws IOException {
+  public static Map<String, JsonObjectWrapper> getItemNoteTypes() {
     var collection =
         mapper.readValue(
             ReferenceDataResponseUtil.class.getResourceAsStream(
