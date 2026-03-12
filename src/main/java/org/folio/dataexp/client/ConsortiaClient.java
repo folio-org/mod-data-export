@@ -6,7 +6,7 @@ import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.annotation.HttpExchange;
 
 /** Feign client for retrieving user tenant collections in a consortium. */
-@HttpExchange(url = "user-tenants")
+@HttpExchange(accept = MediaType.APPLICATION_JSON_VALUE)
 public interface ConsortiaClient {
 
   /**
@@ -14,6 +14,6 @@ public interface ConsortiaClient {
    *
    * @return a collection of user tenants
    */
-  @GetExchange(value = "?limit=1", accept = MediaType.APPLICATION_JSON_VALUE)
+  @GetExchange(value = "user-tenants?limit=1")
   UserTenantCollection getUserTenantCollection();
 }
