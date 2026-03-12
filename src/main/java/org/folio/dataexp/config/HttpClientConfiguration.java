@@ -28,6 +28,7 @@ import org.folio.dataexp.client.OkapiUserPermissionsClient;
 import org.folio.dataexp.client.QueryClient;
 import org.folio.dataexp.client.SearchClient;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
+import org.folio.dataexp.client.SettingsBaseUrlClient;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.client.UserClient;
 import org.springframework.context.annotation.Bean;
@@ -354,6 +355,17 @@ public class HttpClientConfiguration {
   @Bean
   public UserClient userClient(HttpServiceProxyFactory factory) {
     return factory.createClient(UserClient.class);
+  }
+
+  /**
+   * Creates a {@link SettingsBaseUrlClient} bean.
+   *
+   * @param factory the {@link HttpServiceProxyFactory} used to create the client proxy
+   * @return a proxy instance of {@link SettingsBaseUrlClient}
+   */
+  @Bean
+  public SettingsBaseUrlClient settingsBaseUrlClient(HttpServiceProxyFactory factory) {
+    return factory.createClient(SettingsBaseUrlClient.class);
   }
 
 }
