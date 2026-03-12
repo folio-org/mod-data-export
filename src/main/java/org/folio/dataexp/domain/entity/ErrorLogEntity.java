@@ -1,6 +1,5 @@
 package org.folio.dataexp.domain.entity;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -13,7 +12,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import org.folio.dataexp.domain.dto.ErrorLog;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Entity representing an error log entry. */
 @Data
@@ -29,7 +29,7 @@ public class ErrorLogEntity {
   @Id private UUID id;
 
   /** Error log details stored as JSONB. */
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private ErrorLog errorLog;
 

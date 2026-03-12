@@ -3,7 +3,7 @@ package org.folio.dataexp.service.export.strategies.ld;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ class LinkedDataConverterIT extends BaseDataExportInitializerIT {
   @Test
   void convertLdJsonToBibframe2RdfExceptionTest() {
     assertThrows(
-        JsonProcessingException.class, () -> linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
+        JacksonException.class, () -> linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
   }
 
   @SneakyThrows

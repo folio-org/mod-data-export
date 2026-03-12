@@ -1,7 +1,5 @@
 package org.folio.dataexp.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +24,8 @@ import org.folio.dataexp.domain.dto.MaterialType;
 import org.folio.dataexp.domain.dto.MaterialTypes;
 import org.folio.dataexp.domain.dto.ModeOfIssuance;
 import org.folio.processor.referencedata.JsonObjectWrapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Utility class for loading and converting reference data responses from JSON files into maps of

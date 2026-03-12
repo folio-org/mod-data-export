@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.QueryClient;
 import org.folio.querytool.domain.dto.ContentsRequest;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 /** Service for retrieving entities from FQM. */
@@ -39,6 +41,14 @@ public class QueryService {
     return new ContentsRequest().ids(requestIds).entityTypeId(entityTypeId).fields(fields);
   }
 
+  @Retryable(
+      maxAttemptsExpression = "${application.feign-query-client-retry.max-attempts}",
+      backoff = @Backoff(
+          delayExpression = "${application.feign-query-client-retry.initial-wait-time}",
+          maxDelayExpression = "${application.feign-query-client-retry.max-wait-time}",
+          multiplier = 2.0
+      )
+  )
   private List<Map<String, Object>> runQuery(ContentsRequest contents) {
     return queryClient.getContents(contents);
   }
