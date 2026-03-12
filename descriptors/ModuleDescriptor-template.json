@@ -555,6 +555,7 @@
           "pathPattern": "/_/tenant",
           "modulePermissions": [
             "configuration.entries.collection.get",
+            "base-url.item.get",
             "okapi.proxy.self.timers.patch"
           ]
         },

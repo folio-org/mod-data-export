@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import static org.folio.dataexp.util.FolioExecutionContextUtil.prepareContextForTenant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,11 +14,11 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.FolioModuleMetadata;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class BaseUrlServiceIT extends BaseDataExportInitializerIT {
 
@@ -28,10 +29,19 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
   @Autowired private CacheManager cacheManager;
   @Autowired private FolioModuleMetadata folioModuleMetadata;
   @Autowired private FolioExecutionContext currentExecutionContext;
-  @MockitoBean private SettingsBaseUrlClient settingsBaseUrlClient;
+  @Autowired private SettingsBaseUrlClient settingsBaseUrlClient;
+
+  @BeforeEach
+  void setUp() {
+    clearBaseUrlCache();
+  }
 
   @AfterEach
   void tearDown() {
+    clearBaseUrlCache();
+  }
+
+  private void clearBaseUrlCache() {
     var cache = cacheManager.getCache("baseUrl");
     if (cache != null) {
       cache.clear();
@@ -41,6 +51,7 @@ class BaseUrlServiceIT extends BaseDataExportInitializerIT {
   @Test
   void getBaseUrlCachesValuesPerTenant() {
     stubBaseUrlClient(settingsBaseUrlClient);
+    clearInvocations(settingsBaseUrlClient);
 
     var firstTenantContext =
         prepareContextForTenant(FIRST_TENANT, folioModuleMetadata, folioExecutionContext);

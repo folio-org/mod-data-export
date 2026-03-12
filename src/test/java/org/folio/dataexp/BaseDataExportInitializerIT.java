@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.ConfigurationEntryClient;
+import org.folio.dataexp.client.SettingsBaseUrlClient;
+import org.folio.dataexp.domain.dto.BaseUrl;
 import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
@@ -177,6 +179,7 @@ public class BaseDataExportInitializerIT {
   @Autowired private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
   @MockitoBean private ConfigurationEntryClient configurationEntryClient;
+  @MockitoBean private SettingsBaseUrlClient settingsBaseUrlClient;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -206,9 +209,13 @@ public class BaseDataExportInitializerIT {
 
   @BeforeAll
   static void beforeAll(
-      @Autowired MockMvc mockMvc, @Autowired ConfigurationEntryClient configurationEntryClient) {
+      @Autowired MockMvc mockMvc,
+      @Autowired ConfigurationEntryClient configurationEntryClient,
+      @Autowired SettingsBaseUrlClient settingsBaseUrlClient) {
     when(configurationEntryClient.getConfigurationEntryCollectionByQuery(any(String.class)))
         .thenReturn(getConfigurationEntryCollection());
+    when(settingsBaseUrlClient.getBaseUrl())
+        .thenReturn(new BaseUrl().baseUrl("http://localhost:9130"));
     setUpTenant(mockMvc);
   }
 
