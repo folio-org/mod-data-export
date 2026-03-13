@@ -171,7 +171,7 @@ public class DataExportTenantService extends TenantService {
   private void setupConfigEntryInventoryRecordLink() {
     log.info("Loading inventory record link value...");
     var inventoryRecordLinkConfig =
-        configurationService.produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote();
+        configurationService.produceInventoryRecordLinkBasedOnTenantBaseUrl();
     var saved = configurationService.upsertConfiguration(inventoryRecordLinkConfig);
     log.info("Loaded inventory record link value: {}", saved.getValue());
   }

@@ -1,7 +1,6 @@
 package org.folio.dataexp;
 
 import static java.lang.String.format;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,7 +14,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +22,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import org.folio.dataexp.client.ConfigurationEntryClient;
-import org.folio.dataexp.domain.dto.ConfigurationEntry;
-import org.folio.dataexp.domain.dto.ConfigurationEntryCollection;
+import org.folio.dataexp.client.SettingsBaseUrlClient;
+import org.folio.dataexp.domain.dto.BaseUrl;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
-import org.folio.dataexp.service.ConfigurationEntryService;
-import org.folio.dataexp.service.ConfigurationService;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.DefaultFolioExecutionContext;
 import org.folio.spring.FolioExecutionContext;
@@ -179,11 +174,9 @@ public class BaseDataExportInitializerIT {
   private JobExecutionExportFilesEntityRepository jobExecutionExportFilesEntityRepository;
 
   @Autowired protected FolioS3Client s3Client;
-  @Autowired private ConfigurationEntryService configurationEntryService;
-  @Autowired private ConfigurationService configurationService;
   @Autowired private ErrorLogEntityCqlRepository errorLogEntityCqlRepository;
 
-  @MockitoBean private ConfigurationEntryClient configurationEntryClient;
+  @MockitoBean private SettingsBaseUrlClient settingsBaseUrlClient;
 
   public final Map<String, Object> okapiHeaders = new HashMap<>();
 
@@ -213,9 +206,9 @@ public class BaseDataExportInitializerIT {
 
   @BeforeAll
   static void beforeAll(
-      @Autowired MockMvc mockMvc, @Autowired ConfigurationEntryClient configurationEntryClient) {
-    when(configurationEntryClient.getConfigurationEntryCollectionByQuery(any(String.class)))
-        .thenReturn(getConfigurationEntryCollection());
+      @Autowired MockMvc mockMvc, @Autowired SettingsBaseUrlClient settingsBaseUrlClient) {
+    when(settingsBaseUrlClient.getBaseUrl())
+        .thenReturn(new BaseUrl().baseUrl("http://localhost:9130"));
     setUpTenant(mockMvc);
   }
 
@@ -290,20 +283,5 @@ public class BaseDataExportInitializerIT {
   @SneakyThrows
   public static String asJsonString(Object value) {
     return OBJECT_MAPPER.writeValueAsString(value);
-  }
-
-  private static ConfigurationEntryCollection getConfigurationEntryCollection() {
-    ConfigurationEntry ce =
-        new ConfigurationEntry()
-            .id(UUID.randomUUID().toString())
-            .module("TEST_1")
-            .configName("FOLIO host")
-            .code("FOLIO_HOST")
-            .description("test description")
-            .value("http://localhost:9130");
-
-    return new ConfigurationEntryCollection()
-        .totalRecords(1)
-        .configs(Collections.singletonList(ce));
   }
 }
