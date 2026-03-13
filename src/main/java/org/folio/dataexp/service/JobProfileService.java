@@ -130,14 +130,13 @@ public class JobProfileService {
     var metadataOfExistingJobProfile = jobProfileEntity.getJobProfile().getMetadata();
 
     var metadata =
-        Metadata.builder()
+        new Metadata()
             .createdDate(metadataOfExistingJobProfile.getCreatedDate())
             .updatedDate(new Date())
             .createdByUserId(metadataOfExistingJobProfile.getCreatedByUserId())
             .updatedByUserId(userId)
             .createdByUsername(metadataOfExistingJobProfile.getCreatedByUsername())
-            .updatedByUsername(user.getUsername())
-            .build();
+            .updatedByUsername(user.getUsername());
 
     jobProfile.setMetadata(metadata);
     updateLock(jobProfileEntity, jobProfile);
@@ -231,7 +230,7 @@ public class JobProfileService {
     var jobProfiles =
         jobProfileData.stream()
             .filter(i -> Objects.nonNull(i[0]) && Objects.nonNull(i[1]))
-            .map(i -> JobProfile.builder().id((UUID) i[0]).name((String) i[1]).build())
+            .map(i -> new JobProfile().id((UUID) i[0]).name((String) i[1]))
             .toList();
 
     var jobProfileCollection = new JobProfileCollection();

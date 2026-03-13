@@ -65,10 +65,9 @@ public class MappingProfileValidator {
       var matcher = TRANSFORMATION_PATTERN.matcher(transformation.getTransformation());
       if (!matcher.matches()) {
         var parameter =
-            ParametersInner.builder()
+            new ParametersInner()
                 .key(String.format(ERROR_VALIDATION_TRANSFORMATIONS_PARAMETER_KEY_PATTERN, i))
-                .value(transformation.getTransformation())
-                .build();
+                .value(transformation.getTransformation());
         parameters.add(parameter);
       }
     }
@@ -119,10 +118,9 @@ public class MappingProfileValidator {
         var matcher = SUPPRESSION_FIELD_PATTERN.matcher(suppression);
         if (!matcher.matches()) {
           var parameter =
-              ParametersInner.builder()
+              new ParametersInner()
                   .key(String.format(ERROR_VALIDATION_SUPPRESSION_FIELD_PARAMETER_KEY_PATTERN, i))
-                  .value(suppression)
-                  .build();
+                  .value(suppression);
           parameters.add(parameter);
         }
       }

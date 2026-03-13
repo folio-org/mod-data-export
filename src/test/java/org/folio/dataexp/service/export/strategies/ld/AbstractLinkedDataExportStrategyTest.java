@@ -102,7 +102,7 @@ class AbstractLinkedDataExportStrategyTest {
   private TestPreparation prepare(int count, boolean include, boolean updateJob) {
     var jobProfileEntity = new JobProfileEntity();
     var jobExecution =
-        JobExecution.builder().progress(new JobExecutionProgress()).id(UUID.randomUUID()).build();
+        new JobExecution().progress(new JobExecutionProgress()).id(UUID.randomUUID());
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());

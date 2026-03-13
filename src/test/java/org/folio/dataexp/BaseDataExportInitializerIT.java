@@ -82,9 +82,7 @@ import tools.jackson.databind.module.SimpleModule;
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = {"spring.liquibase.enabled=true"}
-
-)
+    properties = {"spring.liquibase.enabled=true"})
 @ContextConfiguration(initializers = BaseDataExportInitializerIT.Initializer.class)
 @Testcontainers
 @AutoConfigureMockMvc
@@ -296,18 +294,16 @@ public class BaseDataExportInitializerIT {
 
   private static ConfigurationEntryCollection getConfigurationEntryCollection() {
     ConfigurationEntry ce =
-        ConfigurationEntry.builder()
+        new ConfigurationEntry()
             .id(UUID.randomUUID().toString())
             .module("TEST_1")
             .configName("FOLIO host")
             .code("FOLIO_HOST")
             .description("test description")
-            .value("http://localhost:9130")
-            .build();
+            .value("http://localhost:9130");
 
-    return ConfigurationEntryCollection.builder()
+    return new ConfigurationEntryCollection()
         .totalRecords(1)
-        .configs(Collections.singletonList(ce))
-        .build();
+        .configs(Collections.singletonList(ce));
   }
 }
