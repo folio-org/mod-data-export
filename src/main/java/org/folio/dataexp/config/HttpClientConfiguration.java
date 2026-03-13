@@ -5,7 +5,6 @@ import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.client.AlternativeTitleTypesClient;
 import org.folio.dataexp.client.AuthorityClient;
 import org.folio.dataexp.client.CallNumberTypesClient;
-import org.folio.dataexp.client.ConfigurationEntryClient;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.client.ConsortiumClient;
 import org.folio.dataexp.client.ConsortiumSearchClient;
@@ -82,17 +81,6 @@ public class HttpClientConfiguration {
   @Bean
   public CallNumberTypesClient callNumberTypesClient(HttpServiceProxyFactory factory) {
     return factory.createClient(CallNumberTypesClient.class);
-  }
-
-  /**
-   * Creates a {@link ConfigurationEntryClient} bean.
-   *
-   * @param factory the {@link HttpServiceProxyFactory} used to create the client proxy
-   * @return a proxy instance of {@link ConfigurationEntryClient}
-   */
-  @Bean
-  public ConfigurationEntryClient configurationEntryClient(HttpServiceProxyFactory factory) {
-    return factory.createClient(ConfigurationEntryClient.class);
   }
 
   /**
