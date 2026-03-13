@@ -25,7 +25,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 
 @ExtendWith(MockitoExtension.class)
 class FileDefinitionsServiceTest {
@@ -85,7 +85,7 @@ class FileDefinitionsServiceTest {
   @SneakyThrows
   void uploadFileTest() {
     var fileDefinitionId = UUID.randomUUID();
-    var resource = new PathResource("src/test/resources/upload.csv");
+    var resource = new FileSystemResource("src/test/resources/upload.csv");
 
     fileDefinitionsService.uploadFile(fileDefinitionId, resource);
     verify(filesUploadService).uploadFile(fileDefinitionId, resource);
@@ -95,7 +95,7 @@ class FileDefinitionsServiceTest {
   @SneakyThrows
   void uploadFileIfExceptionTest() {
     var fileDefinitionId = UUID.randomUUID();
-    var resource = new PathResource("src/test/resources/upload.csv");
+    var resource = new FileSystemResource("src/test/resources/upload.csv");
 
     when(filesUploadService.uploadFile(fileDefinitionId, resource))
         .thenThrow(new RuntimeException("error"));

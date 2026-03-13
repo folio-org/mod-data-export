@@ -1,6 +1,5 @@
 package org.folio.dataexp.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +10,7 @@ import org.folio.processor.rule.Rule;
 import org.folio.processor.translations.TranslationsFunctionHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
 
 /** Configuration class for export-related beans such as rules and processors. */
 @Configuration

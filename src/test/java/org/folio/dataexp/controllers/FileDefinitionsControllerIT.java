@@ -3,7 +3,7 @@ package org.folio.dataexp.controllers;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
@@ -71,14 +71,17 @@ class FileDefinitionsControllerIT extends BaseDataExportInitializerIT {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinition.getId()))
         .thenReturn(FileDefinitionEntity.builder().fileDefinition(fileDefinition).build());
 
+    var headers = defaultHeaders();
+    headers.remove("Content-Type");
+
     mockMvc
         .perform(
             MockMvcRequestBuilders.post(
                     "/data-export/file-definitions/"
                         + fileDefinition.getId().toString()
                         + "/upload")
-                .headers(defaultHeaders())
-                .contentType(APPLICATION_OCTET_STREAM_VALUE)
+                .headers(headers)
+                .contentType(APPLICATION_OCTET_STREAM)
                 .content("uuid"))
         .andExpect(status().isOk());
   }

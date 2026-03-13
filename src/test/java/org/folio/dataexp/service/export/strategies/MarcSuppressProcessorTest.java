@@ -11,7 +11,7 @@ import org.marc4j.marc.impl.RecordImpl;
 class MarcSuppressProcessorTest {
   @Test
   void shouldSuppressListedFields() {
-    var mappingProfile = MappingProfile.builder().fieldsSuppression("500,600").build();
+    var mappingProfile = new MappingProfile().fieldsSuppression("500,600");
     var record = new RecordImpl();
     record.setLeader(new LeaderImpl("01428nam a22003733c 4500"));
     record.addVariableField(new DataFieldImpl("400", 'f', 'f'));
@@ -27,7 +27,7 @@ class MarcSuppressProcessorTest {
 
   @Test
   void shouldSuppress999ff() {
-    var mappingProfile = MappingProfile.builder().suppress999ff(true).build();
+    var mappingProfile = new MappingProfile().suppress999ff(true);
     var record = new RecordImpl();
     record.setLeader(new LeaderImpl("01428nam a22003733c 4500"));
     record.addVariableField(new DataFieldImpl("999", 'f', 'f'));

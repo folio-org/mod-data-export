@@ -7,10 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.github.jknack.handlebars.internal.Files;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -44,9 +40,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -61,6 +56,12 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Base class for integration tests in the mod-data-export module.
@@ -74,8 +75,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * assertions. The class ensures a clean state before and after each test and provides static
  * helpers for JSON serialization and Okapi header creation.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = {"spring.liquibase.enabled=true"})
 @ContextConfiguration(initializers = BaseDataExportInitializerIT.Initializer.class)
 @Testcontainers
 @AutoConfigureMockMvc
@@ -150,13 +152,18 @@ public class BaseDataExportInitializerIT {
       new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
 
   public static final ObjectMapper OBJECT_MAPPER =
-      new ObjectMapper()
-          .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
-          .registerModule(
-              new JavaTimeModule().addDeserializer(LocalDateTime.class, localDateTimeDeserializer))
+      JsonMapper.builder()
+          .findAndAddModules()
+          .addModule(
+              new SimpleModule().addDeserializer(LocalDateTime.class, localDateTimeDeserializer))
           .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-          .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
+          .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true)
+          .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+          .changeDefaultPropertyInclusion(
+              incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+          .changeDefaultPropertyInclusion(
+              incl -> incl.withContentInclusion(JsonInclude.Include.NON_NULL))
+          .build();
   @Autowired protected MockMvc mockMvc;
   @Autowired private FolioModuleMetadata folioModuleMetadata;
   @Autowired private JobExecutionEntityRepository jobExecutionEntityRepository;
