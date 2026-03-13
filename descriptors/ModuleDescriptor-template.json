@@ -55,10 +55,6 @@
       "version": "2.0"
     },
     {
-      "id": "configuration",
-      "version": "2.0"
-    },
-    {
       "id": "electronic-access-relationships",
       "version": "1.0"
     },
@@ -156,7 +152,6 @@
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -201,7 +196,6 @@
             "inventory-storage.instances.collection.get",
             "inventory-storage.holdings.collection.get",
             "inventory-storage.items.collection.get",
-            "configuration.entries.collection.get",
             "inventory-storage.nature-of-content-terms.collection.get",
             "inventory-storage.identifier-types.collection.get",
             "inventory-storage.contributor-name-types.collection.get",
@@ -554,7 +548,6 @@
           ],
           "pathPattern": "/_/tenant",
           "modulePermissions": [
-            "configuration.entries.collection.get",
             "base-url.item.get",
             "okapi.proxy.self.timers.patch"
           ]
