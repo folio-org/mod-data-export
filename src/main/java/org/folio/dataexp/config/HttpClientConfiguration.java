@@ -31,11 +31,9 @@ import org.folio.dataexp.client.SearchConsortiumHoldings;
 import org.folio.dataexp.client.SettingsBaseUrlClient;
 import org.folio.dataexp.client.SourceStorageClient;
 import org.folio.dataexp.client.UserClient;
-import org.folio.dataexp.exception.RestClientErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
@@ -52,8 +50,6 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 @Log4j2
 @RequiredArgsConstructor
 public class HttpClientConfiguration {
-
-  private final RestClientErrorHandler errorHandler;
 
   /**
    * Creates an {@link AlternativeTitleTypesClient} bean.
@@ -386,7 +382,6 @@ public class HttpClientConfiguration {
   public HttpServiceProxyFactory factory(RestClient.Builder restClientBuilder) {
     var restClient =
         restClientBuilder
-            .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
             .requestInterceptor(
                 (request, body, execution) -> {
                   log.debug("Request URL: {}", request.getURI());

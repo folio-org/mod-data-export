@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
@@ -17,6 +19,7 @@ import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.dto.JobExecutionRunBy;
+import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.exception.export.DataExportRequestValidationException;
 import org.folio.dataexp.repository.ExportIdEntityRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
@@ -61,7 +64,12 @@ public class DataExportService {
   public void postDataExport(ExportRequest exportRequest) {
     var fileDefinitionEntity =
         fileDefinitionEntityRepository.getReferenceById(exportRequest.getFileDefinitionId());
-    var fileDefinition = fileDefinitionEntity.getFileDefinition();
+    FileDefinition fileDefinition;
+    try {
+      fileDefinition = fileDefinitionEntity.getFileDefinition();
+    } catch (EntityNotFoundException e) {
+      throw new EntityNotFoundException("Unable to find");
+    }
     var jobProfileEntity =
         jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var mappingProfileEntity =
