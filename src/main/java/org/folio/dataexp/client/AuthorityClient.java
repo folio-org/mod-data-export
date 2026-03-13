@@ -25,7 +25,7 @@ public interface AuthorityClient {
   AuthorityCollection getAuthorities(
       @RequestParam boolean idOnly,
       @RequestParam boolean deleted,
-      @RequestParam String query,
+      @RequestParam(required = false) String query,
       @RequestParam long limit,
       @RequestParam long offset);
 }
