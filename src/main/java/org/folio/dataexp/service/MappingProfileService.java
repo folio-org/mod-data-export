@@ -167,14 +167,13 @@ public class MappingProfileService {
     var metadataOfExistingMappingProfile = mappingProfileEntity.getMappingProfile().getMetadata();
 
     var metadata =
-        Metadata.builder()
+        new Metadata()
             .createdDate(metadataOfExistingMappingProfile.getCreatedDate())
             .updatedDate(new Date())
             .createdByUserId(metadataOfExistingMappingProfile.getCreatedByUserId())
             .updatedByUserId(userId)
             .createdByUsername(metadataOfExistingMappingProfile.getCreatedByUsername())
-            .updatedByUsername(user.getUsername())
-            .build();
+            .updatedByUsername(user.getUsername());
 
     mappingProfile.setMetadata(metadata);
     updateLock(mappingProfileEntity, mappingProfile);

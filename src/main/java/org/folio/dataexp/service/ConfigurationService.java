@@ -50,7 +50,7 @@ public class ConfigurationService {
                 : normalizedBaseUrl.concat("/")),
             "inventory/view/");
 
-    return Config.builder().key(INVENTORY_RECORD_LINK_KEY).value(inventoryRecordLinkValue).build();
+    return new Config().key(INVENTORY_RECORD_LINK_KEY).value(inventoryRecordLinkValue);
   }
 
   /**

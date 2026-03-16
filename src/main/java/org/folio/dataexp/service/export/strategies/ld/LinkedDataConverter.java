@@ -9,6 +9,7 @@ import org.eclipse.rdf4j.rio.WriterConfig;
 import org.eclipse.rdf4j.rio.helpers.BasicWriterSettings;
 import org.folio.rdf4ld.service.Rdf4LdService;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
 
 /** Converter for Linked Data resources. */
 @Log4j2
@@ -22,7 +23,7 @@ public class LinkedDataConverter {
    *
    * @param ldJson Linked Data exported resource JSON as a string
    * @return BIBFRAME 2 JSON-LD as JSON-Lines
-   * @throws JsonProcessingException when input is not valid JSON
+   * @throws JacksonException when input is not valid JSON
    */
   public ByteArrayOutputStream convertLdJsonToBibframe2Rdf(String ldJson)
       throws JsonProcessingException {

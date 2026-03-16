@@ -18,9 +18,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -38,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class TransformationFieldsServiceTest {
@@ -75,7 +74,7 @@ class TransformationFieldsServiceTest {
                     expectedFields.get(transformationField.getFieldId()), transformationField));
   }
 
-  private void mocReferenceData() throws IOException {
+  private void mocReferenceData() {
     HashMap<String, Map<String, JsonObjectWrapper>> map = new HashMap<>();
     map.put(IDENTIFIER_TYPES, ReferenceDataResponseUtil.getIdentifierTypes());
     map.put(ALTERNATIVE_TITLE_TYPES, ReferenceDataResponseUtil.getAlternativeTitleTypes());

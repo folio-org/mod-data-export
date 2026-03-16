@@ -1,13 +1,13 @@
 package org.folio.dataexp.client;
 
 import org.folio.dataexp.domain.dto.User;
-import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /** Feign client for retrieving user information. */
-@FeignClient(name = "users")
+@HttpExchange(url = "users")
 public interface UserClient {
 
   /**
@@ -16,6 +16,6 @@ public interface UserClient {
    * @param userId the user ID
    * @return the user
    */
-  @GetMapping(value = "/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetExchange(value = "/{userId}", accept = MediaType.APPLICATION_JSON_VALUE)
   User getUserById(@PathVariable String userId);
 }

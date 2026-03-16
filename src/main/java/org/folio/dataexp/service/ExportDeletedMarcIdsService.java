@@ -33,15 +33,13 @@ public class ExportDeletedMarcIdsService {
         marcDeletedIdsService.getFileDefinitionForMarcDeletedIds(
             nonNull(request) ? request.getFrom() : null, nonNull(request) ? request.getTo() : null);
     var exportRequest =
-        ExportRequest.builder()
+        new ExportRequest()
             .fileDefinitionId(fileDefinition.getId())
             .jobProfileId(UUID.fromString(DEFAULT_INSTANCE_JOB_PROFILE_ID))
             .all(false)
-            .quick(false)
-            .build();
+            .quick(false);
     dataExportService.postDataExport(exportRequest);
-    return ExportDeletedMarcIdsResponse.builder()
-        .jobExecutionId(fileDefinition.getJobExecutionId())
-        .build();
+    return new ExportDeletedMarcIdsResponse()
+        .jobExecutionId(fileDefinition.getJobExecutionId());
   }
 }

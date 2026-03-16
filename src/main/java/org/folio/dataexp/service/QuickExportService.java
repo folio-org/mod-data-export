@@ -43,10 +43,9 @@ public class QuickExportService {
     dataExportService.postDataExport(
         getExportRequestFromQuickExportRequest(quickExportRequest, fileDefinition));
     var jobExecution = jobExecutionService.getById(fileDefinition.getJobExecutionId());
-    return QuickExportResponse.builder()
+    return new QuickExportResponse()
         .jobExecutionId(fileDefinition.getJobExecutionId())
-        .jobExecutionHrId(jobExecution.getHrId())
-        .build();
+        .jobExecutionHrId(jobExecution.getHrId());
   }
 
   /**

@@ -3,12 +3,12 @@ package org.folio.dataexp.client;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import org.folio.dataexp.domain.dto.AuthorityCollection;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /** Feign client for retrieving authority records. */
-@FeignClient(name = "authority-storage/authorities")
+@HttpExchange(url = "authority-storage/authorities")
 public interface AuthorityClient {
 
   /**
@@ -21,11 +21,11 @@ public interface AuthorityClient {
    * @param offset the starting offset
    * @return a collection of authorities
    */
-  @GetMapping(produces = APPLICATION_JSON_VALUE)
+  @GetExchange(accept = APPLICATION_JSON_VALUE)
   AuthorityCollection getAuthorities(
       @RequestParam boolean idOnly,
       @RequestParam boolean deleted,
-      @RequestParam String query,
+      @RequestParam(required = false) String query,
       @RequestParam long limit,
       @RequestParam long offset);
 }
