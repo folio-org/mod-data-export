@@ -58,18 +58,17 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
    * @return A copy of ExportRequest.
    */
   private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {
-    var exportRequestCopy = new ExportRequest();
-    exportRequestCopy.setFileDefinitionId(exportRequest.getFileDefinitionId());
-    exportRequestCopy.setJobProfileId(exportRequest.getJobProfileId());
-    exportRequestCopy.setRecordType(exportRequest.getRecordType());
-    exportRequestCopy.setIdType(exportRequest.getIdType());
-    exportRequestCopy.setAll(exportRequest.getAll());
-    exportRequestCopy.setQuick(exportRequest.getQuick());
-    exportRequestCopy.setDeletedRecords(exportRequest.getDeletedRecords());
-    exportRequestCopy.setSuppressedFromDiscovery(exportRequest.getSuppressedFromDiscovery());
-    exportRequestCopy.setLastSlice(exportRequest.getLastSlice());
-    exportRequestCopy.setLastExport(exportRequest.getLastExport());
-    exportRequestCopy.setMetadata(exportRequest.getMetadata());
-    return exportRequestCopy;
+    return new ExportRequest()
+        .fileDefinitionId(exportRequest.getFileDefinitionId())
+        .jobProfileId(exportRequest.getJobProfileId())
+        .recordType(exportRequest.getRecordType())
+        .idType(exportRequest.getIdType())
+        .all(exportRequest.getAll())
+        .quick(exportRequest.getQuick())
+        .deletedRecords(exportRequest.getDeletedRecords())
+        .suppressedFromDiscovery(exportRequest.getSuppressedFromDiscovery())
+        .lastSlice(exportRequest.getLastSlice())
+        .lastExport(exportRequest.getLastExport())
+        .metadata(exportRequest.getMetadata());
   }
 }

@@ -43,17 +43,16 @@ public class ExportAuthorityDeletedService {
               true, true, request.getQuery(), request.getLimit(), request.getOffset());
       var fileDefinition =
           getFileDefinition(authorities.getAuthorities().stream().map(Authority::getId).toList());
-      var exportRequest = new ExportRequest();
-      exportRequest.setFileDefinitionId(fileDefinition.getId());
-      exportRequest.setJobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID));
-      exportRequest.setAll(false);
-      exportRequest.setQuick(false);
-      exportRequest.setIdType(ExportRequest.IdTypeEnum.AUTHORITY);
+      var exportRequest = new ExportRequest()
+          .fileDefinitionId(fileDefinition.getId())
+          .jobProfileId(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID))
+          .all(false)
+          .quick(false)
+          .idType(ExportRequest.IdTypeEnum.AUTHORITY);
 
       dataExportService.postDataExport(exportRequest);
-      var response = new ExportAuthorityDeletedResponse();
-      response.setJobExecutionId(fileDefinition.getJobExecutionId());
-      return response;
+      return new ExportAuthorityDeletedResponse()
+          .jobExecutionId(fileDefinition.getJobExecutionId());
     } catch (Exception e) {
       log.error(e);
       throw new AuthorityQueryException(e.getMessage());
