@@ -35,7 +35,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,7 +71,7 @@ class FilesUploadServiceTest {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
 
-    fileUploadService.uploadFile(fileDefinitionId, new PathResource(UPLOADED_FILE_PATH));
+    fileUploadService.uploadFile(fileDefinitionId, new FileSystemResource(UPLOADED_FILE_PATH));
 
     assertEquals(FileDefinition.StatusEnum.COMPLETED, fileDefinition.getStatus());
     verify(fileDefinitionEntityRepository).getReferenceById(fileDefinitionId);
@@ -120,7 +120,7 @@ class FilesUploadServiceTest {
     when(fileDefinitionEntityRepository.getReferenceById(fileDefinitionId))
         .thenReturn(fileDefinitionEntity);
     // When & Then
-    var res = new PathResource(UPLOADED_FILE_PATH);
+    var res = new FileSystemResource(UPLOADED_FILE_PATH);
     var exception =
         assertThrows(
             UploadFileException.class, () -> fileUploadService.uploadFile(fileDefinitionId, res));
@@ -183,7 +183,7 @@ class FilesUploadServiceTest {
         .when(s3Client)
         .write(any(String.class), any(InputStream.class));
     // When & Then
-    var res = new PathResource(UPLOADED_FILE_PATH);
+    var res = new FileSystemResource(UPLOADED_FILE_PATH);
     assertThrows(
         S3ClientException.class, () -> fileUploadService.uploadFile(fileDefinitionId, res));
     assertEquals(FileDefinition.StatusEnum.IN_PROGRESS, fileDefinition.getStatus());

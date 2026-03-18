@@ -3,7 +3,6 @@ package org.folio.dataexp.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.folio.dataexp.domain.dto.Config;
-import org.folio.dataexp.domain.dto.ConfigurationEntry;
 import org.folio.dataexp.domain.entity.ConfigurationEntity;
 import org.folio.dataexp.repository.ConfigurationRepository;
 import org.folio.dataexp.service.validators.ConfigurationValidator;
@@ -18,11 +17,9 @@ public class ConfigurationService {
   /** Key for inventory record link configuration. */
   public static final String INVENTORY_RECORD_LINK_KEY = "inventory_record_link";
 
-  private static final String QUERY_BY_FOLIO_HOST = "code=\"FOLIO_HOST\"";
-
   private final ConfigurationRepository configurationRepository;
   private final ConfigurationValidator configurationValidator;
-  private final ConfigurationEntryService configurationEntryService;
+  private final BaseUrlService baseUrlService;
 
   /**
    * Inserts or updates a configuration value.
@@ -40,25 +37,20 @@ public class ConfigurationService {
     return new Config().key(saved.getKey()).value(saved.getValue());
   }
 
-  /**
-   * Produces the inventory record link based on the FOLIO_HOST config from remote.
-   *
-   * @return Config containing the inventory record link.
-   */
-  public Config produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote() {
-    log.info("Producing the inventory record link.");
-    ConfigurationEntry entryFromRemote =
-        configurationEntryService.retrieveSingleConfigurationEntryByQuery(QUERY_BY_FOLIO_HOST);
-    var folioHostValueFromRemote = entryFromRemote.getValue();
+  /** Produces the inventory record link based on tenant base-url from mod-settings. */
+  public Config produceInventoryRecordLinkBasedOnTenantBaseUrl() {
+    log.info("Producing the inventory record link based on base-url.");
+    var baseUrl = baseUrlService.getBaseUrl();
+    var normalizedBaseUrl = baseUrl == null ? "" : baseUrl;
     var inventoryRecordLinkValue =
         String.join(
             "",
-            (folioHostValueFromRemote.endsWith("/")
-                ? folioHostValueFromRemote
-                : folioHostValueFromRemote.concat("/")),
+            (normalizedBaseUrl.endsWith("/")
+                ? normalizedBaseUrl
+                : normalizedBaseUrl.concat("/")),
             "inventory/view/");
 
-    return Config.builder().key(INVENTORY_RECORD_LINK_KEY).value(inventoryRecordLinkValue).build();
+    return new Config().key(INVENTORY_RECORD_LINK_KEY).value(inventoryRecordLinkValue);
   }
 
   /**

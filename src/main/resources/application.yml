@@ -34,21 +34,18 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
       accept-single-value-as-array: true
-  cloud:
-    openfeign:
-      okhttp:
-        enabled: true
-      client:
-        config:
-          default:
-            connectTimeout: 600000
-            readTimeout: 3600000
   mustache:
     check-template-location: false
+  http:
+    client:
+      connection-timeout: 600000
+      read-timeout: 3600000
 folio:
   tenant:
     validation:
       enabled: true
+  exchange:
+    enabled: true
 management:
   endpoints:
     web:

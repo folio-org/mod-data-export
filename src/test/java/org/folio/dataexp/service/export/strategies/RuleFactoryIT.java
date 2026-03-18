@@ -991,10 +991,9 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
     assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "856".equals(rule.getField())));
 
     var mappingProfile =
-        MappingProfile.builder()
+        new MappingProfile()
             .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-            .fieldsSuppression("008, 020 , 856")
-            .build();
+            .fieldsSuppression("008, 020 , 856");
     var rules = ruleFactory.getRules(mappingProfile);
 
     assertTrue(rules.stream().noneMatch(rule -> "008".equals(rule.getField())));
@@ -1006,10 +1005,9 @@ class RuleFactoryIT extends BaseDataExportInitializerIT {
   @SneakyThrows
   void shouldSuppress999ff() {
     var mappingProfile =
-        MappingProfile.builder()
+        new MappingProfile()
             .recordTypes(Collections.singletonList(RecordTypes.INSTANCE))
-            .suppress999ff(true)
-            .build();
+            .suppress999ff(true);
 
     assertTrue(defaultRulesFromConfigFile.stream().anyMatch(rule -> "999".equals(rule.getField())));
 

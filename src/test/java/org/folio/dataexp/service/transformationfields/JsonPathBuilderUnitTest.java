@@ -3,14 +3,14 @@ package org.folio.dataexp.service.transformationfields;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.SneakyThrows;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 class JsonPathBuilderUnitTest {
 

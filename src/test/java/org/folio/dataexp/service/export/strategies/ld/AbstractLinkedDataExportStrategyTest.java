@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
@@ -55,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.SliceImpl;
+import tools.jackson.core.JacksonException;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractLinkedDataExportStrategyTest {
@@ -102,7 +102,7 @@ class AbstractLinkedDataExportStrategyTest {
   private TestPreparation prepare(int count, boolean include, boolean updateJob) {
     var jobProfileEntity = new JobProfileEntity();
     var jobExecution =
-        JobExecution.builder().progress(new JobExecutionProgress()).id(UUID.randomUUID()).build();
+        new JobExecution().progress(new JobExecutionProgress()).id(UUID.randomUUID());
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setJobProfileId(jobProfileEntity.getId());
@@ -233,7 +233,7 @@ class AbstractLinkedDataExportStrategyTest {
   @SneakyThrows
   @Test
   void saveOutputToLocalStorageConvertErrorTest() {
-    doThrow(JsonProcessingException.class)
+    doThrow(JacksonException.class)
         .when(linkedDataConverter)
         .convertLdJsonToBibframe2Rdf(isA(String.class));
 

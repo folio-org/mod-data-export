@@ -2,6 +2,7 @@ package org.folio.dataexp.service;
 
 import static org.folio.spring.scope.FolioExecutionScopeExecutionContextManager.getRunnableWithCurrentFolioContext;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -61,7 +62,12 @@ public class DataExportService {
   public void postDataExport(ExportRequest exportRequest) {
     var fileDefinitionEntity =
         fileDefinitionEntityRepository.getReferenceById(exportRequest.getFileDefinitionId());
-    var fileDefinition = fileDefinitionEntity.getFileDefinition();
+    FileDefinition fileDefinition;
+    try {
+      fileDefinition = fileDefinitionEntity.getFileDefinition();
+    } catch (EntityNotFoundException e) {
+      throw new EntityNotFoundException("Unable to find");
+    }
     var jobProfileEntity =
         jobProfileEntityRepository.getReferenceById(exportRequest.getJobProfileId());
     var mappingProfileEntity =

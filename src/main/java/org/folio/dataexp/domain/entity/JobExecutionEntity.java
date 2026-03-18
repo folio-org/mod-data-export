@@ -2,7 +2,6 @@ package org.folio.dataexp.domain.entity;
 
 import static java.util.Objects.isNull;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,7 +18,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import org.folio.dataexp.domain.dto.JobExecution;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Entity representing a job execution. */
 @Data
@@ -35,7 +35,7 @@ public class JobExecutionEntity {
   @Id private UUID id;
 
   /** Job execution details stored as JSONB. */
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobExecution jobExecution;
 

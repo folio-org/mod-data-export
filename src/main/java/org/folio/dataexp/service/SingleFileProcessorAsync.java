@@ -58,7 +58,7 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
    * @return A copy of ExportRequest.
    */
   private ExportRequest getExportRequestCopy(ExportRequest exportRequest) {
-    return ExportRequest.builder()
+    return new ExportRequest()
         .fileDefinitionId(exportRequest.getFileDefinitionId())
         .jobProfileId(exportRequest.getJobProfileId())
         .recordType(exportRequest.getRecordType())
@@ -69,7 +69,6 @@ public class SingleFileProcessorAsync extends SingleFileProcessor {
         .suppressedFromDiscovery(exportRequest.getSuppressedFromDiscovery())
         .lastSlice(exportRequest.getLastSlice())
         .lastExport(exportRequest.getLastExport())
-        .metadata(exportRequest.getMetadata())
-        .build();
+        .metadata(exportRequest.getMetadata());
   }
 }

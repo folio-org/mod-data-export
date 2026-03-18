@@ -3,12 +3,12 @@ package org.folio.dataexp.client;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import org.folio.dataexp.domain.dto.Holdings;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /** Feign client for searching consortium holdings. */
-@FeignClient(name = "search/consortium")
+@HttpExchange(url = "search/consortium")
 public interface ConsortiumSearchClient {
 
   /**
@@ -17,6 +17,6 @@ public interface ConsortiumSearchClient {
    * @param holdingId the holding ID
    * @return the holdings record
    */
-  @GetMapping(value = "/holding/{holdingId}", produces = APPLICATION_JSON_VALUE)
+  @GetExchange(value = "/holding/{holdingId}", accept = APPLICATION_JSON_VALUE)
   Holdings getHoldingsById(@PathVariable String holdingId);
 }

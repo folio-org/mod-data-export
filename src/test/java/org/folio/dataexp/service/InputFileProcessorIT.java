@@ -28,7 +28,7 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 class InputFileProcessorIT extends BaseDataExportInitializerIT {
@@ -61,10 +61,10 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
     var path =
         S3FilePathUtils.getPathToUploadedFiles(
             fileDefinition.getId(), fileDefinition.getFileName());
-    var resource = new PathResource(UPLOADED_FILE_PATH_CSV);
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = new JobExecution().id(fileDefinition.getJobExecutionId());
       var jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
@@ -91,10 +91,10 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
     var path =
         S3FilePathUtils.getPathToUploadedFiles(
             fileDefinition.getId(), fileDefinition.getFileName());
-    var resource = new PathResource(UPLOADED_FILE_PATH_WITH_UTF8_BOM_CSV);
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_WITH_UTF8_BOM_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = new JobExecution().id(fileDefinition.getJobExecutionId());
       var jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
@@ -121,10 +121,10 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
     var path =
         S3FilePathUtils.getPathToUploadedFiles(
             fileDefinition.getId(), fileDefinition.getFileName());
-    var resource = new PathResource(UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV);
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_FOR_DUPLICATED_CSV);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = new JobExecution().id(fileDefinition.getJobExecutionId());
       var jobExecutionProgress = new JobExecutionProgress();
       jobExecution.setProgress(jobExecutionProgress);
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
@@ -158,7 +158,7 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
     var path =
         S3FilePathUtils.getPathToUploadedFiles(
             fileDefinition.getId(), fileDefinition.getFileName());
-    var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_CQL);
 
     when(searchClient.submitIdsJob(any(IdsJobPayload.class)))
         .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));
@@ -174,7 +174,7 @@ class InputFileProcessorIT extends BaseDataExportInitializerIT {
     when(searchClient.getResourceIds(any(String.class))).thenReturn(resourceIds);
 
     try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
-      var jobExecution = JobExecution.builder().id(fileDefinition.getJobExecutionId()).build();
+      var jobExecution = new JobExecution().id(fileDefinition.getJobExecutionId());
       jobExecution.setProgress(new JobExecutionProgress());
       var jobExecutionEntity = JobExecutionEntity.fromJobExecution(jobExecution);
       jobExecutionEntityRepository.save(jobExecutionEntity);
