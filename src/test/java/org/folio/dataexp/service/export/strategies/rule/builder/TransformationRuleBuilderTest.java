@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -376,8 +375,7 @@ class TransformationRuleBuilderTest {
     assertThat(updatedRule).isSameAs(existingRule);
     List<DataSource> dataSources = updatedRule.getDataSources();
     assertThat(dataSources).hasSize(3);
-    List<String> subfields =
-        dataSources.stream().map(DataSource::getSubfield).collect(Collectors.toList());
+    List<String> subfields = dataSources.stream().map(DataSource::getSubfield).toList();
     assertThat(subfields).containsExactly("a", "b", "1");
   }
 
