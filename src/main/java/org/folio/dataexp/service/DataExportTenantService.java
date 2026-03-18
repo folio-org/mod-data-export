@@ -1,6 +1,5 @@
 package org.folio.dataexp.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.List;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +18,7 @@ import org.folio.tenant.domain.dto.TenantAttributes;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 /** Service for tenant initialization and reference/configuration data loading. */
 @Service
@@ -171,7 +171,7 @@ public class DataExportTenantService extends TenantService {
   private void setupConfigEntryInventoryRecordLink() {
     log.info("Loading inventory record link value...");
     var inventoryRecordLinkConfig =
-        configurationService.produceInventoryRecordLinkBasedOnFolioHostConfigFromRemote();
+        configurationService.produceInventoryRecordLinkBasedOnTenantBaseUrl();
     var saved = configurationService.upsertConfiguration(inventoryRecordLinkConfig);
     log.info("Loaded inventory record link value: {}", saved.getValue());
   }

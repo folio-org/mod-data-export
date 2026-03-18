@@ -2,14 +2,15 @@ package org.folio.dataexp.client;
 
 import org.folio.dataexp.domain.dto.ConsortiaCollection;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
-import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
 /** Feign client for retrieving consortia and user tenants. */
-@FeignClient(name = "consortia")
+@HttpExchange(url = "consortia")
 public interface ConsortiumClient {
 
   /**
@@ -17,7 +18,7 @@ public interface ConsortiumClient {
    *
    * @return a collection of consortia
    */
-  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetExchange(accept = MediaType.APPLICATION_JSON_VALUE)
   ConsortiaCollection getConsortia();
 
   /**

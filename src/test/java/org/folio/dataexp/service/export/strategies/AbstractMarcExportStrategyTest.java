@@ -78,7 +78,7 @@ class AbstractMarcExportStrategyTest {
   @Test
   void saveOutputToLocalStorageTest() {
     var progress = new JobExecutionProgress();
-    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
+    var jobExecution = new JobExecution().progress(progress).id(UUID.randomUUID());
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());
@@ -158,7 +158,7 @@ class AbstractMarcExportStrategyTest {
   @Test
   void saveOutputToLocalStorageWhenMarcJsonInvalidTest() {
     var progress = new JobExecutionProgress();
-    var jobExecution = JobExecution.builder().progress(progress).id(UUID.randomUUID()).build();
+    var jobExecution = new JobExecution().progress(progress).id(UUID.randomUUID());
     var jobProfileEntity = new JobProfileEntity();
     jobProfileEntity.setId(UUID.randomUUID());
     jobExecution.setId(UUID.randomUUID());

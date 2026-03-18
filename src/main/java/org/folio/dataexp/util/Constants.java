@@ -19,6 +19,8 @@ public class Constants {
   /** Default Okapi URL placeholder. */
   public static final String OKAPI_URL = "http://_";
 
+  public static final String OKAPI = "_";
+
   /** Comma character. */
   public static final String COMMA = ",";
 

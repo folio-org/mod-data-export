@@ -3,7 +3,6 @@ package org.folio.dataexp.domain.entity;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -22,7 +21,9 @@ import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.UserInfo;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /** Entity representing a mapping profile. */
 @Data
@@ -38,7 +39,7 @@ public class MappingProfileEntity {
   @Id private UUID id;
 
   /** Mapping profile details stored as JSONB. */
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private MappingProfile mappingProfile;
 
@@ -109,7 +110,7 @@ public class MappingProfileEntity {
         .updatedByUserId(metadata.getUpdatedByUserId())
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
-        .locked(mappingProfile.getLocked())
+        .locked(ofNullable(mappingProfile.getLocked()).orElse(false))
         .lockedBy(mappingProfile.getLockedBy())
         .lockedAt(
             ofNullable(mappingProfile.getLockedAt())

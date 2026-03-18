@@ -10,8 +10,6 @@ import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static software.amazon.awssdk.utils.StringUtils.isEmpty;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +34,8 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.marc4j.MarcException;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /** Service for managing error logs, including saving, updating, and retrieving error logs. */
 @Service
@@ -111,7 +111,7 @@ public class ErrorLogService {
           folioExecutionContext.getUserId().toString(),
           errorLog.getJobExecutionId(),
           jobProfileId);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       log.error("Error log was not inserted: {}", e.getMessage());
     }
     return errorLog;

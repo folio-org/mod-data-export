@@ -56,4 +56,14 @@ class ConfigurationServiceIT extends BaseDataExportInitializerIT {
       assertEquals("2", configurationService.getValue("config2"));
     }
   }
+
+  @Test
+  void produceInventoryRecordLinkBasedOnTenantBaseUrlTest() {
+    try (var context = new FolioExecutionContextSetter(folioExecutionContext)) {
+      var config = configurationService.produceInventoryRecordLinkBasedOnTenantBaseUrl();
+
+      assertEquals("inventory_record_link", config.getKey());
+      assertEquals("http://localhost:9130/inventory/view/", config.getValue());
+    }
+  }
 }

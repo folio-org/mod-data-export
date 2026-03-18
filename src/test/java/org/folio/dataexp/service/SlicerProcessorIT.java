@@ -28,7 +28,7 @@ import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.scope.FolioExecutionContextSetter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.PathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -56,7 +56,7 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
     fileDefinition.setUploadFormat(FileDefinition.UploadFormatEnum.CQL);
 
     var progress = new JobExecutionProgress();
-    var jobExecution = JobExecution.builder().id(UUID.randomUUID()).build();
+    var jobExecution = new JobExecution().id(UUID.randomUUID());
     jobExecution.setProgress(progress);
     fileDefinition.setJobExecutionId(jobExecution.getId());
 
@@ -65,7 +65,7 @@ class SlicerProcessorIT extends BaseDataExportInitializerIT {
     var path =
         S3FilePathUtils.getPathToUploadedFiles(
             fileDefinition.getId(), fileDefinition.getFileName());
-    var resource = new PathResource(UPLOADED_FILE_PATH_CQL);
+    var resource = new FileSystemResource(UPLOADED_FILE_PATH_CQL);
 
     when(searchClient.submitIdsJob(any(IdsJobPayload.class)))
         .thenReturn(new IdsJob().withId(UUID.randomUUID()).withStatus(IdsJob.Status.COMPLETED));

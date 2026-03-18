@@ -3,7 +3,6 @@ package org.folio.dataexp.domain.entity;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -19,7 +18,8 @@ import lombok.With;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.UserInfo;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Entity representing a job profile. */
 @Data
@@ -35,7 +35,7 @@ public class JobProfileEntity {
   @Id private UUID id;
 
   /** Job profile details stored as JSONB. */
-  @Type(JsonBinaryType.class)
+  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "jsonb", columnDefinition = "jsonb")
   private JobProfile jobProfile;
 
@@ -100,7 +100,7 @@ public class JobProfileEntity {
         .updatedByFirstName(userInfo.getFirstName())
         .updatedByLastName(userInfo.getLastName())
         .mappingProfileId(jobProfile.getMappingProfileId())
-        .locked(jobProfile.getLocked())
+        .locked(ofNullable(jobProfile.getLocked()).orElse(false))
         .lockedBy(jobProfile.getLockedBy())
         .lockedAt(
             ofNullable(jobProfile.getLockedAt())

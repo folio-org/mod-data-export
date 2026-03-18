@@ -1,7 +1,5 @@
 package org.folio.dataexp.service.transformationfields;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,6 +40,8 @@ import org.folio.dataexp.domain.dto.NatureOfContentTerm;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /** Service for retrieving reference data from various clients. */
 @Service
