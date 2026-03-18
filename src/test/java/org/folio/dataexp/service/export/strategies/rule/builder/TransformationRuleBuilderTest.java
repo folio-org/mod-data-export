@@ -1,34 +1,33 @@
 package org.folio.dataexp.service.export.strategies.rule.builder;
 
-import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.util.ErrorCode.ERROR_RULE_NO_INDICATORS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
 import org.folio.dataexp.exception.TransformationRuleException;
 import org.folio.processor.rule.DataSource;
 import org.folio.processor.rule.Rule;
-import static org.folio.dataexp.util.ErrorCode.ERROR_RULE_NO_INDICATORS;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import java.util.Map;
-import java.util.HashMap;
-import org.assertj.core.api.InstanceOfAssertFactories;
-import org.folio.dataexp.util.ErrorCode;
-import java.util.stream.Collectors;
 
 class TransformationRuleBuilderTest {
 
-    private static Stream<Arguments> itemTypeRuleFlagScenarios() {
+  private static Stream<Arguments> itemTypeRuleFlagScenarios() {
     // Scenario 2 setup
     var existingRule = new Rule();
     existingRule.setField("900");
@@ -46,16 +45,15 @@ class TransformationRuleBuilderTest {
         Arguments.of(new ArrayList<Rule>(), RecordTypes.INSTANCE, false));
   }
 
-    private static Stream<Arguments> translationFunctionScenarios() {
+  private static Stream<Arguments> translationFunctionScenarios() {
     return Stream.of(
         Arguments.of("instance.materialtypeid", "set_material_type"),
-        Arguments.of("holdings.permanentlocation.name", "set_location")
-    );
-}
+        Arguments.of("holdings.permanentlocation.name", "set_location"));
+  }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-50149264138c9b470c2cf9a7a31088c3")
   void buildShouldCreateNewRuleWhenNoExistingRuleMatches() throws TransformationRuleException {
-    // TestMate-50149264138c9b470c2cf9a7a31088c3
     // Given
     var transformationRuleBuilder = new TransformationRuleBuilder();
     var rules = new ArrayList<Rule>();
@@ -71,7 +69,8 @@ class TransformationRuleBuilderTest {
     Rule createdRule = resultRuleOptional.get();
     assertEquals("900", createdRule.getField());
     assertEquals("ff", createdRule.getIndicators());
-    assertFalse(createdRule.isItemTypeRule(), "isItemTypeRule should be false for INSTANCE record type");
+    assertFalse(
+        createdRule.isItemTypeRule(), "isItemTypeRule should be false for INSTANCE record type");
     List<DataSource> dataSources = createdRule.getDataSources();
     assertThat(dataSources).hasSize(3);
     // Verify the data source for the subfield '$a'
@@ -95,12 +94,11 @@ class TransformationRuleBuilderTest {
     assertThat(indicator2DataSource.getTranslation().getParameters()).containsEntry("value", "f");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-330ae08fcde919fd7e0df336a4315042")
   void buildShouldAppendToExistingRuleWhenFieldAndIndicatorsMatch()
       throws TransformationRuleException {
-    // TestMate-330ae08fcde919fd7e0df336a4315042
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
     var initialDataSource = new DataSource();
     initialDataSource.setFrom("$.instance.id");
     initialDataSource.setSubfield("a");
@@ -116,6 +114,7 @@ class TransformationRuleBuilderTest {
     mappingTransformation.setTransformation("900ff$b");
     mappingTransformation.setPath("$.instance.hrid");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When
     Optional<Rule> resultRuleOptional =
         transformationRuleBuilder.build(rules, mappingTransformation);
@@ -133,12 +132,11 @@ class TransformationRuleBuilderTest {
     assertEquals("$.instance.hrid", newDataSource.getFrom());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-97865dbaab229b626052d786076545c7")
   void buildShouldCreateNewRuleWhenFieldMatchesButIndicatorsDiffer()
       throws TransformationRuleException {
-    // TestMate-97865dbaab229b626052d786076545c7
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
     var existingDataSource = new DataSource();
     existingDataSource.setFrom("$.existing.path");
     existingDataSource.setSubfield("z");
@@ -152,6 +150,7 @@ class TransformationRuleBuilderTest {
     mappingTransformation.setTransformation("90011$a");
     mappingTransformation.setPath("$.instance.id");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When
     Optional<Rule> resultRuleOptional =
         transformationRuleBuilder.build(rules, mappingTransformation);
@@ -164,31 +163,33 @@ class TransformationRuleBuilderTest {
     assertFalse(createdRule.isItemTypeRule());
     List<DataSource> createdDataSources = createdRule.getDataSources();
     assertThat(createdDataSources).hasSize(3);
-    DataSource subfieldDataSource = createdDataSources.stream()
-        .filter(ds -> "a".equals(ds.getSubfield()))
-        .findFirst()
-        .orElseThrow();
+    DataSource subfieldDataSource =
+        createdDataSources.stream()
+            .filter(ds -> "a".equals(ds.getSubfield()))
+            .findFirst()
+            .orElseThrow();
     assertEquals("$.instance.id", subfieldDataSource.getFrom());
-    DataSource indicator1DataSource = createdDataSources.stream()
-        .filter(ds -> "1".equals(ds.getIndicator()))
-        .findFirst()
-        .orElseThrow();
+    DataSource indicator1DataSource =
+        createdDataSources.stream()
+            .filter(ds -> "1".equals(ds.getIndicator()))
+            .findFirst()
+            .orElseThrow();
     assertEquals("set_value", indicator1DataSource.getTranslation().getFunction());
     assertThat(indicator1DataSource.getTranslation().getParameters()).containsEntry("value", "1");
-    DataSource indicator2DataSource = createdDataSources.stream()
-        .filter(ds -> "2".equals(ds.getIndicator()))
-        .findFirst()
-        .orElseThrow();
+    DataSource indicator2DataSource =
+        createdDataSources.stream()
+            .filter(ds -> "2".equals(ds.getIndicator()))
+            .findFirst()
+            .orElseThrow();
     assertEquals("set_value", indicator2DataSource.getTranslation().getFunction());
     assertThat(indicator2DataSource.getTranslation().getParameters()).containsEntry("value", "1");
     assertThat(existingRule.getDataSources()).hasSize(1);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-9d539f2dd9b2f6652f471ccd75ddca08")
   void buildShouldThrowExceptionWhenExistingRuleHasNullIndicators() {
-    // TestMate-9d539f2dd9b2f6652f471ccd75ddca08
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
     var invalidRule = new Rule();
     invalidRule.setField("900");
     invalidRule.setIndicators(null);
@@ -196,6 +197,7 @@ class TransformationRuleBuilderTest {
     rules.add(invalidRule);
     var mappingTransformation = new Transformations();
     mappingTransformation.setTransformation("900ff$a");
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When & Then
     var exception =
         assertThrows(
@@ -205,12 +207,12 @@ class TransformationRuleBuilderTest {
     assertEquals(expectedMessage, exception.getMessage());
   }
 
-    @ParameterizedTest
+  @ParameterizedTest
   @MethodSource("itemTypeRuleFlagScenarios")
+  @TestMate(name = "TestMate-2b6c9986afec2112e03439591196293b")
   void buildShouldSetItemTypeRuleFlagCorrectly(
       ArrayList<Rule> initialRules, RecordTypes recordType, boolean expectedIsItemTypeRule)
       throws TransformationRuleException {
-    // TestMate-2b6c9986afec2112e03439591196293b
     // Given
     var transformationRuleBuilder = new TransformationRuleBuilder();
     var mappingTransformation = new Transformations();
@@ -232,12 +234,11 @@ class TransformationRuleBuilderTest {
     }
   }
 
-    @Test
-  void buildShouldAddMetadataToRuleWhenPresentInTransformation() throws TransformationRuleException {
-    // TestMate-ea4472693a769cc88bbc2838983e3255
+  @Test
+  @TestMate(name = "TestMate-ea4472693a769cc88bbc2838983e3255")
+  void buildShouldAddMetadataToRuleWhenPresentInTransformation()
+      throws TransformationRuleException {
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
-    var rules = new ArrayList<Rule>();
     var metadata = new HashMap<String, String>();
     metadata.put("createdDate", "$.instance.metadata.createdDate");
     var mappingTransformation = new Transformations();
@@ -245,6 +246,8 @@ class TransformationRuleBuilderTest {
     mappingTransformation.setPath("$.instance.id");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
     mappingTransformation.setMetadataParameters(metadata);
+    var rules = new ArrayList<Rule>();
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When
     Optional<Rule> resultRuleOptional =
         transformationRuleBuilder.build(rules, mappingTransformation);
@@ -252,17 +255,16 @@ class TransformationRuleBuilderTest {
     assertTrue(resultRuleOptional.isPresent(), "A rule should have been created");
     Rule createdRule = resultRuleOptional.get();
     assertThat(createdRule.getMetadata()).isNotNull();
-    assertThat(createdRule.getMetadata().getData())
-        .hasSize(1)
-        .containsKey("createdDate");
+    assertThat(createdRule.getMetadata().getData()).hasSize(1).containsKey("createdDate");
     assertThat(createdRule.getMetadata().getData().get("createdDate").getFrom())
         .isEqualTo("$.instance.metadata.createdDate");
   }
 
-    @ParameterizedTest
-@MethodSource("translationFunctionScenarios")
-void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expectedFunction) throws TransformationRuleException {
-    // TestMate-0960c0f13f4728cc2d28cba6d1308a74
+  @ParameterizedTest
+  @MethodSource("translationFunctionScenarios")
+  @TestMate(name = "TestMate-0960c0f13f4728cc2d28cba6d1308a74")
+  void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expectedFunction)
+      throws TransformationRuleException {
     // Given
     var transformationRuleBuilder = new TransformationRuleBuilder();
     var rules = new ArrayList<Rule>();
@@ -272,21 +274,24 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
     mappingTransformation.setPath("$.some.path");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
     // When
-    Optional<Rule> resultRuleOptional = transformationRuleBuilder.build(rules, mappingTransformation);
+    Optional<Rule> resultRuleOptional =
+        transformationRuleBuilder.build(rules, mappingTransformation);
     // Then
     assertTrue(resultRuleOptional.isPresent(), "A rule should have been created");
     Rule createdRule = resultRuleOptional.get();
-    DataSource dataSource = createdRule.getDataSources().stream()
-        .filter(ds -> "a".equals(ds.getSubfield()))
-        .findFirst()
-        .orElseThrow();
+    DataSource dataSource =
+        createdRule.getDataSources().stream()
+            .filter(ds -> "a".equals(ds.getSubfield()))
+            .findFirst()
+            .orElseThrow();
     assertThat(dataSource.getTranslation()).isNotNull();
     assertEquals(expectedFunction, dataSource.getTranslation().getFunction());
-}
+  }
 
-    @Test
-  void buildShouldNotApplyAnyTranslationWhenFieldIdDoesNotMatch() throws TransformationRuleException {
-    // TestMate-574da94c950fbac97f1e0bc53a9368b0
+  @Test
+  @TestMate(name = "TestMate-574da94c950fbac97f1e0bc53a9368b0")
+  void buildShouldNotApplyAnyTranslationWhenFieldIdDoesNotMatch()
+      throws TransformationRuleException {
     // Given
     var transformationRuleBuilder = new TransformationRuleBuilder();
     var rules = new ArrayList<Rule>();
@@ -307,13 +312,12 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
             .findFirst()
             .orElseThrow();
     assertNull(
-        dataSource.getTranslation(),
-        "Translation should be null for a non-matching fieldId");
+        dataSource.getTranslation(), "Translation should be null for a non-matching fieldId");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-7735df8988f9dc177a71ebb2b566f2f0")
   void buildShouldHandleTransformationWithoutSubfield() throws TransformationRuleException {
-    // TestMate-7735df8988f9dc177a71ebb2b566f2f0
     // Given
     var transformationRuleBuilder = new TransformationRuleBuilder();
     var rules = new ArrayList<Rule>();
@@ -339,11 +343,10 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
     // Therefore, we only verify the primary data source.
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-4a5f32490fe0e02ceaca01654dc80f3b")
   void buildShouldSortDataSourcesBySubfield() throws TransformationRuleException {
-    // TestMate-4a5f32490fe0e02ceaca01654dc80f3b
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
     var dataSourceB = new DataSource();
     dataSourceB.setSubfield("b");
     dataSourceB.setFrom("path.for.b");
@@ -363,6 +366,7 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
     mappingTransformation.setTransformation("900ff$a");
     mappingTransformation.setPath("path.for.a");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When
     Optional<Rule> resultRuleOptional =
         transformationRuleBuilder.build(rules, mappingTransformation);
@@ -377,11 +381,10 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
     assertThat(subfields).containsExactly("a", "b", "1");
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-8f3c0b8ff8d064c6f86cb2543cf0f24f")
   void buildShouldNotUpdateItemTypeRuleFlagIfAlreadyTrue() throws TransformationRuleException {
-    // TestMate-8f3c0b8ff8d064c6f86cb2543cf0f24f
     // Given
-    var transformationRuleBuilder = new TransformationRuleBuilder();
     var existingDataSource = new DataSource();
     existingDataSource.setSubfield("a");
     var existingRule = new Rule();
@@ -397,6 +400,7 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
     mappingTransformation.setTransformation("900ff$b");
     mappingTransformation.setPath("$.instance.hrid");
     mappingTransformation.setRecordType(RecordTypes.INSTANCE);
+    var transformationRuleBuilder = new TransformationRuleBuilder();
     // When
     Optional<Rule> resultRuleOptional =
         transformationRuleBuilder.build(rules, mappingTransformation);
@@ -409,5 +413,4 @@ void buildShouldApplyTranslationForMatchingFieldId(String fieldId, String expect
         returnedRule.isItemTypeRule(),
         "The isItemTypeRule flag should remain true after an INSTANCE transformation");
   }
-
 }
