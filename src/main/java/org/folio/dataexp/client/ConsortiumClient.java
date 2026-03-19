@@ -3,7 +3,6 @@ package org.folio.dataexp.client;
 import org.folio.dataexp.domain.dto.ConsortiaCollection;
 import org.folio.dataexp.domain.dto.UserTenantCollection;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -29,7 +28,7 @@ public interface ConsortiumClient {
    * @param limit the maximum number of records to return
    * @return a collection of user tenants
    */
-  @GetMapping(value = "/{consortiumId}/user-tenants", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetExchange(value = "/{consortiumId}/user-tenants", accept = MediaType.APPLICATION_JSON_VALUE)
   UserTenantCollection getConsortiaUserTenants(
       @PathVariable String consortiumId, @RequestParam String userId, @RequestParam int limit);
 }
