@@ -7,6 +7,7 @@ import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -402,5 +403,52 @@ class ErrorLogServiceTest {
     assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
     assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
     assertEquals(notFoundUuid, capturedErrorLog.getErrorMessageValues().get(0));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-38d9d6eaaa9bb23496731f9cc7ef7a12")
+  @SneakyThrows
+  void populateUuidsNotFoundErrorLogShouldHandleMultipleNewUuids() {
+    // Given
+    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
+    var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
+    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
+            jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
+        .thenReturn(new ArrayList<>());
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(jobExecutionService.getById(jobExecutionId))
+        .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
+    when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    var uuid1 = "d1b2c3d4-e5f6-7890-1234-567890abcdef";
+    var uuid2 = "e1b2c3d4-e5f6-7890-1234-567890fedcba";
+    var notFoundUuids = List.of(uuid1, uuid2);
+    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("jsonString");
+    // When
+    errorLogService.populateUuidsNotFoundErrorLog(jobExecutionId, notFoundUuids);
+    // Then
+    verify(errorLogEntityCqlRepository)
+        .getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            eq("jsonString"),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(jobProfileId));
+    var capturedErrorLog = errorLogCaptor.getValue();
+    assertEquals(SOME_UUIDS_NOT_FOUND.getCode(), capturedErrorLog.getErrorMessageCode());
+    assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
+    assertEquals(ErrorLog.LogLevelEnum.ERROR, capturedErrorLog.getLogLevel());
+
+    var messageValues = capturedErrorLog.getErrorMessageValues();
+    assertEquals(1, messageValues.size());
+
+    var formattedUuids = messageValues.get(0);
+    assertEquals(uuid1 + ", " + uuid2, formattedUuids);
+    assertFalse(formattedUuids.contains("["));
+    assertFalse(formattedUuids.contains("]"));
   }
 }
