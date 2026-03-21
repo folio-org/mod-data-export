@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -1063,7 +1062,7 @@ class MappingProfileServiceTest {
     var offset = 0;
     var limit = 5;
     var offsetRequest = OffsetRequest.of(offset, limit);
-    when(mappingProfileEntityCqlRepository.findByCql(eq(query), eq(offsetRequest)))
+    when(mappingProfileEntityCqlRepository.findByCql(query, offsetRequest))
         .thenReturn(Page.empty(offsetRequest));
     // When
     MappingProfileCollection result =
@@ -1071,7 +1070,7 @@ class MappingProfileServiceTest {
     // Then
     assertThat(result.getMappingProfiles()).isEmpty();
     assertThat(result.getTotalRecords()).isZero();
-    verify(mappingProfileEntityCqlRepository).findByCql(eq(query), eq(offsetRequest));
+    verify(mappingProfileEntityCqlRepository).findByCql(query, offsetRequest);
   }
 
   @Test

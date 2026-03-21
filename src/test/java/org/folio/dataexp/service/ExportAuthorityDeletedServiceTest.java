@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -123,8 +122,7 @@ class ExportAuthorityDeletedServiceTest {
 
   @Test
   @TestMate(name = "TestMate-c5166343d16b1772953cfaeefaec8993")
-  void testPostExportDeletedAuthorityWhenNoAuthoritiesFoundShouldCreateEmptyFileAndTriggerExport()
-      throws IOException {
+  void testPostExportDeletedAuthorityWhenNoAuthoritiesFoundShouldCreateEmptyFileAndTriggerExport() {
     // Given
     var request = new ExportAuthorityDeletedRequest();
     request.setQuery("id=none");
