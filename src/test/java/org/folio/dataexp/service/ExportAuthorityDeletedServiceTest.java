@@ -1,19 +1,28 @@
 package org.folio.dataexp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID;
 import static org.folio.dataexp.util.Constants.DELETED_AUTHORITIES_FILE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.AuthorityClient;
+import org.folio.dataexp.domain.dto.Authority;
 import org.folio.dataexp.domain.dto.AuthorityCollection;
 import org.folio.dataexp.domain.dto.ExportAuthorityDeletedRequest;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
+import org.folio.dataexp.exception.authority.AuthorityQueryException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,16 +30,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.Resource;
-import static org.mockito.ArgumentMatchers.eq;
-import java.io.IOException;
-import java.util.List;
-import org.folio.dataexp.domain.dto.Authority;
 import org.springframework.core.io.ByteArrayResource;
-import static org.folio.dataexp.util.Constants.DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID;
-import java.util.Collections;
-import org.folio.dataexp.exception.authority.AuthorityQueryException;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
 class ExportAuthorityDeletedServiceTest {
@@ -43,11 +44,9 @@ class ExportAuthorityDeletedServiceTest {
 
   @Captor private ArgumentCaptor<ExportRequest> exportRequestArgumentCaptor;
 
-    @Captor
-  private ArgumentCaptor<Resource> resourceCaptor;
+  @Captor private ArgumentCaptor<Resource> resourceCaptor;
 
-    @Captor
-  private ArgumentCaptor<ExportRequest> exportRequestCaptor;
+  @Captor private ArgumentCaptor<ExportRequest> exportRequestCaptor;
 
   @Test
   @SneakyThrows
@@ -79,9 +78,9 @@ class ExportAuthorityDeletedServiceTest {
     assertThat(exportRequest.getJobProfileId()).isInstanceOf(UUID.class);
   }
 
-    @Test
-  void testPostExportDeletedAuthorityWhenAuthoritiesFoundShouldCorrectlyFormatFileUploadContent() throws IOException {
-    // TestMate-ce089722237a638589ba28036d2942f6
+  @Test
+  @TestMate(name = "TestMate-ce089722237a638589ba28036d2942f6")
+  void testPostExportDeletedAuthorityWhenAuthoritiesFoundShouldCorrectlyFormatFileUploadContent() {
     // Given
     var authorityId1 = "authority-uuid-1";
     var authorityId2 = "authority-uuid-2";
@@ -97,10 +96,11 @@ class ExportAuthorityDeletedServiceTest {
     request.setOffset(0);
     var fileDefinitionId = UUID.fromString("00000000-1111-2222-3333-444444444444");
     var jobExecutionId = UUID.fromString("f0e9d8c7-b6a5-4321-fedc-ba9876543210");
-    var fileDefinition = new FileDefinition()
-        .id(fileDefinitionId)
-        .jobExecutionId(jobExecutionId)
-        .fileName(DELETED_AUTHORITIES_FILE_NAME);
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName(DELETED_AUTHORITIES_FILE_NAME);
     when(authorityClient.getAuthorities(true, true, "id=all", 10, 0))
         .thenReturn(authorityCollection);
     when(fileDefinitionsService.postFileDefinition(any(FileDefinition.class)))
@@ -121,9 +121,10 @@ class ExportAuthorityDeletedServiceTest {
     assertThat(capturedExportRequest.getIdType()).isEqualTo(ExportRequest.IdTypeEnum.AUTHORITY);
   }
 
-    @Test
-  void testPostExportDeletedAuthorityWhenNoAuthoritiesFoundShouldCreateEmptyFileAndTriggerExport() throws IOException {
-    // TestMate-c5166343d16b1772953cfaeefaec8993
+  @Test
+  @TestMate(name = "TestMate-c5166343d16b1772953cfaeefaec8993")
+  void testPostExportDeletedAuthorityWhenNoAuthoritiesFoundShouldCreateEmptyFileAndTriggerExport()
+      throws IOException {
     // Given
     var request = new ExportAuthorityDeletedRequest();
     request.setQuery("id=none");
@@ -133,17 +134,18 @@ class ExportAuthorityDeletedServiceTest {
     authorityCollection.setAuthorities(Collections.emptyList());
     var fileDefinitionId = UUID.fromString("00000000-1111-2222-3333-444444444444");
     var jobExecutionId = UUID.fromString("f0e9d8c7-b6a5-4321-fedc-ba9876543210");
-    var fileDefinition = new FileDefinition()
-        .id(fileDefinitionId)
-        .jobExecutionId(jobExecutionId)
-        .fileName(DELETED_AUTHORITIES_FILE_NAME);
-    var fileDefCaptor = ArgumentCaptor.forClass(FileDefinition.class);
+    var fileDefinition =
+        new FileDefinition()
+            .id(fileDefinitionId)
+            .jobExecutionId(jobExecutionId)
+            .fileName(DELETED_AUTHORITIES_FILE_NAME);
     when(authorityClient.getAuthorities(true, true, "id=none", 10, 0))
         .thenReturn(authorityCollection);
     when(fileDefinitionsService.postFileDefinition(any(FileDefinition.class)))
         .thenReturn(fileDefinition);
     when(fileDefinitionsService.uploadFile(eq(fileDefinitionId), any(Resource.class)))
         .thenReturn(fileDefinition);
+    var fileDefCaptor = ArgumentCaptor.forClass(FileDefinition.class);
     // When
     var response = exportAuthorityDeletedService.postExportDeletedAuthority(request);
     // Then
@@ -160,12 +162,14 @@ class ExportAuthorityDeletedServiceTest {
     var capturedExportRequest = exportRequestCaptor.getValue();
     assertThat(capturedExportRequest.getFileDefinitionId()).isEqualTo(fileDefinitionId);
     assertThat(capturedExportRequest.getIdType()).isEqualTo(ExportRequest.IdTypeEnum.AUTHORITY);
-    assertThat(capturedExportRequest.getJobProfileId()).isEqualTo(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID));
+    assertThat(capturedExportRequest.getJobProfileId())
+        .isEqualTo(UUID.fromString(DEFAULT_AUTHORITY_DELETED_JOB_PROFILE_ID));
   }
 
-    @Test
-  void testPostExportDeletedAuthorityWhenDependencyThrowsExceptionShouldThrowAuthorityQueryException() {
-    // TestMate-a1392a096ad9b7ae77f37e2c41899c67
+  @Test
+  @TestMate(name = "TestMate-a1392a096ad9b7ae77f37e2c41899c67")
+  void
+      testPostExportDeletedAuthorityWhenDependencyThrowsExceptShouldThrowAuthorityQueryException() {
     // Given
     var request = new ExportAuthorityDeletedRequest();
     request.setQuery("id=error");
@@ -175,8 +179,10 @@ class ExportAuthorityDeletedServiceTest {
     when(authorityClient.getAuthorities(true, true, "id=error", 10, 0))
         .thenThrow(new RuntimeException(errorMessage));
     // When
-    var exception = assertThrows(AuthorityQueryException.class, () ->
-        exportAuthorityDeletedService.postExportDeletedAuthority(request));
+    var exception =
+        assertThrows(
+            AuthorityQueryException.class,
+            () -> exportAuthorityDeletedService.postExportDeletedAuthority(request));
     // Then
     assertEquals(errorMessage, exception.getMessage());
   }

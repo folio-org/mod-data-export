@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.folio.dataexp.util.Constants.QUERY_CQL_JOB_PROFILE_BY_MAPPING;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -21,6 +22,7 @@ import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobProfile;
 import org.folio.dataexp.domain.dto.JobProfileCollection;
 import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.Transformations;
@@ -44,10 +46,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import static org.mockito.ArgumentMatchers.eq;
-import org.folio.dataexp.domain.dto.MappingProfileCollection;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 @ExtendWith(MockitoExtension.class)
 class MappingProfileServiceTest {
@@ -1055,7 +1055,7 @@ class MappingProfileServiceTest {
     verify(permissionsValidator, never()).checkLockMappingProfilePermission();
   }
 
-    @Test
+  @Test
   void getMappingProfilesWhenRepositoryReturnsEmptyPageShouldReturnEmptyCollection() {
     // TestMate-bc1bc43be113a0ff08520bb8cad6b8f0
     // Given
@@ -1066,16 +1066,17 @@ class MappingProfileServiceTest {
     when(mappingProfileEntityCqlRepository.findByCql(eq(query), eq(offsetRequest)))
         .thenReturn(Page.empty(offsetRequest));
     // When
-    MappingProfileCollection result = mappingProfileService.getMappingProfiles(query, offset, limit);
+    MappingProfileCollection result =
+        mappingProfileService.getMappingProfiles(query, offset, limit);
     // Then
     assertThat(result.getMappingProfiles()).isEmpty();
     assertThat(result.getTotalRecords()).isZero();
     verify(mappingProfileEntityCqlRepository).findByCql(eq(query), eq(offsetRequest));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-50fa7af90610e3167cd6ed6a94090ef8")
   void getMappingProfilesShouldCorrectlyMapMultipleEntitiesToDtos() {
-    // TestMate-50fa7af90610e3167cd6ed6a94090ef8
     // Given
     var id1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var id2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -1089,18 +1090,13 @@ class MappingProfileServiceTest {
     var profile2 = new MappingProfile();
     profile2.setId(id2);
     profile2.setName("Profile 2");
-    var entity1 = MappingProfileEntity.builder()
-        .id(id1)
-        .mappingProfile(profile1)
-        .build();
-    var entity2 = MappingProfileEntity.builder()
-        .id(id2)
-        .mappingProfile(profile2)
-        .build();
+    var entity1 = MappingProfileEntity.builder().id(id1).mappingProfile(profile1).build();
+    var entity2 = MappingProfileEntity.builder().id(id2).mappingProfile(profile2).build();
     var page = new PageImpl<>(List.of(entity1, entity2));
     when(mappingProfileEntityCqlRepository.findByCql(query, offsetRequest)).thenReturn(page);
     // When
-    MappingProfileCollection result = mappingProfileService.getMappingProfiles(query, offset, limit);
+    MappingProfileCollection result =
+        mappingProfileService.getMappingProfiles(query, offset, limit);
     // Then
     assertThat(result.getMappingProfiles()).hasSize(2);
     assertThat(result.getMappingProfiles().get(0).getId()).isEqualTo(id1);
