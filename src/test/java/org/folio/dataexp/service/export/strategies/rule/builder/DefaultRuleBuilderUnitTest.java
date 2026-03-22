@@ -86,10 +86,9 @@ class DefaultRuleBuilderUnitTest {
     assertThat(result).isEmpty();
   }
 
-    @Test
-  @TestMate(name = "TestMate-testBuildShouldIgnoreRulesWithNullIds")
+  @Test
+  @TestMate(name = "TestMate-9245c9bb38f312c03e14dbca44993299")
   void testBuildShouldIgnoreRulesWithNullIds() {
-    // TestMate-9245c9bb38f312c03e14dbca44993299
     // Given
     DefaultRuleBuilder ruleBuilder = new DefaultRuleBuilder();
     String targetFieldId = "target-id";
@@ -101,8 +100,6 @@ class DefaultRuleBuilderUnitTest {
     // When
     Optional<Rule> actualRuleOptional = ruleBuilder.build(rules, targetFieldId);
     // Then
-    assertThat(actualRuleOptional)
-        .isPresent()
-        .containsSame(targetRule);
+    assertThat(actualRuleOptional).isPresent().containsSame(targetRule);
   }
 }
