@@ -1,22 +1,5 @@
 package org.folio.dataexp.service.transformationfields;
 
-import static org.folio.dataexp.util.ExternalPathResolver.LOCATIONS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-import org.folio.dataexp.service.ConsortiaService;
-import org.folio.processor.referencedata.JsonObjectWrapper;
-import org.folio.spring.FolioExecutionContext;
-import org.folio.spring.FolioModuleMetadata;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.util.ExternalPathResolver.ALTERNATIVE_TITLE_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.CONTRIBUTOR_NAME_TYPES;
@@ -26,8 +9,26 @@ import static org.folio.dataexp.util.ExternalPathResolver.IDENTIFIER_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.INSTANCE_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.dataexp.util.ExternalPathResolver.ITEM_NOTE_TYPES;
-import java.util.Map;
+import static org.folio.dataexp.util.ExternalPathResolver.LOCATIONS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.folio.dataexp.TestMate;
+import org.folio.dataexp.service.ConsortiaService;
+import org.folio.processor.referencedata.JsonObjectWrapper;
+import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.FolioModuleMetadata;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ReferenceDataProviderTest {
@@ -67,9 +68,9 @@ class ReferenceDataProviderTest {
     assertEquals(2, locations.size());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-38225fe1eacdf2f408527664001b2431")
   void testGetReferenceDataForTransformationFieldsShouldReturnPopulatedWrapper() {
-    // TestMate-38225fe1eacdf2f408527664001b2431
     // Given
     var tenantId = "diku";
     var altTitleTypeId = "11111111-1111-1111-1111-111111111111";
@@ -81,12 +82,16 @@ class ReferenceDataProviderTest {
     var holdingsNoteTypeId = "77777777-7777-7777-7777-777777777777";
     var itemNoteTypeId = "88888888-8888-8888-8888-888888888888";
     var altTitleTypes = Map.of(altTitleTypeId, new JsonObjectWrapper(Map.of("name", "altTitle")));
-    var contributorTypes = Map.of(contributorTypeId, new JsonObjectWrapper(Map.of("name", "contributor")));
-    var electronicAccess = Map.of(electronicAccessId, new JsonObjectWrapper(Map.of("name", "electronic")));
+    var contributorTypes =
+        Map.of(contributorTypeId, new JsonObjectWrapper(Map.of("name", "contributor")));
+    var electronicAccess =
+        Map.of(electronicAccessId, new JsonObjectWrapper(Map.of("name", "electronic")));
     var instanceTypes = Map.of(instanceTypeId, new JsonObjectWrapper(Map.of("name", "instance")));
-    var identifierTypes = Map.of(identifierTypeId, new JsonObjectWrapper(Map.of("name", "identifier")));
+    var identifierTypes =
+        Map.of(identifierTypeId, new JsonObjectWrapper(Map.of("name", "identifier")));
     var issuanceModes = Map.of(issuanceModeId, new JsonObjectWrapper(Map.of("name", "issuance")));
-    var holdingsNoteTypes = Map.of(holdingsNoteTypeId, new JsonObjectWrapper(Map.of("name", "holdingsNote")));
+    var holdingsNoteTypes =
+        Map.of(holdingsNoteTypeId, new JsonObjectWrapper(Map.of("name", "holdingsNote")));
     var itemNoteTypes = Map.of(itemNoteTypeId, new JsonObjectWrapper(Map.of("name", "itemNote")));
     when(referenceDataService.getAlternativeTitleTypes()).thenReturn(altTitleTypes);
     when(referenceDataService.getContributorNameTypes()).thenReturn(contributorTypes);
@@ -101,7 +106,9 @@ class ReferenceDataProviderTest {
     // Then
     assertThat(result.get(ALTERNATIVE_TITLE_TYPES)).hasSize(1).containsKey(altTitleTypeId);
     assertThat(result.get(CONTRIBUTOR_NAME_TYPES)).hasSize(1).containsKey(contributorTypeId);
-    assertThat(result.get(ELECTRONIC_ACCESS_RELATIONSHIPS)).hasSize(1).containsKey(electronicAccessId);
+    assertThat(result.get(ELECTRONIC_ACCESS_RELATIONSHIPS))
+        .hasSize(1)
+        .containsKey(electronicAccessId);
     assertThat(result.get(INSTANCE_TYPES)).hasSize(1).containsKey(instanceTypeId);
     assertThat(result.get(IDENTIFIER_TYPES)).hasSize(1).containsKey(identifierTypeId);
     assertThat(result.get(ISSUANCE_MODES)).hasSize(1).containsKey(issuanceModeId);
@@ -109,9 +116,10 @@ class ReferenceDataProviderTest {
     assertThat(result.get(ITEM_NOTE_TYPES)).hasSize(1).containsKey(itemNoteTypeId);
   }
 
-    @Test
-  void testGetReferenceDataForTransformationFieldsWhenServiceReturnsEmptyShouldReturnEmptyMapsInWrapper() {
-    // TestMate-4ab841877ce35b1af0e52bb7e5d978db
+  @Test
+  @TestMate(name = "TestMate-4ab841877ce35b1af0e52bb7e5d978db")
+  void
+      testGetRefDataForTransformFieldsWhenServiceReturnsEmptyShouldReturnEmptyMapsInWrapper() {
     // Given
     var tenantId = "member_tenant";
     Map<String, JsonObjectWrapper> emptyMap = Collections.emptyMap();
