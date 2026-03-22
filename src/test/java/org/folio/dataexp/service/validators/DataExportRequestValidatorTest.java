@@ -28,6 +28,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION;
+import static org.folio.dataexp.util.ErrorCode.INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE;
 
 @ExtendWith(MockitoExtension.class)
 class DataExportRequestValidatorTest {
@@ -164,5 +166,44 @@ class DataExportRequestValidatorTest {
     assertDoesNotThrow(
         () -> dataExportRequestValidator.validate(exportRequest, fileDefinition, mappingProfileId));
     verifyNoInteractions(errorLogService);
+  }
+
+    @Test
+  void testValidateWhenMultipleErrorsOccurShouldConcatenateMessages() {
+    // TestMate-655628fa2b5a3a918f36b325955ba2e9
+    // Given
+    var jobExecutionId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    var deletedJobProfileId = UUID.fromString("2c9be114-6d35-4408-adac-9ead35f51a27");
+    var mappingProfileId = "mapping-id";
+    var fileDefinition = new FileDefinition()
+        .jobExecutionId(jobExecutionId)
+        .uploadFormat(FileDefinition.UploadFormatEnum.CQL);
+    var exportRequest = new ExportRequest()
+        .idType(ExportRequest.IdTypeEnum.HOLDING)
+        .jobProfileId(deletedJobProfileId);
+    when(errorLogService.saveGeneralErrorWithMessageValues(
+        INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(),
+        Collections.singletonList(INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription()),
+        jobExecutionId))
+        .thenReturn(new ErrorLog());
+    when(errorLogService.saveGeneralErrorWithMessageValues(
+        ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+        List.of(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription()),
+        jobExecutionId))
+        .thenReturn(new ErrorLog());
+    // When
+    var exception = assertThrows(DataExportRequestValidationException.class,
+        () -> dataExportRequestValidator.validate(exportRequest, fileDefinition, mappingProfileId));
+    // Then
+    var expectedMessage = "Only csv format is supported for holdings export; " + ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription();
+    assertEquals(expectedMessage, exception.getMessage());
+    verify(errorLogService).saveGeneralErrorWithMessageValues(
+        INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getCode(),
+        Collections.singletonList(INVALID_UPLOADED_FILE_EXTENSION_FOR_HOLDING_ID_TYPE.getDescription()),
+        jobExecutionId);
+    verify(errorLogService).saveGeneralErrorWithMessageValues(
+        ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getCode(),
+        List.of(ERROR_MESSAGE_USED_ONLY_FOR_SET_TO_DELETION.getDescription()),
+        jobExecutionId);
   }
 }
