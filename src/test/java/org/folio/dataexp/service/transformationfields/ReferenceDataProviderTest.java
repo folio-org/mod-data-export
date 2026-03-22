@@ -118,8 +118,7 @@ class ReferenceDataProviderTest {
 
   @Test
   @TestMate(name = "TestMate-4ab841877ce35b1af0e52bb7e5d978db")
-  void
-      testGetRefDataForTransformFieldsWhenServiceReturnsEmptyShouldReturnEmptyMapsInWrapper() {
+  void testGetRefDataForTransformFieldsWhenServiceReturnsEmptyShouldReturnEmptyMapsInWrapper() {
     // Given
     var tenantId = "member_tenant";
     Map<String, JsonObjectWrapper> emptyMap = Collections.emptyMap();
