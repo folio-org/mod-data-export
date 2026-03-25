@@ -227,4 +227,61 @@ class AuthorityExportAllStrategyTest {
     assertThat(exportIdsCaptor.getValue()).isEmpty();
     assertThat(marcRecordsCaptor.getValue()).isEmpty();
   }
+
+  @Test
+  @TestMate(name = "TestMate-480264859ce77049dc3dbd62e6b9c18b")
+  void processSlicesWhenDeletedRecordsTrueShouldUseCorrectRepositoryMethod() {
+    // Given
+    var externalId = UUID.fromString("221841e2-0402-4344-8557-1523fdf2f73f");
+    var marcRecord =
+        MarcRecordEntity.builder()
+            .id(UUID.fromString("111841e2-0402-4344-8557-1523fdf2f73e"))
+            .externalId(externalId)
+            .build();
+    List<MarcRecordEntity> marcRecords = List.of(marcRecord);
+    var pageable = PageRequest.of(0, 1);
+    Slice<MarcRecordEntity> slice = new SliceImpl<>(marcRecords, pageable, false);
+    authorityExportAllStrategy.setExportIdsBatch(1);
+    authorityExportAllStrategy.marcAuthorityRecordAllRepository = marcAuthorityRecordAllRepository;
+    when(marcAuthorityRecordAllRepository.findAllWithDeleted(
+            any(UUID.class), any(UUID.class), any(Pageable.class)))
+        .thenReturn(slice);
+    doNothing()
+        .when(authorityExportAllStrategy)
+        .createAndSaveMarc(
+            anySet(),
+            anyList(),
+            any(ExportStrategyStatistic.class),
+            any(MappingProfile.class),
+            any(UUID.class),
+            any(LocalStorageWriter.class));
+    var exportRequest = new ExportRequest().deletedRecords(true);
+    var toId = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
+    var fromId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var jobExecutionId = UUID.fromString("a892033a-3366-4b53-af27-1f3b2843511e");
+    var exportFilesEntity =
+        new JobExecutionExportFilesEntity()
+            .withJobExecutionId(jobExecutionId)
+            .withFromId(fromId)
+            .withToId(toId);
+    var mappingProfile = new MappingProfile();
+    // When
+    authorityExportAllStrategy.processSlices(
+        exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    // Then
+    verify(marcAuthorityRecordAllRepository).findAllWithDeleted(fromId, toId, pageable);
+    verify(marcAuthorityRecordAllRepository, never()).findAllWithoutDeleted(any(), any(), any());
+    verify(authorityExportAllStrategy)
+        .createAndSaveMarc(
+            exportIdsCaptor.capture(),
+            marcRecordsCaptor.capture(),
+            any(ExportStrategyStatistic.class),
+            any(MappingProfile.class),
+            any(UUID.class),
+            any(LocalStorageWriter.class));
+    Set<UUID> expectedIds =
+        marcRecords.stream().map(MarcRecordEntity::getExternalId).collect(Collectors.toSet());
+    assertThat(exportIdsCaptor.getValue()).containsExactlyInAnyOrderElementsOf(expectedIds);
+    assertThat(marcRecordsCaptor.getValue()).isEqualTo(marcRecords);
+  }
 }
