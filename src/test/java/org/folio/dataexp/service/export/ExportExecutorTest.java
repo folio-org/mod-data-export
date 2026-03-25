@@ -1,13 +1,20 @@
 package org.folio.dataexp.service.export;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.UUID;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ExportRequest;
 import org.folio.dataexp.domain.dto.FileDefinition;
 import org.folio.dataexp.domain.dto.JobExecution;
@@ -15,6 +22,7 @@ import org.folio.dataexp.domain.dto.JobExecutionProgress;
 import org.folio.dataexp.domain.entity.FileDefinitionEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
 import org.folio.dataexp.domain.entity.JobExecutionExportFilesStatus;
+import org.folio.dataexp.exception.export.S3ExportsUploadException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
 import org.folio.dataexp.repository.FileDefinitionEntityRepository;
 import org.folio.dataexp.repository.JobExecutionExportFilesEntityRepository;
@@ -25,23 +33,12 @@ import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
 import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
 import org.folio.dataexp.service.export.strategies.InstancesExportStrategy;
 import org.folio.dataexp.service.logs.ErrorLogService;
+import org.folio.dataexp.util.ErrorCode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import org.folio.dataexp.exception.export.S3ExportsUploadException;
-import org.folio.dataexp.util.ErrorCode;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.never;
-import java.util.Set;
-import org.apache.commons.io.FilenameUtils;
-import org.folio.dataexp.domain.dto.JobExecutionExportFilesInner;
-import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class ExportExecutorTest {
@@ -181,9 +178,9 @@ class ExportExecutorTest {
     verify(storageCleanUpService).cleanExportIdEntities(jobExecution.getId());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-ce4fdb3c602156189f0233edadf1eb30")
   void testExportWhenS3UploadFailsShouldSetJobStatusToFail() {
-    // TestMate-ce4fdb3c602156189f0233edadf1eb30
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -195,48 +192,57 @@ class ExportExecutorTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setFileName("test_export.csv");
-    var fileDefinitionEntity = FileDefinitionEntity.builder()
-        .id(fileDefinitionId)
-        .fileDefinition(fileDefinition)
-        .build();
-    var exportEntity = JobExecutionExportFilesEntity.builder()
-        .id(exportEntityId)
-        .jobExecutionId(jobExecutionId)
-        .fileLocation("mod-data-export/download/file.mrc")
-        .status(JobExecutionExportFilesStatus.SCHEDULED)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityId)
+            .jobExecutionId(jobExecutionId)
+            .fileLocation("mod-data-export/download/file.mrc")
+            .status(JobExecutionExportFilesStatus.SCHEDULED)
+            .build();
     var completedExportEntity = exportEntity.withStatus(JobExecutionExportFilesStatus.COMPLETED);
     var commonExportStatistic = new CommonExportStatistic();
     commonExportStatistic.setExportedRecordsListener(new ExportedRecordsListener(null, 1000, null));
     var exportRequest = new ExportRequest();
-    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId)).thenReturn(exportEntity);
-    when(exportStrategyFactory.getExportStrategy(exportRequest)).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveOutputToLocalStorage(eq(exportEntity), eq(exportRequest), any())).thenReturn(new ExportStrategyStatistic(commonExportStatistic.getExportedRecordsListener()));
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
+        .thenReturn(exportEntity);
+    when(exportStrategyFactory.getExportStrategy(exportRequest))
+        .thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveOutputToLocalStorage(
+            eq(exportEntity), eq(exportRequest), any()))
+        .thenReturn(
+            new ExportStrategyStatistic(commonExportStatistic.getExportedRecordsListener()));
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
-    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
-    when(s3ExportsUploader.upload(eq(jobExecution), eq(List.of(completedExportEntity)), eq("test_export")))
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
+        .thenReturn(List.of(completedExportEntity));
+    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecutionId.toString()))
+        .thenReturn(List.of(fileDefinitionEntity));
+    when(s3ExportsUploader.upload(jobExecution, List.of(completedExportEntity), "test_export"))
         .thenThrow(new S3ExportsUploadException("S3 Upload Failed"));
     // When
     exportExecutor.exportAsynch(exportEntity, exportRequest, commonExportStatistic);
     // Then
     assertEquals(JobExecution.StatusEnum.FAIL, jobExecution.getStatus());
     assertNotNull(jobExecution.getCompletedDate());
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        eq(ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode()),
-        eq(List.of(fileDefinitionId.toString())),
-        eq(jobExecutionId));
-    verify(errorLogService).saveGeneralErrorWithMessageValues(
-        eq(ErrorCode.NO_FILE_GENERATED.getCode()),
-        eq(List.of(ErrorCode.NO_FILE_GENERATED.getDescription())),
-        eq(jobExecutionId));
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.INVALID_EXPORT_FILE_DEFINITION_ID.getCode(),
+            List.of(fileDefinitionId.toString()),
+            jobExecutionId);
+    verify(errorLogService)
+        .saveGeneralErrorWithMessageValues(
+            ErrorCode.NO_FILE_GENERATED.getCode(),
+            List.of(ErrorCode.NO_FILE_GENERATED.getDescription()),
+            jobExecutionId);
     verify(jobExecutionService).save(jobExecution);
     verify(storageCleanUpService).cleanExportIdEntities(jobExecutionId);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-91f4310c38a39e7d762d71ffcb06dfeb")
   void testExportWhenAllFilesFailShouldSetJobStatusToFail() {
-    // TestMate-91f4310c38a39e7d762d71ffcb06dfeb
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -248,33 +254,38 @@ class ExportExecutorTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setFileName("test_export.csv");
-    var fileDefinitionEntity = FileDefinitionEntity.builder()
-        .id(fileDefinitionId)
-        .fileDefinition(fileDefinition)
-        .build();
-    var exportEntity = JobExecutionExportFilesEntity.builder()
-        .id(exportEntityId)
-        .jobExecutionId(jobExecutionId)
-        .fileLocation("mod-data-export/download/file.mrc")
-        .status(JobExecutionExportFilesStatus.SCHEDULED)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityId)
+            .jobExecutionId(jobExecutionId)
+            .fileLocation("mod-data-export/download/file.mrc")
+            .status(JobExecutionExportFilesStatus.SCHEDULED)
+            .build();
     var failedExportEntity1 = exportEntity.withStatus(JobExecutionExportFilesStatus.FAILED);
-    var failedExportEntity2 = JobExecutionExportFilesEntity.builder()
-        .id(UUID.randomUUID())
-        .jobExecutionId(jobExecutionId)
-        .status(JobExecutionExportFilesStatus.FAILED)
-        .build();
+    var failedExportEntity2 =
+        JobExecutionExportFilesEntity.builder()
+            .id(UUID.randomUUID())
+            .jobExecutionId(jobExecutionId)
+            .status(JobExecutionExportFilesStatus.FAILED)
+            .build();
     var commonExportStatistic = new CommonExportStatistic();
     commonExportStatistic.setExportedRecordsListener(new ExportedRecordsListener(null, 1000, null));
     var exportRequest = new ExportRequest();
-    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId)).thenReturn(exportEntity);
-    when(exportStrategyFactory.getExportStrategy(exportRequest)).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveOutputToLocalStorage(eq(exportEntity), eq(exportRequest), any()))
-        .thenReturn(new ExportStrategyStatistic(commonExportStatistic.getExportedRecordsListener()));
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
+        .thenReturn(exportEntity);
+    when(exportStrategyFactory.getExportStrategy(exportRequest))
+        .thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveOutputToLocalStorage(
+            eq(exportEntity), eq(exportRequest), any()))
+        .thenReturn(
+            new ExportStrategyStatistic(commonExportStatistic.getExportedRecordsListener()));
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
         .thenReturn(List.of(failedExportEntity1, failedExportEntity2));
-    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString()))
+    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecutionId.toString()))
         .thenReturn(List.of(fileDefinitionEntity));
     // When
     exportExecutor.exportAsynch(exportEntity, exportRequest, commonExportStatistic);
@@ -285,37 +296,44 @@ class ExportExecutorTest {
     verify(storageCleanUpService).cleanExportIdEntities(jobExecutionId);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-055e5c486a85795b7238833724c024a6")
   void testExportWhenNotAllFilesFinishedShouldNotUpdateJobStatus() {
-    // TestMate-055e5c486a85795b7238833724c024a6
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var exportEntityIdA = UUID.fromString("00000000-0000-0000-0000-000000000002");
     var exportEntityIdB = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    var jobExecution = new JobExecution()
-        .id(jobExecutionId)
-        .status(JobExecution.StatusEnum.IN_PROGRESS)
-        .progress(new JobExecutionProgress().failed(0).duplicatedSrs(0).exported(0));
-    var exportEntityA = JobExecutionExportFilesEntity.builder()
-        .id(exportEntityIdA)
-        .jobExecutionId(jobExecutionId)
-        .fileLocation("mod-data-export/download/fileA.mrc")
-        .status(JobExecutionExportFilesStatus.SCHEDULED)
-        .build();
-    var exportEntityB = JobExecutionExportFilesEntity.builder()
-        .id(exportEntityIdB)
-        .jobExecutionId(jobExecutionId)
-        .status(JobExecutionExportFilesStatus.ACTIVE)
-        .build();
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .status(JobExecution.StatusEnum.IN_PROGRESS)
+            .progress(new JobExecutionProgress().failed(0).duplicatedSrs(0).exported(0));
+    var exportEntityA =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityIdA)
+            .jobExecutionId(jobExecutionId)
+            .fileLocation("mod-data-export/download/fileA.mrc")
+            .status(JobExecutionExportFilesStatus.SCHEDULED)
+            .build();
+    var exportEntityB =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityIdB)
+            .jobExecutionId(jobExecutionId)
+            .status(JobExecutionExportFilesStatus.ACTIVE)
+            .build();
     var commonExportStatistic = new CommonExportStatistic();
     var listener = new ExportedRecordsListener(null, 100, jobExecutionId);
     commonExportStatistic.setExportedRecordsListener(listener);
     var exportRequest = new ExportRequest();
     var exportStatistic = new ExportStrategyStatistic(listener);
     // Mocking behavior
-    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityIdA)).thenReturn(exportEntityA);
-    when(exportStrategyFactory.getExportStrategy(exportRequest)).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveOutputToLocalStorage(eq(exportEntityA), eq(exportRequest), any())).thenReturn(exportStatistic);
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityIdA))
+        .thenReturn(exportEntityA);
+    when(exportStrategyFactory.getExportStrategy(exportRequest))
+        .thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveOutputToLocalStorage(
+            eq(exportEntityA), eq(exportRequest), any()))
+        .thenReturn(exportStatistic);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     // Simulate that Entity A is now COMPLETED but Entity B is still ACTIVE
     var updatedEntityA = exportEntityA.withStatus(JobExecutionExportFilesStatus.COMPLETED);
@@ -336,13 +354,13 @@ class ExportExecutorTest {
     verify(jobExecutionService).save(jobExecution);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-cab0e932cc36e3a0c3b8756e75a49c6b")
   void testExportWhenExportAllIsTrueShouldCalculateTotalProgress() {
-    // TestMate-cab0e932cc36e3a0c3b8756e75a49c6b
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    
+
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     var progress = new JobExecutionProgress();
@@ -353,18 +371,20 @@ class ExportExecutorTest {
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
     fileDefinition.setFileName("test_all.csv");
-    var fileDefinitionEntity = FileDefinitionEntity.builder()
-        .id(fileDefinition.getId())
-        .fileDefinition(fileDefinition)
-        .build();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder()
+            .id(fileDefinition.getId())
+            .fileDefinition(fileDefinition)
+            .build();
     var exportRequest = new ExportRequest();
     exportRequest.setAll(true);
-    var exportEntity = JobExecutionExportFilesEntity.builder()
-        .id(exportEntityId)
-        .jobExecutionId(jobExecutionId)
-        .fileLocation("mod-data-export/download/file.mrc")
-        .status(JobExecutionExportFilesStatus.SCHEDULED)
-        .build();
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityId)
+            .jobExecutionId(jobExecutionId)
+            .fileLocation("mod-data-export/download/file.mrc")
+            .status(JobExecutionExportFilesStatus.SCHEDULED)
+            .build();
     var commonExportStatistic = new CommonExportStatistic();
     var listener = new ExportedRecordsListener(null, 1000, jobExecutionId);
     listener.getExportedCount().set(100);
@@ -373,14 +393,22 @@ class ExportExecutorTest {
     exportStatistic.setFailed(10);
     exportStatistic.setDuplicatedSrs(5);
     var completedExportEntity = exportEntity.withStatus(JobExecutionExportFilesStatus.COMPLETED);
-    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId)).thenReturn(exportEntity);
-    when(exportStrategyFactory.getExportStrategy(exportRequest)).thenReturn(instancesExportStrategy);
-    when(instancesExportStrategy.saveOutputToLocalStorage(eq(exportEntity), eq(exportRequest), any())).thenReturn(exportStatistic);
+    when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
+        .thenReturn(exportEntity);
+    when(exportStrategyFactory.getExportStrategy(exportRequest))
+        .thenReturn(instancesExportStrategy);
+    when(instancesExportStrategy.saveOutputToLocalStorage(
+            eq(exportEntity), eq(exportRequest), any()))
+        .thenReturn(exportStatistic);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
-    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId)).thenReturn(List.of(completedExportEntity));
-    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(jobExecutionId.toString())).thenReturn(List.of(fileDefinitionEntity));
+    when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
+        .thenReturn(List.of(completedExportEntity));
+    when(fileDefinitionEntityRepository.getFileDefinitionByJobExecutionId(
+            jobExecutionId.toString()))
+        .thenReturn(List.of(fileDefinitionEntity));
     when(errorLogEntityCqlRepository.countByJobExecutionId(jobExecutionId)).thenReturn(0L);
-    when(s3ExportsUploader.upload(eq(jobExecution), eq(List.of(completedExportEntity)), eq("test_all"))).thenReturn("s3/path/test_all.mrc");
+    when(s3ExportsUploader.upload(jobExecution, List.of(completedExportEntity), "test_all"))
+        .thenReturn("s3/path/test_all.mrc");
     // When
     exportExecutor.export(exportEntity, exportRequest, commonExportStatistic);
     // Then
@@ -389,9 +417,9 @@ class ExportExecutorTest {
     assertThat(jobExecution.getProgress().getFailed()).isEqualTo(10);
     assertThat(jobExecution.getStatus()).isEqualTo(JobExecution.StatusEnum.COMPLETED);
     assertThat(jobExecution.getCompletedDate()).isNotNull();
-    
+
     verify(jobExecutionService).save(jobExecution);
     verify(storageCleanUpService).cleanExportIdEntities(jobExecutionId);
-    verify(s3ExportsUploader).upload(eq(jobExecution), eq(List.of(completedExportEntity)), eq("test_all"));
+    verify(s3ExportsUploader).upload(jobExecution, List.of(completedExportEntity), "test_all");
   }
 }
