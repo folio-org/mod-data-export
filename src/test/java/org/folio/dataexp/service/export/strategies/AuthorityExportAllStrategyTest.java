@@ -256,8 +256,8 @@ class AuthorityExportAllStrategyTest {
             any(UUID.class),
             any(LocalStorageWriter.class));
     var exportRequest = new ExportRequest().deletedRecords(true);
-    var fromId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var toId = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
+    var fromId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobExecutionId = UUID.fromString("a892033a-3366-4b53-af27-1f3b2843511e");
     var exportFilesEntity =
         new JobExecutionExportFilesEntity()
