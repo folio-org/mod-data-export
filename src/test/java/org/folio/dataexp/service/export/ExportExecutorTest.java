@@ -184,7 +184,6 @@ class ExportExecutorTest {
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     jobExecution.setProgress(new JobExecutionProgress());
@@ -192,8 +191,7 @@ class ExportExecutorTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setFileName("test_export.csv");
-    var fileDefinitionEntity =
-        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
+    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     var exportEntity =
         JobExecutionExportFilesEntity.builder()
             .id(exportEntityId)
@@ -201,10 +199,12 @@ class ExportExecutorTest {
             .fileLocation("mod-data-export/download/file.mrc")
             .status(JobExecutionExportFilesStatus.SCHEDULED)
             .build();
-    var completedExportEntity = exportEntity.withStatus(JobExecutionExportFilesStatus.COMPLETED);
     var commonExportStatistic = new CommonExportStatistic();
     commonExportStatistic.setExportedRecordsListener(new ExportedRecordsListener(null, 1000, null));
     var exportRequest = new ExportRequest();
+    var completedExportEntity = exportEntity.withStatus(JobExecutionExportFilesStatus.COMPLETED);
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
         .thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(exportRequest))
@@ -246,7 +246,6 @@ class ExportExecutorTest {
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var fileDefinitionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     jobExecution.setProgress(new JobExecutionProgress());
@@ -254,8 +253,7 @@ class ExportExecutorTest {
     fileDefinition.setId(fileDefinitionId);
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setFileName("test_export.csv");
-    var fileDefinitionEntity =
-        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
+    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     var exportEntity =
         JobExecutionExportFilesEntity.builder()
             .id(exportEntityId)
@@ -263,6 +261,9 @@ class ExportExecutorTest {
             .fileLocation("mod-data-export/download/file.mrc")
             .status(JobExecutionExportFilesStatus.SCHEDULED)
             .build();
+    var commonExportStatistic = new CommonExportStatistic();
+    commonExportStatistic.setExportedRecordsListener(new ExportedRecordsListener(null, 1000, null));
+    var exportRequest = new ExportRequest();
     var failedExportEntity1 = exportEntity.withStatus(JobExecutionExportFilesStatus.FAILED);
     var failedExportEntity2 =
         JobExecutionExportFilesEntity.builder()
@@ -270,9 +271,8 @@ class ExportExecutorTest {
             .jobExecutionId(jobExecutionId)
             .status(JobExecutionExportFilesStatus.FAILED)
             .build();
-    var commonExportStatistic = new CommonExportStatistic();
-    commonExportStatistic.setExportedRecordsListener(new ExportedRecordsListener(null, 1000, null));
-    var exportRequest = new ExportRequest();
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder().id(fileDefinitionId).fileDefinition(fileDefinition).build();
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
         .thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(exportRequest))
@@ -302,12 +302,6 @@ class ExportExecutorTest {
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var exportEntityIdA = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var exportEntityIdB = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    var jobExecution =
-        new JobExecution()
-            .id(jobExecutionId)
-            .status(JobExecution.StatusEnum.IN_PROGRESS)
-            .progress(new JobExecutionProgress().failed(0).duplicatedSrs(0).exported(0));
     var exportEntityA =
         JobExecutionExportFilesEntity.builder()
             .id(exportEntityIdA)
@@ -315,17 +309,17 @@ class ExportExecutorTest {
             .fileLocation("mod-data-export/download/fileA.mrc")
             .status(JobExecutionExportFilesStatus.SCHEDULED)
             .build();
-    var exportEntityB =
-        JobExecutionExportFilesEntity.builder()
-            .id(exportEntityIdB)
-            .jobExecutionId(jobExecutionId)
-            .status(JobExecutionExportFilesStatus.ACTIVE)
-            .build();
     var commonExportStatistic = new CommonExportStatistic();
     var listener = new ExportedRecordsListener(null, 100, jobExecutionId);
     commonExportStatistic.setExportedRecordsListener(listener);
     var exportRequest = new ExportRequest();
     var exportStatistic = new ExportStrategyStatistic(listener);
+    var jobExecution =
+        new JobExecution()
+            .id(jobExecutionId)
+            .status(JobExecution.StatusEnum.IN_PROGRESS)
+            .progress(new JobExecutionProgress().failed(0).duplicatedSrs(0).exported(0));
+    var exportEntityIdB = UUID.fromString("00000000-0000-0000-0000-000000000003");
     // Mocking behavior
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityIdA))
         .thenReturn(exportEntityA);
@@ -337,6 +331,12 @@ class ExportExecutorTest {
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     // Simulate that Entity A is now COMPLETED but Entity B is still ACTIVE
     var updatedEntityA = exportEntityA.withStatus(JobExecutionExportFilesStatus.COMPLETED);
+    var exportEntityB =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityIdB)
+            .jobExecutionId(jobExecutionId)
+            .status(JobExecutionExportFilesStatus.ACTIVE)
+            .build();
     when(jobExecutionExportFilesEntityRepository.findByJobExecutionId(jobExecutionId))
         .thenReturn(List.of(updatedEntityA, exportEntityB));
     // When
@@ -359,8 +359,6 @@ class ExportExecutorTest {
   void testExportWhenExportAllIsTrueShouldCalculateTotalProgress() {
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     var progress = new JobExecutionProgress();
@@ -371,20 +369,8 @@ class ExportExecutorTest {
     fileDefinition.setJobExecutionId(jobExecutionId);
     fileDefinition.setId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
     fileDefinition.setFileName("test_all.csv");
-    var fileDefinitionEntity =
-        FileDefinitionEntity.builder()
-            .id(fileDefinition.getId())
-            .fileDefinition(fileDefinition)
-            .build();
     var exportRequest = new ExportRequest();
     exportRequest.setAll(true);
-    var exportEntity =
-        JobExecutionExportFilesEntity.builder()
-            .id(exportEntityId)
-            .jobExecutionId(jobExecutionId)
-            .fileLocation("mod-data-export/download/file.mrc")
-            .status(JobExecutionExportFilesStatus.SCHEDULED)
-            .build();
     var commonExportStatistic = new CommonExportStatistic();
     var listener = new ExportedRecordsListener(null, 1000, jobExecutionId);
     listener.getExportedCount().set(100);
@@ -392,7 +378,20 @@ class ExportExecutorTest {
     var exportStatistic = new ExportStrategyStatistic(listener);
     exportStatistic.setFailed(10);
     exportStatistic.setDuplicatedSrs(5);
+    var exportEntityId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    var exportEntity =
+        JobExecutionExportFilesEntity.builder()
+            .id(exportEntityId)
+            .jobExecutionId(jobExecutionId)
+            .fileLocation("mod-data-export/download/file.mrc")
+            .status(JobExecutionExportFilesStatus.SCHEDULED)
+            .build();
     var completedExportEntity = exportEntity.withStatus(JobExecutionExportFilesStatus.COMPLETED);
+    var fileDefinitionEntity =
+        FileDefinitionEntity.builder()
+            .id(fileDefinition.getId())
+            .fileDefinition(fileDefinition)
+            .build();
     when(jobExecutionExportFilesEntityRepository.getReferenceById(exportEntityId))
         .thenReturn(exportEntity);
     when(exportStrategyFactory.getExportStrategy(exportRequest))
