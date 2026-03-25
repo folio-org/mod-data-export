@@ -37,6 +37,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tools.jackson.databind.ObjectMapper;
+import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationValidationException;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import org.folio.dataexp.service.transformationfields.DisplayNameKeyBuilder;
+import org.folio.dataexp.service.transformationfields.FieldIdBuilder;
+import org.folio.dataexp.service.transformationfields.JsonPathBuilder;
+import org.folio.dataexp.service.transformationfields.ReferenceDataProvider;
+import org.folio.dataexp.service.transformationfields.TransformationFieldsService;
+import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class TransformationFieldsServiceTest {
@@ -72,6 +83,92 @@ class TransformationFieldsServiceTest {
             transformationField ->
                 checkIfActualFieldEqualToExpected(
                     expectedFields.get(transformationField.getFieldId()), transformationField));
+  }
+
+    @Test
+  void validateTransformationsShouldThrowExceptionWhenItemTransformationIsEmpty() {
+    // TestMate-b424022897ffd88ebe709e492aa95807
+    // Given
+    var invalidItemTransformation = new Transformations();
+    invalidItemTransformation.setRecordType(RecordTypes.ITEM);
+    invalidItemTransformation.setTransformation("");
+    var validInstanceTransformation = new Transformations();
+    validInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    validInstanceTransformation.setTransformation("");
+    var transformations = List.of(validInstanceTransformation, invalidItemTransformation);
+    // When
+    var exception = assertThrows(TransformationValidationException.class, () ->
+        transformationFieldsService.validateTransformations(transformations));
+    // Then
+    assertEquals("Transformations for fields with item record type cannot be empty. Please provide a value.", exception.getMessage());
+  }
+
+    @Test
+  void validateTransformationsShouldPassWhenItemTransformationIsNotEmpty() {
+    // TestMate-b7fa61c11a7f0239fa46089ddcf3fcd1
+    // Given
+    var validItemTransformation = new Transformations();
+    validItemTransformation.setRecordType(RecordTypes.ITEM);
+    validItemTransformation.setTransformation("100  $a");
+    var emptyInstanceTransformation = new Transformations();
+    emptyInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    emptyInstanceTransformation.setTransformation("");
+    var transformations = List.of(validItemTransformation, emptyInstanceTransformation);
+    // When & Then
+    assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+  }
+
+    @Test
+void validateTransformationsShouldIgnoreEmptyTransformationsForNonItemTypes() {
+  // TestMate-1b0355446d359fc1b056762377f19c1a
+  // Given
+  var emptyInstanceTransformation = new Transformations();
+  emptyInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+  emptyInstanceTransformation.setTransformation("");
+  var nullHoldingsTransformation = new Transformations();
+  nullHoldingsTransformation.setRecordType(RecordTypes.HOLDINGS);
+  nullHoldingsTransformation.setTransformation(null);
+  var transformations = List.of(emptyInstanceTransformation, nullHoldingsTransformation);
+  // When & Then
+  assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+}
+
+    @Test
+  void validateTransformationsShouldHandleEmptyList() {
+    // TestMate-682ecc2f93c89abafcccc937415dba3a
+    // Given
+    List<Transformations> transformations = Collections.emptyList();
+    // When & Then
+    assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+  }
+
+    @Test
+  void validateTransformationsShouldThrowExceptionOnFirstInvalidItemInMixedList() {
+    // TestMate-0adc210f6e35bb7516de13f92e4f44de
+    // Given
+    var validInstanceTransformation = new Transformations();
+    validInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    validInstanceTransformation.setTransformation("");
+    var validItemTransformation = new Transformations();
+    validItemTransformation.setRecordType(RecordTypes.ITEM);
+    validItemTransformation.setTransformation("123");
+    var invalidItemTransformation = new Transformations();
+    invalidItemTransformation.setRecordType(RecordTypes.ITEM);
+    invalidItemTransformation.setTransformation("");
+    var validHoldingsTransformation = new Transformations();
+    validHoldingsTransformation.setRecordType(RecordTypes.HOLDINGS);
+    validHoldingsTransformation.setTransformation("456");
+    var transformations = List.of(
+        validInstanceTransformation,
+        validItemTransformation,
+        invalidItemTransformation,
+        validHoldingsTransformation
+    );
+    // When
+    var exception = assertThrows(TransformationValidationException.class, () ->
+        transformationFieldsService.validateTransformations(transformations));
+    // Then
+    assertEquals("Transformations for fields with item record type cannot be empty. Please provide a value.", exception.getMessage());
   }
 
   private void mocReferenceData() {
