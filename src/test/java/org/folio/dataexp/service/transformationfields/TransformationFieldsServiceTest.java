@@ -11,7 +11,9 @@ import static org.folio.dataexp.util.ExternalPathResolver.ISSUANCE_MODES;
 import static org.folio.dataexp.util.ExternalPathResolver.ITEM_NOTE_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.LOAN_TYPES;
 import static org.folio.dataexp.util.ExternalPathResolver.MATERIAL_TYPES;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
@@ -19,14 +21,19 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
 import java.io.FileInputStream;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.RecordTypes;
 import org.folio.dataexp.domain.dto.TransformationField;
 import org.folio.dataexp.domain.dto.TransformationFieldCollection;
+import org.folio.dataexp.domain.dto.Transformations;
+import org.folio.dataexp.exception.TransformationValidationException;
 import org.folio.dataexp.util.ReferenceDataResponseUtil;
 import org.folio.processor.referencedata.JsonObjectWrapper;
 import org.folio.processor.referencedata.ReferenceDataWrapperImpl;
@@ -72,6 +79,100 @@ class TransformationFieldsServiceTest {
             transformationField ->
                 checkIfActualFieldEqualToExpected(
                     expectedFields.get(transformationField.getFieldId()), transformationField));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-b424022897ffd88ebe709e492aa95807")
+  void validateTransformationsShouldThrowExceptionWhenItemTransformationIsEmpty() {
+    // Given
+    var invalidItemTransformation = new Transformations();
+    invalidItemTransformation.setRecordType(RecordTypes.ITEM);
+    invalidItemTransformation.setTransformation("");
+    var validInstanceTransformation = new Transformations();
+    validInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    validInstanceTransformation.setTransformation("");
+    var transformations = List.of(validInstanceTransformation, invalidItemTransformation);
+    // When
+    var exception =
+        assertThrows(
+            TransformationValidationException.class,
+            () -> transformationFieldsService.validateTransformations(transformations));
+    // Then
+    assertEquals(
+        "Transformations for fields with item record type cannot be empty. Please provide a value.",
+        exception.getMessage());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-b7fa61c11a7f0239fa46089ddcf3fcd1")
+  void validateTransformationsShouldPassWhenItemTransformationIsNotEmpty() {
+    // Given
+    var validItemTransformation = new Transformations();
+    validItemTransformation.setRecordType(RecordTypes.ITEM);
+    validItemTransformation.setTransformation("100  $a");
+    var emptyInstanceTransformation = new Transformations();
+    emptyInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    emptyInstanceTransformation.setTransformation("");
+    var transformations = List.of(validItemTransformation, emptyInstanceTransformation);
+    // Then
+    assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-1b0355446d359fc1b056762377f19c1a")
+  void validateTransformationsShouldIgnoreEmptyTransformationsForNonItemTypes() {
+    // Given
+    var emptyInstanceTransformation = new Transformations();
+    emptyInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    emptyInstanceTransformation.setTransformation("");
+    var nullHoldingsTransformation = new Transformations();
+    nullHoldingsTransformation.setRecordType(RecordTypes.HOLDINGS);
+    nullHoldingsTransformation.setTransformation(null);
+    var transformations = List.of(emptyInstanceTransformation, nullHoldingsTransformation);
+    // When & Then
+    assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-682ecc2f93c89abafcccc937415dba3a")
+  void validateTransformationsShouldHandleEmptyList() {
+    // Given
+    List<Transformations> transformations = Collections.emptyList();
+    // When & Then
+    assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
+  }
+
+  @Test
+  @TestMate(name = "TestMate-0adc210f6e35bb7516de13f92e4f44de")
+  void validateTransformationsShouldThrowExceptionOnFirstInvalidItemInMixedList() {
+    // Given
+    var validInstanceTransformation = new Transformations();
+    validInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
+    validInstanceTransformation.setTransformation("");
+    var validItemTransformation = new Transformations();
+    validItemTransformation.setRecordType(RecordTypes.ITEM);
+    validItemTransformation.setTransformation("123");
+    var invalidItemTransformation = new Transformations();
+    invalidItemTransformation.setRecordType(RecordTypes.ITEM);
+    invalidItemTransformation.setTransformation("");
+    var validHoldingsTransformation = new Transformations();
+    validHoldingsTransformation.setRecordType(RecordTypes.HOLDINGS);
+    validHoldingsTransformation.setTransformation("456");
+    var transformations =
+        List.of(
+            validInstanceTransformation,
+            validItemTransformation,
+            invalidItemTransformation,
+            validHoldingsTransformation);
+    // When
+    var exception =
+        assertThrows(
+            TransformationValidationException.class,
+            () -> transformationFieldsService.validateTransformations(transformations));
+    // Then
+    assertEquals(
+        "Transformations for fields with item record type cannot be empty. Please provide a value.",
+        exception.getMessage());
   }
 
   private void mocReferenceData() {
