@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class ConsortiaServiceTest {
@@ -71,5 +72,57 @@ class ConsortiaServiceTest {
     var actual = consortiaService.getAffiliatedTenants("currentTenantId", "userId");
 
     assertEquals(expected, actual);
+  }
+
+    @Test
+void isCurrentTenantCentralTenantShouldReturnTrueWhenIdsMatch() {
+  // TestMate-ba413db3d13135d5087b6f67529c2c9a
+  // Given
+  var tenantId = "central-tenant";
+  var userTenant = new UserTenant();
+  userTenant.setCentralTenantId(tenantId);
+  var userTenantCollection = new UserTenantCollection();
+  userTenantCollection.setUserTenants(List.of(userTenant));
+  when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+  when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+  // When
+  var result = consortiaService.isCurrentTenantCentralTenant(tenantId);
+  // Then
+  assertThat(result).isTrue();
+}
+
+    @Test
+  void isCurrentTenantCentralTenantShouldReturnFalseWhenIdsDoNotMatch() {
+    // TestMate-8a8eb209c7fe07d317427144d2c7eb98
+    // Given
+    var centralTenantId = "central-tenant";
+    var memberTenantId = "member-tenant";
+    var userTenant = new UserTenant();
+    userTenant.setCentralTenantId(centralTenantId);
+    var userTenantCollection = new UserTenantCollection();
+    userTenantCollection.setUserTenants(List.of(userTenant));
+    when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn(memberTenantId);
+    // When
+    var result = consortiaService.isCurrentTenantCentralTenant(memberTenantId);
+    // Then
+    assertThat(result).isFalse();
+  }
+
+    @Test
+  void isCurrentTenantCentralTenantShouldReturnFalseWhenNoCentralTenantFound() {
+    // TestMate-a38fc71f25f95472598b111b2dd24f53
+    // Given
+    var tenantId = "any-tenant";
+    var userTenantCollection = new UserTenantCollection();
+    userTenantCollection.setUserTenants(List.of());
+    when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    // When
+    var result = consortiaService.isCurrentTenantCentralTenant(tenantId);
+    // Then
+    assertThat(result).isFalse();
+    verify(consortiaClient).getUserTenantCollection();
+    verify(folioExecutionContext).getTenantId();
   }
 }
