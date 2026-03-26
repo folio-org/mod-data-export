@@ -21,6 +21,7 @@ import org.folio.dataexp.client.UserClient;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.dto.JobExecutionExportedFilesInner;
 import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.JobProfileCollection;
 import org.folio.dataexp.domain.dto.Metadata;
 import org.folio.dataexp.domain.dto.User;
 import org.folio.dataexp.domain.dto.UserInfo;
@@ -29,10 +30,12 @@ import org.folio.dataexp.exception.job.profile.DefaultJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockJobProfileException;
 import org.folio.dataexp.exception.job.profile.LockJobProfilePermissionException;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
+import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.service.validators.PermissionsValidator;
 import org.folio.s3.client.FolioS3Client;
 import org.folio.spring.FolioExecutionContext;
+import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,12 +46,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.folio.dataexp.domain.dto.JobProfileCollection;
-import org.folio.dataexp.repository.JobProfileEntityCqlRepository;
-import static org.mockito.ArgumentMatchers.eq;
-import org.folio.spring.data.OffsetRequest;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 @ExtendWith(MockitoExtension.class)
 class JobProfileServiceTest {
@@ -68,8 +67,7 @@ class JobProfileServiceTest {
   @Captor private ArgumentCaptor<List<JobExecution>> jobExecutionListCaptor;
   @Captor private ArgumentCaptor<JobProfileEntity> jobProfileEntityCaptor;
 
-    @Mock
-private JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
+  @Mock private JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
 
   private UUID jobProfileId;
   private JobProfileEntity jobProfileEntity;
@@ -945,76 +943,79 @@ private JobProfileEntityCqlRepository jobProfileEntityCqlRepository;
     verify(jobProfileEntityRepository, never()).save(any(JobProfileEntity.class));
   }
 
-    @Test
-void getJobProfilesShouldReturnUsedJobProfilesWhenUsedIsTrue() {
-  // TestMate-09489a728d9d6346b40fd70f88cf5915
-  // Given
-  var offset = 0;
-  var limit = 10;
-  var used = TRUE;
-  var query = (String) null;
-  var profileId = UUID.fromString("c85d533c-a043-465c-a532-d62101086611");
-  var profileName = "Used Profile Name";
-  Object[] profileData = new Object[] {profileId, profileName};
-  List<Object[]> mockListData = Collections.singletonList(profileData);
-  when(jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit)).thenReturn(mockListData);
-  // When
-  JobProfileCollection result = jobProfileService.getJobProfiles(used, query, offset, limit);
-  // Then
-  assertThat(result.getTotalRecords()).isEqualTo(1);
-  assertThat(result.getJobProfiles()).hasSize(1);
-  assertThat(result.getJobProfiles().get(0).getId()).isEqualTo(profileId);
-  assertThat(result.getJobProfiles().get(0).getName()).isEqualTo(profileName);
-  verify(jobProfileEntityCqlRepository).getUsedJobProfilesData(offset, limit);
-}
+  @Test
+  void getJobProfilesShouldReturnUsedJobProfilesWhenUsedIsTrue() {
+    // TestMate-09489a728d9d6346b40fd70f88cf5915
+    // Given
+    var offset = 0;
+    var limit = 10;
+    var used = TRUE;
+    var query = (String) null;
+    var profileId = UUID.fromString("c85d533c-a043-465c-a532-d62101086611");
+    var profileName = "Used Profile Name";
+    Object[] profileData = new Object[] {profileId, profileName};
+    List<Object[]> mockListData = Collections.singletonList(profileData);
+    when(jobProfileEntityCqlRepository.getUsedJobProfilesData(offset, limit))
+        .thenReturn(mockListData);
+    // When
+    JobProfileCollection result = jobProfileService.getJobProfiles(used, query, offset, limit);
+    // Then
+    assertThat(result.getTotalRecords()).isEqualTo(1);
+    assertThat(result.getJobProfiles()).hasSize(1);
+    assertThat(result.getJobProfiles().get(0).getId()).isEqualTo(profileId);
+    assertThat(result.getJobProfiles().get(0).getName()).isEqualTo(profileName);
+    verify(jobProfileEntityCqlRepository).getUsedJobProfilesData(offset, limit);
+  }
 
-    @Test
-void getJobProfilesShouldReturnAllProfilesWhenUsedIsFalseAndQueryIsEmpty() {
-  // TestMate-16400b16bf1a763aab0f8854d5c4d9f6
-  // Given
-  var used = FALSE;
-  var query = "";
-  var offset = 0;
-  var limit = 20;
-  var defaultCql = "(cql.allRecords=1)";
-  var id1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
-  var id2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
-  var profile1 = new JobProfile().id(id1).name("Profile 1");
-  var profile2 = new JobProfile().id(id2).name("Profile 2");
-  var entity1 = JobProfileEntity.builder().id(id1).jobProfile(profile1).build();
-  var entity2 = JobProfileEntity.builder().id(id2).jobProfile(profile2).build();
-  var page = new PageImpl<>(List.of(entity1, entity2));
-  var offsetRequest = OffsetRequest.of(offset, limit);
-  when(jobProfileEntityCqlRepository.findByCql(defaultCql, offsetRequest)).thenReturn(page);
-  // When
-  JobProfileCollection result = jobProfileService.getJobProfiles(used, query, offset, limit);
-  // Then
-  assertThat(result.getJobProfiles()).hasSize(2);
-  assertThat(result.getTotalRecords()).isEqualTo(2);
-  assertThat(result.getJobProfiles().get(0).getId()).isEqualTo(id1);
-  assertThat(result.getJobProfiles().get(0).getName()).isEqualTo("Profile 1");
-  assertThat(result.getJobProfiles().get(1).getId()).isEqualTo(id2);
-  assertThat(result.getJobProfiles().get(1).getName()).isEqualTo("Profile 2");
-  verify(jobProfileEntityCqlRepository).findByCql(eq(defaultCql), eq(offsetRequest));
-}
-
-    @Test
-  void getJobProfilesShouldReturnFilteredProfilesWhenQueryIsProvided() {
-    // TestMate-173165a4f1cbf3bf1a9d77c49a292718
+  @Test
+  void getJobProfilesShouldReturnAllProfilesWhenUsedIsFalseAndQueryIsEmpty() {
+    // TestMate-16400b16bf1a763aab0f8854d5c4d9f6
     // Given
     var used = FALSE;
+    var query = "";
+    var offset = 0;
+    var limit = 20;
+    var defaultCql = "(cql.allRecords=1)";
+    var id1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var id2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var profile1 = new JobProfile().id(id1).name("Profile 1");
+    var profile2 = new JobProfile().id(id2).name("Profile 2");
+    var entity1 = JobProfileEntity.builder().id(id1).jobProfile(profile1).build();
+    var entity2 = JobProfileEntity.builder().id(id2).jobProfile(profile2).build();
+    var page = new PageImpl<>(List.of(entity1, entity2));
+    var offsetRequest = OffsetRequest.of(offset, limit);
+    when(jobProfileEntityCqlRepository.findByCql(defaultCql, offsetRequest)).thenReturn(page);
+    // When
+    JobProfileCollection result = jobProfileService.getJobProfiles(used, query, offset, limit);
+    // Then
+    assertThat(result.getJobProfiles()).hasSize(2);
+    assertThat(result.getTotalRecords()).isEqualTo(2);
+    assertThat(result.getJobProfiles().get(0).getId()).isEqualTo(id1);
+    assertThat(result.getJobProfiles().get(0).getName()).isEqualTo("Profile 1");
+    assertThat(result.getJobProfiles().get(1).getId()).isEqualTo(id2);
+    assertThat(result.getJobProfiles().get(1).getName()).isEqualTo("Profile 2");
+    verify(jobProfileEntityCqlRepository).findByCql(defaultCql, offsetRequest);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-173165a4f1cbf3bf1a9d77c49a292718")
+  void getJobProfilesShouldReturnFilteredProfilesWhenQueryIsProvided() {
+    // Given
     var query = "name==\"Export Profile\"";
     var offset = 0;
     var limit = 10;
     var profileId = UUID.fromString("c85d533c-a043-465c-a532-d62101086611");
     var profileName = "Export Profile";
-    var jobProfile = new JobProfile().id(profileId).name(profileName);
-    var entity = JobProfileEntity.builder().id(profileId).jobProfile(jobProfile).build();
+    var entity =
+        JobProfileEntity.builder()
+            .id(profileId)
+            .jobProfile(new JobProfile().id(profileId).name(profileName))
+            .build();
     var page = new PageImpl<>(List.of(entity));
     var offsetRequest = OffsetRequest.of(offset, limit);
     when(jobProfileEntityCqlRepository.findByCql(query, offsetRequest)).thenReturn(page);
     // When
-    JobProfileCollection result = jobProfileService.getJobProfiles(used, query, offset, limit);
+    JobProfileCollection result = jobProfileService.getJobProfiles(FALSE, query, offset, limit);
     // Then
     verify(jobProfileEntityCqlRepository).findByCql(query, offsetRequest);
     assertThat(result.getTotalRecords()).isEqualTo(1);
@@ -1023,9 +1024,9 @@ void getJobProfilesShouldReturnAllProfilesWhenUsedIsFalseAndQueryIsEmpty() {
     assertThat(result.getJobProfiles().get(0).getName()).isEqualTo(profileName);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-55d3d2beb07bac5b2aea7b654574fea3")
   void getJobProfilesShouldHandleEmptyResultsFromCqlRepository() {
-    // TestMate-55d3d2beb07bac5b2aea7b654574fea3
     // Given
     var used = FALSE;
     var query = "name==nonexistent";
