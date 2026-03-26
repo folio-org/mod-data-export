@@ -114,7 +114,7 @@ class TransformationFieldsServiceTest {
     emptyInstanceTransformation.setRecordType(RecordTypes.INSTANCE);
     emptyInstanceTransformation.setTransformation("");
     var transformations = List.of(validItemTransformation, emptyInstanceTransformation);
-    // When & Then
+    // Then
     assertDoesNotThrow(() -> transformationFieldsService.validateTransformations(transformations));
   }
 
