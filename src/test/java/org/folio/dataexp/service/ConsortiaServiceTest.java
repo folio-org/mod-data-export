@@ -3,9 +3,11 @@ package org.folio.dataexp.service;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.ConsortiaClient;
 import org.folio.dataexp.client.ConsortiumClient;
 import org.folio.dataexp.domain.dto.Consortia;
@@ -71,5 +73,57 @@ class ConsortiaServiceTest {
     var actual = consortiaService.getAffiliatedTenants("currentTenantId", "userId");
 
     assertEquals(expected, actual);
+  }
+
+  @Test
+  @TestMate(name = "TestMate-ba413db3d13135d5087b6f67529c2c9a")
+  void isCurrentTenantCentralTenantShouldReturnTrueWhenIdsMatch() {
+    // Given
+    var tenantId = "central-tenant";
+    var userTenant = new UserTenant();
+    userTenant.setCentralTenantId(tenantId);
+    var userTenantCollection = new UserTenantCollection();
+    userTenantCollection.setUserTenants(List.of(userTenant));
+    when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    // When
+    var result = consortiaService.isCurrentTenantCentralTenant(tenantId);
+    // Then
+    assertThat(result).isTrue();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-8a8eb209c7fe07d317427144d2c7eb98")
+  void isCurrentTenantCentralTenantShouldReturnFalseWhenIdsDoNotMatch() {
+    // Given
+    var userTenant = new UserTenant();
+    var centralTenantId = "central-tenant";
+    userTenant.setCentralTenantId(centralTenantId);
+    var userTenantCollection = new UserTenantCollection();
+    var memberTenantId = "member-tenant";
+    userTenantCollection.setUserTenants(List.of(userTenant));
+    when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn(memberTenantId);
+    // When
+    var result = consortiaService.isCurrentTenantCentralTenant(memberTenantId);
+    // Then
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  @TestMate(name = "TestMate-a38fc71f25f95472598b111b2dd24f53")
+  void isCurrentTenantCentralTenantShouldReturnFalseWhenNoCentralTenantFound() {
+    // Given
+    var tenantId = "any-tenant";
+    var userTenantCollection = new UserTenantCollection();
+    userTenantCollection.setUserTenants(List.of());
+    when(consortiaClient.getUserTenantCollection()).thenReturn(userTenantCollection);
+    when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
+    // When
+    var result = consortiaService.isCurrentTenantCentralTenant(tenantId);
+    // Then
+    assertThat(result).isFalse();
+    verify(consortiaClient).getUserTenantCollection();
+    verify(folioExecutionContext).getTenantId();
   }
 }
