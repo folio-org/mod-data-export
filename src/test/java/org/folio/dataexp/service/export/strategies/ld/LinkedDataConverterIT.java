@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JacksonException;
 import lombok.SneakyThrows;
 import org.folio.dataexp.BaseDataExportInitializerIT;
 import org.folio.dataexp.service.BaseUrlService;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import tools.jackson.core.exc.UnexpectedEndOfInputException;
 
 class LinkedDataConverterIT extends BaseDataExportInitializerIT {
   private static final String TEST_BASE_URL = "https://folio-test.example.org";
@@ -30,7 +30,8 @@ class LinkedDataConverterIT extends BaseDataExportInitializerIT {
   @Test
   void convertLdJsonToBibframe2RdfExceptionTest() {
     assertThrows(
-        JacksonException.class, () -> linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
+        UnexpectedEndOfInputException.class,
+        () -> linkedDataConverter.convertLdJsonToBibframe2Rdf("{"));
   }
 
   @SneakyThrows
