@@ -47,6 +47,25 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.folio.dataexp.domain.dto.ExportRequest;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import org.folio.dataexp.domain.entity.JobExecutionExportFilesEntity;
+import org.folio.dataexp.repository.FolioInstanceAllRepository;
+import org.folio.dataexp.repository.MarcInstanceAllRepository;
+import org.folio.dataexp.service.export.strategies.ExportStrategyStatistic;
+import org.folio.dataexp.service.export.strategies.ExportedRecordsListener;
+import org.folio.dataexp.service.export.strategies.GeneratedMarcResult;
+import org.mockito.ArgumentMatchers;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import jakarta.persistence.EntityManager;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import org.mockito.ArgumentCaptor;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportAllStrategyTest {
@@ -66,6 +85,15 @@ class InstancesExportAllStrategyTest {
   @Mock private RuleProcessor ruleProcessor;
 
   @InjectMocks private InstancesExportAllStrategy instancesExportAllStrategy;
+
+    @Mock
+private FolioInstanceAllRepository folioInstanceAllRepository;
+
+    @Mock
+private MarcInstanceAllRepository marcInstanceAllRepository;
+
+    @Mock
+private EntityManager entityManager;
 
   @BeforeEach
   void setUp() {
@@ -273,6 +301,116 @@ class InstancesExportAllStrategyTest {
     var expectedErrorMessage =
         "Error converting json to marc for record 1eaa1eef-1633-4c7e-af09-796315ebc576";
     verify(errorLogService).saveGeneralError(expectedErrorMessage, jobExecutionId);
+  }
+
+    @Test
+void processSlicesShouldProcessMarcInstanceSlicesWhenProfileIsNotDefaultAndNoSrsType() {
+  // TestMate-134ad8035ee1864307dd8f6ab3e97cf2
+  // Given
+  var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+  var fromId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+  var toId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+  var batchSize = 10;
+  ReflectionTestUtils.setField(instancesExportAllStrategy, "exportIdsBatch", batchSize);
+  ReflectionTestUtils.setField(instancesExportAllStrategy, "entityManager", entityManager);
+  var exportFilesEntity = JobExecutionExportFilesEntity.builder()
+      .jobExecutionId(jobExecutionId)
+      .fromId(fromId)
+      .toId(toId)
+      .fileLocation("test-file")
+      .build();
+  var exportRequest = new ExportRequest();
+  exportRequest.setSuppressedFromDiscovery(true);
+  exportRequest.setDeletedRecords(false);
+  exportRequest.setLastExport(false);
+  var mappingProfile = new MappingProfile();
+  mappingProfile.setDefault(false);
+  mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+  var instanceEntity = InstanceEntity.builder()
+      .id(UUID.fromString("00000000-0000-0000-0000-000000000004"))
+      .jsonb("{\"id\":\"00000000-0000-0000-0000-000000000004\", \"hrid\":\"inst001\"}")
+      .build();
+  Slice<InstanceEntity> folioSlice = new SliceImpl<>(List.of(instanceEntity), PageRequest.of(0, batchSize), false);
+  Slice<InstanceEntity> marcInstanceSlice = new SliceImpl<>(List.of(instanceEntity), PageRequest.of(0, batchSize), false);
+  when(folioInstanceAllRepository.findFolioInstanceAllNonDeletedSuppressed(eq(fromId), eq(toId), any(PageRequest.class)))
+      .thenReturn(folioSlice);
+  when(folioInstanceAllRepository.findMarcInstanceAllNonDeletedCustomInstanceProfile(eq(fromId), eq(toId), any(PageRequest.class)))
+      .thenReturn(marcInstanceSlice);
+  var exportStatistic = new ExportStrategyStatistic(mock(ExportedRecordsListener.class));
+  // When
+  instancesExportAllStrategy.processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+  // Then
+  verify(folioInstanceAllRepository).findFolioInstanceAllNonDeletedSuppressed(eq(fromId), eq(toId), any(PageRequest.class));
+  verify(folioInstanceAllRepository).findMarcInstanceAllNonDeletedCustomInstanceProfile(eq(fromId), eq(toId), any(PageRequest.class));
+  verify(marcInstanceAllRepository, never()).findMarcInstanceAllNonDeleted(any(), any(), any());
+  verify(marcInstanceAllRepository, never()).findMarcInstanceAllNonDeletedNonSuppressed(any(), any(), any());
+  verify(entityManager, atLeastOnce()).clear();
+}
+
+    @Test
+  void processSlicesShouldHandleDeletedMarcRecordsWhenSrsRequested() throws IOException {
+    // TestMate-40b1392229d286cc534f4c16ed5e09b4
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var fromId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var toId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    var batchSize = 10;
+    
+    var mappingProfileEntityRepository = mock(org.folio.dataexp.repository.MappingProfileEntityRepository.class);
+    
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "exportIdsBatch", batchSize);
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "entityManager", entityManager);
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "jsonToMarcConverter", jsonToMarcConverter);
+    ReflectionTestUtils.setField(instancesExportAllStrategy, "mappingProfileEntityRepository", mappingProfileEntityRepository);
+    
+    var exportFilesEntity = JobExecutionExportFilesEntity.builder()
+        .jobExecutionId(jobExecutionId)
+        .fromId(fromId)
+        .toId(toId)
+        .build();
+    var exportRequest = new ExportRequest();
+    exportRequest.setSuppressedFromDiscovery(true);
+    exportRequest.setDeletedRecords(true);
+    exportRequest.setLastExport(true);
+    
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setDefault(false);
+    mappingProfile.setRecordTypes(List.of(RecordTypes.SRS));
+    
+    var defaultMappingProfile = new MappingProfile();
+    defaultMappingProfile.setRecordTypes(new java.util.ArrayList<>());
+    var defaultMappingProfileEntity = new org.folio.dataexp.domain.entity.MappingProfileEntity();
+    defaultMappingProfileEntity.setMappingProfile(defaultMappingProfile);
+    
+    var deletedMarcRecord = MarcRecordEntity.builder()
+        .id(UUID.fromString("00000000-0000-0000-0000-000000000004"))
+        .externalId(UUID.fromString("00000000-0000-0000-0000-000000000005"))
+        .content("{\"leader\":\"00000nam  2200000 i 4500\"}")
+        .build();
+    when(mappingProfileEntityRepository.getReferenceById(any(UUID.class)))
+        .thenReturn(defaultMappingProfileEntity);
+    when(folioInstanceAllRepository.findFolioInstanceAll(eq(fromId), eq(toId), any(PageRequest.class)))
+        .thenReturn(new SliceImpl<>(List.of()));
+    when(marcInstanceAllRepository.findMarcInstanceAllNonDeleted(eq(fromId), eq(toId), any(PageRequest.class)))
+        .thenReturn(new SliceImpl<>(List.of()));
+    when(marcInstanceAllRepository.findMarcInstanceAllDeleted())
+        .thenReturn(List.of(deletedMarcRecord));
+    when(jsonToMarcConverter.convertJsonRecordToMarcRecord(any(), any(), any()))
+        .thenReturn("marc-content");
+    
+    var exportStatistic = new ExportStrategyStatistic(mock(ExportedRecordsListener.class));
+    
+    // When
+    instancesExportAllStrategy.processSlices(exportFilesEntity, exportStatistic, mappingProfile, exportRequest, localStorageWriter);
+    
+    // Then
+    verify(folioInstanceAllRepository).findFolioInstanceAll(eq(fromId), eq(toId), any(PageRequest.class));
+    verify(marcInstanceAllRepository).findMarcInstanceAllNonDeleted(eq(fromId), eq(toId), any(PageRequest.class));
+    verify(marcInstanceAllRepository).findMarcInstanceAllDeleted();
+    verify(entityManager, atLeastOnce()).clear();
+    verify(localStorageWriter).write("marc-content");
+    
+    assertThat(deletedMarcRecord.isDeleted()).isTrue();
   }
 
   private String generateTooLongString() {
