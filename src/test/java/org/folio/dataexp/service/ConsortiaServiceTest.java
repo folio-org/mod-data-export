@@ -96,8 +96,8 @@ class ConsortiaServiceTest {
   @TestMate(name = "TestMate-8a8eb209c7fe07d317427144d2c7eb98")
   void isCurrentTenantCentralTenantShouldReturnFalseWhenIdsDoNotMatch() {
     // Given
-    var centralTenantId = "central-tenant";
     var userTenant = new UserTenant();
+    var centralTenantId = "central-tenant";
     userTenant.setCentralTenantId(centralTenantId);
     var userTenantCollection = new UserTenantCollection();
     var memberTenantId = "member-tenant";
