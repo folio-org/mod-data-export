@@ -8,6 +8,7 @@ import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONV
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -44,8 +46,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import tools.jackson.databind.ObjectMapper;
-import java.util.Collections;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -101,18 +101,6 @@ class ErrorLogServiceTest {
 
   @Test
   void saveTest() {
-    var errorLog = new ErrorLog();
-
-    when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
-    errorLogService.save(errorLog);
-
-    verify(errorLogEntityCqlRepository)
-        .insertIfNotExists(
-            isA(UUID.class), any(), isA(java.util.Date.class), isA(String.class), any(), any());
-  }
-
-  @Test
-  void updateTest() {
     var errorLog = new ErrorLog();
 
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
@@ -454,80 +442,88 @@ class ErrorLogServiceTest {
     assertFalse(formattedUuids.contains("]"));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-da84ac9509d5a813a5f37509d1876f9f")
   @SneakyThrows
   void populateUuidsNotFoundNumberErrorLogShouldUpdateExistingErrorLogWhenFound() {
-    // TestMate-da84ac9509d5a813a5f37509d1876f9f
     // Given
     var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
     var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
-    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
     var initialCount = "5";
-    var incrementValue = 10;
-    var expectedTotal = "15";
-    var errorLog = new ErrorLog()
-        .errorMessageValues(Collections.singletonList(initialCount))
-        .jobExecutionId(jobExecutionId)
-        .errorMessageCode(SOME_UUIDS_NOT_FOUND.getCode());
+    var errorLog =
+        new ErrorLog()
+            .errorMessageValues(Collections.singletonList(initialCount))
+            .jobExecutionId(jobExecutionId)
+            .errorMessageCode(SOME_UUIDS_NOT_FOUND.getCode());
     var errorLogEntity = new ErrorLogEntity();
     errorLogEntity.setErrorLog(errorLog);
-    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(
+            jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
         .thenReturn(Collections.singletonList(errorLogEntity));
     when(folioExecutionContext.getUserId()).thenReturn(userId);
+    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
     when(jobExecutionService.getById(jobExecutionId))
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
-    
+
     var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("jsonString");
+    var incrementValue = 10;
     // When
     errorLogService.populateUuidsNotFoundNumberErrorLog(jobExecutionId, incrementValue);
     // Then
-    verify(errorLogEntityCqlRepository).getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-        isA(UUID.class),
-        eq("jsonString"),
-        isA(Date.class),
-        eq(userId.toString()),
-        eq(jobExecutionId),
-        eq(jobProfileId));
+    verify(errorLogEntityCqlRepository)
+        .getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            eq("jsonString"),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(jobProfileId));
     var capturedErrorLog = errorLogCaptor.getValue();
+    var expectedTotal = "15";
     assertEquals(expectedTotal, capturedErrorLog.getErrorMessageValues().get(0));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-45e2650784d528d5504331f8b75cb393")
   void isErrorsByErrorCodePresentShouldReturnTrueWhenSingleErrorCodeExists() {
-    // TestMate-45e2650784d528d5504331f8b75cb393
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var errorCode = "error.uuidsNotFound";
     var errorCodes = List.of(errorCode);
     var expectedPattern = "%" + errorCode + "%";
     var errorLogEntity = new ErrorLogEntity();
-    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern))
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(
+            jobExecutionId, expectedPattern))
         .thenReturn(List.of(errorLogEntity));
     // When
     var result = errorLogService.isErrorsByErrorCodePresent(errorCodes, jobExecutionId);
     // Then
     assertTrue(result);
-    verify(errorLogEntityCqlRepository).getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern);
+    verify(errorLogEntityCqlRepository)
+        .getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-bde556279710d3e8ae8f4f446eb3feb2")
   void isErrorsByErrorCodePresentShouldReturnTrueWhenMultipleErrorCodesExist() {
-    // TestMate-bde556279710d3e8ae8f4f446eb3feb2
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
     var errorCodes = List.of("ERR_1", "ERR_2");
     var expectedPattern = "%(ERR_1|ERR_2)%";
     var errorLogEntity = new ErrorLogEntity();
-    
-    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern))
+
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCodes(
+            jobExecutionId, expectedPattern))
         .thenReturn(List.of(errorLogEntity));
     // When
     var result = errorLogService.isErrorsByErrorCodePresent(errorCodes, jobExecutionId);
     // Then
     assertTrue(result);
-    verify(errorLogEntityCqlRepository).getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern);
+    verify(errorLogEntityCqlRepository)
+        .getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern);
   }
 }
