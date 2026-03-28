@@ -8,6 +8,10 @@ import org.folio.processor.translations.Translation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.CAMPUSES;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.INSTITUTIONS;
+import static org.folio.dataexp.service.export.strategies.translation.builder.LocationTranslationBuilder.LIBRARIES;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class LocationTranslationBuilderUnitTest {
 
@@ -67,5 +71,30 @@ class LocationTranslationBuilderUnitTest {
     // Then
     assertThat(actualTranslation.getFunction()).isEqualTo(functionName);
     assertThat(actualTranslation.getParameters()).isEmpty();
+  }
+
+    @ParameterizedTest
+  @TestMate(name = "TestMate-f4b2c1a0e9d8c7b6a5f4e3d2c1b0a9f8")
+  @CsvSource({
+    "holdings.location.library.name, name, " + LIBRARIES + ", libraryId",
+    "holdings.location.campus.code, code, " + CAMPUSES + ", campusId",
+    "holdings.location.institution.name, name, " + INSTITUTIONS + ", institutionId"
+  })
+  void testBuildWhenFieldIdHasFourPartsShouldSetReferenceDataForKnownTypes(String fieldId, String expectedField, String expectedRefData, String expectedRefIdField) {
+    // TestMate-57583535e79e5e93392046c7acca9a3a
+    // Given
+    LocationTranslationBuilder builder = new LocationTranslationBuilder();
+    String functionName = "set_location";
+    Transformations mappingTransformation = new Transformations();
+    mappingTransformation.setFieldId(fieldId);
+    // When
+    Translation actualTranslation = builder.build(functionName, mappingTransformation);
+    // Then
+    assertThat(actualTranslation.getFunction()).isEqualTo(functionName);
+    assertThat(actualTranslation.getParameters())
+        .hasSize(3)
+        .containsEntry("field", expectedField)
+        .containsEntry("referenceData", expectedRefData)
+        .containsEntry("referenceDataIdField", expectedRefIdField);
   }
 }
