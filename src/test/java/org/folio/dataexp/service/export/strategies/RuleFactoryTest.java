@@ -15,6 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
+import org.folio.dataexp.service.export.strategies.rule.builder.DefaultRuleBuilder;
+import org.mockito.MockedConstruction;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -39,5 +46,32 @@ class RuleFactoryTest {
         ruleFactory.createDefaultByTransformations(transformations, defaultRules);
     // Then
     assertThat(result).isEmpty();
+  }
+
+    @Test
+  void testCreateDefaultByTransformationsShouldPropagateTransformationRuleException() {
+    // TestMate-3dcc1f62c61e104028cf0b12117a1d11
+    // Given
+    // We use a fieldId that contains "transformation.builder" to trigger the TransformationRuleBuilder
+    // which is already instantiated in the static map of the RuleFactory.
+    Transformations transformations = new Transformations();
+    transformations.setEnabled(true);
+    transformations.setFieldId("transformation.builder.test");
+    transformations.setTransformation("900  $a"); // Valid transformation format
+    transformations.setRecordType(RecordTypes.INSTANCE);
+    
+    // TransformationRuleBuilder.build iterates over the provided rules. 
+    // According to Reference 5, it throws TransformationRuleException if an existing rule 
+    // for the same field has null indicators.
+    List<Rule> defaultRules = new ArrayList<>();
+    Rule existingRule = new Rule();
+    existingRule.setField("900");
+    existingRule.setIndicators(null); // This triggers the exception in TransformationRuleBuilder
+    defaultRules.add(existingRule);
+    // When & Then
+    // The method should delegate to TransformationRuleBuilder, which throws the exception,
+    // and RuleFactory should propagate it.
+    assertThrows(TransformationRuleException.class, () ->
+        ruleFactory.createDefaultByTransformations(transformations, defaultRules));
   }
 }
