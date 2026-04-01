@@ -65,8 +65,7 @@ class DataExportTenantServiceTest {
 
     // Then
     var configCaptor = ArgumentCaptor.forClass(Config.class);
-    verify(configurationService, times(2))
-        .upsertConfiguration(configCaptor.capture());
+    verify(configurationService, times(2)).upsertConfiguration(configCaptor.capture());
     var capturedConfigs = configCaptor.getAllValues();
     assertThat(capturedConfigs)
         .extracting(Config::getKey)
