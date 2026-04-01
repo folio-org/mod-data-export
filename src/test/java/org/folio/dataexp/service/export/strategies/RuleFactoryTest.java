@@ -36,8 +36,8 @@ class RuleFactoryTest {
     transformations.setRecordType(RecordTypes.HOLDINGS);
     List<Rule> defaultRules = new ArrayList<>();
     // When
-    Optional<Rule> result =
-        ruleFactory.createDefaultByTransformations(transformations, defaultRules);
+    Optional<Rule> result = ruleFactory
+        .createDefaultByTransformations(transformations, defaultRules);
     // Then
     assertThat(result).isEmpty();
   }
