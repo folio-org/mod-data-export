@@ -22,6 +22,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.ObjectMapper;
+import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
+import java.io.InputStream;
+import java.util.UUID;
+import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class DataExportTenantServiceTest {
@@ -75,5 +82,55 @@ class DataExportTenantServiceTest {
         .contains(String.valueOf(SlicerProcessor.DEFAULT_SLICE_SIZE));
     verify(timerService).updateCleanUpFilesTimerIfRequired();
     assertThat(System.getProperty(DataExportTenantService.TENANT_FOR_VIEWS)).isEqualTo(tenantId);
+  }
+
+    @Test
+  void testLoadReferenceDataShouldSaveAllDefaultMappingProfiles() throws Exception {
+    // TestMate-2cb63a452a72cfc82d7e0179a631ca5d
+    // Given
+    var mappingProfileId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(mappingProfileId);
+    mappingProfile.setName("Default mapping profile");
+    var jobProfile = new JobProfile();
+    jobProfile.setId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
+    jobProfile.setName("Default job profile");
+    when(objectMapper.readValue(any(InputStream.class), eq(MappingProfile.class))).thenReturn(mappingProfile);
+    when(objectMapper.readValue(any(InputStream.class), eq(JobProfile.class))).thenReturn(jobProfile);
+    // When
+    dataExportTenantService.loadReferenceData();
+    // Then
+    var mappingProfileCaptor = ArgumentCaptor.forClass(MappingProfileEntity.class);
+    verify(mappingProfileEntityRepository, times(4)).save(mappingProfileCaptor.capture());
+    
+    var capturedEntities = mappingProfileCaptor.getAllValues();
+    assertThat(capturedEntities).hasSize(4);
+    assertThat(capturedEntities.get(0).getId()).isEqualTo(mappingProfileId);
+    assertThat(capturedEntities.get(0).getName()).isEqualTo("Default mapping profile");
+    verify(jobProfileEntityRepository, times(5)).save(any(JobProfileEntity.class));
+  }
+
+    @Test
+  void testLoadReferenceDataShouldHandleExceptionsDuringMappingProfileLoading() throws Exception {
+    // TestMate-5391172ea861f051988005412add9c0d
+    // Given
+    var mappingProfileId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(mappingProfileId);
+    mappingProfile.setName("Valid mapping profile");
+    var jobProfileId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var jobProfile = new JobProfile();
+    jobProfile.setId(jobProfileId);
+    jobProfile.setName("Valid job profile");
+    when(objectMapper.readValue(any(InputStream.class), eq(MappingProfile.class)))
+        .thenThrow(new RuntimeException("Simulated parsing error"))
+        .thenReturn(mappingProfile, mappingProfile, mappingProfile);
+    when(objectMapper.readValue(any(InputStream.class), eq(JobProfile.class)))
+        .thenReturn(jobProfile);
+    // When
+    dataExportTenantService.loadReferenceData();
+    // Then
+    verify(mappingProfileEntityRepository, times(3)).save(any(MappingProfileEntity.class));
+    verify(jobProfileEntityRepository, times(5)).save(any(JobProfileEntity.class));
   }
 }
