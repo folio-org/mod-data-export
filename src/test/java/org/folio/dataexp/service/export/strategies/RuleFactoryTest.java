@@ -1,6 +1,7 @@
 package org.folio.dataexp.service.export.strategies;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.when;
-import org.folio.dataexp.service.export.strategies.rule.builder.DefaultRuleBuilder;
-import org.mockito.MockedConstruction;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -48,20 +42,22 @@ class RuleFactoryTest {
     assertThat(result).isEmpty();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-3dcc1f62c61e104028cf0b12117a1d11")
   void testCreateDefaultByTransformationsShouldPropagateTransformationRuleException() {
     // TestMate-3dcc1f62c61e104028cf0b12117a1d11
     // Given
-    // We use a fieldId that contains "transformation.builder" to trigger the TransformationRuleBuilder
+    // We use a fieldId that contains "transformation.builder" to trigger the
+    // TransformationRuleBuilder
     // which is already instantiated in the static map of the RuleFactory.
     Transformations transformations = new Transformations();
     transformations.setEnabled(true);
     transformations.setFieldId("transformation.builder.test");
     transformations.setTransformation("900  $a"); // Valid transformation format
     transformations.setRecordType(RecordTypes.INSTANCE);
-    
-    // TransformationRuleBuilder.build iterates over the provided rules. 
-    // According to Reference 5, it throws TransformationRuleException if an existing rule 
+
+    // TransformationRuleBuilder.build iterates over the provided rules.
+    // According to Reference 5, it throws TransformationRuleException if an existing rule
     // for the same field has null indicators.
     List<Rule> defaultRules = new ArrayList<>();
     Rule existingRule = new Rule();
@@ -71,7 +67,8 @@ class RuleFactoryTest {
     // When & Then
     // The method should delegate to TransformationRuleBuilder, which throws the exception,
     // and RuleFactory should propagate it.
-    assertThrows(TransformationRuleException.class, () ->
-        ruleFactory.createDefaultByTransformations(transformations, defaultRules));
+    assertThrows(
+        TransformationRuleException.class,
+        () -> ruleFactory.createDefaultByTransformations(transformations, defaultRules));
   }
 }
