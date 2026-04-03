@@ -166,7 +166,7 @@ public class S3ExportsUploader {
           var fileSuffix = FilenameUtils.getExtension(exportFile.getName());
           var zipEntryName =
               String.format(
-                  Constants.FILE_NAME_FORMAT,
+                  Constants.ZIP_FILE_MEMBER_NAME_FORMAT,
                   fileName,
                   jobExecution.getHrId(),
                   countExportsFiles,
