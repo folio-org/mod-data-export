@@ -7,11 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -19,6 +24,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -213,6 +220,58 @@ class S3ExportsUploaderTest {
 
     var temDir = new File(temDirLocation);
     assertFalse(temDir.exists());
+  }
+
+  @Test
+  @SneakyThrows
+  void uploadMultipleExportsCheckMemberFileNames() {
+    // Capture the zip file before it's deleted from local storage to check its contents
+    var uploadedZipFile = new ByteArrayOutputStream();
+    when(s3Client.write(anyString(), any(InputStream.class), anyLong()))
+      .thenAnswer(invocation -> {
+        try (InputStream is = invocation.getArgument(1)) {
+          is.transferTo(uploadedZipFile);
+        }
+        return "some-path";
+      });
+
+    var jobExecution = new JobExecution();
+    jobExecution.setId(UUID.randomUUID());
+    jobExecution.setHrId(200);
+    var tempDirLocation =
+        S3FilePathUtils.getTempDirForJobExecutionId(StringUtils.EMPTY, jobExecution.getId());
+    Files.createDirectories(Path.of(tempDirLocation));
+
+    var exportFileName1 = "marc_export_sliced_1.mrc";
+    var exportFileName2 = "marc_export_sliced_2.mrc";
+    var fileLocation1 = tempDirLocation + exportFileName1;
+    var writer = new LocalStorageWriter(fileLocation1, OUTPUT_BUFFER_SIZE);
+    var marc = "marc";
+    writer.write(marc);
+    writer.close();
+
+    var fileLocation2 = tempDirLocation + exportFileName2;
+    writer = new LocalStorageWriter(fileLocation2, OUTPUT_BUFFER_SIZE);
+    writer.write(marc);
+    writer.close();
+
+    var export1 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation1).build();
+    var export2 = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation2).build();
+
+    var expectedS3Path = tempDirLocation + "marc_export-200.zip";
+    var initialFileName = "marc_export";
+    var s3PathName = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
+    assertEquals(expectedS3Path, s3PathName);
+
+    try(ZipInputStream zis = new ZipInputStream(
+      new ByteArrayInputStream(uploadedZipFile.toByteArray())
+    )) {
+      ZipEntry entry;
+      while ((entry = zis.getNextEntry()) != null) {
+        var name = entry.getName();
+        assertTrue(name.endsWith(".mrc"));
+      }
+    }
   }
 
   @Test
