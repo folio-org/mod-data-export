@@ -59,10 +59,12 @@ class S3ExportsUploaderTest {
     jobExecution.setId(UUID.randomUUID());
     jobExecution.setHrId(200);
 
+    List<JobExecutionExportFilesEntity> empty = Collections.emptyList();
+
     S3ExportsUploadException s3Exception =
         assertThrows(
             S3ExportsUploadException.class,
-            () -> s3ExportsUploader.upload(jobExecution, Collections.emptyList(), initialFileName));
+            () -> s3ExportsUploader.upload(jobExecution, empty, initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
   }
 
@@ -172,13 +174,12 @@ class S3ExportsUploaderTest {
     var writer = new LocalStorageWriter(fileLocation, OUTPUT_BUFFER_SIZE);
     writer.close();
     var export = JobExecutionExportFilesEntity.builder().fileLocation(fileLocation).build();
+    var exportList = Collections.singletonList(export);
 
     S3ExportsUploadException s3Exception =
         assertThrows(
             S3ExportsUploadException.class,
-            () ->
-                s3ExportsUploader.upload(
-                    jobExecution, Collections.singletonList(export), initialFileName));
+            () -> s3ExportsUploader.upload(jobExecution, exportList, initialFileName));
     assertEquals(EMPTY_FILE_FOR_EXPORT_ERROR_MESSAGE, s3Exception.getMessage());
 
     var temDir = new File(temDirLocation);
@@ -228,12 +229,13 @@ class S3ExportsUploaderTest {
     // Capture the zip file before it's deleted from local storage to check its contents
     var uploadedZipFile = new ByteArrayOutputStream();
     when(s3Client.write(anyString(), any(InputStream.class), anyLong()))
-      .thenAnswer(invocation -> {
-        try (InputStream is = invocation.getArgument(1)) {
-          is.transferTo(uploadedZipFile);
-        }
-        return "some-path";
-      });
+        .thenAnswer(
+            invocation -> {
+              try (InputStream is = invocation.getArgument(1)) {
+                is.transferTo(uploadedZipFile);
+              }
+              return "some-path";
+            });
 
     var jobExecution = new JobExecution();
     jobExecution.setId(UUID.randomUUID());
@@ -260,12 +262,12 @@ class S3ExportsUploaderTest {
 
     var expectedS3Path = tempDirLocation + "marc_export-200.zip";
     var initialFileName = "marc_export";
-    var s3PathName = s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
+    var s3PathName =
+        s3ExportsUploader.upload(jobExecution, List.of(export1, export2), initialFileName);
     assertEquals(expectedS3Path, s3PathName);
 
-    try(ZipInputStream zis = new ZipInputStream(
-      new ByteArrayInputStream(uploadedZipFile.toByteArray())
-    )) {
+    try (ZipInputStream zis =
+        new ZipInputStream(new ByteArrayInputStream(uploadedZipFile.toByteArray()))) {
       ZipEntry entry;
       while ((entry = zis.getNextEntry()) != null) {
         var name = entry.getName();
