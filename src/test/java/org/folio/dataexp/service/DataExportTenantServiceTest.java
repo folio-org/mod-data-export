@@ -2,12 +2,19 @@ package org.folio.dataexp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
+import java.util.UUID;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.Config;
+import org.folio.dataexp.domain.dto.JobProfile;
+import org.folio.dataexp.domain.dto.MappingProfile;
+import org.folio.dataexp.domain.entity.JobProfileEntity;
+import org.folio.dataexp.domain.entity.MappingProfileEntity;
 import org.folio.dataexp.repository.JobProfileEntityRepository;
 import org.folio.dataexp.repository.MappingProfileEntityRepository;
 import org.folio.spring.FolioExecutionContext;
@@ -20,20 +27,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.JdbcTemplate;
 import tools.jackson.databind.ObjectMapper;
-import org.folio.dataexp.domain.dto.JobProfile;
-import org.folio.dataexp.domain.dto.MappingProfile;
-import org.folio.dataexp.domain.entity.JobProfileEntity;
-import org.folio.dataexp.domain.entity.MappingProfileEntity;
-import java.io.InputStream;
-import java.util.UUID;
-import static org.mockito.ArgumentMatchers.eq;
 
 @ExtendWith(MockitoExtension.class)
 class DataExportTenantServiceTest {
 
-  @Mock private JdbcTemplate jdbcTemplate;
   @Mock private FolioExecutionContext context;
   @Mock private FolioSpringLiquibase folioSpringLiquibase;
   @Mock private JobProfileEntityRepository jobProfileEntityRepository;
@@ -84,9 +82,9 @@ class DataExportTenantServiceTest {
     assertThat(System.getProperty(DataExportTenantService.TENANT_FOR_VIEWS)).isEqualTo(tenantId);
   }
 
-    @Test
-  void testLoadReferenceDataShouldSaveAllDefaultMappingProfiles() throws Exception {
-    // TestMate-2cb63a452a72cfc82d7e0179a631ca5d
+  @Test
+  @TestMate(name = "TestMate-2cb63a452a72cfc82d7e0179a631ca5d")
+  void testLoadReferenceDataShouldSaveAllDefaultMappingProfiles() {
     // Given
     var mappingProfileId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var mappingProfile = new MappingProfile();
@@ -95,24 +93,26 @@ class DataExportTenantServiceTest {
     var jobProfile = new JobProfile();
     jobProfile.setId(UUID.fromString("00000000-0000-0000-0000-000000000002"));
     jobProfile.setName("Default job profile");
-    when(objectMapper.readValue(any(InputStream.class), eq(MappingProfile.class))).thenReturn(mappingProfile);
-    when(objectMapper.readValue(any(InputStream.class), eq(JobProfile.class))).thenReturn(jobProfile);
+    when(objectMapper.readValue(any(InputStream.class), eq(MappingProfile.class)))
+        .thenReturn(mappingProfile);
+    when(objectMapper.readValue(any(InputStream.class), eq(JobProfile.class)))
+        .thenReturn(jobProfile);
     // When
     dataExportTenantService.loadReferenceData();
     // Then
     var mappingProfileCaptor = ArgumentCaptor.forClass(MappingProfileEntity.class);
     verify(mappingProfileEntityRepository, times(4)).save(mappingProfileCaptor.capture());
-    
+
     var capturedEntities = mappingProfileCaptor.getAllValues();
     assertThat(capturedEntities).hasSize(4);
-    assertThat(capturedEntities.get(0).getId()).isEqualTo(mappingProfileId);
-    assertThat(capturedEntities.get(0).getName()).isEqualTo("Default mapping profile");
+    assertThat(capturedEntities.getFirst().getId()).isEqualTo(mappingProfileId);
+    assertThat(capturedEntities.getFirst().getName()).isEqualTo("Default mapping profile");
     verify(jobProfileEntityRepository, times(5)).save(any(JobProfileEntity.class));
   }
 
-    @Test
-  void testLoadReferenceDataShouldHandleExceptionsDuringMappingProfileLoading() throws Exception {
-    // TestMate-5391172ea861f051988005412add9c0d
+  @Test
+  @TestMate(name = "TestMate-5391172ea861f051988005412add9c0d")
+  void testLoadReferenceDataShouldHandleExceptionsDuringMappingProfileLoading() {
     // Given
     var mappingProfileId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var mappingProfile = new MappingProfile();
