@@ -54,6 +54,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
+import static org.folio.dataexp.service.ConfigurationService.INVENTORY_RECORD_LINK_KEY;
+import org.folio.dataexp.domain.dto.RecordTypes;
+import static org.folio.dataexp.util.ErrorCode.SOME_RECORDS_FAILED;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -69,6 +72,8 @@ class ErrorLogServiceTest {
   @InjectMocks private ErrorLogService errorLogService;
 
   @Captor private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
+
+    @Captor private ArgumentCaptor<ErrorLog> errorLogCaptor;
 
   @Test
   void getErrorLogsByQueryTest() {
@@ -662,5 +667,87 @@ class ErrorLogServiceTest {
             eq(jobExecutionId),
             eq(null));
     assertThat(result.getJobExecutionId()).isEqualTo(jobExecutionId);
+  }
+
+    @Test
+  void testSaveWithAffectedRecordShouldConstructInventoryLinkUsingConfiguration() throws Exception {
+    // TestMate-a4b379a312ca773eb2bb2b3f3746f64b
+    // Given
+    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var jobProfileId = UUID.fromString("00000000-0000-0000-0000-000000000003");
+    var instanceId = "00000000-0000-0000-0000-000000000004";
+    var hrid = "inst001";
+    var title = "Test Title";
+    var baseUrl = "https://folio-testing.edu/inventory/view/";
+    var errorMessage = "Sample error message";
+    var errorCode = "SAMPLE_ERROR_CODE";
+    var instance = new JSONObject();
+    instance.put(ID_KEY, instanceId);
+    instance.put(HRID_KEY, hrid);
+    instance.put(TITLE_KEY, title);
+    var jobExecution = new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(configurationService.getValue(INVENTORY_RECORD_LINK_KEY)).thenReturn(baseUrl);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
+    when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("{}");
+    // When
+    errorLogService.saveWithAffectedRecord(instance, errorMessage, errorCode, jobExecutionId);
+    // Then
+    verify(configurationService).getValue(INVENTORY_RECORD_LINK_KEY);
+    verify(errorLogEntityCqlRepository).insertIfNotExists(
+        isA(UUID.class),
+        anyString(),
+        isA(Date.class),
+        eq(userId.toString()),
+        eq(jobExecutionId),
+        eq(jobProfileId));
+    var capturedErrorLog = errorLogCaptor.getValue();
+    var affectedRecord = capturedErrorLog.getAffectedRecord();
+    assertEquals(baseUrl + instanceId, affectedRecord.getInventoryRecordLink());
+    assertEquals(instanceId, affectedRecord.getId());
+    assertEquals(hrid, affectedRecord.getHrid());
+    assertEquals(title, affectedRecord.getTitle());
+    assertEquals(RecordTypes.INSTANCE, affectedRecord.getRecordType());
+    assertEquals(errorCode, capturedErrorLog.getErrorMessageCode());
+    assertEquals(List.of(errorMessage), capturedErrorLog.getErrorMessageValues());
+  }
+
+    @Test
+  @SneakyThrows
+  void populateUuidsNotFoundNumberErrorLogShouldCreateNewErrorLogWhenNoExistingFound() {
+    // TestMate-9f3d41b44a8e1ead6b08dc11717af598
+    // Given
+    var jobExecutionId = UUID.fromString("a890b134-736f-4e5a-8351-9c608f3a3a58");
+    var userId = UUID.fromString("b890b134-736f-4e5a-8351-9c608f3a3a59");
+    var jobProfileId = UUID.fromString("c890b134-736f-4e5a-8351-9c608f3a3a50");
+    var numberOfNotFoundUuids = 10;
+    when(errorLogEntityCqlRepository.getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode()))
+        .thenReturn(new ArrayList<>());
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    
+    var jobExecution = new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId);
+    when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
+    when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
+    
+    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
+    when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("{}");
+    // When
+    errorLogService.populateUuidsNotFoundNumberErrorLog(jobExecutionId, numberOfNotFoundUuids);
+    // Then
+    verify(errorLogEntityCqlRepository).getByJobExecutionIdAndErrorCode(jobExecutionId, SOME_UUIDS_NOT_FOUND.getCode());
+    verify(errorLogEntityCqlRepository).insertIfNotExists(
+        isA(UUID.class),
+        anyString(),
+        isA(Date.class),
+        eq(userId.toString()),
+        eq(jobExecutionId),
+        eq(jobProfileId));
+    var capturedErrorLog = errorLogCaptor.getValue();
+    assertEquals(SOME_RECORDS_FAILED.getCode(), capturedErrorLog.getErrorMessageCode());
+    assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
+    assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
+    assertEquals("10", capturedErrorLog.getErrorMessageValues().get(0));
   }
 }
