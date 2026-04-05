@@ -82,7 +82,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
 
 @ExtendWith(MockitoExtension.class)
 class InstancesExportStrategyTest {
@@ -860,17 +859,15 @@ class InstancesExportStrategyTest {
     verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-505932c06d2b13fe758cc6b801e170cc")
   void testGetIdentifiersShouldHandleMissingOptionalFieldsInJson() {
-    // TestMate-505932c06d2b13fe758cc6b801e170cc
     // Given
     var instanceId = UUID.fromString("c0a80101-0000-0000-0000-000000000001");
     var partialJson = "{\"id\": \"c0a80101-0000-0000-0000-000000000001\"}";
-    var instanceEntity = InstanceEntity.builder()
-        .id(instanceId)
-        .jsonb(partialJson)
-        .build();
-    when(instanceEntityRepository.findByIdIn(Set.of(instanceId))).thenReturn(List.of(instanceEntity));
+    var instanceEntity = InstanceEntity.builder().id(instanceId).jsonb(partialJson).build();
+    when(instanceEntityRepository.findByIdIn(Set.of(instanceId)))
+        .thenReturn(List.of(instanceEntity));
     // When
     var opt = instancesExportStrategy.getIdentifiers(instanceId);
     // Then

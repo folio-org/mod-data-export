@@ -1,26 +1,33 @@
 package org.folio.dataexp.service.export.strategies;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.HOLDINGS_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.INSTANCE_HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ITEMS_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.EntityManager;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.folio.dataexp.TestMate;
 import org.folio.dataexp.client.SearchConsortiumHoldings;
 import org.folio.dataexp.domain.dto.ConsortiumHolding;
 import org.folio.dataexp.domain.dto.ConsortiumHoldingCollection;
@@ -42,12 +49,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import java.util.Collections;
 
 @ExtendWith(MockitoExtension.class)
 class HoldingsItemsResolverServiceTest {
@@ -260,9 +261,9 @@ class HoldingsItemsResolverServiceTest {
             jobExecutionId);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-62ff2cbbfccf6f13577db8b16a2985d2")
   void testRetrieveHoldingsAndItemsByInstanceIdWhenNoUpdateNeededShouldExitEarly() {
-    // TestMate-62ff2cbbfccf6f13577db8b16a2985d2
     // Given
     var instanceId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -271,7 +272,8 @@ class HoldingsItemsResolverServiceTest {
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
     // When
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
     // Then
     assertTrue(instance.isEmpty());
     assertTrue(!instance.containsKey(HOLDINGS_KEY));
@@ -281,14 +283,14 @@ class HoldingsItemsResolverServiceTest {
     verify(folioExecutionContext, never()).getTenantId();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-602cbca5e4f75b0695c1319ef775ab32")
   void testRetrieveHoldingsAndItemsByInstanceIdWhenOnlyHoldingsRequestedShouldNotFetchItems() {
-    // TestMate-602cbca5e4f75b0695c1319ef775ab32
     // Given
     var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
     var holdingId = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
-    var jobExecutionId = UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
-    var instanceHrid = "instHrid-123";
+    final var jobExecutionId = UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
+    final var instanceHrid = "instHrid-123";
     var tenantId = "test-tenant";
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
@@ -300,7 +302,7 @@ class HoldingsItemsResolverServiceTest {
             .instanceId(instanceId)
             .jsonb(holdingJson.toJSONString())
             .build();
-    var instance = new JSONObject();
+    final var instance = new JSONObject();
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(consortiaService.isCurrentTenantCentralTenant(tenantId)).thenReturn(false);
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId))
@@ -324,42 +326,47 @@ class HoldingsItemsResolverServiceTest {
     assertTrue(((JSONArray) actualHolding.get(ITEMS_KEY)).isEmpty());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-24384d444f63e9c1e8e166b6387e3e81")
   void testRetrieveHoldingsAndItemsByInstanceIdWhenJsonIsInvalidShouldSkipRecord() {
-    // TestMate-24384d444f63e9c1e8e166b6387e3e81
     // Given
     var instanceId = UUID.fromString("11111111-1111-1111-1111-111111111111");
     var validHoldingId = UUID.fromString("22222222-2222-2222-2222-222222222222");
     var malformedHoldingId = UUID.fromString("33333333-3333-3333-3333-333333333333");
     var validItemId = UUID.fromString("44444444-4444-4444-4444-444444444444");
     var malformedItemId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000000");
-    var instanceHrid = "inst-001";
+    final var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    final var instanceHrid = "inst-001";
     var tenantId = "test-tenant";
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS, RecordTypes.ITEM));
-    var validHolding = HoldingsRecordEntity.builder()
-        .id(validHoldingId)
-        .instanceId(instanceId)
-        .jsonb("{\"id\":\"" + validHoldingId + "\", \"hrid\":\"hold-001\"}")
-        .build();
-    // Use a string that is syntactically invalid JSON (e.g., missing closing brace) to trigger a ParseException.
-    var malformedHolding = HoldingsRecordEntity.builder()
-        .id(malformedHoldingId)
-        .instanceId(instanceId)
-        .jsonb("{\"id\": ")
-        .build();
-    var validItem = ItemEntity.builder()
-        .id(validItemId)
-        .holdingsRecordId(validHoldingId)
-        .jsonb("{\"id\":\"" + validItemId + "\", \"barcode\":\"ABC\"}")
-        .build();
-    var malformedItem = ItemEntity.builder()
-        .id(malformedItemId)
-        .holdingsRecordId(validHoldingId)
-        .jsonb("{\"barcode\": ")
-        .build();
-    var instance = new JSONObject();
+    var validHolding =
+        HoldingsRecordEntity.builder()
+            .id(validHoldingId)
+            .instanceId(instanceId)
+            .jsonb("{\"id\":\"" + validHoldingId + "\", \"hrid\":\"hold-001\"}")
+            .build();
+    // Use a string that is syntactically invalid JSON (e.g., missing closing brace) to trigger a
+    // ParseException.
+    var malformedHolding =
+        HoldingsRecordEntity.builder()
+            .id(malformedHoldingId)
+            .instanceId(instanceId)
+            .jsonb("{\"id\": ")
+            .build();
+    var validItem =
+        ItemEntity.builder()
+            .id(validItemId)
+            .holdingsRecordId(validHoldingId)
+            .jsonb("{\"id\":\"" + validItemId + "\", \"barcode\":\"ABC\"}")
+            .build();
+    var malformedItem =
+        ItemEntity.builder()
+            .id(malformedItemId)
+            .holdingsRecordId(validHoldingId)
+            .jsonb("{\"barcode\": ")
+            .build();
+    final var instance = new JSONObject();
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(consortiaService.isCurrentTenantCentralTenant(tenantId)).thenReturn(false);
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId))
@@ -384,21 +391,21 @@ class HoldingsItemsResolverServiceTest {
     assertEquals("ABC", actualItem.getAsString("barcode"));
     // entityManager.clear() is called once in retrieveHoldingsAndItemsByInstanceIdForLocalTenant
     // and once in addHoldingsAndItems because RecordTypes.ITEM is present in the mapping profile.
-    verify(entityManager, org.mockito.Mockito.atLeastOnce()).clear();
+    verify(entityManager, atLeastOnce()).clear();
   }
 
-    @Test
-  void testRetrieveHoldingsAndItemsByInstanceIdWhenCentralTenantShouldFilterOutCurrentTenantFromRemoteLoop() {
-    // TestMate-c5dd4b356577d3edc9883933eb2c34f8
+  @Test
+  @TestMate(name = "TestMate-c5dd4b356577d3edc9883933eb2c34f8")
+  void testCentralTenantShouldFilterOutCurrentTenantFromRemoteLoop() {
     // Given
-    var instanceId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    var jobExecutionId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-    var userId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    final var instanceId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    final var jobExecutionId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+    final var userId = UUID.fromString("33333333-3333-3333-3333-333333333333");
     var centralTenantId = "central";
-    var memberTenantId = "member1";
-    var memberHoldingId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+    final var memberTenantId = "member1";
+    final var memberHoldingId = UUID.fromString("44444444-4444-4444-4444-444444444444");
     var centralHoldingId = UUID.fromString("55555555-5555-5555-5555-555555555555");
-    var instanceHrid = "inst-001";
+    final var instanceHrid = "inst-001";
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
     var centralHolding = new ConsortiumHolding();
@@ -411,43 +418,47 @@ class HoldingsItemsResolverServiceTest {
     memberHolding.setInstanceId(instanceId.toString());
     var consortiumHoldings = new ConsortiumHoldingCollection();
     consortiumHoldings.setHoldings(List.of(centralHolding, memberHolding));
-    var memberHoldingEntity = HoldingsRecordEntity.builder()
-        .id(memberHoldingId)
-        .instanceId(instanceId)
-        .jsonb("{\"id\":\"" + memberHoldingId + "\"}")
-        .build();
+    var memberHoldingEntity =
+        HoldingsRecordEntity.builder()
+            .id(memberHoldingId)
+            .instanceId(instanceId)
+            .jsonb("{\"id\":\"" + memberHoldingId + "\"}")
+            .build();
     when(folioExecutionContext.getTenantId()).thenReturn(centralTenantId);
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(consortiaService.isCurrentTenantCentralTenant(centralTenantId)).thenReturn(true);
-    when(consortiaService.getAffiliatedTenants(centralTenantId, userId.toString())).thenReturn(List.of(memberTenantId));
+    when(consortiaService.getAffiliatedTenants(centralTenantId, userId.toString()))
+        .thenReturn(List.of(memberTenantId));
     when(searchConsortiumHoldings.getHoldingsById(instanceId)).thenReturn(consortiumHoldings);
     when(permissionsValidator.isInstanceViewPermissionExists(memberTenantId)).thenReturn(true);
-    when(holdingsRecordEntityTenantRepository.findByIdIn(eq(memberTenantId), anySet())).thenReturn(List.of(memberHoldingEntity));
+    when(holdingsRecordEntityTenantRepository.findByIdIn(eq(memberTenantId), anySet()))
+        .thenReturn(List.of(memberHoldingEntity));
     doNothing().when(entityManager).clear();
-    var instance = new JSONObject();
+    final var instance = new JSONObject();
     // When
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
     // Then
     verify(searchConsortiumHoldings).getHoldingsById(instanceId);
     verify(holdingsRecordEntityTenantRepository).findByIdIn(eq(memberTenantId), anySet());
     verify(holdingsRecordEntityTenantRepository, never()).findByIdIn(eq(centralTenantId), anySet());
     verify(entityManager).clear();
-    assertThat(instance.containsKey(HOLDINGS_KEY)).isTrue();
+    assertThat(instance).containsKey(HOLDINGS_KEY);
     var holdingsArray = (JSONArray) instance.get(HOLDINGS_KEY);
     assertEquals(1, holdingsArray.size());
-    var actualHolding = (JSONObject) holdingsArray.get(0);
+    var actualHolding = (JSONObject) holdingsArray.getFirst();
     assertEquals(memberHoldingId.toString(), actualHolding.getAsString(ID_KEY));
     assertEquals(instanceHrid, actualHolding.getAsString(INSTANCE_HRID_KEY));
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-16c9a9a5d7b3f00a00cddd54e56ffe59")
   void testRetrieveHoldingsAndItemsByInstanceIdWhenHoldingsAlreadyExistInJsonShouldAppend() {
-    // TestMate-16c9a9a5d7b3f00a00cddd54e56ffe59
     // Given
-    var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
-    var jobExecutionId = UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
-    var instanceHrid = "inst-001";
-    var tenantId = "test-tenant";
+    final var instanceId = UUID.fromString("1eaa1eef-1633-4c7e-af09-796315ebc576");
+    final var jobExecutionId = UUID.fromString("c0ffee00-0000-0000-0000-000000000000");
+    final var instanceHrid = "inst-001";
+    final var tenantId = "test-tenant";
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
     var instanceJson = new JSONObject();
@@ -458,16 +469,18 @@ class HoldingsItemsResolverServiceTest {
     instanceJson.put(HOLDINGS_KEY, existingHoldings);
     var holdingId1 = UUID.fromString("0eaa7eef-9633-4c7e-af09-796315ebc576");
     var holdingId2 = UUID.fromString("9f9f9f9f-9f9f-9f9f-9f9f-9f9f9f9f9f9f");
-    var holdingEntity1 = HoldingsRecordEntity.builder()
-        .id(holdingId1)
-        .instanceId(instanceId)
-        .jsonb("{\"id\":\"" + holdingId1 + "\"}")
-        .build();
-    var holdingEntity2 = HoldingsRecordEntity.builder()
-        .id(holdingId2)
-        .instanceId(instanceId)
-        .jsonb("{\"id\":\"" + holdingId2 + "\"}")
-        .build();
+    var holdingEntity1 =
+        HoldingsRecordEntity.builder()
+            .id(holdingId1)
+            .instanceId(instanceId)
+            .jsonb("{\"id\":\"" + holdingId1 + "\"}")
+            .build();
+    var holdingEntity2 =
+        HoldingsRecordEntity.builder()
+            .id(holdingId2)
+            .instanceId(instanceId)
+            .jsonb("{\"id\":\"" + holdingId2 + "\"}")
+            .build();
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(consortiaService.isCurrentTenantCentralTenant(tenantId)).thenReturn(false);
     when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId))
@@ -492,26 +505,27 @@ class HoldingsItemsResolverServiceTest {
     verify(entityManager).clear();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-80ffa7f1cdabfc5cc08fc23bddf12a6")
   void testRetrieveHoldingsAndItemsByInstanceIdWhenNoHoldingsFoundShouldNotAddKey() {
-    // TestMate-a80ffa7f1cdabfc5cc08fc23bddf12a6
     // Given
-    var instanceId = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var instanceHrid = "inst-123";
-    var tenantId = "test-tenant";
-    var instance = new JSONObject();
+    final var instanceId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    final var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    final var instanceHrid = "inst-123";
+    final var tenantId = "test-tenant";
+    final var instance = new JSONObject();
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
     when(folioExecutionContext.getTenantId()).thenReturn(tenantId);
     when(consortiaService.isCurrentTenantCentralTenant(tenantId)).thenReturn(false);
-    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId)).thenReturn(Collections.emptyList());
+    when(holdingsRecordEntityRepository.findByInstanceIdIs(instanceId))
+        .thenReturn(Collections.emptyList());
     doNothing().when(entityManager).clear();
     // When
-    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
+    holdingsItemsResolverService.retrieveHoldingsAndItemsByInstanceId(
+        instance, instanceId, instanceHrid, mappingProfile, jobExecutionId);
     // Then
     assertTrue(instance.isEmpty());
-    assertTrue(!instance.containsKey(HOLDINGS_KEY));
     verify(holdingsRecordEntityRepository).findByInstanceIdIs(instanceId);
     verify(entityManager).clear();
     verify(itemEntityTenantRepository, never()).findByHoldingsRecordIdIn(anyString(), anySet());
