@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -326,5 +327,65 @@ class RuleFactoryTest {
     var actualRules = spyRuleFactory.getRules(mappingProfile);
     // Then
     assertThat(actualRules).hasSize(2).containsExactly(rule100, rule245);
+  }
+
+    @Test
+void buildRulesShouldCallCreateWhenMappingProfileDoesNotContainInstance() throws TransformationRuleException {
+    // TestMate-2825de9a93a8b8b2c1d3cec49562079e
+    // Given
+    var holdingsRule = new Rule();
+    holdingsRule.setId("holdings.hrid");
+    holdingsRule.setField("001");
+    var defaultRulesFromConfigFile = new ArrayList<Rule>();
+    var defaultHoldingsRulesFromConfigFile = List.of(holdingsRule);
+    var ruleFactory = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
+    // When
+    var actualRules = ruleFactory.buildRules(mappingProfile);
+    // Then
+    assertThat(actualRules).containsExactly(holdingsRule);
+}
+
+    @Test
+  void buildRulesShouldCallCreateWhenMappingProfileIsNull() throws TransformationRuleException {
+    // TestMate-60324df72f9fc56335d82b4890b76984
+    // Given
+    var defaultRule = new Rule();
+    defaultRule.setId("instance.hrid");
+    defaultRule.setField("001");
+    var defaultRulesFromConfigFile = List.of(defaultRule);
+    var defaultHoldingsRulesFromConfigFile = new ArrayList<Rule>();
+    var ruleFactory = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    // When
+    var actualRules = ruleFactory.buildRules(null);
+    // Then
+    assertThat(actualRules).containsExactly(defaultRule);
+  }
+
+    @Test
+  void buildRulesShouldCallCreateWhenRulesFromConfigIsEmpty() throws TransformationRuleException {
+    // TestMate-ff3b8fa3d9aa0238868a7fedc302cefe
+    // Given
+    var instanceDefaultRule = new Rule();
+    instanceDefaultRule.setId("instance.default");
+    instanceDefaultRule.setField("001");
+    var holdingsDefaultRule = new Rule();
+    holdingsDefaultRule.setId("holdings.default");
+    holdingsDefaultRule.setField("002");
+    var defaultRulesFromConfigFile = List.of(instanceDefaultRule);
+    var defaultHoldingsRulesFromConfigFile = List.of(holdingsDefaultRule);
+    var ruleFactoryWithDefaults = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    var mappingProfile = new MappingProfile();
+    mappingProfile.setId(UUID.fromString("f3f00482-936d-470a-819a-9769db382793"));
+    mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
+    mappingProfile.setTransformations(new ArrayList<>());
+    // When
+    var actualRules = ruleFactoryWithDefaults.buildRules(mappingProfile);
+    // Then
+    assertThat(actualRules)
+        .hasSize(1)
+        .containsExactly(instanceDefaultRule)
+        .doesNotContain(holdingsDefaultRule);
   }
 }
