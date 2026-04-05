@@ -1,9 +1,11 @@
 package org.folio.dataexp.service.logs;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.folio.dataexp.service.export.Constants.DELETED_KEY;
 import static org.folio.dataexp.service.export.Constants.HRID_KEY;
 import static org.folio.dataexp.service.export.Constants.ID_KEY;
 import static org.folio.dataexp.service.export.Constants.TITLE_KEY;
+import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
 import static org.folio.dataexp.util.ErrorCode.ERROR_MESSAGE_JSON_CANNOT_BE_CONVERTED_TO_MARC;
 import static org.folio.dataexp.util.ErrorCode.SOME_UUIDS_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +29,7 @@ import lombok.SneakyThrows;
 import net.minidev.json.JSONObject;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.ErrorLog;
+import org.folio.dataexp.domain.dto.ErrorLogCollection;
 import org.folio.dataexp.domain.dto.JobExecution;
 import org.folio.dataexp.domain.entity.ErrorLogEntity;
 import org.folio.dataexp.repository.ErrorLogEntityCqlRepository;
@@ -39,21 +42,18 @@ import org.folio.spring.FolioExecutionContext;
 import org.folio.spring.data.OffsetRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.marc4j.MarcException;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import tools.jackson.databind.ObjectMapper;
-import org.folio.dataexp.domain.dto.ErrorLogCollection;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.data.domain.Page;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.folio.dataexp.util.Constants.QUERY_CQL_ALL_RECORDS;
-import org.mockito.Captor;
+import org.springframework.data.domain.PageImpl;
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 class ErrorLogServiceTest {
@@ -68,8 +68,7 @@ class ErrorLogServiceTest {
   @Mock private JobProfileService jobProfileService;
   @InjectMocks private ErrorLogService errorLogService;
 
-    @Captor
-private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
+  @Captor private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
 
   @Test
   void getErrorLogsByQueryTest() {
@@ -538,7 +537,7 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
         .getByJobExecutionIdAndErrorCodes(jobExecutionId, expectedPattern);
   }
 
-    @ParameterizedTest
+  @ParameterizedTest
   @NullAndEmptySource
   void getErrorLogsByQueryWhenQueryIsEmptyShouldUseAllRecordsConst(String query) {
     // TestMate-08ee9a7528ddf18f0a322d5db9a6b61a
@@ -556,15 +555,15 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
     assertThat(result.getTotalRecords()).isZero();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-a8762a41e0a8a8572d08fe8c5af25670")
   void getErrorLogsByQueryShouldCorrectlyHandlePagination() {
-    // TestMate-a8762a41e0a8a8572d08fe8c5af25670
     // Given
     var query = "errorCode==SOME_CODE";
     int offset = 20;
     int limit = 10;
     var expectedOffsetRequest = OffsetRequest.of(offset, limit);
-    when(errorLogEntityCqlRepository.findByCql(eq(query), eq(expectedOffsetRequest)))
+    when(errorLogEntityCqlRepository.findByCql(query, expectedOffsetRequest))
         .thenReturn(Page.empty(expectedOffsetRequest));
     // When
     ErrorLogCollection result = errorLogService.getErrorLogsByQuery(query, offset, limit);
@@ -577,9 +576,9 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
     assertThat(result.getTotalRecords()).isZero();
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-4e4e8f0953b84039d742a9feff53342a")
   void saveShouldPreserveExistingId() throws Exception {
-    // TestMate-4e4e8f0953b84039d742a9feff53342a
     // Given
     var existingId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var userId = UUID.fromString("00000000-0000-0000-0000-000000000002");
@@ -594,28 +593,24 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
     assertThat(result.getId()).isEqualTo(existingId);
     verify(errorLogEntityCqlRepository)
         .insertIfNotExists(
-            eq(existingId),
-            eq(jsonString),
-            isA(Date.class),
-            eq(userId.toString()),
-            any(),
-            any());
+            eq(existingId), eq(jsonString), isA(Date.class), eq(userId.toString()), any(), any());
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-3c8fbfd82a8e898ea55dfc3787222920")
   void saveShouldPopulateJobProfileIdWhenJobProfileExists() throws JacksonException {
-    // TestMate-3c8fbfd82a8e898ea55dfc3787222920
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobProfileId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
-    
+
     var errorLog = new ErrorLog();
     errorLog.setJobExecutionId(jobExecutionId);
-    
+
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     jobExecution.setJobProfileId(jobProfileId);
+
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
@@ -625,30 +620,30 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
     // Then
     verify(jobExecutionService).getById(jobExecutionId);
     verify(jobProfileService).jobProfileExists(jobProfileId);
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-        isA(UUID.class),
-        anyString(),
-        isA(Date.class),
-        eq(userId.toString()),
-        eq(jobExecutionId),
-        eq(jobProfileId)
-    );
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            anyString(),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(jobProfileId));
     assertThat(result.getJobExecutionId()).isEqualTo(jobExecutionId);
   }
 
-    @Test
-  void saveShouldSetJobProfileIdToNullWhenProfileDoesNotExist() throws Exception {
-    // TestMate-2f65cdc76c6dd64705a2abf92c614c1e
+  @Test
+  @TestMate(name = "TestMate-2f65cdc76c6dd64705a2abf92c614c1e")
+  void saveShouldSetJobProfileIdToNullWhenProfileDoesNotExist() {
     // Given
     var jobExecutionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
     var jobProfileId = UUID.fromString("00000000-0000-0000-0000-000000000002");
-    var userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     var errorLog = new ErrorLog();
     errorLog.setJobExecutionId(jobExecutionId);
     var jobExecution = new JobExecution();
     jobExecution.setId(jobExecutionId);
     jobExecution.setJobProfileId(jobProfileId);
     var jsonString = "{}";
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000003");
     when(folioExecutionContext.getUserId()).thenReturn(userId);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(false);
@@ -658,14 +653,14 @@ private ArgumentCaptor<OffsetRequest> offsetRequestCaptor;
     // Then
     verify(jobExecutionService).getById(jobExecutionId);
     verify(jobProfileService).jobProfileExists(jobProfileId);
-    verify(errorLogEntityCqlRepository).insertIfNotExists(
-        isA(UUID.class),
-        eq(jsonString),
-        isA(Date.class),
-        eq(userId.toString()),
-        eq(jobExecutionId),
-        eq(null)
-    );
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            isA(UUID.class),
+            eq(jsonString),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(jobExecutionId),
+            eq(null));
     assertThat(result.getJobExecutionId()).isEqualTo(jobExecutionId);
   }
 }
