@@ -858,4 +858,26 @@ class InstancesExportStrategyTest {
             isA(MarcException.class));
     verify(errorLogService, never()).saveGeneralErrorWithMessageValues(any(), any(), any());
   }
+
+  @Test
+  @TestMate(name = "TestMate-505932c06d2b13fe758cc6b801e170cc")
+  void testGetIdentifiersShouldHandleMissingOptionalFieldsInJson() {
+    // Given
+    var instanceId = UUID.fromString("c0a80101-0000-0000-0000-000000000001");
+    var partialJson = "{\"id\": \"c0a80101-0000-0000-0000-000000000001\"}";
+    var instanceEntity = InstanceEntity.builder().id(instanceId).jsonb(partialJson).build();
+    when(instanceEntityRepository.findByIdIn(Set.of(instanceId)))
+        .thenReturn(List.of(instanceEntity));
+    // When
+    var opt = instancesExportStrategy.getIdentifiers(instanceId);
+    // Then
+    assertTrue(opt.isPresent());
+    var exportIdentifiers = opt.get();
+    assertThat(exportIdentifiers.getIdentifierHridMessage()).isEqualTo("Instance with HRID: null");
+    var associatedJson = exportIdentifiers.getAssociatedJsonObject();
+    assertThat(associatedJson.getAsString(ErrorLogService.ID)).isEqualTo(instanceId.toString());
+    assertThat(associatedJson.get(ErrorLogService.HRID)).isNull();
+    assertThat(associatedJson.get(ErrorLogService.TITLE)).isNull();
+    verify(instanceEntityRepository).findByIdIn(Set.of(instanceId));
+  }
 }
