@@ -749,4 +749,33 @@ class ErrorLogServiceTest {
     assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
     assertEquals("10", capturedErrorLog.getErrorMessageValues().get(0));
   }
+
+    @Test
+  void saveShouldSetJobProfileIdToNullWhenJobExecutionIdIsNull() throws JacksonException {
+    // TestMate-bf633de4dddf640cff5c1f4474b0118f
+    // Given
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var errorLogId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var dummyJson = "{}";
+    var errorLog = new ErrorLog();
+    errorLog.setId(errorLogId);
+    errorLog.setJobExecutionId(null);
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(objectMapper.writeValueAsString(any(ErrorLog.class))).thenReturn(dummyJson);
+    // When
+    var result = errorLogService.save(errorLog);
+    // Then
+    verify(errorLogEntityCqlRepository).insertIfNotExists(
+        eq(errorLogId),
+        eq(dummyJson),
+        isA(Date.class),
+        eq(userId.toString()),
+        eq(null),
+        eq(null)
+    );
+    verify(jobExecutionService, never()).getById(any(UUID.class));
+    verify(jobProfileService, never()).jobProfileExists(any(UUID.class));
+    assertThat(result.getId()).isEqualTo(errorLogId);
+    assertThat(result.getJobExecutionId()).isNull();
+  }
 }
