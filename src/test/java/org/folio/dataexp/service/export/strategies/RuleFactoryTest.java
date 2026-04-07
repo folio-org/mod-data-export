@@ -339,12 +339,12 @@ class RuleFactoryTest {
     holdingsRule.setField("001");
     var defaultRulesFromConfigFile = new ArrayList<Rule>();
     var defaultHoldingsRulesFromConfigFile = List.of(holdingsRule);
-    var ruleFactory =
+    var ruleFactoryLocal =
         new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
     // When
-    var actualRules = ruleFactory.buildRules(mappingProfile);
+    var actualRules = ruleFactoryLocal.buildRules(mappingProfile);
     // Then
     assertThat(actualRules).containsExactly(holdingsRule);
   }
@@ -358,10 +358,10 @@ class RuleFactoryTest {
     defaultRule.setField("001");
     var defaultRulesFromConfigFile = List.of(defaultRule);
     var defaultHoldingsRulesFromConfigFile = new ArrayList<Rule>();
-    var ruleFactory =
+    var ruleFactoryLocal =
         new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
     // When
-    var actualRules = ruleFactory.buildRules(null);
+    var actualRules = ruleFactoryLocal.buildRules(null);
     // Then
     assertThat(actualRules).containsExactly(defaultRule);
   }
