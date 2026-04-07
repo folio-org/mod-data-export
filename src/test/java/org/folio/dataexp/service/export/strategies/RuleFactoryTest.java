@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import org.folio.dataexp.TestMate;
 import org.folio.dataexp.domain.dto.MappingProfile;
 import org.folio.dataexp.domain.dto.RecordTypes;
@@ -25,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class RuleFactoryTest {
@@ -329,43 +329,46 @@ class RuleFactoryTest {
     assertThat(actualRules).hasSize(2).containsExactly(rule100, rule245);
   }
 
-    @Test
-void buildRulesShouldCallCreateWhenMappingProfileDoesNotContainInstance() throws TransformationRuleException {
-    // TestMate-2825de9a93a8b8b2c1d3cec49562079e
+  @Test
+  @TestMate(name = "TestMate-2825de9a93a8b8b2c1d3cec49562079e")
+  void buildRulesShouldCallCreateWhenMappingProfileDoesNotContainInstance()
+      throws TransformationRuleException {
     // Given
     var holdingsRule = new Rule();
     holdingsRule.setId("holdings.hrid");
     holdingsRule.setField("001");
     var defaultRulesFromConfigFile = new ArrayList<Rule>();
     var defaultHoldingsRulesFromConfigFile = List.of(holdingsRule);
-    var ruleFactory = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    var ruleFactory =
+        new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
     var mappingProfile = new MappingProfile();
     mappingProfile.setRecordTypes(List.of(RecordTypes.HOLDINGS));
     // When
     var actualRules = ruleFactory.buildRules(mappingProfile);
     // Then
     assertThat(actualRules).containsExactly(holdingsRule);
-}
+  }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-60324df72f9fc56335d82b4890b76984")
   void buildRulesShouldCallCreateWhenMappingProfileIsNull() throws TransformationRuleException {
-    // TestMate-60324df72f9fc56335d82b4890b76984
     // Given
     var defaultRule = new Rule();
     defaultRule.setId("instance.hrid");
     defaultRule.setField("001");
     var defaultRulesFromConfigFile = List.of(defaultRule);
     var defaultHoldingsRulesFromConfigFile = new ArrayList<Rule>();
-    var ruleFactory = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    var ruleFactory =
+        new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
     // When
     var actualRules = ruleFactory.buildRules(null);
     // Then
     assertThat(actualRules).containsExactly(defaultRule);
   }
 
-    @Test
+  @Test
+  @TestMate(name = "TestMate-ff3b8fa3d9aa0238868a7fedc302cefe")
   void buildRulesShouldCallCreateWhenRulesFromConfigIsEmpty() throws TransformationRuleException {
-    // TestMate-ff3b8fa3d9aa0238868a7fedc302cefe
     // Given
     var instanceDefaultRule = new Rule();
     instanceDefaultRule.setId("instance.default");
@@ -375,7 +378,8 @@ void buildRulesShouldCallCreateWhenMappingProfileDoesNotContainInstance() throws
     holdingsDefaultRule.setField("002");
     var defaultRulesFromConfigFile = List.of(instanceDefaultRule);
     var defaultHoldingsRulesFromConfigFile = List.of(holdingsDefaultRule);
-    var ruleFactoryWithDefaults = new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
+    var ruleFactoryWithDefaults =
+        new RuleFactory(defaultRulesFromConfigFile, defaultHoldingsRulesFromConfigFile);
     var mappingProfile = new MappingProfile();
     mappingProfile.setId(UUID.fromString("f3f00482-936d-470a-819a-9769db382793"));
     mappingProfile.setRecordTypes(List.of(RecordTypes.INSTANCE));
