@@ -300,7 +300,6 @@ class ErrorLogServiceTest {
     when(folioExecutionContext.getUserId()).thenReturn(UUID.randomUUID());
     when(jobExecutionService.getById(jobExecutionId))
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(UUID.randomUUID()));
-    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     // Use a real ObjectMapper to serialize the captured object, ensuring valid JSON.
     when(objectMapper.writeValueAsString(errorLogCaptor.capture()))
         .thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
@@ -341,7 +340,6 @@ class ErrorLogServiceTest {
     when(jobExecutionService.getById(jobExecutionId))
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
-    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     when(objectMapper.writeValueAsString(errorLogCaptor.capture()))
         .thenAnswer(invocation -> new ObjectMapper().writeValueAsString(invocation.getArgument(0)));
     var errorMessageCode = ErrorCode.SOME_UUIDS_NOT_FOUND.getCode();
@@ -388,7 +386,7 @@ class ErrorLogServiceTest {
             });
     var notFoundUuid = "a1b2c3d4-e5f6-7890-1234-567890abcdef";
     var notFoundUuids = List.of(notFoundUuid);
-    var errorLogCaptor = ArgumentCaptor.forClass(String.class);
+    var errorLogCaptorLocal = ArgumentCaptor.forClass(String.class);
     // When
     errorLogService.populateUuidsNotFoundErrorLog(jobExecutionId, notFoundUuids);
     // Then
@@ -397,13 +395,14 @@ class ErrorLogServiceTest {
     verify(errorLogEntityCqlRepository)
         .insertIfNotExists(
             isA(UUID.class),
-            errorLogCaptor.capture(),
+            errorLogCaptorLocal.capture(),
             isA(Date.class),
             eq(userId.toString()),
             eq(jobExecutionId),
             eq(jobProfileId));
     var realObjectMapper = new ObjectMapper();
-    var capturedErrorLog = realObjectMapper.readValue(errorLogCaptor.getValue(), ErrorLog.class);
+    var capturedErrorLog =
+        realObjectMapper.readValue(errorLogCaptorLocal.getValue(), ErrorLog.class);
     assertEquals(SOME_UUIDS_NOT_FOUND.getCode(), capturedErrorLog.getErrorMessageCode());
     assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
     assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
@@ -428,7 +427,6 @@ class ErrorLogServiceTest {
     var uuid1 = "d1b2c3d4-e5f6-7890-1234-567890abcdef";
     var uuid2 = "e1b2c3d4-e5f6-7890-1234-567890fedcba";
     var notFoundUuids = List.of(uuid1, uuid2);
-    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("jsonString");
     // When
     errorLogService.populateUuidsNotFoundErrorLog(jobExecutionId, notFoundUuids);
@@ -481,7 +479,6 @@ class ErrorLogServiceTest {
         .thenReturn(new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId));
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
 
-    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("jsonString");
     var incrementValue = 10;
     // When
@@ -731,8 +728,6 @@ class ErrorLogServiceTest {
     var jobExecution = new JobExecution().id(jobExecutionId).jobProfileId(jobProfileId);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     when(jobProfileService.jobProfileExists(jobProfileId)).thenReturn(true);
-
-    var errorLogCaptor = ArgumentCaptor.forClass(ErrorLog.class);
     when(objectMapper.writeValueAsString(errorLogCaptor.capture())).thenReturn("{}");
     var numberOfNotFoundUuids = 10;
     // When
