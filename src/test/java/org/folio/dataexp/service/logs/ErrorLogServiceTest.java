@@ -93,7 +93,7 @@ class ErrorLogServiceTest {
     assertEquals(1, collection.getTotalRecords());
     var errorLogs = collection.getErrorLogs();
 
-    assertEquals(errorLog.getId(), errorLogs.get(0).getId());
+    assertEquals(errorLog.getId(), errorLogs.getFirst().getId());
   }
 
   @Test
@@ -111,7 +111,7 @@ class ErrorLogServiceTest {
 
     var errors = errorLogService.getByQuery(query);
 
-    assertEquals(errorLog.getId(), errors.get(0).getId());
+    assertEquals(errorLog.getId(), errors.getFirst().getId());
   }
 
   @Test
@@ -406,7 +406,7 @@ class ErrorLogServiceTest {
     assertEquals(SOME_UUIDS_NOT_FOUND.getCode(), capturedErrorLog.getErrorMessageCode());
     assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
     assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
-    assertEquals(notFoundUuid, capturedErrorLog.getErrorMessageValues().get(0));
+    assertEquals(notFoundUuid, capturedErrorLog.getErrorMessageValues().getFirst());
   }
 
   @Test
@@ -449,7 +449,7 @@ class ErrorLogServiceTest {
     var messageValues = capturedErrorLog.getErrorMessageValues();
     assertEquals(1, messageValues.size());
 
-    var formattedUuids = messageValues.get(0);
+    var formattedUuids = messageValues.getFirst();
     assertEquals(uuid1 + ", " + uuid2, formattedUuids);
     assertFalse(formattedUuids.contains("["));
     assertFalse(formattedUuids.contains("]"));
@@ -496,7 +496,7 @@ class ErrorLogServiceTest {
             eq(jobProfileId));
     var capturedErrorLog = errorLogCaptor.getValue();
     var expectedTotal = "15";
-    assertEquals(expectedTotal, capturedErrorLog.getErrorMessageValues().get(0));
+    assertEquals(expectedTotal, capturedErrorLog.getErrorMessageValues().getFirst());
   }
 
   @Test
@@ -747,6 +747,35 @@ class ErrorLogServiceTest {
     assertEquals(SOME_RECORDS_FAILED.getCode(), capturedErrorLog.getErrorMessageCode());
     assertEquals(jobExecutionId, capturedErrorLog.getJobExecutionId());
     assertEquals(1, capturedErrorLog.getErrorMessageValues().size());
-    assertEquals("10", capturedErrorLog.getErrorMessageValues().get(0));
+    assertEquals("10", capturedErrorLog.getErrorMessageValues().getFirst());
+  }
+
+  @Test
+  @TestMate(name = "TestMate-bf633de4dddf640cff5c1f4474b0118f")
+  void saveShouldSetJobProfileIdToNullWhenJobExecutionIdIsNull() throws JacksonException {
+    // Given
+    var userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    var errorLogId = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    var errorLog = new ErrorLog();
+    errorLog.setId(errorLogId);
+    errorLog.setJobExecutionId(null);
+    var dummyJson = "{}";
+    when(folioExecutionContext.getUserId()).thenReturn(userId);
+    when(objectMapper.writeValueAsString(any(ErrorLog.class))).thenReturn(dummyJson);
+    // When
+    var result = errorLogService.save(errorLog);
+    // Then
+    verify(errorLogEntityCqlRepository)
+        .insertIfNotExists(
+            eq(errorLogId),
+            eq(dummyJson),
+            isA(Date.class),
+            eq(userId.toString()),
+            eq(null),
+            eq(null));
+    verify(jobExecutionService, never()).getById(any(UUID.class));
+    verify(jobProfileService, never()).jobProfileExists(any(UUID.class));
+    assertThat(result.getId()).isEqualTo(errorLogId);
+    assertThat(result.getJobExecutionId()).isNull();
   }
 }
