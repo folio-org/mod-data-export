@@ -324,7 +324,7 @@ class DefaultJobProfileIdTest {
     // Add dirty data to test cleaning logic
     uuids.set(0, "\"" + expectedUuid0 + "\""); // Wrapped in quotes
     uuids.set(1, "\uFEFF" + expectedUuid1); // Starts with BOM
-    var csvContent = String.join("\n", uuids);
+    var csvContent = String.join(System.lineSeparator(), uuids);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     // Two passes: one for counting lines, one for processing
     when(s3Client.read(anyString()))
@@ -396,7 +396,7 @@ class DefaultJobProfileIdTest {
         new JobExecution()
             .id(jobExecutionId)
             .progress(new JobExecutionProgress().total(0).readIds(0).exported(0).failed(0));
-    var csvContent = String.format("%s\n%s\n%s", instanceIdA, instanceIdA, instanceIdB);
+    var csvContent = String.format("%s%n%s%n%s", instanceIdA, instanceIdA, instanceIdB);
     when(jobExecutionService.getById(jobExecutionId)).thenReturn(jobExecution);
     // Two passes: one for counting lines, one for processing
     when(s3Client.read(anyString()))
@@ -448,9 +448,9 @@ class DefaultJobProfileIdTest {
   }
 
   @Test
+  @TestMate(name = "TestMate-1e539259a7e54e170459af439c9c3dda")
   @SneakyThrows
   void testReadFileWhenUploadFormatIsCqlShouldSubmitSearchJobAndProcessResults() {
-    // TestMate-1e539259a7e54e170459af439c9c3dda
     // Given
     var instanceId = UUID.fromString("00000000-0000-0000-0000-00000000000A");
 
